@@ -127,7 +127,7 @@ const MAX_PLAYER_LEVEL=30,TALENT_BRANCHES={
 const TALENT_TIERS=[0,1,5,10];
 let state=null,uid=1,keys={},last=0,poolFilter='all',enemyPatrols={};
 const stat=c=>({...defs[c.id],...defs[c.id].tiers[c.level]});
-const make=(id,level=0)=>({uid:uid++,id,level,uses:0,soulbound:!!defs[id].soulbound});
+const make=(id,level=0,soulboundOverride)=>({uid:uid++,id,level,uses:0,soulbound:soulboundOverride!==undefined?!!soulboundOverride:!!defs[id].soulbound});
 const owned=id=>state.pool.find(c=>c.uid===id),active=()=>state.deck.map(owned).filter(Boolean);
 const materials=()=>Math.max(0,Number(localStorage.getItem(MATERIAL_KEY))||0),setMaterials=n=>localStorage.setItem(MATERIAL_KEY,String(Math.max(0,n)));
 const talentRank=id=>Math.max(0,Number(state.talents&&state.talents[id])||0);
@@ -236,7 +236,7 @@ function animateHero(dt,moved){
 function loop(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;const previous=state?{...state.pos,room:state.room}:null;move(dt);animateEnemy(dt);const moved=!!(previous&&state&&!state.battle&&$('menuOverlay').classList.contains('hidden')&&(previous.room!==state.room||Math.hypot(state.pos.x-previous.x,state.pos.y-previous.y)>.01));animateHero(dt,moved);requestAnimationFrame(loop)}
 function fitWorld(){$('world').style.setProperty('--world-scale',Math.min(innerWidth/800,innerHeight/500))}
 const inputKey=e=>e.key.length===1?e.key.toLowerCase():e.key;
-addEventListener('keydown',e=>{const key=inputKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key))e.preventDefault();if(key==='m'&&!e.repeat&&state&&!state.battle){e.preventDefault();keys={};$('menuOverlay').classList.contains('hidden')?showMap():$('menuModal').querySelector('.world-map, .region-map')?closeMenu():null;return}keys[key]=true});addEventListener('keyup',e=>keys[inputKey(e)]=false);addEventListener('blur',()=>{keys={};save()});addEventListener('pagehide',save);
+addEventListener('keydown',e=>{const key=inputKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key))e.preventDefault();if(key==='m'&&!e.repeat&&state&&!state.battle){e.preventDefault();keys={};$('menuOverlay').classList.contains('hidden')?showMap():$('menuModal').querySelector('.world-map, .region-map')?closeMenu():null;return}if(key==='Escape'&&!e.repeat&&state&&!$('menuOverlay').classList.contains('hidden')){e.preventDefault();closeMenu();return}keys[key]=true});addEventListener('keyup',e=>keys[inputKey(e)]=false);addEventListener('blur',()=>{keys={};save()});addEventListener('pagehide',save);
 document.querySelectorAll('#touch button').forEach(b=>{const release=()=>{keys[b.dataset.key]=false;b.classList.remove('touching')};b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.key]=true;b.classList.add('touching');move(.14);animateHero(.14,true);if(b.setPointerCapture)b.setPointerCapture(e.pointerId)};b.onpointerup=b.onpointercancel=b.onlostpointercapture=release});
 $('newBtn').onclick=newGame;$('resumeBtn').onclick=load;$('mapBtn').onclick=showMap;$('deckBtn').onclick=showDeck;$('charBtn').onclick=showCharacter;$('saveBtn').onclick=()=>{save();toast('Journey saved in this browser.')};
 if(localStorage.getItem(SAVE_KEY))$('resumeBtn').classList.remove('hidden');

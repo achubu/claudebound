@@ -428,6 +428,74 @@ Fixed in two places:
   · 3 damage"), a single line now reads `Ember Blade · 6 dmg − 3 armor = 3
   dealt` (`cardEffect()` in `assets/expansion.js`) — no math left implicit.
 
+## Round 7 — real chest artwork
+
+Replaced the recycled crystal-icon placeholder with actual chest artwork you
+provided. New file: `assets/items/loot-chest.png` — cropped to a single
+chest from your source image, background flood-filled to transparent so it
+floats cleanly on the dark battle screen instead of showing a white box.
+`.loot-chest-graphic` in `assets/expansion.js` now points at this image
+directly (`background-size:contain`) instead of slicing/tinting the
+Aetherlink crystal sheet — no more sepia/hue-rotate filter needed since the
+art is already the right theme, just kept the pulsing glow animation.
+
+## Round 8 — one Soulbound copy of each starter card
+
+Request: make one of each starter card type Soulbound so it can't be lost.
+Starter deck is `strike, strike, guard, guard, focus, mend` — the fix marks
+exactly the **first** copy of each unique id (1 Strike, 1 Guard, Focus,
+Mend) as Soulbound, leaving the duplicate Strike and duplicate Guard as
+normal Impermanent cards still genuinely at risk on defeat.
+
+This had to be per-**instance**, not per-card-type — the game's real
+Soulbound cards (Phoenix/Oath/Verdict/Glacial/Stormglass) are Soulbound by
+their card *definition*, so simply flagging `defs.strike.soulbound=true`
+would have made every future Strike you ever find in a loot chest
+permanently unlosable too, not just your starting one.
+
+- `make()` (`index.html`) gained an optional third argument to force a
+  specific card *instance's* Soulbound flag, independent of its
+  definition's default.
+- `newGame()` (`assets/expansion.js`) now passes that override for exactly
+  the first occurrence of each starter card id.
+- **Caught and fixed a real bug along the way**: `validateImport()` was
+  unconditionally rebuilding every card's `soulbound` flag from its
+  definition on every save import (`c.soulbound=!!defs[c.id].soulbound`),
+  which would have silently wiped this protection the moment you exported
+  and reimported a save. Changed to only force `true` for cards that are
+  Soulbound by definition, otherwise preserve whatever the save says —
+  verified directly with an export→import round trip in the test suite,
+  not just assumed.
+
+## Round 9 — swapped in your cleaner chest artwork
+
+Replaced `assets/items/loot-chest.png` with your new, higher-quality single
+chest image (was already tightly cropped, no second chest to trim out this
+time). Background removed the same way as before — flood-filled from the
+border rather than a flat white→alpha threshold, so it doesn't eat into any
+light-colored pixels that are part of the chest art itself (the pale
+crystal facets, the glowing rune inlays) — then cropped tight to the
+result. Same filename, so no code changes were needed; `.loot-chest-graphic`
+in `assets/expansion.js` already pointed at this path.
+
+## Round 10 — Escape closes menus
+
+Added an Escape-key handler (`index.html`) alongside the existing `M`-key
+map toggle, in the same keydown listener. Pressing Escape while any menu
+screen is open (Map, Character/Talents, Deck Workshop, Aetherlink, Main
+Menu — anything routed through the shared `#menuOverlay`/`closeMenu()`
+system) closes it, the same as clicking that screen's own "Return" button.
+Guarded so it does nothing on the start screen, during normal exploration,
+or mid-battle when no menu is layered on top — and ignores held-key repeat
+so it only fires once per press.
+
+**Not covered by the automated test suite**: the Node/DOM-shim harness
+stubs `addEventListener` as a no-op, so there's no way to script "press
+Escape" and assert the menu closed. Verified by tracing the exact condition
+against every place `openMenu()`/`closeMenu()` is called, and confirmed the
+full suite still passes (rules out a syntax error), but this one specific
+behavior should be spot-checked by hand in a browser.
+
 ## Testing
 
 ```
@@ -442,5 +510,7 @@ the empty-chest band grants no card/potion while still naming a thief, that
 every talent rank (including the first and last) always does something,
 that Overload Surge actually lets a card through with 0 energy exactly once,
 that the heavy-hit multiplier scales with distance without regressing
-early-map fights, and that the combat log now explains an armor reduction
-in one readable line instead of two separate ones.
+early-map fights, that the combat log now explains an armor reduction in
+one readable line instead of two separate ones, and that exactly one
+starter copy of each card type survives both an import round trip and 100
+simulated defeat card-loss rolls while its duplicate stays at risk.

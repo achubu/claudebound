@@ -199,5 +199,42 @@ const lastLog=state.battle.logs[state.battle.logs.length-1];
 assert(lastLog.includes('armor'),'the combat log explains the armor reduction in the same line: "'+lastLog+'"');
 assert.equal(state.battle.enemy.hp,97,'a 6-damage Strike into 3 armor still correctly deals 3 (100-97=3)');
 
-console.log('PASS: armor/pierce mechanics, Elaris reward-pool fix, revived enemy types, raised region scaling, full-HP defeat recovery, loot chest odds, distance-based enemy tiering, talent-tree balance, distance-scaled elite rate, distance-scaled patrol density, Elaris/Vespera distance-scaled enemy strength, distance-scaled heavy-hit damage, and armor visibility in the UI/log all verified.');
+// --- One copy of each starter card type is Soulbound; extras and future
+// copies of the same card are not (only the game's true Soulbound cards —
+// Phoenix/Oath/Verdict/Glacial/Stormglass — should ever be unconditionally
+// protected by their definition; starter protection is per-instance).
+newGame();
+const byId={};for(const c of state.pool){(byId[c.id]=byId[c.id]||[]).push(c)}
+for(const id of ['strike','guard','focus','mend']){
+ assert(byId[id]&&byId[id].length,'starter deck actually contains '+id);
+ const soulboundCount=byId[id].filter(c=>c.soulbound).length;
+ assert.equal(soulboundCount,1,'exactly one starting '+id+' is Soulbound (got '+soulboundCount+' of '+byId[id].length+')');
+}
+assert(!defs.strike.soulbound&&!defs.guard.soulbound,'the card DEFINITIONS themselves are not Soulbound — only these specific starting instances are, so future Strike/Guard drops from loot chests stay Impermanent as normal');
+const rewardStrike=make('strike');
+assert(!rewardStrike.soulbound,'a freshly-made Strike (e.g. from a loot chest) is not Soulbound by default');
+
+// --- Starter-card Soulbound protection survives an export/import round trip ---
+newGame();
+const beforeExport=JSON.parse(JSON.stringify(state));
+const roundTripped=validateImport(beforeExport);
+const strikeAfter=roundTripped.pool.find(c=>c.id==='strike'&&c.soulbound);
+assert(strikeAfter,'the protected starting Strike is still Soulbound after an import round trip (previously validateImport wiped instance-level Soulbound flags back to the card definition default)');
+const secondStrike=roundTripped.pool.filter(c=>c.id==='strike');
+assert.equal(secondStrike.filter(c=>c.soulbound).length,1,'still exactly one Soulbound Strike after round trip, not both');
+
+// --- The actual payoff: a defeat can never destroy the protected copy,
+// even across many rolls, while the extra duplicate strike/guard remains
+// genuinely at risk like any other Impermanent card. ---
+for(let trial=0;trial<100;trial++){
+ newGame();
+ state.room='1,1';state.battle={phase:'fight',enemy:{hp:1},logs:[]};
+ loseBattle();
+ for(const id of ['strike','guard','focus','mend']){
+  const remaining=state.pool.filter(c=>c.id===id);
+  assert(remaining.some(c=>c.soulbound),'trial '+trial+': the protected '+id+' survived a defeat card-loss roll');
+ }
+}
+
+console.log('PASS: armor/pierce mechanics, Elaris reward-pool fix, revived enemy types, raised region scaling, full-HP defeat recovery, loot chest odds, distance-based enemy tiering, talent-tree balance, distance-scaled elite rate, distance-scaled patrol density, Elaris/Vespera distance-scaled enemy strength, distance-scaled heavy-hit damage, armor visibility in the UI/log, and one-Soulbound-per-starter-card-type (surviving both import and 100 defeat rolls) all verified.');
 `);
