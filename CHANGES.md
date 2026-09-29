@@ -407,6 +407,27 @@ Level 1 gear). Vespera's flat region multiplier was tuned down slightly
 an entrance. After the tweak: entry ~75%, far corner ~45%, preserving the
 gradient while making the doorway feel like a doorway.
 
+## Round 6 — armor was invisible in the UI
+
+Report: "my attack cards aren't registering correct damage against
+enemies — if I do 6 damage the enemy isn't taking 6 damage." The math was
+correct the whole time (armor has worked as designed since Round 1) — the
+bug was that **armor was never shown anywhere in the UI.** A Strike dealing
+6 raw damage into an armored enemy nets less, exactly as intended, but the
+only trace of that was a log line ("Armor absorbs X damage") competing with
+everything else in a 5-line scrolling combat log — genuinely easy to miss
+and reasonable to read as a bug.
+
+Fixed in two places:
+- **Enemy panel now shows a persistent 🛡 Armor stat** next to HP
+  (`index.html`), plus a one-line explainer ("Armor blocks N damage from
+  every non-Pierce hit. Pierce cards ignore it.") whenever the current
+  enemy has any.
+- **The combat log line itself now does the math in front of the player**:
+  instead of two separate entries ("Armor absorbs 3 damage" / "Ember Blade
+  · 3 damage"), a single line now reads `Ember Blade · 6 dmg − 3 armor = 3
+  dealt` (`cardEffect()` in `assets/expansion.js`) — no math left implicit.
+
 ## Testing
 
 ```
@@ -420,5 +441,6 @@ easy enemies next to the start and only hard ones at the map's edges, that
 the empty-chest band grants no card/potion while still naming a thief, that
 every talent rank (including the first and last) always does something,
 that Overload Surge actually lets a card through with 0 energy exactly once,
-and that the heavy-hit multiplier scales with distance without regressing
-early-map fights.
+that the heavy-hit multiplier scales with distance without regressing
+early-map fights, and that the combat log now explains an armor reduction
+in one readable line instead of two separate ones.

@@ -186,5 +186,18 @@ assert(farHeavy>nearHeavy,'a heavy hit does more damage far from the start than 
 assert(nearHeavy<=Math.round(10*1.7),'near the start, the heavy-hit multiplier stays close to its original 1.5x (got '+nearHeavy+')');
 assert.equal(farHeavy,Math.round(10*2.5),'at the map edge, the heavy-hit multiplier reaches its full 2.5x (got '+farHeavy+')');
 
-console.log('PASS: armor/pierce mechanics, Elaris reward-pool fix, revived enemy types, raised region scaling, full-HP defeat recovery, loot chest odds, distance-based enemy tiering, talent-tree balance, distance-scaled elite rate, distance-scaled patrol density, Elaris/Vespera distance-scaled enemy strength, and distance-scaled heavy-hit damage all verified.');
+// --- Armor visibility: the UI now shows the enemy's armor stat, and the
+// combat log explains the reduction in one line instead of two separate
+// ones a player could easily miss (this is the actual fix for "my attack
+// cards aren't registering correct damage" — the math was always right,
+// it just wasn't shown anywhere).
+newGame();state.room='0,1';const s4=roomSpawns(state.room)[0];startBattle(s4.uid);
+state.battle.enemy.armor=3;state.battle.enemy.hp=100;
+state.battle.hand=[make('strike')];state.battle.energy=3;
+playCard(0);
+const lastLog=state.battle.logs[state.battle.logs.length-1];
+assert(lastLog.includes('armor'),'the combat log explains the armor reduction in the same line: "'+lastLog+'"');
+assert.equal(state.battle.enemy.hp,97,'a 6-damage Strike into 3 armor still correctly deals 3 (100-97=3)');
+
+console.log('PASS: armor/pierce mechanics, Elaris reward-pool fix, revived enemy types, raised region scaling, full-HP defeat recovery, loot chest odds, distance-based enemy tiering, talent-tree balance, distance-scaled elite rate, distance-scaled patrol density, Elaris/Vespera distance-scaled enemy strength, distance-scaled heavy-hit damage, and armor visibility in the UI/log all verified.');
 `);
