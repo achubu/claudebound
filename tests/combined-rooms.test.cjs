@@ -26,7 +26,7 @@ for(const region of ['city','elaris']){
   assert(patrolCount>=2&&patrolCount<=4,'Crowded combined area');
  }
  for(const key of Object.keys(rooms)){
-  if(joinedArea(key).cells.length===1)assert(roomSpawns(key).length<=1);
+  if(joinedArea(key).cells.length===1)assert(roomSpawns(key).length<=3,'single rooms now scale 1-3 patrols with distance from the start room');
   for(const spawn of roomSpawns(key))assert(walkable(key,spawn.x,spawn.y,28));
  }
 }

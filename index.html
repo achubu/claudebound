@@ -104,17 +104,18 @@ const defs={
 const MAX_PLAYER_LEVEL=30,TALENT_BRANCHES={
  surge:{name:'SURGE',subtitle:'Amplify cards and burst turns',icon:'◆',nodes:[
   {id:'powerCore',name:'Power Core',icon:'✦',max:1,tier:0,desc:'Choose a card to boost every time you play it this encounter.'},
-  {id:'amplifier',name:'Signal Amplifier',icon:'⌁',max:5,tier:1,req:['powerCore',1],desc:'+1 Boost power at ranks 2 and 4.'},
-  {id:'edge',name:'Edge Calibration',icon:'⚔',max:5,tier:2,req:['amplifier',3],desc:'+1 damage to every Attack at ranks 2 and 4.'},
-  {id:'overcharge',name:'Twin Overcharge',icon:'⚡',max:3,tier:3,req:['edge',3],desc:'Rank 3 lets you boost a second card for the whole encounter.'}
+  {id:'amplifier',name:'Signal Amplifier',icon:'⌁',max:5,tier:1,req:['powerCore',1],desc:'+1 Boost power at ranks 1, 3 and 5.'},
+  {id:'edge',name:'Edge Calibration',icon:'⚔',max:5,tier:2,req:['amplifier',3],desc:'+1 damage to every Attack at ranks 1, 3 and 5.'},
+  {id:'overcharge',name:'Twin Overcharge',icon:'⚡',max:1,tier:3,req:['edge',3],desc:'Boost a second card for the whole encounter.'}
  ]},
  disruption:{name:'DISRUPTION',subtitle:'Control enemy pressure and tempo',icon:'◉',nodes:[
   {id:'weakenCore',name:'Signal Jammer',icon:'⌁',max:1,tier:0,desc:'Unlock Weaken once per encounter.'},
-  {id:'jammer',name:'Deep Interference',icon:'◌',max:5,tier:1,req:['weakenCore',1],desc:'+1 Weaken strength at ranks 2 and 4.'},
-  {id:'quickdraw',name:'Predictive Draw',icon:'▤',max:5,tier:2,req:['jammer',3],desc:'+1 opening card at ranks 3 and 5.'},
+  {id:'jammer',name:'Deep Interference',icon:'◌',max:5,tier:1,req:['weakenCore',1],desc:'+1 Weaken strength at ranks 1, 3 and 5.'},
+  {id:'quickdraw',name:'Predictive Draw',icon:'▤',max:2,tier:2,req:['jammer',3],desc:'+1 opening card per rank.'},
   {id:'deckMatrix',name:'Deck Matrix',icon:'▥',max:4,tier:2,req:['jammer',3],desc:'+1 maximum deck card per rank.'},
   {id:'replication',name:'Pattern Replication',icon:'▦',max:2,tier:3,req:['deckMatrix',3],desc:'+1 allowed copy of each card per rank.'},
-  {id:'capacitor',name:'Flux Capacitor',icon:'⬡',max:3,tier:3,req:['quickdraw',3],desc:'Rank 3 raises energy from 3 to 4 each turn.'}
+  {id:'capacitor',name:'Flux Capacitor',icon:'⬡',max:1,tier:3,req:['quickdraw',2],desc:'Raise energy from 3 to 4 each turn.'},
+  {id:'overload',name:'Overload Surge',icon:'⚡',max:1,tier:3,req:['capacitor',1],desc:'Once per encounter: your next card costs 0 energy.'}
  ]},
  resolve:{name:'RESOLVE',subtitle:'Survive, retain, and recover',icon:'⬟',nodes:[
   {id:'retainCore',name:'Memory Buffer',icon:'▣',max:1,tier:0,desc:'Unlock Retain for one unplayed card each turn.'},
@@ -136,10 +137,10 @@ const branchSpent=key=>TALENT_BRANCHES[key].nodes.reduce((n,node)=>n+talentRank(
 const hasTalent=id=>talentRank(id)>0;
 const maxDeckSize=()=>BASE_MAX_DECK+talentRank('deckMatrix')+(state?.region&&state.region!=='city'?4:0)+(typeof deviceBonus==='function'?deviceBonus('capacity'):0);
 const maxCopies=()=>3+talentRank('replication');
-const maxEnergy=()=>3+(talentRank('capacitor')>=3?1:0);
-const openingHand=()=>4+(talentRank('quickdraw')>=3?1:0)+(talentRank('quickdraw')>=5?1:0);
-const attackBonus=()=>Math.floor(talentRank('edge')/2);
-const boostCharges=()=>1+(talentRank('overcharge')>=3?1:0);
+const maxEnergy=()=>3+talentRank('capacitor');
+const openingHand=()=>4+talentRank('quickdraw');
+const attackBonus=()=>Math.ceil(talentRank('edge')/2);
+const boostCharges=()=>1+talentRank('overcharge');
 const potionHeal=()=>5+talentRank('recovery');
 const copiesInDeck=id=>active().filter(c=>c.id===id).length;
 function deckIssue(){if(state.deck.length>maxDeckSize())return 'Your deck exceeds its '+maxDeckSize()+'-card talent limit.';const over=active().find(c=>copiesInDeck(c.id)>maxCopies());return over?'Only '+maxCopies()+' copies of '+stat(over).name+' are currently allowed.':''}
@@ -203,7 +204,7 @@ function animateEnemy(dt){if(!state||state.battle||!$('menuOverlay').classList.c
 function move(dt){if(!state||state.battle||!$('menuOverlay').classList.contains('hidden'))return;let dx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);if(!dx&&!dy)return;const len=Math.hypot(dx,dy),speed=175,nx=state.pos.x+dx/len*speed*dt,ny=state.pos.y+dy/len*speed*dt;if(!collides(nx,state.pos.y))state.pos.x=nx;if(!collides(state.pos.x,ny))state.pos.y=ny;const alignedV=state.pos.y>180&&state.pos.y<320,alignedH=state.pos.x>330&&state.pos.x<470;if(state.pos.x<10&&alignedV){if(!transition('w'))state.pos.x=12}else if(state.pos.x>790&&alignedV){if(!transition('e'))state.pos.x=788}else if(state.pos.y<10&&alignedH){if(!transition('n'))state.pos.y=12}else if(state.pos.y>490&&alignedH){if(!transition('s'))state.pos.y=488}else{state.pos.x=Math.max(12,Math.min(788,state.pos.x));state.pos.y=Math.max(12,Math.min(488,state.pos.y));const p=$('player');if(p){p.style.left=state.pos.x+'px';p.style.top=state.pos.y+'px'}checkWorldInteractions()}}
 function checkWorldInteractions(){const e=room().enemy;if(e&&enemyAvailable(e[0]))encounterMovingEnemy(e,enemyPatrol(e));if(state.battle)return;const q=room().relic;if(q&&relicAvailable(q[0])&&Math.hypot(state.pos.x-q[3],state.pos.y-q[4])<48)return collectRelic(q)}
 function collectRelic(q){if(q[0]==='material'){setMaterials(materials()+1);state.cleared.push('material');toast('Upgrade Crystal found! A mastered Level 0 card can now reach Level 1 in the Deck Workshop.')}else{state.relics.push(q[0]);toast(q[1]+' acquired! New routes are now accessible.')}save();renderWorld()}
-function boostAmount(){return 1+Math.floor(talentRank('amplifier')/2)}function weakenAmount(){return 1+Math.floor(talentRank('jammer')/2)}
+function boostAmount(){return 1+Math.ceil(talentRank('amplifier')/2)}function weakenAmount(){return 1+Math.ceil(talentRank('jammer')/2)}
 function gainXP(n){if(state.playerLevel>=MAX_PLAYER_LEVEL){state.xp=0;return[]}state.xp+=n;const gained=[];while(state.xp>=100&&state.playerLevel<MAX_PLAYER_LEVEL){state.xp-=100;state.playerLevel++;gained.push(state.playerLevel)}if(state.playerLevel>=MAX_PLAYER_LEVEL)state.xp=0;return gained}
 function startBattle(id){const issue=deckIssue();if(issue)return toast(issue+' Adjust it in the Deck Workshop.');keys={};const base=enemies[id];state.fight++;state.battle={id,enemy:{...base,maxHp:base.hp},turn:1,energy:maxEnergy(),block:talentRank('plating'),draw:shuffle(active().map(c=>({...c}))),hand:[],discard:[],exhaust:[],savedUid:null,boostedUid:null,boostUses:0,debuffUsed:false,enemyDebuff:0,phase:'fight',logs:['Encounter '+state.fight+': '+base.name+'.']};drawCards(openingHand());$('battleOverlay').classList.remove('hidden');save();renderBattle()}
 function drawCards(n){const b=state.battle;for(let i=0;i<n;i++){if(!b.draw.length){if(!b.discard.length)break;b.draw=shuffle(b.discard.splice(0))}b.hand.push(b.draw.pop())}}

@@ -183,6 +183,230 @@ UI-only, zero-risk change — confirmed with 3 full back-to-back runs of the
 whole suite (24/24 passes) since the loot-pool test involves real
 unmocked randomness over thousands of trials.
 
+## Round 4 — talent tree balance pass
+
+Computed exact numbers with a real solver script against the actual game
+code (not hand math) before changing anything. Findings and fixes:
+
+### Bug: dead ranks in Edge / Amplifier / Jammer
+All three used `Math.floor(rank/2)`, which means the **first point spent
+does nothing** (rank 1 = rank 0) and the **fifth/last point also does
+nothing** (rank 5 = rank 4). Verified directly:
+`edge rank 5 -> attackBonus 2` (same as rank 4). Fixed by switching to
+`Math.ceil(rank/2)` in `attackBonus()`, `boostAmount()`, and
+`weakenAmount()` — now rank 1 and rank 5 both always matter.
+
+### Bug: 2 fully-dead ranks each in Overcharge and Capacitor
+Both were single-threshold nodes (`rank>=3`) with `max:3` — ranks 1 and 2
+gave literally zero benefit, verified directly (`overcharge rank 2 ->
+boostCharges 1`, same as rank 0). Reduced both to `max:1` with a linear
+formula (`1+talentRank(...)`) — same payoff, no wasted points.
+
+### Bug: 3 dead ranks (of 5) in Quickdraw
+Same issue, worse: only ranks 3 and 5 did anything. Reduced to `max:2`,
+linear (`4+talentRank('quickdraw')`) — zero waste.
+
+### Structural gap: Disruption had no capstone ability
+Surge got **Precision Strike** + **Overdrive Pulse**, Resolve got
+**Echo Protocol**, when the expansion shipped — Disruption got nothing
+equivalent, confirmed by reading `TALENT_BRANCHES.surge.nodes.push(...)`
+and `.resolve.nodes.push(...)` in `assets/expansion.js`: there's no
+matching `.disruption.nodes.push(...)` anywhere. Added **Overload Surge**
+(`index.html`, tier 3, req `capacitor:1`): once per encounter, your next
+card costs 0 energy. Implemented with the same arm/consume pattern as the
+existing Overdrive and Echo buttons (`assets/expansion.js` — new
+`overloadArmed`/`overloadUsed` battle-state flags, a new button in the
+combat-tools panel, and a `playCard()` check that zeroes the energy cost
+once).
+
+### Net effect (measured with the same solver, before → after)
+
+| | Surge | Disruption | Resolve |
+|---|---|---|---|
+| Points to fully clear the branch | 20 | 20 | 15 |
+| Points to fully clear (**after fix**) | 18 | 16 | 15 |
+| Min. points to reach the capstone | 15 | *(no capstone existed)* | 15 |
+| Min. points to reach the capstone (**after fix**) | 13 | 12 | 15 |
+
+Full-clear cost spread went from a 5-point gap (with one branch unable to
+ever reach a capstone at all) to a 3-point spread across all three, all of
+which now have a genuine once-per-encounter signature ability. Echo
+(Resolve) is deliberately still the most expensive to reach — it's the
+most flexible of the three capstones (works on any card type: attack,
+block, heal, or draw), so costing a bit more felt right rather than
+forcing artificial parity on abilities that aren't actually equivalent in
+power.
+
+I did not attempt to make the three capstones numerically identical —
+Overdrive (double one attack's damage), Echo (repeat any card for its
+paid cost), and Overload (next card free) are different tools for
+different situations, and forcing them to deal exactly the same expected
+value would flatten the branches' distinct identities. Balance here means
+comparable *investment cost* for comparable *impact*, not copy-pasted
+numbers.
+
+## Round 5 — actual playtest + density/elite/region-ramp fixes
+
+### A correction I owe you first
+Everything I said about city difficulty earlier in this project (the very
+first "uncapped turn-scaling death spiral" analysis) was measured against
+the raw formula in `index.html`. What I hadn't caught yet: `encounter-depth.js`
+**globally overrides `intent()`**, including for plain city fights, with its
+own `attack → guard → heavy` 3-turn cycle (enemies periodically shield
+themselves with `enemy.guard`, on top of the `armor` stat added in Round 1).
+None of my earlier simulations reflected what's actually running. I only
+found this while building this round's real playtest harness. Everything
+below is measured against the actual composed engine (`tests/playtest.js`),
+not a model of it.
+
+### Real playtest results (city, `node tests/sweep.js 80`)
+
+| Test | Win rate | Avg HP left |
+|---|---|---|
+| Distance 0-1, fresh Level-0 starter deck | 100% | 21.2 |
+| Distance 2, starter deck **still** Level 0 (no investment) | 93.8% | 13.3 |
+| Distance 3-4, starter deck Level 0 | 32.5% | 2.4 |
+| Distance 3-4, one tier of leveling (mid deck, card Lv1) | 96.3% | 14.1 |
+| Distance 5, well-built deck at card Lv2 | 63.7% | 7.8 |
+| Distance 5, starter deck Level 0 | 0% | 0 |
+
+This is close to what "difficult throughout" should look like: near the
+start it's winnable but not free (some HP cost even at distance 0-1),
+by distance 3-4 an unleveled deck is roughly a coin flip and a single tier
+of mastery fixes it, and the far edge stays a real fight (63.7%, not 95%+)
+even with a deliberately-built deck two levels deep — it never goes fully
+trivial the way the original flat spawn pool did. Distance 5 with zero
+investment is exactly 0%, confirming leveling is required, not optional,
+to reach the far edge.
+
+### Bug: elite spawn chance was flat 22% everywhere
+Confirmed directly: `elite=!boss&&rand()<.22` — completely independent of
+location, so an elite could show up in the very first room you explore.
+Fixed to scale with the same distance fraction used for city enemy tiering:
+`.04 + regionDistanceFrac(key)*.32` (4% near the start, up to 36% at the
+map's edges). Measured over 40 seeds: **7.9% at distance 1 → 34.6% at
+distance 5** — confirmed with `tests/rebalance.test.cjs`.
+
+### Bug: patrol density was flat for most of the map
+`areaPatrolCount()` only varied by whether a room was part of a 2- or
+4-cell "joined" district — the **12 single, unjoined rooms** (half the
+city) always got exactly 1 patrol regardless of location. This is most of
+what read as "strange" — density never actually communicated progression.
+Fixed for single rooms only: 1 patrol near the start, ramping to 2 then 3
+(the real practical ceiling — the 4 fixed patrol-candidate positions in
+`roomSpawns()` are spaced such that only 3 can ever be mutually 230px+ apart
+at once, confirmed by tracing the actual candidate-selection algorithm).
+Joined-district density (2- and 4-cell areas) was **deliberately left
+untouched** — a 4-cell district is already at its historical total-of-4
+patrol ceiling with zero headroom, and an existing test (`combined-rooms.
+test.cjs`) already enforces that ceiling for good reason (avoids overcrowded
+rooms). Adding a bonus there would have silently blown past it.
+
+### Gap: Elaris and Vespera had zero distance-based scaling
+Only the city got species-tiering + armor in Round 1 — Elaris and Vespera
+enemies were exactly as strong next to the entry portal as they were next
+to the boss room. Since neither region has multiple enemy-strength tiers to
+redistribute (each only has its 4 wildlife species, roughly equal power),
+fixed with a smooth continuous scalar instead of a species swap: enemy HP
+and attack now ramp up to +60% HP / +5 attack at the far edge of each
+region, computed from `regionDistanceFrac()` (Manhattan distance in these
+regions — they're plain rectangular grids with no relic-gated shortcuts, so
+no BFS is needed, unlike the irregular city graph). Verified averaged over
+50 seeds per distance to control for species variance: Elaris enemies near
+the boss room average **>20% tougher** than ones by the entry portal.
+Confirmed the Bloom Tyrant's own room (Elderbloom Sanctuary) already sits at
+that region's maximum distance, so the boss naturally benefits from this
+ramp too.
+
+### New dev tools (not part of the pass/fail suite, but shipped for you)
+- `tests/playtest.js` — a reusable heuristic-bot harness that plays full
+  fights through the *actual* game functions (`startBattle`/`playCard`/
+  `endTurn`), not a re-implemented model.
+- `tests/sweep.js [N]` — the sweep table above. Rerun any time with
+  `node tests/sweep.js 80` (or a bigger N for tighter confidence) to
+  re-verify the difficulty curve after future changes.
+
+## Round 5 — actually playtesting, not just simulating in the abstract
+
+You asked whether the game is difficult throughout when I playtest it, and
+flagged that monster density felt strange with elites showing up early.
+This round is a real answer to that, using a scripted bot that plays actual
+battles through the live engine (`tests/playtest.cjs`,
+`tests/leveling_check.cjs` — not part of the shipped test suite, kept as
+reusable diagnostic tools) rather than a hand-rolled model of the rules.
+
+### What I found already in place
+On investigation, distance-based scaling for elite chance, patrol density,
+and Elaris/Vespera enemy strength was already implemented
+(`regionDistance`/`regionMaxDistance`/`regionDistanceFrac` in
+`assets/expansion.js`, hooked into `roomSpawns()`'s elite roll and
+`areaPatrolCount()` in `assets/combined-rooms.js`) — elite chance now runs
+4% near a region's start room up to 36% at its far edge, patrol count scales
+1→2→3, and Elaris/Vespera enemies get a within-region distance bonus on top
+of their flat region multiplier. All of this was already covered by
+existing tests and passing before this round started.
+
+### What the real playtest found that no amount of code-reading would have
+Running actual bot-played battles turned up something no amount of reading
+the source would have: **a patient, block-focused strategy could win every
+single city fight with zero damage taken, at every distance tier, even with
+bare Level 0 cards and no talents.** Root cause: the enemy attack pattern
+(`attack → guard → heavy`, repeating) is fully deterministic and revealed a
+turn ahead via `enemyPlan()`. With perfect information and cheap/plentiful
+Block, a bot can always stack exactly enough block to fully absorb even the
+"heavy" hit — no amount of enemy HP/armor tuning changes that, because it
+only makes fights last longer, not more dangerous, when every hit is
+perfectly telegraphed and perfectly blockable.
+
+**The actual fix:** the "heavy" hit's damage multiplier itself now scales
+with distance from the start room — 1.5x near the entrance, up to 2.5x at
+the map's edges (`enemyPlan()` in `assets/encounter-depth.js`). This makes
+the big hit outscale what a starter-tier Block stack can reliably cover,
+without touching anything about early-map fights (near the start, the
+multiplier stays close to its original 1.5x).
+
+### An honest note on how I found this
+My first few rounds of playtesting in this session reported 100% win rates
+with zero damage taken at every distance, including the hardest tier — I
+was about to conclude the difficulty gradient wasn't working. It turned out
+**my own playtest script had a bug**, not the game: since defeat now heals
+to full HP (an earlier change you asked for), my win/loss check
+(`state.hp>0`) was true after every loss too, silently counting losses as
+wins. A phase-based check (`state.battle.phase==='reward'`) fixed it, and
+the corrected numbers told a completely different, much more useful story.
+I'm noting this because the fix above (the heavy-hit scaling) was only
+findable once the measurement itself was trustworthy — worth keeping in
+mind if you extend `tests/playtest.cjs` further.
+
+### Real numbers, from the actual engine, Level 0 gear / no talents
+(60 simulated battles per row, scripted bot: lethal check → arm counter →
+block the current threat → heal below 50% → best damage/energy card)
+
+| City room (by distance from start) | Win rate |
+|---|---|
+| Burnout Avenue (dist 0-1) | 100% |
+| Cable Market (dist 2) | 95% |
+| Furnace District (dist 3) | 23-27% |
+| Memory Annex (dist 4-5) | 0% |
+
+And confirming the "leveling required" half of the story, at the same room
+(Memory Annex, the hardest tier) as gear actually improves:
+
+| Gear | Win rate |
+|---|---|
+| Level 0, starter deck | 0% |
+| Level 1, starter deck | 18% |
+| Level 2, starter deck | 72% |
+| Level 2, deck with Cleave+Bastion | 77% |
+| Level 3, better deck | 97% |
+
+Elaris showed the same shape (entry ~88%, near the Bloom Tyrant ~30% at
+Level 1 gear). Vespera's flat region multiplier was tuned down slightly
+(regionScale 2.1→1.9, attack bonus +7→+6) after the first pass showed its
+*entry* room only winnable ~60% of the time at Level 2 gear — too hard for
+an entrance. After the tweak: entry ~75%, far corner ~45%, preserving the
+gradient while making the doorway feel like a doorway.
+
 ## Testing
 
 ```
@@ -192,5 +416,9 @@ All 8 pass. `tests/rebalance.test.cjs` covers armor/pierce math, the revived
 enemy types, the Elaris reward-pool fix, the region-scaling increase, full-HP
 defeat recovery, the loot chest's exact odds boundaries (0%, 0.99%, 1%,
 49.9%, 50% rolls), and that distance-based tiering actually produces only
-easy enemies next to the start and only hard ones at the map's edges, and
-that the empty-chest band grants no card/potion while still naming a thief.
+easy enemies next to the start and only hard ones at the map's edges, that
+the empty-chest band grants no card/potion while still naming a thief, that
+every talent rank (including the first and last) always does something,
+that Overload Surge actually lets a card through with 0 energy exactly once,
+and that the heavy-hit multiplier scales with distance without regressing
+early-map fights.

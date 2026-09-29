@@ -12,7 +12,13 @@ function enemyPlan(b=state.battle,turn=b?.turn){
  const pattern=boss?['guard','charge','elemental','attack','charge','elemental']:element?['attack','charge','elemental','guard']:['attack','guard','heavy'];
  const kind=pattern[(turn-1)%pattern.length],enraged=boss&&b.enemy.hp<=b.enemy.maxHp/2;
  const base=Math.max(1,b.enemy.attack-(b.enemyDebuff||0))+(enraged?2:0);
- const damage=['charge','guard'].includes(kind)?0:Math.round(base*(kind==='elemental'?1.8:kind==='heavy'?1.5:1))+(b.exposed||0);
+ // Heavy hits scale from 1.5x near the region's start room up to 2.5x at its
+ // farthest edge, so a fully-stacked Block turn that comfortably absorbs an
+ // early heavy attack can no longer just as comfortably absorb a late-map
+ // one — encourages coming back stronger rather than tanking every hit
+ // forever with the same starter-tier block cards.
+ const heavyFrac=(typeof regionDistanceFrac==='function')?regionDistanceFrac(state.room):0,heavyMult=1.5+heavyFrac;
+ const damage=['charge','guard'].includes(kind)?0:Math.round(base*(kind==='elemental'?1.8:kind==='heavy'?heavyMult:1))+(b.exposed||0);
  return{kind,element,damage,name:kind==='charge'?'Gathering '+element+' energy':kind==='guard'?'Rootguard':kind==='elemental'?(boss?'Cataclysm':'Charged')+' '+element+' strike':kind==='heavy'?'Heavy attack':'Strike',enraged};
 }
 intent=function(){return enemyPlan().damage};

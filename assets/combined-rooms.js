@@ -21,7 +21,21 @@ function joinedArea(key=state.room){
 }
 function cellOffset(key,area=joinedArea()){const [x,y]=key.split(',').map(Number);return{x:(x-area.left)*800,y:(y-area.top)*500}}
 function joinedExit(dir,key=state.room){const raw=rooms[key].exits[dir];return typeof raw==='string'&&joinedArea(key).cells.includes(raw)?raw:null}
-function areaPatrolCount(key){const area=joinedArea(key);return area.cells.length===2&&key===area.cells[0]?2:1}
+// Joined-area density (2- and 4-cell districts) is left exactly as before —
+// it's already tuned so each district's total patrol count stays sane, and
+// a 4-cell district is already at that ceiling with zero room to add more.
+// The actual flatness problem is in the 12 single, unjoined city rooms,
+// which previously always got exactly 1 patrol no matter how far they were
+// from the start. Those now scale 1 -> 2 -> 3 with distance from the
+// region's start room (3 is the real practical ceiling for a single room:
+// the 4 fixed patrol candidate positions in roomSpawns() are spaced such
+// that only 3 of them can ever be mutually >230px apart at once).
+function areaPatrolCount(key){
+ const area=joinedArea(key);
+ if(area.cells.length!==1)return area.cells.length===2&&key===area.cells[0]?2:1;
+ const frac=(typeof regionDistanceFrac==='function')?regionDistanceFrac(key):0;
+ return frac>=.7?3:frac>=.35?2:1;
+}
 function cameraPosition(area,pos,viewportWidth=800,viewportHeight=500){return{x:Math.max(0,Math.min(area.width-viewportWidth,pos.x-viewportWidth/2)),y:Math.max(0,Math.min(area.height-viewportHeight,pos.y-viewportHeight/2))}}
 function updateAreaCamera(){
  if(!state)return;const area=joinedArea(),offset=cellOffset(state.room,area),mobile=innerWidth<=720,viewWidth=mobile?480:800,scale=Math.min(innerWidth/viewWidth,innerHeight/500),viewHeight=mobile?Math.min(area.height,Math.max(250,(innerHeight-160)/scale)):500,camera=cameraPosition(area,{x:offset.x+state.pos.x,y:offset.y+state.pos.y},viewWidth,viewHeight);
