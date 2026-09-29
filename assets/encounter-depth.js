@@ -29,7 +29,12 @@ cardEffect=function(c,empowered,doubleAttack){
  if(b.id==='bloomTyrant')b.enemy.element=enemyPlan(b).element;
  depthCardEffect(c,empowered,doubleAttack);
  const dealt=before-b.enemy.hp,absorbed=Math.min(b.enemy.guard||0,dealt);
- if(absorbed){b.enemy.hp+=absorbed;b.enemy.guard-=absorbed;b.logs.push('Rootguard absorbs '+absorbed+' damage.')}
+ if(absorbed){
+  b.enemy.hp+=absorbed;b.enemy.guard-=absorbed;
+  const net=dealt-absorbed,last=b.logs[b.logs.length-1];
+  if(last!==undefined)b.logs[b.logs.length-1]=last+' − '+absorbed+' block = '+net+' dealt';
+  else b.logs.push('Enemy Block absorbs '+absorbed+' damage.');
+ }
  if(d.shock)b.disrupted=true;
 };
 endTurn=function(){
@@ -64,7 +69,8 @@ renderBattle=function(){
  depthBattleRender();const b=state?.battle;if(!b||b.phase!=='fight')return;
  const plan=enemyPlan(b),next=enemyPlan(b,b.turn+1),box=$('battleModal').querySelector('.intent');
  if(box)box.innerHTML='<b>'+plan.name+'</b>'+(plan.damage?' · '+plan.damage+' damage':' · no attack')+(plan.kind==='elemental'?' · COUNTER WINDOW':'')+'<small>Next: '+next.name+(next.damage?' · '+next.damage+' damage':'')+'</small>';
- const status=document.createElement('p');status.className='encounter-status';status.textContent=(plan.enraged?'ENRAGED · ':'')+'Enemy Block '+(b.enemy.guard||0)+(b.disrupted?' · Lightning disruption armed':'')+(b.playerPoison?' · Poison '+b.playerPoison:'')+(b.playerBurn?' · Burn '+b.playerBurn:'');box?.append(status);
+ const statusText=(plan.enraged?'ENRAGED · ':'')+(b.enemy.guard?'Enemy Block '+b.enemy.guard+' · ':'')+(b.disrupted?'Lightning disruption armed · ':'')+(b.playerPoison?'Poison '+b.playerPoison+' · ':'')+(b.playerBurn?'Burn '+b.playerBurn+' · ':'');
+ if(statusText){const status=document.createElement('p');status.className='encounter-status';status.textContent=statusText.replace(/ · $/,'');box?.append(status)}
  const tips=$('battleModal').querySelector('.battle-footer>.muted');if(tips)tips.textContent='Reserve one counter for a charged elemental strike. Other cards need Memory Buffer.';
  document.querySelectorAll('#hand .card-wrap').forEach((wrap,i)=>{
   const c=b.hand[i];if(!stat(c).counter||hasTalent('retainCore'))return;
