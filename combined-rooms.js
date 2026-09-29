@@ -106,7 +106,7 @@ renderWorld=function(){
  if(area.art)appendAreaPainting(world,area);
  for(const key of area.cells){
   const cell=key===state.room?current:document.createElement('div'),offset=cellOffset(key,area);cell.classList.add('area-cell');cell.style.left=offset.x+'px';cell.style.top=offset.y+'px';cell.dataset.room=key;
-  if(key!==state.room){NeonCity.render(cell,key,rooms[key]);appendPatrols(cell,key);const q=rooms[key].relic;if(q&&!hasRelic(q[0])&&q[0]!=='material'){const relic=document.createElement('div');relic.className='relic';relic.textContent=q[2];relic.dataset.name=q[1];relic.style.left=q[3]+'px';relic.style.top=q[4]+'px';cell.append(relic)}const cache=chestFor(key);if(cache&&!state.chests.includes(cache.id)){const chest=document.createElement('div');chest.className='secret-chest';chest.textContent='▣';chest.style.left=cache.x+'px';chest.style.top=cache.y+'px';cell.append(chest)}}
+  if(key!==state.room){NeonCity.render(cell,key,rooms[key]);appendPatrols(cell,key);const q=rooms[key].relic;if(q&&!hasRelic(q[0])&&q[0]!=='material'){const relic=document.createElement('div');relic.className='relic';relic.textContent=q[2];relic.dataset.name=q[1];relic.style.left=q[3]+'px';relic.style.top=q[4]+'px';cell.append(relic)}const cache=chestFor(key);if(cache&&!state.chests.includes(cache.id)){const chest=document.createElement('div');chest.className='map-chest';chest.style.left=cache.x+'px';chest.style.top=cache.y+'px';cell.append(chest)}}
   for(const dir of ['n','s','e','w'])if(joinedExit(dir,key))cell.querySelector('.city-exit.'+dir)?.remove();
   world.append(cell);
  }
