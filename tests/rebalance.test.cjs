@@ -1,6 +1,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
-const {run}=require('./expansion.test.cjs');
+const assert=require('node:assert/strict');
+const {run,context}=require('./expansion.test.cjs');
 run(fs.readFileSync(path.join(__dirname,'../assets/combined-rooms.js'),'utf8'));
 
 run(`
@@ -136,7 +137,7 @@ function eliteRateAt(minD,maxD,samples){
  }
  return elite/total;
 }
-const eliteNear=eliteRateAt(0,1,60),eliteFar=eliteRateAt(4,5,60);
+const eliteNear=eliteRateAt(0,1,300),eliteFar=eliteRateAt(4,5,300);
 assert(eliteNear<0.15,'elites should be rare near the start (got '+(eliteNear*100).toFixed(1)+'%)');
 assert(eliteFar>0.25,'elites should be common near the map edge (got '+(eliteFar*100).toFixed(1)+'%)');
 assert(eliteFar>eliteNear*2,'elite rate should be meaningfully higher far from the start than near it');
@@ -236,5 +237,33 @@ for(let trial=0;trial<100;trial++){
  }
 }
 
-console.log('PASS: armor/pierce mechanics, Elaris reward-pool fix, revived enemy types, raised region scaling, full-HP defeat recovery, loot chest odds, distance-based enemy tiering, talent-tree balance, distance-scaled elite rate, distance-scaled patrol density, Elaris/Vespera distance-scaled enemy strength, distance-scaled heavy-hit damage, armor visibility in the UI/log, and one-Soulbound-per-starter-card-type (surviving both import and 100 defeat rolls) all verified.');
+// --- Every card renders an <img> pointing at its own per-level art file,
+// with the original icon glyph kept in the markup as a fallback in case
+// that file is ever missing or fails to load.
+newGame();
+const sampleCard=make('strike',2);
+const html=cardHTML(sampleCard);
+assert(html.includes('assets/cards/strike-lv2.png'),'cardHTML references the correct id+level art path');
+assert(html.includes('onerror='),'the <img> has an onerror fallback so a missing file never breaks the card');
+assert(html.includes('art-glyph'),'the original icon glyph is still in the markup as a fallback');
+
+console.log('PASS: armor/pierce mechanics, Elaris reward-pool fix, revived enemy types, raised region scaling, full-HP defeat recovery, loot chest odds, distance-based enemy tiering, talent-tree balance, distance-scaled elite rate, distance-scaled patrol density, Elaris/Vespera distance-scaled enemy strength, distance-scaled heavy-hit damage, armor visibility in the UI/log, one-Soulbound-per-starter-card-type (surviving both import and 100 defeat rolls), and per-card art wiring all verified.');
 `);
+
+// --- Every card definition actually has a placeholder file on disk for
+// every level 0-3 (catches a future card added without running the art
+// generator in tools/generate_card_placeholders.py).
+const cardsDir=path.join(__dirname,'..','assets','cards');
+run(`newGame();globalThis.__ids=Object.keys(defs);`);
+const ids=context.__ids;
+assert(ids.length>0,'defs actually has cards to check');
+const missing=[];
+for(const id of ids){
+ for(let level=0;level<4;level++){
+  const file=path.join(cardsDir,`${id}-lv${level}.png`);
+  if(!fs.existsSync(file))missing.push(`${id}-lv${level}.png`);
+ }
+}
+assert.equal(missing.length,0,'every card has art for every level 0-3, missing: '+missing.join(', '));
+console.log(`PASS: all ${ids.length} cards × 4 levels (${ids.length*4} files) have art in assets/cards/.`);
+

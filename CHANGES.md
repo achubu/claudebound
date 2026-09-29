@@ -496,6 +496,49 @@ against every place `openMenu()`/`closeMenu()` is called, and confirmed the
 full suite still passes (rules out a syntax error), but this one specific
 behavior should be spot-checked by hand in a browser.
 
+## Round 11 — per-card art, ready for your own artwork
+
+Every card in the game now has its own image, wired up and ready for you to
+replace with real art. No gameplay logic touched.
+
+### What's there now
+`assets/cards/<id>-lv<level>.png` — one file per **unique card × mastery
+level**, e.g. `strike-lv0.png` through `strike-lv3.png`. All 22 cards in
+`defs` (pulled directly from the live game data, not hand-typed — see
+below) × 4 levels = **88 files**, generated as clearly-labeled placeholders
+(colored by card kind, big ASCII tag, full card name, cost/level/Soulbound
+footer, and the card's own id printed in the corner so you always know
+which file you're looking at even outside the game).
+
+### How to replace them
+Just overwrite a file with the same name — `strike-lv2.png`, say — with
+your own art, same or different dimensions (it's rendered with
+`object-fit:cover`, so it'll crop to fit rather than distort). No code
+changes needed. If a file is ever missing or fails to load, the card falls
+back to its original icon glyph automatically instead of breaking.
+
+### `tools/generate_card_placeholders.py`
+Kept in the repo as a real, reusable tool, not a one-off script. Pulls the
+card list straight from the live game code (via the same Node/VM test
+harness everything else in this project uses) rather than a hand-maintained
+list that could drift out of sync, so if you add a new card to `defs`
+later, running this again fills in just that card's 4 missing placeholders
+without touching any files you've already replaced with real art
+(`--force` regenerates everything if you ever want to reset).
+
+### Where the art actually renders
+`cardHTML()` (`index.html`) is the single function every card view in the
+game goes through — deck workshop, hand during battle, loot chest reveals,
+talent-adjacent screens — so this one change point covers every place a
+card appears, confirmed by reading the full call chain rather than assumed.
+
+### Also fixed: a flaky test I ran into along the way
+While validating this, `tests/rebalance.test.cjs`'s elite-spawn-rate check
+(from the Round 5 distance-scaling work) occasionally failed on pure
+sampling variance — a pre-existing issue unrelated to card art, caught
+because I ran the suite several times in a row rather than once. Bumped its
+sample size 60→300 per distance band and confirmed stable across 6+ runs.
+
 ## Testing
 
 ```
@@ -511,6 +554,9 @@ every talent rank (including the first and last) always does something,
 that Overload Surge actually lets a card through with 0 energy exactly once,
 that the heavy-hit multiplier scales with distance without regressing
 early-map fights, that the combat log now explains an armor reduction in
-one readable line instead of two separate ones, and that exactly one
-starter copy of each card type survives both an import round trip and 100
-simulated defeat card-loss rolls while its duplicate stays at risk.
+one readable line instead of two separate ones, that exactly one starter
+copy of each card type survives both an import round trip and 100
+simulated defeat card-loss rolls while its duplicate stays at risk, that
+`cardHTML()` references the correct per-card-per-level art path with a
+working glyph fallback, and that all 22 cards × 4 levels (88 files) actually
+exist on disk.
