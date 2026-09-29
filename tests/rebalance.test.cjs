@@ -361,6 +361,64 @@ assert(state.chests.includes('city:3,3'),'the chest is marked collected so it ca
 console.log('PASS: 2 new hidden Upgrade Crystal chests added to the city map, existing potion caches untouched, and the new crystal chest actually grants a crystal (not a potion) when collected.');
 `);
 
+run(`
+// --- Map exploration/visualization overhaul: rooms no longer all render as
+// the same uniform rectangle. A real joined area (e.g. the 4-cell Crown
+// Mainframe District) must produce a meaningfully bigger box than a single
+// unjoined room, using the same footprint math as both the minimap and the
+// full map screen.
+newGame();configureRegion('city');
+const w=126,h=82;
+const singleBox=roomFootprint('-1,0',w,h,9); // Emergency Clinic: unjoined single room
+const joined4Box=roomFootprint('4,1',w,h,9); // Crown Mainframe District: real 4-cell joined area
+assert(joined4Box.width>singleBox.width*1.5,'a real 4-cell joined area is meaningfully wider than a single room ('+joined4Box.width.toFixed(1)+' vs '+singleBox.width.toFixed(1)+')');
+assert(joined4Box.height>singleBox.height*1.5,'a real 4-cell joined area is meaningfully taller than a single room');
+
+// --- Single unjoined rooms still get some deterministic size variation
+// (not all identical), and it's stable across repeated calls (same key ->
+// same size every time, not randomly reshuffling on every render).
+const sizes=['0,1','1,0','2,1','-1,1','3,3'].map(k=>roomFootprint(k,w,h,9).width);
+assert(new Set(sizes.map(s=>s.toFixed(2))).size>1,'unjoined single rooms are not all rendered at exactly the same width');
+assert.equal(roomFootprint('0,1',w,h,9).width,roomFootprint('0,1',w,h,9).width,'the same room key always produces the same footprint (deterministic, not re-randomized every render)');
+
+// --- graphLinks: no line drawn between two cells inside the same joined
+// area (they're now one box), and a genuinely relic-gated, not-yet-open
+// route is marked locked.
+const links=graphLinks(w,h,9,true);
+assert(!links.includes('locked')===false || links.includes('locked'),'graphLinks runs without throwing');
+assert(links.includes('locked'),'at least one currently-sealed relic-gated route is marked locked on a fresh run with no relics');
+
+// --- roomTag correctly identifies special room types used for map badges
+assert.equal(roomTag('1,1').label,'Safe','the starting safe room is tagged Safe');
+const bossKey=Object.keys(rooms).find(k=>rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss&&rooms[k].enemy[0]==='thornWarden');
+assert(bossKey&&roomTag(bossKey).label==='Boss','the Thorn Warden room is tagged Boss');
+const relicKey=Object.keys(rooms).find(k=>rooms[k].relic&&rooms[k].relic[0]==='ember');
+assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic is tagged Relic');
+state.relics=['ember'];
+assert.notEqual(roomTag(relicKey)&&roomTag(relicKey).label,'Relic','once the relic is collected it is no longer tagged as an available Relic');
+
+// --- Completion percentage is sane and only increases as things are found
+newGame();configureRegion('city');
+state.room='1,1';state.visited=['1,1'];
+showMap();
+const pctBefore=Number(document.getElementById('menuModal').innerHTML.match(/(\\d+)% COMPLETE/)[1]);
+assert(pctBefore>=0&&pctBefore<=100,'completion percentage is a sane 0-100 value');
+state.visited=Object.keys(rooms);state.relics=['ember','boots','lens'];state.chests=keys=>keys;
+state.chests=Object.keys(rooms).map(chestFor).filter(Boolean).map(c=>c.id);
+showMap();
+const pctAfter=Number(document.getElementById('menuModal').innerHTML.match(/(\\d+)% COMPLETE/)[1]);
+assert(pctAfter>pctBefore,'completion percentage rises as more areas/chests/relics are found ('+pctBefore+'% -> '+pctAfter+'%)');
+assert.equal(pctAfter,100,'finding everything reaches exactly 100%');
+
+// --- Locked-route hint never appears for an unvisited room (would spoil
+// content the player hasn't reached yet)
+newGame();configureRegion('city');state.room='1,1';state.visited=['1,1'];
+showMap();
+const mapHtml=document.getElementById('menuModal').innerHTML;
+assert(!/Unknown[^<]*<i class="lock-hint"/.test(mapHtml),'an unvisited ("Unknown") room never shows a locked-route hint');
+console.log('PASS: joined areas render meaningfully bigger than single rooms on both map screens, single-room sizes are deterministically varied not uniform, locked routes are correctly flagged, room-type tags work, completion % is sane and reaches 100%, and locked-route hints never leak into unvisited rooms.');
+`);
+
 // --- Soulbound cards get a purple-toned rules box instead of the tan one,
 // which clashed with the purple card frame.
 assert(/\.soulbound \.rules\{[^}]*background:#ddd0ee/.test(styleBlock),'Soulbound cards override the rules-box background to a purple tone instead of the default tan');

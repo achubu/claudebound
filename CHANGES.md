@@ -727,6 +727,110 @@ screen (which uses `.innerHTML =`). Switched to source-level checks instead
 PNG — exists in both render call sites) and did the actual visual
 confirmation with a real Chromium screenshot during development instead.
 
+## Round 17 — map exploration overhaul (Metroid + Castlevania)
+
+You asked whether a Metroid/Castlevania-style map overhaul was feasible,
+then said the real complaint was that every room "feels like moving around
+in a rectangle." I read the actual map/room data before proposing
+anything, which changed the plan for the better — and led to picking a
+different one of the two reference games for each of the game's two map
+screens, since that's genuinely how they differ from each other:
+
+- **Corner minimap** (always visible, already a pixel-positioned node
+  graph) → leaned into **Super Metroid**: real room-size variation,
+  connecting lines, locked-route lines.
+- **Full map screen** (already CSS Grid) → leaned into **Castlevania
+  SotN**: native grid-spanning for multi-cell areas, room-type icons, a
+  completion percentage.
+
+### The actual root cause of "it's all one rectangle"
+The map data already has genuine multi-cell districts that share one
+continuous background — 2- and 4-cell "joined areas" like the 4-cell Crown
+Mainframe District (`JOINED_AREAS` in `assets/combined-rooms.js`) — but
+every map screen rendered every single cell as the same uniform-sized box,
+completely discarding that real shape/size information. Fixing this
+didn't require inventing new content, just actually using data that was
+already there.
+
+### What changed
+- **`roomFootprint()`** (new, `index.html`): computes each room's box size
+  from its *real* footprint — a joined area spanning N columns/rows draws
+  proportionally bigger, and even single unjoined rooms get a small
+  deterministic size/aspect jitter (seeded by the room key, so it's stable
+  across renders, not randomly reshuffling every time you open the map) —
+  purely so the map doesn't read as a grid of identical tiles.
+- **`graphLinks()`** (`index.html`): rewritten to skip drawing a connector
+  line between two cells that are actually the same joined area (they're
+  one box now), and to correctly mark a genuinely relic-gated, not-yet-open
+  route with the existing crimson dashed "locked" styling.
+- **`roomTag()`** (new): identifies Boss / Safe / Relic / Crystal / Chest
+  rooms for small colored badges on both map screens.
+- **Full map (`showMap()`, `assets/expansion.js`)**: completely rewritten
+  — joined areas now use native `grid-column/row: span N` instead of one
+  cell per room, added SECURE/DANGER/BOSS/YOU ARE HERE status text, room-
+  type badges, a 🔒 hint naming the required relic on routes you've
+  actually seen (never shown for unvisited rooms, so it can't spoil
+  anything), and an overall completion percentage combining areas visited,
+  hidden chests found, and relics claimed. The `combined-rooms.js` wrapper
+  that used to bolt on a "· joined area" text label after the fact is now
+  redundant (the box's own size communicates that) and was removed.
+- **Corner minimap (`renderMinimap()`, `index.html`)**: same footprint
+  logic, plus a small colored corner dot per room-type tag.
+
+### A real cross-file bug this surfaced
+The base test harness (`tests/expansion.test.cjs`, shared by every other
+test file) doesn't load `combined-rooms.js` — which defines `joinedArea()`
+— even though the real game always does. Calling it directly from the new
+map code broke every single test the moment I ran the suite. Added
+`getJoinedArea()`, a defensive wrapper that falls back to treating a room
+as its own single-cell area when `joinedArea` isn't loaded, matching the
+same `typeof X==='function'` pattern already used elsewhere in this
+codebase for other optional cross-file dependencies.
+
+### Verified with real Chromium renders, not just the CSS
+Generated actual `renderMinimap()`/`showMap()` output from the live game
+engine and rendered it with headless Chromium mid-development — confirmed
+real size variation between a 4-cell joined district and a single room,
+the dashed locked-route line, current-room highlighting, and the relic/
+safe/boss badges all render correctly together, not just in isolation.
+
+## Round 18 — square card art container
+
+Changed `.art` (`index.html`) from a fixed `height:92px` (a ~1.7:1
+landscape rectangle) to `aspect-ratio:1/1` — the container is now a true
+square regardless of the card's own width, so any square artwork you drop
+in later (`assets/cards/<id>-lv<level>.png`, same filenames as before)
+will display correctly via the existing `object-fit:cover`. No image files
+were touched — this is purely the container.
+
+Verified with a real Chromium render using the actual game engine's
+`cardHTML()` output and the existing Round 11 placeholder art: the square
+frame crops cleanly, and the rest of the card (rules box, level pips,
+mastery bar, serial footer) still lays out correctly below the now-taller
+art area — the card simply grows to fit, since `.card` was already
+`min-height` rather than a fixed height.
+
+One honest note: while re-running the suite I hit a single, one-off
+`TypeError` in `joinedArea()` inside the pre-existing fixed-seed room-walk
+sweep in `tests/expansion.test.cjs` — since this CSS-only change cannot
+possibly affect that JS logic, I swept 3,000 seeds across all three
+regions plus 5 direct reruns of the file plus 5 full 8-file suite runs (40
+test-file executions total) and could not reproduce it again. Flagging it
+rather than quietly ignoring it, but treating it as a non-reproducible
+anomaly rather than a real bug given the volume of clean runs since.
+
+## Round 19 — card art reset to blank squares
+
+Replaced all 88 labeled placeholder images (`assets/cards/<id>-lv<level>.png`
+— the colored, text-labeled ones from Round 11) with plain blank white
+500×500 PNGs, ready for you to overwrite with real art later. Same
+filenames, same 500×500 size the square container (Round 18) expects — no
+code changes needed, just overwrite a file to replace it.
+
+Pulled the card list straight from the live game (`Object.keys(defs)`,
+same 22 cards) rather than assuming the old placeholder set was still
+accurate, so nothing was missed or renamed by mistake.
+
 ## Testing
 
 ```
@@ -763,4 +867,13 @@ and actually increment the persistent `materials()` count, that the city
 map has exactly 6 hidden chests (2 granting crystals, 4 unchanged potion
 caches) with Elaris untouched at 3, that walking to a new crystal chest
 grants a crystal and not a potion, and that both chest-rendering call sites
-use the real loot-chest artwork instead of the old glyph.
+use the real loot-chest artwork instead of the old glyph, that a real
+4-cell joined area renders meaningfully bigger than a single room on both
+map screens, that unjoined single-room sizes are deterministically varied
+rather than uniform, that locked relic-gated routes are correctly flagged,
+that room-type tags identify the right rooms, that the completion
+percentage is sane and reaches exactly 100% once everything is found, and
+that a locked-route hint never appears on a room the player hasn't visited
+yet, and (Round 18) verified with a real Chromium render that the now-
+square art container crops cleanly with object-fit:cover and the rest of
+the card still lays out correctly beneath it.
