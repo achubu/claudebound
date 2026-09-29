@@ -539,6 +539,194 @@ sampling variance — a pre-existing issue unrelated to card art, caught
 because I ran the suite several times in a row rather than once. Bumped its
 sample size 60→300 per distance band and confirmed stable across 6+ runs.
 
+## Round 12 — premium card frame (CSS only, no art needed)
+
+Upgraded the card frame's chrome to read closer to a premium foil trading
+card, inspired by a reference image you shared. Pure CSS/markup — no new
+art assets, works with the existing placeholder images from Round 11 and
+will work with your real art too. All of this was actually rendered with
+headless Chromium (via Playwright) at every step and visually inspected,
+not just reasoned about from the CSS — which is how the two real bugs below
+got caught before shipping instead of after.
+
+### What changed (`index.html` — `cardHTML()` and the `<style>` block)
+- **Ornate double-border + 4 corner gem accents** — a dark inner ring plus a
+  thin gold (purple for Soulbound) ring, with small glowing gem dots at
+  each corner, all done with layered `box-shadow` and `::after`
+  radial-gradients — no extra DOM elements needed.
+- **Foil shimmer** — a slow diagonal sheen sweeps across the card
+  (`::before`, animated `background-position`, `mix-blend-mode:overlay`),
+  respects `prefers-reduced-motion`.
+- **Embossed gold-gradient title** (purple for Soulbound) using
+  `background-clip:text` + a thin dark `-webkit-text-stroke` for
+  definition against the similarly-toned card background.
+- **Kind-glyph badge** in the corner of the rules box — reuses the card's
+  existing `icon` field a second time, so no new data or mapping needed.
+- **Diamond-shaped level pips** (via `clip-path`) with a glow on filled
+  ranks, instead of plain rounded rectangles.
+- **Glossier mastery bar** with a subtle top highlight strip.
+- **Card serial footer** (e.g. `STR-001/022`) — id-based tag, position in
+  `Object.keys(defs)`, and total card count, all pulled live from the game
+  data, not hand-typed.
+
+### Two real bugs caught by actually rendering it, not just reading the CSS
+1. **`text-shadow` silently desaturates `background-clip:text` gradients in
+   Chromium** — the gold title read as muddy gray until I isolated the
+   exact property causing it (confirmed with a side-by-side debug render)
+   and switched to `filter:drop-shadow` instead, which doesn't have this
+   interaction.
+2. **The mastery bar (`.track`) is a `<span>`, which is `display:inline` by
+   default — and inline elements ignore explicit `height` entirely**, per
+   the CSS spec. Its fill child's `height:100%` was resolving against an
+   indeterminate ancestor instead, ballooning to ~290px and pushing the new
+   serial footer far outside the visible card. Root-caused by measuring
+   every child element's actual bounding box in real Chromium rather than
+   guessing, then fixed with one `display:block`. (For comparison: the HP
+   meter bar never had this problem because it's built on a `<div>`, which
+   is block-level by default — confirmed there's no second instance of this
+   pattern anywhere else in the codebase.)
+
+## Round 13 — toned down the shine, fixed a real overlay bug
+
+Feedback: too shiny/distracting, and something was overlaid on the center
+of every card's art. Both addressed:
+
+### Removed the animated foil shimmer
+The diagonal sweeping sheen (`.card::before`, `@keyframes foilSweep`) is
+gone entirely — with several cards visible at once in the deck workshop,
+continuous motion across all of them was the likely source of "distracting."
+The static double-border and corner-gem accents (`.card::after`) stay; those
+don't move.
+
+### Fixed a real bug: the fallback glyph was painting on top of loaded art
+The small icon glyph in the art panel was only ever supposed to be a
+fallback — shown if a card's image file is missing or fails to load, hidden
+once real art is there. Instead it was rendering on top of *every* card's
+art, always, including the placeholder art from Round 11. Root cause: `.art
+img` had no explicit `z-index`, while `.art-glyph` had `z-index:0` and comes
+later in the DOM — in CSS stacking order, an explicit `z-index:0` beats an
+implicit `z-index:auto` in the same tier, so the later glyph painted above
+the image regardless of load success. Gave `.art img` `z-index:1` so it
+unambiguously stacks above the glyph; the glyph now only shows through when
+there's genuinely no image to display. Caught by re-examining my own
+Round 12 screenshots after your report — it was visible there too, I'd
+missed it.
+
+Both fixes verified with real Chromium renders, not just read off the CSS.
+
+## Round 14 — "14 dmg into 4 block hit for nothing"
+
+Investigated by reproducing the exact scenario through the real engine
+before touching anything — didn't want to guess. Direct test: enemy with 0
+armor, 4 Block, hit with a 14-damage attack.
+
+**The math was already correct**: 14 − 4 = 10 net damage, confirmed with
+several variations (single hit, two hits in the same turn depleting Block
+across both) — no compounding bug, no double-absorption, nothing zeroed
+out. So this wasn't the same class of issue as the earlier Armor report.
+
+**The actual problem was visibility** — the mechanic worked but was
+essentially invisible, making a correct 10-damage hit easy to misread as
+"nothing happened":
+
+1. **No persistent Block indicator.** Unlike Armor (which got a `🛡 N
+   Armor` tag next to the enemy's HP back in Round 6), Block only ever
+   appeared in a transient status line inside the attack-intent box.
+   Fixed: `.enemy.guard` now gets the same treatment as Armor — `◈ N
+   Block` next to HP, plus an explanatory note, whenever it's active
+   (`index.html`).
+2. **"Enemy Block 0" printed as noise on nearly every turn**, since Block
+   is normally 0 outside the enemy's periodic guard phase. Seeing "Block 0"
+   constantly trains you to stop reading that line — so the one turn it
+   said "Block 4," it blended in as more of the same. Fixed: the status
+   line (`assets/encounter-depth.js`) now only appears when there's
+   actually something to report (nonzero Block, an active status effect,
+   or Enraged).
+3. **The log split the math into two disconnected lines** — `"Big Hit · 14
+   damage"` immediately followed by a separate `"Rootguard absorbs 4
+   damage."` — instead of showing the net result in one place. Fixed the
+   same way the Armor log was fixed in Round 6: `cardEffect()`'s wrapper in
+   `assets/encounter-depth.js` now amends the existing damage line in
+   place — `Big Hit · 14 damage − 4 block = 10 dealt` — rather than
+   appending a second line.
+
+Verified directly: the exact reported scenario (0 armor, 4 Block, 14
+damage) now nets 90 HP remaining from 100, with that single combined log
+line, and the Block indicator visible on the enemy panel *before* the
+card is even played — not just reasoned about, tested against the real
+`playCard()`/`cardEffect()` call chain.
+
+## Round 15 — purple rules box for Soulbound cards
+
+The card text box was tan on every card, including Soulbound ones, which
+clashed with their purple frame. Added a Soulbound-specific override
+(`index.html`): the rules box goes from tan (`#e3d5b4`) to a light lavender
+(`#ddd0ee`) with dark plum text (`#2c1f3d`) instead of navy, and the small
+"ATTACK"/"SOULBOUND ATTACK" type label shifts from muted brown to muted
+purple to match. Verified with a real Chromium render before shipping —
+the lavender box now reads as part of the same purple family as the border
+and title, instead of looking like a leftover default.
+
+## Round 16 — Upgrade Crystal drop rate, 2 new hidden chests, unified chest art
+
+### A real scarcity problem, found before implementing anything
+Investigated the existing "Card upgrade crystals" mechanic (`materials()` /
+`setMaterials()`) before touching anything — it already existed, distinct
+from the Aetherlink device crystals. Leveling a card up requires **both**
+50 uses of mastery **and** spending one of these crystals. Checked how many
+existed on the map: **exactly one, ever**, at Memory Annex. That's a hard
+ceiling on how many cards could ever be leveled up in an entire playthrough
+— a real gap given the armor/tiering balance work assumes meaningful card
+leveling is possible.
+
+### Recommended and implemented a drop rate
+Added Upgrade Crystal as a 5th possible outcome of the post-battle loot
+chest (`assets/expansion.js`), at **4%** — chosen to sit close to the
+existing 8% elite-only device-crystal rate as a precedent for "a good drop
+rate" already established in this game, while not being elite-gated (elites
+are already rare, 4–36% depending on distance, so gating a second reward
+behind them would make it doubly rare). New odds:
+
+| Outcome | Odds |
+|---|---|
+| Soulbound card | 1% (unchanged) |
+| **Upgrade Crystal (new)** | **4%** |
+| Empty (looted by an animal) | 24% |
+| Potion | 35.5% |
+| Random Impermanent card | 35.5% |
+
+The reward screen shows a dedicated "◆ Upgrade Crystal" result with the
+running total, and the combat log reads `Loot chest: an Upgrade Crystal! (N
+total)`.
+
+### 2 new hidden chests, both granting Upgrade Crystals
+Added to `chestFor()` (`assets/expansion.js`): **Reactor Causeway (3,3)**
+and **Lastlight Shelter (4,3)** — both previously empty rooms (no relic, no
+boss role), moderately far from the start, clear of both boss rooms. Unlike
+the loot-chest drop above, these are guaranteed, one-time, walk-up-to-collect
+pickups — the same interaction as the 4 existing potion caches, just
+granting a crystal instead. The original 4 city potion caches and 3 Elaris
+potion caches are untouched.
+
+### All map chests now use the actual loot-chest artwork
+Previously every hidden chest (old and new) rendered as a plain `▣` glyph.
+Replaced with the same `assets/items/loot-chest.png` art used for the
+battle-reward chest, at a smaller 46px scale with the existing pulsing glow
+animation, in both places a chest can render — `renderWorld()`
+(`assets/expansion.js`) for the current cell, and `assets/combined-rooms.js`
+for the adjacent cells the minimap draws. Verified with a real Chromium
+render, not just assumed from the CSS.
+
+### A test-methodology note
+The Node/VM harness's DOM shim has a no-op `.append()` — only content set
+via direct `.innerHTML = "..."` string assignment can be read back in
+tests. `renderWorld()` builds the map exclusively via `.append()` calls, so
+I couldn't assert on its rendered output the way I did for the battle
+screen (which uses `.innerHTML =`). Switched to source-level checks instead
+(confirming `.secret-chest` is gone and `.map-chest` — pointing at the real
+PNG — exists in both render call sites) and did the actual visual
+confirmation with a real Chromium screenshot during development instead.
+
 ## Testing
 
 ```
@@ -558,5 +746,21 @@ one readable line instead of two separate ones, that exactly one starter
 copy of each card type survives both an import round trip and 100
 simulated defeat card-loss rolls while its duplicate stays at risk, that
 `cardHTML()` references the correct per-card-per-level art path with a
-working glyph fallback, and that all 22 cards × 4 levels (88 files) actually
-exist on disk.
+working glyph fallback, that all 22 cards × 4 levels (88 files) actually
+exist on disk, that the mastery bar's `display:block` fix is present in
+the CSS source, that `.art img` stacks above `.art-glyph` so the fallback
+icon can't overlay loaded art, and that the animated foil sweep is gone
+while the static corner-gem accents remain (the Node/VM harness can't run
+real layout or paint order, so these check the CSS rules directly — the
+actual visual fixes were verified with real Chromium renders during
+development), that a 14-damage hit into 4 Block correctly nets 10 damage in
+one combined log line, that the enemy panel shows Block before the card
+consuming it is even played, and that "Enemy Block 0" no longer prints as
+status-line noise, that Soulbound cards override the rules-box color to
+a purple tone rather than reusing the tan default, that the new loot chest
+odds land in the right bands (including the new 4% Upgrade Crystal band)
+and actually increment the persistent `materials()` count, that the city
+map has exactly 6 hidden chests (2 granting crystals, 4 unchanged potion
+caches) with Elaris untouched at 3, that walking to a new crystal chest
+grants a crystal and not a potion, and that both chest-rendering call sites
+use the real loot-chest artwork instead of the old glyph.

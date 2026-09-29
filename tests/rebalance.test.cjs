@@ -67,12 +67,15 @@ assert.equal(state.hp,40,'defeat now heals the player back to full HP');
 function forceRoll(roll){newGame();state.talents={};state.battle={id:'test',spawnId:'test',phase:'fight',enemy:{hp:0,boss:false,elite:false},logs:[]};const old=Math.random;Math.random=()=>roll;winBattle();Math.random=old;return state.battle}
 assert.equal(forceRoll(0).lootType,'soulbound','roll 0 is inside the 1% Soulbound band');
 assert.equal(forceRoll(.0099).lootType,'soulbound','just under 1% is still Soulbound');
-assert.equal(forceRoll(.01).lootType,'empty','exactly 1% rolls over into the empty-chest band');
-assert.equal(forceRoll(.2599).lootType,'empty','just under 26% is still empty');
-assert.equal(forceRoll(.26).lootType,'potion','exactly 26% rolls over into potion');
-assert.equal(forceRoll(.6299).lootType,'potion','just under 63% is still potion');
-assert.equal(forceRoll(.63).lootType,'card','exactly 63% rolls over into card');
+assert.equal(forceRoll(.01).lootType,'crystal','exactly 1% rolls over into the Upgrade Crystal band');
+assert.equal(forceRoll(.0499).lootType,'crystal','just under 5% is still an Upgrade Crystal');
+assert.equal(forceRoll(.05).lootType,'empty','exactly 5% rolls over into the empty-chest band');
+assert.equal(forceRoll(.2899).lootType,'empty','just under 29% is still empty');
+assert.equal(forceRoll(.29).lootType,'potion','exactly 29% rolls over into potion');
+assert.equal(forceRoll(.6449).lootType,'potion','just under 64.5% is still potion');
+assert.equal(forceRoll(.645).lootType,'card','exactly 64.5% rolls over into card');
 forceRoll(0);assert(state.pool.some(c=>['phoenix','oath','verdict'].includes(c.id)),'Soulbound jackpot actually grants a Soulbound card');
+const materialsBefore=materials();forceRoll(.03);assert.equal(materials(),materialsBefore+1,'the Upgrade Crystal outcome actually increments the persistent materials() count');
 assert(typeof forceRoll(.15).thief==='string'&&forceRoll(.15).thief.length,'an empty chest names the animal that looted it');
 assert(!forceRoll(.15).reward,'an empty chest grants no card');
 
@@ -266,4 +269,112 @@ for(const id of ids){
 }
 assert.equal(missing.length,0,'every card has art for every level 0-3, missing: '+missing.join(', '));
 console.log(`PASS: all ${ids.length} cards × 4 levels (${ids.length*4} files) have art in assets/cards/.`);
+
+// --- Regression test for a real layout bug found while building the card
+// frame upgrade: .track (the mastery progress bar) is applied to a <span>,
+// which is display:inline by default — and inline elements ignore explicit
+// height entirely per the CSS spec. Its child's height:100% then resolved
+// against an indeterminate ancestor instead of the 10px bar, ballooning to
+// ~290px and pushing everything below it (the new card-serial footer) far
+// outside the visible card. The Node/VM harness can't run real layout, so
+// this checks the CSS source directly rather than computed pixels.
+const styleBlock=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8').match(/<style>([\s\S]*?)<\/style>/)[1];
+const trackRule=styleBlock.match(/\.track\{[^}]*\}/);
+assert(trackRule,'.track has a CSS rule');
+assert(trackRule[0].includes('display:block'),'.track is explicitly display:block, so the fill bar height:100% resolves correctly (a span defaults to inline, which ignores explicit height entirely)');
+
+// --- Regression test for a real stacking-order bug: the art-glyph fallback
+// icon (meant to show only when the art image fails to load) was painting
+// on TOP of a successfully-loaded image, because it came later in the DOM
+// with an explicit z-index while the <img> had none (z-index:auto loses to
+// an explicit 0 in the same stacking tier). Checked directly in the CSS
+// source since the Node/VM harness has no real paint/stacking engine.
+const imgRule=styleBlock.match(/\.art img\{[^}]*\}/);
+const glyphRule=styleBlock.match(/\.art-glyph\{[^}]*\}/);
+assert(imgRule&&glyphRule,'.art img and .art-glyph both have CSS rules');
+const imgZ=imgRule[0].match(/z-index:(-?\d+)/),glyphZ=glyphRule[0].match(/z-index:(-?\d+)/);
+assert(imgZ,'.art img has an explicit z-index (an auto z-index here loses to .art-glyph\\u2019s explicit one and paints underneath, even though the image is later loaded)');
+assert(Number(imgZ[1])>Number(glyphZ?.[1]??0),'.art img stacks above .art-glyph, so the fallback icon is hidden once real art loads instead of overlaying it');
+
+// --- The distracting animated foil sweep has been removed; the static
+// double-border and corner-gem accents should remain.
+assert(!styleBlock.includes('foilSweep'),'the animated foil shimmer sweep has been removed');
+assert(!/\.card::before\{/.test(styleBlock),'.card::before (the foil sweep layer) no longer exists');
+assert(/\.card::after\{/.test(styleBlock),'the static corner-gem accents (.card::after) are still present');
+
+run(`
+// --- Enemy Block (guard): a user reported "14 damage into 4 block hit for
+// nothing" — the underlying math was actually correct (verified: 14-4=10
+// net), but the mechanic was invisible (no persistent UI indicator, "Enemy
+// Block 0" shown as noise every turn so the real value was easy to miss)
+// and the log split it into two disconnected lines. Fixed all three.
+newGame();
+state.room='0,1';const s5=roomSpawns(state.room).filter(x=>!x.boss)[0];startBattle(s5.uid);
+state.battle.enemy.armor=0;state.battle.enemy.guard=4;state.battle.enemy.hp=100;
+renderBattle();
+const enemyPanelHtml=document.getElementById('battleModal').innerHTML;
+assert(enemyPanelHtml.includes('block-tag')&&enemyPanelHtml.includes('Block'),'the enemy panel shows a persistent Block indicator before the card is played (previously only Armor had one)');
+defs.__testBlock={name:'Test Big Hit',cost:1,kind:'Attack',icon:'X',tiers:[{damage:14},{damage:14},{damage:14},{damage:14}]};
+state.battle.hand=[make('__testBlock')];state.battle.energy=3;
+playCard(0);
+assert.equal(state.battle.enemy.hp,90,'14 damage into 4 block correctly nets 10 damage (100-10=90), reproducing and confirming the reported scenario is NOT a math bug');
+const blockLogLine=state.battle.logs[state.battle.logs.length-1];
+assert.equal(blockLogLine,'Test Big Hit · 14 damage − 4 block = 10 dealt','the log now shows the full math in one line instead of two disconnected ones');
+
+// --- "Enemy Block 0" no longer prints as noise every turn (was easy to
+// tune out, making the real nonzero value easy to miss)
+newGame();
+state.room='0,1';const s6=roomSpawns(state.room).filter(x=>!x.boss)[0];startBattle(s6.uid);
+state.battle.enemy.guard=0;
+renderBattle();
+const noGuardHtml=document.getElementById('battleModal').innerHTML;
+assert(!noGuardHtml.includes('Enemy Block 0'),'"Enemy Block 0" is no longer shown as status-line noise when there is nothing to report');
+console.log('PASS: Enemy Block math confirmed correct, combined into one clear log line, given a persistent UI indicator, and no longer shown as zero-value noise.');
+`);
+
+run(`
+// --- 2 new hidden crystal chests exist on the city map, alongside the 4
+// existing potion caches (previously the map had exactly ONE Upgrade
+// Crystal source ever, at Memory Annex's relic — a hard ceiling on card
+// leveling for the whole rest of a run).
+newGame();configureRegion('city');
+const cityChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
+assert.equal(cityChests.length,6,'city has 6 hidden chests total (was 4)');
+assert.equal(cityChests.filter(c=>c.reward==='crystal').length,2,'exactly 2 of them grant an Upgrade Crystal');
+assert.equal(cityChests.filter(c=>c.reward==='potion').length,4,'the original 4 potion caches are untouched');
+assert(chestFor('3,3')&&chestFor('3,3').reward==='crystal','Reactor Causeway is a new crystal chest');
+assert(chestFor('4,3')&&chestFor('4,3').reward==='crystal','Lastlight Shelter is a new crystal chest');
+configureRegion('elaris');
+const elarisChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
+assert.equal(elarisChests.length,3,'Elaris still has its original 3 potion caches, untouched');
+assert(elarisChests.every(c=>c.reward==='potion'),'no Elaris chest was changed to a crystal reward');
+
+// --- Walking to a new crystal chest actually grants a crystal, not a potion
+configureRegion('city');state.room='3,3';state.chests=[];
+const materialsBeforeWalk=materials(),potionsBeforeWalk=state.potions;
+state.pos={x:400,y:145};
+checkWorldInteractions();
+assert.equal(materials(),materialsBeforeWalk+1,'walking to the Reactor Causeway chest grants an Upgrade Crystal');
+assert.equal(state.potions,potionsBeforeWalk,'it does NOT also grant a potion');
+assert(state.chests.includes('city:3,3'),'the chest is marked collected so it cannot be farmed repeatedly');
+
+console.log('PASS: 2 new hidden Upgrade Crystal chests added to the city map, existing potion caches untouched, and the new crystal chest actually grants a crystal (not a potion) when collected.');
+`);
+
+// --- Soulbound cards get a purple-toned rules box instead of the tan one,
+// which clashed with the purple card frame.
+assert(/\.soulbound \.rules\{[^}]*background:#ddd0ee/.test(styleBlock),'Soulbound cards override the rules-box background to a purple tone instead of the default tan');
+assert(!/\.soulbound \.rules\{[^}]*background:#e3d5b4/.test(styleBlock),'the Soulbound rules-box override is not just reusing the tan color');
+
+// --- All hidden map chests use the loot-chest graphic, not the old plain
+// glyph — checked at the source level (both call sites: renderWorld() in
+// expansion.js for the current cell, and combined-rooms.js for adjacent
+// cells the minimap renders), since the DOM shim's .append() is a no-op
+// stub that can't be inspected for appended (as opposed to innerHTML-
+// assigned) content.
+const expansionSrc=fs.readFileSync(path.join(__dirname,'..','assets/expansion.js'),'utf8');
+const combinedRoomsSrc=fs.readFileSync(path.join(__dirname,'..','assets/combined-rooms.js'),'utf8');
+assert(!expansionSrc.includes('secret-chest')&&!combinedRoomsSrc.includes('secret-chest'),'the old .secret-chest glyph class is gone from both render call sites');
+assert(expansionSrc.includes('map-chest')&&combinedRoomsSrc.includes('map-chest'),'both render call sites use the new .map-chest class');
+assert(/\.map-chest\{[^}]*loot-chest\.png/.test(expansionSrc),'.map-chest is styled with the actual loot-chest.png graphic, not just a renamed glyph');
 
