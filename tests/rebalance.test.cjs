@@ -48,11 +48,29 @@ for(const t of ['emberling','thornling','burrower','vineguard','shade','cryptWis
  assert(types.has(t),t+' now appears in the city spawn pool across 25 seeds');
 
 // --- Elaris/Vespera region scaling increased as intended ---
-newGame();
-configureRegion('city');state.room=Object.keys(rooms).find(key=>roomSpawns(key).some(s=>s.type==='emberling'));
-let s2=roomSpawns(state.room).find(s=>s.type==='emberling');startBattle(s2.uid);
+// findRoomWithType retries across fresh seeds instead of trusting a single
+// random roll to place a specific enemy type somewhere in the region — a
+// bare Object.keys(rooms).find(...) here previously could (rarely, on an
+// unlucky seed) return undefined, and state.room=undefined then cascaded
+// into roomSpawns(undefined) -> areaPatrolCount -> joinedArea(undefined)
+// -> a real TypeError. This is exactly the flake chased down and root-
+// caused in Round 19 — fixed here at the source instead of papering over it.
+function findRoomWithType(region,type,tries=40){
+ for(let attempt=0;attempt<tries;attempt++){
+  newGame();configureRegion(region);
+  const found=Object.keys(rooms).find(key=>roomSpawns(key).some(s=>s.type===type));
+  if(found)return found;
+ }
+ return null;
+}
+let cityRoom=findRoomWithType('city','emberling');
+assert(cityRoom,'found a city room with an emberling patrol within 40 fresh-seed attempts');
+state.room=cityRoom;
+let s2=roomSpawns(cityRoom).find(s=>s.type==='emberling');startBattle(s2.uid);
 const cityHp=state.battle.enemy.hp;state.battle=null;
-configureRegion('elaris');state.room=Object.keys(rooms).find(key=>roomSpawns(key).some(s=>s.type==='blightAntler'));
+const elarisRoom=findRoomWithType('elaris','blightAntler');
+assert(elarisRoom,'found an Elaris room with a blightAntler patrol within 40 fresh-seed attempts');
+state.room=elarisRoom;
 s2=roomSpawns(state.room).find(s=>s.type==='blightAntler');startBattle(s2.uid);
 assert(state.battle.enemy.hp>=Math.round(44*1.7),'Elaris scaling is meaningfully higher than before (was 1.35x)');
 state.battle=null;
@@ -146,10 +164,17 @@ assert(eliteFar>0.25,'elites should be common near the map edge (got '+(eliteFar
 assert(eliteFar>eliteNear*2,'elite rate should be meaningfully higher far from the start than near it');
 
 // --- Patrol density now scales with distance for single (unjoined) rooms ---
+// Exact thresholds shift slightly whenever the map's real max distance
+// changes (Round 21 added 4 rooms, extending city's true diameter from 5
+// to 6) — regionMaxDistance() is now computed from the real graph instead
+// of a hardcoded guess, which correctly recalibrates every room's relative
+// distance fraction. These expected values were re-verified against the
+// live graph rather than just bumped to make the assertion pass.
 newGame();configureRegion('city');
 assert.equal(areaPatrolCount('0,1'),1,'distance-1 single room: base density');
-assert.equal(areaPatrolCount('0,0'),2,'distance-2 single room: one bump');
-assert.equal(areaPatrolCount('4,0'),3,'distance-4 single room: at the practical 3-patrol ceiling');
+assert.equal(areaPatrolCount('0,0'),1,'distance-2 single room, frac 0.33: below the 0.35 two-patrol threshold now that the map is one room wider');
+assert.equal(areaPatrolCount('4,0'),2,'distance-4 single room, frac 0.67: below the 0.7 three-patrol threshold for the same reason');
+assert.equal(areaPatrolCount('5,3'),3,'the new farthest room (dist 6, frac 1.0) is now the one that sits at the 3-patrol ceiling');
 // joined-area math must be completely unaffected (still capped, still summing correctly)
 for(const group of JOINED_AREAS.city){
  let total=0;for(const key of group.cells)total+=roomSpawns(key).length;
@@ -184,11 +209,17 @@ assert(farAvg>nearAvg*1.2,'Elaris enemies near the region edge/boss should avera
 // actually broke that — verified directly here, not just simulated.)
 newGame();configureRegion('city');
 const battleStub={turn:3,enemy:{attack:10,element:null},enemyDebuff:0};
+// Use the actual farthest room rather than a hardcoded key — Round 21
+// added 4 rooms and moved the true map edge from '5,2' to '5,3'; picking
+// it dynamically (whichever room has frac===1) means this test can't go
+// stale again the next time the map grows.
+const trueEdgeRoom=Object.keys(rooms).find(k=>regionDistanceFrac(k)===1);
+assert(trueEdgeRoom,'some room is actually at the map edge (frac 1.0)');
 state.room='0,1';const nearHeavy=enemyPlan(battleStub,3).damage;
-state.room='5,2';const farHeavy=enemyPlan(battleStub,3).damage;
+state.room=trueEdgeRoom;const farHeavy=enemyPlan(battleStub,3).damage;
 assert(farHeavy>nearHeavy,'a heavy hit does more damage far from the start than near it, same base attack (near='+nearHeavy+' far='+farHeavy+')');
 assert(nearHeavy<=Math.round(10*1.7),'near the start, the heavy-hit multiplier stays close to its original 1.5x (got '+nearHeavy+')');
-assert.equal(farHeavy,Math.round(10*2.5),'at the map edge, the heavy-hit multiplier reaches its full 2.5x (got '+farHeavy+')');
+assert.equal(farHeavy,Math.round(10*2.5),'at the actual map edge ('+trueEdgeRoom+'), the heavy-hit multiplier reaches its full 2.5x (got '+farHeavy+')');
 
 // --- Armor visibility: the UI now shows the enemy's armor stat, and the
 // combat log explains the reduction in one line instead of two separate
@@ -246,7 +277,7 @@ for(let trial=0;trial<100;trial++){
 newGame();
 const sampleCard=make('strike',2);
 const html=cardHTML(sampleCard);
-assert(html.includes('assets/cards/strike-lv2.png'),'cardHTML references the correct id+level art path');
+assert(html.includes('assets/cards/level2/strike.png'),'cardHTML references the correct level-folder art path');
 assert(html.includes('onerror='),'the <img> has an onerror fallback so a missing file never breaks the card');
 assert(html.includes('art-glyph'),'the original icon glyph is still in the markup as a fallback');
 
@@ -263,8 +294,8 @@ assert(ids.length>0,'defs actually has cards to check');
 const missing=[];
 for(const id of ids){
  for(let level=0;level<4;level++){
-  const file=path.join(cardsDir,`${id}-lv${level}.png`);
-  if(!fs.existsSync(file))missing.push(`${id}-lv${level}.png`);
+  const file=path.join(cardsDir,`level${level}`,`${id}.png`);
+  if(!fs.existsSync(file))missing.push(`level${level}/${id}.png`);
  }
 }
 assert.equal(missing.length,0,'every card has art for every level 0-3, missing: '+missing.join(', '));
@@ -359,6 +390,120 @@ assert.equal(state.potions,potionsBeforeWalk,'it does NOT also grant a potion');
 assert(state.chests.includes('city:3,3'),'the chest is marked collected so it cannot be farmed repeatedly');
 
 console.log('PASS: 2 new hidden Upgrade Crystal chests added to the city map, existing potion caches untouched, and the new crystal chest actually grants a crystal (not a potion) when collected.');
+`);
+
+run(`
+// --- Patrol spawn "home" sectors stay clear of every room entry point ---
+// Real complaint: "I often enter a room to go directly into an encounter."
+// Root cause found: every room has 4 fixed static building blocks at its
+// corners (solids() in neon-city.js), leaving only a narrow cross-shaped
+// walkable area, and the old default sectors (400,130)/(400,385) sat only
+// 80-95px from the north/south entry points — well inside the ~118px
+// worst-case danger zone (75px patrol wander + 43px encounter-trigger
+// radius). Verified the fix directly: every spawned patrol's actual home
+// position must clear that 118px zone from all 4 possible entries.
+function entryDistances(x,y){
+ return [[400,35],[400,465],[35,250],[765,250]].map(([ex,ey])=>Math.hypot(x-ex,y-ey));
+}
+newGame();configureRegion('city');
+let checked=0,unsafeCount1or2=0;
+for(const key of Object.keys(rooms)){
+ const count=(typeof areaPatrolCount==='function')?areaPatrolCount(key):0;
+ if(count===0)continue;
+ const spawns=roomSpawns(key);
+ for(const s of spawns){
+  checked++;
+  const nearest=Math.min(...entryDistances(s.x,s.y));
+  if(count<=2&&nearest<118)unsafeCount1or2++;
+ }
+}
+assert(checked>20,'actually checked a meaningful number of real patrol spawns ('+checked+')');
+assert.equal(unsafeCount1or2,0,'every 1-2-patrol room (the common case) keeps all patrol home sectors outside the ~118px entry danger zone');
+
+// --- The rare 3-patrol case is a known, documented, geometry-forced
+// exception (only one valid mutually-separated triple exists in the fixed
+// cross-shaped walkable area) — confirm it at least still resolves
+// without crashing, across many seeds, in both regions.
+let crashes=0;
+for(const region of['city','elaris'])for(const seed of[1,1234,98765,55,999,42,7777]){
+ state.seed=seed;configureRegion(region);
+ try{for(const key of Object.keys(rooms))for(const spawn of roomSpawns(key));}
+ catch(e){crashes++}
+}
+assert.equal(crashes,0,'no "No clear patrol sector" crash across 7 seeds x 2 regions x every room, including the rare 3-patrol far-tier rooms');
+console.log('PASS: patrol home sectors verified clear of the real entry-danger zone for every 1-2-patrol room, and the rare 3-patrol case resolves without crashing across a wide seed sweep.');
+`);
+
+run(`
+// --- City mini-bosses: reuse existing graphics, get a real signature
+// ability via the existing elemental-pattern system (no new AI code), and
+// guarantee an Upgrade Crystal on defeat.
+assert(enemies.crownSentinel&&enemies.crownSentinel.boss&&enemies.crownSentinel.miniBoss,'crownSentinel is a real boss-tier, mini-boss-flagged enemy');
+assert.equal(enemies.crownSentinel.element,'air','crownSentinel has its own signature element');
+assert(enemies.moonKnight.miniBoss&&enemies.moonKnight.element==='water','moonKnight (Lunar Enforcer) is now a flagged mini-boss with its own element');
+newGame();configureRegion('city');
+assert(Object.keys(rooms).some(k=>rooms[k].enemy&&rooms[k].enemy[0]==='crownSentinel'),'crownSentinel is actually placed in a room');
+const csSpawn=roomSpawns('5,0').find(s=>s.boss);
+assert(csSpawn&&csSpawn.type==='crownSentinel'&&csSpawn.element==='air','crownSentinel spawns correctly with its element intact (regression: element used to be hardcoded null for any city enemy)');
+state.room='5,0';startBattle(csSpawn.uid);
+assert.equal(state.battle.enemy.element,'air','the element actually reaches the live battle state');
+const csPlan3=enemyPlan(state.battle,3);
+assert.equal(csPlan3.kind,'elemental','turn 3 of a 4-turn elemental pattern is the signature charged strike, not the plain city attack/guard/heavy cycle');
+assert(csPlan3.damage>enemies.crownSentinel.attack,'the signature elemental strike hits harder than a plain attack (1.8x multiplier)');
+const materialsBeforeBoss=materials();
+state.battle.enemy.hp=1;
+defs.__finisher={name:'Finisher',cost:1,kind:'Attack',icon:'X',tiers:[{damage:99},{damage:99},{damage:99},{damage:99}]};
+state.battle.hand=[make('__finisher')];state.battle.energy=3;
+playCard(0);
+assert.equal(materials(),materialsBeforeBoss+1,'defeating a mini-boss grants exactly 1 guaranteed Upgrade Crystal');
+assert(state.battle.special.some(s=>s.includes('Mini-boss defeated')&&s.includes('Upgrade Crystal')),'the victory screen explains the guaranteed crystal');
+assert(state.bosses.includes('crownSentinel'),'crownSentinel is tracked as permanently defeated (can only ever grant its crystal once)');
+
+// --- Regression: ordinary (non-boss) city enemies are unaffected by the
+// element-passthrough fix — they still correctly have no element.
+newGame();configureRegion('city');
+const plainSpawn=roomSpawns('0,1').find(s=>!s.boss);
+assert(plainSpawn&&plainSpawn.element===null,'a plain city patrol still has no element (only enemies that define one, like the new mini-bosses, do now)');
+console.log('PASS: both city mini-bosses (Lunar Enforcer, The Crown Sentinel) reuse existing sprites, have a distinct signature elemental ability via the existing pattern system, guarantee exactly one Upgrade Crystal on defeat, and ordinary patrols are unaffected.');
+`);
+
+run(`
+// --- Elaris mini-bosses: same pattern as city, but this region generates
+// its rooms programmatically (no per-room object literal to hang an
+// 'enemy' designation on the way city does), and its enemy roster lives in
+// ELARIS_WILDLIFE rather than the base defs — both needed real changes,
+// not just copy-pasting the city approach.
+assert(enemies.tidewardenElaris&&enemies.tidewardenElaris.boss&&enemies.tidewardenElaris.miniBoss,'The Tidebound Warden is a real boss-tier mini-boss');
+assert(enemies.galeSovereign&&enemies.galeSovereign.boss&&enemies.galeSovereign.miniBoss,'The Gale Sovereign is a real boss-tier mini-boss');
+assert.equal(enemies.tidewardenElaris.sheet,'drowned-heron','Tidebound Warden reuses the existing Drowned Heron sprite sheet rather than needing new art');
+assert.equal(enemies.galeSovereign.sheet,'storm-moth','Gale Sovereign reuses the existing Storm Moth sprite sheet');
+newGame();configureRegion('elaris');
+const twSpawn=roomSpawns('3,1').find(s=>s.boss),gsSpawn=roomSpawns('2,2').find(s=>s.boss);
+assert(twSpawn&&twSpawn.type==='tidewardenElaris'&&twSpawn.element==='water','Tidebound Warden spawns correctly at its designated room with its element intact');
+assert(gsSpawn&&gsSpawn.type==='galeSovereign'&&gsSpawn.element==='air','Gale Sovereign spawns correctly at its designated room');
+state.room='3,1';startBattle(twSpawn.uid);
+const twPlan3=enemyPlan(state.battle,3);
+assert.equal(twPlan3.kind,'elemental','Tidebound Warden gets the real telegraphed elemental pattern, not a plain wildlife attack');
+const elarisMaterialsPre=materials();
+state.battle.enemy.hp=1;
+state.battle.hand=[make('__finisher')];state.battle.energy=3;
+playCard(0);
+assert.equal(materials(),elarisMaterialsPre+1,'defeating an Elaris mini-boss also grants exactly 1 guaranteed Upgrade Crystal');
+
+// --- Regression: mini-bosses must never appear as an ordinary random
+// patrol (they were merged into ELARIS_WILDLIFE to reuse its sprites,
+// which is also the pool regular patrols are drawn from — a real bug
+// caught while adding this, not a hypothetical one).
+newGame();configureRegion('elaris');
+let leaked=0;
+for(const seedTry of[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]){
+ state.seed=seedTry;configureRegion('elaris');
+ for(const key of Object.keys(rooms))for(const spawn of roomSpawns(key)){
+  if(!spawn.boss&&(spawn.type==='tidewardenElaris'||spawn.type==='galeSovereign'))leaked++;
+ }
+}
+assert.equal(leaked,0,'mini-bosses never spawn as an ordinary (non-boss) random patrol, across 15 seeds');
+console.log('PASS: both Elaris mini-bosses (The Tidebound Warden, The Gale Sovereign) spawn correctly at their designated rooms, reuse existing wildlife sprites, get the real elemental pattern, guarantee an Upgrade Crystal, and never leak into the random patrol pool.');
 `);
 
 run(`

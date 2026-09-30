@@ -61,32 +61,36 @@ const dirs={n:{dx:0,dy:-1,op:'s'},s:{dx:0,dy:1,op:'n'},e:{dx:1,dy:0,op:'w'},w:{d
 const rooms={
  '1,1':{name:'Meadowrest',theme:'canopy',colors:['#2b8b7f','#0b2730','#4a7d6e'],exits:{w:'0,1',e:'2,1',n:'1,0'}},
  '0,1':{name:'Ember Hollow',theme:'ember',colors:['#c84f3d','#37182b','#8c4d35'],exits:{e:'1,1',w:'-1,1',n:'0,0'},enemy:['emberling',250,255],relic:['ember','Ember Sigil','✹',585,150]},
- '-1,1':{name:'Gearwood Verge',theme:'canopy',colors:['#36866e','#102c31','#5b7656'],exits:{e:'0,1',n:'-1,0'},enemy:['thornling',520,245]},
+ '-1,1':{name:'Gearwood Verge',theme:'canopy',colors:['#36866e','#102c31','#5b7656'],exits:{e:'0,1',n:'-1,0',s:'-1,2'},enemy:['thornling',520,245]},
  '-1,0':{name:'Boiler Gardens',theme:'forge',colors:['#bd713b','#30252a','#88633d'],exits:{s:'-1,1',e:'0,0'}},
  '0,0':{name:'Glasswind Rise',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{w:'-1,0',s:'0,1',e:'1,0'},enemy:['cryptWisp',430,215]},
  '1,0':{name:'Whispering Canopy',theme:'canopy',colors:['#42a95c','#12333a','#4e8e59'],exits:{w:'0,0',s:'1,1',e:'2,0'},enemy:['thornling',545,310]},
  '2,0':{name:'Thorn Gallery',theme:'canopy',colors:['#75a943','#213326','#71834c'],exits:{w:'1,0',s:'2,1',e:'3,0'},enemy:['vineguard',390,245],relic:['boots','Briarstep Boots','♜',650,130]},
  '3,0':{name:'Orrery Walk',theme:'vault',colors:['#5574b8','#171e41','#647aa2'],exits:{w:'2,0',s:'3,1',e:{to:'4,0',requires:'ember'}},enemy:['moonKnight',520,285]},
- '4,0':{name:'Starwatch Gallery',theme:'vault',colors:['#7664bd','#1b183d','#766eaa'],exits:{w:'3,0',s:'4,1'}},
+ '4,0':{name:'Starwatch Gallery',theme:'vault',colors:['#7664bd','#1b183d','#766eaa'],exits:{w:'3,0',s:'4,1',e:'5,0'}},
  '2,1':{name:'Ancient Rootway',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{w:'1,1',n:'2,0',e:{to:'3,1',requires:'ember'},s:{to:'2,2',requires:'boots'}},enemy:['burrower',525,170]},
  '3,1':{name:'Moon Vault',theme:'vault',colors:['#5267b9','#171b48','#667ac3'],exits:{w:'2,1',n:'3,0',e:{to:'4,1',requires:'lens'}},enemy:['moonKnight',390,250,true]},
  '4,1':{name:'Crown Depths',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{w:'3,1',n:'4,0',e:'5,1',s:'4,2'},enemy:['crownEye',510,190]},
- '5,1':{name:'Ashen Lift',theme:'ember',colors:['#b84e46','#301a29','#8a5147'],exits:{w:'4,1',s:'5,2'},enemy:['forgeBeast',380,250]},
+ '5,1':{name:'Ashen Lift',theme:'ember',colors:['#b84e46','#301a29','#8a5147'],exits:{w:'4,1',s:'5,2',n:'5,0'},enemy:['forgeBeast',380,250]},
  '2,2':{name:'Underroot Descent',theme:'root',colors:['#6d4a72','#1e1a2d','#6a526b'],exits:{n:'2,1',w:'1,2',e:'3,2',s:'2,3'},enemy:['shade',270,320]},
  '1,2':{name:'Flooded Crypt',theme:'crypt',colors:['#2489a1','#0b243b','#3b8491'],exits:{e:'2,2',w:'0,2'},enemy:['cryptWisp',520,250],relic:['lens','Moon Lens','◉',190,150]},
- '0,2':{name:'Rusted Aqueduct',theme:'crypt',colors:['#327f88','#102638','#526f70'],exits:{e:'1,2',s:'0,3'}},
- '0,3':{name:'Siltwheel Basin',theme:'crypt',colors:['#347d78','#10272e','#557670'],exits:{n:'0,2',e:'1,3'},enemy:['burrower',470,270]},
+ '0,2':{name:'Rusted Aqueduct',theme:'crypt',colors:['#327f88','#102638','#526f70'],exits:{e:'1,2',s:'0,3',w:'-1,2'}},
+ '0,3':{name:'Siltwheel Basin',theme:'crypt',colors:['#347d78','#10272e','#557670'],exits:{n:'0,2',e:'1,3',w:'-1,3'},enemy:['burrower',470,270]},
  '1,3':{name:'Starfall Turbine',theme:'vault',colors:['#416a9b','#151e39','#527b91'],exits:{w:'0,3',e:'2,3'},enemy:['crownEye',455,230]},
  '2,3':{name:'Hollow Foundry',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{w:'1,3',n:'2,2',e:'3,3'},enemy:['forgeBeast',430,255]},
  '3,3':{name:'Smelter Causeway',theme:'forge',colors:['#cf6335','#351c22','#95573b'],exits:{w:'2,3',n:'3,2',e:'4,3'}},
  '3,2':{name:'Sunken Forge',theme:'forge',colors:['#b85a35','#301b26','#8e573d'],exits:{w:'2,2',s:'3,3',e:'4,2'},enemy:['forgeBeast',410,280]},
  '4,2':{name:'Warden Core',theme:'ember',colors:['#9a354f','#2b101f','#874052'],exits:{w:'3,2',n:'4,1',e:'5,2',s:'4,3'},enemy:['thornWarden',400,245,true]},
- '5,2':{name:'Coilgrave Annex',theme:'root',colors:['#785179','#211a2e','#6f5971'],exits:{w:'4,2',n:'5,1'},enemy:['shade',440,240],relic:['material','Upgrade Crystal','◆',690,285]},
- '4,3':{name:'Warden Exhaust',theme:'forge',colors:['#8d4b42','#2b1923','#76534b'],exits:{w:'3,3',n:'4,2'}}
+ '5,2':{name:'Coilgrave Annex',theme:'root',colors:['#785179','#211a2e','#6f5971'],exits:{w:'4,2',n:'5,1',s:'5,3'},enemy:['shade',440,240],relic:['material','Upgrade Crystal','◆',690,285]},
+ '4,3':{name:'Warden Exhaust',theme:'forge',colors:['#8d4b42','#2b1923','#76534b'],exits:{w:'3,3',n:'4,2',e:'5,3'}},
+ '-1,2':{name:'Undercroft Reservoir',theme:'crypt',colors:['#327f88','#102638','#526f70'],exits:{n:'-1,1',e:'0,2',s:'-1,3'}},
+ '-1,3':{name:'Silt Collector',theme:'crypt',colors:['#347d78','#10272e','#557670'],exits:{n:'-1,2',e:'0,3'}},
+ '5,0':{name:'Skybridge Relay',theme:'vault',colors:['#7664bd','#1b183d','#766eaa'],exits:{w:'4,0',s:'5,1'},enemy:['crownSentinel',400,250]},
+ '5,3':{name:'Flooded Terminus',theme:'ember',colors:['#b84e46','#301a29','#8a5147'],exits:{n:'5,2',w:'4,3'}}
 };
 NeonCity.configure(rooms);
 const enemies={
- emberling:{name:'Ember Jackal',icon:'♞',hp:35,attack:7,armor:0},thornling:{name:'Circuit Thornling',icon:'♣',hp:38,attack:7,armor:0},vineguard:{name:'Briar Sentinel',icon:'♠',hp:46,attack:8,armor:2},burrower:{name:'Tunnel Borehound',icon:'●',hp:50,attack:8,armor:2},moonKnight:{name:'Lunar Enforcer',icon:'☾',hp:80,attack:11,armor:4,boss:true},shade:{name:'Phase Shade',icon:'◐',hp:56,attack:10,armor:3},cryptWisp:{name:'Data Wisp',icon:'✧',hp:58,attack:10,armor:3},forgeBeast:{name:'Reactor Mauler',icon:'♨',hp:65,attack:11,armor:4},crownEye:{name:'Crown Observer',icon:'◉',hp:72,attack:12,armor:5},thornWarden:{name:'Thorn Warden',icon:'♛',hp:110,attack:14,armor:6,boss:true}};
+ emberling:{name:'Ember Jackal',icon:'♞',hp:35,attack:7,armor:0},thornling:{name:'Circuit Thornling',icon:'♣',hp:38,attack:7,armor:0},vineguard:{name:'Briar Sentinel',icon:'♠',hp:46,attack:8,armor:2},burrower:{name:'Tunnel Borehound',icon:'●',hp:50,attack:8,armor:2},moonKnight:{name:'Lunar Enforcer',icon:'☾',hp:80,attack:11,armor:4,boss:true,element:'water',miniBoss:true},shade:{name:'Phase Shade',icon:'◐',hp:56,attack:10,armor:3},cryptWisp:{name:'Data Wisp',icon:'✧',hp:58,attack:10,armor:3},forgeBeast:{name:'Reactor Mauler',icon:'♨',hp:65,attack:11,armor:4},crownEye:{name:'Crown Observer',icon:'◉',hp:72,attack:12,armor:5},thornWarden:{name:'Thorn Warden',icon:'♛',hp:110,attack:14,armor:6,boss:true},crownSentinel:{name:'The Crown Sentinel',icon:'◈',hp:88,attack:12,armor:5,boss:true,element:'air',miniBoss:true}};
 const defs={
  strike:{name:'Ember Blade',cost:1,kind:'Attack',icon:'⚔',tiers:[{damage:6},{damage:9},{damage:12},{damage:16}]},
  guard:{name:'Crystal Ward',cost:1,kind:'Defense',icon:'◈',tiers:[{block:5},{block:7},{block:9},{block:12}]},
@@ -151,7 +155,7 @@ function spendTalent(branch,id){if(state.battle&&state.battle.phase==='fight')re
 function resetTalents(){if(state.battle&&state.battle.phase==='fight')return toast('Recompile talents after the encounter.');state.talents={};syncTalentVitals(false);save();showCharacter()}
 function shuffle(a){for(let i=a.length-1;i;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function rules(c){const d=stat(c),p=[];if(d.damage)p.push('Deal '+d.damage+' damage.'+(d.pierce?' Pierce: ignores enemy armor.':''));if(d.block)p.push('Gain '+d.block+' block.');if(d.heal)p.push('Heal '+d.heal+' HP.');if(d.draw)p.push('Draw '+d.draw+'.');if(d.energy)p.push('Gain '+d.energy+' energy.');if(d.exhaust)p.push('Exhaust.');return p.join(' ')}
-function cardArtPath(id,level){return 'assets/cards/'+id+'-lv'+level+'.png'}
+function cardArtPath(id,level){return 'assets/cards/level'+level+'/'+id+'.png'}
 function cardSerial(id){const ids=Object.keys(defs),idx=ids.indexOf(id)+1,tag=(id.replace(/_.*/,'').slice(0,3)||id.slice(0,3)).toUpperCase();return tag+'-'+String(idx).padStart(3,'0')+'/'+String(ids.length).padStart(3,'0')}
 function cardHTML(c){const d=stat(c),uses=Math.min(USES,c.uses||0),ready=c.level<3&&uses>=USES,pips=[1,2,3].map(n=>'<span class="pip '+(c.level>=n?'on':'')+'"></span>').join('');return '<span class="ownership">'+(c.soulbound?'◆ SOULBOUND · PROTECTED':'◇ IMPERMANENT · AT RISK')+'</span><span class="cost">'+d.cost+'</span><span class="card-name">'+d.name+'</span><span class="art"><img src="'+cardArtPath(c.id,c.level)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'"><span class="art-glyph">'+d.icon+'</span></span><span class="rules"><span class="kind-badge">'+d.icon+'</span><span class="type">'+d.kind.toUpperCase()+'</span>'+rules(c)+'</span><span class="upgrade-row"><span>LEVEL '+c.level+'</span><span class="pips">'+pips+'</span></span><span class="mastery-label"><span>'+(c.level>=3?'MASTERED':ready?'<b class="ready-tag">READY TO UPGRADE</b>':'CARD MASTERY')+'</span><span>'+(c.level>=3?'MAX':uses+'/50')+'</span></span><span class="track"><span style="width:'+(c.level>=3?100:uses*2)+'%"></span></span><span class="card-serial">'+cardSerial(c.id)+'</span>'}
 function cardElement(c,play,disabled=false){const wrap=document.createElement('div');wrap.className='card-wrap';const b=document.createElement('button');b.className='card'+(c.soulbound?' soulbound':'')+(c.level<3&&(c.uses||0)>=USES?' ready':'');b.innerHTML=cardHTML(c);b.disabled=disabled;b.onclick=play;b.setAttribute('aria-label',(c.soulbound?'Soulbound ':'Impermanent ')+stat(c).name+', level '+c.level+', '+(c.uses||0)+' of 50 uses');wrap.append(b);return wrap}
@@ -164,7 +168,10 @@ function exitInfo(dir){const raw=room().exits[dir];return typeof raw==='string'?
 function doorLocked(info){return info&&info.requires&&!hasRelic(info.requires)}
 function objective(){if(!hasRelic('ember'))return 'Search west for a seal-breaking relic.';if(!hasRelic('boots'))return 'Search Cable Market for gear to reach the lower city.';if(!hasRelic('lens'))return 'Descend through Underpass Zero and search the Drowned Archive.';if(!state.bosses.includes('thornWarden'))return 'The Moon Lens reveals a route to the Warden Mainframe.';if(!state.cleared.includes('material'))return 'A faint crystal resonance flickers inside the Memory Annex.';return 'The Thorn Warden has fallen. Continue mastering your cards.'}
 function monsterArt(id){
- const sprites={emberling:'ember-jackal.png',thornling:'circuit-thornling.png',vineguard:'briar-sentinel.png',burrower:'tunnel-borehound.png',moonKnight:'lunar-enforcer.png',shade:'phase-shade.png',cryptWisp:'data-wisp.png',forgeBeast:'reactor-mauler.png',crownEye:'crown-observer.png',thornWarden:'thorn-warden.png'};
+ // crownSentinel is a new mini-boss identity that deliberately reuses the
+ // existing Crown Observer artwork rather than needing new art — same
+ // pattern the game already uses for card placeholders (Round 11).
+ const sprites={emberling:'ember-jackal.png',thornling:'circuit-thornling.png',vineguard:'briar-sentinel.png',burrower:'tunnel-borehound.png',moonKnight:'lunar-enforcer.png',shade:'phase-shade.png',cryptWisp:'data-wisp.png',forgeBeast:'reactor-mauler.png',crownEye:'crown-observer.png',thornWarden:'thorn-warden.png',crownSentinel:'crown-observer.png'};
  if(sprites[id])return '<img class="monster-sprite" src="assets/monsters/'+sprites[id]+'" alt="'+enemies[id].name+'">';
  const common='<defs><linearGradient id="brass" x2="0" y2="1"><stop stop-color="#ffe08a"/><stop offset=".45" stop-color="#b97832"/><stop offset="1" stop-color="#5c321d"/></linearGradient><linearGradient id="steel"><stop stop-color="#a9edf0"/><stop offset=".5" stop-color="#417687"/><stop offset="1" stop-color="#172b3b"/></linearGradient></defs>';
  const art={

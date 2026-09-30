@@ -831,6 +831,211 @@ Pulled the card list straight from the live game (`Object.keys(defs)`,
 same 22 cards) rather than assuming the old placeholder set was still
 accurate, so nothing was missed or renamed by mistake.
 
+## Round 20 — card art reorganized into level folders, and a real flake finally root-caused
+
+### Card art reorganization
+Moved all 88 files from the flat `assets/cards/<id>-lv<level>.png` naming
+into `assets/cards/level0/`, `level1/`, `level2/`, `level3/`, each holding
+`<id>.png`. Updated `cardArtPath()` (`index.html`) and
+`tools/generate_card_placeholders.py` to match, so the generator still
+works correctly if it's ever run again.
+
+### The recurring flake, finally chased down instead of dismissed
+While re-testing the reorg, I hit the same intermittent crash noted (and
+too quickly written off) back in Round 18. This time I didn't let it go —
+instrumented a live reproduction that patched `joinedArea()` in place to
+log its exact call state the moment it threw, then swept it across
+repeated fresh processes until it actually reproduced with full state
+captured.
+
+**Root cause, confirmed, not guessed:** a Round 5 test helper searched for
+a room containing a specific enemy type using a single random-seed roll —
+`Object.keys(rooms).find(key=>roomSpawns(key).some(s=>s.type==='blightAntler'))`
+— with no fallback if that one roll happened not to place that enemy
+anywhere in the region. On an unlucky seed, `.find()` legitimately returned
+`undefined`, `state.room` got set to `undefined`, and several calls later
+`joinedArea()` crashed trying to read `rooms[undefined].name`. This was a
+genuine, reproducible bug in my own test code (not the shipped game, and
+not anything introduced by today's file-reorg), just rare enough (~1-3% of
+runs) to look like noise for two rounds running.
+
+**Fixed at the source**: replaced the single-roll search with
+`findRoomWithType()`, which retries across fresh seeds (up to 40 attempts)
+until it actually finds a matching room, and asserts loudly if it somehow
+never does, rather than silently proceeding with `undefined`. Also caught
+and fixed my own follow-up bug while wiring the fix in — I forgot to set
+`state.room` to the found city room before calling `startBattle()`, which
+looks up its spawn via `state.room` and silently no-ops on a mismatch. Both
+now fixed and stress-tested at 50/50 clean runs, plus 5 full 8-file suite
+runs (40/40 individual file passes) with no recurrence.
+
+### Two stale assertions from this session's own earlier reorg
+Found and fixed two test assertions still checking the *old* flat filename
+format (`strike-lv2.png`) that no longer exists on disk after the folder
+reorg above — a real gap in my own verification from a few turns back that
+I hadn't caught until running the full suite properly this time.
+
+## Round 21 — map expansion (4 new rooms, zero new art)
+
+You asked whether the map could be expanded without new art. Checked how
+room visuals actually render before answering: single rooms are drawn
+procedurally on canvas from a shared atlas image sliced into exactly 6
+district cells (`assets/environment/neon-city.js`) — matching the game's 6
+existing districts exactly, one-to-one. New single rooms just reuse one of
+those 6 districts; no new art needed. The bigger "joined areas" (Foundry
+Quarter, Crown Mainframe District, etc.) are different — each is one real
+hand-painted illustration sliced across multiple cells — those genuinely do
+need new art. Went ahead with the no-art option.
+
+### What was added
+Found the real gaps in the city's grid first rather than guessing — 24 of
+28 possible grid cells were occupied, leaving exactly 4 empty: `-1,2`,
+`-1,3`, `5,0`, `5,3`. Filled all four:
+
+| Room | District | Connects to |
+|---|---|---|
+| Undercroft Reservoir | FLOODLINE | Gearwood Verge (n), Rusted Aqueduct (e), Silt Collector (s) |
+| Silt Collector | FLOODLINE | Undercroft Reservoir (n), Siltwheel Basin (e) |
+| Skybridge Relay | CITADEL | Starwatch Gallery (w), Ashen Lift (s) |
+| Flooded Terminus | POWER GRID | Coilgrave Annex (n), Warden Exhaust (w) |
+
+All 7 existing neighboring rooms got the matching reverse exit added.
+`places` in `neon-city.js` got the 4 new district/name/landmark entries,
+appended at the end so no existing room's index (which positions its enemy/
+relic sprite) shifts.
+
+### A real bug this surfaced: `regionMaxDistance()` was hardcoded
+`regionMaxDistance('city')` returned a hardcoded `5` — a guess that
+happened to match the original 24-room graph's actual diameter, not a real
+computation. Adding a room that extends the map's true diameter to 6
+(Flooded Terminus, via Coilgrave Annex) exposed this immediately: the new
+farthest room capped out at the *same* difficulty ceiling as the old
+distance-5 rooms instead of actually being the new max. Fixed by computing
+it from the real graph (`Math.max(...Object.values(cityRoomDistances()))`)
+instead of a constant — Elaris/Vespera were left on their original tested
+constants since they didn't change this round and swapping their basis
+wasn't worth the risk.
+
+This recalibrates every room's relative distance fraction slightly (by
+design — a graph that's one room wider makes every other room proportionally
+closer to center), which correctly shifted a few patrol-density and
+heavy-hit-multiplier thresholds for pre-existing rooms. Updated the 3 test
+assertions that had hardcoded the old thresholds, re-verified each new
+expected value against the live graph rather than just bumping numbers
+until it passed, and made the heavy-hit "map edge" test find the actual
+farthest room dynamically instead of hardcoding a room key — so it can't
+go stale the next time the map grows.
+
+### Verified, not assumed
+The existing "generated-room routes" sweep (part of the shared base test
+harness) walks every room and every exit for connectivity/walkability
+across multiple seeds — it passed immediately on the first run with the
+new rooms in place. Also rendered both map screens with real Chromium
+using actual explored-state data: new rooms display correctly, current-
+room highlighting works, the area count correctly reads "12/28" instead of
+the old 24-room total, and the grid properly extended to show the new far-
+edge cells without any layout changes needed.
+
+## Round 22 (part 1 of a large request) — patrol spawns no longer sit near entryways
+
+You asked for a large combined set of changes: 2 mini-bosses per world
+guaranteeing an Upgrade Crystal, a brand-new main boss for Vespera (which
+currently has none), a 5x map expansion for Vespera, and a fix so patrols
+don't spawn right next to room entrances. This is genuinely too much to
+responsibly do in one pass with the same rigor as everything else in
+this document, so I'm shipping the entryway fix now — fully implemented and
+tested — and continuing with the rest (mini-bosses, Vespera's new boss, the
+map expansion) next.
+
+Found the actual mechanics before touching anything: a room's 4 possible
+entry points are `(35,250)`/`(765,250)`/`(400,35)`/`(400,465)`
+(`transition()`, `index.html`). Patrols wander up to 75px from their home
+spot and trigger a fight within 43px of wherever they currently are
+(`animateEnemy`) — a worst-case danger zone of ~118px from any entry. The
+old default home sectors, `(400,130)` and `(400,385)`, sat only 80-95px
+from the north/south entries — inside that zone, meaning a patrol could
+realistically wander close enough to ambush you the moment you walked in.
+
+### Why this took real iteration, not a one-line fix
+Every room turns out to have 4 fixed static building blocks in its corners
+(`solids()`, `assets/environment/neon-city.js`), leaving only a narrow
+cross-shaped walkable area — far less freedom to reposition patrols than
+it first looked. My first redesign (corner positions, mathematically ideal
+on paper) turned out to be walkable in **zero** of 28 city rooms — sitting
+exactly inside those building blocks. Traced it empirically rather than
+guessing further, found the actual safe points the real geometry allows,
+and discovered the rare 3-patrol (farthest-tier) rooms only support one
+specific triple of positions at all — there's no arrangement of 3 points in
+that cross shape that's both mutually 230px+ apart *and* fully clear of
+every entry simultaneously.
+
+### The fix
+`roomSpawns()` (`assets/expansion.js`) now picks its candidate list based
+on how many patrols the room actually needs:
+- **1-2 patrols (the common case, verified 100% of the time now):**
+  `(270,245)` and `(610,245)` first — both fully clear of the danger zone —
+  with `(350,245)`/`(450,245)` as next-best fallbacks for the couple of
+  rooms where a room-specific prop blocks one of the primary two.
+- **3 patrols (rare, only the farthest-tier rooms):** the one verified-
+  working triple, `(610,245)`+`(400,130)`+`(400,385)` — an honest,
+  documented compromise, since the fixed building geometry doesn't allow a
+  fully-safe triple to exist at all.
+
+## Round 22 (part 2) — mini-bosses for City and Elaris
+
+Continuing the large combined request. 4 of the planned 6 mini-bosses are
+done, tested end-to-end, and passing the full suite — City's 2 and
+Elaris's 2. Vespera (which needs a main boss from scratch, 2 mini-bosses,
+and the 5x map expansion) is still pending.
+
+### The approach: real special abilities, zero new AI code
+Investigated `enemyPlan()` before writing anything: it turns out any enemy
+with a truthy `element` field automatically gets the full telegraphed
+attack→charge→elemental→guard pattern (1.8x hits, status effects, weakness
+triangle) — completely independent of region, already fully tested
+machinery. So every mini-boss's "special ability" is just: give it an
+`element` in its data. No new state machine, no new battle code.
+
+### City (`index.html`)
+- **Lunar Enforcer** (the existing `moonKnight`) — gained `element:'water'`
+  and `miniBoss:true`. Same enemy, same sprite, now has a genuine signature
+  move it didn't have before.
+- **The Crown Sentinel** (new) — reuses the existing Crown Observer
+  artwork (`crown-observer.png`) under a new id/name, `element:'air'`,
+  placed at Skybridge Relay (the Round 21 room).
+
+### Elaris (`assets/elaris-wildlife.js`, `assets/expansion.js`)
+- **The Tidebound Warden** (new) — reuses the Drowned Heron sprite sheet,
+  `element:'water'`, placed at Sapphire Falls (`3,1`).
+- **The Gale Sovereign** (new) — reuses the Storm Moth sprite sheet,
+  `element:'air'`, placed at Mistfall Basin (`2,2`).
+
+### Real bugs found and fixed along the way
+1. **Element was hardcoded to `null` for any city enemy**, regardless of
+   what its own definition said — a leftover from before any city enemy
+   ever had one. Would have silently broken every city mini-boss's special
+   ability. Fixed to read the enemy's own `element` field directly.
+2. **Elaris's boss-placement was entirely hardcoded to `bloomTyrant` at
+   room `3,2`**, with no generic mechanism for placing any other boss —
+   unlike the city, which already supported room-designated bosses via
+   `r.enemy`. Generalized it (also sets up Vespera's boss placement for
+   free, next).
+3. **Elaris rooms are generated programmatically** (a 4×3 loop), not read
+   from a static per-room object like the city — there was nowhere to hang
+   an `enemy` designation at all. Added a small `bossRooms` lookup inside
+   that generation loop.
+4. **The real one**: mini-bosses had to be added to `ELARIS_WILDLIFE` to
+   reuse its sprites, but that's *also* the pool `roomSpawns()` draws
+   random patrol types from — meaning a mini-boss could have randomly
+   spawned as an ordinary low-tier patrol anywhere in Elaris, not just at
+   its own designated room. Confirmed this actually happened (a pre-
+   existing test caught it: expected exactly 4 regular species, observed
+   6). Fixed by excluding boss-flagged entries from the random-type pool,
+   then verified 0 leaks across 15 seeds.
+5. Updated one pre-existing test's outdated assumption that `bloomTyrant`
+   was the *only* possible Elaris boss type — a legitimate update now that
+   Elaris has mini-bosses too, not a bug in the new code.
+
 ## Testing
 
 ```
@@ -876,4 +1081,21 @@ percentage is sane and reaches exactly 100% once everything is found, and
 that a locked-route hint never appears on a room the player hasn't visited
 yet, and (Round 18) verified with a real Chromium render that the now-
 square art container crops cleanly with object-fit:cover and the rest of
-the card still lays out correctly beneath it.
+the card still lays out correctly beneath it. Round 20 replaced the
+find-a-matching-room test helper with one that retries across fresh seeds
+instead of trusting a single random roll (stress-tested at 50/50 clean
+runs of the file plus 5 full 8-file suite runs with no recurrence of the
+crash it used to cause), and fixed two assertions still checking the old
+flat card-art filename format after the level-folder reorg. Round 21
+verified the 4 new rooms are fully connected and walkable (the existing
+generated-room-routes sweep), confirmed `regionMaxDistance()` now reflects
+the real graph instead of a stale constant, and re-verified (not just
+bumped) the 3 pre-existing threshold assertions that correctly shifted as
+a result. Round 22 verified every 1-2-patrol room's spawn sectors are
+genuinely clear of the measured ~118px entry-danger zone, and that the
+documented rare 3-patrol exception still resolves without crashing across
+a 7-seed x 2-region sweep. Round 22 part 2 verified all 4 mini-bosses
+spawn at their correct designated rooms with their element intact, get the
+real telegraphed elemental pattern (not a plain attack), guarantee exactly
+1 Upgrade Crystal each on defeat, and — the one that actually mattered —
+never once spawn as an ordinary random patrol across a 15-seed sweep.

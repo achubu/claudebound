@@ -5,7 +5,7 @@ Run again any time a card is added — existing files are skipped unless
 --force is passed, so re-running after adding one new card only fills the
 gap instead of regenerating everything.
 
-Output: assets/cards/<id>-lv<level>.png  (e.g. assets/cards/strike-lv0.png)
+Output: assets/cards/level<level>/<id>.png  (e.g. assets/cards/level0/strike.png)
 Replace any of these with real art using the exact same filename and the
 game will pick it up automatically — no code changes needed.
 """
@@ -111,6 +111,8 @@ def draw_card(cid, level, name, kind, cost, soulbound):
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
+    for level in range(4):
+        os.makedirs(os.path.join(OUT_DIR, f'level{level}'), exist_ok=True)
     # Pull the authoritative card list straight from the real game code
     # rather than hand-maintaining a duplicate list here.
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -134,7 +136,7 @@ console.log(JSON.stringify(out));
     made, skipped = 0, 0
     for c in cards:
         for level in range(4):
-            path = os.path.join(OUT_DIR, f"{c['id']}-lv{level}.png")
+            path = os.path.join(OUT_DIR, f'level{level}', f"{c['id']}.png")
             if os.path.exists(path) and not FORCE:
                 skipped += 1
                 continue
