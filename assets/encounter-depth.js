@@ -52,7 +52,16 @@ endTurn=function(){
  b.enemy.guard=0;
  if(b.freeze>0){b.freeze--;b.logs.push('Frozen: enemy action skipped.')}
  else if(plan.kind==='charge'){b.logs.push(plan.name+'. A charged strike is coming—reserve or arm your counter.')}
- else if(plan.kind==='guard'){b.enemy.guard=b.id==='bloomTyrant'?8:5;b.logs.push('Rootguard: '+b.enemy.guard+' enemy Block.');b.counter=null}
+ else if(plan.kind==='guard'){b.enemy.guard=b.id==='bloomTyrant'?8:5;
+  // Every enemy action, guard included, resolves at the END of the turn
+  // that telegraphs it — same timing as charge->elemental — so this Block
+  // only becomes active starting the NEXT turn, protecting the enemy from
+  // your following attacks (which is why it can still show up later
+  // alongside a totally different intent, like a Heavy attack, once that
+  // next turn's own plan has moved on). The old message ("Rootguard: 5
+  // enemy Block.") read as if it had already happened, which is exactly
+  // what made that carried-over Block look unexplained.
+  b.logs.push('Rootguard primed: '+b.enemy.guard+' Block will protect the enemy starting next turn.');b.counter=null}
  else if(plan.kind==='elemental'&&b.counter&&COUNTERS[plan.element]===b.counter){b.enemy.hp=Math.max(0,b.enemy.hp-6);b.logs.push('Prismatic Counter cancels the charged strike and its status effect. 6 damage returned.');b.counter=null;b.exposed=0}
  else{
   let incoming=plan.damage;if(b.disrupted){incoming=Math.ceil(incoming/2);b.disrupted=false;b.logs.push('Lightning disruption halves the attack.')}

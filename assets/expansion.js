@@ -160,7 +160,12 @@ function patrolFor(s){return patrolCatalog[s.uid]||(patrolCatalog[s.uid]={x:s.x,
 // (Reactor Causeway, Lastlight Shelter) grant Upgrade Crystals — the map
 // previously had exactly one, ever (Memory Annex's relic), which capped
 // how many cards could ever be leveled up for an entire run.
-function chestFor(key){const designated=activeRegion==='city'?{'-1,0':'potion','4,0':'potion','0,2':'potion','5,2':'potion','3,3':'crystal','4,3':'crystal'}:activeRegion==='elaris'?{'1,0':'potion','2,1':'potion','3,2':'potion'}:null;if(!designated||!designated[key])return null;return{id:activeRegion+':'+key,x:400,y:145,reward:designated[key]}}
+// (400,145) sat right on the main north-south thoroughfare (x=400 is the
+// straight line between the north and south entries) — a hidden chest
+// should reward deliberately stepping off the main path to find it, not
+// sit in the way of it like a patrol. (330,180) is off both the N-S and
+// E-W through-lines, and verified walkable in every room of both regions.
+function chestFor(key){const designated=activeRegion==='city'?{'-1,0':'potion','4,0':'potion','0,2':'potion','5,2':'potion','3,3':'crystal','4,3':'crystal'}:activeRegion==='elaris'?{'1,0':'potion','2,1':'potion','3,2':'potion'}:null;if(!designated||!designated[key])return null;return{id:activeRegion+':'+key,x:330,y:180,reward:designated[key]}}
 renderWorld=function(){if(!state)return;const r=room(),world=$('world');if(collides(state.pos.x,state.pos.y))state.pos={x:400,y:280};NeonCity.render(world,state.room,r);for(const s of roomSpawns(state.room)){if(!spawnAvailable(s))continue;const p=patrolFor(s),node=document.createElement('div');node.className='enemy-node monster-'+s.type+(s.boss?' boss':'')+(s.elite?' elite':'');node.dataset.spawn=s.uid;node.dataset.name=(s.elite?'★ ELITE · ':'')+(s.element?ELEMENT_ICONS[s.element]+' ':'')+enemies[s.type].name;node.innerHTML=monsterArt(s.type);node.style.left=p.x+'px';node.style.top=p.y+'px';world.append(node)}if(r.relic&&relicAvailable(r.relic[0])){const q=r.relic,node=document.createElement('div');node.className='relic';node.textContent=q[2];node.dataset.name=q[1];node.style.left=q[3]+'px';node.style.top=q[4]+'px';world.append(node)}const chest=chestFor(state.room);if(chest&&!state.chests.includes(chest.id)){const node=document.createElement('div');node.className='map-chest';node.title=chest.reward==='crystal'?'Hidden loot chest — Upgrade Crystal':'Hidden loot chest';node.style.left=chest.x+'px';node.style.top=chest.y+'px';world.append(node)}if(portalTarget()){const portal=document.createElement('button');portal.className='region-portal';portal.innerHTML='<img class="portal-art" src="assets/environment/elaris-portal.png" alt=""><small>'+portalTarget().label+'</small>';portal.onclick=travelPortal;world.append(portal)}const player=document.createElement('div');player.id='player';player.style.left=state.pos.x+'px';player.style.top=state.pos.y+'px';player.innerHTML='<span class="hero-sprite"></span>';world.append(player);animateHero(0,false);renderHUD()};
 animateEnemy=function(dt){if(!state||state.battle||!$('menuOverlay').classList.contains('hidden'))return;for(const s of roomSpawns(state.room)){if(!spawnAvailable(s))continue;const p=patrolFor(s),speed=s.boss?8:14;p.turn-=dt;if(p.turn<0){p.angle+=.8;p.turn=3}const nx=p.x+Math.cos(p.angle)*speed*dt,ny=p.y+Math.sin(p.angle)*speed*dt;if(walkable(state.room,nx,ny,26)&&Math.hypot(nx-s.x,ny-s.y)<75){p.x=nx;p.y=ny}else p.angle+=1.8;const node=document.querySelector('[data-spawn="'+s.uid+'"]');if(node){node.style.left=p.x+'px';node.style.top=p.y+'px';node.querySelector('.monster-sprite')?.style.setProperty('--enemy-facing',Math.cos(p.angle)<0?-1:1)}if(Math.hypot(state.pos.x-p.x,state.pos.y-p.y)<(s.boss?58:43)){startBattle(s.uid);if(state.battle)return}}};
 checkWorldInteractions=function(){if(state.battle)return;const q=room().relic;if(q&&relicAvailable(q[0])&&Math.hypot(state.pos.x-q[3],state.pos.y-q[4])<48)collectRelic(q);const chest=chestFor(state.room);if(chest&&!state.chests.includes(chest.id)&&Math.hypot(state.pos.x-chest.x,state.pos.y-chest.y)<38){state.chests.push(chest.id);if(chest.reward==='crystal'){setMaterials(materials()+1);toast('Hidden loot chest: an Upgrade Crystal!')}else{state.potions+=1;toast('Hidden loot chest: a small healing potion!')}save();renderWorld()}};
@@ -202,18 +207,29 @@ const LOOT_CHEST_ODDS={soulbound:.01,crystal:.05,empty:.29,potion:.645};
 const LOOT_THIEVES=['a scavenging fox','a wiry alley cat','a startled crow','a masked raccoon','a quick sewer rat','a one-eared stray dog'];
 function rollLootChest(){const r=Math.random();return r<LOOT_CHEST_ODDS.soulbound?'soulbound':r<LOOT_CHEST_ODDS.crystal?'crystal':r<LOOT_CHEST_ODDS.empty?'empty':r<LOOT_CHEST_ODDS.potion?'potion':'card'}
 winBattle=function(){const b=state.battle;if(b.phase!=='fight')return;b.phase='reward';state.wins++;const levels=gainXP(b.enemy.boss?50:b.enemy.elite?40:25);if(b.enemy.boss){if(!state.bosses.includes(b.id))state.bosses.push(b.id)}else state.cooldowns[b.spawnId]=3;
-b.lootType=rollLootChest();b.reward=null;b.potionDrop=false;b.chestOpened=false;
+const isMiniBoss=b.enemy.boss&&enemies[b.id]&&enemies[b.id].miniBoss;
+b.lootType=rollLootChest();
+// A mini-boss already guarantees its own Upgrade Crystal below — if the
+// independent loot-chest roll ALSO happens to land on 'crystal' (its own
+// 4% chance, unrelated to the guarantee), that's a genuine double-grant
+// from one kill, not "extra luck": the guarantee is supposed to mean
+// exactly one, not one-or-sometimes-two. Redirect that specific
+// coincidence to a card instead, rather than letting it silently stack.
+if(isMiniBoss&&b.lootType==='crystal')b.lootType='card';
+b.reward=null;b.potionDrop=false;b.chestOpened=false;
 if(b.lootType==='card'){const rewardIds=activeRegion!=='city'?['cinder','venom','gale','counter','bastion','mend']:['cleave','riposte','bastion','mend','spark','shatter'];b.reward=make(rewardIds[Math.floor(Math.random()*rewardIds.length)]);state.pool.push(b.reward);if(state.deck.length<maxDeckSize()&&copiesInDeck(b.reward.id)<maxCopies())state.deck.push(b.reward.uid)}
 else if(b.lootType==='potion'){state.potions++;b.potionDrop=true}
 else if(b.lootType==='crystal'){setMaterials(materials()+1)}
 else if(b.lootType==='soulbound'){b.reward=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(b.reward)}
 else{b.thief=LOOT_THIEVES[Math.floor(Math.random()*LOOT_THIEVES.length)]}
 b.special=[];if(b.id==='thornWarden'&&!state.iceGift){state.iceGift=true;const ice=make('glacial');state.pool.push(ice);b.special.push('Glacial Covenant: guaranteed Soulbound Ice card. The Elaris portal is now open!')}else if(b.id==='bloomTyrant'&&!state.stormGift){state.stormGift=true;state.pool.push(make('stormglass'));b.special.push('Stormglass Covenant: guaranteed Soulbound Lightning card. The Vespera portal is now open!')}else if(b.enemy.boss&&b.lootType!=='soulbound'&&Math.random()<.10){const soul=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(soul);b.special.push('Soulbound boss card: '+stat(soul).name)}
-// Mini-bosses (enemies[type].miniBoss) always drop an Upgrade Crystal on
-// defeat, on top of whatever their normal loot chest roll gave — true
+// Mini-bosses always drop exactly one Upgrade Crystal on defeat — true
 // bosses can only ever be defeated once each (state.bosses), so this is a
-// reliable one-time reward per mini-boss, never a farmable loop.
-if(b.enemy.boss&&enemies[b.id]&&enemies[b.id].miniBoss){setMaterials(materials()+1);b.special.push('Mini-boss defeated: guaranteed Upgrade Crystal! ('+materials()+' total)')}
+// reliable one-time reward per mini-boss, never a farmable loop. The loot-
+// chest roll above already can't also land on 'crystal' for a mini-boss,
+// so this is genuinely the only source of it for this kill — exactly one,
+// never two.
+if(isMiniBoss){setMaterials(materials()+1);b.special.push('Mini-boss defeated: guaranteed Upgrade Crystal! ('+materials()+' total)')}
 if(b.enemy.elite&&Math.random()<.08){const type=Object.keys(CRYSTALS)[Math.floor(Math.random()*3)],crystal=rollUpgradeCrystal(type);state.device.crystals.push(crystal);b.crystalDrop=crystal.uid;b.special.push(crystalLabel(crystal)+' crystal found! Slot it into the Aetherlink.')}b.levels=levels;b.logs.push(b.lootType==='soulbound'?'Loot chest: Soulbound card!':b.lootType==='potion'?'Loot chest: small healing potion.':b.lootType==='crystal'?'Loot chest: an Upgrade Crystal! ('+materials()+' total)':b.lootType==='empty'?'Loot chest: empty — '+b.thief+' bolted off with everything inside.':'Loot chest: one random card added to your collection.')};
 const baseLoseBattle=loseBattle;
 loseBattle=function(){const b=state.battle;baseLoseBattle();state.hp=state.maxHp;state.room=activeRegion!=='city'?'0,0':'1,1';state.pos={x:400,y:300};b.lastRegion=activeRegion;if(!active().length&&state.pool.length)state.deck=[state.pool[0].uid]};
@@ -244,7 +260,22 @@ function normalizeElementalCards(s){
  for(const zone of ['draw','hand','discard','exhaust'])for(const card of s.battle?.[zone]||[])if(/^counter_(fire|water|earth|air)$/.test(card.id))card.id='counter';
  return true;
 }
-function restoreGame(s){const countersMigrated=normalizeElementalCards(s);state=s;uid=Math.max(1,...s.pool.map(c=>c.uid+1));configureRegion(state.region);state.regionVisits[state.region]=state.visited;keys={};$('startOverlay').classList.add('hidden');$('battleOverlay').classList.add('hidden');$('menuOverlay').classList.add('hidden');save();renderWorld();if(countersMigrated)toast('Elemental counters combined into one Prismatic Counter type.')}
+// A save created before this protection existed (or one where it was
+// otherwise lost) never gets it back just by loading — load()/
+// validateImport() only PRESERVE an existing soulbound flag, they never
+// retroactively grant one. Same one-time-migration pattern as the counter-
+// card merge above: heal any starter type (Strike/Guard/Focus/Mend) that
+// has at least one copy but none of them protected, by protecting its
+// first copy — matching newGame()'s original "first occurrence" rule.
+function healStarterProtection(s){
+ let healed=false;
+ for(const type of['strike','guard','focus','mend']){
+  const copies=s.pool.filter(c=>c.id===type);
+  if(copies.length&&!copies.some(c=>c.soulbound)){copies[0].soulbound=true;healed=true}
+ }
+ return healed;
+}
+function restoreGame(s){const countersMigrated=normalizeElementalCards(s);const starterHealed=healStarterProtection(s);state=s;uid=Math.max(1,...s.pool.map(c=>c.uid+1));configureRegion(state.region);state.regionVisits[state.region]=state.visited;keys={};$('startOverlay').classList.add('hidden');$('battleOverlay').classList.add('hidden');$('menuOverlay').classList.add('hidden');save();renderWorld();if(countersMigrated)toast('Elemental counters combined into one Prismatic Counter type.');else if(starterHealed)toast('One of each starter card type is now protected from loss.')}
 function exportSave(){if(!state)return toast('Begin or load a journey first.');if(state.battle)return toast('Finish the encounter before exporting.');const payload={format:'cardbound-save',version:3,state,materials:materials()},blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='cardbound-'+state.region+'-level-'+state.playerLevel+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Save exported.')}
 async function importSave(file){try{if(!file||file.size>2000000)throw Error('Choose a save file smaller than 2 MB.');const payload=JSON.parse(await file.text());if(payload.format!=='cardbound-save'||payload.version!==3)throw Error('Not a Cardbound expansion save.');const s=validateImport(payload.state);if(!Number.isInteger(payload.materials)||payload.materials<0||payload.materials>100000)throw Error('Invalid material count.');if(state&&!confirm('Replace this journey with the imported save?'))return;restoreGame(s);setMaterials(payload.materials);save();renderWorld();toast('Save imported successfully.')}catch(e){toast(e.message||'Unable to import this save.')}}
 function showMainMenu(){keys={};openMenu('<div class="eyebrow">CARDBOUND</div><h2>Main menu</h2><p>Save transfer is available between encounters.</p><button id="exportSave">Export save file</button> <button id="importSave">Import save file</button><p><button id="backToGame">Return to game</button> <button id="restartJourney" class="danger">New journey</button></p>');$('exportSave').onclick=exportSave;$('importSave').onclick=()=>$('saveFile').click();$('backToGame').onclick=closeMenu;$('restartJourney').onclick=()=>{if(confirm('Start a new journey? Export your current save first if you want to keep it.'))newGame()}}
@@ -252,37 +283,89 @@ const baseShowCharacter=showCharacter;
 showCharacter=function(){baseShowCharacter();const portrait=document.querySelector('.sheet-portrait');if(portrait){portrait.src='assets/characters/character-portal.webp';portrait.style.maxHeight='none';portrait.style.aspectRatio='16 / 9';portrait.style.objectFit='cover'}const info=document.createElement('p');info.className='notice';info.textContent='Aetherlink: '+deviceSlots()+' sockets · Critical strike '+talentRank('critical')*3+'% · Every level grants +1 max HP and heals 5 HP.';$('menuModal').append(info)};
 objective=function(){if(activeRegion==='vespera')return 'Explore Stormglass Reach. Reserve Prismatic Counter for charged attacks.';if(activeRegion==='elaris')return state.bosses.includes('bloomTyrant')?'The Vespera portal is open in Elderbloom Sanctuary.':'Defeat the Bloom Tyrant in Elderbloom Sanctuary. Reserve your counter for charged strikes.';if(state.bosses.includes('thornWarden'))return 'The Warden portal is open. Return to Warden Mainframe to enter Elaris.';if(!hasRelic('ember'))return 'Search west for the Ember Sigil.';if(!hasRelic('boots'))return 'Clear Cable Market to recover the Briarstep Boots.';if(!hasRelic('lens'))return 'Find the Moon Lens in the Drowned Archive.';return 'Defeat the Thorn Warden to unlock Ice and Elaris.'};
 function relicName(id){for(const r of Object.values(rooms))if(r.relic&&r.relic[0]===id)return r.relic[2]+' '+r.relic[1];return id}
-// Castlevania SotN-style block map: each real joined area (a genuine 2- or
-// 4-cell district that shares one continuous background) draws as ONE cell
-// spanning its true grid footprint via native CSS grid-column/row span,
-// instead of one same-sized box per individual cell — this is the direct
-// fix for rooms all reading as the same uniform rectangle. Layered on top:
-// room-type icons, a locked-route hint (only for routes out of rooms
-// you've actually seen, so it never spoils unexplored content), and an
-// overall completion percentage across areas/chests/relics.
+// The map now reads as an actually-drawn map, not a data grid: only areas
+// you've genuinely visited render at all (a real fog of war — the OLD
+// version drew a same-shaped "Unknown" box at every undiscovered area's
+// exact position and size, which quietly told you the whole map's layout
+// before you'd earned it); rooms are organic hand-drawn-ish blobs (varied
+// border-radius + a slight per-room rotation, both seeded deterministically
+// off the room key so they're stable across renders) on a spaced-out,
+// percentage-based canvas instead of touching CSS-grid cells; and an SVG
+// layer draws slightly curved connector lines between rooms you've found —
+// full lines between two you've both visited, short stubs fading into fog
+// where a visited room's exit leads somewhere you haven't been yet.
+function mapAreaFootprint(key,minX,maxX,minY,maxY){
+ const area=getJoinedArea(key);
+ const axs=area.cells.map(c=>Number(c.split(',')[0])),ays=area.cells.map(c=>Number(c.split(',')[1]));
+ const aMinX=Math.min(...axs),aMaxX=Math.max(...axs),aMinY=Math.min(...ays),aMaxY=Math.max(...ays);
+ const cols=maxX-minX+1,rows=maxY-minY+1,stepX=100/(cols+0.8),stepY=100/(rows+0.8),marginX=stepX*0.4,marginY=stepY*0.4;
+ const centerCol=(aMinX+aMaxX)/2-minX,centerRow=(aMinY+aMaxY)/2-minY;
+ const x=marginX+stepX*(centerCol+0.5),y=marginY+stepY*(centerRow+0.5);
+ // Kept well under 1 step even for a multi-cell joined area — a rotated
+ // organic blob's visual footprint reaches further than its own box, so
+ // this leaves real breathing room for neighbors instead of crowding them.
+ let width=stepX*0.44+(aMaxX-aMinX)*stepX*0.82,height=stepY*0.4+(aMaxY-aMinY)*stepY*0.82;
+ const j=keyHash(key);
+ if(area.cells.length===1){width*=0.8+((j%23)/22)*0.3;height*=0.8+(((j>>5)%23)/22)*0.3}
+ const radii=[30+j%30,30+(j>>3)%30,30+(j>>6)%30,30+(j>>9)%30],rotate=((j%9)-4)*0.7;
+ return{x,y,width,height,area,rotate,borderRadius:radii[0]+'% '+(100-radii[0])+'% '+radii[2]+'% '+(100-radii[2])+'% / '+radii[1]+'% '+radii[3]+'% '+(100-radii[3])+'% '+(100-radii[1])+'%'};
+}
 showMap=function(){
- const keys=Object.keys(rooms),xs=keys.map(k=>Number(k.split(',')[0])),ys=keys.map(k=>Number(k.split(',')[1])),minX=Math.min(...xs),minY=Math.min(...ys),maxX=Math.max(...xs),maxY=Math.max(...ys);
- const drawn=new Set(),cellsHTML=[];
+ const keys=Object.keys(rooms);
+ // The viewport frames only the explored bounding box (plus one ring of
+ // padding for stubs to fade into), not the whole region's grid — early
+ // in a run that's a handful of rooms in one corner, and reserving space
+ // for the entire map left most of the canvas empty until deep into it.
+ const visitedKeys=keys.filter(k=>state.visited.includes(k));
+ const boundsKeys=visitedKeys.length?visitedKeys:[state.room];
+ const bxs=boundsKeys.map(k=>Number(k.split(',')[0])),bys=boundsKeys.map(k=>Number(k.split(',')[1]));
+ const minX=Math.max(Math.min(...bxs)-1,Math.min(...keys.map(k=>Number(k.split(',')[0])))),maxX=Math.min(Math.max(...bxs)+1,Math.max(...keys.map(k=>Number(k.split(',')[0]))));
+ const minY=Math.max(Math.min(...bys)-1,Math.min(...keys.map(k=>Number(k.split(',')[1])))),maxY=Math.min(Math.max(...bys)+1,Math.max(...keys.map(k=>Number(k.split(',')[1]))));
+ const drawn=new Set(),areas=[],footprints={};
  for(const k of keys){
   const area=getJoinedArea(k),areaId=area.cells.join('|');
   if(drawn.has(areaId))continue;drawn.add(areaId);
-  const axs=area.cells.map(c=>Number(c.split(',')[0])),ays=area.cells.map(c=>Number(c.split(',')[1]));
-  const aMinX=Math.min(...axs),aMinY=Math.min(...ays),colSpan=Math.max(...axs)-aMinX+1,rowSpan=Math.max(...ays)-aMinY+1;
-  const seen=area.cells.some(c=>state.visited.includes(c)),current=area.cells.includes(state.room);
-  const cleared=seen&&area.cells.every(c=>roomCleared(c));
+  areas.push(area);footprints[areaId]=mapAreaFootprint(k,minX,maxX,minY,maxY);footprints[areaId].id=areaId;footprints[areaId].primaryKey=area.cells[0];
+ }
+ const areaOf=key=>areas.find(a=>a.cells.includes(key)),seenArea=a=>a.cells.some(c=>state.visited.includes(c));
+ const cellsHTML=[],linksSVG=[],doneLinks=new Set();
+ for(const area of areas){
+  const fp=footprints[area.cells.join('|')],seen=seenArea(area);
+  if(!seen)continue;
+  const current=area.cells.includes(state.room),cleared=area.cells.every(c=>roomCleared(c));
   const isBoss=area.cells.some(c=>{const r=rooms[c];return r.enemy&&enemies[r.enemy[0]]&&enemies[r.enemy[0]].boss&&!state.bosses.includes(r.enemy[0])});
-  const tag=seen?area.cells.map(roomTag).find(Boolean):null;
-  const lockedExits=seen?[...new Set(area.cells.flatMap(c=>Object.values(rooms[c].exits).filter(e=>typeof e==='object'&&e.requires&&!hasRelic(e.requires)).map(e=>e.requires)))]:[];
-  cellsHTML.push('<div class="panel'+(current?' current-room':'')+(isBoss?' boss-room':'')+(!seen?' unknown-room':'')+'" style="grid-column:'+(aMinX-minX+1)+' / span '+colSpan+';grid-row:'+(aMinY-minY+1)+' / span '+rowSpan+'">'+(seen?'<b>'+area.name+'</b>':'Unknown')+(seen?'<small>'+(current?'YOU ARE HERE':isBoss?'BOSS':cleared?'SECURE':'DANGER')+'</small>':'')+(tag?'<i class="room-tag-badge">'+tag.label+'</i>':'')+(lockedExits.length?'<i class="lock-hint">🔒 '+lockedExits.map(relicName).join(', ')+'</i>':'')+'</div>');
+  const tag=area.cells.map(roomTag).find(Boolean);
+  const lockedExits=[...new Set(area.cells.flatMap(c=>Object.values(rooms[c].exits).filter(e=>typeof e==='object'&&e.requires&&!hasRelic(e.requires)).map(e=>e.requires)))];
+  cellsHTML.push('<div class="panel'+(current?' current-room':'')+(isBoss?' boss-room':'')+'" style="left:'+fp.x+'%;top:'+fp.y+'%;width:'+fp.width+'%;height:'+fp.height+'%;border-radius:'+fp.borderRadius+';transform:translate(-50%,-50%) rotate('+fp.rotate+'deg)">'+'<b>'+area.name+'</b>'+'<small>'+(current?'YOU ARE HERE':isBoss?'BOSS':cleared?'SECURE':'DANGER')+'</small>'+(tag?'<i class="room-tag-badge">'+tag.label+'</i>':'')+(lockedExits.length?'<i class="lock-hint">🔒 '+lockedExits.map(relicName).join(', ')+'</i>':'')+'</div>');
+  // Connector lines/stubs: walk this area's real exits once each.
+  for(const c of area.cells)for(const raw of Object.values(rooms[c].exits)){
+   const to=typeof raw==='string'?raw:raw.to;if(!rooms[to])continue;
+   const toArea=areaOf(to);if(!toArea||toArea===area)continue;
+   const toFp=footprints[toArea.cells.join('|')],toSeen=seenArea(toArea);
+   const linkId=[fp.id,toFp.id].sort().join('|');
+   if(toSeen){
+    if(doneLinks.has(linkId))continue;doneLinks.add(linkId);
+    const locked=typeof raw==='object'&&raw.requires&&!hasRelic(raw.requires);
+    const midX=(fp.x+toFp.x)/2+(keyHash(linkId)%7-3)*0.6,midY=(fp.y+toFp.y)/2+(keyHash(linkId+'y')%7-3)*0.6;
+    linksSVG.push('<path d="M'+fp.x+' '+fp.y+' Q '+midX+' '+midY+' '+toFp.x+' '+toFp.y+'" class="map-link'+(locked?' locked':'')+'"/>');
+   }else{
+    // Stub toward an undiscovered neighbor: a short curve that fades out,
+    // hinting there's more here without revealing anything about it.
+    const stubId=fp.id+'>'+to;if(doneLinks.has(stubId))continue;doneLinks.add(stubId);
+    const dx=toFp.x-fp.x,dy=toFp.y-fp.y,len=Math.hypot(dx,dy)||1,stubLen=Math.min(len*0.4,7);
+    const sx=fp.x+dx/len*stubLen,sy=fp.y+dy/len*stubLen;
+    linksSVG.push('<path d="M'+fp.x+' '+fp.y+' L '+sx+' '+sy+'" class="map-link map-stub"/>');
+   }
+  }
  }
  const discovered=state.visited.filter(k=>rooms[k]).length;
  const allChests=keys.map(chestFor).filter(Boolean),chestsFound=allChests.filter(c=>state.chests.includes(c.id)).length;
  const allRelics=Object.values(rooms).filter(r=>r.relic&&r.relic[0]!=='material'),relicsFound=state.relics.length;
  const pct=Math.round(((discovered/keys.length)+(allChests.length?chestsFound/allChests.length:1)+(allRelics.length?relicsFound/allRelics.length:1))/3*100);
- openMenu('<div class="eyebrow">'+(activeRegion==='city'?'NEON AFTERMATH':activeRegion==='vespera'?'VESPERA':'ELARIS')+' · '+pct+'% COMPLETE</div><h2>Exploration map</h2><div class="region-map" style="grid-template-columns:repeat('+(maxX-minX+1)+',1fr)">'+cellsHTML.join('')+'</div><p>'+discovered+'/'+keys.length+' areas visited · '+chestsFound+'/'+allChests.length+' hidden chests found · '+relicsFound+'/'+allRelics.length+' relics claimed.</p><button id="mapReturn">Return</button>');
+ openMenu('<div class="eyebrow">'+(activeRegion==='city'?'NEON AFTERMATH':activeRegion==='vespera'?'VESPERA':'ELARIS')+' · '+pct+'% COMPLETE</div><h2>Exploration map</h2><div class="map-canvas"><svg class="map-links" viewBox="0 0 100 100" preserveAspectRatio="none">'+linksSVG.join('')+'</svg>'+cellsHTML.join('')+'</div><p>'+discovered+'/'+keys.length+' areas visited · '+chestsFound+'/'+allChests.length+' hidden chests found · '+relicsFound+'/'+allRelics.length+' relics claimed.</p><button id="mapReturn">Return</button>');
  $('mapReturn').onclick=closeMenu;
 };
-const style=document.createElement('style');style.textContent='.device-core{font-size:90px;text-align:center;color:#78fff1;text-shadow:0 0 30px #41cdfc}.combat-tools{padding:12px;border:1px solid #529baf;margin-bottom:12px}.region-portal{position:absolute;left:340px;top:340px;width:120px;height:95px;border:2px solid #9dffff;border-radius:50%;background:radial-gradient(#cdfff1,#215ca0,#22113d);box-shadow:0 0 35px #86e5e8;font-size:42px;z-index:7;animation:pulse 3s infinite}.region-portal small{display:block;font:12px system-ui}.elite .monster-sprite{filter:drop-shadow(0 0 8px #ffc958)}.region-map{display:grid;gap:5px}.region-map .panel{position:relative;padding:8px;font:11px system-ui;min-height:60px}.region-map small{display:block;color:#9edcae}.current-room{outline:2px solid #fff189}.region-map .boss-room{border-color:#e0524f;box-shadow:0 0 10px #e0524f55}.region-map .boss-room small{color:#ff9d9a}.region-map .unknown-room{color:#53616a;background:#0c141d;opacity:.65}.region-map .room-tag-badge{position:absolute;top:5px;right:5px;font:8px system-ui;letter-spacing:.3px;padding:2px 5px;border-radius:4px;background:#0009;color:#fff}.region-map .lock-hint{display:block;margin-top:4px;font-size:9px;color:#e0a0a0}.wildlife{position:absolute;pointer-events:none;z-index:3;color:#ceffee;font-size:19px;animation:wildlifeDrift 12s ease-in-out infinite}@keyframes wildlifeDrift{50%{transform:translate(50px,-20px)}}select{max-width:100%;background:#152e40;color:#e3faf7;padding:10px}.loot-chest-wrap{text-align:center}.loot-chest-graphic{display:inline-block;width:170px;height:170px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 16px #7fd8ff99);animation:chestGlow 2.4s ease-in-out infinite}@keyframes chestGlow{50%{filter:drop-shadow(0 0 28px #a6e8ffcc);transform:scale(1.04)}}.armor-tag{color:#9dd6ff;text-shadow:0 0 6px #4aa3ff88}.armor-note{font-size:11px;margin:2px 0 0}.block-tag{color:#a8e6a1;text-shadow:0 0 6px #5ecb5088}.map-chest{position:absolute;transform:translate(-50%,-50%);width:46px;height:46px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 10px #7fd8ff99);z-index:5;animation:chestGlow 2.4s ease-in-out infinite;pointer-events:none}';document.head.append(style);
+const style=document.createElement('style');style.textContent='.device-core{font-size:90px;text-align:center;color:#78fff1;text-shadow:0 0 30px #41cdfc}.combat-tools{padding:12px;border:1px solid #529baf;margin-bottom:12px}.region-portal{position:absolute;left:340px;top:340px;width:120px;height:95px;border:2px solid #9dffff;border-radius:50%;background:radial-gradient(#cdfff1,#215ca0,#22113d);box-shadow:0 0 35px #86e5e8;font-size:42px;z-index:7;animation:pulse 3s infinite}.region-portal small{display:block;font:12px system-ui}.elite .monster-sprite{filter:drop-shadow(0 0 8px #ffc958)}.map-canvas{position:relative;width:100%;aspect-ratio:16/10;background:radial-gradient(ellipse at 50% 40%,#16283a,#070d14 75%);border:1px solid #2c4356;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 60px #00000066}.map-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.map-link{fill:none;stroke:#5c8fa8;stroke-width:.5;stroke-linecap:round;stroke-dasharray:1.2 1.6;opacity:.75}.map-link.locked{stroke:#c25a6a;stroke-dasharray:.5 1.1}.map-link.map-stub{stroke:#3c5468;opacity:.55;stroke-dasharray:.8 1.4}.map-canvas .panel{position:absolute;min-width:92px;min-height:66px;padding:12px 10px 8px;font:11px system-ui;background:linear-gradient(160deg,#1c3247,#0f1c29);border:1px solid #3f6178;box-shadow:0 0 0 1px #0009,0 4px 14px #0007;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px}.map-canvas .panel b{font-size:12px;text-shadow:0 0 6px #4aa3ff55}.map-canvas small{display:block;color:#9edcae;letter-spacing:.4px}.current-room{border-color:#fff189!important;box-shadow:0 0 0 1px #fff18988,0 0 22px #fff18966!important}.map-canvas .boss-room{border-color:#e0524f!important;box-shadow:0 0 0 1px #e0524f88,0 0 18px #e0524f55!important}.map-canvas .boss-room small{color:#ff9d9a}.map-canvas .room-tag-badge{position:absolute;top:-13px;right:10%;font:8px system-ui;letter-spacing:.3px;padding:2px 6px;border-radius:4px;background:#16283a;border:1px solid #3f6178;color:#fff;white-space:nowrap;z-index:2}.map-canvas .lock-hint{font-size:9px;color:#e0a0a0;white-space:nowrap}.wildlife{position:absolute;pointer-events:none;z-index:3;color:#ceffee;font-size:19px;animation:wildlifeDrift 12s ease-in-out infinite}@keyframes wildlifeDrift{50%{transform:translate(50px,-20px)}}select{max-width:100%;background:#152e40;color:#e3faf7;padding:10px}.loot-chest-wrap{text-align:center}.loot-chest-graphic{display:inline-block;width:170px;height:170px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 16px #7fd8ff99);animation:chestGlow 2.4s ease-in-out infinite}@keyframes chestGlow{50%{filter:drop-shadow(0 0 28px #a6e8ffcc);transform:scale(1.04)}}.armor-tag{color:#9dd6ff;text-shadow:0 0 6px #4aa3ff88}.armor-note{font-size:11px;margin:2px 0 0}.block-tag{color:#a8e6a1;text-shadow:0 0 6px #5ecb5088}.map-chest{position:absolute;transform:translate(-50%,-50%);width:46px;height:46px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 10px #7fd8ff99);z-index:5;animation:chestGlow 2.4s ease-in-out infinite;pointer-events:none}';document.head.append(style);
 const navDevice=document.createElement('button');navDevice.textContent='Aetherlink';navDevice.onclick=showDevice;$('nav').append(navDevice);const navMenu=document.createElement('button');navMenu.textContent='Menu';navMenu.onclick=showMainMenu;$('nav').append(navMenu);
 const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='.json,application/json';fileInput.id='saveFile';fileInput.hidden=true;fileInput.onchange=()=>{importSave(fileInput.files[0]);fileInput.value=''};document.body.append(fileInput);
 const importButton=document.createElement('button');importButton.textContent='Import save file';importButton.onclick=()=>fileInput.click();$('startOverlay').querySelector('section').append(importButton);
