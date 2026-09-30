@@ -4,7 +4,12 @@ const ELARIS_WILDLIFE={
  cinderFox:{name:'Cinder Fox',icon:'♨',hp:38,attack:7,element:'fire',sheet:'cinder-fox',cycle:'.95s'},
  drownedHeron:{name:'Drowned Heron',icon:'≈',hp:55,attack:9,element:'water',sheet:'drowned-heron',cycle:'1.4s'},
  blightAntler:{name:'Blight Antler',icon:'◆',hp:44,attack:8,element:'earth',sheet:'blight-antler',cycle:'1.2s'},
- stormMoth:{name:'Storm Moth',icon:'≋',hp:52,attack:9,element:'air',sheet:'storm-moth',cycle:'.7s'}
+ stormMoth:{name:'Storm Moth',icon:'≋',hp:52,attack:9,element:'air',sheet:'storm-moth',cycle:'.7s'},
+ // Round 22 mini-bosses: reuse an existing species' sprite sheet under a
+ // new id/name/boss-tier stat block — same "new identity, borrowed art"
+ // pattern as the city's crownSentinel.
+ tidewardenElaris:{name:'The Tidebound Warden',icon:'≈',hp:70,attack:11,armor:3,element:'water',sheet:'drowned-heron',cycle:'1.4s',boss:true,miniBoss:true},
+ galeSovereign:{name:'The Gale Sovereign',icon:'≋',hp:66,attack:11,armor:3,element:'air',sheet:'storm-moth',cycle:'.7s',boss:true,miniBoss:true}
 };
 Object.assign(enemies,ELARIS_WILDLIFE);
 const cityMonsterArt=monsterArt;

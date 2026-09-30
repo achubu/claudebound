@@ -8,9 +8,16 @@ const depthMonsterArt=monsterArt;
 monsterArt=function(id){return id==='bloomTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="The Bloom Tyrant" style="background-image:url(assets/monsters/elaris/bloom-tyrant.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
 function enemyPlan(b=state.battle,turn=b?.turn){
  if(!b)return{kind:'attack',name:'Attack',damage:0,element:null};
- const boss=b.id==='bloomTyrant',element=boss?(Math.floor((turn-1)/3)%2?'air':'earth'):b.enemy.element;
- const pattern=boss?['guard','charge','elemental','attack','charge','elemental']:element?['attack','charge','elemental','guard']:['attack','guard','heavy'];
- const kind=pattern[(turn-1)%pattern.length],enraged=boss&&b.enemy.hp<=b.enemy.maxHp/2;
+ // Only the region's main boss cycles a fixed earth/air element on its own
+ // 6-turn pattern — every other enemy (city, Elaris, Vespera, mini-boss or
+ // plain patrol alike) just uses whatever element its own enemies[] entry
+ // has. That means giving any boss-tier enemy an `element` field is enough
+ // to give it the full telegraphed attack/charge/elemental/guard pattern
+ // and status-effect special ability, with zero new AI code — this is how
+ // the Round 22 mini-bosses get a real signature move each.
+ const isBloomTyrant=b.id==='bloomTyrant',element=isBloomTyrant?(Math.floor((turn-1)/3)%2?'air':'earth'):b.enemy.element;
+ const pattern=isBloomTyrant?['guard','charge','elemental','attack','charge','elemental']:element?['attack','charge','elemental','guard']:['attack','guard','heavy'];
+ const kind=pattern[(turn-1)%pattern.length],enraged=b.enemy.boss&&b.enemy.hp<=b.enemy.maxHp/2;
  const base=Math.max(1,b.enemy.attack-(b.enemyDebuff||0))+(enraged?2:0);
  // Heavy hits scale from 1.5x near the region's start room up to 2.5x at its
  // farthest edge, so a fully-stacked Block turn that comfortably absorbs an
@@ -19,7 +26,7 @@ function enemyPlan(b=state.battle,turn=b?.turn){
  // forever with the same starter-tier block cards.
  const heavyFrac=(typeof regionDistanceFrac==='function')?regionDistanceFrac(state.room):0,heavyMult=1.5+heavyFrac;
  const damage=['charge','guard'].includes(kind)?0:Math.round(base*(kind==='elemental'?1.8:kind==='heavy'?heavyMult:1))+(b.exposed||0);
- return{kind,element,damage,name:kind==='charge'?'Gathering '+element+' energy':kind==='guard'?'Rootguard':kind==='elemental'?(boss?'Cataclysm':'Charged')+' '+element+' strike':kind==='heavy'?'Heavy attack':'Strike',enraged};
+ return{kind,element,damage,name:kind==='charge'?'Gathering '+element+' energy':kind==='guard'?'Rootguard':kind==='elemental'?(isBloomTyrant?'Cataclysm':'Charged')+' '+element+' strike':kind==='heavy'?'Heavy attack':'Strike',enraged};
 }
 intent=function(){return enemyPlan().damage};
 const depthCardEffect=cardEffect;

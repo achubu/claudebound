@@ -51,7 +51,7 @@ rules=function(c){const d=stat(c);return originalRules(c)+(d.freeze?' Freeze: en
 syncTalentVitals=function(heal=false){const old=state.maxHp,next=30+state.playerLevel-1+talentRank('vitality')*2;state.maxHp=next;state.hp=Math.min(next,state.hp+(heal?Math.max(0,next-old):0))};
 gainXP=function(n){const gained=[];if(state.playerLevel>=30){state.xp=0;return gained}state.xp+=n;while(state.xp>=100&&state.playerLevel<30){state.xp-=100;state.playerLevel++;gained.push(state.playerLevel);syncTalentVitals(false);state.hp=Math.min(state.maxHp,state.hp+5)}if(state.playerLevel===30)state.xp=0;return gained};
 
-function configureRegion(region){activeRegion=region;for(const key of Object.keys(rooms))delete rooms[key];if(region==='city'){Object.assign(rooms,JSON.parse(JSON.stringify(CITY_ROOMS)))}else if(region==='vespera'){const names=['Stormglass Landing','Prism Coast','Thunderfen','Resonant Spires'];for(let y=0;y<2;y++)for(let x=0;x<2;x++){const key=x+','+y,exits={};if(x)exits.w='0,'+y;else exits.e='1,'+y;if(y)exits.n=x+',0';else exits.s=x+',1';rooms[key]={name:names[y*2+x],exits,district:2,cityIndex:y*2+x}}}else{const names=['Dawnroot Landing','Sunpetal Plains','Orchid Rainforest','Jade River','Fernveil Grove','Wildheart Meadow','Moon Orchid Vale','Sapphire Falls','Canopy Cathedral','Amber Savannah','Mistfall Basin','Elderbloom Sanctuary'];for(let y=0;y<3;y++)for(let x=0;x<4;x++){const key=x+','+y,index=y*4+x,exits={};if(x)exits.w=(x-1)+','+y;if(x<3)exits.e=(x+1)+','+y;if(y)exits.n=x+','+(y-1);if(y<2)exits.s=x+','+(y+1);rooms[key]={name:names[index],exits,district:index%4,landmark:['FOREST','PLAINS','RAINFOREST','RIVERLAND'][index%4],cityIndex:index}}}spawnCatalog={};patrolCatalog={}}
+function configureRegion(region){activeRegion=region;for(const key of Object.keys(rooms))delete rooms[key];if(region==='city'){Object.assign(rooms,JSON.parse(JSON.stringify(CITY_ROOMS)))}else if(region==='vespera'){const names=['Stormglass Landing','Prism Coast','Thunderfen','Resonant Spires'];for(let y=0;y<2;y++)for(let x=0;x<2;x++){const key=x+','+y,exits={};if(x)exits.w='0,'+y;else exits.e='1,'+y;if(y)exits.n=x+',0';else exits.s=x+',1';rooms[key]={name:names[y*2+x],exits,district:2,cityIndex:y*2+x}}}else{const names=['Dawnroot Landing','Sunpetal Plains','Orchid Rainforest','Jade River','Fernveil Grove','Wildheart Meadow','Moon Orchid Vale','Sapphire Falls','Canopy Cathedral','Amber Savannah','Mistfall Basin','Elderbloom Sanctuary'];const bossRooms={'3,1':'tidewardenElaris','2,2':'galeSovereign'};for(let y=0;y<3;y++)for(let x=0;x<4;x++){const key=x+','+y,index=y*4+x,exits={};if(x)exits.w=(x-1)+','+y;if(x<3)exits.e=(x+1)+','+y;if(y)exits.n=x+','+(y-1);if(y<2)exits.s=x+','+(y+1);rooms[key]={name:names[index],exits,district:index%4,landmark:['FOREST','PLAINS','RAINFOREST','RIVERLAND'][index%4],cityIndex:index};if(bossRooms[key])rooms[key].enemy=[bossRooms[key],400,250]}}spawnCatalog={};patrolCatalog={}}
 // Restore the original fixed street layout and collision boundaries.
 // Elaris keeps its new scenery, using the same fixed room footprint.
 function walkable(key,x,y,margin=0){
@@ -90,7 +90,14 @@ function cityRoomDistances(){
 // Elaris and Vespera are plain rectangular grids generated in configureRegion
 // (every cell connects to its in-bounds NSEW neighbors, no relic gates), so
 // Manhattan distance from (0,0) is exact — no BFS needed for those regions.
-function regionMaxDistance(region){return region==='vespera'?2:5}
+// City's max distance is computed from the real room graph (via the
+// existing frozen CITY_ROOMS BFS) instead of a hardcoded guess, so adding
+// new rooms that extend the map's actual diameter — like the 4 added in
+// this round — is automatically reflected instead of silently capping
+// the new farthest room at the same difficulty ceiling as the old one.
+// Elaris/Vespera are left as their original tested constants; they didn't
+// change today and swapping their basis isn't worth the risk here.
+function regionMaxDistance(region){if(region==='city')return Math.max(...Object.values(cityRoomDistances()));return region==='vespera'?2:5}
 function regionDistance(key,region=activeRegion){
  if(region==='city')return cityRoomDistances()[key]||0;
  const[x,y]=key.split(',').map(Number);return x+y;
@@ -107,14 +114,40 @@ function roomSpawns(key){
  const cache=activeRegion+':'+key;if(spawnCatalog[cache])return spawnCatalog[cache];
  const rand=seeded(hashSeed(state.seed+cache+'enemies')),r=rooms[key],safe=activeRegion==='city'?key==='1,1':key==='0,0';
  const count=safe?0:(typeof areaPatrolCount==='function'?areaPatrolCount(key):2),list=[];
+ // Every room has 4 fixed static building blocks at its corners (see
+ // solids() in neon-city.js), leaving only a narrow cross-shaped walkable
+ // area — which sharply limits how far spawn "home" sectors can actually
+ // move away from the room's entry points (35,250)/(765,250)/(400,35)/
+ // (400,465)). (270,245) and (610,245) are the safest pair the geometry
+ // allows (117px and 37px clear of the ~118px worst-case patrol-wander +
+ // encounter-trigger danger zone) and are used first for the common
+ // 1-2-patrol case. The rare 3-patrol (farthest-tier) rooms can't fit 3
+ // mutually-230px-separated points AND stay clear of entries at the same
+ // time — (610,245)+(400,130)+(400,385) is the only triple the cross shape
+ // actually supports, verified against every room in both regions, so it's
+ // used specifically (and only) when a third patrol is actually needed.
+ const candidates=count>=3?[[610,245],[400,130],[400,385],[270,245],[400,250],[350,245],[450,245],[330,180],[330,320]]:[[270,245],[610,245],[350,245],[450,245],[400,250],[400,130],[400,385]];
  for(let i=0;i<count;i++){
-  const types=activeRegion==='city'?cityTierTypes(key):Object.keys(ELARIS_WILDLIFE);
-  const regionBoss=activeRegion==='elaris'&&key==='3,2'&&i===0,boss=regionBoss||(i===0&&activeRegion==='city'&&r.enemy&&enemies[r.enemy[0]].boss),type=regionBoss?'bloomTyrant':boss?r.enemy[0]:types[Math.floor(rand()*types.length)];
-  // Fixed, widely separated home sectors leave the main crossing and doors clear.
-  const candidates=[[400,130],[400,385],[270,245],[610,245]];
+  // Mini-bosses now live in ELARIS_WILDLIFE (so they can reuse a species'
+  // sprite sheet), but must never be drawn as an ordinary random patrol —
+  // only ever appear via their own designated room slot (r.enemy above).
+  const types=activeRegion==='city'?cityTierTypes(key):Object.keys(ELARIS_WILDLIFE).filter(id=>!ELARIS_WILDLIFE[id].boss);
+  // The region's own main boss (currently only bloomTyrant at Elaris 3,2)
+  // keeps its special story-tied slot. Room-designated bosses (r.enemy,
+  // e.g. mini-bosses) used to only work in the city — generalized so any
+  // region's rooms can place one, which is how the Round 22 Elaris/Vespera
+  // mini-bosses get placed without needing bespoke per-region logic.
+  const regionBoss=activeRegion==='elaris'&&key==='3,2'&&i===0,roomBoss=i===0&&r.enemy&&enemies[r.enemy[0]]&&enemies[r.enemy[0]].boss,boss=regionBoss||roomBoss,type=regionBoss?'bloomTyrant':boss?r.enemy[0]:types[Math.floor(rand()*types.length)];
   let spot=candidates.find(([x,y])=>walkable(key,x,y,28)&&list.every(s=>Math.hypot(s.x-x,s.y-y)>230));
   if(!spot)throw Error('No clear patrol sector in '+key);
-  const [x,y]=spot,eliteChance=.04+regionDistanceFrac(key)*.32,elite=!boss&&rand()<eliteChance,element=activeRegion!=='city'?enemies[type].element:null;
+  // Element now comes straight from the enemy's own definition rather than
+  // being unconditionally nulled out for city specifically — that hardcode
+  // predated any city enemy ever having an element, but the Round 22
+  // mini-bosses (crownSentinel, and moonKnight now) do, and need it to
+  // actually reach their battle state for their signature elemental attack
+  // pattern to trigger. Regular city enemies still have no `element` field
+  // in their own definition, so this is a no-op for them (still null).
+  const [x,y]=spot,eliteChance=.04+regionDistanceFrac(key)*.32,elite=!boss&&rand()<eliteChance,element=enemies[type].element||null;
   list.push({uid:cache+':'+i,type,x,y,boss,elite,element});
  }
  return spawnCatalog[cache]=list;
@@ -175,7 +208,13 @@ else if(b.lootType==='potion'){state.potions++;b.potionDrop=true}
 else if(b.lootType==='crystal'){setMaterials(materials()+1)}
 else if(b.lootType==='soulbound'){b.reward=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(b.reward)}
 else{b.thief=LOOT_THIEVES[Math.floor(Math.random()*LOOT_THIEVES.length)]}
-b.special=[];if(b.id==='thornWarden'&&!state.iceGift){state.iceGift=true;const ice=make('glacial');state.pool.push(ice);b.special.push('Glacial Covenant: guaranteed Soulbound Ice card. The Elaris portal is now open!')}else if(b.id==='bloomTyrant'&&!state.stormGift){state.stormGift=true;state.pool.push(make('stormglass'));b.special.push('Stormglass Covenant: guaranteed Soulbound Lightning card. The Vespera portal is now open!')}else if(b.enemy.boss&&b.lootType!=='soulbound'&&Math.random()<.10){const soul=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(soul);b.special.push('Soulbound boss card: '+stat(soul).name)}if(b.enemy.elite&&Math.random()<.08){const type=Object.keys(CRYSTALS)[Math.floor(Math.random()*3)],crystal=rollUpgradeCrystal(type);state.device.crystals.push(crystal);b.crystalDrop=crystal.uid;b.special.push(crystalLabel(crystal)+' crystal found! Slot it into the Aetherlink.')}b.levels=levels;b.logs.push(b.lootType==='soulbound'?'Loot chest: Soulbound card!':b.lootType==='potion'?'Loot chest: small healing potion.':b.lootType==='crystal'?'Loot chest: an Upgrade Crystal! ('+materials()+' total)':b.lootType==='empty'?'Loot chest: empty — '+b.thief+' bolted off with everything inside.':'Loot chest: one random card added to your collection.')};
+b.special=[];if(b.id==='thornWarden'&&!state.iceGift){state.iceGift=true;const ice=make('glacial');state.pool.push(ice);b.special.push('Glacial Covenant: guaranteed Soulbound Ice card. The Elaris portal is now open!')}else if(b.id==='bloomTyrant'&&!state.stormGift){state.stormGift=true;state.pool.push(make('stormglass'));b.special.push('Stormglass Covenant: guaranteed Soulbound Lightning card. The Vespera portal is now open!')}else if(b.enemy.boss&&b.lootType!=='soulbound'&&Math.random()<.10){const soul=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(soul);b.special.push('Soulbound boss card: '+stat(soul).name)}
+// Mini-bosses (enemies[type].miniBoss) always drop an Upgrade Crystal on
+// defeat, on top of whatever their normal loot chest roll gave — true
+// bosses can only ever be defeated once each (state.bosses), so this is a
+// reliable one-time reward per mini-boss, never a farmable loop.
+if(b.enemy.boss&&enemies[b.id]&&enemies[b.id].miniBoss){setMaterials(materials()+1);b.special.push('Mini-boss defeated: guaranteed Upgrade Crystal! ('+materials()+' total)')}
+if(b.enemy.elite&&Math.random()<.08){const type=Object.keys(CRYSTALS)[Math.floor(Math.random()*3)],crystal=rollUpgradeCrystal(type);state.device.crystals.push(crystal);b.crystalDrop=crystal.uid;b.special.push(crystalLabel(crystal)+' crystal found! Slot it into the Aetherlink.')}b.levels=levels;b.logs.push(b.lootType==='soulbound'?'Loot chest: Soulbound card!':b.lootType==='potion'?'Loot chest: small healing potion.':b.lootType==='crystal'?'Loot chest: an Upgrade Crystal! ('+materials()+' total)':b.lootType==='empty'?'Loot chest: empty — '+b.thief+' bolted off with everything inside.':'Loot chest: one random card added to your collection.')};
 const baseLoseBattle=loseBattle;
 loseBattle=function(){const b=state.battle;baseLoseBattle();state.hp=state.maxHp;state.room=activeRegion!=='city'?'0,0':'1,1';state.pos={x:400,y:300};b.lastRegion=activeRegion;if(!active().length&&state.pool.length)state.deck=[state.pool[0].uid]};
 const baseRenderBattle=renderBattle;
