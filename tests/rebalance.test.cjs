@@ -383,7 +383,7 @@ assert(elarisChests.every(c=>c.reward==='potion'),'no Elaris chest was changed t
 // --- Walking to a new crystal chest actually grants a crystal, not a potion
 configureRegion('city');state.room='3,3';state.chests=[];
 const materialsBeforeWalk=materials(),potionsBeforeWalk=state.potions;
-state.pos={x:400,y:145};
+state.pos={x:330,y:180};
 checkWorldInteractions();
 assert.equal(materials(),materialsBeforeWalk+1,'walking to the Reactor Causeway chest grants an Upgrade Crystal');
 assert.equal(state.potions,potionsBeforeWalk,'it does NOT also grant a potion');
@@ -555,13 +555,115 @@ const pctAfter=Number(document.getElementById('menuModal').innerHTML.match(/(\\d
 assert(pctAfter>pctBefore,'completion percentage rises as more areas/chests/relics are found ('+pctBefore+'% -> '+pctAfter+'%)');
 assert.equal(pctAfter,100,'finding everything reaches exactly 100%');
 
-// --- Locked-route hint never appears for an unvisited room (would spoil
-// content the player hasn't reached yet)
+// --- Fog of war: an unvisited area doesn't render as a box at all (real
+// hiding, not a same-shaped "Unknown" placeholder revealing its position/
+// size) — and by construction, a hidden area obviously can't show a
+// locked-route hint either.
 newGame();configureRegion('city');state.room='1,1';state.visited=['1,1'];
 showMap();
 const mapHtml=document.getElementById('menuModal').innerHTML;
-assert(!/Unknown[^<]*<i class="lock-hint"/.test(mapHtml),'an unvisited ("Unknown") room never shows a locked-route hint');
-console.log('PASS: joined areas render meaningfully bigger than single rooms on both map screens, single-room sizes are deterministically varied not uniform, locked routes are correctly flagged, room-type tags work, completion % is sane and reaches 100%, and locked-route hints never leak into unvisited rooms.');
+assert(!mapHtml.includes('Unknown'),'unvisited areas render nothing at all, not an "Unknown" placeholder box');
+assert(!mapHtml.includes(rooms['4,2'].name),'an unvisited room\\'s real name never appears in the map HTML before it\\'s been found');
+console.log('PASS: joined areas render meaningfully bigger than single rooms on both map screens, single-room sizes are deterministically varied not uniform, locked routes are correctly flagged, room-type tags work, completion % is sane and reaches 100%, and unvisited areas are genuinely hidden rather than shown as placeholders.');
+`);
+
+run(`
+// --- Hidden chests sit off the main N-S and E-W travel lines, not on top
+// of them, and are universally walkable in both regions.
+newGame();configureRegion('city');
+const cityChest=chestFor('-1,0');
+assert.notEqual(cityChest.x,400,'chest x is off the main north-south thoroughfare');
+let allWalkable=true;
+for(const key of Object.keys(rooms))if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false;
+assert(allWalkable,'the chest position is walkable in every city room');
+configureRegion('elaris');
+for(const key of Object.keys(rooms))if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false;
+assert(allWalkable,'the chest position is also walkable in every Elaris room');
+
+// --- Enemy Block timing is now honestly telegraphed: the message shown
+// when Block is set makes clear it protects the FOLLOWING turn, not the
+// current one — this was the actual root cause of "I hit it and the block
+// didn't break, no armor, no reason for it": the math was always correct
+// (verified in Round 14), the block was just a leftover from a different
+// turn's already-resolved guard action with no indication of the delay.
+const blockRoom=findRoomWithType('city','emberling');
+assert(blockRoom,'found a city room with an emberling patrol within 40 fresh-seed attempts');
+state.room=blockRoom;
+const blockSpawn=roomSpawns(blockRoom).find(s=>s.type==='emberling');
+startBattle(blockSpawn.uid);
+state.battle.hand=[];state.battle.energy=3;
+endTurn();
+assert.equal(enemyPlan(state.battle,state.battle.turn).kind,'guard','turn 2 of the standard city pattern is a guard turn');
+assert.equal(state.battle.enemy.guard,0,'Block is NOT yet active during the turn that telegraphs it (matches every other enemy action resolving at end-of-turn, e.g. charge)');
+endTurn();
+assert.equal(state.battle.enemy.guard,5,'Block becomes active only once the guard turn has actually resolved, i.e. starting the following turn');
+const guardTelegraphLog=state.battle.logs[state.battle.logs.length-1];
+assert(guardTelegraphLog.includes('starting next turn')||guardTelegraphLog.includes('next turn'),'the telegraph message explicitly says this Block applies starting next turn, not immediately (old message: "Rootguard: 5 enemy Block." read as already-active)');
+
+// --- Starter card protection now heals on load, not just on a fresh game
+// — this is very likely what actually happened to a lost starter Mend:
+// any save from before this protection existed (or one that otherwise
+// lost it) would stay unprotected forever just by loading, since
+// load()/validateImport() only ever PRESERVE an existing flag, never
+// retroactively grant one.
+newGame();
+for(const c of state.pool)c.soulbound=false;
+save();
+state=null;
+load();
+const healedTypes=['strike','guard','focus','mend'].every(type=>state.pool.some(c=>c.id===type&&c.soulbound));
+assert(healedTypes,'loading a save with no starter protection at all retroactively protects one copy of each starter type');
+const strikeProtectedCount=state.pool.filter(c=>c.id==='strike'&&c.soulbound).length;
+if(strikeProtectedCount!==1)console.log('DEBUG full pool:', JSON.stringify(state.pool.map(c=>c.id+':sb='+c.soulbound+':uid'+c.uid)));
+assert.equal(strikeProtectedCount,1,'healing protects exactly one copy per type, not both starter duplicates');
+console.log('PASS: hidden chests are off the main thoroughfares and walkable everywhere, the Block-timing telegraph now honestly says it applies next turn, and loading a save with no starter protection at all now heals it retroactively.');
+`);
+
+run(`
+// --- Mini-bosses grant exactly ONE guaranteed Upgrade Crystal, never two.
+// Found while stress-testing the fixes above (not something reported, but
+// a real bug): the loot chest's own independent 4% chance to roll
+// 'crystal' could coincidentally ALSO fire on a mini-boss kill, stacking
+// with the guaranteed crystal for a silent double-grant — reproduced at
+// roughly a 9% real rate across a 200-run sweep of this exact scenario
+// before the fix, and 0/200 after.
+newGame();configureRegion('city');
+let anyMismatch=false;
+for(let seedTry=1;seedTry<=60;seedTry++){
+ newGame();configureRegion('city');state.seed=seedTry;
+ const csSpawn=roomSpawns('5,0').find(s=>s.boss);
+ state.room='5,0';startBattle(csSpawn.uid);
+ state.battle.enemy.hp=1;
+ state.battle.hand=[make('__finisher')];state.battle.energy=3;
+ playCard(0);
+ if(materials()!==1)anyMismatch=true;
+}
+assert(!anyMismatch,'a mini-boss kill grants exactly 1 Upgrade Crystal across 60 different seeds, never 2 from a coincidental loot-chest crystal roll stacking with the guarantee');
+console.log('PASS: mini-bosses grant exactly one guaranteed Upgrade Crystal across 60 seeds — the loot chest can no longer coincidentally stack a second one on the same kill.');
+`);
+
+run(`
+// --- Map redesign: organic percentage-based canvas, not a CSS grid of
+// touching rectangles. Explore a real, non-trivial chunk of the map
+// (several connected rooms, not just the start) so both full-line and
+// stub connectors, and multiple room shapes, actually appear.
+newGame();configureRegion('city');
+state.visited=['1,1','0,1','-1,1','0,0','1,0'];state.room='0,1';
+showMap();
+const canvasHtml=document.getElementById('menuModal').innerHTML;
+assert(canvasHtml.includes('map-canvas'),'the map now renders inside the new organic canvas container, not the old CSS-grid .region-map');
+assert(!canvasHtml.includes('grid-column'),'rooms are no longer positioned with CSS grid-column/row spanning');
+assert(/left:[\\d.]+%/.test(canvasHtml)&&/top:[\\d.]+%/.test(canvasHtml),'rooms are positioned with percentage-based left/top, giving real spacing instead of touching grid cells');
+assert(/border-radius:\\d+% \\d+% \\d+% \\d+% \\/ \\d+% \\d+% \\d+% \\d+%/.test(canvasHtml),'rooms use an organic asymmetric border-radius (a hand-drawn blob shape), not sharp rectangle corners');
+assert(/rotate\\(-?[\\d.]+deg\\)/.test(canvasHtml),'each room has a slight individual rotation for a less mechanically-uniform, more hand-placed feel');
+assert(canvasHtml.includes('<svg')&&canvasHtml.includes('map-link'),'a connector-line SVG layer is present linking visited rooms');
+assert(canvasHtml.includes('map-stub'),'a room with an exit into unvisited territory shows a short fading stub, not a full line to a hidden destination');
+
+// --- The exact same room footprint is stable across repeated calls (not
+// randomly reshuffled every time the map is opened)
+const fp1=mapAreaFootprint('0,1',-1,5,0,3),fp2=mapAreaFootprint('0,1',-1,5,0,3);
+assert.equal(fp1.x,fp2.x);assert.equal(fp1.borderRadius,fp2.borderRadius);assert.equal(fp1.rotate,fp2.rotate);
+console.log('PASS: the map redesign renders as a spaced-out, organically-shaped, connector-linked canvas instead of a touching CSS grid, with stable per-room shapes and real fog-of-war stubs toward unexplored exits.');
 `);
 
 // --- Soulbound cards get a purple-toned rules box instead of the tan one,

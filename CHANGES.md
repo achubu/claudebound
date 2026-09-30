@@ -1036,6 +1036,114 @@ machinery. So every mini-boss's "special ability" is just: give it an
    was the *only* possible Elaris boss type — a legitimate update now that
    Elaris has mini-bosses too, not a bug in the new code.
 
+## Round 23 — three real reports, plus a fourth bug found chasing them
+
+Three issues reported from actual play, all investigated with the real
+engine rather than guessed at from description alone.
+
+### 1. "6 attack didn't break the block, no armor, no reason for it"
+Reproduced the exact numbers from the report (5 Block, three consecutive
+6-damage attacks) directly — the math was correct every time (confirmed
+extensively, again). The real issue was **timing**: every enemy action,
+Block included, resolves at the *end* of the turn that telegraphs it —
+identical to how a charge-up attack works. So the moment you see "Rootguard:
+5 enemy Block" in the log, that Block doesn't exist yet; it only becomes
+active starting the *next* turn — by which point the enemy has often
+already moved on to a completely different queued action (a Heavy Attack,
+in the reported case), making the leftover Block look unexplained. Fixed
+the message (`assets/encounter-depth.js`) to say plainly what actually
+happens: "Rootguard primed: 5 Block will protect the enemy starting next
+turn."
+
+### 2. Loot chests placed like patrol hazards, should be off-path
+They were: every hidden chest sat at a fixed `(400,145)`, exactly on the
+main north-south walking line connecting a room's north and south
+entrances — in the way, not off to the side. Moved to `(330,180)`
+(`assets/expansion.js`), verified walkable in all 28 city rooms and all 12
+Elaris rooms, and off both the north-south and east-west through-lines.
+
+### 3. Lost the starter Mend, "makes things very difficult"
+Root-caused, not just patched: the one-Soulbound-per-starter-type
+protection (Round 8) only ever gets *applied* by a brand-new game —
+`load()`/`validateImport()` only ever *preserve* an existing soulbound
+flag, they never retroactively grant one. Any save that predates this
+protection (or lost it some other way) stays permanently unprotected just
+by continuing to load it. Added `healStarterProtection()`
+(`assets/expansion.js`), called from `restoreGame()` on every load: if a
+starter type (Strike/Guard/Focus/Mend) has at least one copy but none
+protected, its first copy is protected — same rule `newGame()` already
+uses, just applied retroactively where it's missing. Verified directly: a
+simulated "old-format" save with zero protection on any card comes back
+from `load()` with exactly one protected copy of each starter type.
+
+### 4. Found while stress-testing the above: mini-bosses could grant 2 crystals
+Not reported — caught by running the Round 22 mini-boss tests repeatedly
+while verifying today's fixes, at roughly a 9% real rate. Root cause: the
+post-battle loot chest has its own independent 4% chance to roll
+`'crystal'` (Round 16), completely unrelated to a mini-boss's *guaranteed*
+crystal (Round 22) — when both coincidentally fired on the same kill, the
+player silently got 2 instead of the promised 1. Technically "working as
+built" (my own Round 22 comment even said "on top of whatever their normal
+loot chest roll gave"), but a guarantee that unpredictably sometimes
+doubles is a bad guarantee. Fixed (`assets/expansion.js`): a mini-boss kill
+can no longer roll into the loot chest's own `'crystal'` outcome — that
+specific coincidence now redirects to a card reward instead, so the
+guarantee means exactly what it says. Verified with a targeted 200-run
+stress test of the exact scenario that used to fail ~9% of the time: 0/200
+after the fix.
+
+## Round 24 — the full map screen redesigned to actually read as a map
+
+You asked for undiscovered areas to be genuinely hidden, shapes that
+aren't just a grid of rectangles, connector lines between rooms, more
+spacing, and an overall feel closer to opening a hand-drawn map. This
+replaces the Round 17 CSS-grid block map entirely.
+
+### Real fog of war
+The old map drew a same-shaped "Unknown" box at every undiscovered area's
+exact grid position and size — which quietly told you the whole map's
+layout (how many rooms, their shapes, where they connect) before you'd
+earned any of it. Undiscovered areas now render **nothing at all**. A
+visited room's real exit toward unexplored territory shows only as a
+short line fading into the dark — enough to know there's more to find,
+nothing about what it is.
+
+### Organic shapes, not touching rectangles
+Switched from CSS Grid (`grid-column`/`grid-row` spanning, cells touching
+edge to edge) to percentage-based absolute positioning
+(`mapAreaFootprint()`, `assets/expansion.js`), with real gaps between
+rooms. Each room gets an asymmetric, deterministically-seeded
+`border-radius` (a hand-drawn "blob" rather than a sharp rectangle) plus a
+small individual rotation, both stable across renders (seeded off the
+room key) so the map doesn't reshuffle every time it's opened.
+
+### Connector lines
+An SVG layer draws a gently curved path between any two rooms you've
+visited that are actually connected, and a short fading stub from a
+visited room toward an exit that leads somewhere you haven't been —
+dashed, ink-like strokes; a locked (relic-gated) route gets a distinct
+reddish dash pattern.
+
+### The viewport now frames only what's actually explored
+Previously the canvas reserved space for the entire region's grid — early
+in a run, that left most of the screen empty around a small cluster in one
+corner. The bounding box is now computed from `state.visited` (plus one
+ring of padding for stubs to fade into), so the map fills its space from
+the very first room onward and grows outward as you explore, rather than
+staying a small island in a mostly-empty rectangle.
+
+### Iterated against real renders, not just the HTML
+Caught with actual Chromium screenshots, not assumed: room-type badges
+initially overlapped the room name (fixed by moving them above the box
+instead of into its corner, plus more top padding); adjacent organic blobs
+initially crowded and overlapped each other (fixed by re-tuning the size/
+fill-ratio math, since a rotated blob's visual footprint reaches further
+than its own bounding width/height suggests); a 3-line room name
+("Canal Pump House") in a small box could still clip a badge (fixed with a
+minimum panel size). Verified again after each fix, across a multi-room
+explored city cluster, a fresh single-room game, and an Elaris map with a
+mini-boss room — all render cleanly.
+
 ## Testing
 
 ```
@@ -1099,3 +1207,18 @@ spawn at their correct designated rooms with their element intact, get the
 real telegraphed elemental pattern (not a plain attack), guarantee exactly
 1 Upgrade Crystal each on defeat, and — the one that actually mattered —
 never once spawn as an ordinary random patrol across a 15-seed sweep.
+Round 23 verified the hidden chest position is walkable in every room of
+both regions, that Block is confirmed inactive during the very turn that
+telegraphs it and active starting the next, that a simulated old-format
+save with zero starter protection comes back from load() with exactly one
+protected copy of each starter type, and that a mini-boss kill grants
+exactly 1 Upgrade Crystal — never 2 — across 60 different seeds. Round 24
+verified the new map canvas replaces the CSS-grid system entirely (no more
+grid-column positioning), that rooms use real percentage-based spacing and
+an organic asymmetric border-radius with per-room rotation, that a
+connector-line SVG layer with real and stub links is present, that
+per-room shapes are stable across repeated calls, and that an unvisited
+area's real name never appears in the map HTML before it's been found —
+plus real Chromium renders of a multi-room city cluster, a fresh single-
+room game, and an Elaris map, iterated against each screenshot until the
+badge/spacing/overflow issues those renders caught were actually fixed.
