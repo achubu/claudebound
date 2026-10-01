@@ -2,15 +2,24 @@
 // Save coordinates stay local; joined areas share one continuous illustrated background.
 const JOINED_AREAS={
  vespera:[{name:'Stormglass Reach',art:'stormglass',cells:['0,0','1,0','0,1','1,1']}],
+ // Round 29: city rebuilt again to match the user's own hand-designed
+ // maze layout (a long main corridor with two looping branches to mini-
+ // bosses, not a simple spine). Crown Mainframe District is the only
+ // existing art district that found a clean 2x2 block in the new shape;
+ // Promenade Market has no matching slot this time and is parked for a
+ // future region rather than forced in somewhere that wouldn't fit its
+ // art calibration.
  city:[
-  {name:'Burnout Avenue · West Service Road',art:'burnout',cells:['-1,1','0,1']},
-  {name:'Promenade Market',art:'promenade',cells:['1,0','2,0']},
-  {name:'Foundry Quarter',art:'foundry',cells:['2,2','3,2','2,3','3,3']},
-  {name:'Crown Mainframe District',art:'mainframe',cells:['4,1','5,1','4,2','5,2']}
+  {name:'Crown Mainframe District',art:'mainframe',cells:['1,7','2,7','1,8','2,8']}
  ],
+ // Round 30: relocated into the new maze — both districts' art is
+ // percentage-based (not tied to specific coordinates), so only the cell
+ // adjacency needed preserving. Sunpetal Wilds (2-cell E/W pair) sits
+ // just past the start; Emerald Expanse (2x2 block) sits mid-path, near
+ // the secondary loop pocket.
  elaris:[
   {name:'Sunpetal Wilds',art:'sunpetal',cells:['1,0','2,0']},
-  {name:'Emerald Expanse',art:'emerald',cells:['1,1','2,1','1,2','2,2']}
+  {name:'Emerald Expanse',art:'emerald',cells:['5,4','6,4','5,5','6,5']}
  ]
 };
 function joinedArea(key=state.room){

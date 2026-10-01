@@ -6,6 +6,34 @@ const depthRules=rules;
 rules=function(c){return depthRules(c)+(stat(c).shock?' Disrupt: halve the next enemy attack. Exhaust.':'')};
 const depthMonsterArt=monsterArt;
 monsterArt=function(id){return id==='bloomTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="The Bloom Tyrant" style="background-image:url(assets/monsters/elaris/bloom-tyrant.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
+// Round 22 gave every boss an element (for the telegraphed elemental
+// strike + status effect), but all 4 mini-bosses still shared the exact
+// same 4-turn attack/charge/elemental/guard template, differing only in
+// which element colored their one signature hit — mechanically
+// indistinguishable from each other and from any ordinary elemental
+// enemy. Each boss now has its own real sequence: different length,
+// different cadence of attack/guard/heavy/charge/elemental, so two bosses
+// sharing an element (moonKnight/tidewardenElaris both water,
+// crownSentinel/galeSovereign both air) still feel nothing alike to
+// fight. bloomTyrant's own dual-element 6-turn cycle (below) predates
+// this table and already had real identity, so it's untouched.
+const BOSS_PATTERNS={
+ // Thorn Warden — the city's actual final boss: a slow, defensive wall
+ // that punishes patience with a heavy hit right before its own charge.
+ thornWarden:['guard','attack','heavy','guard','charge','elemental','attack'],
+ // Lunar Enforcer — an aggressive ambusher: minimal guard, back-to-back
+ // strikes bracketing its one burst, over quickly.
+ moonKnight:['attack','attack','charge','elemental','attack'],
+ // The Crown Sentinel — a patient marksman: charges early and often,
+ // guards to reset rather than trading blows.
+ crownSentinel:['charge','elemental','guard','attack','charge','elemental'],
+ // The Tidebound Warden — a tank, not an ambusher like its fellow water
+ // boss: guards on both sides of its burst instead of attacking into it.
+ tidewardenElaris:['guard','attack','charge','elemental','guard','attack'],
+ // The Gale Sovereign — a storm, not a marksman like its fellow air boss:
+ // back-to-back charges with a heavy hit wedged between them.
+ galeSovereign:['attack','charge','elemental','heavy','charge','elemental']
+};
 function enemyPlan(b=state.battle,turn=b?.turn){
  if(!b)return{kind:'attack',name:'Attack',damage:0,element:null};
  // Only the region's main boss cycles a fixed earth/air element on its own
@@ -16,7 +44,7 @@ function enemyPlan(b=state.battle,turn=b?.turn){
  // and status-effect special ability, with zero new AI code — this is how
  // the Round 22 mini-bosses get a real signature move each.
  const isBloomTyrant=b.id==='bloomTyrant',element=isBloomTyrant?(Math.floor((turn-1)/3)%2?'air':'earth'):b.enemy.element;
- const pattern=isBloomTyrant?['guard','charge','elemental','attack','charge','elemental']:element?['attack','charge','elemental','guard']:['attack','guard','heavy'];
+ const pattern=isBloomTyrant?['guard','charge','elemental','attack','charge','elemental']:BOSS_PATTERNS[b.id]||(element?['attack','charge','elemental','guard']:['attack','guard','heavy']);
  const kind=pattern[(turn-1)%pattern.length],enraged=b.enemy.boss&&b.enemy.hp<=b.enemy.maxHp/2;
  const base=Math.max(1,b.enemy.attack-(b.enemyDebuff||0))+(enraged?2:0);
  // Heavy hits scale from 1.5x near the region's start room up to 2.5x at its
