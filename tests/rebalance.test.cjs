@@ -7,7 +7,7 @@ run(fs.readFileSync(path.join(__dirname,'../assets/combined-rooms.js'),'utf8'));
 run(`
 // --- Armor reduces non-pierce damage, Pierce ignores it ---
 newGame();
-state.room='0,1';let spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
+state.room='2,1';let spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
 state.battle.enemy.armor=3;state.battle.enemy.hp=100;
 state.battle.hand=[make('strike')];state.battle.energy=3;playCard(0);
 assert.equal(state.battle.enemy.hp,100-Math.max(0,6-3),'armor reduces a non-pierce hit');
@@ -16,7 +16,7 @@ assert.equal(state.battle.enemy.hp,hpBeforeShatter-10,'Shatter Lance ignores arm
 state.battle=null;
 
 // --- Armor of 0 (or undefined, e.g. wildlife/boss) never reduces damage ---
-state.room='0,1';spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
+state.room='2,1';spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
 state.battle.enemy.armor=0;state.battle.enemy.hp=100;
 state.battle.hand=[make('strike')];state.battle.energy=3;playCard(0);
 assert.equal(state.battle.enemy.hp,94,'zero armor leaves damage untouched');
@@ -97,22 +97,25 @@ const materialsBefore=materials();forceRoll(.03);assert.equal(materials(),materi
 assert(typeof forceRoll(.15).thief==='string'&&forceRoll(.15).thief.length,'an empty chest names the animal that looted it');
 assert(!forceRoll(.15).reward,'an empty chest grants no card');
 
-// --- Enemy tiering by distance from the start room ---
+// --- Round 28: city enemy tiering is now true exclusive zones (8 of
+// them, one enemy type each, in escalating level order), not a cumulative
+// distance-based pool — so this checks zone exclusivity directly rather
+// than the old raw-BFS-distance thresholds, which don't mean anything
+// comparable on a spine that's nearly 3x longer than before.
 newGame();configureRegion('city');
-const dist=cityRoomDistances();
-const nearTypes=new Set(),farTypes=new Set();
+const zoneTypes={};
 for(const key of Object.keys(rooms)){
- const d=dist[key]||0;
- for(const s of roomSpawns(key)){
-  if(s.boss)continue; // designated boss slots are untouched by tiering
-  if(d<=1)nearTypes.add(s.type);
-  if(d>=4)farTypes.add(s.type);
- }
+ const z=rooms[key].zone;if(!z)continue;
+ for(const s of roomSpawns(key)){if(s.boss)continue;(zoneTypes[z]=zoneTypes[z]||new Set()).add(s.type)}
 }
-assert(nearTypes.size,'rooms adjacent to the start actually have patrols to sample');
-for(const t of nearTypes)assert(['emberling','thornling'].includes(t),'only the easiest enemies spawn right next to the start: got '+t);
-assert(farTypes.has('forgeBeast')||farTypes.has('crownEye')||farTypes.has('shade')||farTypes.has('cryptWisp'),'the far edge of the map offers the hardest non-boss enemies');
-assert(!farTypes.has('emberling')&&!farTypes.has('thornling'),'the easiest enemies no longer spawn at the far edge of the map');
+for(let z=1;z<=8;z++)assert(zoneTypes[z]&&zoneTypes[z].size===1&&zoneTypes[z].has(CITY_ZONE_ENEMY[z-1]),'zone '+z+' spawns exactly its own enemy type ('+CITY_ZONE_ENEMY[z-1]+'), got: '+JSON.stringify([...(zoneTypes[z]||[])]));
+// Round 29: rebuilt again to match the user's hand-designed maze (42
+// rooms) — room keys and the exact level distribution shifted again, so
+// these reference the real zone 1 / zone 8 / boss rooms in that layout.
+assert.equal(enemyLevel('1,5'),1,'zone 1 rooms report level 1');
+assert.equal(enemyLevel('9,4'),8,'zone 8 rooms report level 8');
+assert.equal(enemyLevel('10,6'),9,'the Thorn Warden\\'s room reports level 9, above every regular zone');
+assert(enemyLevel('9,4')>enemyLevel('1,5'),'enemy level genuinely rises as you progress across the map');
 
 // --- Talent tree balance: no dead ranks (every point spent does something) ---
 newGame();
@@ -127,7 +130,7 @@ state.talents={capacitor:0};assert.equal(maxEnergy(),3);state.talents={capacitor
 // --- Every branch now has a working once-per-encounter capstone ---
 assert(TALENT_BRANCHES.disruption.nodes.some(n=>n.id==='overload'),'Disruption has a capstone node (previously it had none)');
 newGame();state.talents={weakenCore:1,jammer:2,quickdraw:2,capacitor:1,overload:1};
-state.room='0,1';const s3=roomSpawns(state.room)[0];startBattle(s3.uid);
+state.room='2,1';const s3=roomSpawns(state.room)[0];startBattle(s3.uid);
 state.battle.overloadArmed=true;
 state.battle.hand=[make('strike')];state.battle.energy=0; // 0 energy: a normal play would be blocked
 const enemyHpBefore=state.battle.enemy.hp;
@@ -144,7 +147,7 @@ assert(Math.max(...Object.values(totals))-Math.min(...Object.values(totals))<=4,
 
 // --- Elite spawn chance now scales with distance instead of a flat 22% everywhere ---
 newGame();configureRegion('city');
-assert(regionDistanceFrac('0,1')<regionDistanceFrac('4,2'),'distance fraction is higher near the map edge than near the start');
+assert(regionDistanceFrac('1,5')<regionDistanceFrac('10,6'),'distance fraction is higher near the map edge than near the start');
 // deterministic large-sample check of the actual elite rate by distance band
 function eliteRateAt(minD,maxD,samples){
  let elite=0,total=0;
@@ -158,7 +161,10 @@ function eliteRateAt(minD,maxD,samples){
  }
  return elite/total;
 }
-const eliteNear=eliteRateAt(0,1,300),eliteFar=eliteRateAt(4,5,300);
+// Far range shifted from 4-5 to 6-7: the Round 26 city's max distance is
+// now 7 (was 6), so the proportionally-far band moved with it.
+// Far range shifted again: Round 29's maze has max distance 12 (was 7).
+const eliteNear=eliteRateAt(0,1,300),eliteFar=eliteRateAt(10,12,300);
 assert(eliteNear<0.15,'elites should be rare near the start (got '+(eliteNear*100).toFixed(1)+'%)');
 assert(eliteFar>0.25,'elites should be common near the map edge (got '+(eliteFar*100).toFixed(1)+'%)');
 assert(eliteFar>eliteNear*2,'elite rate should be meaningfully higher far from the start than near it');
@@ -171,10 +177,16 @@ assert(eliteFar>eliteNear*2,'elite rate should be meaningfully higher far from t
 // distance fraction. These expected values were re-verified against the
 // live graph rather than just bumped to make the assertion pass.
 newGame();configureRegion('city');
-assert.equal(areaPatrolCount('0,1'),1,'distance-1 single room: base density');
-assert.equal(areaPatrolCount('0,0'),1,'distance-2 single room, frac 0.33: below the 0.35 two-patrol threshold now that the map is one room wider');
-assert.equal(areaPatrolCount('4,0'),2,'distance-4 single room, frac 0.67: below the 0.7 three-patrol threshold for the same reason');
-assert.equal(areaPatrolCount('5,3'),3,'the new farthest room (dist 6, frac 1.0) is now the one that sits at the 3-patrol ceiling');
+// Recalculated against the Round 26 linear-spine city (12 rooms, max
+// distance 7 — down from the old 28-room open grid's max of 6), not just
+// re-keyed: the actual distance/frac of every room changed along with the
+// topology, so these values were re-verified from the live graph rather
+// than assumed to still hold.
+// Round 29: recalculated against the user's hand-designed 42-room maze
+// (max distance 12, not 7) — verified from the live graph, not assumed.
+assert.equal(areaPatrolCount('1,5'),1,'distance-1 single room (frac 0.083): base density');
+assert.equal(areaPatrolCount('2,2'),2,'distance-5 single room (frac 0.417): above the 0.35 two-patrol threshold');
+assert.equal(areaPatrolCount('9,4'),3,'the farthest single room (frac 1.0) sits at the 3-patrol ceiling');
 // joined-area math must be completely unaffected (still capped, still summing correctly)
 for(const group of JOINED_AREAS.city){
  let total=0;for(const key of group.cells)total+=roomSpawns(key).length;
@@ -198,7 +210,12 @@ function avgElarisHpAt(dist,samples){
  }
  return sum/n;
 }
-const nearAvg=avgElarisHpAt(1,50),farAvg=avgElarisHpAt(5,50);
+// Round 30: sampled at distance 18, not 4 — the new 30-room maze has a
+// real max distance of 19 (via the new BFS-based regionDistance, not the
+// old x+y shortcut), so distance 4 is barely past the start, nowhere near
+// "far." Distance 19 itself is bloomTyrant's room exclusively (no non-
+// boss spawn there), so 18 is the farthest sampleable distance.
+const nearAvg=avgElarisHpAt(1,50),farAvg=avgElarisHpAt(18,50);
 assert(farAvg>nearAvg*1.2,'Elaris enemies near the region edge/boss should average meaningfully tougher than near the entry portal (near avg='+nearAvg.toFixed(1)+', far avg='+farAvg.toFixed(1)+')');
 
 // --- Heavy-hit multiplier scales with distance from the city's start room ---
@@ -215,7 +232,7 @@ const battleStub={turn:3,enemy:{attack:10,element:null},enemyDebuff:0};
 // stale again the next time the map grows.
 const trueEdgeRoom=Object.keys(rooms).find(k=>regionDistanceFrac(k)===1);
 assert(trueEdgeRoom,'some room is actually at the map edge (frac 1.0)');
-state.room='0,1';const nearHeavy=enemyPlan(battleStub,3).damage;
+state.room='1,5';const nearHeavy=enemyPlan(battleStub,3).damage;
 state.room=trueEdgeRoom;const farHeavy=enemyPlan(battleStub,3).damage;
 assert(farHeavy>nearHeavy,'a heavy hit does more damage far from the start than near it, same base attack (near='+nearHeavy+' far='+farHeavy+')');
 assert(nearHeavy<=Math.round(10*1.7),'near the start, the heavy-hit multiplier stays close to its original 1.5x (got '+nearHeavy+')');
@@ -226,7 +243,7 @@ assert.equal(farHeavy,Math.round(10*2.5),'at the actual map edge ('+trueEdgeRoom
 // ones a player could easily miss (this is the actual fix for "my attack
 // cards aren't registering correct damage" — the math was always right,
 // it just wasn't shown anywhere).
-newGame();state.room='0,1';const s4=roomSpawns(state.room)[0];startBattle(s4.uid);
+newGame();state.room='2,1';const s4=roomSpawns(state.room)[0];startBattle(s4.uid);
 state.battle.enemy.armor=3;state.battle.enemy.hp=100;
 state.battle.hand=[make('strike')];state.battle.energy=3;
 playCard(0);
@@ -340,7 +357,7 @@ run(`
 // Block 0" shown as noise every turn so the real value was easy to miss)
 // and the log split it into two disconnected lines. Fixed all three.
 newGame();
-state.room='0,1';const s5=roomSpawns(state.room).filter(x=>!x.boss)[0];startBattle(s5.uid);
+state.room='2,1';const s5=roomSpawns(state.room).filter(x=>!x.boss)[0];startBattle(s5.uid);
 state.battle.enemy.armor=0;state.battle.enemy.guard=4;state.battle.enemy.hp=100;
 renderBattle();
 const enemyPanelHtml=document.getElementById('battleModal').innerHTML;
@@ -355,7 +372,7 @@ assert.equal(blockLogLine,'Test Big Hit · 14 damage − 4 block = 10 dealt','th
 // --- "Enemy Block 0" no longer prints as noise every turn (was easy to
 // tune out, making the real nonzero value easy to miss)
 newGame();
-state.room='0,1';const s6=roomSpawns(state.room).filter(x=>!x.boss)[0];startBattle(s6.uid);
+state.room='2,1';const s6=roomSpawns(state.room).filter(x=>!x.boss)[0];startBattle(s6.uid);
 state.battle.enemy.guard=0;
 renderBattle();
 const noGuardHtml=document.getElementById('battleModal').innerHTML;
@@ -364,32 +381,53 @@ console.log('PASS: Enemy Block math confirmed correct, combined into one clear l
 `);
 
 run(`
-// --- 2 new hidden crystal chests exist on the city map, alongside the 4
-// existing potion caches (previously the map had exactly ONE Upgrade
-// Crystal source ever, at Memory Annex's relic — a hard ceiling on card
-// leveling for the whole rest of a run).
+// --- Every hidden chest in both regions now lives specifically in a
+// mini-boss branch room — genuinely optional and off the mandatory path,
+// not scattered along the route you can't avoid (the old city chests had
+// 4 of 6 sitting right on the required spine, which isn't "off the path"
+// at all). Scarcer too: city went 6->2, Elaris 3->2.
 newGame();configureRegion('city');
 const cityChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
-assert.equal(cityChests.length,6,'city has 6 hidden chests total (was 4)');
-assert.equal(cityChests.filter(c=>c.reward==='crystal').length,2,'exactly 2 of them grant an Upgrade Crystal');
-assert.equal(cityChests.filter(c=>c.reward==='potion').length,4,'the original 4 potion caches are untouched');
-assert(chestFor('3,3')&&chestFor('3,3').reward==='crystal','Reactor Causeway is a new crystal chest');
-assert(chestFor('4,3')&&chestFor('4,3').reward==='crystal','Lastlight Shelter is a new crystal chest');
+assert.equal(cityChests.length,2,'city has exactly 2 hidden chests, both in mini-boss branches');
+assert(cityChests.every(c=>c.reward==='crystal'),'both city chests grant an Upgrade Crystal');
+// Round 29: the user's hand-designed maze has real loops, not a single
+// spine, so "off the path" is checked structurally here instead of
+// against a hardcoded room list — a chest room is only genuinely optional
+// if it's a mini-boss's own room (a dead-end you choose to detour into),
+// not the start or any room on the main through-corridor.
+assert(chestFor('2,9')&&chestFor('2,9').reward==='crystal','the Lunar Enforcer\\'s room is a crystal chest');
+assert(chestFor('4,0')&&chestFor('4,0').reward==='crystal','the Crown Sentinel\\'s room is a crystal chest');
+const cityChestKeys=Object.keys(rooms).filter(k=>chestFor(k));
+assert(cityChestKeys.every(k=>rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss),'every city chest sits specifically in a boss room (a real optional detour), not a through-route room');
+assert(!chestFor('0,5'),'no chest sits in the start room');
 configureRegion('elaris');
 const elarisChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
-assert.equal(elarisChests.length,3,'Elaris still has its original 3 potion caches, untouched');
-assert(elarisChests.every(c=>c.reward==='potion'),'no Elaris chest was changed to a crystal reward');
+assert.equal(elarisChests.length,2,'Elaris has exactly 2 hidden chests, both in mini-boss branches');
+assert(elarisChests.every(c=>c.reward==='potion'),'both Elaris chests grant a potion');
+const elarisSpineRooms=['0,0','1,0','2,0','2,1','1,1','1,2','2,2','3,2'];
+assert(elarisSpineRooms.every(k=>!chestFor(k)),'no chest sits on the mandatory Elaris spine');
 
-// --- Walking to a new crystal chest actually grants a crystal, not a potion
-configureRegion('city');state.room='3,3';state.chests=[];
-const materialsBeforeWalk=materials(),potionsBeforeWalk=state.potions;
+// --- Round 31: a crystal chest now requires defeating the room's boss
+// first -- walking up to it before the fight is won no longer collects
+// it. Walking to it afterward grants a crystal, not a potion.
+configureRegion('city');state.room='2,9';state.chests=[];state.bosses=state.bosses.filter(id=>id!=='moonKnight');
+const materialsBeforeFight=materials();
 state.pos={x:330,y:180};
 checkWorldInteractions();
-assert.equal(materials(),materialsBeforeWalk+1,'walking to the Reactor Causeway chest grants an Upgrade Crystal');
+assert.equal(materials(),materialsBeforeFight,'the chest does NOT open while the room\\'s boss is still alive');
+assert(!state.chests.includes('city:2,9'),'an uncollected, boss-guarded chest is not marked collected just by walking near it');
+defs.__finisher=defs.__finisher||{name:'Finisher',cost:1,kind:'Attack',icon:'X',tiers:[{damage:99},{damage:99},{damage:99},{damage:99}]};
+const bossSpawn=roomSpawns('2,9').find(s=>s.boss);startBattle(bossSpawn.uid);
+state.battle.enemy.hp=1;state.battle.hand=[make('__finisher')];state.battle.energy=3;playCard(0);
+assert(state.bosses.includes('moonKnight'),'the boss is now defeated');
+finishBattle();state.battle=null; // checkWorldInteractions() bails immediately while a battle (even the reward screen) is active
+const materialsBeforeWalk=materials(),potionsBeforeWalk=state.potions;
+checkWorldInteractions();
+assert.equal(materials(),materialsBeforeWalk+1,'walking to the Lunar Enforcer\\'s room chest now grants an Upgrade Crystal, boss defeated');
 assert.equal(state.potions,potionsBeforeWalk,'it does NOT also grant a potion');
-assert(state.chests.includes('city:3,3'),'the chest is marked collected so it cannot be farmed repeatedly');
+assert(state.chests.includes('city:2,9'),'the chest is marked collected so it cannot be farmed repeatedly');
 
-console.log('PASS: 2 new hidden Upgrade Crystal chests added to the city map, existing potion caches untouched, and the new crystal chest actually grants a crystal (not a potion) when collected.');
+console.log('PASS: both regions\\' chests are scarce (2 each), live exclusively in mini-boss branch rooms, never sit on the mandatory spine, a crystal chest is locked until that room\\'s boss is actually defeated, and once unlocked grants a crystal (not a potion) when collected.');
 `);
 
 run(`
@@ -417,7 +455,10 @@ for(const key of Object.keys(rooms)){
   if(count<=2&&nearest<118)unsafeCount1or2++;
  }
 }
-assert(checked>20,'actually checked a meaningful number of real patrol spawns ('+checked+')');
+// Threshold lowered from 20: the Round 26 city shrank from 28 to 12 rooms
+// (a true linear spine has far fewer rooms than an open grid by design),
+// so there are fewer total patrol spawns to check across both regions.
+assert(checked>10,'actually checked a meaningful number of real patrol spawns ('+checked+')');
 assert.equal(unsafeCount1or2,0,'every 1-2-patrol room (the common case) keeps all patrol home sectors outside the ~118px entry danger zone');
 
 // --- The rare 3-patrol case is a known, documented, geometry-forced
@@ -443,13 +484,13 @@ assert.equal(enemies.crownSentinel.element,'air','crownSentinel has its own sign
 assert(enemies.moonKnight.miniBoss&&enemies.moonKnight.element==='water','moonKnight (Lunar Enforcer) is now a flagged mini-boss with its own element');
 newGame();configureRegion('city');
 assert(Object.keys(rooms).some(k=>rooms[k].enemy&&rooms[k].enemy[0]==='crownSentinel'),'crownSentinel is actually placed in a room');
-const csSpawn=roomSpawns('5,0').find(s=>s.boss);
+const csSpawn=roomSpawns('4,0').find(s=>s.boss);
 assert(csSpawn&&csSpawn.type==='crownSentinel'&&csSpawn.element==='air','crownSentinel spawns correctly with its element intact (regression: element used to be hardcoded null for any city enemy)');
-state.room='5,0';startBattle(csSpawn.uid);
+state.room='4,0';startBattle(csSpawn.uid);
 assert.equal(state.battle.enemy.element,'air','the element actually reaches the live battle state');
-const csPlan3=enemyPlan(state.battle,3);
-assert.equal(csPlan3.kind,'elemental','turn 3 of a 4-turn elemental pattern is the signature charged strike, not the plain city attack/guard/heavy cycle');
-assert(csPlan3.damage>enemies.crownSentinel.attack,'the signature elemental strike hits harder than a plain attack (1.8x multiplier)');
+const csElementalTurn=[1,2,3,4,5,6].map(t=>enemyPlan(state.battle,t)).find(p=>p.kind==='elemental');
+assert(csElementalTurn,'crownSentinel\\'s own pattern includes a signature elemental strike somewhere in its cycle, not the plain city attack/guard/heavy cycle');
+assert(csElementalTurn.damage>enemies.crownSentinel.attack,'the signature elemental strike hits harder than a plain attack (1.8x multiplier)');
 const materialsBeforeBoss=materials();
 state.battle.enemy.hp=1;
 defs.__finisher={name:'Finisher',cost:1,kind:'Attack',icon:'X',tiers:[{damage:99},{damage:99},{damage:99},{damage:99}]};
@@ -462,7 +503,7 @@ assert(state.bosses.includes('crownSentinel'),'crownSentinel is tracked as perma
 // --- Regression: ordinary (non-boss) city enemies are unaffected by the
 // element-passthrough fix — they still correctly have no element.
 newGame();configureRegion('city');
-const plainSpawn=roomSpawns('0,1').find(s=>!s.boss);
+const plainSpawn=roomSpawns('2,1').find(s=>!s.boss);
 assert(plainSpawn&&plainSpawn.element===null,'a plain city patrol still has no element (only enemies that define one, like the new mini-bosses, do now)');
 console.log('PASS: both city mini-bosses (Lunar Enforcer, The Crown Sentinel) reuse existing sprites, have a distinct signature elemental ability via the existing pattern system, guarantee exactly one Upgrade Crystal on defeat, and ordinary patrols are unaffected.');
 `);
@@ -478,12 +519,12 @@ assert(enemies.galeSovereign&&enemies.galeSovereign.boss&&enemies.galeSovereign.
 assert.equal(enemies.tidewardenElaris.sheet,'drowned-heron','Tidebound Warden reuses the existing Drowned Heron sprite sheet rather than needing new art');
 assert.equal(enemies.galeSovereign.sheet,'storm-moth','Gale Sovereign reuses the existing Storm Moth sprite sheet');
 newGame();configureRegion('elaris');
-const twSpawn=roomSpawns('3,1').find(s=>s.boss),gsSpawn=roomSpawns('2,2').find(s=>s.boss);
+const twSpawn=roomSpawns('0,2').find(s=>s.boss),gsSpawn=roomSpawns('10,6').find(s=>s.boss);
 assert(twSpawn&&twSpawn.type==='tidewardenElaris'&&twSpawn.element==='water','Tidebound Warden spawns correctly at its designated room with its element intact');
 assert(gsSpawn&&gsSpawn.type==='galeSovereign'&&gsSpawn.element==='air','Gale Sovereign spawns correctly at its designated room');
-state.room='3,1';startBattle(twSpawn.uid);
-const twPlan3=enemyPlan(state.battle,3);
-assert.equal(twPlan3.kind,'elemental','Tidebound Warden gets the real telegraphed elemental pattern, not a plain wildlife attack');
+state.room='0,2';startBattle(twSpawn.uid);
+const twElementalTurn=[1,2,3,4,5,6].map(t=>enemyPlan(state.battle,t)).find(p=>p.kind==='elemental');
+assert(twElementalTurn,'Tidebound Warden\\'s own pattern includes a signature elemental strike somewhere in its cycle, not a plain wildlife attack');
 const elarisMaterialsPre=materials();
 state.battle.enemy.hp=1;
 state.battle.hand=[make('__finisher')];state.battle.energy=3;
@@ -514,32 +555,40 @@ run(`
 // full map screen.
 newGame();configureRegion('city');
 const w=126,h=82;
-const singleBox=roomFootprint('-1,0',w,h,9); // Emergency Clinic: unjoined single room
-const joined4Box=roomFootprint('4,1',w,h,9); // Crown Mainframe District: real 4-cell joined area
+const singleBox=roomFootprint('1,5',w,h,9); // Scrapfire Alley: unjoined single room
+const joined4Box=roomFootprint('1,7',w,h,9); // Crown Mainframe District: real 4-cell joined area
 assert(joined4Box.width>singleBox.width*1.5,'a real 4-cell joined area is meaningfully wider than a single room ('+joined4Box.width.toFixed(1)+' vs '+singleBox.width.toFixed(1)+')');
 assert(joined4Box.height>singleBox.height*1.5,'a real 4-cell joined area is meaningfully taller than a single room');
 
 // --- Single unjoined rooms still get some deterministic size variation
 // (not all identical), and it's stable across repeated calls (same key ->
 // same size every time, not randomly reshuffling on every render).
-const sizes=['0,1','1,0','2,1','-1,1','3,3'].map(k=>roomFootprint(k,w,h,9).width);
+const sizes=['2,1','1,5','3,1','4,0','2,2'].map(k=>roomFootprint(k,w,h,9).width);
 assert(new Set(sizes.map(s=>s.toFixed(2))).size>1,'unjoined single rooms are not all rendered at exactly the same width');
-assert.equal(roomFootprint('0,1',w,h,9).width,roomFootprint('0,1',w,h,9).width,'the same room key always produces the same footprint (deterministic, not re-randomized every render)');
+assert.equal(roomFootprint('2,1',w,h,9).width,roomFootprint('2,1',w,h,9).width,'the same room key always produces the same footprint (deterministic, not re-randomized every render)');
 
 // --- graphLinks: no line drawn between two cells inside the same joined
-// area (they're now one box), and a genuinely relic-gated, not-yet-open
-// route is marked locked.
+// area (they're now one box). Round 26 removed every relic-gated exit from
+// the city (a true linear spine doesn't need gates to prevent shortcuts),
+// so the locked-route rendering is exercised directly with a synthetic
+// gate rather than depending on the live map happening to have one.
+const _origNExit2=rooms['2,1'].exits.n;
+rooms['2,1'].exits.n={to:'9,4',requires:'__testRelic'}; // 9,4 isn't otherwise connected to 2,1, so this doesn't collide with graphLinks' existing-link dedup
 const links=graphLinks(w,h,9,true);
-assert(!links.includes('locked')===false || links.includes('locked'),'graphLinks runs without throwing');
-assert(links.includes('locked'),'at least one currently-sealed relic-gated route is marked locked on a fresh run with no relics');
+assert(links.includes('locked'),'a synthetic sealed route is correctly marked locked when no relics are held');
+if(_origNExit2===undefined)delete rooms['2,1'].exits.n;else rooms['2,1'].exits.n=_origNExit2; // restore exactly what was there before
 
 // --- roomTag correctly identifies special room types used for map badges
-assert.equal(roomTag('1,1').label,'Safe','the starting safe room is tagged Safe');
+assert.equal(roomTag('0,5').label,'Safe','the starting safe room is tagged Safe');
 const bossKey=Object.keys(rooms).find(k=>rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss&&rooms[k].enemy[0]==='thornWarden');
 assert(bossKey&&roomTag(bossKey).label==='Boss','the Thorn Warden room is tagged Boss');
-const relicKey=Object.keys(rooms).find(k=>rooms[k].relic&&rooms[k].relic[0]==='ember');
-assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic is tagged Relic');
-state.relics=['ember'];
+// 'boots' specifically, not 'ember'/'lens' — those two now live in the
+// mini-boss branch rooms (Round 26), where roomTag()'s Boss check takes
+// precedence over Relic regardless of collection state, so a boss room
+// with an uncollected relic still correctly shows "Boss", not "Relic".
+const relicKey=Object.keys(rooms).find(k=>rooms[k].relic&&rooms[k].relic[0]==='boots');
+assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic (and no boss) is tagged Relic');
+state.relics=['boots'];
 assert.notEqual(roomTag(relicKey)&&roomTag(relicKey).label,'Relic','once the relic is collected it is no longer tagged as an available Relic');
 
 // --- Completion percentage is sane and only increases as things are found
@@ -559,11 +608,11 @@ assert.equal(pctAfter,100,'finding everything reaches exactly 100%');
 // hiding, not a same-shaped "Unknown" placeholder revealing its position/
 // size) — and by construction, a hidden area obviously can't show a
 // locked-route hint either.
-newGame();configureRegion('city');state.room='1,1';state.visited=['1,1'];
+newGame();configureRegion('city');state.room='0,5';state.visited=['0,5'];
 showMap();
 const mapHtml=document.getElementById('menuModal').innerHTML;
 assert(!mapHtml.includes('Unknown'),'unvisited areas render nothing at all, not an "Unknown" placeholder box');
-assert(!mapHtml.includes(rooms['4,2'].name),'an unvisited room\\'s real name never appears in the map HTML before it\\'s been found');
+assert(!mapHtml.includes(rooms['9,8'].name),'an unvisited room\\'s real name never appears in the map HTML before it\\'s been found');
 console.log('PASS: joined areas render meaningfully bigger than single rooms on both map screens, single-room sizes are deterministically varied not uniform, locked routes are correctly flagged, room-type tags work, completion % is sane and reaches 100%, and unvisited areas are genuinely hidden rather than shown as placeholders.');
 `);
 
@@ -571,7 +620,7 @@ run(`
 // --- Hidden chests sit off the main N-S and E-W travel lines, not on top
 // of them, and are universally walkable in both regions.
 newGame();configureRegion('city');
-const cityChest=chestFor('-1,0');
+const cityChest=chestFor('2,9');
 assert.notEqual(cityChest.x,400,'chest x is off the main north-south thoroughfare');
 let allWalkable=true;
 for(const key of Object.keys(rooms))if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false;
@@ -631,8 +680,8 @@ newGame();configureRegion('city');
 let anyMismatch=false;
 for(let seedTry=1;seedTry<=60;seedTry++){
  newGame();configureRegion('city');state.seed=seedTry;
- const csSpawn=roomSpawns('5,0').find(s=>s.boss);
- state.room='5,0';startBattle(csSpawn.uid);
+ const csSpawn=roomSpawns('4,0').find(s=>s.boss);
+ state.room='4,0';startBattle(csSpawn.uid);
  state.battle.enemy.hp=1;
  state.battle.hand=[make('__finisher')];state.battle.energy=3;
  playCard(0);
@@ -648,22 +697,59 @@ run(`
 // (several connected rooms, not just the start) so both full-line and
 // stub connectors, and multiple room shapes, actually appear.
 newGame();configureRegion('city');
-state.visited=['1,1','0,1','-1,1','0,0','1,0'];state.room='0,1';
+state.visited=['0,5','1,5','1,4','1,6','1,3'];state.room='1,5';
 showMap();
 const canvasHtml=document.getElementById('menuModal').innerHTML;
-assert(canvasHtml.includes('map-canvas'),'the map now renders inside the new organic canvas container, not the old CSS-grid .region-map');
+assert(canvasHtml.includes('map-canvas'),'the map renders inside the new canvas container, not the old CSS-grid .region-map');
 assert(!canvasHtml.includes('grid-column'),'rooms are no longer positioned with CSS grid-column/row spanning');
 assert(/left:[\\d.]+%/.test(canvasHtml)&&/top:[\\d.]+%/.test(canvasHtml),'rooms are positioned with percentage-based left/top, giving real spacing instead of touching grid cells');
-assert(/border-radius:\\d+% \\d+% \\d+% \\d+% \\/ \\d+% \\d+% \\d+% \\d+%/.test(canvasHtml),'rooms use an organic asymmetric border-radius (a hand-drawn blob shape), not sharp rectangle corners');
-assert(/rotate\\(-?[\\d.]+deg\\)/.test(canvasHtml),'each room has a slight individual rotation for a less mechanically-uniform, more hand-placed feel');
+assert(!/border-radius:\\d/.test(canvasHtml)&&!/rotate\\(/.test(canvasHtml),'rooms are plain rectangles again (no per-room organic border-radius or rotation) — reverted per explicit feedback, keeping only the spacing/connector-line parts of the redesign');
 assert(canvasHtml.includes('<svg')&&canvasHtml.includes('map-link'),'a connector-line SVG layer is present linking visited rooms');
 assert(canvasHtml.includes('map-stub'),'a room with an exit into unvisited territory shows a short fading stub, not a full line to a hidden destination');
 
+// --- Room size still reflects real footprint (a joined area still draws
+// meaningfully bigger than a single room) even as a plain rectangle — the
+// "based on room size" sizing logic was explicitly kept, only the organic
+// shape/rotation was reverted.
+const singleFp=mapAreaFootprint('1,5',0,10,0,9),joinedFp=mapAreaFootprint('1,7',0,10,0,9);
+assert(joinedFp.width>singleFp.width*1.3,'a real joined area still renders a meaningfully wider rectangle than a single room');
+
 // --- The exact same room footprint is stable across repeated calls (not
 // randomly reshuffled every time the map is opened)
-const fp1=mapAreaFootprint('0,1',-1,5,0,3),fp2=mapAreaFootprint('0,1',-1,5,0,3);
-assert.equal(fp1.x,fp2.x);assert.equal(fp1.borderRadius,fp2.borderRadius);assert.equal(fp1.rotate,fp2.rotate);
-console.log('PASS: the map redesign renders as a spaced-out, organically-shaped, connector-linked canvas instead of a touching CSS grid, with stable per-room shapes and real fog-of-war stubs toward unexplored exits.');
+const fp1=mapAreaFootprint('2,1',0,10,0,9),fp2=mapAreaFootprint('2,1',0,10,0,9);
+assert.equal(fp1.x,fp2.x);assert.equal(fp1.width,fp2.width);
+console.log('PASS: the map redesign keeps the spaced-out percentage-based canvas and connector lines, renders rooms as plain rectangles sized by real room footprint (organic blob shape/rotation reverted per feedback), and fog-of-war stubs toward unexplored exits still work.');
+`);
+
+run(`
+// --- Every boss now has its own real move sequence, not one of two
+// generic shared templates. Round 22 gave every boss an element, but all
+// 4 mini-bosses still shared one identical 4-turn attack/charge/elemental/
+// guard pattern, and the city's own final boss (thornWarden) had no
+// pattern at all — mechanically identical to a plain patrol. Verify all 6
+// are now genuinely different sequences.
+const bossIds=['thornWarden','moonKnight','crownSentinel','tidewardenElaris','galeSovereign','bloomTyrant'];
+const stubBattle={id:null,enemy:{hp:100,maxHp:100,attack:10,boss:true,element:null},enemyDebuff:0,exposed:0};
+const sequences={};
+for(const id of bossIds){
+ stubBattle.id=id;stubBattle.enemy.element=enemies[id].element||null;stubBattle.enemy.attack=enemies[id].attack;
+ const seq=[];
+ for(let t=1;t<=7;t++)seq.push(enemyPlan(stubBattle,t).kind);
+ sequences[id]=seq.join('>');
+}
+const uniqueSequences=new Set(Object.values(sequences));
+assert.equal(uniqueSequences.size,bossIds.length,'all 6 bosses have a genuinely distinct move sequence, not shared templates — got: '+JSON.stringify(sequences));
+assert.equal(enemies.thornWarden.element,'earth','the city\\'s own final boss now has an element and a real pattern, not the plain attack/guard/heavy cycle every regular patrol uses');
+newGame();configureRegion('city');
+const twSeq=[1,2,3,4,5,6].map(t=>enemyPlan({id:'thornWarden',enemy:{hp:100,maxHp:100,attack:14,element:'earth',boss:true},enemyDebuff:0,exposed:0},t).kind);
+assert(twSeq.includes('elemental')&&twSeq.includes('heavy')&&twSeq.includes('guard'),'thornWarden\\'s pattern genuinely mixes multiple move types (attack/guard/heavy/charge/elemental), not just one template');
+
+// --- Two bosses sharing an element (moonKnight+tidewardenElaris both
+// water; crownSentinel+galeSovereign both air) still have different
+// patterns from each other — the actual point of this whole change.
+assert.notEqual(sequences.moonKnight,sequences.tidewardenElaris,'the two water bosses have different patterns from each other, not just different names on the same template');
+assert.notEqual(sequences.crownSentinel,sequences.galeSovereign,'the two air bosses have different patterns from each other, not just different names on the same template');
+console.log('PASS: all 6 bosses (including the city\\'s own final boss, which previously had no unique pattern at all) now have genuinely distinct move sequences, including the two pairs that share an element.');
 `);
 
 // --- Soulbound cards get a purple-toned rules box instead of the tan one,
@@ -683,3 +769,48 @@ assert(!expansionSrc.includes('secret-chest')&&!combinedRoomsSrc.includes('secre
 assert(expansionSrc.includes('map-chest')&&combinedRoomsSrc.includes('map-chest'),'both render call sites use the new .map-chest class');
 assert(/\.map-chest\{[^}]*loot-chest\.png/.test(expansionSrc),'.map-chest is styled with the actual loot-chest.png graphic, not just a renamed glyph');
 
+run(`
+// --- Round 30: the minimap used to reuse the full map's whole-region
+// layout math at a tiny widget size — fine for a 12-room spine, illegible
+// once a region grew past ~20 rooms (boxes shrink/overlap as the region
+// grows, and it never actually showed "nearby" info despite the label,
+// just the whole map shrunk down). Verify the fix holds: the local
+// neighborhood is genuinely bounded regardless of total region size, and
+// never grows unbounded as more of the map is explored.
+newGame();configureRegion('city');
+state.visited=['0,5','1,5','1,4','1,6','1,3','3,1','2,1'];state.room='1,5';
+const localSmall=localMapNodes(state.room,2);
+assert(localSmall.length<Object.keys(rooms).length,'the local neighborhood is a genuine subset of the region, not the whole map');
+assert(localSmall.length<=15,'a depth-2 local neighborhood stays small even in a 42-room region (got '+localSmall.length+')');
+assert(localSmall.includes(state.room),'the current room is always included in its own local neighborhood');
+// Exploring further (more rooms visited) must never change what counts as
+// "nearby" — only the player's actual position should.
+state.visited=Object.keys(rooms);
+const localAfterFullExplore=localMapNodes(state.room,2);
+assert.equal(localAfterFullExplore.length,localSmall.length,'the local neighborhood size depends only on position, not how much of the map has been explored');
+renderMinimap();
+const minimapHtml=document.getElementById('minimap').innerHTML;
+const cellCount=(minimapHtml.match(/mini-cell/g)||[]).length;
+assert.equal(cellCount,localSmall.length,'renderMinimap() actually renders the local subset, not the full region');
+assert(minimapHtml.includes('mini-cell current'),'the current room is visually marked');
+assert(minimapHtml.includes('NEARBY'),'the minimap is honestly labeled as a local/nearby view, not an overall-progress view');
+assert(/[0-9]+.[0-9]+/.test(minimapHtml),'the overall discovered/total count is still shown alongside the local view');
+console.log('PASS: the minimap renders a genuinely bounded local neighborhood around the player (not the whole region shrunk down), stays small regardless of total map size, and is honestly labeled.');
+`);
+// --- Round 31: chests were visibly "walking" back and forth in-game
+// every 2.4s. Root cause: .map-chest's glow animation set transform:
+// scale(1.04) at its 50% keyframe, which REPLACES the whole transform
+// property rather than combining with it -- so the base translate(-50%,
+// -50%) centering offset was lost for that instant, snapping the chest
+// roughly half its own width/height away before snapping back, over and
+// over. Fixed by giving .map-chest its own animation that keeps the
+// translate chained through every keyframe. Checked against the actual
+// CSS text the game injects, not a hand-copied snippet -- this would
+// have caught the real bug.
+{
+const liveCss=expansionSrc.match(/style\.textContent='(.*?)';document\.head\.append/s)[1];
+assert(!/\.map-chest\{[^}]*animation:chestGlow[^a-zA-Z]/.test(liveCss),'.map-chest no longer shares the plain chestGlow animation (which has no translate to preserve)');
+assert(/\.map-chest\{[^}]*animation:mapChestGlow/.test(liveCss),'.map-chest uses its own dedicated animation');
+assert(/@keyframes mapChestGlow\{50%\{[^}]*translate\(-50%,-50%\)/.test(liveCss),'the animated keyframe keeps translate(-50%,-50%) chained with the scale, so the chest never loses its centering offset mid-animation');
+console.log('PASS: the chest-jumping bug (transform replaced, not combined, mid-animation) is fixed and the live CSS is checked directly so this can\'t silently regress.');
+}

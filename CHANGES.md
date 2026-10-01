@@ -1144,6 +1144,432 @@ minimum panel size). Verified again after each fix, across a multi-room
 explored city cluster, a fresh single-room game, and an Elaris map with a
 mini-boss room — all render cleanly.
 
+## Round 25 — map shape reverted to rectangles, and real per-boss move patterns
+
+### Map: kept the spacing and connector lines, reverted the organic shapes
+You liked the Round 24 spacing and connector lines but not the hand-drawn
+blob shapes. Reverted `mapAreaFootprint()` and the panel CSS
+(`assets/expansion.js`) to plain rectangles (a small consistent 6px
+corner radius, matching the rest of the UI) — removed the per-room
+asymmetric border-radius and rotation entirely. Room size is still based
+on real footprint (a joined area still draws meaningfully wider than a
+single room), and everything else from Round 24 — percentage-based
+spacing, the SVG connector lines, fog-of-war hiding of undiscovered areas
+— is untouched.
+
+### Every boss now has its own real move sequence
+You asked whether bosses each play through their own small set of moves —
+checked directly and found the honest answer was no: all 4 mini-bosses
+shared one identical 4-turn template (differing only by which element
+colored their one signature hit), and the city's own final boss,
+`thornWarden`, had no element or special pattern at all — mechanically
+identical to an ordinary patrol, just with bigger numbers.
+
+Added a `BOSS_PATTERNS` lookup (`assets/encounter-depth.js`) giving each
+boss its own sequence built from the existing move types
+(attack/guard/heavy/charge/elemental), each with a distinct cadence and
+identity:
+
+| Boss | Pattern | Identity |
+|---|---|---|
+| Thorn Warden (city final boss) | guard→attack→heavy→guard→charge→elemental→attack | slow defensive wall, punishes patience |
+| Lunar Enforcer | attack→attack→charge→elemental→attack | aggressive ambusher, minimal guard |
+| The Crown Sentinel | charge→elemental→guard→attack→charge→elemental | patient marksman, charges often |
+| The Tidebound Warden | guard→attack→charge→elemental→guard→attack | tank, guards both sides of its burst |
+| The Gale Sovereign | attack→charge→elemental→heavy→charge→elemental | storm, back-to-back charges |
+| The Bloom Tyrant | *(unchanged — already had a real 6-turn dual-element cycle)* | |
+
+Gave `thornWarden` an element (`earth`, fitting its bramble/root theme) so
+its pattern's charge/elemental turns actually have something to key off
+of. Verified directly: all 6 sequences are genuinely distinct from each
+other, and critically, the two pairs that share an element (the two water
+bosses, the two air bosses) still play nothing alike — which was the
+actual point.
+
+## Round 26 (part 1) — City rebuilt as a linear spine with branching mini-boss detours
+
+You asked for the map to become a true left-to-right linear progression
+instead of an open world — divergent paths to the mini-bosses that find
+their way back to the main path and the final boss, applied to every
+world. This is genuinely the largest structural change in the project so
+far, since it touches the actual room graph (not just visuals) plus every
+system that places content in it. Doing all three worlds at once risked a
+rushed, undercooked result across too many interconnected systems, so
+City is being shipped first as a complete, fully-tested foundation; Elaris
+and Vespera (which also still needs its entire boss roster built from
+Round 22's unfinished scope) are next.
+
+### The new structure (12 rooms, down from 28)
+```
+Afterlight Refuge (START) → Central Interchange → Promenade Market (joined)
+  → Skyrail Approach ─┬→ Signal Observatory (direct)
+                       └→ Vault Station [Lunar Enforcer + Ember Sigil + crystal chest] → rejoins ahead
+  → Signal Observatory ─┬→ Crown Mainframe District (direct)
+                         └→ Skybridge Relay [Crown Sentinel + Moon Lens + crystal chest] → rejoins ahead
+  → Crown Mainframe District (joined) → Warden Mainframe = FINAL BOSS (Thorn Warden)
+```
+
+Both mini-boss branches are genuine diverge-and-reconverge detours —
+bidirectional going in, one-way on the rejoin, so taking the branch is
+optional but never a shortcut back the wrong way. The two existing hand-
+painted joined districts (Promenade Market, Crown Mainframe District) were
+kept exactly as they were and the spine was built to run straight through
+them, since their art is calibrated to that specific cell adjacency and
+can't be safely reshuffled. The relic-gate system (`requires: 'ember'`
+etc.) was removed entirely — a true linear spine doesn't need gates to
+prevent shortcuts, and keeping them would have created a chicken-and-egg
+problem (a gate blocking the very branch where its own key is found).
+Relics are now standalone rewards for exploring the branches instead.
+
+### A real latent bug found and fixed along the way
+`configure()` (`assets/environment/neon-city.js`) assumed every entry in
+its `places` lookup had a matching room and would have crashed on any
+future room removal. Added a safety guard rather than just avoiding the
+issue this time.
+
+### Fixing the test suite: real work, not mechanical find-replace
+16 rooms were removed, and five different test files had accumulated
+hardcoded references to specific rooms across every previous round —
+fixing this took real care, not blind substitution:
+- One fix I almost got wrong: a chest-test line looked like it needed a
+  City-specific room, but tracing the actual execution order showed it
+  runs *after* a portal travel to Elaris, so the original room reference
+  was already correct — "fixing" it would have broken something that
+  wasn't broken.
+- Two tests needed a *synthetic* relic-gated exit constructed on the fly
+  to keep testing the underlying lock mechanism, since City no longer has
+  a real one — and both needed the temporary exit properly restored
+  afterward (not just deleted), since later tests in the same shared
+  process depend on that connection being real.
+- One movement test turned out to be specifically exercising
+  `joinedExit()`'s seamless continuous-coordinate transition (for moving
+  between two cells of the same joined area) — a different mechanic from
+  a standard room-to-room transition. The replacement rooms had to also be
+  a real joined pair, not just any adjacent rooom, or the test would
+  silently verify the wrong thing.
+- Several distance/patrol/elite-rate thresholds were recalculated against
+  the new graph's actual values (verified from the live engine) rather
+  than assumed to still hold — the new spine's max distance is 7, not 6,
+  so every distance-fraction-dependent expectation shifted slightly.
+
+All 8 test files pass, and the new map was verified with a real Chromium
+render of the fully-explored city: the spine reads clearly left to right,
+both branches visibly diverge from the spine and reconverge into Crown
+Mainframe District, and both boss rooms are flagged.
+
+## Round 26 (part 2) — Elaris rebuilt the same way
+
+Continuing the map restructure. Elaris gets the same linear-spine
+treatment as City, with one added wrinkle: its rooms were previously
+*programmatically generated* (a plain 4×3 loop in `configureRegion()`),
+not hand-authored — a non-uniform spine-with-branches topology doesn't fit
+a generic grid loop, so it's now hand-authored too, matching City.
+
+### The new structure (same 12 rooms, none removed — just reconnected)
+```
+Dawnroot Landing (START) → Sunpetal Wilds (joined)
+  → Emerald Expanse (joined) → Elderbloom Sanctuary = FINAL BOSS (Bloom Tyrant)
+
+Branch A: Sunpetal Wilds → Jade River → Sapphire Falls [Tidebound Warden]
+  → rejoins directly into the boss room
+Branch B: Dawnroot Landing → Fernveil Grove → Canopy Cathedral [Gale Sovereign]
+  → rejoins into Emerald Expanse
+```
+
+Unlike City, no rooms needed removing here — all 12 already had enough
+flavor and existing connections to reshape into a clean spine + 2
+branches just by redirecting exits and relocating the two mini-bosses
+(Gale Sovereign moved from Mistfall Basin, which is now a required spine
+room inside Emerald Expanse, to its own dedicated branch room, Canopy
+Cathedral — a boss living inside a room you're required to pass through
+anyway isn't a real branch). Both existing hand-painted joined districts
+(Sunpetal Wilds, Emerald Expanse) were kept with their original internal
+adjacency, same as City's districts — only their *external* connections
+were pruned or redirected to remove shortcuts. Bloom Tyrant stays at its
+existing room key, since that key is tied directly to the
+Vespera-portal-unlock logic elsewhere.
+
+### Much smaller test fallout than City's
+Because no room keys were deleted (just reconnected and one boss
+relocated), only 2 fixes were needed across all 8 test files: one hardcoded
+reference to Gale Sovereign's old room, and one genuine flake this exposed
+— a different test file relied on a single random rule to find a specific
+Elaris enemy type with no retry, which the changed spawn distribution made
+just likely enough to fail (confirmed genuinely flaky before the fix:
+2 failures in 5 runs; 0 in 8 after, using the same retry-across-seeds
+pattern already established in Round 20).
+
+Verified with a real Chromium render of the fully-explored Elaris map:
+same left-to-right spine, both branches visibly diverging and
+reconverging — one straight into the boss room, one into the joined
+district — exactly matching City's pattern.
+
+## Round 27 (part 1) — map line accuracy, boss room exclusivity, chest scarcity
+
+Three concrete fixes from your feedback, applied to both City and Elaris
+immediately since they're universal, not tied to a specific region's
+layout. The bigger asks from the same message — an enemy level system
+with on-screen display, and substantially expanding the map so each
+section is dominated by one enemy type in escalating difficulty "waves"
+— are large enough to need their own dedicated pass; this is the
+well-scoped part shipped now.
+
+### 1. Map connections are now straight, not wavy
+The connector-line SVG was drawing every link as a slightly curved path
+(a deliberate "hand-drawn" touch from Round 24) — which could make two
+rooms sitting directly next to each other look like they connected at a
+diagonal. Removed the curve entirely (`assets/expansion.js`): lines are
+now a plain straight segment between room centers, so cardinally-aligned
+rooms connect with a clean horizontal/vertical line, and only genuinely
+diagonal room pairs (like a branch's rejoin point) show an angled one —
+because that's their real spatial relationship, not an artistic flourish.
+
+### 2. Mini-bosses (and the main boss) now have their room to themselves
+Checked directly and found a real bug: `3,1` (Lunar Enforcer) also had a
+random Data Wisp patrol, and `5,0` (Crown Sentinel) had two Phase Shades
+— the distance-based patrol-density formula was still populating boss
+rooms with ordinary enemies alongside the boss. Fixed in `roomSpawns()`:
+any room flagged as a boss room (mini or main, in either region) now gets
+exactly one spawn — the boss, nothing else.
+
+### 3. Chests are scarce and actually off the path now
+Checked city's chest rooms against the mandatory spine and found 4 of 6
+sitting directly on it — you'd pass them no matter what, which isn't "off
+the path" in any real sense, and Elaris's chests were in the same
+position (all 3 on the spine or in the boss room itself). Every chest in
+both regions now lives specifically in a mini-boss branch room — city
+keeps its 2 Upgrade Crystal chests (already correctly placed, from Round
+26), Elaris's chests move from the spine into its 2 branch rooms. Both
+regions go from a mix of spine/branch chests down to exactly 2, both
+genuinely optional, both in a stable location that reaching the mini-boss
+already requires finding — nothing for this to need to move again.
+
+Verified with a real Chromium render of the fully-explored city: the
+lines read as true straight connections, both boss rooms are flagged red
+with no other enemy present, and the chest count correctly reads 0/2.
+
+## Round 29 — City rebuilt to match your hand-designed maze, plus a real enemy-level system
+
+You provided an exact map layout (Excel grid, confirmed via both the
+image and text versions matching) — a true maze with loops, not the
+simpler spine-with-branches shape from Round 28. This replaces that
+layout entirely.
+
+### The map, parsed and verified programmatically
+Rather than hand-transcribing a 42-room grid (high risk of a silent
+misread), the grid was parsed into exact (row, col) cells and run through
+a real BFS: 42 cells, 46 edges, zero unreachable rooms, 5 genuine loops
+(a tree with 42 nodes would have exactly 41 edges — 46 confirms the
+branches really do loop back with multiple paths, matching what the
+layout shows). The two mini-bosses sit at distance 6 and 9 from the
+start; the main boss at distance 11, at the end of the long corridor —
+same relative positioning as your drawing.
+
+### A real bug caught by the test suite, not by inspection
+The first level-bucketing formula silently produced **zero rooms at
+level 1** — meaning the easiest enemy could never actually appear
+anywhere on the 42-room map. This wasn't visible by eye; it only
+surfaced because a retry-based test (`findRoomWithType`, 40 fresh-seed
+attempts) still came back empty. Traced to the exact rounding error,
+fixed, and verified all 8 levels are populated before moving on
+(distribution: L1:1, L2:5, L3:4, L4:8, L5:8, L6:5, L7:8, L8:2 rooms).
+
+### Enemy level: a real stat driver, not just a label
+`enemyLevel(key)` is now the single source of truth for both the number
+shown next to an enemy's name in battle and their actual HP/attack
+scaling — city previously had **zero** distance-based scaling at all
+(hardcoded to a 0 multiplier), relying purely on which species showed up.
+Level is shown in the battle UI next to the enemy's name, color-coded
+against the player's own level (green = ready, amber = close, red = go
+level up first) via a new `levelColor()` helper.
+
+### Zone-exclusive enemy types — real "waves," not a cumulative pool
+`cityTierTypes()` was rewritten from a cumulative distance-pool (where
+3-4 enemy types could all appear in the same room) to a strict per-room
+`zone` field — each of the 8 zones spawns exactly one enemy type, so
+reaching a new zone means a real "wave" of a new, tougher enemy, not a
+random mix diluted with easier types you've already outgrown.
+
+### Everything art-dependent re-anchored, not rebuilt
+The one existing joined-art district with a compatible 2×2 block in the
+new shape (Crown Mainframe District) was kept — its percentage-based art
+calibration doesn't care about room coordinates, only cell adjacency, so
+only the `JOINED_AREAS` cell list needed updating. The other existing
+district (Promenade Market) had no matching slot in this layout and was
+parked for a future region rather than forced in somewhere it wouldn't
+fit.
+
+### Also fixed along the way
+- `portalTarget()` hardcoded the *previous* boss room as the City-to-
+  Elaris portal trigger — would have silently broken region transitions
+  after the boss moved. Caught and fixed before it shipped.
+- `configure()`'s safety guard (added in Round 26) paid off directly this
+  round — no crashes from the `places`/`rooms` key mismatches that
+  happened naturally mid-rebuild.
+- Straightened out the map's connector lines (no more artificial curve
+  that could make adjacent rooms look diagonally connected) and made
+  mini-boss/main-boss rooms spawn-exclusive (no stray extra patrols
+  sharing a boss's room) — both carried over cleanly to the new layout
+  with no extra work, since they're generic fixes.
+
+### Test suite: extensive, deliberate repair — not mechanical find-replace
+Two full rounds of test breakage (first from the zone/level system, then
+again from the complete room-graph replacement) were worked through
+methodically against real engine output, not assumption:
+- Recalculated every distance-fraction-dependent threshold (patrol
+  density, elite rate, heavy-hit scaling) against the new graph's actual
+  BFS distances (max distance 12), verified from the live engine each
+  time rather than estimated.
+- Caught and fixed a test helper that pointed a synthetic locked-gate
+  target at a room already connected to its source by a different path —
+  `graphLinks()`'s own link-deduplication was silently swallowing the
+  synthetic locked link, not a bug in the game.
+- Rebuilt the map-render and footprint tests with real connected room
+  clusters from the new graph, not just swapped individual keys.
+
+All 8 test files verified clean across 4 full consecutive runs (32/32),
+and the final maze was confirmed with a real Chromium render of the
+fully-explored map against your original layout: the long corridor to
+the main boss, both looping mini-boss branches, and the interconnected
+right-side cluster all match.
+
+## Round 30 — Elaris rebuilt as its own fresh maze, plus a real minimap bug fix
+
+### Elaris: same concept as City's maze, a genuinely different shape
+Not a reskin of City's layout — a diagonal/zigzag main corridor (not a
+long horizontal one), with an early branch (west of the start, looping
+down to the Tidebound Warden) and a late branch (looping through the
+Gale Sovereign near the end), plus a small secondary loop pocket
+mid-path. Built and verified the same disciplined way as City: cells
+defined explicitly, then run through a real BFS before any game code was
+written — 30 rooms, 39 edges (10 more than a tree needs, confirming real
+loops), zero unreachable cells. Elaris only has 4 wildlife types (vs.
+City's 8), so each spans 2 of the 8 zone levels; levels continue from
+where City's left off (9-18) rather than restarting at 1, since the
+player should be meaningfully stronger by the time they reach this
+region. Both existing hand-painted Elaris districts (Sunpetal Wilds,
+Emerald Expanse) were relocated into real adjacent/2×2 blocks in the new
+shape.
+
+### Two real bugs found and fixed, not just stale key cleanup
+- `regionMaxDistance('elaris')` was **hardcoded to 5** this entire time —
+  never made dynamic like City's. Worse, `regionDistance` used a raw
+  `x+y` coordinate-sum as a distance approximation, which is exact on a
+  plain grid but is just wrong once the region becomes a real maze with
+  loops (confirmed directly: the old shortcut gave a near/far difficulty
+  sample that wasn't meaningfully different at all). Generalized City's
+  proper BFS distance function to work for any region with a frozen room
+  snapshot, added the equivalent `ELARIS_ROOMS` snapshot, and verified
+  the fix directly against live engine output.
+- Every hardcoded reference to Bloom Tyrant's old room key (`'3,2'`) —
+  `roomSpawns()`'s boss-detection checks, both directions of
+  `portalTarget()` — was found and updated alongside the room data, not
+  left stale like a near-miss earlier this session almost left City's
+  portal.
+- A touch-movement test's failure led to catching a design-constraint
+  mismatch: it expected crossing between two specific rooms, which only
+  worked in the *old* maze because those rooms happened to sit inside a
+  joined art district (continuous-coordinate movement, not a normal
+  per-room transition). Traced with the real engine rather than guessed,
+  then pointed the test at the actual joined-area cells in the new maze.
+
+### Minimap bug fix (reported directly, with a screenshot)
+The inline minimap was reusing the full map screen's whole-region layout
+math at a tiny 126×82px widget size — fine for a 12-room spine, illegible
+once a region grew past ~20 rooms (every box shrinks and overlaps as the
+map grows). It also never delivered on "limited information about your
+surroundings" from earlier in this session — it was always the whole
+region, just shrunk down, not actually scoped to nearby rooms.
+Rewritten (`localMapNodes()` + a new `renderMinimap()`) to compute a
+genuine local neighborhood — BFS 2 steps out from the player's actual
+room via real exits — and lay out only that subset, so box size no
+longer degrades as the map grows, regardless of total region size. The
+overall discovered/total count is still shown in the header for
+big-picture progress; only the visual grid itself is now local. A
+regression test was added confirming the local neighborhood stays small
+and constant regardless of how much of the map has been explored (it
+depends only on position, never on exploration progress).
+
+All 8 test files verified clean across 3 consecutive full runs (24/24),
+plus real Chromium renders of both the fully-explored Elaris maze
+(confirming the shape, both boss branches, and both art districts) and
+the fixed minimap widget (confirming legible, properly-sized, correctly
+color-coded boxes against the originally-reported broken state).
+
+## Round 31 — the actual chest-movement bug
+
+Earlier rounds treated "chests keep moving" as meta feedback about me
+relocating their *room* placement across successive map rebuilds, and
+fixed that (down to 2 per region, both off the mandatory path). That
+wasn't what this was about — chests were visibly oscillating back and
+forth on screen, in real time, like a patrolling enemy.
+
+### Root cause: a CSS animation replacing transform instead of combining it
+`.map-chest` centers itself with a base `transform: translate(-50%,
+-50%)`. Its glow animation's 50% keyframe set `transform: scale(1.04)` —
+in CSS, an animated `transform` **replaces** the property entirely for
+that keyframe rather than stacking with the base value. So twice every
+2.4-second cycle, the chest lost its centering offset, snapped about half
+its own width/height away, then snapped back — a repeating back-and-forth
+jump, exactly like a patrol AI.
+
+Verified the exact magnitude directly (isolated CSS test, sampled the
+real rendered position across the full animation cycle via Chromium):
+the old rule jumped the chest roughly 22px diagonally and back every
+cycle; a hand-copied snippet wasn't used for this, since the earlier
+chest.x/chest.y investigation showed those values are static — the bug
+had to be in rendering, not placement, so the actual injected CSS text
+was pulled and tested as-is.
+
+### Fix
+Gave `.map-chest` its own dedicated `mapChestGlow` animation that keeps
+`translate(-50%, -50%)` chained through every keyframe, so centering
+survives the whole cycle. `.loot-chest-graphic` (the reward-screen
+chest, which has no base transform to lose) keeps the original shared
+`chestGlow` animation unchanged — only the one affected rule was touched.
+
+Re-verified after the fix with the same method: position now stays
+within 1px across the full cycle, with only the intended size-pulse
+(46→48→46px) remaining.
+
+### Regression test
+Added a check against the actual live CSS the game injects (not a
+hand-copied snippet, which would defeat the purpose) — confirms
+`.map-chest` no longer shares the plain animation and that its own
+keyframe keeps the translate chained with the scale.
+
+## Round 32 — crystal chests now require defeating the nearby boss
+
+### New requirement: defeat the boss before the chest opens
+An Upgrade Crystal chest sits in the same room as a mini-boss by design,
+but you could previously just walk past the fight and loot it. Fixed in
+`checkWorldInteractions()`: a crystal-reward chest now checks whether the
+room's boss is in `state.bosses` (actually defeated) before allowing
+collection — walking into it beforehand shows a toast naming the boss to
+beat, with no state change. Elaris's potion chests are unaffected; this
+is specifically about crystal rewards, which are the ones placed next to
+a boss.
+
+### Verified enemy level display is already complete, not just assumed
+Before touching anything, checked directly whether every enemy category
+in both regions (regular patrol, elite, mini-boss, main boss, city and
+Elaris) actually carries and renders a level: traced real battle starts
+down to the actual injected HTML (`<h2>Ember Jackal <span class=
+"enemy-level"... >Lv.1</span></h2>`), not just the underlying data. It
+was already correct everywhere — no changes needed there; Vespera is the
+only region still missing this, same as everything else about it.
+
+### Test coverage
+Extended the chest test to cover the actual sequence: walk up before the
+fight (blocked, no crystal, not marked collected), defeat the boss for
+real (the actual `startBattle`/`playCard`/`finishBattle` flow, not just
+flipping a flag), then walk up again (now grants the crystal). Caught
+and fixed two of my own mistakes while writing it: used a test-only
+finishing card (`__finisher`) before its definition existed yet in file
+order, and missed that `checkWorldInteractions()` bails out immediately
+while a battle is still open on its reward screen — both found by
+running the test and tracing the actual failure, not by assumption.
+
 ## Testing
 
 ```
@@ -1222,3 +1648,22 @@ area's real name never appears in the map HTML before it's been found —
 plus real Chromium renders of a multi-room city cluster, a fresh single-
 room game, and an Elaris map, iterated against each screenshot until the
 badge/spacing/overflow issues those renders caught were actually fixed.
+Round 25 verified the map still sizes rooms by real footprint as plain
+rectangles (no organic radius/rotation remaining) with spacing and
+connector lines intact, and that all 6 bosses now have genuinely distinct
+move sequences — including confirming the two same-element boss pairs
+don't just share a reskinned template. Round 26 verified all 8 test files
+pass against the rebuilt city graph, with every affected threshold
+recalculated (not just re-keyed) against the new topology's real values,
+plus a real Chromium render of the fully-explored city confirming the
+spine reads left to right with both branches visibly diverging and
+reconverging into the final district. Round 26 part 2 verified all 8 test
+files pass against the rebuilt Elaris graph, confirmed the same flaky-
+random-roll class of bug from Round 20 was genuinely reproducing (2/5
+runs) before fixing it the same way (0/8 after), and a real Chromium
+render of the fully-explored Elaris map confirming the same spine-plus-
+branches structure as City. Round 27 part 1 verified every boss room (mini
+or main, both regions) spawns exactly the boss and nothing else, that no
+chest sits on either region's mandatory spine, and confirmed with a real
+Chromium render that connector lines are genuinely straight between
+cardinally-aligned rooms.

@@ -3,7 +3,7 @@ const {run}=require('./expansion.test.cjs');
 run(`
 newGame();
 state.talents.powerCore=1;
-state.room='0,1';let spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
+state.room='2,1';let spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
 state.battle.enemy.armor=0;
 let strike=owned(state.deck.find(id=>owned(id).id==='strike')),strikeUid=strike.uid;
 state.battle.boostedUids=[strikeUid];
@@ -17,9 +17,27 @@ state.battle.hand=[{...owned(strikeUid)}];state.battle.energy=3;playCard(0);
 assert.equal(state.battle.enemy.hp,enemyHp-14,'later uses in the same encounter stay boosted');
 state.battle=null;
 
-configureRegion('city');state.room=Object.keys(rooms).find(key=>roomSpawns(key).some(s=>s.type==='emberling'));spawn=roomSpawns(state.room).find(s=>s.type==='emberling');startBattle(spawn.uid);
+// A single random roll isn't guaranteed to place a specific enemy type
+// anywhere in the region on every seed — retries across fresh seeds
+// instead of trusting one roll (this exact class of flake was root-caused
+// and fixed the same way in Round 20; this file just hadn't needed the
+// same treatment until the Elaris restructure changed the odds enough to
+// surface it here too).
+function findRoomWithType(region,type,tries=40){
+ for(let attempt=0;attempt<tries;attempt++){
+  newGame();configureRegion(region);
+  const found=Object.keys(rooms).find(key=>roomSpawns(key).some(s=>s.type===type));
+  if(found)return found;
+ }
+ return null;
+}
+const cityRoom=findRoomWithType('city','emberling');
+assert(cityRoom,'found a city room with an emberling patrol within 40 fresh-seed attempts');
+state.room=cityRoom;spawn=roomSpawns(cityRoom).find(s=>s.type==='emberling');startBattle(spawn.uid);
 const cityHp=state.battle.enemy.hp,cityAttack=state.battle.enemy.attack;state.battle=null;
-configureRegion('elaris');state.room=Object.keys(rooms).find(key=>roomSpawns(key).some(s=>s.type==='blightAntler'));spawn=roomSpawns(state.room).find(s=>s.type==='blightAntler');startBattle(spawn.uid);
+const elarisRoom=findRoomWithType('elaris','blightAntler');
+assert(elarisRoom,'found an Elaris room with a blightAntler patrol within 40 fresh-seed attempts');
+state.room=elarisRoom;spawn=roomSpawns(elarisRoom).find(s=>s.type==='blightAntler');startBattle(spawn.uid);
 assert(state.battle.enemy.hp>cityHp,'Elaris enemies have more health');
 assert(state.battle.enemy.attack>cityAttack,'Elaris enemies hit harder');
 

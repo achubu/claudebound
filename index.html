@@ -59,38 +59,52 @@
 const SAVE_KEY='cardbound-integrated-v2',MATERIAL_KEY='cardbound-upgrade-materials-v2',MIN_DECK=4,BASE_MAX_DECK=6,USES=50,$=id=>document.getElementById(id);
 const dirs={n:{dx:0,dy:-1,op:'s'},s:{dx:0,dy:1,op:'n'},e:{dx:1,dy:0,op:'w'},w:{dx:-1,dy:0,op:'e'}};
 const rooms={
- '1,1':{name:'Meadowrest',theme:'canopy',colors:['#2b8b7f','#0b2730','#4a7d6e'],exits:{w:'0,1',e:'2,1',n:'1,0'}},
- '0,1':{name:'Ember Hollow',theme:'ember',colors:['#c84f3d','#37182b','#8c4d35'],exits:{e:'1,1',w:'-1,1',n:'0,0'},enemy:['emberling',250,255],relic:['ember','Ember Sigil','✹',585,150]},
- '-1,1':{name:'Gearwood Verge',theme:'canopy',colors:['#36866e','#102c31','#5b7656'],exits:{e:'0,1',n:'-1,0',s:'-1,2'},enemy:['thornling',520,245]},
- '-1,0':{name:'Boiler Gardens',theme:'forge',colors:['#bd713b','#30252a','#88633d'],exits:{s:'-1,1',e:'0,0'}},
- '0,0':{name:'Glasswind Rise',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{w:'-1,0',s:'0,1',e:'1,0'},enemy:['cryptWisp',430,215]},
- '1,0':{name:'Whispering Canopy',theme:'canopy',colors:['#42a95c','#12333a','#4e8e59'],exits:{w:'0,0',s:'1,1',e:'2,0'},enemy:['thornling',545,310]},
- '2,0':{name:'Thorn Gallery',theme:'canopy',colors:['#75a943','#213326','#71834c'],exits:{w:'1,0',s:'2,1',e:'3,0'},enemy:['vineguard',390,245],relic:['boots','Briarstep Boots','♜',650,130]},
- '3,0':{name:'Orrery Walk',theme:'vault',colors:['#5574b8','#171e41','#647aa2'],exits:{w:'2,0',s:'3,1',e:{to:'4,0',requires:'ember'}},enemy:['moonKnight',520,285]},
- '4,0':{name:'Starwatch Gallery',theme:'vault',colors:['#7664bd','#1b183d','#766eaa'],exits:{w:'3,0',s:'4,1',e:'5,0'}},
- '2,1':{name:'Ancient Rootway',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{w:'1,1',n:'2,0',e:{to:'3,1',requires:'ember'},s:{to:'2,2',requires:'boots'}},enemy:['burrower',525,170]},
- '3,1':{name:'Moon Vault',theme:'vault',colors:['#5267b9','#171b48','#667ac3'],exits:{w:'2,1',n:'3,0',e:{to:'4,1',requires:'lens'}},enemy:['moonKnight',390,250,true]},
- '4,1':{name:'Crown Depths',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{w:'3,1',n:'4,0',e:'5,1',s:'4,2'},enemy:['crownEye',510,190]},
- '5,1':{name:'Ashen Lift',theme:'ember',colors:['#b84e46','#301a29','#8a5147'],exits:{w:'4,1',s:'5,2',n:'5,0'},enemy:['forgeBeast',380,250]},
- '2,2':{name:'Underroot Descent',theme:'root',colors:['#6d4a72','#1e1a2d','#6a526b'],exits:{n:'2,1',w:'1,2',e:'3,2',s:'2,3'},enemy:['shade',270,320]},
- '1,2':{name:'Flooded Crypt',theme:'crypt',colors:['#2489a1','#0b243b','#3b8491'],exits:{e:'2,2',w:'0,2'},enemy:['cryptWisp',520,250],relic:['lens','Moon Lens','◉',190,150]},
- '0,2':{name:'Rusted Aqueduct',theme:'crypt',colors:['#327f88','#102638','#526f70'],exits:{e:'1,2',s:'0,3',w:'-1,2'}},
- '0,3':{name:'Siltwheel Basin',theme:'crypt',colors:['#347d78','#10272e','#557670'],exits:{n:'0,2',e:'1,3',w:'-1,3'},enemy:['burrower',470,270]},
- '1,3':{name:'Starfall Turbine',theme:'vault',colors:['#416a9b','#151e39','#527b91'],exits:{w:'0,3',e:'2,3'},enemy:['crownEye',455,230]},
- '2,3':{name:'Hollow Foundry',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{w:'1,3',n:'2,2',e:'3,3'},enemy:['forgeBeast',430,255]},
- '3,3':{name:'Smelter Causeway',theme:'forge',colors:['#cf6335','#351c22','#95573b'],exits:{w:'2,3',n:'3,2',e:'4,3'}},
- '3,2':{name:'Sunken Forge',theme:'forge',colors:['#b85a35','#301b26','#8e573d'],exits:{w:'2,2',s:'3,3',e:'4,2'},enemy:['forgeBeast',410,280]},
- '4,2':{name:'Warden Core',theme:'ember',colors:['#9a354f','#2b101f','#874052'],exits:{w:'3,2',n:'4,1',e:'5,2',s:'4,3'},enemy:['thornWarden',400,245,true]},
- '5,2':{name:'Coilgrave Annex',theme:'root',colors:['#785179','#211a2e','#6f5971'],exits:{w:'4,2',n:'5,1',s:'5,3'},enemy:['shade',440,240],relic:['material','Upgrade Crystal','◆',690,285]},
- '4,3':{name:'Warden Exhaust',theme:'forge',colors:['#8d4b42','#2b1923','#76534b'],exits:{w:'3,3',n:'4,2',e:'5,3'}},
- '-1,2':{name:'Undercroft Reservoir',theme:'crypt',colors:['#327f88','#102638','#526f70'],exits:{n:'-1,1',e:'0,2',s:'-1,3'}},
- '-1,3':{name:'Silt Collector',theme:'crypt',colors:['#347d78','#10272e','#557670'],exits:{n:'-1,2',e:'0,3'}},
- '5,0':{name:'Skybridge Relay',theme:'vault',colors:['#7664bd','#1b183d','#766eaa'],exits:{w:'4,0',s:'5,1'},enemy:['crownSentinel',400,250]},
- '5,3':{name:'Flooded Terminus',theme:'ember',colors:['#b84e46','#301a29','#8a5147'],exits:{n:'5,2',w:'4,3'}}
+ '0,5':{name:'Afterlight Refuge',theme:'canopy',colors:['#2b8b7f','#0b2730','#4a7d6e'],exits:{e:'1,5'}},
+ '1,5':{name:'Scrapfire Alley',theme:'ember',colors:['#c84f3d','#37182b','#8c4d35'],exits:{n:'1,4',s:'1,6',w:'0,5'},zone:1,level:1},
+ '1,4':{name:'Creeperline Alley',theme:'canopy',colors:['#36866e','#102c31','#5b7656'],exits:{n:'1,3',s:'1,5'},zone:2,level:2,relic:['boots','Briarstep Boots','♜',650,130]},
+ '1,6':{name:'Thornway Row',theme:'canopy',colors:['#36866e','#102c31','#5b7656'],exits:{n:'1,5',s:'1,7',e:'2,6'},zone:2,level:2},
+ '1,3':{name:'Vinecoil Yard',theme:'canopy',colors:['#36866e','#102c31','#5b7656'],exits:{s:'1,4',e:'2,3'},zone:2,level:2},
+ '2,6':{name:'Bramblegate Junction',theme:'canopy',colors:['#36866e','#102c31','#5b7656'],exits:{s:'2,7',w:'1,6',e:'3,6'},zone:2,level:2},
+ '1,7':{name:'Crown Boulevard',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{n:'1,6',s:'1,8',e:'2,7'},zone:2,level:2},
+ '2,3':{name:'Overgrown Alley',theme:'canopy',colors:['#75a943','#213326','#71834c'],exits:{n:'2,2',w:'1,3'},zone:3,level:3},
+ '3,6':{name:'Mossgate Row',theme:'canopy',colors:['#75a943','#213326','#71834c'],exits:{n:'3,5',w:'2,6',e:'4,6'},zone:3,level:3},
+ '2,7':{name:'Ashfall Substation',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{n:'2,6',s:'2,8',w:'1,7'},zone:3,level:3},
+ '1,8':{name:'Warden Antechamber',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{n:'1,7',e:'2,8'},zone:3,level:3},
+ '2,2':{name:'Undercroft Alley',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{n:'2,1',s:'2,3'},zone:4,level:4},
+ '3,5':{name:'Borehound Row',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{n:'3,4',s:'3,6'},zone:4,level:4},
+ '4,6':{name:'Tunnelworks Yard',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{w:'3,6',e:'5,6'},zone:4,level:4},
+ '2,8':{name:'Memory Annex',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{n:'2,7',s:'2,9',w:'1,8'},zone:4,level:4,relic:['material','Upgrade Crystal','◆',690,285]},
+ '2,1':{name:'Undercroft Passage',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{s:'2,2',e:'3,1'},zone:4,level:4},
+ '3,4':{name:'Borehound Den',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{s:'3,5',e:'4,4'},zone:4,level:4},
+ '5,6':{name:'Tunnelworks Corridor',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{n:'5,5',s:'5,7',w:'4,6',e:'6,6'},zone:4,level:4},
+ '2,9':{name:'Rootcellar Hollow',theme:'root',colors:['#9c713a','#29202b','#806342'],exits:{n:'2,8'},zone:4,level:4,enemy:['moonKnight',400,250],relic:['ember','Ember Sigil','✹',400,150]},
+ '3,1':{name:'Fractured Alley',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{w:'2,1',e:'4,1'},zone:5,level:5},
+ '4,4':{name:'Shade Row',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{n:'4,3',w:'3,4'},zone:5,level:5},
+ '5,5':{name:'Phasefall Yard',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{s:'5,6'},zone:5,level:5},
+ '6,6':{name:'Driftvault Junction',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{w:'5,6',e:'7,6'},zone:5,level:5},
+ '5,7':{name:'Fractured Passage',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{n:'5,6'},zone:5,level:5},
+ '4,1':{name:'Shade Den',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{n:'4,0',s:'4,2',w:'3,1'},zone:5,level:5},
+ '4,3':{name:'Phasefall Corridor',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{n:'4,2',s:'4,4'},zone:5,level:5},
+ '7,6':{name:'Driftvault Hollow',theme:'vault',colors:['#57a6aa','#172f4a','#63858e'],exits:{n:'7,5',s:'7,7',w:'6,6',e:'8,6'},zone:5,level:5},
+ '4,0':{name:'Corrupted Alley',theme:'crypt',colors:['#2489a1','#0b243b','#3b8491'],exits:{s:'4,1'},zone:6,level:6,enemy:['crownSentinel',400,250],relic:['lens','Moon Lens','◉',400,150]},
+ '4,2':{name:'Wisplight Row',theme:'crypt',colors:['#2489a1','#0b243b','#3b8491'],exits:{n:'4,1',s:'4,3'},zone:6,level:6},
+ '7,5':{name:'Databank Yard',theme:'crypt',colors:['#2489a1','#0b243b','#3b8491'],exits:{n:'7,4',s:'7,6'},zone:6,level:6},
+ '8,6':{name:'Cryptline Junction',theme:'crypt',colors:['#2489a1','#0b243b','#3b8491'],exits:{w:'7,6',e:'9,6'},zone:6,level:6},
+ '7,7':{name:'Corrupted Passage',theme:'crypt',colors:['#2489a1','#0b243b','#3b8491'],exits:{n:'7,6',s:'7,8'},zone:6,level:6},
+ '7,4':{name:'Slag Alley',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{s:'7,5',e:'8,4'},zone:7,level:7},
+ '9,6':{name:'Reactor Row',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{n:'9,5',s:'9,7',w:'8,6',e:'10,6'},zone:7,level:7},
+ '7,8':{name:'Foundry Yard',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{n:'7,7',e:'8,8'},zone:7,level:7},
+ '8,4':{name:'Mauler Junction',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{w:'7,4',e:'9,4'},zone:7,level:7},
+ '9,5':{name:'Slag Passage',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{n:'9,4',s:'9,6'},zone:7,level:7},
+ '10,6':{name:'Reactor Den',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{w:'9,6'},level:9,enemy:['thornWarden',400,250]},
+ '9,7':{name:'Foundry Corridor',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{n:'9,6',s:'9,8'},zone:7,level:7},
+ '8,8':{name:'Mauler Hollow',theme:'forge',colors:['#a84e32','#2c1b25','#81513d'],exits:{w:'7,8',e:'9,8'},zone:7,level:7},
+ '9,4':{name:'Crown Alley',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{s:'9,5',w:'8,4'},zone:8,level:8},
+ '9,8':{name:'Mainframe Row',theme:'vault',colors:['#8a3f9a','#241434','#81528b'],exits:{n:'9,7',w:'8,8'},zone:8,level:8}
 };
 NeonCity.configure(rooms);
 const enemies={
- emberling:{name:'Ember Jackal',icon:'♞',hp:35,attack:7,armor:0},thornling:{name:'Circuit Thornling',icon:'♣',hp:38,attack:7,armor:0},vineguard:{name:'Briar Sentinel',icon:'♠',hp:46,attack:8,armor:2},burrower:{name:'Tunnel Borehound',icon:'●',hp:50,attack:8,armor:2},moonKnight:{name:'Lunar Enforcer',icon:'☾',hp:80,attack:11,armor:4,boss:true,element:'water',miniBoss:true},shade:{name:'Phase Shade',icon:'◐',hp:56,attack:10,armor:3},cryptWisp:{name:'Data Wisp',icon:'✧',hp:58,attack:10,armor:3},forgeBeast:{name:'Reactor Mauler',icon:'♨',hp:65,attack:11,armor:4},crownEye:{name:'Crown Observer',icon:'◉',hp:72,attack:12,armor:5},thornWarden:{name:'Thorn Warden',icon:'♛',hp:110,attack:14,armor:6,boss:true},crownSentinel:{name:'The Crown Sentinel',icon:'◈',hp:88,attack:12,armor:5,boss:true,element:'air',miniBoss:true}};
+ emberling:{name:'Ember Jackal',icon:'♞',hp:35,attack:7,armor:0},thornling:{name:'Circuit Thornling',icon:'♣',hp:38,attack:7,armor:0},vineguard:{name:'Briar Sentinel',icon:'♠',hp:46,attack:8,armor:2},burrower:{name:'Tunnel Borehound',icon:'●',hp:50,attack:8,armor:2},moonKnight:{name:'Lunar Enforcer',icon:'☾',hp:80,attack:11,armor:4,boss:true,element:'water',miniBoss:true},shade:{name:'Phase Shade',icon:'◐',hp:56,attack:10,armor:3},cryptWisp:{name:'Data Wisp',icon:'✧',hp:58,attack:10,armor:3},forgeBeast:{name:'Reactor Mauler',icon:'♨',hp:65,attack:11,armor:4},crownEye:{name:'Crown Observer',icon:'◉',hp:72,attack:12,armor:5},thornWarden:{name:'Thorn Warden',icon:'♛',hp:110,attack:14,armor:6,boss:true,element:'earth'},crownSentinel:{name:'The Crown Sentinel',icon:'◈',hp:88,attack:12,armor:5,boss:true,element:'air',miniBoss:true}};
 const defs={
  strike:{name:'Ember Blade',cost:1,kind:'Attack',icon:'⚔',tiers:[{damage:6},{damage:9},{damage:12},{damage:16}]},
  guard:{name:'Crystal Ward',cost:1,kind:'Defense',icon:'◈',tiers:[{block:5},{block:7},{block:9},{block:12}]},
@@ -223,8 +237,54 @@ function roomFootprint(key,w,h,pad=9){
  return{x,y,width,height,primary:area.cells[0]===key,area};
 }
 function graphLinks(w,h,pad,large=false){const out=[],done=new Set();for(const [key,r] of Object.entries(rooms))for(const raw of Object.values(r.exits)){const to=typeof raw==='string'?raw:raw.to;if(!rooms[to])continue;const areaFrom=getJoinedArea(key),areaTo=getJoinedArea(to);if(areaFrom.cells.includes(to))continue;const fromKey=areaFrom.cells[0],toKey=areaTo.cells[0];if(fromKey===toKey)continue;const id=[fromKey,toKey].sort().join('|');if(done.has(id))continue;done.add(id);const a=roomFootprint(fromKey,w,h,pad),b=roomFootprint(toKey,w,h,pad),len=Math.hypot(b.x-a.x,b.y-a.y),ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI,seen=areaFrom.cells.some(c=>state.visited.includes(c))&&areaTo.cells.some(c=>state.visited.includes(c)),locked=typeof raw==='object'&&raw.requires&&!hasRelic(raw.requires);out.push('<i class="'+(large?'map-link':'mini-link')+(seen?'':' unseen')+(locked?' locked':'')+'" style="left:'+a.x+'px;top:'+a.y+'px;width:'+len+'px;transform:rotate('+ang+'deg)"></i>')}return out.join('')}
-function roomTag(key){const r=rooms[key];if(!r)return null;if(r.enemy&&enemies[r.enemy[0]]&&enemies[r.enemy[0]].boss)return{color:'#e0524f',label:'Boss'};if(key==='1,1'||key==='0,0')return{color:'#5ecb50',label:'Safe'};if(r.relic&&r.relic[0]!=='material'&&!hasRelic(r.relic[0]))return{color:'#e0c34f',label:'Relic'};if(r.relic&&r.relic[0]==='material'&&!state.cleared.includes('material'))return{color:'#9dd6ff',label:'Crystal'};const chest=chestFor(key);if(chest&&!state.chests.includes(chest.id))return{color:'#7fd8ff',label:'Chest'};return null}
-function renderMinimap(){const w=126,h=82,cells=[],seenAreas=new Set();for(const key of Object.keys(rooms)){const area=getJoinedArea(key),areaId=area.cells.join('|');if(seenAreas.has(areaId))continue;seenAreas.add(areaId);const box=roomFootprint(key,w,h,9),visited=area.cells.some(c=>state.visited.includes(c)),current=area.cells.includes(state.room),tag=area.cells.map(roomTag).find(Boolean);cells.push('<span class="mini-cell '+(current?'current':visited?'visited':'unseen')+'" style="left:'+box.x+'px;top:'+box.y+'px;width:'+box.width+'px;height:'+box.height+'px" title="'+(visited?area.name:'Unexplored')+'">'+(visited&&tag?'<i class="mini-tag" style="background:'+tag.color+'"></i>':'')+'</span>')}const discovered=state.visited.filter(key=>rooms[key]).length;$('minimap').innerHTML='<div class="minimap-title"><span>EXPLORED · M</span><span>'+discovered+'/'+Object.keys(rooms).length+'</span></div><div class="minimap-grid">'+graphLinks(w,h,9)+cells.join('')+'</div><div class="mini-legend">Gold current · Blue visited · Dark unknown</div>';$('minimap').setAttribute('aria-label','Explored-area minimap. '+discovered+' of '+Object.keys(rooms).length+' areas visited. Current area: '+room().name)}
+function roomTag(key){const r=rooms[key];if(!r)return null;if(r.enemy&&enemies[r.enemy[0]]&&enemies[r.enemy[0]].boss)return{color:'#e0524f',label:'Boss'};if(key==='0,5'||key==='0,0')return{color:'#5ecb50',label:'Safe'};if(r.relic&&r.relic[0]!=='material'&&!hasRelic(r.relic[0]))return{color:'#e0c34f',label:'Relic'};if(r.relic&&r.relic[0]==='material'&&!state.cleared.includes('material'))return{color:'#9dd6ff',label:'Crystal'};const chest=chestFor(key);if(chest&&!state.chests.includes(chest.id))return{color:'#7fd8ff',label:'Chest'};return null}
+// The minimap used to reuse the full map's whole-region footprint math at
+// a tiny widget size — fine for a 12-room spine, illegible once the map
+// grew to 42 rooms spread across a wide non-grid maze (every box tiny,
+// overlapping). It also never actually delivered "limited information
+// about your surroundings" — it was always the whole region, just
+// shrunk. Rewritten to compute a genuinely local neighborhood (BFS from
+// the current room, 2 steps out via real exits) and lay out only that
+// subset, so box size no longer degrades as the map grows, and the
+// widget actually shows what it claims to.
+function localMapNodes(center,depth){
+ const dist={[center]:0},queue=[center],order=[center];
+ while(queue.length){
+  const cur=queue.shift();
+  if(dist[cur]>=depth)continue;
+  const r=rooms[cur];if(!r)continue;
+  for(const raw of Object.values(r.exits)){
+   const to=typeof raw==='string'?raw:raw.to;
+   if(!rooms[to]||to in dist)continue;
+   dist[to]=dist[cur]+1;queue.push(to);order.push(to);
+  }
+ }
+ return order;
+}
+function renderMinimap(){
+ const w=126,h=82,pad=10;
+ const localKeys=localMapNodes(state.room,2);
+ const xs=localKeys.map(k=>Number(k.split(',')[0])),ys=localKeys.map(k=>Number(k.split(',')[1]));
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ const spanX=Math.max(1,maxX-minX),spanY=Math.max(1,maxY-minY);
+ const pos=key=>{const [x,y]=key.split(',').map(Number);return{x:pad+(x-minX)/spanX*(w-2*pad),y:pad+(y-minY)/spanY*(h-2*pad)}};
+ const cellSize=Math.max(9,Math.min(16,Math.min((w-2*pad)/(spanX+1),(h-2*pad)/(spanY+1))*0.82));
+ const cells=[],links=[],doneLinks=new Set();
+ for(const key of localKeys){
+  const p=pos(key),visited=state.visited.includes(key),current=key===state.room,tag=roomTag(key);
+  cells.push('<span class="mini-cell '+(current?'current':visited?'visited':'unseen')+'" style="left:'+p.x+'px;top:'+p.y+'px;width:'+cellSize+'px;height:'+cellSize+'px" title="'+(visited?rooms[key].name:'Unexplored')+'">'+(visited&&tag?'<i class="mini-tag" style="background:'+tag.color+'"></i>':'')+'</span>');
+  for(const raw of Object.values(rooms[key].exits)){
+   const to=typeof raw==='string'?raw:raw.to;
+   if(!localKeys.includes(to))continue;
+   const id=[key,to].sort().join('|');if(doneLinks.has(id))continue;doneLinks.add(id);
+   const a=pos(key),b=pos(to),len=Math.hypot(b.x-a.x,b.y-a.y),ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI,seen=state.visited.includes(key)&&state.visited.includes(to);
+   links.push('<i class="mini-link'+(seen?'':' unseen')+'" style="left:'+a.x+'px;top:'+a.y+'px;width:'+len+'px;transform:rotate('+ang+'deg)"></i>');
+  }
+ }
+ const discovered=state.visited.filter(key=>rooms[key]).length;
+ $('minimap').innerHTML='<div class="minimap-title"><span>NEARBY · M</span><span>'+discovered+'/'+Object.keys(rooms).length+'</span></div><div class="minimap-grid">'+links.join('')+cells.join('')+'</div><div class="mini-legend">Gold current · Blue visited · Dark unknown</div>';
+ $('minimap').setAttribute('aria-label','Nearby-area minimap, 2 rooms out from your current position. '+discovered+' of '+Object.keys(rooms).length+' areas visited overall. Current area: '+room().name);
+}
 function enemyAvailable(id){return enemies[id].boss?!state.bosses.includes(id):!(state.cooldowns[id]>0)}
 function relicAvailable(id){if(id==='material')return !state.cleared.includes('material')&&roomCleared(state.room);return !hasRelic(id)&&roomCleared(state.room)}
 function roomCleared(key){const e=rooms[key].enemy;return !e||!enemyAvailable(e[0])}
@@ -245,11 +305,11 @@ function intent(){const b=state.battle;return Math.max(0,b.enemy.attack+Math.flo
 function playCard(i){const b=state.battle,c=b.hand[i],d=stat(c);if(!c||d.cost>b.energy)return;const boosted=hasTalent('powerCore')&&b.boostUses<boostCharges()&&b.boostedUid===c.uid,bonus=boosted?boostAmount():0;b.energy-=d.cost;b.hand.splice(i,1);if(boosted){b.boostUses++;b.boostedUid=null}(d.exhaust?b.exhaust:b.discard).push(c);const original=owned(c.uid);if(original&&original.level<3)original.uses=Math.min(USES,(original.uses||0)+1);const damage=(d.damage||0)+(d.damage?attackBonus()+bonus:0);b.enemy.hp=Math.max(0,b.enemy.hp-damage);b.block+=(d.block||0)+(d.block?bonus:0);state.hp=Math.min(state.maxHp,state.hp+(d.heal||0)+(d.heal?bonus:0));b.energy+=d.energy||0;if(d.draw)drawCards(d.draw);b.logs.push((boosted?'Empowered: ':'')+d.name+(attackBonus()&&d.damage?' · +'+attackBonus()+' calibrated damage':'')+'.');if(!b.enemy.hp)winBattle();save();renderBattle()}
 function endTurn(){const b=state.battle,hit=intent(),damage=Math.max(0,hit-b.block);state.hp=Math.max(0,state.hp-damage);b.logs.push(b.enemy.name+' attacks for '+hit+'. Lose '+damage+' HP.');b.block=0;const keep=hasTalent('retainCore')&&b.savedUid?b.hand.filter(c=>c.uid===b.savedUid).slice(0,1):[];b.discard.push(...b.hand.filter(c=>!keep.some(k=>k.uid===c.uid)));b.hand=keep;b.savedUid=null;if(!state.hp)loseBattle();else{b.turn++;b.energy=maxEnergy();drawCards(4)}save();renderBattle()}
 function winBattle(){const b=state.battle,isBoss=!!b.enemy.boss,earned=isBoss?50:25,levels=gainXP(earned);state.wins++;if(isBoss)state.bosses.push(b.id);else state.cooldowns[b.id]=3;b.potionDrop=Math.random()<.30;if(b.potionDrop)state.potions++;b.phase='reward';b.offers=shuffle(['cleave','riposte','bastion','mend','spark','shatter']).slice(0,3).map(id=>make(id));b.soulDrop=isBoss&&Math.random()<.10;b.soulOffer=b.soulDrop?make(shuffle(['phoenix','oath','verdict']).pop()):null;b.logs.push('Victory! +'+earned+' XP.'+(b.potionDrop?' Small healing potion found.':'')+(levels.length?' Level '+state.playerLevel+' reached · +'+levels.length+' talent point!':''))}
-function loseBattle(){const candidates=active().filter(c=>!c.soulbound);let lost=null;gainXP(10);if(candidates.length){const c=candidates[Math.floor(Math.random()*candidates.length)];lost=stat(c).name;state.pool=state.pool.filter(x=>x.uid!==c.uid);state.deck=state.deck.filter(x=>x!==c.uid)}state.hp=state.maxHp;state.room='1,1';state.pos={x:400,y:300};state.battle.phase='lost';state.battle.lost=lost}
+function loseBattle(){const candidates=active().filter(c=>!c.soulbound);let lost=null;gainXP(10);if(candidates.length){const c=candidates[Math.floor(Math.random()*candidates.length)];lost=stat(c).name;state.pool=state.pool.filter(x=>x.uid!==c.uid);state.deck=state.deck.filter(x=>x!==c.uid)}state.hp=state.maxHp;state.room='0,5';state.pos={x:400,y:300};state.battle.phase='lost';state.battle.lost=lost}
 function chooseReward(c){if(c){state.pool.push(c);if(state.deck.length<maxDeckSize()&&copiesInDeck(c.id)<maxCopies())state.deck.push(c.uid)}finishBattle()}
 function finishBattle(){state.battle=null;$('battleOverlay').classList.add('hidden');save();renderWorld()}
 function renderBattle(){const b=state.battle,m=$('battleModal');if(b.phase==='reward'){m.innerHTML='<div class="eyebrow">VICTORY</div><h2>Choose one Level 0 card</h2>'+(b.potionDrop?'<p class="notice">⚗ Small healing potion dropped. You now have '+state.potions+'.</p>':'<p class="muted">No healing potion dropped.</p>')+(b.soulDrop?'<div class="panel"><b class="soul-legend">◆ Boss Soulbound drop!</b><div class="cards" id="soulOffer"></div></div>':'')+'<div class="cards" id="offers"></div><p><button id="skipReward">Skip reward</button></p>';if(b.soulDrop)$('soulOffer').append(cardElement(b.soulOffer,()=>chooseReward(b.soulOffer)));b.offers.forEach(c=>$('offers').append(cardElement(c,()=>chooseReward(c))));$('skipReward').onclick=()=>chooseReward(null);return}if(b.phase==='lost'){m.innerHTML='<div class="eyebrow">DEFEAT · +10 XP</div><h2>Afterlight Refuge calls you home.</h2><p>'+(b.lost?'Lost Impermanent card: <b>'+b.lost+'</b>.':'No Impermanent card was available to lose.')+'</p><p class="muted">Soulbound boss cards remain protected. You return with half health.</p><button id="returnWorld" class="primary">Return to Afterlight Refuge</button>';$('returnWorld').onclick=finishBattle;return}
- m.innerHTML='<div class="toolbar"><span class="badge">Turn '+b.turn+'</span><span class="badge">Energy '+b.energy+'/'+maxEnergy()+'</span><span class="badge">Player Lv '+state.playerLevel+' · '+state.xp+'/100 XP</span><button id="battleChar">Character</button></div><div class="battle-top"><div class="combatant"><div class="eyebrow">'+state.name.toUpperCase()+'</div><h2>'+state.hp+'/'+state.maxHp+' HP</h2><div class="meter"><span style="width:'+state.hp/state.maxHp*100+'%"></span></div><p>Block '+b.block+' · Draw '+b.draw.length+' · Discard '+b.discard.length+'</p>'+(hasTalent('weakenCore')&&!b.debuffUsed?'<button id="weaken" class="ability">Use Weaken · Enemy −'+weakenAmount()+'</button>':hasTalent('weakenCore')?'<p class="soul-legend">Weaken active: −'+b.enemyDebuff+' attack</p>':'<p class="muted">Learn Signal Jammer in the talent tree.</p>')+'</div><div class="combatant enemy"><div class="eyebrow">'+(b.enemy.boss?'BOSS':'ENCOUNTER')+'</div><div class="battle-monster">'+monsterArt(b.id)+'</div><h2>'+b.enemy.name+'</h2><p>'+b.enemy.hp+'/'+b.enemy.maxHp+' HP'+(b.enemy.armor?' · <b class="armor-tag">🛡 '+b.enemy.armor+' Armor</b>':'')+(b.enemy.guard?' · <b class="block-tag">◈ '+b.enemy.guard+' Block</b>':'')+'</p><div class="meter"><span style="width:'+b.enemy.hp/b.enemy.maxHp*100+'%"></span></div>'+(b.enemy.armor?'<p class="muted armor-note">Armor blocks '+b.enemy.armor+' damage from every non-Pierce hit. Pierce cards ignore it.</p>':'')+(b.enemy.guard?'<p class="muted armor-note">Block absorbs the next '+b.enemy.guard+' damage you deal, then runs out.</p>':'')+'<div class="intent">'+(b.turn%3===0?'Heavy attack':'Attack')+': <b>'+intent()+' damage</b></div></div></div><div class="hand-title"><h2>Your hand</h2><span class="muted">Click a card to play</span></div><div class="cards" id="hand"></div><div class="battle-footer"><span class="muted">'+(hasTalent('retainCore')?'Retain one card before ending the turn.':'Learn Memory Buffer to retain a card.')+'</span><button id="endTurn" class="primary">End turn</button></div><div id="combatLog">'+b.logs.slice(-5).join(' · ')+'</div>';
+ m.innerHTML='<div class="toolbar"><span class="badge">Turn '+b.turn+'</span><span class="badge">Energy '+b.energy+'/'+maxEnergy()+'</span><span class="badge">Player Lv '+state.playerLevel+' · '+state.xp+'/100 XP</span><button id="battleChar">Character</button></div><div class="battle-top"><div class="combatant"><div class="eyebrow">'+state.name.toUpperCase()+'</div><h2>'+state.hp+'/'+state.maxHp+' HP</h2><div class="meter"><span style="width:'+state.hp/state.maxHp*100+'%"></span></div><p>Block '+b.block+' · Draw '+b.draw.length+' · Discard '+b.discard.length+'</p>'+(hasTalent('weakenCore')&&!b.debuffUsed?'<button id="weaken" class="ability">Use Weaken · Enemy −'+weakenAmount()+'</button>':hasTalent('weakenCore')?'<p class="soul-legend">Weaken active: −'+b.enemyDebuff+' attack</p>':'<p class="muted">Learn Signal Jammer in the talent tree.</p>')+'</div><div class="combatant enemy"><div class="eyebrow">'+(b.enemy.boss?'BOSS':'ENCOUNTER')+'</div><div class="battle-monster">'+monsterArt(b.id)+'</div><h2>'+b.enemy.name+(typeof b.enemy.level==='number'?' <span class="enemy-level" style="color:'+levelColor(b.enemy.level)+'">Lv.'+b.enemy.level+'</span>':'')+'</h2><p>'+b.enemy.hp+'/'+b.enemy.maxHp+' HP'+(b.enemy.armor?' · <b class="armor-tag">🛡 '+b.enemy.armor+' Armor</b>':'')+(b.enemy.guard?' · <b class="block-tag">◈ '+b.enemy.guard+' Block</b>':'')+'</p><div class="meter"><span style="width:'+b.enemy.hp/b.enemy.maxHp*100+'%"></span></div>'+(b.enemy.armor?'<p class="muted armor-note">Armor blocks '+b.enemy.armor+' damage from every non-Pierce hit. Pierce cards ignore it.</p>':'')+(b.enemy.guard?'<p class="muted armor-note">Block absorbs the next '+b.enemy.guard+' damage you deal, then runs out.</p>':'')+'<div class="intent">'+(b.turn%3===0?'Heavy attack':'Attack')+': <b>'+intent()+' damage</b></div></div></div><div class="hand-title"><h2>Your hand</h2><span class="muted">Click a card to play</span></div><div class="cards" id="hand"></div><div class="battle-footer"><span class="muted">'+(hasTalent('retainCore')?'Retain one card before ending the turn.':'Learn Memory Buffer to retain a card.')+'</span><button id="endTurn" class="primary">End turn</button></div><div id="combatLog">'+b.logs.slice(-5).join(' · ')+'</div>';
  b.hand.forEach((c,i)=>{const wrap=cardElement(c,()=>playCard(i),stat(c).cost>b.energy);if(hasTalent('powerCore')){const d=stat(c),boost=document.createElement('button'),selected=boostedCardUids(b),isBoosted=selected.includes(c.uid),slots=boostCharges()-selected.length;boost.className='ability'+(isBoosted?' selected':'');boost.textContent=isBoosted?'✓ Boosted for encounter · +'+boostAmount():slots>0?'Power Boost +'+boostAmount()+' · lasts encounter':'Power Boost slots full';boost.disabled=(!isBoosted&&slots<=0)||!(d.damage||d.block||d.heal);boost.onclick=()=>{const next=boostedCardUids(b);b.boostedUids=next.includes(c.uid)?next.filter(id=>id!==c.uid):next.length<boostCharges()?[...next,c.uid]:next;b.boostedUid=null;b.boostUses=b.boostedUids.length;save();renderBattle()};wrap.append(boost)}if(hasTalent('retainCore')){const keep=document.createElement('button');keep.className='ability'+(b.savedUid===c.uid?' selected':'');keep.textContent=b.savedUid===c.uid?'✓ Retained':'Retain this card';keep.onclick=()=>{b.savedUid=b.savedUid===c.uid?null:c.uid;save();renderBattle()};wrap.append(keep)}$('hand').append(wrap)});if($('weaken'))$('weaken').onclick=()=>{b.debuffUsed=true;b.enemyDebuff=weakenAmount();b.logs.push('Weaken: enemy attack −'+b.enemyDebuff+' this encounter.');save();renderBattle()};$('endTurn').onclick=endTurn;$('battleChar').onclick=showCharacter}
 function openMenu(html){$('menuModal').innerHTML=html;$('menuOverlay').classList.remove('hidden')}function closeMenu(){$('menuOverlay').classList.add('hidden');save();renderWorld()}
 function showMap(){const w=880,h=560,cells=[];for(const [k,r] of Object.entries(rooms)){const p=roomPoint(k,w,h,54),seen=state.visited.includes(k),cleared=seen&&roomCleared(k);cells.push('<div class="map-room '+(k===state.room?'current ':'')+(!seen?'unknown':'')+'" style="left:'+p.x+'px;top:'+p.y+'px">'+(seen?r.name:'?')+(seen?'<span class="map-status">'+(k===state.room?'YOU ARE HERE':cleared?'SECURE':'DANGER')+'</span>':'')+'</div>')}const discovered=state.visited.filter(k=>rooms[k]).length;openMenu('<div class="eyebrow">EXPLORATION MAP · M TO CLOSE</div><h2>Neon Aftermath · '+discovered+'/'+Object.keys(rooms).length+' discovered</h2><p class="muted">The city branches, loops, and reconnects. Discover 24 areas across six districts. Red routes require relics.</p><div class="world-map"><div class="map-surface">'+graphLinks(w,h,54,true)+cells.join('')+'</div></div><div class="map-key"><span>Gold border: current</span><span>Blue: explored</span><span>Dark: unknown</span><span>Crimson: sealed route</span></div><p>Relics: '+(state.relics.length?state.relics.map(x=>x==='ember'?'✹ Ember Sigil':x==='boots'?'♜ Briarstep Boots':'◉ Moon Lens').join(' · '):'None yet')+'</p><button id="closeMenu" class="primary">Return</button>');$('closeMenu').onclick=closeMenu;fitMap()}
