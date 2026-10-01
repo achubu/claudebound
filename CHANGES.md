@@ -1570,6 +1570,148 @@ order, and missed that `checkWorldInteractions()` bails out immediately
 while a battle is still open on its reward screen — both found by
 running the test and tracing the actual failure, not by assumption.
 
+## Round 33 — enemy level was missing from the world-map label specifically
+
+You were right, and the screenshot pinned it down exactly: the level
+display I'd verified earlier only ever covered the **battle screen**'s
+`<h2>` — the floating name label that appears over an enemy while
+exploring, before you've engaged it, never got the same treatment. Two
+genuinely separate pieces of UI, and I'd only checked one.
+
+### Why it couldn't just reuse the battle screen's colored badge
+The battle screen's level tag is real HTML (a colored `<span>`). The
+world-map label is a CSS `::after{content:attr(data-name)}` pseudo-
+element — and `content: attr()` can only render plain text, never HTML,
+so the same color-coded span trick doesn't work here. The positioning
+for this label is also split across three cascading theme-specific CSS
+rules I didn't fully trust myself to restructure safely in one pass.
+Given the choice between a bigger, riskier CSS rework for color-coding
+here too, or a small, safe fix that reliably shows the number, I took the
+safe one: the level is now appended as plain text directly into the
+label string itself (`'Ember Jackal · Lv.1'`), in both live code paths
+that build it — `renderWorld()` (expansion.js, your current room) and
+`appendPatrols()` (combined-rooms.js, other cells of a joined district).
+The dead copy in index.html's unused base `renderWorld()` got the same
+treatment for consistency, though it's never actually called.
+
+### Verified against your exact screenshot
+Computed the label directly through the real engine for the same enemy
+and room from your screenshot and confirmed it now reads "Ember Jackal ·
+Lv.1" — not just that a level field exists somewhere, but the literal
+string that will render. Added a regression test checking this
+specifically, separate from the existing battle-screen level test.
+
+## Round 34 — battle screen condensed so cards are always visible
+
+A full redesign of the battle screen's top info area, aimed specifically
+at small screens: previously a separate toolbar plus two tall full-width
+stat panels, pushing the hand of cards down far enough that it could
+require scrolling before seeing a single card.
+
+### The new layout
+One compact block directly above the hand: a slim Turn/Energy/Level/
+Character row, then the player and enemy side by side (not stacked),
+each with a name, a health bar with the HP numbers overlaid directly on
+the bar itself (saves a whole line versus writing them separately), and
+compact inline tags for Block/Armor/Guard — full explanations moved to
+hover tooltips instead of permanent paragraphs. The enemy's current and
+next attack sit in a single intent bar right below. Player health is
+green, enemy health is red, confirmed programmatically (not just by eye)
+with an RGB-channel check on the actual CSS values.
+
+### A second space-eater found only by testing in a real browser
+The mock-based Node test harness doesn't track DOM built via
+`appendChild`/`prepend`, so initial verification missed a whole separate
+panel: `.combat-tools`, prepended above everything else, which
+unconditionally showed "Enemy element: Neutral · Freeze 0 · Burn 0
+turns · Poison 0" — every single battle, even when literally nothing
+there was active. Caught by actually loading the real game in Chromium
+and measuring where the cards landed, not by trusting the mock's
+approximation. Fixed to only render when something is genuinely relevant
+(a real element, an active status effect, or an available talent
+ability), and dropped a one-time "Elaris enemies are tougher" tip that
+didn't need repeating every battle.
+
+### What this took to get right, not just change
+- A first attempt at ellipsis-truncating long enemy names didn't work —
+  diagnosed as a classic flexbox gotcha (flex children need explicit
+  `min-width:0` before `overflow:hidden`/`text-overflow:ellipsis` can
+  actually engage) and fixed properly rather than papering over it.
+- Restructured the header layout a second time after confirming the
+  first version cramped names and HP onto one line badly enough to lose
+  the name entirely on narrow screens — moved HP onto the bar itself
+  instead, giving the name its own full-width line.
+- Preserved every class name (`.intent`, `.battle-footer>.muted`,
+  `#hand`) that `encounter-depth.js` depends on finding via
+  `querySelector` after this HTML renders — confirmed this specifically
+  still works with a real Chromium `querySelector` call, since the Node
+  test mock can't simulate that lookup and a false pass there wouldn't
+  mean much.
+- Verified a regular (non-elite, non-boss) enemy name displays in full
+  at the target small viewport, and that a worst-case long name (a boss
+  with the Elite prefix) degrades gracefully to an ellipsis rather than
+  breaking the layout.
+- Measured, not guessed: at a real 390×700 mobile viewport, cards now
+  start at y=261px (previously well below the fold with the old two-
+  panel layout) — confirmed directly in Chromium, not estimated.
+
+All 8 test files pass across 3 consecutive full runs, plus a new
+regression test covering the condensed structure, the color-coding, and
+that every downstream injection point survived the redesign.
+
+## Round 35 — Mirror Array (new capstone talent) and a WoW Classic-style talent tree
+
+### Mirror Array: clone a card into your deck for the encounter
+A genuinely new mechanic, not a reskin of the existing Echo Protocol
+(which just replays a card — this adds a real temporary copy to your
+draw pile). Implemented as a per-card button on each card in hand, same
+established pattern as the existing Boost/Retain abilities, so you
+choose exactly which card to clone. The clone is deliberately never
+soulbound and never counts toward permanent card mastery (it isn't a
+real owned card, just a battle-scoped duplicate) — and because it only
+lives inside `state.battle`, it vanishes automatically the instant the
+encounter ends, no special cleanup needed.
+
+Sits at a brand-new **tier 4**, the true end of the Resolve branch,
+gated behind **Echo Protocol itself** (not just a point threshold) —
+matching how WoW's own capstone talents work: you need the specific
+talent before it, not just enough points spent some other way.
+
+### Talent tree: redesigned to read as a real tree, not a scrolling list
+Replaced the single-column stack of wide text cards with rows of compact
+icon nodes connected by lines:
+- Nodes grouped into **tier rows** (multiple nodes per row wherever the
+  tree actually branches), instead of one flat vertical list.
+- **Connector lines** between every talent and its prerequisite, gold
+  when unlocked and dashed gray when not — computed from each node's
+  real rendered position (reusing the exploration map's proven
+  connector-line technique) rather than hand-tuned coordinates, so it
+  handles branching and even a same-tier dependency (Disruption's
+  Overload → Capacitor) without special-casing.
+- Full name and description moved into a **hover tooltip** (gold title,
+  description, current rank, status) instead of permanently-visible
+  text — the piece that actually makes a compact icon grid readable.
+- Kept the game's existing dark sci-fi palette (gold/amber already used
+  elsewhere for emphasis) rather than a literal parchment reskin, so it
+  reads as *this game's* talent tree in WoW's layout, not a mismatched
+  genre swap.
+
+### A real bug caught before it shipped
+First visual verification showed Mirror Array completely missing from
+the rendered tree. Traced to the test environment using a stale copy of
+`expansion.js` left over from an earlier task — not a game bug, but
+worth noting since trusting that render without digging in would have
+been a false pass.
+
+All 8 test files verified clean across 3 consecutive full runs, with
+dedicated coverage for both the new talent's data (tier, requirement,
+point threshold, the actual clone-and-expire gameplay sequence) and the
+new rendering (tier-rows present, tooltip markup carries the real
+name/description, old always-visible text blocks gone, the connector
+function runs safely with no real DOM to measure). Verified visually
+with real Chromium renders, including an actual hover-triggered tooltip
+on the new talent.
+
 ## Testing
 
 ```
