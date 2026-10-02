@@ -9,6 +9,13 @@ const nodes=new Map(),storage=new Map();
 const context=vm.createContext({console,assert,Image:process.env.CARDBOUND_RENDER?require('@napi-rs/canvas').Image:class{constructor(){this.complete=false}},document:{getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},querySelector:()=>node(),querySelectorAll:()=>[],createElement:()=>node(),head:node(),body:node()},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},setTimeout:()=>0,clearTimeout(){},requestAnimationFrame(){},addEventListener(){},innerWidth:1280,innerHeight:800,confirm:()=>true,Blob,URL});
 const run=s=>vm.runInContext(s,context);
 run(fs.readFileSync(path.join(root,'assets/environment/neon-city.js'),'utf8'));
+// Round 37: `defs` moved out of index.html's inline script into its own
+// externally-sourced file (assets/cards.js), so it's loaded here
+// separately, in the same order the real page loads it in (before the
+// inline script) -- the regex below only ever captured inline <script>
+// blocks, never <script src>, so without this `defs` would silently be
+// undefined for every test.
+run(fs.readFileSync(path.join(root,'assets/cards.js'),'utf8'));
 for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
 run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
 run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));

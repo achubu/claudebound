@@ -823,9 +823,20 @@ run(`
 // current room) and appendPatrols() (other cells of a joined area).
 newGame();configureRegion('city');
 state.room='1,5';
-const worldSpawn=roomSpawns(state.room).find(spn=>!spn.boss);
+// Specifically non-elite: elite status rolls randomly, and without this
+// filter the exact-match assertion below is flaky (fails whenever the
+// roll happens to produce an elite, which prepends "★ ELITE · "). Retried
+// across fresh seeds too, since both patrol slots in this room rolling
+// elite simultaneously -- unlikely, but not impossible -- would otherwise
+// still leave a residual flake.
+let worldSpawn;
+for(let attempt=0;attempt<20&&!worldSpawn;attempt++){
+ newGame();configureRegion('city');state.room='1,5';
+ worldSpawn=roomSpawns(state.room).find(spn=>!spn.boss&&!spn.elite);
+}
+assert(worldSpawn,'found a non-elite patrol at 1,5 within 20 fresh-seed attempts');
 const worldLabel=(worldSpawn.elite?'★ ELITE · ':'')+(worldSpawn.element?ELEMENT_ICONS[worldSpawn.element]+' ':'')+enemies[worldSpawn.type].name+' · Lv.'+enemyLevel(state.room);
-assert(/Lv\\.\\d+$/.test(worldLabel),'the world-map patrol label ends with a level number, same as the battle screen');
+assert(/Lv\.[0-9]+$/.test(worldLabel),'the world-map patrol label ends with a level number, same as the battle screen');
 assert.equal(worldLabel,'Ember Jackal · Lv.'+enemyLevel('1,5'),'matches the exact enemy and room from the reported screenshot');
 console.log('PASS: the world-map patrol label (shown before engaging, not just the battle screen) now includes the enemy\\'s level.');
 `);
@@ -935,3 +946,19 @@ assert(!sheetHtml.includes('class="talent-name"')&&!sheetHtml.includes('class="t
 renderTalentConnectors();
 console.log('PASS: the talent tree renders nodes grouped into tier rows with compact icons, rank badges, and hover tooltips carrying the full description (not permanently-visible text blocks), and the connector-drawing function runs safely with no real DOM to measure.');
 `);
+// --- Round 36: cards were inconsistently sized depending on viewport
+// width (a mobile media query scaled them via calc(50vw-31px)), which
+// made them look dramatically different between two screenshots taken
+// at different window sizes. Measured precisely from the user's own
+// reference screenshot (a grid overlay on the actual image) and fixed
+// as a true constant: the card itself no longer has a mobile override at
+// all, while other responsive UI (HUD, minimap, etc.) keeps shrinking as
+// before.
+{
+const indexSrc2=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+assert(indexSrc2.includes('.card-wrap{width:218px') && indexSrc2.includes('.card{position:relative;width:218px'),'cards use the new fixed 218px width (measured from the user\'s reference screenshot), not the old 174px');
+const mobileBlock=indexSrc2.match(/@media\(max-width:720px\)\{[^}]*\}/s)[0];
+assert(!mobileBlock.includes('.card'),'the mobile breakpoint no longer touches .card/.card-wrap at all -- card size is now a true constant regardless of viewport');
+assert(mobileBlock.includes('#hud'),'other responsive elements (like the HUD) still shrink on narrow screens -- only the card itself was pinned');
+console.log('PASS: card size is now a fixed 218px constant matching the user\'s reference screenshot, with no mobile-breakpoint override remaining, while other UI elements keep their existing responsive shrinking.');
+}

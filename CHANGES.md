@@ -1712,6 +1712,95 @@ function runs safely with no real DOM to measure). Verified visually
 with real Chromium renders, including an actual hover-triggered tooltip
 on the new talent.
 
+## Round 36 — card size made a true fixed constant
+
+The original "card size changed" report turned out to be a browser-
+caching artifact on your end (confirmed gone in a fresh incognito
+session), not a real bug — but along the way you asked for something
+concrete and worth keeping regardless: cards should have one fixed size
+that never shrinks on narrow screens, while everything else (HUD,
+minimap, etc.) keeps adapting as it already did.
+
+### What changed
+Measured your reference screenshot directly (a pixel grid overlaid on
+the actual image) rather than estimating: cards there render at ~218px
+wide. `.card`/`.card-wrap` now use that as a true fixed width (up from
+174px), and the old mobile-breakpoint override that scaled cards via
+`calc(50vw - 31px)` on narrow screens was removed entirely — card size
+no longer varies with viewport width at all. Confirmed directly in
+Chromium at both a narrow (400px) and wide (900px) viewport: card width
+measured identically (218px) at both, while the HUD still shrinks on the
+narrow one exactly as before. Only the card itself was pinned.
+
+### A real, unrelated flaky test found and fixed along the way
+While verifying this, a pre-existing test (Round 33's world-map label
+check) turned up genuinely flaky under repeated stress-testing — it
+assumed the first patrol spawn would never roll Elite, which isn't true,
+occasionally producing "★ ELITE · Ember Jackal · Lv.1" instead of the
+expected plain string. Fixed with an explicit non-elite filter plus a
+retry-across-seeds loop (consistent with how this exact class of bug was
+handled in earlier rounds), confirmed with 20 consecutive stress-test
+runs, zero failures.
+
+One honest note: while fixing that flaky test, a regex typo
+(double-escaped backslash) slipped into my own edit and broke the suite
+outright for a bit. Caught and fixed before shipping — all 8 files now
+verified clean across 4 consecutive full runs (32/32).
+
+## Round 37 — card data decoupled for compendium.html, with the gap actually closed
+
+Gemini (building a separate `compendium.html` page) asked for `defs`
+(card definitions) to be extracted from `index.html` into its own file so
+an external page could read it. The core idea was sound, but Gemini's
+specific instructions didn't match this repo and had a bug baked in that
+would've made the whole thing silently fail.
+
+### What was wrong with the request as given
+- Asked for `cards.js` at the repository root — every other JS module in
+  this project lives under `assets/`. Put it at `assets/cards.js` instead
+  and pointed `compendium.html` there.
+- `compendium.html` also referenced a `game.js` that doesn't exist
+  anywhere (the game's logic lives inline in `index.html` itself, which
+  is exactly why the data needed splitting out — the logic can't be),
+  and root-level `expansion.js`/`encounter-depth.js` that are actually
+  under `assets/`. Fixed all three paths.
+
+### The bug that would have made this not work at all
+`const defs = {...}` at the top of a script creates a plain global
+*identifier* (`defs` works fine from anywhere in that same document,
+which is why `index.html` itself was never the problem) — but it does
+**not** create a `window.defs` property. `compendium.html`'s own
+detection script only ever checked `window.X` names, so no matter what
+name got added to that list, it could never have found the data. Fixed
+by explicitly mirroring onto `window` in `assets/cards.js` (guarded so
+it's a no-op in the test suite, which has no `window` at all), and added
+`window.defs` to `compendium.html`'s own check.
+
+### Closing the gap from last round
+Also moved `stat()`, `rules()`, and `cardArtPath()` into `assets/cards.js`
+alongside `defs`, and rewired `compendium.html` to use them directly
+instead of guessing at field names that don't exist on this data (there's
+no flat `desc`/`type`/`img` string on a `defs` entry — the real effect
+lives in `tiers`, `kind` is the actual type field, and `icon` is a single
+glyph, not an image path). Also fixed `compendium.html` converting its
+card object to an array via `Object.values()`, which silently threw away
+each card's id (the object key) — without the id there's no way to build
+the real art path or feed the card back through `rules()`. Verified
+directly in a real browser: the compendium page now shows the real
+type (Attack/Defense/Skill), the real generated rules text ("Deal 6
+damage.", "Gain 5 block."), and the actual card art, not a placeholder.
+
+### Verified both ends independently
+The test harness only ever extracted `index.html`'s *inline* `<script>`
+content — it had no way to know about an externally-sourced `<script
+src>` file, so without updating it, moving `defs` out would have broken
+all 8 test files silently. Fixed alongside the refactor, not as an
+afterthought. Confirmed the real game still plays correctly post-move
+(a card play actually resolves damage, `cardArtPath`/`rules` return
+identical output to before) and confirmed the compendium page separately,
+both via real Chromium renders, not just test-mode checks. 24/24 test
+runs clean across 3 full passes.
+
 ## Testing
 
 ```

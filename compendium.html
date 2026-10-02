@@ -200,10 +200,14 @@
     </style>
 
     <!-- Load Local Game Scripts -->
-    <script src="game.js" onerror="console.warn('game.js not found')"></script>
-    <script src="cards.js" onerror="console.warn('cards.js not found')"></script>
-    <script src="expansion.js" onerror="console.warn('expansion.js not found')"></script>
-    <script src="encounter-depth.js" onerror="console.warn('encounter-depth.js not found')"></script>
+    <!-- Round 37: corrected to the real file layout. There's no standalone
+         game.js -- the game's main logic lives inline inside index.html
+         itself, which this page can't reach into (that's the whole reason
+         cards.js was split out: to share just the data, not the logic).
+         The other two scripts live under assets/, not at root. -->
+    <script src="assets/cards.js" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/expansion.js" onerror="console.warn('assets/expansion.js not found')"></script>
+    <script src="assets/encounter-depth.js" onerror="console.warn('assets/encounter-depth.js not found')"></script>
 </head>
 <body>
 
@@ -260,24 +264,47 @@
             const cardGrid = document.getElementById('card-grid');
             const monsterGrid = document.getElementById('monster-grid');
 
-            // Scan window object for any globally defined card arrays/objects
-            let rawCards = window.cards || window.cardsData || window.CARDS || window.ALL_CARDS || window.cardDatabase;
+            // Scan window object for any globally defined card arrays/objects.
+            // The real game's data is `defs` (assets/cards.js) -- checked
+            // first since that's what's actually there; the others are kept
+            // as a fallback in case this page ever points at something else.
+            let rawCards = window.defs || window.cards || window.cardsData || window.CARDS || window.ALL_CARDS || window.cardDatabase;
             
-            // If cards are stored as an object instead of an array, convert to array
+            // If cards are stored as an object instead of an array, convert to
+            // array -- using entries, not values, so each card keeps its real
+            // id (the object key). Without the id there's no way to build the
+            // real art path or feed it back through rules()/stat() below.
             let cardList = [];
             if (Array.isArray(rawCards)) {
                 cardList = rawCards;
             } else if (rawCards && typeof rawCards === 'object') {
-                cardList = Object.values(rawCards);
+                cardList = Object.entries(rawCards).map(([id, c]) => ({ id, ...c }));
             }
 
             if (cardList.length > 0) {
                 cardGrid.innerHTML = cardList.map(c => {
                     const title = c.name || c.id || 'Unknown Card';
-                    const type = c.type || c.category || 'Ability';
+                    // `kind` is the real field name on defs entries ('Attack',
+                    // 'Defense', etc.) -- type/category never existed on this
+                    // data, they were a guess.
+                    const type = c.kind || c.type || c.category || 'Ability';
                     const cost = c.cost ?? c.energy ?? 'N/A';
-                    const desc = c.desc || c.description || c.text || 'No description available.';
-                    const imgSrc = c.img || c.image || c.icon || `assets/cards/${(c.id || title).toLowerCase().replace(/\s+/g, '-')}.png`;
+                    // rules()/stat() (assets/cards.js) are the exact functions
+                    // the game itself uses to turn a card's level-0 tier into
+                    // readable text ("Deal 6 damage.") -- there's no separate
+                    // description string on defs entries to fall back to, so
+                    // without this every card would just say "No description
+                    // available."
+                    const desc = (typeof window.rules === 'function' && c.id)
+                        ? window.rules({ id: c.id, level: 0 })
+                        : (c.desc || c.description || c.text || 'No description available.');
+                    // Real card art (assets/cards/level0/<id>.png), via the
+                    // same cardArtPath() the game uses -- c.icon is a single
+                    // Unicode glyph, not an image path, so using it directly
+                    // as a src always 404s.
+                    const imgSrc = (typeof window.cardArtPath === 'function' && c.id)
+                        ? window.cardArtPath(c.id, 0)
+                        : (c.img || c.image || `assets/cards/level0/${(c.id || title).toLowerCase().replace(/\s+/g, '-')}.png`);
 
                     return `
                         <div class="card">
