@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Compendium & Documentation</title>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --card-bg: #1e2230;
+            --accent-color: #ff4757;
+            --accent-blue: #2ed573;
+            --text-main: #e0e6ed;
+            --text-dim: #a4b0be;
+            --border-color: #2f3542;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #141722;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--accent-color);
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            background: #181b26;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 0.75rem;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-img-wrapper {
+            width: 100%;
+            height: 180px;
+            background-color: #0b0c12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-img-wrapper svg {
+            width: 80px;
+            height: 80px;
+        }
+
+        .card-content {
+            padding: 1.25rem;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            color: #ffffff;
+        }
+
+        .card-type {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.75rem;
+        }
+
+        .stats-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-list span {
+            color: var(--text-dim);
+        }
+
+        .badge {
+            background-color: #2f3542;
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .map-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .map-title {
+            font-size: 1.3rem;
+            color: var(--accent-blue);
+            margin-top: 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: #141722;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Battle Lab Game Compendium</h1>
+        <div class="subtitle">Complete Archives: Monsters, Bosses, Expansion Data & Encounter Mechanics</div>
+    </header>
+
+    <nav>
+        <a href="#monsters">Bestiary</a>
+        <a href="#bosses">Boss Encounters</a>
+        <a href="#expansion">Expansion Info</a>
+        <a href="#mechanics">Game Mechanics</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- MONSTERS SECTION -->
+        <section id="monsters">
+            <h2>Bestiary & Enemies</h2>
+            <div class="grid">
+                
+                <!-- Reactor Mauler -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-type">Standard Enemy</div>
+                        <h3 class="card-title">Reactor Mauler</h3>
+                        <p class="card-desc">A highly aggressive brute found near core sectors. Uses radioactive charges to deal heavy damage.</p>
+                        <ul class="stats-list">
+                            <li><span>Threat Level:</span> <strong class="badge">Medium</strong></li>
+                            <li><span>Primary Attack:</span> Core Slam</li>
+                            <li><span>Special Trait:</span> Radiation Aura</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Lunar Enforcer -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-type">Elite Unit</div>
+                        <h3 class="card-title">Lunar Enforcer</h3>
+                        <p class="card-desc">Heavily armored security unit utilizing advanced lunar shielding and precision energy blasters.</p>
+                        <ul class="stats-list">
+                            <li><span>Threat Level:</span> <strong class="badge">High</strong></li>
+                            <li><span>Primary Attack:</span> Plasma Blast</li>
+                            <li><span>Special Trait:</span> Shield Generator</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase Shade -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#1e90ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-type">Stealth Enemy</div>
+                        <h3 class="card-title">Phase Shade</h3>
+                        <p class="card-desc">Ethereal entity capable of shifting through dimensional layers to bypass front-line defenses.</p>
+                        <ul class="stats-list">
+                            <li><span>Threat Level:</span> <strong class="badge">Medium</strong></li>
+                            <li><span>Primary Attack:</span> Phase Blade</li>
+                            <li><span>Special Trait:</span> Invisibility / Ambush</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tunnel Borehound -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#ffa502" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a7 7 0 1 0 10 10"></path></svg>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-type">Beast</div>
+                        <h3 class="card-title">Tunnel Borehound</h3>
+                        <p class="card-desc">Subterranean predator that burrows beneath encounters and strikes from unexposed flanks.</p>
+                        <ul class="stats-list">
+                            <li><span>Threat Level:</span> <strong class="badge">Low</strong></li>
+                            <li><span>Primary Attack:</span> Burrow Strike</li>
+                            <li><span>Special Trait:</span> Armor Piercing</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Thorn Warden -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9 0 6-4 9-10 9z"></path></svg>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-type">Support Enemy</div>
+                        <h3 class="card-title">Thorn Warden</h3>
+                        <p class="card-desc">Bio-engineered defender that entangles targets in hazardous constricting flora.</p>
+                        <ul class="stats-list">
+                            <li><span>Threat Level:</span> <strong class="badge">Medium</strong></li>
+                            <li><span>Primary Attack:</span> Vine Lash</li>
+                            <li><span>Special Trait:</span> Root / Immobilize</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bloom Tyrant (Elaris) -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#ff6b81" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3m-3.5-6.5l-2.1 2.1m-8.8 8.8l-2.1 2.1m0-13l2.1 2.1m8.8 8.8l2.1 2.1"></path></svg>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-type">Elaris Sub-Boss</div>
+                        <h3 class="card-title">Bloom Tyrant</h3>
+                        <p class="card-desc">A massive floral behemoth guarding deep sector nodes. Releases toxic spore clouds when damaged.</p>
+                        <ul class="stats-list">
+                            <li><span>Threat Level:</span> <strong class="badge">Severe</strong></li>
+                            <li><span>Primary Attack:</span> Spore Burst</li>
+                            <li><span>Special Trait:</span> Poison Cloud / Regen</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- BOSSES SECTION -->
+        <section id="bosses">
+            <h2>Boss Encounters</h2>
+            <div class="map-card">
+                <h3 class="map-title">Touch Crystals Boss Encounter</h3>
+                <p>An intense multi-phase boss fight centered around controlling crystal conduits. Players must manipulate and touch energy crystals in sequence to remove the boss's invulnerability shield while managing wave reinforcements.</p>
+                <ul style="color: var(--text-dim);">
+                    <li><strong>Phase 1:</strong> Direct engagement; Boss shields at 75% Health threshold.</li>
+                    <li><strong>Phase 2:</strong> Crystal Activation; Requires active position management to overload energy nodes.</li>
+                    <li><strong>Phase 3:</strong> Overdrive Enrage; High AOE damage output until defeated.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- EXPANSION DATA -->
+        <section id="expansion">
+            <h2>Expansion & Map Content</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-type">System Module</div>
+                        <h3 class="card-title">Expansion Data (`expansion.js`)</h3>
+                        <p class="card-desc">Contains references to extended encounters, modular difficulty modifiers, and extra drop tables.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-type">Layout Module</div>
+                        <h3 class="card-title">Mobile Crystal Styling</h3>
+                        <p class="card-desc">Dedicated UI and responsive layouts configured via `mobile-crystals.css` for cross-platform play.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GAME MECHANICS -->
+        <section id="mechanics">
+            <h2>Core Mechanics & Encounter Data</h2>
+            <div class="map-card">
+                <h3 class="map-title">Encounter Depth Engine (`encounter-depth.js`)</h3>
+                <p>The encounter depth system controls spawning frequency, difficulty scaling based on layer depth, and card/ability availability throughout a run.</p>
+                <div style="display: flex; gap: 2rem; margin-top: 1rem; font-size: 0.95rem; color: var(--text-dim);">
+                    <div><strong>Depth 1-3:</strong> Basic encounters (Borehounds, Maulers)</div>
+                    <div><strong>Depth 4-7:</strong> Advanced units (Shades, Enforcers)</div>
+                    <div><strong>Depth 8+:</strong> Bosses & Expansion Units</div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>Battle Lab Compendium &mdash; Generated from internal game archives.</p>
+    </footer>
+
+</body>
+</html>
