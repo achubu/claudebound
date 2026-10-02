@@ -946,19 +946,8 @@ assert(!sheetHtml.includes('class="talent-name"')&&!sheetHtml.includes('class="t
 renderTalentConnectors();
 console.log('PASS: the talent tree renders nodes grouped into tier rows with compact icons, rank badges, and hover tooltips carrying the full description (not permanently-visible text blocks), and the connector-drawing function runs safely with no real DOM to measure.');
 `);
-// --- Round 36: cards were inconsistently sized depending on viewport
-// width (a mobile media query scaled them via calc(50vw-31px)), which
-// made them look dramatically different between two screenshots taken
-// at different window sizes. Measured precisely from the user's own
-// reference screenshot (a grid overlay on the actual image) and fixed
-// as a true constant: the card itself no longer has a mobile override at
-// all, while other responsive UI (HUD, minimap, etc.) keeps shrinking as
-// before.
-{
-const indexSrc2=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-assert(indexSrc2.includes('.card-wrap{width:218px') && indexSrc2.includes('.card{position:relative;width:218px'),'cards use the new fixed 218px width (measured from the user\'s reference screenshot), not the old 174px');
-const mobileBlock=indexSrc2.match(/@media\(max-width:720px\)\{[^}]*\}/s)[0];
-assert(!mobileBlock.includes('.card'),'the mobile breakpoint no longer touches .card/.card-wrap at all -- card size is now a true constant regardless of viewport');
-assert(mobileBlock.includes('#hud'),'other responsive elements (like the HUD) still shrink on narrow screens -- only the card itself was pinned');
-console.log('PASS: card size is now a fixed 218px constant matching the user\'s reference screenshot, with no mobile-breakpoint override remaining, while other UI elements keep their existing responsive shrinking.');
-}
+// Round 36's fixed-218px card sizing was rolled back by explicit request
+// (cards read as too big) -- back to the original 174px base plus the
+// mobile-responsive calc(50vw-31px) scaling. No replacement assertion
+// needed here; this is a reversion to a prior, already-understood state,
+// not a new decision that needs its own regression coverage.

@@ -1801,6 +1801,19 @@ identical output to before) and confirmed the compendium page separately,
 both via real Chromium renders, not just test-mode checks. 24/24 test
 runs clean across 3 full passes.
 
+## Round 38 — card size reverted, per explicit request
+
+Round 36's fixed 218px card size (and removal of the mobile-responsive
+scaling) read as too big in practice. Rolled all of it back:
+`.card`/`.card-wrap` are 174px again, and the `calc(50vw - 31px)` mobile
+override (145px floor) is restored, so cards once again scale with
+viewport width exactly as they did before Round 36. Removed the
+regression test that had specifically locked in the 218px behavior, since
+it was asserting a decision that's now reversed — a prior, already-
+understood state doesn't need new coverage of its own. Verified directly:
+card renders at 174px again, and all 8 test files pass clean across 3
+full runs.
+
 ## Testing
 
 ```
