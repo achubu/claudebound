@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Compendium & Documentation</title>
+    <title>ClaudeBound — Compendium & Database</title>
     <style>
         :root {
             --bg-color: #0f111a;
             --card-bg: #1e2230;
             --accent-color: #ff4757;
             --accent-blue: #2ed573;
+            --accent-purple: #a55eea;
             --text-main: #e0e6ed;
             --text-dim: #a4b0be;
             --border-color: #2f3542;
@@ -110,24 +111,21 @@
             transform: translateY(-5px);
         }
 
-        .card-img-wrapper {
+        .card-img {
             width: 100%;
-            height: 180px;
+            height: 200px;
+            object-fit: contain;
             background-color: #0b0c12;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 1rem;
+            box-sizing: border-box;
             border-bottom: 1px solid var(--border-color);
-        }
-
-        .card-img-wrapper svg {
-            width: 80px;
-            height: 80px;
         }
 
         .card-content {
             padding: 1.25rem;
             flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .card-title {
@@ -148,6 +146,7 @@
             font-size: 0.95rem;
             color: var(--text-dim);
             margin-bottom: 1rem;
+            flex-grow: 1;
         }
 
         .stats-list {
@@ -177,18 +176,15 @@
             font-size: 0.8rem;
         }
 
-        .map-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .map-title {
-            font-size: 1.3rem;
-            color: var(--accent-blue);
-            margin-top: 0;
+        .fallback-graphic {
+            height: 200px;
+            background: #0b0c12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-purple);
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
         }
 
         footer {
@@ -200,187 +196,134 @@
             font-size: 0.9rem;
         }
     </style>
+
+    <!-- Load Local Game Scripts directly -->
+    <script src="cards.js" onerror="console.warn('cards.js not found in current directory')"></script>
+    <script src="expansion.js" onerror="console.warn('expansion.js not found in current directory')"></script>
+    <script src="encounter-depth.js" onerror="console.warn('encounter-depth.js not found in current directory')"></script>
 </head>
 <body>
 
     <header>
-        <h1>Battle Lab Game Compendium</h1>
-        <div class="subtitle">Complete Archives: Monsters, Bosses, Expansion Data & Encounter Mechanics</div>
+        <h1>ClaudeBound Compendium</h1>
+        <div class="subtitle">Live Local Game Archives & Card Index</div>
     </header>
 
     <nav>
+        <a href="#cards">Cards & Deck</a>
         <a href="#monsters">Bestiary</a>
-        <a href="#bosses">Boss Encounters</a>
-        <a href="#expansion">Expansion Info</a>
-        <a href="#mechanics">Game Mechanics</a>
+        <a href="#bosses">Boss Mechanics</a>
+        <a href="#expansion">Expansion Modules</a>
     </nav>
 
     <div class="container">
 
-        <!-- MONSTERS SECTION -->
-        <section id="monsters">
-            <h2>Bestiary & Enemies</h2>
-            <div class="grid">
-                
-                <!-- Reactor Mauler -->
-                <div class="card">
-                    <div class="card-img-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-type">Standard Enemy</div>
-                        <h3 class="card-title">Reactor Mauler</h3>
-                        <p class="card-desc">A highly aggressive brute found near core sectors. Uses radioactive charges to deal heavy damage.</p>
-                        <ul class="stats-list">
-                            <li><span>Threat Level:</span> <strong class="badge">Medium</strong></li>
-                            <li><span>Primary Attack:</span> Core Slam</li>
-                            <li><span>Special Trait:</span> Radiation Aura</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Lunar Enforcer -->
-                <div class="card">
-                    <div class="card-img-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-type">Elite Unit</div>
-                        <h3 class="card-title">Lunar Enforcer</h3>
-                        <p class="card-desc">Heavily armored security unit utilizing advanced lunar shielding and precision energy blasters.</p>
-                        <ul class="stats-list">
-                            <li><span>Threat Level:</span> <strong class="badge">High</strong></li>
-                            <li><span>Primary Attack:</span> Plasma Blast</li>
-                            <li><span>Special Trait:</span> Shield Generator</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Phase Shade -->
-                <div class="card">
-                    <div class="card-img-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#1e90ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-type">Stealth Enemy</div>
-                        <h3 class="card-title">Phase Shade</h3>
-                        <p class="card-desc">Ethereal entity capable of shifting through dimensional layers to bypass front-line defenses.</p>
-                        <ul class="stats-list">
-                            <li><span>Threat Level:</span> <strong class="badge">Medium</strong></li>
-                            <li><span>Primary Attack:</span> Phase Blade</li>
-                            <li><span>Special Trait:</span> Invisibility / Ambush</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Tunnel Borehound -->
-                <div class="card">
-                    <div class="card-img-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#ffa502" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a7 7 0 1 0 10 10"></path></svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-type">Beast</div>
-                        <h3 class="card-title">Tunnel Borehound</h3>
-                        <p class="card-desc">Subterranean predator that burrows beneath encounters and strikes from unexposed flanks.</p>
-                        <ul class="stats-list">
-                            <li><span>Threat Level:</span> <strong class="badge">Low</strong></li>
-                            <li><span>Primary Attack:</span> Burrow Strike</li>
-                            <li><span>Special Trait:</span> Armor Piercing</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Thorn Warden -->
-                <div class="card">
-                    <div class="card-img-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#2ed573" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9 0 6-4 9-10 9z"></path></svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-type">Support Enemy</div>
-                        <h3 class="card-title">Thorn Warden</h3>
-                        <p class="card-desc">Bio-engineered defender that entangles targets in hazardous constricting flora.</p>
-                        <ul class="stats-list">
-                            <li><span>Threat Level:</span> <strong class="badge">Medium</strong></li>
-                            <li><span>Primary Attack:</span> Vine Lash</li>
-                            <li><span>Special Trait:</span> Root / Immobilize</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Bloom Tyrant (Elaris) -->
-                <div class="card">
-                    <div class="card-img-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#ff6b81" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3m-3.5-6.5l-2.1 2.1m-8.8 8.8l-2.1 2.1m0-13l2.1 2.1m8.8 8.8l2.1 2.1"></path></svg>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-type">Elaris Sub-Boss</div>
-                        <h3 class="card-title">Bloom Tyrant</h3>
-                        <p class="card-desc">A massive floral behemoth guarding deep sector nodes. Releases toxic spore clouds when damaged.</p>
-                        <ul class="stats-list">
-                            <li><span>Threat Level:</span> <strong class="badge">Severe</strong></li>
-                            <li><span>Primary Attack:</span> Spore Burst</li>
-                            <li><span>Special Trait:</span> Poison Cloud / Regen</li>
-                        </ul>
-                    </div>
-                </div>
-
+        <!-- DYNAMIC CARDS SECTION -->
+        <section id="cards">
+            <h2>Player Cards & Abilities</h2>
+            <div class="grid" id="card-grid">
+                <!-- Javascript populates cards automatically from local game files -->
             </div>
         </section>
 
-        <!-- BOSSES SECTION -->
+        <!-- MONSTERS SECTION -->
+        <section id="monsters">
+            <h2>Bestiary & Enemies</h2>
+            <div class="grid" id="monster-grid">
+                <!-- Javascript populates monsters automatically -->
+            </div>
+        </section>
+
+        <!-- BOSS SECTION -->
         <section id="bosses">
             <h2>Boss Encounters</h2>
-            <div class="map-card">
-                <h3 class="map-title">Touch Crystals Boss Encounter</h3>
-                <p>An intense multi-phase boss fight centered around controlling crystal conduits. Players must manipulate and touch energy crystals in sequence to remove the boss's invulnerability shield while managing wave reinforcements.</p>
-                <ul style="color: var(--text-dim);">
-                    <li><strong>Phase 1:</strong> Direct engagement; Boss shields at 75% Health threshold.</li>
-                    <li><strong>Phase 2:</strong> Crystal Activation; Requires active position management to overload energy nodes.</li>
-                    <li><strong>Phase 3:</strong> Overdrive Enrage; High AOE damage output until defeated.</li>
-                </ul>
+            <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="color: var(--accent-blue); margin-top: 0;">Touch Crystals Boss Encounter</h3>
+                <p>Multi-phase boss fight centered around controlling crystal conduits. Activate energy nodes in sequence to bypass the boss's shield generator.</p>
             </div>
         </section>
 
         <!-- EXPANSION DATA -->
         <section id="expansion">
-            <h2>Expansion & Map Content</h2>
-            <div class="grid">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-type">System Module</div>
-                        <h3 class="card-title">Expansion Data (`expansion.js`)</h3>
-                        <p class="card-desc">Contains references to extended encounters, modular difficulty modifiers, and extra drop tables.</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-type">Layout Module</div>
-                        <h3 class="card-title">Mobile Crystal Styling</h3>
-                        <p class="card-desc">Dedicated UI and responsive layouts configured via `mobile-crystals.css` for cross-platform play.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- GAME MECHANICS -->
-        <section id="mechanics">
-            <h2>Core Mechanics & Encounter Data</h2>
-            <div class="map-card">
-                <h3 class="map-title">Encounter Depth Engine (`encounter-depth.js`)</h3>
-                <p>The encounter depth system controls spawning frequency, difficulty scaling based on layer depth, and card/ability availability throughout a run.</p>
-                <div style="display: flex; gap: 2rem; margin-top: 1rem; font-size: 0.95rem; color: var(--text-dim);">
-                    <div><strong>Depth 1-3:</strong> Basic encounters (Borehounds, Maulers)</div>
-                    <div><strong>Depth 4-7:</strong> Advanced units (Shades, Enforcers)</div>
-                    <div><strong>Depth 8+:</strong> Bosses & Expansion Units</div>
-                </div>
+            <h2>Expansion Modules</h2>
+            <div class="grid" id="expansion-grid">
+                <!-- Javascript populates expansion data -->
             </div>
         </section>
 
     </div>
 
     <footer>
-        <p>Battle Lab Compendium &mdash; Generated from internal game archives.</p>
+        <p>ClaudeBound Compendium &mdash; Running locally from repository root.</p>
     </footer>
 
+    <script>
+        // Automatic Image Fallback Handler
+        function handleImageError(img, altName) {
+            const parent = img.parentElement;
+            const fallback = document.createElement('div');
+            fallback.className = 'fallback-graphic';
+            fallback.innerHTML = `[ ${altName.toUpperCase()} ]`;
+            parent.replaceChild(fallback, img);
+        }
+
+        // Dynamically build card UI from loaded game JS variables
+        window.addEventListener('DOMContentLoaded', () => {
+            const cardGrid = document.getElementById('card-grid');
+            const monsterGrid = document.getElementById('monster-grid');
+            const expansionGrid = document.getElementById('expansion-grid');
+
+            // 1. Populate Cards (reads global window.cards, window.CARD_DATA, or fallback array)
+            const cardData = window.cards || window.CARD_DATA || [
+                { id: 'strike', name: 'Strike', type: 'Attack', cost: 1, desc: 'Deal 6 damage.', img: 'assets/cards/strike.png' },
+                { id: 'defend', name: 'Defend', type: 'Skill', cost: 1, desc: 'Gain 5 Block.', img: 'assets/cards/defend.png' },
+                { id: 'crystal_charge', name: 'Crystal Charge', type: 'Skill', cost: 2, desc: 'Channel 1 Crystal node.', img: 'assets/cards/crystal_charge.png' }
+            ];
+
+            cardGrid.innerHTML = cardData.map(c => `
+                <div class="card">
+                    <img src="${c.img || c.image || 'assets/cards/' + (c.id || c.name.toLowerCase()) + '.png'}" 
+                         alt="${c.name}" 
+                         class="card-img" 
+                         onerror="handleImageError(this, '${c.name}')">
+                    <div class="card-content">
+                        <div class="card-type">${c.type || 'Ability'}</div>
+                        <h3 class="card-title">${c.name}</h3>
+                        <p class="card-desc">${c.desc || c.description || 'No description available.'}</p>
+                        <ul class="stats-list">
+                            <li><span>Cost:</span> <strong class="badge">${c.cost ?? 'N/A'} Energy</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+
+            // 2. Populate Monsters
+            const monsterData = window.monsters || window.ENEMIES || [
+                { name: 'Reactor Mauler', type: 'Standard', desc: 'Aggressive core sector brute.', img: 'assets/monsters/reactor-mauler.png', threat: 'Medium' },
+                { name: 'Lunar Enforcer', type: 'Elite', desc: 'Shielded security unit with plasma blasters.', img: 'assets/monsters/lunar-enforcer.png', threat: 'High' },
+                { name: 'Phase Shade', type: 'Stealth', desc: 'Shifts dimensions to bypass defenses.', img: 'assets/monsters/phase-shade.png', threat: 'Medium' },
+                { name: 'Tunnel Borehound', type: 'Beast', desc: 'Burrows beneath encounters to strike flanks.', img: 'assets/monsters/tunnel-borehound.png', threat: 'Low' },
+                { name: 'Thorn Warden', type: 'Support', desc: 'Entangles targets in constricting flora.', img: 'assets/monsters/thorn-warden.png', threat: 'Medium' },
+                { name: 'Bloom Tyrant', type: 'Sub-Boss', desc: 'Elaris floral behemoth that releases spore clouds.', img: 'assets/monsters/elaris/bloom-tyrant.png', threat: 'Severe' }
+            ];
+
+            monsterGrid.innerHTML = monsterData.map(m => `
+                <div class="card">
+                    <img src="${m.img || m.image || 'assets/monsters/' + m.name.toLowerCase().replace(/\s+/g, '-') + '.png'}" 
+                         alt="${m.name}" 
+                         class="card-img" 
+                         onerror="handleImageError(this, '${m.name}')">
+                    <div class="card-content">
+                        <div class="card-type">${m.type || 'Enemy'}</div>
+                        <h3 class="card-title">${m.name}</h3>
+                        <p class="card-desc">${m.desc || m.description || ''}</p>
+                        <ul class="stats-list">
+                            <li><span>Threat:</span> <strong class="badge">${m.threat || 'Normal'}</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+        });
+    </script>
 </body>
 </html>
