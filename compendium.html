@@ -185,6 +185,8 @@
             color: var(--accent-purple);
             font-weight: bold;
             border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         footer {
@@ -197,10 +199,11 @@
         }
     </style>
 
-    <!-- Load Local Game Scripts directly -->
-    <script src="cards.js" onerror="console.warn('cards.js not found in current directory')"></script>
-    <script src="expansion.js" onerror="console.warn('expansion.js not found in current directory')"></script>
-    <script src="encounter-depth.js" onerror="console.warn('encounter-depth.js not found in current directory')"></script>
+    <!-- Load Local Game Scripts -->
+    <script src="game.js" onerror="console.warn('game.js not found')"></script>
+    <script src="cards.js" onerror="console.warn('cards.js not found')"></script>
+    <script src="expansion.js" onerror="console.warn('expansion.js not found')"></script>
+    <script src="encounter-depth.js" onerror="console.warn('encounter-depth.js not found')"></script>
 </head>
 <body>
 
@@ -213,7 +216,6 @@
         <a href="#cards">Cards & Deck</a>
         <a href="#monsters">Bestiary</a>
         <a href="#bosses">Boss Mechanics</a>
-        <a href="#expansion">Expansion Modules</a>
     </nav>
 
     <div class="container">
@@ -221,17 +223,13 @@
         <!-- DYNAMIC CARDS SECTION -->
         <section id="cards">
             <h2>Player Cards & Abilities</h2>
-            <div class="grid" id="card-grid">
-                <!-- Javascript populates cards automatically from local game files -->
-            </div>
+            <div class="grid" id="card-grid"></div>
         </section>
 
         <!-- MONSTERS SECTION -->
         <section id="monsters">
             <h2>Bestiary & Enemies</h2>
-            <div class="grid" id="monster-grid">
-                <!-- Javascript populates monsters automatically -->
-            </div>
+            <div class="grid" id="monster-grid"></div>
         </section>
 
         <!-- BOSS SECTION -->
@@ -243,14 +241,6 @@
             </div>
         </section>
 
-        <!-- EXPANSION DATA -->
-        <section id="expansion">
-            <h2>Expansion Modules</h2>
-            <div class="grid" id="expansion-grid">
-                <!-- Javascript populates expansion data -->
-            </div>
-        </section>
-
     </div>
 
     <footer>
@@ -258,71 +248,57 @@
     </footer>
 
     <script>
-        // Automatic Image Fallback Handler
         function handleImageError(img, altName) {
             const parent = img.parentElement;
             const fallback = document.createElement('div');
             fallback.className = 'fallback-graphic';
-            fallback.innerHTML = `[ ${altName.toUpperCase()} ]`;
+            fallback.innerHTML = `[ ${altName} ]`;
             parent.replaceChild(fallback, img);
         }
 
-        // Dynamically build card UI from loaded game JS variables
         window.addEventListener('DOMContentLoaded', () => {
             const cardGrid = document.getElementById('card-grid');
             const monsterGrid = document.getElementById('monster-grid');
-            const expansionGrid = document.getElementById('expansion-grid');
 
-            // 1. Populate Cards (reads global window.cards, window.CARD_DATA, or fallback array)
-            const cardData = window.cards || window.CARD_DATA || [
-                { id: 'strike', name: 'Strike', type: 'Attack', cost: 1, desc: 'Deal 6 damage.', img: 'assets/cards/strike.png' },
-                { id: 'defend', name: 'Defend', type: 'Skill', cost: 1, desc: 'Gain 5 Block.', img: 'assets/cards/defend.png' },
-                { id: 'crystal_charge', name: 'Crystal Charge', type: 'Skill', cost: 2, desc: 'Channel 1 Crystal node.', img: 'assets/cards/crystal_charge.png' }
-            ];
+            // Scan window object for any globally defined card arrays/objects
+            let rawCards = window.cards || window.cardsData || window.CARDS || window.ALL_CARDS || window.cardDatabase;
+            
+            // If cards are stored as an object instead of an array, convert to array
+            let cardList = [];
+            if (Array.isArray(rawCards)) {
+                cardList = rawCards;
+            } else if (rawCards && typeof rawCards === 'object') {
+                cardList = Object.values(rawCards);
+            }
 
-            cardGrid.innerHTML = cardData.map(c => `
-                <div class="card">
-                    <img src="${c.img || c.image || 'assets/cards/' + (c.id || c.name.toLowerCase()) + '.png'}" 
-                         alt="${c.name}" 
-                         class="card-img" 
-                         onerror="handleImageError(this, '${c.name}')">
-                    <div class="card-content">
-                        <div class="card-type">${c.type || 'Ability'}</div>
-                        <h3 class="card-title">${c.name}</h3>
-                        <p class="card-desc">${c.desc || c.description || 'No description available.'}</p>
-                        <ul class="stats-list">
-                            <li><span>Cost:</span> <strong class="badge">${c.cost ?? 'N/A'} Energy</strong></li>
-                        </ul>
-                    </div>
-                </div>
-            `).join('');
+            if (cardList.length > 0) {
+                cardGrid.innerHTML = cardList.map(c => {
+                    const title = c.name || c.id || 'Unknown Card';
+                    const type = c.type || c.category || 'Ability';
+                    const cost = c.cost ?? c.energy ?? 'N/A';
+                    const desc = c.desc || c.description || c.text || 'No description available.';
+                    const imgSrc = c.img || c.image || c.icon || `assets/cards/${(c.id || title).toLowerCase().replace(/\s+/g, '-')}.png`;
 
-            // 2. Populate Monsters
-            const monsterData = window.monsters || window.ENEMIES || [
-                { name: 'Reactor Mauler', type: 'Standard', desc: 'Aggressive core sector brute.', img: 'assets/monsters/reactor-mauler.png', threat: 'Medium' },
-                { name: 'Lunar Enforcer', type: 'Elite', desc: 'Shielded security unit with plasma blasters.', img: 'assets/monsters/lunar-enforcer.png', threat: 'High' },
-                { name: 'Phase Shade', type: 'Stealth', desc: 'Shifts dimensions to bypass defenses.', img: 'assets/monsters/phase-shade.png', threat: 'Medium' },
-                { name: 'Tunnel Borehound', type: 'Beast', desc: 'Burrows beneath encounters to strike flanks.', img: 'assets/monsters/tunnel-borehound.png', threat: 'Low' },
-                { name: 'Thorn Warden', type: 'Support', desc: 'Entangles targets in constricting flora.', img: 'assets/monsters/thorn-warden.png', threat: 'Medium' },
-                { name: 'Bloom Tyrant', type: 'Sub-Boss', desc: 'Elaris floral behemoth that releases spore clouds.', img: 'assets/monsters/elaris/bloom-tyrant.png', threat: 'Severe' }
-            ];
-
-            monsterGrid.innerHTML = monsterData.map(m => `
-                <div class="card">
-                    <img src="${m.img || m.image || 'assets/monsters/' + m.name.toLowerCase().replace(/\s+/g, '-') + '.png'}" 
-                         alt="${m.name}" 
-                         class="card-img" 
-                         onerror="handleImageError(this, '${m.name}')">
-                    <div class="card-content">
-                        <div class="card-type">${m.type || 'Enemy'}</div>
-                        <h3 class="card-title">${m.name}</h3>
-                        <p class="card-desc">${m.desc || m.description || ''}</p>
-                        <ul class="stats-list">
-                            <li><span>Threat:</span> <strong class="badge">${m.threat || 'Normal'}</strong></li>
-                        </ul>
-                    </div>
-                </div>
-            `).join('');
+                    return `
+                        <div class="card">
+                            <img src="${imgSrc}" 
+                                 alt="${title}" 
+                                 class="card-img" 
+                                 onerror="handleImageError(this, '${title}')">
+                            <div class="card-content">
+                                <div class="card-type">${type}</div>
+                                <h3 class="card-title">${title}</h3>
+                                <p class="card-desc">${desc}</p>
+                                <ul class="stats-list">
+                                    <li><span>Cost:</span> <strong class="badge">${cost} Energy</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                cardGrid.innerHTML = `<p style="color: var(--text-dim);">No card data array found in game scripts. Check DevTools Console (F12) to see global variables.</p>`;
+            }
         });
     </script>
 </body>
