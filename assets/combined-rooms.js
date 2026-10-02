@@ -106,7 +106,7 @@ function appendAreaPainting(world,area){
 }
 const singleRenderWorld=renderWorld;
 function appendPatrols(container,key){
- for(const spawn of roomSpawns(key)){if(!spawnAvailable(spawn))continue;const p=patrolFor(spawn),node=document.createElement('div');node.className='enemy-node monster-'+spawn.type+(spawn.boss?' boss':'')+(spawn.elite?' elite':'');node.dataset.spawn=spawn.uid;node.dataset.name=(spawn.elite?'★ ELITE · ':'')+(spawn.element?ELEMENT_ICONS[spawn.element]+' ':'')+enemies[spawn.type].name;node.style.left=p.x+'px';node.style.top=p.y+'px';node.innerHTML=monsterArt(spawn.type);container.append(node)}
+ for(const spawn of roomSpawns(key)){if(!spawnAvailable(spawn))continue;const p=patrolFor(spawn),node=document.createElement('div');node.className='enemy-node monster-'+spawn.type+(spawn.boss?' boss':'')+(spawn.elite?' elite':'');node.dataset.spawn=spawn.uid;node.dataset.name=(spawn.elite?'★ ELITE · ':'')+(spawn.element?ELEMENT_ICONS[spawn.element]+' ':'')+enemies[spawn.type].name+' · Lv.'+enemyLevel(key);node.style.left=p.x+'px';node.style.top=p.y+'px';node.innerHTML=monsterArt(spawn.type);container.append(node)}
 }
 renderWorld=function(){
  if(!state)return;singleRenderWorld();const world=$('world'),area=joinedArea(),current=document.createElement('div');
