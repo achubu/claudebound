@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardbound — Compendium & Database</title>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --card-bg: #1e2230;
+            --accent-color: #ff4757;
+            --accent-blue: #2ed573;
+            --accent-purple: #a55eea;
+            --text-main: #e0e6ed;
+            --text-dim: #a4b0be;
+            --border-color: #2f3542;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #141722;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--accent-color);
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            background: #181b26;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 0.75rem;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            background-color: #0b0c12;
+            padding: 1rem;
+            box-sizing: border-box;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-content {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            color: #ffffff;
+        }
+
+        .card-type {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .stats-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.75rem;
+        }
+
+        .stats-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-list span {
+            color: var(--text-dim);
+        }
+
+        .badge {
+            background-color: #2f3542;
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .fallback-graphic {
+            height: 200px;
+            background: #0b0c12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-purple);
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: #141722;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .lead, .dim { color: var(--text-dim); }
+        .lead { margin-top: -0.75rem; margin-bottom: 1.5rem; }
+        .game-card.soul { border-color: #7d5aa8; }
+        .soul-tag { color: var(--accent-purple); }
+        .level-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; background: #0b0c12; border-bottom: 1px solid var(--border-color); }
+        .lvl { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; border: 1px solid transparent; border-radius: 5px; font-size: 0.7rem; color: var(--text-dim); }
+        .lvl img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; opacity: .65; }
+        .lvl.on, .lvl:hover { border-color: var(--accent-color); color: #fff; }
+        .lvl.on img, .lvl:hover img { opacity: 1; }
+        .lvl:focus-visible { outline: 2px solid var(--accent-color); }
+        .lvl-label { font-size: 0.75rem; color: var(--text-dim); font-weight: normal; }
+        .region { margin-bottom: 2.5rem; }
+        .region-title { font-size: 1.35rem; margin: 0 0 0.25rem; color: #fff; }
+        .empty { padding: 1rem; border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-dim); }
+        .dossier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .sprite-box { display: grid; place-items: center; }
+        .sprite-box svg { width: 160px; height: 160px; }
+        .sheet { height: 100%; aspect-ratio: 3 / 4; background-size: 400% 100%; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated; }
+        .pattern-title { margin: 1rem 0 0.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
+        .pattern { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+        .step { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; padding: 8px 10px; border-radius: 6px; background: #161925; border-left: 4px solid #57606f; font-size: 0.88rem; }
+        .step b { color: var(--text-dim); font-weight: 600; font-size: 0.78rem; align-self: center; }
+        .step-name { color: #fff; font-weight: 600; }
+        .step-dmg { font-weight: 700; white-space: nowrap; }
+        .step-tip { grid-column: 1 / -1; color: var(--text-dim); font-size: 0.8rem; }
+        .k-attack { border-left-color: #ff6b6b; } .k-heavy { border-left-color: #ff4757; } .k-guard { border-left-color: #1e90ff; }
+        .k-charge { border-left-color: #ffa502; } .k-elemental { border-left-color: #a55eea; }
+        .cycle-note { font-size: 0.8rem; color: var(--text-dim); margin: 0.4rem 0 0; }
+        .mini-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; font-size: 0.78rem; }
+        .mini-pattern i { color: var(--text-dim); font-style: normal; }
+        .chip { padding: 2px 7px; border-radius: 10px; background: #161925; border-left: 3px solid #57606f; text-transform: capitalize; }
+        .notes { margin: 0.75rem 0 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--text-dim); }
+        .notes b { color: #fff; }
+        .mech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+        .mech { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mech p { margin: 0.35rem 0 0; color: var(--text-dim); font-size: 0.9rem; }
+        @media (max-width: 600px) { h1 { font-size: 1.6rem; } nav { gap: 0; flex-wrap: wrap; } nav a { padding: 0.4rem 0.6rem; } .dossier-grid { grid-template-columns: 1fr; } }
+    </style>
+
+    <!-- Load Local Game Scripts -->
+    <!-- Round 37: corrected to the real file layout. There's no standalone
+         game.js -- the game's main logic lives inline inside index.html
+         itself, which this page can't reach into (that's the whole reason
+         cards.js was split out: to share just the data, not the logic).
+         cards.js is only a fallback now: the full card and enemy data is
+         read from the running game (see loadGameData below), because
+         expansion.js / encounter-depth.js depend on the game's own globals
+         and crashed here, silently dropping 10 of the 23 cards. -->
+    <script src="assets/cards.js?v=neon-covenant" onerror="console.warn('assets/cards.js not found')"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Cardbound Compendium</h1>
+        <div class="subtitle">Card upgrades, bestiary &amp; boss dossiers</div>
+    </header>
+
+    <nav>
+        <a href="#cards">Cards</a>
+        <a href="#bosses">Bosses</a>
+        <a href="#monsters">Bestiary</a>
+        <a href="#mechanics">Attack guide</a>
+    </nav>
+
+    <div class="container">
+
+        <section id="cards">
+            <h2>Player Cards &amp; Upgrades</h2>
+            <p class="lead">Every card has four forms: Level 0 plus three upgrades. Tap a level to see its artwork and what it does.</p>
+            <div class="grid" id="card-grid"></div>
+        </section>
+
+        <section id="bosses">
+            <h2>Bosses &amp; Mini-bosses</h2>
+            <p class="lead">Boss attacks follow a fixed sequence that repeats. Learn it and you'll know exactly when to block, when to hold a counter, and when to attack.</p>
+            <div id="boss-list"></div>
+        </section>
+
+        <section id="monsters">
+            <h2>Bestiary</h2>
+            <div id="monster-list"></div>
+        </section>
+
+        <section id="mechanics">
+            <h2>Attack guide</h2>
+            <div class="mech-grid" id="mechanics-list"></div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>Cardbound Compendium &mdash; card and enemy data is read live from the game.</p>
+    </footer>
+
+    <script>
+        // ---------------------------------------------------------------
+        // Data source. The game's full card and enemy data only exists once
+        // index.html has run all of its scripts (expansion cards, Elaris
+        // wildlife, the Bloom Tyrant, boss attack patterns), so the page is
+        // loaded invisibly and its live values are read directly. It never
+        // starts a journey, so it never writes a save.
+        // ---------------------------------------------------------------
+        function loadGameData() {
+            return new Promise(resolve => {
+                const frame = document.createElement('iframe');
+                frame.src = 'index.html';
+                frame.setAttribute('aria-hidden', 'true');
+                frame.tabIndex = -1;
+                frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';
+                const done = data => { clearTimeout(timer); resolve(data); };
+                const timer = setTimeout(() => done(null), 10000);
+                frame.onload = () => {
+                    try {
+                        const get = name => frame.contentWindow.eval(name);
+                        done({
+                            defs: get('defs'), rules: get('rules'), stat: get('stat'), cardArtPath: get('cardArtPath'),
+                            enemies: get('enemies'), monsterArt: get('monsterArt'),
+                            enemyStats: get('typeof enemyStats === "function" ? enemyStats : null'),
+                            balanceFor: get('typeof balanceFor === "function" ? balanceFor : null'),
+                            bossPatterns: get('typeof BOSS_PATTERNS !== "undefined" ? BOSS_PATTERNS : {}'),
+                            counters: get('typeof COUNTERS !== "undefined" ? COUNTERS : {}'),
+                            miniBossCards: get('typeof MINI_BOSS_CARDS !== "undefined" ? MINI_BOSS_CARDS : {}'),
+                            soulChance: get('typeof MINI_BOSS_SOULBOUND_CHANCE !== "undefined" ? MINI_BOSS_SOULBOUND_CHANCE : 0.25')
+                        });
+                    } catch (e) { console.warn('Compendium: could not read game data', e); done(null); }
+                };
+                document.body.append(frame);
+            });
+        }
+
+        // Which enemies live where, and at what level. Mirrors the spawn
+        // tables and room levels in assets/expansion.js; health and attack
+        // come live from the game's own enemyStats(), so they always match
+        // what you face in battle.
+        const REGIONS = [
+            { id: 'city', name: 'Neon Aftermath', blurb: 'The ruined city where every journey starts.', levels: [1, 8], bossLevels: { moonKnight: 4, crownSentinel: 6, thornWarden: 9 },
+              regular: ['emberling', 'thornling', 'vineguard', 'burrower', 'shade', 'cryptWisp', 'forgeBeast', 'crownEye'],
+              miniBosses: ['moonKnight', 'crownSentinel'], boss: 'thornWarden' },
+            { id: 'elaris', name: 'Elaris', blurb: 'An overgrown wild world reached through the boss portal.', levels: [10, 17], bossLevels: { tidewardenElaris: 10, galeSovereign: 16, bloomTyrant: 18 },
+              regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth'],
+              miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
+            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 42 rooms, levels 19–27.', levels: [19, 26], bossLevels: { arcSentinel: 21, resonantPhantom: 25, stormTyrant: 27 },
+              regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' }
+        ];
+        const ELEMENT_EFFECT = {
+            fire: 'Burn: 2 damage at the end of each of your next 2 turns.',
+            earth: 'Poison: 1 damage every turn, stacking up to 3.',
+            water: 'Drain: you start your next turn with 1 less energy.',
+            air: 'Exposed: the next hit you take deals +2 damage.'
+        };
+        const ELEMENT_ICON = { fire: '🔥', earth: '🌿', water: '💧', air: '🌪', lightning: 'ϟ' };
+        const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
+        const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
+
+        function handleImageError(img, altName) {
+            const fallback = document.createElement('div');
+            fallback.className = 'fallback-graphic';
+            fallback.textContent = `[ ${altName} ]`;
+            img.replaceWith(fallback);
+        }
+
+        // ---------------------------------------------------------------
+        // Cards: every card at Level 0-3, with its art and rules per level.
+        // ---------------------------------------------------------------
+        function renderCards(game) {
+            const grid = document.getElementById('card-grid');
+            const defs = game ? game.defs : window.defs;
+            const rules = game ? game.rules : window.rules;
+            const artPath = game ? game.cardArtPath : window.cardArtPath;
+            const stat = game ? game.stat : window.stat;
+            if (!defs) { grid.innerHTML = '<p class="dim">No card data found.</p>'; return; }
+            const order = { Attack: 0, Defense: 1, Skill: 2, Healing: 3 };
+            const list = Object.entries(defs).map(([id, c]) => ({ id, ...c }))
+                .sort((a, b) => (!!a.soulbound - !!b.soulbound) || ((order[a.kind] ?? 9) - (order[b.kind] ?? 9)) || a.name.localeCompare(b.name));
+            grid.innerHTML = list.map(c => {
+                const levels = [0, 1, 2, 3].map(level => {
+                    let text = '', cost = c.cost, name = c.name;
+                    try { text = rules({ id: c.id, level }); } catch (e) { text = c.desc || ''; }
+                    try { const s = stat({ id: c.id, level }); cost = s.cost; name = s.name; } catch (e) {}
+                    return { level, text, cost, name, art: artPath(c.id, level) };
+                });
+                const thumbs = levels.map(l => `
+                    <button class="lvl${l.level === 0 ? ' on' : ''}" data-level="${l.level}" aria-pressed="${l.level === 0}" title="Level ${l.level}">
+                        <img src="${l.art}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+                        <span>Lv ${l.level}</span>
+                    </button>`).join('');
+                return `
+                    <article class="card game-card${c.soulbound ? ' soul' : ''}" data-levels='${esc(JSON.stringify(levels))}'>
+                        <img src="${levels[0].art}" alt="${esc(c.name)}, level 0" class="card-img main-art" onerror="handleImageError(this, '${esc(c.name)}')">
+                        <div class="level-strip">${thumbs}</div>
+                        <div class="card-content">
+                            <div class="card-type">${esc(c.kind || 'Ability')}${c.element ? ' · ' + (ELEMENT_ICON[c.element] || '') + ' ' + cap(c.element) : ''}${c.soulbound ? ' · <span class="soul-tag">◆ Soulbound</span>' : ''}${c.unique && game && game.enemies[c.unique] ? ' · <span class="soul-tag">◇ Mini-boss drop: ' + esc(game.enemies[c.unique].name) + '</span>' : ''}</div>
+                            <h3 class="card-title"><span class="lvl-name">${esc(levels[0].name)}</span> <small class="lvl-label">Level 0</small></h3>
+                            <p class="card-desc lvl-text">${levels[0].text}</p>
+                            <ul class="stats-list">
+                                <li><span>Cost:</span> <strong class="badge lvl-cost">${levels[0].cost} Energy</strong></li>
+                            </ul>
+                        </div>
+                    </article>`;
+            }).join('');
+            grid.addEventListener('click', e => {
+                const btn = e.target.closest('.lvl'); if (!btn) return;
+                const card = btn.closest('.game-card'), levels = JSON.parse(card.dataset.levels), l = levels[+btn.dataset.level];
+                card.querySelectorAll('.lvl').forEach(b => { const on = b === btn; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+                const main = card.querySelector('.main-art');
+                if (main) { main.src = l.art; main.alt = l.name + ', level ' + l.level; }
+                card.querySelector('.lvl-name').textContent = l.name;
+                card.querySelector('.lvl-label').textContent = 'Level ' + l.level;
+                card.querySelector('.lvl-text').innerHTML = l.text;
+                card.querySelector('.lvl-cost').textContent = l.cost + ' Energy';
+            });
+        }
+
+        // ---------------------------------------------------------------
+        // Enemies
+        // ---------------------------------------------------------------
+        function artFor(game, id, name) {
+            let html = '';
+            try { html = game.monsterArt(id); } catch (e) {}
+            const img = /<img[^>]*src="([^"]+)"/.exec(html);
+            if (img) return `<img src="${img[1]}" alt="${esc(name)}" class="card-img" onerror="handleImageError(this, '${esc(name)}')">`;
+            const sheet = /url\(([^)]+)\)/.exec(html);
+            if (sheet) return `<div class="card-img sprite-box"><div class="sheet" role="img" aria-label="${esc(name)}" style="background-image:url(${sheet[1]})"></div></div>`;
+            const svg = /<svg[\s\S]*<\/svg>/.exec(html);
+            if (svg) return `<div class="card-img sprite-box">${svg[0]}</div>`;
+            return `<div class="fallback-graphic">[ ${esc(name)} ]</div>`;
+        }
+
+        function patternFor(game, id, e) {
+            if (game.bossPatterns[id]) return game.bossPatterns[id];
+            return e.element ? ['attack', 'charge', 'elemental', 'guard'] : ['attack', 'guard', 'heavy'];
+        }
+
+        // Turn-by-turn description, using the same numbers as enemyPlan()
+        // in assets/encounter-depth.js (before Weaken and enemy level).
+        function describeStep(kind, attack, element, shifter, turn, game, region, isBoss) {
+            const B = k => game.balanceFor ? game.balanceFor(k, region) : ({ heavyBase: 1.5, heavyDistance: 1, bossHeavyMax: Infinity, elementalMult: 1.8, bossElementalMult: 1.8 })[k];
+            const heavyLo = Math.min(B('heavyBase'), isBoss ? B('bossHeavyMax') : Infinity), heavyHi = Math.min(B('heavyBase') + B('heavyDistance'), isBoss ? B('bossHeavyMax') : Infinity);
+            const elementalMult = B(isBoss ? 'bossElementalMult' : 'elementalMult');
+            const el = shifter ? shifter.shift[Math.floor((turn - 1) / (shifter.shiftEvery || 3)) % shifter.shift.length] : element;
+            const guardBlock = shifter ? 8 : 5;
+            switch (kind) {
+                case 'attack': return { label: 'Strike', dmg: `${attack}`, tip: 'A normal hit.' };
+                case 'heavy': { const lo = Math.round(attack * heavyLo), hi = Math.round(attack * heavyHi); return { label: 'Heavy attack', dmg: lo === hi ? `${lo}` : `${lo}–${hi}`, tip: lo === hi ? 'A big hit. Stack Block this turn.' : 'Hits harder the further you are from the region start. Stack Block.' }; }
+                case 'guard': return { label: shifter ? 'Rootguard' : 'Guard', dmg: '—', tip: `No damage this turn, so you can skip blocking. It gains ${guardBlock} Block next turn, which soaks your next attacks first.` };
+                case 'charge': return { label: `Charging ${ELEMENT_ICON[el] || ''} ${cap(el)}`, dmg: '—', tip: `No damage now. Next comes a charged ${el} strike. Play Prismatic Counter to cancel it.` };
+                case 'elemental': return { label: `Charged ${ELEMENT_ICON[el] || ''} ${cap(el)} strike`, dmg: `${Math.round(attack * elementalMult)}`, tip: (ELEMENT_EFFECT[el] || '') + ' Cancelled by an armed Prismatic Counter, which reflects 6 damage.' };
+            }
+            return { label: kind, dmg: '?', tip: '' };
+        }
+
+        function enemyCard(game, id, region, opts = {}) {
+            const e = game.enemies[id]; if (!e) return '';
+            const statsAt = level => game.enemyStats ? game.enemyStats(id, { region: region.id, level, boss: !!e.boss }) : { hp: e.hp, attack: e.attack };
+            const bossLevel = region.bossLevels[id];
+            const lo = statsAt(bossLevel || region.levels[0]), hi = statsAt(bossLevel || region.levels[1]);
+            const hp = lo.hp === hi.hp ? `${lo.hp}` : `${lo.hp}–${hi.hp}`, attackText = lo.attack === hi.attack ? `${lo.attack}` : `${lo.attack}–${hi.attack}`, attack = lo.attack;
+            const tier = e.boss ? (e.miniBoss ? 'Mini-boss' : 'Region boss') : 'Enemy';
+            const el = e.element ? ` · ${ELEMENT_ICON[e.element] || ''} ${cap(e.element)}` : '';
+            const pattern = patternFor(game, id, e), shifter = e.shift ? e : null;
+            const steps = pattern.map((k, i) => {
+                const s = describeStep(k, attack, e.element, shifter, i + 1, game, region.id, !!e.boss);
+                return `<li class="step k-${k}"><b>Turn ${i + 1}</b><span class="step-name">${s.label}</span><span class="step-dmg">${s.dmg === '—' ? 'no damage' : s.dmg + ' dmg'}</span><span class="step-tip">${s.tip}</span></li>`;
+            }).join('');
+            const notes = [];
+            if (e.boss) notes.push('<b>Enraged</b> below 50% HP: every attack deals +2 damage.');
+            if (shifter) { const every = shifter.shiftEvery || 3; notes.push(`<b>Shifting element:</b> ${shifter.shift.map((el, i) => `${el} for turns ${i * every + 1}–${(i + 1) * every}`).join(', ')}, then repeats. Your Prismatic Counter adapts automatically.`); }
+            const dropId = game.miniBossCards && game.miniBossCards[id];
+            if (dropId && game.defs[dropId]) notes.push(`<b>Unique drop:</b> ${esc(game.defs[dropId].name)} — Soulbound ${Math.round(game.soulChance * 100)}% of the time, otherwise Impermanent. Drops once, the first time you win.`);
+            if (e.armor) notes.push(`<b>Armor ${e.armor}:</b> blocks ${e.armor} damage from every hit except Pierce cards.`);
+            const fixedCycle = opts.full ? `<ol class="pattern">${steps}</ol><p class="cycle-note">Repeats every ${pattern.length} turns.</p>` :
+                `<p class="mini-pattern">${pattern.map(k => `<span class="chip k-${k}">${k === 'elemental' ? 'charged strike' : k}</span>`).join('<i>→</i>')}</p>`;
+            return `
+                <article class="card enemy-card${opts.full ? ' dossier' : ''}">
+                    ${artFor(game, id, e.name)}
+                    <div class="card-content">
+                        <div class="card-type">${tier}${el}</div>
+                        <h3 class="card-title">${e.boss ? '★ ' : ''}${esc(e.name)}</h3>
+                        <ul class="stats-list">
+                            <li><span>Health:</span> <strong class="badge">${hp} HP</strong></li>
+                            <li><span>Level:</span> <strong class="badge">${bossLevel ? 'Lv ' + bossLevel : `Lv ${region.levels[0]}–${region.levels[1]}`}</strong></li>
+                            <li><span>Attack:</span> <strong class="badge">${attackText}</strong></li>
+                            <li><span>Armor:</span> <strong class="badge">${e.armor || 0}</strong></li>
+                        </ul>
+                        <h4 class="pattern-title">${opts.full ? 'Attack sequence' : 'Attack cycle'}</h4>
+                        ${fixedCycle}
+                        ${notes.length ? `<ul class="notes">${notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
+                    </div>
+                </article>`;
+        }
+
+        function renderEnemies(game) {
+            const bossList = document.getElementById('boss-list'), monsterList = document.getElementById('monster-list');
+            if (!game || !game.enemies) {
+                const msg = '<p class="dim">Enemy data loads from the game itself. Open this page from the hosted site or a local web server rather than straight from a file.</p>';
+                bossList.innerHTML = monsterList.innerHTML = msg; return;
+            }
+            const bossNote = 'Stats at each boss\'s own level. Matching that level is a fair fight: a typical build beats a mini-boss about half the time and a final boss about 4 times in 10; a strong build wins most of the time.';
+            bossList.innerHTML = REGIONS.map(r => {
+                const ids = [...r.miniBosses, r.boss].filter(Boolean);
+                return `<div class="region"><h3 class="region-title">${esc(r.name)}</h3><p class="dim">${r.blurb} ${ids.length ? bossNote : ''}</p>
+                    ${ids.length ? `<div class="dossier-grid">${ids.map(id => enemyCard(game, id, r, { full: true })).join('')}</div>` : '<p class="empty">No mini-bosses or boss in this region yet.</p>'}</div>`;
+            }).join('');
+            monsterList.innerHTML = REGIONS.map(r => `<div class="region"><h3 class="region-title">${esc(r.name)}</h3>
+                <p class="dim">Enemies here are level ${r.levels[0]}–${r.levels[1]}, getting tougher the further you go; stats show that range. Elites have extra health and +2 attack.</p>
+                <div class="grid">${r.regular.map(id => enemyCard(game, id, r)).join('')}</div></div>`).join('');
+        }
+
+        function renderMechanics() {
+            const items = [
+                ['Strike', 'Deals the enemy\'s attack value.'],
+                ['Heavy attack', 'About 1.5× attack near a region\'s start, a little more at its far edge. Bosses\' heavy hits are capped lower so one hit never decides the fight.'],
+                ['Guard', 'Gives the enemy 5 Block (Bloom Tyrant: 8) starting next turn. Block soaks your damage first.'],
+                ['Charge', 'No damage. It telegraphs a charged elemental strike on the following turn.'],
+                ['Charged strike', 'About 1.8× attack (1.5× for bosses) plus a status effect if any damage gets through. An armed Prismatic Counter cancels it and reflects 6 damage.'],
+                ...Object.entries(ELEMENT_EFFECT).map(([el, t]) => [`${ELEMENT_ICON[el]} ${cap(el)} strike`, t]),
+                ['Enraged', 'Bosses and mini-bosses below 50% health deal +2 damage on every attack.'],
+                ['Weaken', 'Talent ability: lowers enemy attack for the whole encounter, which reduces every number above.']
+            ];
+            document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('card-grid').innerHTML = document.getElementById('boss-list').innerHTML = '<p class="dim">Loading game data…</p>';
+            const game = await loadGameData();
+            renderCards(game);
+            renderEnemies(game);
+            renderMechanics();
+        });
+    </script>
+</body>
+</html>
