@@ -38,37 +38,6 @@ function drawMoveMarker(){
  if(!marker){marker=document.createElement('span');marker.className='move-marker';marker.setAttribute('aria-hidden','true');$('world').append(marker)}
  marker.style.left=touchRoute.target.x+'px';marker.style.top=(touchRoute.target.y+25)+'px';
 }
-// Generous room-exit targeting. Exit labels are small, and on phones the
-// zoomed camera crops the room so the side exits are often off screen
-// entirely, which left keyboard arrows as the only reliable way between
-// rooms. A tap now counts as "go through that exit" when it lands either
-// in the outer band of a room side that has an exit, or in the outer band
-// of the visible screen on that side (as long as the exit is reasonably
-// close). Corner taps pick whichever side the tap is proportionally nearer.
-const EXIT_DOOR={n:{x:400,y:15},s:{x:400,y:485},e:{x:785,y:250},w:{x:15,y:250}};
-const EXIT_BAND={x:170,y:110},SCREEN_BAND=.2,SCREEN_REACH={x:560,y:360};
-function externalExit(key,dir,area){const raw=rooms[key]?.exits?.[dir];if(!raw)return null;if(typeof raw==='string'&&area.cells.includes(raw))return null;return raw}
-function edgeExitFor(t,clientX,clientY,area,bounds,scale){
- const cx=Math.floor(t.x/800),cy=Math.floor(t.y/500),key=(area.left+cx)+','+(area.top+cy);
- if(!area.cells.includes(key))return null;
- const o=cellOffset(key,area),lx=t.x-o.x,ly=t.y-o.y;
- // Visible part of the world element, in world units, for the screen bands.
- const visLeft=Math.max(bounds.left,0),visRight=Math.min(bounds.right,innerWidth),visTop=Math.max(bounds.top,0),visBottom=Math.min(bounds.bottom,innerHeight);
- const sw=Math.max(1,visRight-visLeft),sh=Math.max(1,visBottom-visTop);
- const screen={w:(clientX-visLeft)/sw,e:(visRight-clientX)/sw,n:(clientY-visTop)/sh,s:(visBottom-clientY)/sh};
- const dist={w:lx,e:800-lx,n:ly,s:500-ly},span={w:800,e:800,n:500,s:500};
- let best=null;
- for(const dir of ['n','s','e','w']){
-  if(!externalExit(key,dir,area))continue;
-  const horizontal=dir==='e'||dir==='w',band=horizontal?EXIT_BAND.x:EXIT_BAND.y,reach=horizontal?SCREEN_REACH.x:SCREEN_REACH.y;
-  const inRoomBand=dist[dir]<=band,inScreenBand=screen[dir]<=SCREEN_BAND&&dist[dir]<=reach;
-  if(!inRoomBand&&!inScreenBand)continue;
-  const score=Math.min(dist[dir]/span[dir],screen[dir]);
-  if(!best||score<best.score)best={dir,key,score};
- }
- if(!best)return null;
- return{dir:best.dir,key:best.key,point:{x:o.x+EXIT_DOOR[best.dir].x,y:o.y+EXIT_DOOR[best.dir].y}};
-}
 $('world').onclick=e=>{
  if(e.target.closest('button,a,input,select'))return;
  if(!state||state.battle)return;
@@ -82,10 +51,7 @@ $('world').onclick=e=>{
  const enemy=e.target.closest('.enemy-node');
  if(enemy){for(const key of area.cells){const spawn=roomSpawns(key).find(s=>s.uid===enemy.dataset.spawn);if(spawn){const p=patrolFor(spawn),o=cellOffset(key,area);setTouchDestination({x:o.x+p.x,y:o.y+p.y});return}}}
  const bounds=$('world').getBoundingClientRect(),scale=bounds.width/area.width;
- const tap={x:(e.clientX-bounds.left)/scale,y:(e.clientY-bounds.top)/scale};
- const edge=edgeExitFor(tap,e.clientX,e.clientY,area,bounds,scale);
- if(edge){setTouchDestination(edge.point,{dir:edge.dir,key:edge.key});return}
- setTouchDestination({x:tap.x,y:tap.y-25});
+ setTouchDestination({x:(e.clientX-bounds.left)/scale,y:(e.clientY-bounds.top)/scale-25});
 };
 const keyboardMove=move;
 move=function(dt){
