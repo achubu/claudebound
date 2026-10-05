@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClaudeBound — Compendium & Database</title>
+    <title>Cardbound — Compendium & Database</title>
     <style>
         :root {
             --bg-color: #0f111a;
@@ -197,6 +197,44 @@
             color: var(--text-dim);
             font-size: 0.9rem;
         }
+
+        .lead, .dim { color: var(--text-dim); }
+        .lead { margin-top: -0.75rem; margin-bottom: 1.5rem; }
+        .game-card.soul { border-color: #7d5aa8; }
+        .soul-tag { color: var(--accent-purple); }
+        .level-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; background: #0b0c12; border-bottom: 1px solid var(--border-color); }
+        .lvl { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; border: 1px solid transparent; border-radius: 5px; font-size: 0.7rem; color: var(--text-dim); }
+        .lvl img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; opacity: .65; }
+        .lvl.on, .lvl:hover { border-color: var(--accent-color); color: #fff; }
+        .lvl.on img, .lvl:hover img { opacity: 1; }
+        .lvl:focus-visible { outline: 2px solid var(--accent-color); }
+        .lvl-label { font-size: 0.75rem; color: var(--text-dim); font-weight: normal; }
+        .region { margin-bottom: 2.5rem; }
+        .region-title { font-size: 1.35rem; margin: 0 0 0.25rem; color: #fff; }
+        .empty { padding: 1rem; border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-dim); }
+        .dossier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .sprite-box { display: grid; place-items: center; }
+        .sprite-box svg { width: 160px; height: 160px; }
+        .sheet { height: 100%; aspect-ratio: 3 / 4; background-size: 400% 100%; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated; }
+        .pattern-title { margin: 1rem 0 0.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
+        .pattern { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+        .step { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; padding: 8px 10px; border-radius: 6px; background: #161925; border-left: 4px solid #57606f; font-size: 0.88rem; }
+        .step b { color: var(--text-dim); font-weight: 600; font-size: 0.78rem; align-self: center; }
+        .step-name { color: #fff; font-weight: 600; }
+        .step-dmg { font-weight: 700; white-space: nowrap; }
+        .step-tip { grid-column: 1 / -1; color: var(--text-dim); font-size: 0.8rem; }
+        .k-attack { border-left-color: #ff6b6b; } .k-heavy { border-left-color: #ff4757; } .k-guard { border-left-color: #1e90ff; }
+        .k-charge { border-left-color: #ffa502; } .k-elemental { border-left-color: #a55eea; }
+        .cycle-note { font-size: 0.8rem; color: var(--text-dim); margin: 0.4rem 0 0; }
+        .mini-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; font-size: 0.78rem; }
+        .mini-pattern i { color: var(--text-dim); font-style: normal; }
+        .chip { padding: 2px 7px; border-radius: 10px; background: #161925; border-left: 3px solid #57606f; text-transform: capitalize; }
+        .notes { margin: 0.75rem 0 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--text-dim); }
+        .notes b { color: #fff; }
+        .mech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+        .mech { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+        .mech p { margin: 0.35rem 0 0; color: var(--text-dim); font-size: 0.9rem; }
+        @media (max-width: 600px) { h1 { font-size: 1.6rem; } nav { gap: 0; flex-wrap: wrap; } nav a { padding: 0.4rem 0.6rem; } .dossier-grid { grid-template-columns: 1fr; } }
     </style>
 
     <!-- Load Local Game Scripts -->
@@ -204,128 +242,279 @@
          game.js -- the game's main logic lives inline inside index.html
          itself, which this page can't reach into (that's the whole reason
          cards.js was split out: to share just the data, not the logic).
-         The other two scripts live under assets/, not at root. -->
-    <script src="assets/cards.js" onerror="console.warn('assets/cards.js not found')"></script>
-    <script src="assets/expansion.js" onerror="console.warn('assets/expansion.js not found')"></script>
-    <script src="assets/encounter-depth.js" onerror="console.warn('assets/encounter-depth.js not found')"></script>
+         cards.js is only a fallback now: the full card and enemy data is
+         read from the running game (see loadGameData below), because
+         expansion.js / encounter-depth.js depend on the game's own globals
+         and crashed here, silently dropping 10 of the 23 cards. -->
+    <script src="assets/cards.js?v=neon-covenant" onerror="console.warn('assets/cards.js not found')"></script>
 </head>
 <body>
 
     <header>
-        <h1>ClaudeBound Compendium</h1>
-        <div class="subtitle">Live Local Game Archives & Card Index</div>
+        <h1>Cardbound Compendium</h1>
+        <div class="subtitle">Card upgrades, bestiary &amp; boss dossiers</div>
     </header>
 
     <nav>
-        <a href="#cards">Cards & Deck</a>
+        <a href="#cards">Cards</a>
+        <a href="#bosses">Bosses</a>
         <a href="#monsters">Bestiary</a>
-        <a href="#bosses">Boss Mechanics</a>
+        <a href="#mechanics">Attack guide</a>
     </nav>
 
     <div class="container">
 
-        <!-- DYNAMIC CARDS SECTION -->
         <section id="cards">
-            <h2>Player Cards & Abilities</h2>
+            <h2>Player Cards &amp; Upgrades</h2>
+            <p class="lead">Every card has four forms: Level 0 plus three upgrades. Tap a level to see its artwork and what it does.</p>
             <div class="grid" id="card-grid"></div>
         </section>
 
-        <!-- MONSTERS SECTION -->
-        <section id="monsters">
-            <h2>Bestiary & Enemies</h2>
-            <div class="grid" id="monster-grid"></div>
+        <section id="bosses">
+            <h2>Bosses &amp; Mini-bosses</h2>
+            <p class="lead">Boss attacks follow a fixed sequence that repeats. Learn it and you'll know exactly when to block, when to hold a counter, and when to attack.</p>
+            <div id="boss-list"></div>
         </section>
 
-        <!-- BOSS SECTION -->
-        <section id="bosses">
-            <h2>Boss Encounters</h2>
-            <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
-                <h3 style="color: var(--accent-blue); margin-top: 0;">Touch Crystals Boss Encounter</h3>
-                <p>Multi-phase boss fight centered around controlling crystal conduits. Activate energy nodes in sequence to bypass the boss's shield generator.</p>
-            </div>
+        <section id="monsters">
+            <h2>Bestiary</h2>
+            <div id="monster-list"></div>
+        </section>
+
+        <section id="mechanics">
+            <h2>Attack guide</h2>
+            <div class="mech-grid" id="mechanics-list"></div>
         </section>
 
     </div>
 
     <footer>
-        <p>ClaudeBound Compendium &mdash; Running locally from repository root.</p>
+        <p>Cardbound Compendium &mdash; card and enemy data is read live from the game.</p>
     </footer>
 
     <script>
-        function handleImageError(img, altName) {
-            const parent = img.parentElement;
-            const fallback = document.createElement('div');
-            fallback.className = 'fallback-graphic';
-            fallback.innerHTML = `[ ${altName} ]`;
-            parent.replaceChild(fallback, img);
+        // ---------------------------------------------------------------
+        // Data source. The game's full card and enemy data only exists once
+        // index.html has run all of its scripts (expansion cards, Elaris
+        // wildlife, the Bloom Tyrant, boss attack patterns), so the page is
+        // loaded invisibly and its live values are read directly. It never
+        // starts a journey, so it never writes a save.
+        // ---------------------------------------------------------------
+        function loadGameData() {
+            return new Promise(resolve => {
+                const frame = document.createElement('iframe');
+                frame.src = 'index.html';
+                frame.setAttribute('aria-hidden', 'true');
+                frame.tabIndex = -1;
+                frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';
+                const done = data => { clearTimeout(timer); resolve(data); };
+                const timer = setTimeout(() => done(null), 10000);
+                frame.onload = () => {
+                    try {
+                        const get = name => frame.contentWindow.eval(name);
+                        done({
+                            defs: get('defs'), rules: get('rules'), stat: get('stat'), cardArtPath: get('cardArtPath'),
+                            enemies: get('enemies'), monsterArt: get('monsterArt'),
+                            bossPatterns: get('typeof BOSS_PATTERNS !== "undefined" ? BOSS_PATTERNS : {}'),
+                            counters: get('typeof COUNTERS !== "undefined" ? COUNTERS : {}')
+                        });
+                    } catch (e) { console.warn('Compendium: could not read game data', e); done(null); }
+                };
+                document.body.append(frame);
+            });
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const cardGrid = document.getElementById('card-grid');
-            const monsterGrid = document.getElementById('monster-grid');
+        // Which enemies live where. Mirrors the spawn tables in
+        // assets/expansion.js and assets/elaris-wildlife.js; the stats
+        // themselves are read live. Region scaling mirrors startBattle()
+        // in assets/expansion.js.
+        const REGIONS = [
+            { id: 'city', name: 'Neon Aftermath', blurb: 'The ruined city where every journey starts.', hpScale: 1, attackBonus: 0,
+              regular: ['emberling', 'thornling', 'vineguard', 'burrower', 'shade', 'cryptWisp', 'forgeBeast', 'crownEye'],
+              miniBosses: ['moonKnight', 'crownSentinel'], boss: 'thornWarden' },
+            { id: 'elaris', name: 'Elaris', blurb: 'An overgrown wild world reached through the boss portal.', hpScale: 1.75, attackBonus: 5,
+              regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth'],
+              miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
+            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked coast. No bosses yet in this build.', hpScale: 1.9, attackBonus: 6,
+              regular: ['cinderFox', 'blightAntler', 'stormMoth'], miniBosses: [], boss: null }
+        ];
+        const BLOOM_PATTERN = ['guard', 'charge', 'elemental', 'attack', 'charge', 'elemental'];
+        const ELEMENT_EFFECT = {
+            fire: 'Burn: 2 damage at the end of each of your next 2 turns.',
+            earth: 'Poison: 1 damage every turn, stacking up to 3.',
+            water: 'Drain: you start your next turn with 1 less energy.',
+            air: 'Exposed: the next hit you take deals +2 damage.'
+        };
+        const ELEMENT_ICON = { fire: '🔥', earth: '🌿', water: '💧', air: '🌪', lightning: 'ϟ' };
+        const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
+        const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
 
-            // Scan window object for any globally defined card arrays/objects.
-            // The real game's data is `defs` (assets/cards.js) -- checked
-            // first since that's what's actually there; the others are kept
-            // as a fallback in case this page ever points at something else.
-            let rawCards = window.defs || window.cards || window.cardsData || window.CARDS || window.ALL_CARDS || window.cardDatabase;
-            
-            // If cards are stored as an object instead of an array, convert to
-            // array -- using entries, not values, so each card keeps its real
-            // id (the object key). Without the id there's no way to build the
-            // real art path or feed it back through rules()/stat() below.
-            let cardList = [];
-            if (Array.isArray(rawCards)) {
-                cardList = rawCards;
-            } else if (rawCards && typeof rawCards === 'object') {
-                cardList = Object.entries(rawCards).map(([id, c]) => ({ id, ...c }));
-            }
+        function handleImageError(img, altName) {
+            const fallback = document.createElement('div');
+            fallback.className = 'fallback-graphic';
+            fallback.textContent = `[ ${altName} ]`;
+            img.replaceWith(fallback);
+        }
 
-            if (cardList.length > 0) {
-                cardGrid.innerHTML = cardList.map(c => {
-                    const title = c.name || c.id || 'Unknown Card';
-                    // `kind` is the real field name on defs entries ('Attack',
-                    // 'Defense', etc.) -- type/category never existed on this
-                    // data, they were a guess.
-                    const type = c.kind || c.type || c.category || 'Ability';
-                    const cost = c.cost ?? c.energy ?? 'N/A';
-                    // rules()/stat() (assets/cards.js) are the exact functions
-                    // the game itself uses to turn a card's level-0 tier into
-                    // readable text ("Deal 6 damage.") -- there's no separate
-                    // description string on defs entries to fall back to, so
-                    // without this every card would just say "No description
-                    // available."
-                    const desc = (typeof window.rules === 'function' && c.id)
-                        ? window.rules({ id: c.id, level: 0 })
-                        : (c.desc || c.description || c.text || 'No description available.');
-                    // Real card art (assets/cards/level0/<id>.png), via the
-                    // same cardArtPath() the game uses -- c.icon is a single
-                    // Unicode glyph, not an image path, so using it directly
-                    // as a src always 404s.
-                    const imgSrc = (typeof window.cardArtPath === 'function' && c.id)
-                        ? window.cardArtPath(c.id, 0)
-                        : (c.img || c.image || `assets/cards/level0/${(c.id || title).toLowerCase().replace(/\s+/g, '-')}.png`);
-
-                    return `
-                        <div class="card">
-                            <img src="${imgSrc}" 
-                                 alt="${title}" 
-                                 class="card-img" 
-                                 onerror="handleImageError(this, '${title}')">
-                            <div class="card-content">
-                                <div class="card-type">${type}</div>
-                                <h3 class="card-title">${title}</h3>
-                                <p class="card-desc">${desc}</p>
-                                <ul class="stats-list">
-                                    <li><span>Cost:</span> <strong class="badge">${cost} Energy</strong></li>
-                                </ul>
-                            </div>
+        // ---------------------------------------------------------------
+        // Cards: every card at Level 0-3, with its art and rules per level.
+        // ---------------------------------------------------------------
+        function renderCards(game) {
+            const grid = document.getElementById('card-grid');
+            const defs = game ? game.defs : window.defs;
+            const rules = game ? game.rules : window.rules;
+            const artPath = game ? game.cardArtPath : window.cardArtPath;
+            const stat = game ? game.stat : window.stat;
+            if (!defs) { grid.innerHTML = '<p class="dim">No card data found.</p>'; return; }
+            const order = { Attack: 0, Defense: 1, Skill: 2, Healing: 3 };
+            const list = Object.entries(defs).map(([id, c]) => ({ id, ...c }))
+                .sort((a, b) => (!!a.soulbound - !!b.soulbound) || ((order[a.kind] ?? 9) - (order[b.kind] ?? 9)) || a.name.localeCompare(b.name));
+            grid.innerHTML = list.map(c => {
+                const levels = [0, 1, 2, 3].map(level => {
+                    let text = '', cost = c.cost, name = c.name;
+                    try { text = rules({ id: c.id, level }); } catch (e) { text = c.desc || ''; }
+                    try { const s = stat({ id: c.id, level }); cost = s.cost; name = s.name; } catch (e) {}
+                    return { level, text, cost, name, art: artPath(c.id, level) };
+                });
+                const thumbs = levels.map(l => `
+                    <button class="lvl${l.level === 0 ? ' on' : ''}" data-level="${l.level}" aria-pressed="${l.level === 0}" title="Level ${l.level}">
+                        <img src="${l.art}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+                        <span>Lv ${l.level}</span>
+                    </button>`).join('');
+                return `
+                    <article class="card game-card${c.soulbound ? ' soul' : ''}" data-levels='${esc(JSON.stringify(levels))}'>
+                        <img src="${levels[0].art}" alt="${esc(c.name)}, level 0" class="card-img main-art" onerror="handleImageError(this, '${esc(c.name)}')">
+                        <div class="level-strip">${thumbs}</div>
+                        <div class="card-content">
+                            <div class="card-type">${esc(c.kind || 'Ability')}${c.element ? ' · ' + (ELEMENT_ICON[c.element] || '') + ' ' + cap(c.element) : ''}${c.soulbound ? ' · <span class="soul-tag">◆ Soulbound</span>' : ''}</div>
+                            <h3 class="card-title"><span class="lvl-name">${esc(levels[0].name)}</span> <small class="lvl-label">Level 0</small></h3>
+                            <p class="card-desc lvl-text">${levels[0].text}</p>
+                            <ul class="stats-list">
+                                <li><span>Cost:</span> <strong class="badge lvl-cost">${levels[0].cost} Energy</strong></li>
+                            </ul>
                         </div>
-                    `;
-                }).join('');
-            } else {
-                cardGrid.innerHTML = `<p style="color: var(--text-dim);">No card data array found in game scripts. Check DevTools Console (F12) to see global variables.</p>`;
+                    </article>`;
+            }).join('');
+            grid.addEventListener('click', e => {
+                const btn = e.target.closest('.lvl'); if (!btn) return;
+                const card = btn.closest('.game-card'), levels = JSON.parse(card.dataset.levels), l = levels[+btn.dataset.level];
+                card.querySelectorAll('.lvl').forEach(b => { const on = b === btn; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+                const main = card.querySelector('.main-art');
+                if (main) { main.src = l.art; main.alt = l.name + ', level ' + l.level; }
+                card.querySelector('.lvl-name').textContent = l.name;
+                card.querySelector('.lvl-label').textContent = 'Level ' + l.level;
+                card.querySelector('.lvl-text').innerHTML = l.text;
+                card.querySelector('.lvl-cost').textContent = l.cost + ' Energy';
+            });
+        }
+
+        // ---------------------------------------------------------------
+        // Enemies
+        // ---------------------------------------------------------------
+        function artFor(game, id, name) {
+            let html = '';
+            try { html = game.monsterArt(id); } catch (e) {}
+            const img = /<img[^>]*src="([^"]+)"/.exec(html);
+            if (img) return `<img src="${img[1]}" alt="${esc(name)}" class="card-img" onerror="handleImageError(this, '${esc(name)}')">`;
+            const sheet = /url\(([^)]+)\)/.exec(html);
+            if (sheet) return `<div class="card-img sprite-box"><div class="sheet" role="img" aria-label="${esc(name)}" style="background-image:url(${sheet[1]})"></div></div>`;
+            const svg = /<svg[\s\S]*<\/svg>/.exec(html);
+            if (svg) return `<div class="card-img sprite-box">${svg[0]}</div>`;
+            return `<div class="fallback-graphic">[ ${esc(name)} ]</div>`;
+        }
+
+        function patternFor(game, id, e) {
+            if (id === 'bloomTyrant') return BLOOM_PATTERN;
+            if (game.bossPatterns[id]) return game.bossPatterns[id];
+            return e.element ? ['attack', 'charge', 'elemental', 'guard'] : ['attack', 'guard', 'heavy'];
+        }
+
+        // Turn-by-turn description, using the same numbers as enemyPlan()
+        // in assets/encounter-depth.js (before Weaken and enemy level).
+        function describeStep(kind, attack, element, isBloom, turn, counters) {
+            const el = isBloom ? (Math.floor((turn - 1) / 3) % 2 ? 'air' : 'earth') : element;
+            const guardBlock = isBloom ? 8 : 5;
+            switch (kind) {
+                case 'attack': return { label: 'Strike', dmg: `${attack}`, tip: 'A normal hit.' };
+                case 'heavy': return { label: 'Heavy attack', dmg: `${Math.round(attack * 1.5)}–${Math.round(attack * 2.5)}`, tip: 'Hits harder the further you are from the region start. Stack Block.' };
+                case 'guard': return { label: isBloom ? 'Rootguard' : 'Guard', dmg: '—', tip: `No damage this turn, so you can skip blocking. It gains ${guardBlock} Block next turn, which soaks your next attacks first.` };
+                case 'charge': return { label: `Charging ${ELEMENT_ICON[el] || ''} ${cap(el)}`, dmg: '—', tip: `No damage now. Next comes a charged ${el} strike. Play Prismatic Counter to cancel it.` };
+                case 'elemental': return { label: `Charged ${ELEMENT_ICON[el] || ''} ${cap(el)} strike`, dmg: `${Math.round(attack * 1.8)}`, tip: (ELEMENT_EFFECT[el] || '') + ' Cancelled by an armed Prismatic Counter, which reflects 6 damage.' };
             }
+            return { label: kind, dmg: '?', tip: '' };
+        }
+
+        function enemyCard(game, id, region, opts = {}) {
+            const e = game.enemies[id]; if (!e) return '';
+            const hp = Math.round(e.hp * region.hpScale), attack = e.attack + region.attackBonus;
+            const tier = e.boss ? (e.miniBoss ? 'Mini-boss' : 'Region boss') : 'Enemy';
+            const el = e.element ? ` · ${ELEMENT_ICON[e.element] || ''} ${cap(e.element)}` : '';
+            const pattern = patternFor(game, id, e), isBloom = id === 'bloomTyrant';
+            const steps = pattern.map((k, i) => {
+                const s = describeStep(k, attack, e.element, isBloom, i + 1, game.counters);
+                return `<li class="step k-${k}"><b>Turn ${i + 1}</b><span class="step-name">${s.label}</span><span class="step-dmg">${s.dmg === '—' ? 'no damage' : s.dmg + ' dmg'}</span><span class="step-tip">${s.tip}</span></li>`;
+            }).join('');
+            const notes = [];
+            if (e.boss) notes.push('<b>Enraged</b> below 50% HP: every attack deals +2 damage.');
+            if (isBloom) notes.push('<b>Shifting element:</b> earth for turns 1–3, air for turns 4–6, then repeats. Your Prismatic Counter adapts automatically.');
+            if (e.armor) notes.push(`<b>Armor ${e.armor}:</b> blocks ${e.armor} damage from every hit except Pierce cards.`);
+            const fixedCycle = opts.full ? `<ol class="pattern">${steps}</ol><p class="cycle-note">Repeats every ${pattern.length} turns.</p>` :
+                `<p class="mini-pattern">${pattern.map(k => `<span class="chip k-${k}">${k === 'elemental' ? 'charged strike' : k}</span>`).join('<i>→</i>')}</p>`;
+            return `
+                <article class="card enemy-card${opts.full ? ' dossier' : ''}">
+                    ${artFor(game, id, e.name)}
+                    <div class="card-content">
+                        <div class="card-type">${tier}${el}</div>
+                        <h3 class="card-title">${e.boss ? '★ ' : ''}${esc(e.name)}</h3>
+                        <ul class="stats-list">
+                            <li><span>Health:</span> <strong class="badge">${hp} HP</strong></li>
+                            <li><span>Attack:</span> <strong class="badge">${attack}</strong></li>
+                            <li><span>Armor:</span> <strong class="badge">${e.armor || 0}</strong></li>
+                        </ul>
+                        <h4 class="pattern-title">${opts.full ? 'Attack sequence' : 'Attack cycle'}</h4>
+                        ${fixedCycle}
+                        ${notes.length ? `<ul class="notes">${notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
+                    </div>
+                </article>`;
+        }
+
+        function renderEnemies(game) {
+            const bossList = document.getElementById('boss-list'), monsterList = document.getElementById('monster-list');
+            if (!game || !game.enemies) {
+                const msg = '<p class="dim">Enemy data loads from the game itself. Open this page from the hosted site or a local web server rather than straight from a file.</p>';
+                bossList.innerHTML = monsterList.innerHTML = msg; return;
+            }
+            const scaleNote = r => r.hpScale === 1 ? 'Base stats.' : `Stats shown at Level 1 in ${r.name}: ×${r.hpScale} health, +${r.attackBonus} attack.`;
+            bossList.innerHTML = REGIONS.map(r => {
+                const ids = [...r.miniBosses, r.boss].filter(Boolean);
+                return `<div class="region"><h3 class="region-title">${esc(r.name)}</h3><p class="dim">${r.blurb} ${ids.length ? scaleNote(r) : ''}</p>
+                    ${ids.length ? `<div class="dossier-grid">${ids.map(id => enemyCard(game, id, r, { full: true })).join('')}</div>` : '<p class="empty">No mini-bosses or boss in this region yet.</p>'}</div>`;
+            }).join('');
+            monsterList.innerHTML = REGIONS.map(r => `<div class="region"><h3 class="region-title">${esc(r.name)}</h3>
+                <p class="dim">${scaleNote(r)} Enemies get +8% health and about +1.5 attack per level above 1, and elites have +25% health.</p>
+                <div class="grid">${r.regular.map(id => enemyCard(game, id, r)).join('')}</div></div>`).join('');
+        }
+
+        function renderMechanics() {
+            const items = [
+                ['Strike', 'Deals the enemy\'s attack value.'],
+                ['Heavy attack', '1.5× attack near a region\'s start, rising to 2.5× at its far edge.'],
+                ['Guard', 'Gives the enemy 5 Block (Bloom Tyrant: 8) starting next turn. Block soaks your damage first.'],
+                ['Charge', 'No damage. It telegraphs a charged elemental strike on the following turn.'],
+                ['Charged strike', '1.8× attack plus a status effect if any damage gets through. An armed Prismatic Counter cancels it and reflects 6 damage.'],
+                ...Object.entries(ELEMENT_EFFECT).map(([el, t]) => [`${ELEMENT_ICON[el]} ${cap(el)} strike`, t]),
+                ['Enraged', 'Bosses and mini-bosses below 50% health deal +2 damage on every attack.'],
+                ['Weaken', 'Talent ability: lowers enemy attack for the whole encounter, which reduces every number above.']
+            ];
+            document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('card-grid').innerHTML = document.getElementById('boss-list').innerHTML = '<p class="dim">Loading game data…</p>';
+            const game = await loadGameData();
+            renderCards(game);
+            renderEnemies(game);
+            renderMechanics();
         });
     </script>
 </body>

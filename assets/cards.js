@@ -17,6 +17,7 @@ const defs={
  shatter:{name:'Shatter Lance',cost:2,kind:'Attack',icon:'⚒',pierce:true,tiers:[{damage:10},{damage:13},{damage:16},{damage:20}]},
  phoenix:{name:'Phoenix Covenant',cost:2,kind:'Soulbound Attack',icon:'♨',soulbound:true,tiers:[{damage:14,heal:2},{damage:17,heal:3},{damage:21,heal:4},{damage:26,heal:6}]},
  oath:{name:'Oath of the First Star',cost:2,kind:'Soulbound Defense',icon:'✵',soulbound:true,tiers:[{block:14,draw:1},{block:17,draw:1},{block:20,draw:2},{block:25,draw:2}]},
+ neonCovenant:{name:'Neon Covenant',cost:0,kind:'Soulbound Skill',icon:'◉',soulbound:true,tiers:[{draw:1,energy:1},{draw:1,energy:1,block:2},{draw:1,energy:1,block:4},{draw:1,energy:1,block:6}]},
  verdict:{name:'Eternal Verdict',cost:3,kind:'Soulbound Attack',icon:'⚜',soulbound:true,tiers:[{damage:24},{damage:29},{damage:35},{damage:43}]}
 };
 // Moved alongside `defs` (Round 37) so compendium.html can generate the
@@ -26,7 +27,7 @@ const defs={
 // in `tiers`, and `rules()` is what turns that into readable text).
 const stat=c=>({...defs[c.id],...defs[c.id].tiers[c.level]});
 function rules(c){const d=stat(c),p=[];if(d.damage)p.push('Deal '+d.damage+' damage.'+(d.pierce?' Pierce: ignores enemy armor.':''));if(d.block)p.push('Gain '+d.block+' block.');if(d.heal)p.push('Heal '+d.heal+' HP.');if(d.draw)p.push('Draw '+d.draw+'.');if(d.energy)p.push('Gain '+d.energy+' energy.');if(d.exhaust)p.push('Exhaust.');return p.join(' ')}
-function cardArtPath(id,level){return 'assets/cards/level'+level+'/'+id+'.png'}
+function cardArtPath(id,level){return 'assets/cards/level'+level+'/'+id+(id==='neonCovenant'?'.webp':id==='stormglass'&&level===2?'.jpeg':'.png')}
 // `const`/function declarations at top level create lexical globals
 // (plain `defs`/`stat`/`rules`/`cardArtPath` all work fine from index.
 // html's own inline script, in the same document) but do NOT create

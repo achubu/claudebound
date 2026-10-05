@@ -11,6 +11,7 @@ function makeContext(){
  const context=vm.createContext({console,assert:require('node:assert/strict'),Image:class{constructor(){this.complete=false}},document:{getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},querySelector:()=>node(),querySelectorAll:()=>[],createElement:()=>node(),head:node(),body:node()},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},setTimeout:()=>0,clearTimeout(){},requestAnimationFrame(){},addEventListener(){},innerWidth:1280,innerHeight:800,confirm:()=>true,Blob,URL});
  const run=s=>vm.runInContext(s,context);
  run(fs.readFileSync(path.join(root,'assets/environment/neon-city.js'),'utf8'));
+ run(fs.readFileSync(path.join(root,'assets/cards.js'),'utf8'));
  for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
  run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
  run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));
@@ -68,7 +69,7 @@ function playOutBattle(maxTurns=40){
 }
 `;
 
-function playtest({region, room, deckIds, cardLevel, playerLevel, n}){
+function playtest({region, depth, deckIds, cardLevel, playerLevel, n}){
  let wins=0,totalTurns=0,totalHp=0;
  for(let i=0;i<n;i++){
   const {context,run}=makeContext();
@@ -78,9 +79,9 @@ function playtest({region, room, deckIds, cardLevel, playerLevel, n}){
    state.pool=[${deckIds.map(id=>`make('${id}')`).join(',')}];
    state.pool.forEach(c=>c.level=${cardLevel});
    state.deck=state.pool.map(c=>c.uid);
-   configureRegion('${region}');state.room='${room}';state.pos={x:400,y:300};
+   configureRegion('${region}');state.room=Object.keys(rooms).filter(k=>roomSpawns(k).some(s=>!s.boss)).sort((a,b)=>Math.abs(regionDistanceFrac(a)-${depth})-Math.abs(regionDistanceFrac(b)-${depth}))[0];assert(state.room,'region has a non-boss patrol');state.pos={x:400,y:300};
    const spawns=roomSpawns(state.room).filter(s=>!s.boss);
-   if(!spawns.length)throw new Error('no non-boss spawn in ${room}');
+   if(!spawns.length)throw new Error('no non-boss spawn in selected room');
    const spawn=spawns[0];
    startBattle(spawn.uid);
    globalThis.__result=playOutBattle();
@@ -93,23 +94,23 @@ function playtest({region, room, deckIds, cardLevel, playerLevel, n}){
 }
 
 // Starter-ish deck, no talent investment: the floor-case a fresh explorer sees.
-const CITY_DECK=['strike','strike','strike','guard','guard','focus'];
+const CITY_DECK=['strike','strike','guard','guard','focus','mend'];
 const ELEMENTAL_DECK=['strike','cleave','bastion','cinder','venom','counter'];
 
 console.log('=== CITY: difficulty by distance from Afterlight Refuge (Level 0 cards, no talents) ===');
-for(const [label,room] of [['dist 0-1 (Burnout Ave)','0,1'],['dist 2 (Cable Market)','2,0'],['dist 3 (Furnace District)','3,2'],['dist 4-5 (Memory Annex)','5,2']]){
- const r=playtest({region:'city',room,deckIds:CITY_DECK,cardLevel:0,playerLevel:1,n:60});
+for(const [label,depth] of [['Near entry',0],['One-third depth',.33],['Two-thirds depth',.67],['Deepest patrol',1]]){
+ const r=playtest({region:'city',depth,deckIds:CITY_DECK,cardLevel:0,playerLevel:1,n:60});
  console.log(label.padEnd(28), 'win%='+r.winRate.padStart(5), ' avgTurns='+r.avgTurns.padStart(5), ' avgHpLeft='+r.avgHp.padStart(5));
 }
 
 console.log('\n=== ELARIS: near entry vs near the Bloom Tyrant (Level 1 cards) ===');
-for(const [label,room] of [['near entry (Sunpetal Plains)','1,0'],['near boss (Mistfall Basin)','2,2']]){
- const r=playtest({region:'elaris',room,deckIds:ELEMENTAL_DECK,cardLevel:1,playerLevel:5,n:60});
+for(const [label,depth] of [['Near entry',0],['Near boss',1]]){
+ const r=playtest({region:'elaris',depth,deckIds:ELEMENTAL_DECK,cardLevel:1,playerLevel:5,n:60});
  console.log(label.padEnd(28), 'win%='+r.winRate.padStart(5), ' avgTurns='+r.avgTurns.padStart(5), ' avgHpLeft='+r.avgHp.padStart(5));
 }
 
 console.log('\n=== VESPERA: near entry vs far corner (Level 2 cards) ===');
-for(const [label,room] of [['near entry (Prism Coast)','1,0'],['far corner (Resonant Spires)','1,1']]){
- const r=playtest({region:'vespera',room,deckIds:ELEMENTAL_DECK,cardLevel:2,playerLevel:10,n:60});
+for(const [label,depth] of [['Near entry',0],['Far corner',1]]){
+ const r=playtest({region:'vespera',depth,deckIds:ELEMENTAL_DECK,cardLevel:2,playerLevel:10,n:60});
  console.log(label.padEnd(28), 'win%='+r.winRate.padStart(5), ' avgTurns='+r.avgTurns.padStart(5), ' avgHpLeft='+r.avgHp.padStart(5));
 }

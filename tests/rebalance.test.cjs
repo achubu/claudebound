@@ -311,7 +311,7 @@ assert(ids.length>0,'defs actually has cards to check');
 const missing=[];
 for(const id of ids){
  for(let level=0;level<4;level++){
-  const file=path.join(cardsDir,`level${level}`,`${id}.png`);
+  const file=path.join(__dirname,'..',run(`cardArtPath(${JSON.stringify(id)},${level})`));
   if(!fs.existsSync(file))missing.push(`level${level}/${id}.png`);
  }
 }
@@ -926,7 +926,7 @@ assert(!state.battle.draw.some(c=>c.uid===dup.uid)&&!state.battle.hand.some(c=>c
 assert.equal(state.battle.cloneUsed,false,'Mirror Array is available again (once per encounter, not once per run)');
 console.log('PASS: Mirror Array is a genuine capstone (tier 4, gated behind Echo Protocol itself) that clones a card into the draw pile for exactly one encounter, usable once per fight, never soulbound, and never persists or counts toward permanent card mastery.');
 `);
-run(`
+run(String.raw`
 // --- Round 35 (visual): the talent tree redesign. Checks the structural
 // pieces that make it read as a real tree (rows + connector lines +
 // compact icon nodes + hover tooltips) rather than just that the old
@@ -935,7 +935,14 @@ newGame();state.playerLevel=30;
 state.talents={powerCore:1,amplifier:3,critical:2,edge:3,retainCore:1,plating:5,vitality:5,recovery:3,echo:1,cloneCore:1};
 showCharacter();
 const sheetHtml=document.getElementById('menuModal').innerHTML;
-assert(sheetHtml.includes('talent-row'),'nodes render grouped into tier rows, not one flat list');
+assert(sheetHtml.includes('talent-layout'),'nodes render in a prerequisite-aligned grid');
+for(const [key,branch] of Object.entries(TALENT_BRANCHES)){
+ const html=talentRowsHTML(key,branch),positions={};
+ for(const m of html.matchAll(/grid-row:(\d+);grid-column:(\d+) \/ span 2[^]*?data-talent="([^"]+)"/g))positions[m[3]]={row:+m[1],col:+m[2]};
+ for(const node of branch.nodes.filter(n=>n.req))assert(positions[node.id].row>positions[node.req[0]].row,'every dependent talent is below its prerequisite');
+ const edges=branch.nodes.filter(n=>n.req).map(n=>[positions[n.req[0]],positions[n.id]]);
+ for(const [a,b] of edges)for(const [c,d] of edges)if(a.row===c.row&&b.row===d.row)assert((a.col-c.col)*(b.col-d.col)>=0,'connections preserve left-to-right order');
+}
 assert(sheetHtml.includes('talent-tooltip')&&sheetHtml.includes('Mirror Array'),'the hover tooltip markup carries the real talent name and description, not just an icon');
 assert(sheetHtml.includes('talent-rank-badge'),'a compact rank badge renders on each node');
 assert(!sheetHtml.includes('class="talent-name"')&&!sheetHtml.includes('class="talent-desc"'),'the old always-visible name/description blocks are gone, replaced by the tooltip');

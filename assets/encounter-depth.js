@@ -93,7 +93,7 @@ endTurn=function(){
  else if(plan.kind==='elemental'&&b.counter&&COUNTERS[plan.element]===b.counter){b.enemy.hp=Math.max(0,b.enemy.hp-6);b.logs.push('Prismatic Counter cancels the charged strike and its status effect. 6 damage returned.');b.counter=null;b.exposed=0}
  else{
   let incoming=plan.damage;if(b.disrupted){incoming=Math.ceil(incoming/2);b.disrupted=false;b.logs.push('Lightning disruption halves the attack.')}
-  const damage=Math.max(0,incoming-b.block);state.hp=Math.max(0,state.hp-damage);b.logs.push(plan.name+': '+damage+' HP damage.');b.exposed=0;b.counter=null;
+  const damage=Math.max(0,incoming-talentRank('plating')-b.block);state.hp=Math.max(0,state.hp-damage);b.logs.push(plan.name+': '+damage+' HP damage.');b.exposed=0;b.counter=null;
   if(plan.kind==='elemental'&&damage>0){
    if(plan.element==='fire')b.playerBurn=2;
    if(plan.element==='earth')b.playerPoison=Math.min(3,(b.playerPoison||0)+1);

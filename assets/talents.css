@@ -1,0 +1,34 @@
+/* Illustrated circuitry, with always-readable labels and explicit investment. */
+.sheet-portrait{max-height:132px!important;aspect-ratio:auto!important;object-position:center 45%!important}
+.talent-header{align-items:center}.talent-header h2{margin-bottom:5px}.talent-header p{font:12px/1.5 system-ui}
+.talent-tree{gap:14px;align-items:start}.talent-branch{--branch:#f3b665;min-width:0;border:1px solid #66513b;padding:12px;background:linear-gradient(160deg,#252a30,#0b1723);border-radius:12px}
+.talent-branch.disruption{--branch:#78dfff;border-color:#355e72}.talent-branch.resolve{--branch:#7be3bc;border-color:#356052}
+.talent-branch h3{color:var(--branch);letter-spacing:2px;padding:17px 10px;margin:0;border-bottom:1px solid var(--branch);background:linear-gradient(90deg,#09131eef,#09131e70),url('Talent Graphics/talent3.jpg') center/cover;border-radius:6px}
+.talent-branch.disruption h3{background-image:linear-gradient(90deg,#09131eef,#09131e70),url('Talent Graphics/talent1.jpg')}.talent-branch.resolve h3{background-image:linear-gradient(90deg,#09131eef,#09131e70),url('talents/aegis.webp')}
+.branch-spend{min-height:38px;margin:10px 0!important;font:11px/1.5 system-ui!important;color:#bdccd5}
+.talent-lane{gap:32px;padding:14px 2px 20px;background:radial-gradient(ellipse at top,#243b4666,#08121ecc)}
+.talent-row{gap:10px;justify-content:space-evenly}
+.talent-node{width:86px;min-width:0;height:116px;flex:0 1 86px;display:flex;flex-direction:column;justify-content:flex-start;border:1px solid #4d6170;background:#101e29;padding:5px;border-radius:8px;transition:border-color .15s,box-shadow .15s;cursor:pointer}
+.talent-node .talent-icon{display:block;width:100%;height:70px;filter:none;overflow:hidden;border-radius:4px}
+.talent-icon img{width:100%;height:100%;object-fit:cover;display:block}
+.talent-label{display:block;font:600 10px/1.25 system-ui;color:#e1eaf0;padding-top:6px;text-align:center}
+.talent-node.locked{filter:none;opacity:.8}.talent-node.locked .talent-icon{filter:saturate(.45)}
+.talent-node.learned .talent-icon,.talent-node.maxed .talent-icon{filter:none}
+.talent-node.available{border-color:var(--branch);box-shadow:0 0 12px #70dbe829}
+.talent-node[aria-pressed=true]{outline:2px solid #fff1c2;outline-offset:3px;opacity:1}
+.talent-node:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.talent-rank-badge{z-index:2;right:3px;bottom:42px;font-size:10px;min-width:24px;background:#06121eef}
+.talent-pips{bottom:-9px}.talent-tooltip{display:none!important}
+.talent-layout{display:grid;grid-auto-rows:116px;row-gap:48px;position:relative;z-index:1}
+.talent-slot{display:flex;justify-content:center;min-width:0}
+.talent-connectors path{fill:none;stroke-linecap:round}
+.talent-connectors .connector-track{stroke:#050e17;stroke-width:6;stroke-dasharray:none}
+.talent-connectors .connector-wire{stroke:currentColor;stroke-width:2;stroke-dasharray:none}
+.talent-connectors circle{fill:currentColor;stroke:#0b1723;stroke-width:1}
+.talent-connectors .connector-lit{color:var(--branch);filter:drop-shadow(0 0 3px var(--branch))}
+.talent-connectors .connector-dim{color:#527080;stroke-dasharray:none}
+.talent-detail{position:sticky;bottom:-24px;z-index:25;display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px;margin:18px 0 0;background:#091824f5;border:1px solid #6b94a4;border-radius:10px;box-shadow:0 -8px 28px #0008;min-height:122px}
+.talent-detail>img{width:64px;height:64px;border-radius:7px}.talent-detail h3{margin:3px 0;color:#ffe3a4;font-size:17px}.talent-detail p{margin:4px 0;font:12px/1.45 system-ui}.talent-detail small{font:11px/1.4 system-ui;color:#a9c7d4}.talent-detail .eyebrow{font-size:9px}.talent-detail button{min-height:44px}
+.talent-tabs{display:none}.talent-footer{padding:14px 0}.talent-points{white-space:nowrap}
+@media(max-width:900px){.talent-tree{grid-template-columns:1fr}.talent-tabs{display:flex;gap:6px;margin:14px 0}.talent-tabs button{flex:1;min-height:44px;font:700 11px system-ui;padding:8px}.talent-tabs button[aria-pressed=true]{border-color:#ffe0a2;background:#264351}.talent-tree[data-view=surge] .talent-branch:not(.surge),.talent-tree[data-view=disruption] .talent-branch:not(.disruption),.talent-tree[data-view=resolve] .talent-branch:not(.resolve){display:none}.talent-detail{grid-template-columns:48px 1fr;gap:10px;bottom:-13px;padding:10px}.talent-detail>img{width:48px;height:48px}.talent-detail button{grid-column:1/-1}.talent-node{flex-basis:86px}.talent-header{flex-wrap:wrap}.talent-header h2{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.talent-node{transition:none}}

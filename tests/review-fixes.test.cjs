@@ -1,0 +1,28 @@
+const {run}=require('./expansion.test.cjs');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+run(`
+newGame();
+assert(objective().includes('east'),'fresh journey directs player to the actual exit');
+assert.equal(cardArtPath('stormglass',2),'assets/cards/level2/stormglass.jpeg');
+state.room='1,5';startBattle(roomSpawns(state.room)[0].uid);
+const original=active().find(c=>c.id==='strike'),battleCopy={...original};
+state.battle.hand=[battleCopy];state.battle.enemy.hp=100;state.battle.energy=3;
+playCard(0);
+assert.equal(original.uses,1);assert.equal(battleCopy.uses,1);
+assert(cardHTML({...battleCopy,uses:0}).includes('1/50'),'restored stale battle copy displays real collection mastery');
+save();assert(load());assert.equal(owned(original.uid).uses,1);
+state.battle=null;state.playerLevel=2;state.talents={};
+const root=TALENT_BRANCHES.surge.nodes.find(n=>n.id==='powerCore');
+const locked=TALENT_BRANCHES.surge.nodes.find(n=>n.id==='edge');
+assert(!talentNodeHTML('surge',locked).includes(' disabled'),'locked nodes remain inspectable');
+inspectTalent('surge','edge');assert.equal(talentSpent(),0,'inspecting never spends a point');
+assert(document.getElementById('talentDetail').innerHTML.includes('disabled'),'locked investment stays disabled');
+inspectTalent('surge','powerCore');assert.equal(talentSpent(),0);
+document.getElementById('learnTalent').onclick();assert.equal(talentRank('powerCore'),1);assert.equal(talentPoints(),0);
+spendTalent('surge','amplifier');assert.equal(talentRank('amplifier'),0,'cannot overspend');
+state.battle={phase:'fight'};assert(talentReason('surge',root).includes('Finish the encounter'));
+state.battle=null;save();assert(load());assert.equal(talentRank('powerCore'),1,'talent survives reload');
+globalThis.reviewArt=Object.values(TALENT_BRANCHES).flatMap(b=>b.nodes).map(n=>talentArt(n.id));
+`);
+for(const art of run('reviewArt')) assert(fs.existsSync(path.join(__dirname,'..',art)),art+' exists');
+console.log('PASS: real mastery display/reload, correct opening direction, art paths, inspectable locked talents and guarded point investment.');
