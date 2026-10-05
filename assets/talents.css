@@ -32,3 +32,16 @@
 .talent-tabs{display:none}.talent-footer{padding:14px 0}.talent-points{white-space:nowrap}
 @media(max-width:900px){.talent-tree{grid-template-columns:1fr}.talent-tabs{display:flex;gap:6px;margin:14px 0}.talent-tabs button{flex:1;min-height:44px;font:700 11px system-ui;padding:8px}.talent-tabs button[aria-pressed=true]{border-color:#ffe0a2;background:#264351}.talent-tree[data-view=surge] .talent-branch:not(.surge),.talent-tree[data-view=disruption] .talent-branch:not(.disruption),.talent-tree[data-view=resolve] .talent-branch:not(.resolve){display:none}.talent-detail{grid-template-columns:48px 1fr;gap:10px;bottom:-13px;padding:10px}.talent-detail>img{width:48px;height:48px}.talent-detail button{grid-column:1/-1}.talent-node{flex-basis:86px}.talent-header{flex-wrap:wrap}.talent-header h2{font-size:22px}}
 @media(prefers-reduced-motion:reduce){.talent-node{transition:none}}
+/* Round 40: the trees are now 9 rows deep and 4-6 paths wide, so one tree
+   shows at a time on every screen size (tabs), using the full width. */
+.talent-tree{grid-template-columns:1fr}
+.talent-tabs{display:flex;gap:6px;margin:14px 0}
+.talent-tabs button{flex:1;min-height:44px;font:700 12px system-ui;padding:8px;letter-spacing:.5px}
+.talent-tabs button[aria-pressed=true]{border-color:#ffe0a2;background:#264351}
+.talent-tabs button small{display:block;font:600 10px system-ui;color:#a9c7d4;letter-spacing:0}
+.talent-tree[data-view=surge] .talent-branch:not(.surge),.talent-tree[data-view=disruption] .talent-branch:not(.disruption),.talent-tree[data-view=resolve] .talent-branch:not(.resolve){display:none}
+.talent-lane{overflow-x:auto;overscroll-behavior-x:contain}
+.talent-layout{row-gap:40px;min-width:calc(var(--paths,3) * 92px)}
+.branch-paths{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.branch-paths span{font:600 10px system-ui;color:var(--branch);border:1px solid color-mix(in srgb,var(--branch) 45%,transparent);border-radius:999px;padding:3px 8px;background:#08121e}
+@media(max-width:900px){.talent-layout{min-width:calc(var(--paths,3) * 78px);row-gap:34px}}

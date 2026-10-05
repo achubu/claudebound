@@ -1,9 +1,9 @@
 'use strict';
 // The region boss and new card are registered before a journey is restored.
-enemies.bloomTyrant={name:'The Bloom Tyrant',icon:'❃',hp:150,attack:10,boss:true,element:'earth'};
+enemies.bloomTyrant={name:'The Bloom Tyrant',icon:'❃',hp:150,attack:10,boss:true,element:'earth',shift:['earth','air'],shiftEvery:3};
 addCard('stormglass','Stormglass Covenant',1,'Soulbound Lightning','ϟ',{damage:7,shock:true,element:'lightning',soulbound:true,exhaust:true});
 const depthRules=rules;
-rules=function(c){return depthRules(c)+(stat(c).shock?' Disrupt: halve the next enemy attack. Exhaust.':'')};
+rules=function(c){return depthRules(c)+(stat(c).shock?' Disrupt: halve the next enemy attack.':'')};
 const depthMonsterArt=monsterArt;
 monsterArt=function(id){return id==='bloomTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="The Bloom Tyrant" style="background-image:url(assets/monsters/elaris/bloom-tyrant.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
 // Round 22 gave every boss an element (for the telegraphed elemental
@@ -32,8 +32,21 @@ const BOSS_PATTERNS={
  tidewardenElaris:['guard','attack','charge','elemental','guard','attack'],
  // The Gale Sovereign — a storm, not a marksman like its fellow air boss:
  // back-to-back charges with a heavy hit wedged between them.
- galeSovereign:['attack','charge','elemental','heavy','charge','elemental']
+ galeSovereign:['attack','charge','elemental','heavy','charge','elemental'],
+ // The Bloom Tyrant — Elaris's final boss (formerly special-cased inline).
+ bloomTyrant:['guard','charge','elemental','attack','charge','elemental'],
+ // Vespera (Round 38). The Arc Sentinel — an armored bulwark that guards
+ // first, then follows its charged strike straight into a heavy blow.
+ arcSentinel:['guard','charge','elemental','attack','heavy','attack'],
+ // The Resonant Phantom — two charged strikes per cycle, so a single
+ // Prismatic Counter can't cover both; plan which one to cancel.
+ resonantPhantom:['attack','charge','elemental','attack','charge','elemental','guard'],
+ // The Tempest Colossus — Vespera's final boss. Shifts between water and
+ // air every 4 turns (see enemies.stormTyrant.shift), 8-turn cycle.
+ stormTyrant:['charge','elemental','attack','guard','heavy','charge','elemental','attack']
 };
+// Any enemy with a `shift` list cycles its element every `shiftEvery` turns.
+function shiftingElement(id,turn){const e=enemies[id];if(!e||!e.shift)return null;return e.shift[Math.floor((turn-1)/(e.shiftEvery||3))%e.shift.length]}
 function enemyPlan(b=state.battle,turn=b?.turn){
  if(!b)return{kind:'attack',name:'Attack',damage:0,element:null};
  // Only the region's main boss cycles a fixed earth/air element on its own
@@ -43,8 +56,8 @@ function enemyPlan(b=state.battle,turn=b?.turn){
  // to give it the full telegraphed attack/charge/elemental/guard pattern
  // and status-effect special ability, with zero new AI code — this is how
  // the Round 22 mini-bosses get a real signature move each.
- const isBloomTyrant=b.id==='bloomTyrant',element=isBloomTyrant?(Math.floor((turn-1)/3)%2?'air':'earth'):b.enemy.element;
- const pattern=isBloomTyrant?['guard','charge','elemental','attack','charge','elemental']:BOSS_PATTERNS[b.id]||(element?['attack','charge','elemental','guard']:['attack','guard','heavy']);
+ const shifted=shiftingElement(b.id,turn),isShifter=!!shifted,element=shifted||b.enemy.element;
+ const pattern=BOSS_PATTERNS[b.id]||(element?['attack','charge','elemental','guard']:['attack','guard','heavy']);
  const kind=pattern[(turn-1)%pattern.length],enraged=b.enemy.boss&&b.enemy.hp<=b.enemy.maxHp/2;
  const base=Math.max(1,b.enemy.attack-(b.enemyDebuff||0))+(enraged?2:0);
  // Heavy hits scale from 1.5x near the region's start room up to 2.5x at its
@@ -52,16 +65,16 @@ function enemyPlan(b=state.battle,turn=b?.turn){
  // early heavy attack can no longer just as comfortably absorb a late-map
  // one — encourages coming back stronger rather than tanking every hit
  // forever with the same starter-tier block cards.
- const heavyFrac=(typeof regionDistanceFrac==='function')?regionDistanceFrac(state.room):0,heavyMult=1.5+heavyFrac;
- const damage=['charge','guard'].includes(kind)?0:Math.round(base*(kind==='elemental'?1.8:kind==='heavy'?heavyMult:1))+(b.exposed||0);
- return{kind,element,damage,name:kind==='charge'?'Gathering '+element+' energy':kind==='guard'?'Rootguard':kind==='elemental'?(isBloomTyrant?'Cataclysm':'Charged')+' '+element+' strike':kind==='heavy'?'Heavy attack':'Strike',enraged};
+ const heavyFrac=(typeof regionDistanceFrac==='function')?regionDistanceFrac(state.room):0,heavyMult=Math.min(balanceFor('heavyBase')+balanceFor('heavyDistance')*heavyFrac,b.enemy.boss?balanceFor('bossHeavyMax'):Infinity);
+ const damage=['charge','guard'].includes(kind)?0:Math.round(base*(kind==='elemental'?balanceFor(b.enemy.boss?'bossElementalMult':'elementalMult'):kind==='heavy'?heavyMult:1))+(b.exposed||0);
+ return{kind,element,damage,name:kind==='charge'?'Gathering '+element+' energy':kind==='guard'?'Rootguard':kind==='elemental'?(isShifter?'Cataclysm':'Charged')+' '+element+' strike':kind==='heavy'?'Heavy attack':'Strike',enraged};
 }
 intent=function(){return enemyPlan().damage};
 const depthCardEffect=cardEffect;
 cardEffect=function(c,empowered,doubleAttack){
  const b=state.battle,d=stat(c),before=b.enemy.hp;
  // Adaptive counter follows the telegraphed element, including the boss's shifts.
- if(b.id==='bloomTyrant')b.enemy.element=enemyPlan(b).element;
+ if(enemies[b.id]&&enemies[b.id].shift)b.enemy.element=enemyPlan(b).element;
  depthCardEffect(c,empowered,doubleAttack);
  const dealt=before-b.enemy.hp,absorbed=Math.min(b.enemy.guard||0,dealt);
  if(absorbed){
@@ -80,7 +93,7 @@ endTurn=function(){
  b.enemy.guard=0;
  if(b.freeze>0){b.freeze--;b.logs.push('Frozen: enemy action skipped.')}
  else if(plan.kind==='charge'){b.logs.push(plan.name+'. A charged strike is coming—reserve or arm your counter.')}
- else if(plan.kind==='guard'){b.enemy.guard=b.id==='bloomTyrant'?8:5;
+ else if(plan.kind==='guard'){b.enemy.guard=enemies[b.id]&&enemies[b.id].shift?8:5;
   // Every enemy action, guard included, resolves at the END of the turn
   // that telegraphs it — same timing as charge->elemental — so this Block
   // only becomes active starting the NEXT turn, protecting the enemy from
@@ -94,7 +107,7 @@ endTurn=function(){
  else{
   let incoming=plan.damage;if(b.disrupted){incoming=Math.ceil(incoming/2);b.disrupted=false;b.logs.push('Lightning disruption halves the attack.')}
   const damage=Math.max(0,incoming-talentRank('plating')-b.block);state.hp=Math.max(0,state.hp-damage);b.logs.push(plan.name+': '+damage+' HP damage.');b.exposed=0;b.counter=null;
-  if(plan.kind==='elemental'&&damage>0){
+  if(plan.kind==='elemental'&&damage>0&&!plan.noStatus){
    if(plan.element==='fire')b.playerBurn=2;
    if(plan.element==='earth')b.playerPoison=Math.min(3,(b.playerPoison||0)+1);
    if(plan.element==='water')b.drained=true;

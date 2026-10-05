@@ -25,7 +25,7 @@ const defs={
 // guessing at a description format that doesn't actually exist on `defs`
 // entries (there's no flat description string -- the real effect lives
 // in `tiers`, and `rules()` is what turns that into readable text).
-const stat=c=>({...defs[c.id],...defs[c.id].tiers[c.level]});
+let stat=c=>({...defs[c.id],...defs[c.id].tiers[c.level]});
 function rules(c){const d=stat(c),p=[];if(d.damage)p.push('Deal '+d.damage+' damage.'+(d.pierce?' Pierce: ignores enemy armor.':''));if(d.block)p.push('Gain '+d.block+' block.');if(d.heal)p.push('Heal '+d.heal+' HP.');if(d.draw)p.push('Draw '+d.draw+'.');if(d.energy)p.push('Gain '+d.energy+' energy.');if(d.exhaust)p.push('Exhaust.');return p.join(' ')}
 function cardArtPath(id,level){return 'assets/cards/level'+level+'/'+id+(id==='neonCovenant'?'.webp':id==='stormglass'&&level===2?'.jpeg':'.png')}
 // `const`/function declarations at top level create lexical globals

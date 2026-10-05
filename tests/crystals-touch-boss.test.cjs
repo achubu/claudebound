@@ -21,7 +21,7 @@ b.turn=3;b.enemy.element='water';b.disrupted=true;b.block=0;b.enemy.hp=300;b.pla
 // Boss unlock and reward happen once, then both regions round-trip through the portal.
 state.battle=null;state.room='10,9';assert.equal(portalTarget(),null);const boss=roomSpawns('10,9').find(s=>s.boss);assert.equal(boss.type,'bloomTyrant');startBattle(boss.uid);winBattle();
 assert(state.bosses.includes('bloomTyrant'));assert.equal(state.pool.filter(c=>c.id==='stormglass').length,1);assert(state.pool.find(c=>c.id==='stormglass').soulbound);
-finishBattle();assert.equal(portalTarget().region,'vespera');travelPortal();assert.equal(state.region,'vespera');assert.equal(Object.keys(rooms).length,4);assert.equal(joinedArea().cells.length,4);
+finishBattle();assert.equal(portalTarget().region,'vespera');travelPortal();assert.equal(state.region,'vespera');assert.equal(Object.keys(rooms).length,42,'Vespera matches the city at 42 rooms');assert.equal(joinedArea().cells.length,4);
 save();state=null;assert(load());assert.equal(state.region,'vespera');validateImport(JSON.parse(JSON.stringify(state)));travelPortal();assert.equal(state.region,'elaris');assert.equal(state.room,'10,9');
 // Touch route crosses joined room seams using normal collision and movement.
 state.room='1,0';state.pos={x:760,y:250};state.battle=null;keys={};assert(setTouchDestination({x:860,y:250}));

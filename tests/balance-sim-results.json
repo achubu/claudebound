@@ -1,0 +1,396 @@
+{
+ "M": 50,
+ "overrides": {},
+ "report": {
+  "city": [
+   {
+    "key": "zone:1",
+    "name": "Regular enemies Lv 1",
+    "kind": "zone",
+    "level": 1,
+    "cardLevel": 0,
+    "win": 100,
+    "build": "Surge",
+    "policy": "careful",
+    "avg": 100,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:2",
+    "name": "Regular enemies Lv 2",
+    "kind": "zone",
+    "level": 2,
+    "cardLevel": 0,
+    "win": 100,
+    "build": "Surge",
+    "policy": "careful",
+    "avg": 100,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:3",
+    "name": "Regular enemies Lv 3",
+    "kind": "zone",
+    "level": 3,
+    "cardLevel": 0,
+    "win": 100,
+    "build": "Surge",
+    "policy": "careful",
+    "avg": 97,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:4",
+    "name": "Regular enemies Lv 4",
+    "kind": "zone",
+    "level": 4,
+    "cardLevel": 0,
+    "win": 100,
+    "build": "Disruption",
+    "policy": "careful",
+    "avg": 98,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:5",
+    "name": "Regular enemies Lv 5",
+    "kind": "zone",
+    "level": 5,
+    "cardLevel": 0,
+    "win": 100,
+    "build": "Resolve",
+    "policy": "race",
+    "avg": 75,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:6",
+    "name": "Regular enemies Lv 6",
+    "kind": "zone",
+    "level": 6,
+    "cardLevel": 0,
+    "win": 96,
+    "build": "Hybrid",
+    "policy": "race",
+    "avg": 72,
+    "target": [
+     75,
+     100
+    ],
+    "ok": false
+   },
+   {
+    "key": "zone:7",
+    "name": "Regular enemies Lv 7",
+    "kind": "zone",
+    "level": 7,
+    "cardLevel": 1,
+    "win": 100,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 88,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:8",
+    "name": "Regular enemies Lv 8",
+    "kind": "zone",
+    "level": 8,
+    "cardLevel": 1,
+    "win": 100,
+    "build": "Hybrid",
+    "policy": "race",
+    "avg": 66,
+    "target": [
+     75,
+     100
+    ],
+    "ok": false
+   },
+   {
+    "key": "mini:moonKnight",
+    "name": "Lunar Enforcer (mini-boss)",
+    "kind": "mini",
+    "level": 4,
+    "cardLevel": 0,
+    "win": 100,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 60,
+    "target": [
+     45,
+     70
+    ],
+    "ok": true
+   },
+   {
+    "key": "mini:crownSentinel",
+    "name": "The Crown Sentinel (mini-boss)",
+    "kind": "mini",
+    "level": 6,
+    "cardLevel": 0,
+    "win": 100,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 58,
+    "target": [
+     45,
+     70
+    ],
+    "ok": true
+   },
+   {
+    "key": "boss:thornWarden",
+    "name": "Thorn Warden (BOSS)",
+    "kind": "boss",
+    "level": 9,
+    "cardLevel": 1,
+    "win": 100,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 50,
+    "target": [
+     35,
+     60
+    ],
+    "ok": true
+   }
+  ],
+  "elaris": [
+   {
+    "key": "zone:10",
+    "name": "Regular enemies Lv 10",
+    "kind": "zone",
+    "level": 10,
+    "cardLevel": 1,
+    "win": 96,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 94,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:11",
+    "name": "Regular enemies Lv 11",
+    "kind": "zone",
+    "level": 11,
+    "cardLevel": 1,
+    "win": 98,
+    "build": "Disruption",
+    "policy": "careful",
+    "avg": 93,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:12",
+    "name": "Regular enemies Lv 12",
+    "kind": "zone",
+    "level": 12,
+    "cardLevel": 1,
+    "win": 98,
+    "build": "Resolve",
+    "policy": "race",
+    "avg": 92,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:13",
+    "name": "Regular enemies Lv 13",
+    "kind": "zone",
+    "level": 13,
+    "cardLevel": 2,
+    "win": 96,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 95,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:14",
+    "name": "Regular enemies Lv 14",
+    "kind": "zone",
+    "level": 14,
+    "cardLevel": 2,
+    "win": 100,
+    "build": "Disruption",
+    "policy": "careful",
+    "avg": 99,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:15",
+    "name": "Regular enemies Lv 15",
+    "kind": "zone",
+    "level": 15,
+    "cardLevel": 2,
+    "win": 98,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 97,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:16",
+    "name": "Regular enemies Lv 16",
+    "kind": "zone",
+    "level": 16,
+    "cardLevel": 2,
+    "win": 92,
+    "build": "Disruption",
+    "policy": "careful",
+    "avg": 88,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:17",
+    "name": "Regular enemies Lv 17",
+    "kind": "zone",
+    "level": 17,
+    "cardLevel": 2,
+    "win": 92,
+    "build": "Disruption",
+    "policy": "careful",
+    "avg": 89,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "mini:tidewardenElaris",
+    "name": "The Tidebound Warden (mini-boss)",
+    "kind": "mini",
+    "level": 10,
+    "cardLevel": 1,
+    "win": 80,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 68,
+    "target": [
+     45,
+     70
+    ],
+    "ok": true
+   },
+   {
+    "key": "mini:galeSovereign",
+    "name": "The Gale Sovereign (mini-boss)",
+    "kind": "mini",
+    "level": 16,
+    "cardLevel": 2,
+    "win": 76,
+    "build": "Disruption",
+    "policy": "careful",
+    "avg": 61,
+    "target": [
+     45,
+     70
+    ],
+    "ok": true
+   },
+   {
+    "key": "boss:bloomTyrant",
+    "name": "The Bloom Tyrant (BOSS)",
+    "kind": "boss",
+    "level": 18,
+    "cardLevel": 2,
+    "win": 84,
+    "build": "Surge",
+    "policy": "careful",
+    "avg": 39,
+    "target": [
+     35,
+     60
+    ],
+    "ok": true
+   }
+  ],
+  "vespera": [
+   {
+    "key": "zone:23",
+    "name": "Regular enemies Lv 23",
+    "kind": "zone",
+    "level": 23,
+    "cardLevel": 3,
+    "win": 98,
+    "build": "Resolve",
+    "policy": "careful",
+    "avg": 96,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   },
+   {
+    "key": "zone:26",
+    "name": "Regular enemies Lv 26",
+    "kind": "zone",
+    "level": 26,
+    "cardLevel": 3,
+    "win": 90,
+    "build": "Surge",
+    "policy": "careful",
+    "avg": 87,
+    "target": [
+     75,
+     100
+    ],
+    "ok": true
+   }
+  ]
+ }
+}

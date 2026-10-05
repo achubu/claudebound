@@ -1,4 +1,55 @@
 'use strict';
+// ---------------------------------------------------------------------
+// BALANCE — every knob that decides how strong an enemy is, in one place.
+// Enemy level is the main difficulty driver; it climbs across the worlds
+// (city 1-9, Elaris 10-18 via hand-set room levels, Vespera from
+// regionLevelBase). regionHp / regionAttack are extra per-world
+// multipliers on top of level; heavy attacks scale with distance from the
+// region's start room. tests/balance-sim.cjs measures the effect of any
+// change here across all three worlds.
+// ---------------------------------------------------------------------
+// Any knob below may also be a per-world object, e.g. bossHp:{city:.7,elaris:1}.
+const BALANCE={
+ // Per level above 1. Gentle in the city (few talents, un-upgraded cards);
+ // steeper in Elaris; Vespera grows mostly through health, because cards
+ // are maxed by then and a steep attack climb turns fights into cliffs.
+ hpPerLevel:{city:.04,elaris:.06,vespera:.05},
+ attackPerLevel:{city:.4,elaris:1.1,vespera:.25},
+ // Extra per-world strength on top of level (Round 38: about 5-10 points harder).
+ regionHp:{city:1.08,elaris:1.8,vespera:2.35},
+ regionAttack:{city:0,elaris:5,vespera:16},
+ // Level of a region's start rooms when a room has no hand-set level.
+ // Elaris rooms are hand-set to 10-18 and Vespera's to 19-27.
+ regionLevelBase:{city:1,elaris:1,vespera:19},
+ eliteHp:{city:1.15,elaris:1.25,vespera:1.25},eliteAttack:2,
+ bossHp:1,bossAttack:0,         // extra for region bosses only
+ miniBossHp:1,miniBossAttack:0, // extra for mini-bosses only
+ // Heavy hit = attack x (heavyBase + heavyDistance x distance from start, 0..1).
+ heavyBase:1.5,heavyDistance:.25,
+ bossHeavyMax:1.3,              // bosses' heavy hits are capped, so one hit can't decide the fight
+ elementalMult:1.8,             // charged elemental strike
+ bossElementalMult:1.5,         // same, for bosses and mini-bosses
+ // Individual health tuning, set with tests/balance-sim.cjs so that at a
+ // fair-fight level (player level = boss level) a typical build beats each
+ // final boss about 39 times in 100 and each mini-boss about 52. "Typical"
+ // is the average over 16 builds covering every talent path (Round 40).
+ perEnemy:{
+  moonKnight:{hp:0.7},crownSentinel:{hp:0.75},thornWarden:{hp:0.84},
+  tidewardenElaris:{hp:0.91},galeSovereign:{hp:0.59},bloomTyrant:{hp:0.5},
+  arcSentinel:{hp:0.9},resonantPhantom:{hp:1.01},stormTyrant:{hp:0.55}
+ }
+};
+
+
+function balanceFor(key,region=activeRegion){const v=BALANCE[key];return v!==null&&typeof v==='object'?(v[region]??v.city):v}
+// The single source of truth for an enemy's health and attack: used by
+// startBattle() and by compendium.html, so the two can never disagree.
+function enemyStats(id,{region=activeRegion,level=1,elite=false,boss=!!enemies[id]?.boss}={}){
+ const base=enemies[id],mini=boss&&!!base.miniBoss,final=boss&&!base.miniBoss,tune=BALANCE.perEnemy[id]||{},get=k=>balanceFor(k,region);
+ const hp=base.hp*(get('regionHp')??1)*(elite?get('eliteHp'):1)*(1+(level-1)*get('hpPerLevel'))*(tune.hp??1)*(final?get('bossHp'):mini?get('miniBossHp'):1);
+ const attack=base.attack+(get('regionAttack')??0)+(elite?get('eliteAttack'):0)+Math.round((level-1)*get('attackPerLevel'))+(final?get('bossAttack'):mini?get('miniBossAttack'):0)+(tune.attack??0);
+ return{hp:Math.round(hp),attack};
+}
 // Elaris expansion: world generation and combat share the adventure's existing state.
 const EXPANSION_VERSION=3;
 const CITY_ROOMS=JSON.parse(JSON.stringify(rooms));
@@ -10,6 +61,97 @@ const ELARIS_ROOM_KEYS=['0,0','1,0','0,1','2,0','1,1','0,2','2,1','1,2','2,2','3
 // configureRegion('elaris') has been called, so this is captured as a
 // standalone literal (same shape as CITY_ROOMS) rather than read live.
 const ELARIS_ROOMS={'0,0':{exits:{s:'0,1',e:'1,0'}},'1,0':{exits:{s:'1,1',w:'0,0',e:'2,0'}},'0,1':{exits:{n:'0,0',s:'0,2',e:'1,1'}},'2,0':{exits:{s:'2,1',w:'1,0'}},'1,1':{exits:{n:'1,0',s:'1,2',w:'0,1',e:'2,1'}},'0,2':{exits:{n:'0,1',e:'1,2'}},'2,1':{exits:{n:'2,0',s:'2,2',w:'1,1'}},'1,2':{exits:{n:'1,1',w:'0,2',e:'2,2'}},'2,2':{exits:{n:'2,1',w:'1,2',e:'3,2'}},'3,2':{exits:{w:'2,2',e:'4,2'}},'4,2':{exits:{s:'4,3',w:'3,2'}},'4,3':{exits:{n:'4,2',s:'4,4'}},'4,4':{exits:{n:'4,3',e:'5,4'}},'5,4':{exits:{s:'5,5',w:'4,4',e:'6,4'}},'6,4':{exits:{s:'6,5',w:'5,4'}},'5,5':{exits:{n:'5,4',s:'5,6',e:'6,5'}},'6,5':{exits:{n:'6,4',s:'6,6',w:'5,5'}},'5,6':{exits:{n:'5,5',e:'6,6'}},'6,6':{exits:{n:'6,5',w:'5,6',e:'7,6'}},'7,6':{exits:{w:'6,6',e:'8,6'}},'8,6':{exits:{s:'8,7',w:'7,6',e:'9,6'}},'8,7':{exits:{n:'8,6',s:'8,8',e:'9,7'}},'9,6':{exits:{s:'9,7',w:'8,6',e:'10,6'}},'8,8':{exits:{n:'8,7',e:'9,8'}},'9,7':{exits:{n:'9,6',s:'9,8',w:'8,7',e:'10,7'}},'10,6':{exits:{s:'10,7',w:'9,6'}},'9,8':{exits:{n:'9,7',w:'8,8',e:'10,8'}},'10,7':{exits:{n:'10,6',s:'10,8',w:'9,7'}},'10,8':{exits:{n:'10,7',s:'10,9',w:'9,8'}},'10,9':{exits:{n:'10,8'}}};
+// ---------------------------------------------------------------------
+// VESPERA — world 3, rebuilt at the city's scale: 42 rooms, 8 zones
+// (levels 19-26), two mini-bosses on side branches, and a final boss at
+// the far end. Generated from a hand-designed maze graph (42 cells, 45
+// links, 4 loops, every room reachable) — see CHANGES.md.
+// ---------------------------------------------------------------------
+const VESPERA_ROOM_DATA={
+ '0,0':{name:"Stormglass Landing",exits:{s:"0,1",e:"1,0"},district:2,landmark:"ZONE 1",cityIndex:0},
+ '1,0':{name:"Prism Coast",exits:{s:"1,1",w:"0,0"},district:2,landmark:"ZONE 1",cityIndex:1,zone:1,level:19},
+ '0,1':{name:"Thunderfen",exits:{n:"0,0",s:"0,2",e:"1,1"},district:2,landmark:"ZONE 1",cityIndex:2,zone:1,level:19},
+ '1,1':{name:"Resonant Spires",exits:{n:"1,0",e:"2,1",w:"0,1"},district:2,landmark:"ZONE 1",cityIndex:3,zone:1,level:19},
+ '0,2':{name:"Prism Shore Shoals",exits:{n:"0,1",s:"0,3"},district:2,landmark:"ZONE 1",cityIndex:4,zone:1,level:19},
+ '2,1':{name:"Prism Shore Causeway",exits:{e:"3,1",w:"1,1"},district:2,landmark:"ZONE 1",cityIndex:5,zone:1,level:19},
+ '0,3':{name:"Prism Shore Reach",exits:{n:"0,2",e:"1,3"},district:2,landmark:"ZONE 1",cityIndex:6,zone:1,level:19},
+ '3,1':{name:"Brinelight Shoals",exits:{s:"3,2",e:"4,1",w:"2,1"},district:2,landmark:"ZONE 2",cityIndex:7,zone:2,level:20},
+ '1,3':{name:"Brinelight Causeway",exits:{e:"2,3",w:"0,3"},district:2,landmark:"ZONE 2",cityIndex:8,zone:2,level:20},
+ '4,1':{name:"Brinelight Reach",exits:{e:"5,1",w:"3,1"},district:2,landmark:"ZONE 2",cityIndex:9,zone:2,level:20},
+ '3,2':{name:"Brinelight Hollow",exits:{n:"3,1",s:"3,3"},district:2,landmark:"ZONE 2",cityIndex:10,zone:2,level:20},
+ '2,3':{name:"Brinelight Flats",exits:{s:"2,4",e:"3,3",w:"1,3"},district:2,landmark:"ZONE 2",cityIndex:11,zone:2,level:20},
+ '5,1':{name:"Galefen Shoals",exits:{s:"5,2",e:"6,1",w:"4,1"},district:0,landmark:"ZONE 3",cityIndex:12,zone:3,level:21},
+ '3,3':{name:"Galefen Causeway",exits:{n:"3,2",e:"4,3",w:"2,3"},district:0,landmark:"ZONE 3",cityIndex:13,zone:3,level:21},
+ '2,4':{name:"Galefen Reach",exits:{n:"2,3",s:"2,5"},district:0,landmark:"ZONE 3",cityIndex:14,zone:3,level:21},
+ '6,1':{name:"Galefen Hollow",exits:{e:"7,1",w:"5,1"},district:0,landmark:"ZONE 3",cityIndex:15,zone:3,level:21},
+ '5,2':{name:"Galefen Flats",exits:{n:"5,1",s:"5,3"},district:0,landmark:"ZONE 3",cityIndex:16,zone:3,level:21},
+ '4,3':{name:"Prism Bazaar West",exits:{e:"5,3",w:"3,3"},district:0,landmark:"ZONE 3",cityIndex:17,zone:3,level:21},
+ '2,5':{name:"Galefen Ridge",exits:{n:"2,4",w:"1,5"},district:0,landmark:"ZONE 3",cityIndex:18,zone:3,level:21},
+ '7,1':{name:"Galefen Steps",exits:{e:"8,1",w:"6,1"},district:0,landmark:"ZONE 3",cityIndex:19,zone:3,level:21},
+ '5,3':{name:"Prism Bazaar East",exits:{n:"5,2",e:"6,3",w:"4,3"},district:0,landmark:"ZONE 3",cityIndex:20,zone:3,level:21},
+ '1,5':{name:"Shattered Vault",exits:{e:"2,5"},district:0,landmark:"ZONE 3",cityIndex:21,zone:3,level:21,enemy:["arcSentinel",400,250]},
+ '8,1':{name:"Glasswind Shoals",exits:{s:"8,2",w:"7,1"},district:0,landmark:"ZONE 4",cityIndex:22,zone:4,level:22},
+ '6,3':{name:"Glasswind Causeway",exits:{s:"6,4",w:"5,3"},district:0,landmark:"ZONE 4",cityIndex:23,zone:4,level:22},
+ '8,2':{name:"Glasswind Reach",exits:{n:"8,1",s:"8,3"},district:0,landmark:"ZONE 4",cityIndex:24,zone:4,level:22},
+ '6,4':{name:"Glasswind Hollow",exits:{n:"6,3",s:"6,5"},district:0,landmark:"ZONE 4",cityIndex:25,zone:4,level:22},
+ '8,3':{name:"Stormforge Gate",exits:{n:"8,2",s:"8,4",e:"9,3"},district:1,landmark:"ZONE 5",cityIndex:26,zone:5,level:23},
+ '6,5':{name:"Ion Marsh Shoals",exits:{n:"6,4"},district:1,landmark:"ZONE 5",cityIndex:27,zone:5,level:23},
+ '9,3':{name:"Stormforge Works",exits:{s:"9,4",w:"8,3"},district:1,landmark:"ZONE 5",cityIndex:28,zone:5,level:23},
+ '8,4':{name:"Stormforge Yard",exits:{n:"8,3",e:"9,4"},district:1,landmark:"ZONE 5",cityIndex:29,zone:5,level:23},
+ '9,4':{name:"Stormforge Crucible",exits:{n:"9,3",e:"10,4",w:"8,4"},district:1,landmark:"ZONE 5",cityIndex:30,zone:5,level:23},
+ '10,4':{name:"Resonant Shoals",exits:{n:"10,3",s:"10,5",w:"9,4"},district:1,landmark:"ZONE 6",cityIndex:31,zone:6,level:24},
+ '10,3':{name:"Resonant Causeway",exits:{n:"10,2",s:"10,4"},district:1,landmark:"ZONE 6",cityIndex:32,zone:6,level:24},
+ '10,5':{name:"Resonant Reach",exits:{n:"10,4",s:"10,6"},district:1,landmark:"ZONE 6",cityIndex:33,zone:6,level:24},
+ '10,2':{name:"Tempest Shoals",exits:{s:"10,3",e:"11,2"},district:3,landmark:"ZONE 7",cityIndex:34,zone:7,level:25},
+ '10,6':{name:"Tempest Causeway",exits:{n:"10,5",w:"9,6"},district:3,landmark:"ZONE 7",cityIndex:35,zone:7,level:25},
+ '11,2':{name:"Resonance Chamber",exits:{w:"10,2"},district:3,landmark:"ZONE 7",cityIndex:36,zone:7,level:25,enemy:["resonantPhantom",400,250]},
+ '9,6':{name:"Tempest Reach",exits:{e:"10,6",w:"8,6"},district:3,landmark:"ZONE 7",cityIndex:37,zone:7,level:25},
+ '8,6':{name:"Tempest Hollow",exits:{e:"9,6",w:"7,6"},district:3,landmark:"ZONE 7",cityIndex:38,zone:7,level:25},
+ '7,6':{name:"Stormeye Shoals",exits:{e:"8,6",w:"6,6"},district:3,landmark:"ZONE 8",cityIndex:39,zone:8,level:26},
+ '6,6':{name:"Stormeye Causeway",exits:{s:"6,7",e:"7,6"},district:3,landmark:"ZONE 8",cityIndex:40,zone:8,level:26},
+ '6,7':{name:"Eye of the Tempest",exits:{n:"6,6"},district:3,landmark:"ZONE 8",cityIndex:41,level:27,enemy:["stormTyrant",400,250]}
+};
+const VESPERA_ROOM_KEYS=Object.keys(VESPERA_ROOM_DATA);
+// Storm-touched creatures. Each borrows an existing sprite (art) and is
+// recolored with the Vespera tint so it reads as a distinct species.
+const VESPERA_ENEMIES={
+ vespFox:{name:'Static Fox',icon:'ϟ',hp:44,attack:9,element:'fire',art:'cinderFox'},
+ vespThorn:{name:'Prism Thornling',icon:'✦',hp:46,attack:9,armor:1,element:'earth',art:'thornling'},
+ vespMoth:{name:'Tempest Moth',icon:'≋',hp:48,attack:9,element:'air',art:'stormMoth'},
+ vespHeron:{name:'Brinewing Heron',icon:'≈',hp:50,attack:10,element:'water',art:'drownedHeron'},
+ vespShade:{name:'Ion Shade',icon:'☄',hp:52,attack:10,armor:2,element:'air',art:'shade'},
+ vespStag:{name:'Rimeglass Stag',icon:'◆',hp:54,attack:10,armor:2,element:'earth',art:'blightAntler'},
+ vespWisp:{name:'Arc Wisp',icon:'✧',hp:56,attack:10,armor:2,element:'water',art:'cryptWisp'},
+ vespMauler:{name:'Thunder Mauler',icon:'♨',hp:58,attack:11,armor:2,element:'fire',art:'forgeBeast'},
+ arcSentinel:{name:'The Arc Sentinel',icon:'⚡',hp:84,attack:11,armor:4,boss:true,miniBoss:true,element:'water',art:'vineguard'},
+ resonantPhantom:{name:'The Resonant Phantom',icon:'☄',hp:80,attack:12,armor:3,boss:true,miniBoss:true,element:'air',art:'shade'},
+ stormTyrant:{name:'The Tempest Colossus',icon:'🌩',hp:150,attack:11,armor:2,boss:true,element:'water',shift:['water','air'],shiftEvery:4,art:'bloomTyrant'}
+};
+Object.assign(enemies,VESPERA_ENEMIES);
+const VESPERA_ZONE_ENEMY=['vespFox','vespThorn','vespMoth','vespHeron','vespShade','vespStag','vespWisp','vespMauler'];
+const VESPERA_TINT='hue-rotate(205deg) saturate(1.3) brightness(1.08)';
+const VESPERA_GROUND_FILTER='hue-rotate(205deg) saturate(.8) brightness(.8) contrast(1.06)';
+// Borrowed-art enemies render their source sprite, recolored and renamed.
+// Calls the *current* global monsterArt so later wrappers (e.g. the Bloom
+// Tyrant's sprite in encounter-depth.js) still apply to the source art.
+const vesperaPreviousArt=monsterArt;
+monsterArt=function(id){
+ const e=enemies[id];if(!e||!e.art)return vesperaPreviousArt(id);
+ let html=monsterArt(e.art).replace(/(alt|aria-label)="[^"]*"/,'$1="'+e.name+'"');
+ if(html.startsWith('<img'))return html.replace('<img','<img style="filter:'+VESPERA_TINT+' drop-shadow(0 12px 7px #000b)"');
+ return html.includes('style="')?html.replace('style="','style="filter:'+VESPERA_TINT+';'):html.replace(/^<(\w+)/,'<$1 style="filter:'+VESPERA_TINT+'"');
+};
+const vesperaStyle=document.createElement('style');
+vesperaStyle.textContent=`
+#world[data-environment="vespera"]:before{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;background:linear-gradient(180deg,#1d2b6a33,#3a1d6a26),repeating-linear-gradient(105deg,transparent 0 13px,#b9d8ff14 13px 14px);background-size:auto,60px 120px;animation:vesperaRain .7s linear infinite}
+#world[data-environment="vespera"]:after{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;background:#d9ecff;opacity:0;animation:vesperaFlash 11s infinite}
+#world[data-environment="vespera"] .joined-scenery{filter:saturate(.85) brightness(.9)}
+#world[data-environment="vespera"] .wildlife{color:#bfe3ff;text-shadow:0 0 8px #7fc4ff}
+@keyframes vesperaRain{to{background-position:0 0,-30px 120px}}
+@keyframes vesperaFlash{0%,93%,100%{opacity:0}94%{opacity:.18}95%{opacity:0}96.5%{opacity:.1}}
+@media (prefers-reduced-motion:reduce){#world[data-environment="vespera"]:before,#world[data-environment="vespera"]:after{animation:none}}`;
+document.head.append(vesperaStyle);
+function vesperaTierTypes(key){const z=rooms[key]&&rooms[key].zone;return z?[VESPERA_ZONE_ENEMY[z-1]]:['vespFox']}
 const ELEMENTS=['fire','water','earth','air'];
 const COUNTERS={fire:'water',water:'air',earth:'fire',air:'earth'};
 const ELEMENT_ICONS={fire:'♨',water:'≈',earth:'◆',air:'≋',ice:'❄',poison:'☠'};
@@ -57,12 +199,35 @@ addCard('venom','Venom Bloom',1,'Poison Attack','☠',{damage:3,poison:2,element
 addCard('gale','Gale Cut',1,'Air Attack','≋',{damage:5,draw:1,element:'air'});
 addCard('counter','Prismatic Counter',1,'Elemental Counter','◈',{block:3,counter:true,exhaust:true});
 for(const element of ELEMENTS)addCard('counter_'+element,element[0].toUpperCase()+element.slice(1)+' Reversal',1,'Elemental Counter',ELEMENT_ICONS[element],{block:3,counter:element,exhaust:true});
+// Round 38: every mini-boss drops its own unique card on defeat — Soulbound
+// (protected forever) 25% of the time, otherwise the same card as an
+// Impermanent copy. The card's definition is neither; each copy's
+// `soulbound` flag decides.
+const MINI_BOSS_SOULBOUND_CHANCE=.25;
+const MINI_BOSS_CARDS={moonKnight:'lunarEdict',crownSentinel:'neonCovenant',tidewardenElaris:'tidebound',galeSovereign:'sovereignGale',arcSentinel:'arcBulwark',resonantPhantom:'phantomResonance'};
+addCard('lunarEdict','Lunar Edict',1,'Unique Attack','☾',{damage:6,block:4,element:'water'});
+addCard('tidebound','Tidebound Aegis',1,'Unique Defense','≈',{block:8,heal:3,element:'water'});
+addCard('sovereignGale','Sovereign Gale',1,'Unique Attack','≋',{damage:7,draw:1,pierce:true,element:'air'});
+addCard('arcBulwark','Arc Bulwark',2,'Unique Defense','ϟ',{block:12,shock:true,element:'lightning'});
+addCard('phantomResonance','Phantom Resonance',2,'Unique Attack','☄',{damage:14,draw:1,element:'air'});
+defs.tidebound.tiers.forEach((t,level)=>t.heal=3+level);
+defs.neonCovenant.kind='Unique Skill';delete defs.neonCovenant.soulbound;
+for(const [boss,id] of Object.entries(MINI_BOSS_CARDS))defs[id].unique=boss;
+function dropMiniBossCard(b,roll=Math.random()){
+ const id=MINI_BOSS_CARDS[b.id];if(!id)return null;
+ state.miniDrops=Array.isArray(state.miniDrops)?state.miniDrops:[];
+ if(state.miniDrops.includes(b.id))return null;
+ state.miniDrops.push(b.id);if(b.id==='crownSentinel')state.neonGift=true;
+ const soul=roll<MINI_BOSS_SOULBOUND_CHANCE,card=make(id,0,soul);state.pool.push(card);b.uniqueDrop=card.uid;
+ b.special.push(soul?'◆ SOULBOUND unique drop: '+stat(card).name+'! It can never be lost. Find it in the Deck Workshop.':'◇ Unique drop: '+stat(card).name+' (Impermanent). Mini-boss cards are Soulbound 25% of the time. Find it in the Deck Workshop.');
+ return card;
+}
 const originalRules=rules;
 rules=function(c){const d=stat(c);return originalRules(c)+(d.freeze?' Freeze: enemy skips its next attack.':'')+(d.burn?' Burn: 2 damage for 2 turns.':'')+(d.poison?' Poison: +2 stacking damage each turn.':'')+(d.counter===true?' Counter a charged elemental strike and deal 6 damage. Reserve this card for free between turns.':d.counter?' Arm '+d.counter+' to counter '+Object.keys(COUNTERS).find(e=>COUNTERS[e]===d.counter)+'.':'')};
 syncTalentVitals=function(heal=false){const old=state.maxHp,next=30+state.playerLevel-1+talentRank('vitality')*2;state.maxHp=next;state.hp=Math.min(next,state.hp+(heal?Math.max(0,next-old):0))};
 gainXP=function(n){const gained=[];if(state.playerLevel>=30){state.xp=0;return gained}state.xp+=n;while(state.xp>=100&&state.playerLevel<30){state.xp-=100;state.playerLevel++;gained.push(state.playerLevel);syncTalentVitals(false);state.hp=Math.min(state.maxHp,state.hp+5)}if(state.playerLevel===30)state.xp=0;return gained};
 
-function configureRegion(region){activeRegion=region;for(const key of Object.keys(rooms))delete rooms[key];if(region==='city'){Object.assign(rooms,JSON.parse(JSON.stringify(CITY_ROOMS)))}else if(region==='vespera'){const names=['Stormglass Landing','Prism Coast','Thunderfen','Resonant Spires'];for(let y=0;y<2;y++)for(let x=0;x<2;x++){const key=x+','+y,exits={};if(x)exits.w='0,'+y;else exits.e='1,'+y;if(y)exits.n=x+',0';else exits.s=x+',1';rooms[key]={name:names[y*2+x],exits,district:2,cityIndex:y*2+x}}}else{
+function configureRegion(region){activeRegion=region;for(const key of Object.keys(rooms))delete rooms[key];if(region==='city'){Object.assign(rooms,JSON.parse(JSON.stringify(CITY_ROOMS)))}else if(region==='vespera'){Object.assign(rooms,JSON.parse(JSON.stringify(VESPERA_ROOM_DATA)))}else{
  // Round 30: a fresh hand-designed maze (30 rooms), same concept as
  // City's Round 29 rebuild but a different shape (verified via BFS before
  // writing: 30 cells, 39 edges -- 10 more than a tree needs, confirming
@@ -115,15 +280,16 @@ function walkable(key,x,y,margin=0){
 }
 NeonCity.render=function(world,key,r){
  if(activeRegion==='city')return originalRoomRender(world,key,r,rooms,hasRelic);
- world.innerHTML='';world.dataset.environment='elaris';
+ world.innerHTML='';world.dataset.environment=activeRegion;
  const canvas=document.createElement('canvas');canvas.className='city-ground';canvas.width=800;canvas.height=500;world.append(canvas);
  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.fillStyle='#31553d';ctx.fillRect(0,0,800,500);
  if(natureTexture.complete&&natureTexture.naturalWidth){const v=r.district;ctx.drawImage(natureTexture,(v%2)*natureTexture.width/2,Math.floor(v/2)*natureTexture.height/2,natureTexture.width/2,natureTexture.height/2,0,0,800,500)}
- const title=document.createElement('div');title.className='city-landmark';title.textContent='ELARIS · '+r.name;world.append(title);
+ if(activeRegion==='vespera')canvas.style.filter=VESPERA_GROUND_FILTER;
+ const title=document.createElement('div');title.className='city-landmark';title.textContent=(activeRegion==='vespera'?'VESPERA · ':'ELARIS · ')+r.name;world.append(title);
  for(const [dir,raw]of Object.entries(r.exits)){const to=typeof raw==='string'?raw:raw.to,node=document.createElement('div');node.className='city-exit '+dir;node.textContent=rooms[to].name;world.append(node)}
- for(let i=0;i<4;i++){const wildlife=document.createElement('span');wildlife.className='wildlife';wildlife.textContent=i%2?'🦋':'✧';wildlife.style.left=(160+i*135)+'px';wildlife.style.top=(140+(i%2)*190)+'px';wildlife.style.animationDelay=(-i*2)+'s';world.append(wildlife)}
+ for(let i=0;i<4;i++){const wildlife=document.createElement('span');wildlife.className='wildlife';wildlife.textContent=activeRegion==='vespera'?(i%2?'ϟ':'✦'):(i%2?'🦋':'✧');wildlife.style.left=(160+i*135)+'px';wildlife.style.top=(140+(i%2)*190)+'px';wildlife.style.animationDelay=(-i*2)+'s';world.append(wildlife)}
 };
-natureTexture.onload=()=>{if(state&&activeRegion==='elaris'&&!state.battle)renderWorld()};
+natureTexture.onload=()=>{if(state&&activeRegion!=='city'&&!state.battle)renderWorld()};
 
 // Enemy strength ramps with distance from the start room, so exploring
 // outward naturally leads from easy patrols toward the hardest non-boss
@@ -143,7 +309,7 @@ natureTexture.onload=()=>{if(state&&activeRegion==='elaris'&&!state.battle)rende
 const regionDistanceCache={};
 function regionRoomDistances(region){
  if(regionDistanceCache[region])return regionDistanceCache[region];
- const source=region==='city'?CITY_ROOMS:region==='elaris'?ELARIS_ROOMS:null;
+ const source=region==='city'?CITY_ROOMS:region==='elaris'?ELARIS_ROOMS:region==='vespera'?VESPERA_ROOM_DATA:null;
  if(!source)return{};
  const startKey=region==='city'?'0,5':'0,0',dist={[startKey]:0},queue=[startKey];
  while(queue.length){
@@ -155,10 +321,9 @@ function regionRoomDistances(region){
  }
  return regionDistanceCache[region]=dist;
 }
-function regionMaxDistance(region){if(region==='vespera')return 2;return Math.max(...Object.values(regionRoomDistances(region)))}
+function regionMaxDistance(region){return Math.max(...Object.values(regionRoomDistances(region)))}
 function regionDistance(key,region=activeRegion){
- if(region==='city'||region==='elaris')return regionRoomDistances(region)[key]||0;
- const[x,y]=key.split(',').map(Number);return x+y;
+ return regionRoomDistances(region)[key]||0;
 }
 function regionDistanceFrac(key,region=activeRegion){return Math.min(1,regionDistance(key,region)/regionMaxDistance(region))}
 // Round 28: city rooms now carry an explicit zone (1-8), each with
@@ -176,7 +341,7 @@ function cityTierTypes(key){const z=rooms[key]&&rooms[key].zone;return z?[CITY_Z
 function enemyLevel(key){
  const r=rooms[key];
  if(r&&typeof r.level==='number')return r.level;
- return Math.max(1,1+Math.round(regionDistanceFrac(key)*7));
+ return Math.max(1,(BALANCE.regionLevelBase[activeRegion]??1)+Math.round(regionDistanceFrac(key)*7));
 }
 // Color-codes how an enemy's level compares to the player's own — green
 // means you're ready, amber means it'll be close, red means go level up
@@ -208,7 +373,7 @@ function roomSpawns(key){
   // Mini-bosses now live in ELARIS_WILDLIFE (so they can reuse a species'
   // sprite sheet), but must never be drawn as an ordinary random patrol —
   // only ever appear via their own designated room slot (r.enemy above).
-  const types=activeRegion==='city'?cityTierTypes(key):Object.keys(ELARIS_WILDLIFE).filter(id=>!ELARIS_WILDLIFE[id].boss);
+  const types=activeRegion==='city'?cityTierTypes(key):activeRegion==='vespera'?vesperaTierTypes(key):Object.keys(ELARIS_WILDLIFE).filter(id=>!ELARIS_WILDLIFE[id].boss);
   // The region's own main boss (currently only bloomTyrant at Elaris 3,2)
   // keeps its special story-tied slot. Room-designated bosses (r.enemy,
   // e.g. mini-bosses) used to only work in the city — generalized so any
@@ -251,7 +416,7 @@ function patrolFor(s){return patrolCatalog[s.uid]||(patrolCatalog[s.uid]={x:s.x,
 // regions lives specifically in a mini-boss branch room — optional,
 // found only by actually taking the detour, same reward logic as the
 // mini-boss itself rather than scattered along the route you can't avoid.
-function chestFor(key){const designated=activeRegion==='city'?{'2,9':'crystal','4,0':'crystal'}:activeRegion==='elaris'?{'0,2':'potion','10,6':'potion'}:null;if(!designated||!designated[key])return null;return{id:activeRegion+':'+key,x:330,y:180,reward:designated[key]}}
+function chestFor(key){const designated=activeRegion==='city'?{'2,9':'crystal','4,0':'crystal'}:activeRegion==='elaris'?{'0,2':'potion','10,6':'potion'}:activeRegion==='vespera'?{'1,5':'crystal','11,2':'crystal'}:null;if(!designated||!designated[key])return null;return{id:activeRegion+':'+key,x:330,y:180,reward:designated[key]}}
 renderWorld=function(){if(!state)return;const r=room(),world=$('world');if(collides(state.pos.x,state.pos.y))state.pos={x:400,y:280};NeonCity.render(world,state.room,r);for(const s of roomSpawns(state.room)){if(!spawnAvailable(s))continue;const p=patrolFor(s),node=document.createElement('div');node.className='enemy-node monster-'+s.type+(s.boss?' boss':'')+(s.elite?' elite':'');node.dataset.spawn=s.uid;node.dataset.name=(s.elite?'★ ELITE · ':'')+(s.element?ELEMENT_ICONS[s.element]+' ':'')+enemies[s.type].name+' · Lv.'+enemyLevel(state.room);node.innerHTML=monsterArt(s.type);node.style.left=p.x+'px';node.style.top=p.y+'px';world.append(node)}if(r.relic&&relicAvailable(r.relic[0])){const q=r.relic,node=document.createElement('div');node.className='relic';node.textContent=q[2];node.dataset.name=q[1];node.style.left=q[3]+'px';node.style.top=q[4]+'px';world.append(node)}const chest=chestFor(state.room);if(chest&&!state.chests.includes(chest.id)){const node=document.createElement('div');node.className='map-chest';node.title=chest.reward==='crystal'?'Hidden loot chest — Upgrade Crystal':'Hidden loot chest';node.style.left=chest.x+'px';node.style.top=chest.y+'px';world.append(node)}if(portalTarget()){const portal=document.createElement('button');portal.className='region-portal';portal.innerHTML='<img class="portal-art" src="assets/environment/elaris-portal.png" alt=""><small>'+portalTarget().label+'</small>';portal.onclick=travelPortal;world.append(portal)}const player=document.createElement('div');player.id='player';player.style.left=state.pos.x+'px';player.style.top=state.pos.y+'px';player.innerHTML='<span class="hero-sprite"></span>';world.append(player);animateHero(0,false);renderHUD()};
 animateEnemy=function(dt){if(!state||state.battle||!$('menuOverlay').classList.contains('hidden'))return;for(const s of roomSpawns(state.room)){if(!spawnAvailable(s))continue;const p=patrolFor(s),speed=s.boss?8:14;p.turn-=dt;if(p.turn<0){p.angle+=.8;p.turn=3}const nx=p.x+Math.cos(p.angle)*speed*dt,ny=p.y+Math.sin(p.angle)*speed*dt;if(walkable(state.room,nx,ny,26)&&Math.hypot(nx-s.x,ny-s.y)<75){p.x=nx;p.y=ny}else p.angle+=1.8;const node=document.querySelector('[data-spawn="'+s.uid+'"]');if(node){node.style.left=p.x+'px';node.style.top=p.y+'px';node.querySelector('.monster-sprite')?.style.setProperty('--enemy-facing',Math.cos(p.angle)<0?-1:1)}if(Math.hypot(state.pos.x-p.x,state.pos.y-p.y)<(s.boss?58:43)){startBattle(s.uid);if(state.battle)return}}};
 checkWorldInteractions=function(){if(state.battle)return;const q=room().relic;if(q&&relicAvailable(q[0])&&Math.hypot(state.pos.x-q[3],state.pos.y-q[4])<48)collectRelic(q);const chest=chestFor(state.room);if(chest&&!state.chests.includes(chest.id)&&Math.hypot(state.pos.x-chest.x,state.pos.y-chest.y)<38){
@@ -282,18 +447,28 @@ function travelPortal(){
 }
 
 
-startBattle=function(spawnId){const issue=deckIssue();if(issue)return toast(issue+' Open Deck to adjust.');if(!active().length)return toast('Equip a card before fighting.');const spawn=roomSpawns(state.room).find(s=>s.uid===spawnId);if(!spawn||!spawnAvailable(spawn))return;const base=enemies[spawn.type],regionScale=activeRegion==='vespera'?1.9:activeRegion==='elaris'?1.75:1,eliteScale=spawn.elite?1.25:1,
-// Every encounter now carries a real level (enemyLevel()) that directly
-// drives its stat bonus on top of its species' own base stats — city
-// previously had NO distance/level-based scaling at all (distFrac was
-// hardcoded to 0 there), relying purely on which enemy type showed up.
-// Level 1 is the baseline (no bonus); each level beyond that adds a real,
-// visible increment, so a Level 6 Phase Shade hits harder than its own
-// base stats alone would suggest, same species or not.
-level=enemyLevel(state.room),levelScale=1+(level-1)*.08,levelAttack=Math.round((level-1)*1.5),
-health=Math.round(base.hp*regionScale*eliteScale*levelScale),attackBonus=(activeRegion==='vespera'?6:activeRegion==='elaris'?5:0)+(spawn.elite?2:0)+levelAttack;keys={};state.fight++;state.battle={id:spawn.type,spawnId:spawn.uid,enemy:{...base,boss:spawn.boss,elite:spawn.elite,element:spawn.element,level,name:(spawn.elite?'Elite ':'')+base.name,hp:health,maxHp:health,attack:base.attack+attackBonus},turn:1,energy:maxEnergy(),block:crystalOpeningBlock(),draw:shuffle(active().map(c=>({...c}))),hand:[],discard:[],exhaust:[],savedUid:null,boostedUid:null,boostedUids:[],boostUses:0,debuffUsed:false,enemyDebuff:0,phase:'fight',logs:['Encounter: '+base.name],freeze:0,burn:0,burnTurns:0,poison:0,counter:null,doubleUsed:false,doubleArmed:false,echoUsed:false,echoArmed:false,overloadUsed:false,overloadArmed:false,cloneUsed:false};drawCards(openingHand());$('battleOverlay').classList.remove('hidden');save();renderBattle()};
+startBattle=function(spawnId){const issue=deckIssue();if(issue)return toast(issue+' Open Deck to adjust.');if(!active().length)return toast('Equip a card before fighting.');const spawn=roomSpawns(state.room).find(s=>s.uid===spawnId);if(!spawn||!spawnAvailable(spawn))return;const base=enemies[spawn.type],level=enemyLevel(state.room),stats=enemyStats(spawn.type,{level,elite:spawn.elite,boss:spawn.boss}),health=stats.hp,attackBonus=stats.attack-base.attack;keys={};state.fight++;state.battle={id:spawn.type,spawnId:spawn.uid,enemy:{...base,boss:spawn.boss,elite:spawn.elite,element:spawn.element,level,name:(spawn.elite?'Elite ':'')+base.name,hp:health,maxHp:health,attack:base.attack+attackBonus},turn:1,energy:maxEnergy(),block:crystalOpeningBlock(),draw:shuffle(active().map(c=>({...c}))),hand:[],discard:[],exhaust:[],savedUid:null,boostedUid:null,boostedUids:[],boostUses:0,debuffUsed:false,enemyDebuff:0,phase:'fight',logs:['Encounter: '+base.name],freeze:0,burn:0,burnTurns:0,poison:0,counter:null,doubleUsed:false,doubleArmed:false,echoUsed:false,echoArmed:false,overloadUsed:false,overloadArmed:false,cloneUsed:false};drawCards(openingHand());$('battleOverlay').classList.remove('hidden');save();renderBattle()};
 function boostedCardUids(b){return Array.isArray(b.boostedUids)?b.boostedUids:(b.boostedUid==null?[]:[b.boostedUid])}
-function cardEffect(c,empowered,doubleAttack){const b=state.battle,d=stat(c),boost=empowered?boostAmount():0;let damage=d.damage?d.damage+attackBonus()+deviceBonus('assault')+boost:0;if(damage&&doubleAttack)damage*=2;if(damage&&Math.random()<talentRank('critical')*.03){damage*=2;b.logs.push('Critical strike!')}if(damage&&b.enemy.element&&COUNTERS[b.enemy.element]===(d.element==='ice'?'water':d.element)){damage=Math.round(damage*1.5);b.logs.push('Elemental weakness: +50% damage.')}const preArmor=damage,armorBlocked=(damage&&b.enemy.armor&&!d.pierce)?Math.min(damage,b.enemy.armor):0;if(armorBlocked)damage=Math.max(0,damage-b.enemy.armor);b.enemy.hp=Math.max(0,b.enemy.hp-damage);if(d.block)b.block+=d.block+deviceBonus('aegis')+boost;if(d.heal)state.hp=Math.min(state.maxHp,state.hp+d.heal+boost);b.energy+=d.energy||0;if(d.draw)drawCards(d.draw);if(d.freeze)b.freeze=Math.max(b.freeze,d.freeze);if(d.burn){b.burn=d.burn;b.burnTurns=2}if(d.poison)b.poison+=d.poison;if(d.counter){b.counter=d.counter===true?(COUNTERS[b.enemy.element]||null):d.counter;b.logs.push(b.counter?'Prismatic Counter armed for '+b.counter+'.':'No elemental attack to counter.')} b.logs.push(d.name+(preArmor?(armorBlocked?' · '+preArmor+' dmg − '+armorBlocked+' armor = '+damage+' dealt':' · '+damage+' damage'):''))}
+// Talent hooks: talent-matrix.js defines `talentMatrix`; with it absent (or
+// no talents learned) every hook is neutral and this behaves exactly as before.
+function cardEffect(c,empowered,doubleAttack){
+ const b=state.battle,d=stat(c),boost=empowered?boostAmount():0,tm=typeof talentMatrix==='object'?talentMatrix:null;
+ let damage=d.damage?d.damage+attackBonus()+deviceBonus('assault')+boost+(tm?tm.flatDamage(c,d,b):0):0;
+ if(damage&&doubleAttack)damage*=2;
+ if(damage&&Math.random()<talentRank('critical')*.03+talentRank('lethal')*.04){damage=Math.round(damage*(tm?tm.critMultiplier():2));b.logs.push('Critical strike!');if(tm)tm.onCrit(b)}
+ if(damage&&b.enemy.element&&COUNTERS[b.enemy.element]===(d.element==='ice'?'water':d.element)){const mult=tm?tm.weaknessMultiplier():1.5;damage=Math.round(damage*mult);b.logs.push('Elemental weakness: +'+Math.round((mult-1)*100)+'% damage.')}
+ if(damage&&tm)damage=tm.finalDamage(damage,b);
+ const armor=Math.max(0,(b.enemy.armor||0)-(tm?tm.armorIgnore(b):0)),preArmor=damage,armorBlocked=(damage&&armor&&!d.pierce)?Math.min(damage,armor):0;
+ if(armorBlocked)damage=Math.max(0,damage-armor);
+ b.enemy.hp=Math.max(0,b.enemy.hp-damage);
+ if(d.block)b.block+=d.block+deviceBonus('aegis')+boost+(tm?tm.blockBonus(c,d,b):0);
+ if(d.heal)state.hp=Math.min(state.maxHp,state.hp+d.heal+boost);
+ b.energy+=d.energy||0;if(d.draw)drawCards(d.draw);if(d.freeze)b.freeze=Math.max(b.freeze,d.freeze);
+ if(d.burn){b.burn=d.burn+(tm?tm.dotBonus():0);b.burnTurns=2}if(d.poison)b.poison+=d.poison+(tm?tm.dotBonus():0);
+ if(d.counter){b.counter=d.counter===true?(COUNTERS[b.enemy.element]||null):d.counter;b.logs.push(b.counter?'Prismatic Counter armed for '+b.counter+'.':'No elemental attack to counter.')}
+ b.logs.push(d.name+(preArmor?(armorBlocked?' · '+preArmor+' dmg − '+armorBlocked+' armor = '+damage+' dealt':' · '+damage+' damage'):''));
+ if(tm)tm.afterCard(c,d,b,damage);
+}
 playCard=function(i){const b=state.battle;if(!b||b.phase!=='fight')return;const c=b.hand[i];if(!c)return;const d=stat(c);const overload=b.overloadArmed&&hasTalent('overload')&&!b.overloadUsed;if(!overload&&d.cost>b.energy)return;const boosted=hasTalent('powerCore')&&boostedCardUids(b).includes(c.uid),repeat=b.echoArmed&&hasTalent('echo')&&!b.echoUsed,overdrive=b.doubleArmed&&d.damage&&hasTalent('doublePower')&&!b.doubleUsed;b.energy-=overload?0:d.cost;b.hand.splice(i,1);if(b.savedUid===c.uid)b.savedUid=null;if(repeat){b.echoUsed=true;b.echoArmed=false}if(overdrive){b.doubleUsed=true;b.doubleArmed=false}if(overload){b.overloadUsed=true;b.overloadArmed=false;b.logs.push('Overload Surge: card played for free.')}cardEffect(c,boosted,overdrive);if(repeat&&b.enemy.hp>0){b.logs.push('Echo Protocol repeats the card.');cardEffect(c,false,false)}(d.exhaust?b.exhaust:b.discard).push(c);recordCardUse(c);if(!b.enemy.hp)winBattle();save();renderBattle()};
 endTurn=function(){const b=state.battle;if(!b||b.phase!=='fight')return;const dot=b.poison+(b.burnTurns>0?b.burn:0);b.enemy.hp=Math.max(0,b.enemy.hp-dot);if(dot)b.logs.push('Burn / poison: '+dot+' damage.');if(b.burnTurns>0)b.burnTurns--;if(!b.enemy.hp){winBattle();save();renderBattle();return}if(b.freeze>0){b.freeze--;b.logs.push('Frozen: enemy skips its attack.')}else if(b.counter&&COUNTERS[b.enemy.element]===b.counter){b.enemy.hp=Math.max(0,b.enemy.hp-6);b.logs.push('Elemental counter: attack negated, 6 damage returned.');b.counter=null}else{const damage=Math.max(0,intent()-talentRank('plating')-b.block);state.hp=Math.max(0,state.hp-damage);b.logs.push(b.enemy.name+' attacks for '+damage+' HP.');b.counter=null}b.block=0;const keep=hasTalent('retainCore')?b.hand.filter(c=>c.uid===b.savedUid).slice(0,1):[];b.discard.push(...b.hand.filter(c=>!keep.includes(c)));b.hand=keep;b.savedUid=null;if(!state.hp)loseBattle();else if(!b.enemy.hp)winBattle();else{b.turn++;b.energy=maxEnergy();drawCards(4)}save();renderBattle()};
 // Upgrade Crystals are needed (alongside the 50-use mastery grind) to
@@ -323,7 +498,8 @@ else if(b.lootType==='crystal'){setMaterials(materials()+1)}
 else if(b.lootType==='soulbound'){b.reward=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(b.reward)}
 else{b.thief=LOOT_THIEVES[Math.floor(Math.random()*LOOT_THIEVES.length)]}
 b.special=[];if(b.id==='thornWarden'&&!state.iceGift){state.iceGift=true;const ice=make('glacial');state.pool.push(ice);b.special.push('Glacial Covenant: guaranteed Soulbound Ice card. The Elaris portal is now open!')}else if(b.id==='bloomTyrant'&&!state.stormGift){state.stormGift=true;state.pool.push(make('stormglass'));b.special.push('Stormglass Covenant: guaranteed Soulbound Lightning card. The Vespera portal is now open!')}else if(b.enemy.boss&&b.lootType!=='soulbound'&&Math.random()<.10){const soul=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(soul);b.special.push('Soulbound boss card: '+stat(soul).name)}
-if(b.id==='crownSentinel'&&grantNeonCovenant())b.special.push('Neon Covenant: guaranteed Soulbound card! 0 energy · Draw 1 · Gain 1 energy. Find it in the Deck Workshop.');
+if(isMiniBoss)dropMiniBossCard(b);
+if(b.id==='stormTyrant')b.special.push('The Tempest Colossus falls and Vespera\'s storm breaks. All three worlds are conquered!');
 // Mini-bosses always drop exactly one Upgrade Crystal on defeat — true
 // bosses can only ever be defeated once each (state.bosses), so this is a
 // reliable one-time reward per mini-boss, never a farmable loop. The loot-
@@ -344,6 +520,7 @@ if(!b.chestOpened){
 const head=b.lootType==='card'?'<h2>'+stat(b.reward).name+'</h2><p>The loot chest held a new Impermanent card.</p>':b.lootType==='potion'?'<h2>⚗ Small Healing Potion</h2><p>The loot chest held a potion. You now have '+state.potions+'.</p>':b.lootType==='crystal'?'<h2>◆ Upgrade Crystal</h2><p>The loot chest held an Upgrade Crystal — spend it in the Deck Workshop on a mastered card. You now have '+materials()+'.</p>':b.lootType==='soulbound'?'<h2>◆ '+stat(b.reward).name+'</h2><p class="notice">Jackpot! The loot chest held a rare Soulbound card (1% odds).</p>':'<h2>🐾 Empty Chest</h2><p>You open the chest to find '+b.thief+' already inside — it bolts off into the ruins with everything that was in there.</p>';
 m.innerHTML='<div class="eyebrow">VICTORY · LOOT CHEST</div>'+head+'<div id="randomReward" class="cards"></div>'+b.special.map(s=>'<p class="notice">'+s+'</p>').join('')+(b.levels.length?'<p>Level '+state.playerLevel+'! +'+b.levels.length+' maximum HP, +'+b.levels.length*5+' healing, and +'+b.levels.length+' talent point(s).</p>':'')+'<button id="continueReward" class="primary">Continue</button>';
 if(b.lootType==='card'||b.lootType==='soulbound')$('randomReward').append(cardElement(b.reward,()=>{},true));
+if(b.uniqueDrop){const u=state.pool.find(c=>c.uid===b.uniqueDrop);if(u)$('randomReward').append(cardElement(u,()=>{},true))}
 if(b.crystalDrop){const c=state.device.crystals.find(c=>c.uid===b.crystalDrop);if(c){const art=document.createElement('div');art.className='crystal-reward';art.innerHTML=crystalArt(c)+'<b>'+crystalLabel(c)+'</b>';$('randomReward').append(art)}}
 $('continueReward').onclick=finishBattle;return}baseRenderBattle();if(b.phase!=='fight')return;const tools=document.createElement('div');tools.className='combat-tools';
 // Round 34: this used to always show "Enemy element: Neutral · Freeze 0 ·
@@ -365,7 +542,7 @@ if(tools.innerHTML)$('battleModal').prepend(tools);if($('overdrive'))$('overdriv
 newGame=function(){uid=1;const starterSeen=new Set();const pool=['strike','strike','guard','guard','focus','mend'].map(id=>{const first=!starterSeen.has(id);starterSeen.add(id);return make(id,0,first)});state={version:EXPANSION_VERSION,name:'Adventurer',characterId:'protagonist',seed:Math.floor(Math.random()*4294967295),region:'city',regionVisits:{city:['0,5'],elaris:['0,0']},playerLevel:1,xp:0,hp:30,maxHp:30,gold:0,potions:0,pool,deck:pool.map(c=>c.uid),room:'0,5',pos:{x:400,y:300},visited:['0,5'],relics:[],cleared:[],bosses:[],cooldowns:{},fight:0,wins:0,talents:{},battle:null,chests:[],device:{crystals:[],slots:[null,null,null,null,null],next:1}};state.visited=state.regionVisits.city;configureRegion('city');$('startOverlay').classList.add('hidden');$('menuOverlay').classList.add('hidden');$('battleOverlay').classList.add('hidden');setMaterials(0);save();renderWorld()};
 save=function(){if(!state)return;state.regionVisits[state.region]=state.visited;localStorage.setItem('cardbound-expansion-v3',JSON.stringify(state))};
 load=function(){try{const parsed=JSON.parse(localStorage.getItem('cardbound-expansion-v3'));if(!parsed||parsed.version!==3)throw Error('No save');const battle=parsed.battle;parsed.battle=null;validateImport(parsed);parsed.battle=battle;restoreGame(parsed);if(battle){$('battleOverlay').classList.remove('hidden');renderBattle()}return true}catch(e){toast('No valid expansion save found. Begin a new journey.');return false}};
-function validateImport(s){if(!s||s.version!==3||!['city','elaris','vespera'].includes(s.region)||!Number.isInteger(s.seed)||s.seed<0||!Array.isArray(s.pool)||s.pool.length>10000||!Array.isArray(s.deck)||s.deck.length>30)throw Error('Unsupported or malformed save.');const ids=new Set();for(const c of s.pool){if(!c||!Object.hasOwn(defs,c.id)||!Number.isInteger(c.uid)||c.uid<1||ids.has(c.uid)||!Number.isInteger(c.level)||c.level<0||c.level>3||!Number.isInteger(c.uses)||c.uses<0||c.uses>((defs[c.id].soulbound||c.soulbound)?USES:USES*2))throw Error('Invalid card data.');ids.add(c.uid);c.soulbound=defs[c.id].soulbound?true:!!c.soulbound}if(new Set(s.deck).size!==s.deck.length||s.deck.some(id=>!ids.has(id)))throw Error('Invalid deck.');if(!Number.isInteger(s.playerLevel)||s.playerLevel<1||s.playerLevel>30||!Number.isFinite(s.hp)||s.hp<0||s.hp>1000||!Number.isFinite(s.maxHp)||s.maxHp<1||s.maxHp>1000||!Number.isFinite(s.xp)||s.xp<0||s.xp>=100||!Number.isInteger(s.potions)||s.potions<0)throw Error('Invalid player stats.');const validRooms=s.region==='city'?Object.keys(CITY_ROOMS):s.region==='vespera'?['0,0','1,0','0,1','1,1']:ELARIS_ROOM_KEYS;if(!validRooms.includes(s.room)||!s.pos||!Number.isFinite(s.pos.x)||!Number.isFinite(s.pos.y))throw Error('Invalid room.');for(const field of ['visited','relics','cleared','bosses','chests'])if(!Array.isArray(s[field])||s[field].some(x=>typeof x!=='string'||x.length>100||/[<>]/.test(x)))throw Error('Invalid world data.');if(!s.regionVisits||!Array.isArray(s.regionVisits.city)||!Array.isArray(s.regionVisits.elaris)||!s.cooldowns||!s.talents||!s.device||!Array.isArray(s.device.crystals)||s.device.crystals.length>1000||!Array.isArray(s.device.slots)||s.device.slots.length!==5)throw Error('Invalid progression data.');for(const [id,rank] of Object.entries(s.talents)){const node=Object.values(TALENT_BRANCHES).flatMap(b=>b.nodes).find(n=>n.id===id);if(!node||!Number.isInteger(rank)||rank<0||rank>node.max)throw Error('Invalid talent.')}const crystalIds=new Set();for(const c of s.device.crystals){if(!c||!Object.hasOwn(CRYSTALS,c.type)||typeof c.uid!=='string'||!/^crystal-\d+$/.test(c.uid)||crystalIds.has(c.uid))throw Error('Invalid crystal.');if(c.rarity!==undefined&&!Object.hasOwn(CRYSTAL_RARITIES,c.rarity))throw Error('Invalid crystal rarity.');crystalIds.add(c.uid)}if(s.device.slots.some(id=>id!==null&&!crystalIds.has(id))||new Set(s.device.slots.filter(Boolean)).size!==s.device.slots.filter(Boolean).length)throw Error('Invalid sockets.');if(s.battle)throw Error('Save transfer is available between encounters only.');s.name='Adventurer';return s}
+function validateImport(s){if(s&&s.miniDrops!==undefined&&(!Array.isArray(s.miniDrops)||s.miniDrops.some(id=>!Object.hasOwn(MINI_BOSS_CARDS,id))))throw Error('Invalid mini-boss drop record.');if(!s||s.version!==3||!['city','elaris','vespera'].includes(s.region)||!Number.isInteger(s.seed)||s.seed<0||!Array.isArray(s.pool)||s.pool.length>10000||!Array.isArray(s.deck)||s.deck.length>30)throw Error('Unsupported or malformed save.');const ids=new Set();for(const c of s.pool){if(!c||!Object.hasOwn(defs,c.id)||!Number.isInteger(c.uid)||c.uid<1||ids.has(c.uid)||!Number.isInteger(c.level)||c.level<0||c.level>3||!Number.isInteger(c.uses)||c.uses<0||c.uses>((defs[c.id].soulbound||c.soulbound)?USES:USES*2))throw Error('Invalid card data.');ids.add(c.uid);c.soulbound=defs[c.id].soulbound?true:!!c.soulbound}if(new Set(s.deck).size!==s.deck.length||s.deck.some(id=>!ids.has(id)))throw Error('Invalid deck.');if(!Number.isInteger(s.playerLevel)||s.playerLevel<1||s.playerLevel>30||!Number.isFinite(s.hp)||s.hp<0||s.hp>1000||!Number.isFinite(s.maxHp)||s.maxHp<1||s.maxHp>1000||!Number.isFinite(s.xp)||s.xp<0||s.xp>=100||!Number.isInteger(s.potions)||s.potions<0)throw Error('Invalid player stats.');const validRooms=s.region==='city'?Object.keys(CITY_ROOMS):s.region==='vespera'?VESPERA_ROOM_KEYS:ELARIS_ROOM_KEYS;if(!validRooms.includes(s.room)||!s.pos||!Number.isFinite(s.pos.x)||!Number.isFinite(s.pos.y))throw Error('Invalid room.');for(const field of ['visited','relics','cleared','bosses','chests'])if(!Array.isArray(s[field])||s[field].some(x=>typeof x!=='string'||x.length>100||/[<>]/.test(x)))throw Error('Invalid world data.');if(!s.regionVisits||!Array.isArray(s.regionVisits.city)||!Array.isArray(s.regionVisits.elaris)||!s.cooldowns||!s.talents||!s.device||!Array.isArray(s.device.crystals)||s.device.crystals.length>1000||!Array.isArray(s.device.slots)||s.device.slots.length!==5)throw Error('Invalid progression data.');for(const [id,rank] of Object.entries(s.talents)){const node=Object.values(TALENT_BRANCHES).flatMap(b=>b.nodes).find(n=>n.id===id);if(!node||!Number.isInteger(rank)||rank<0||rank>node.max)throw Error('Invalid talent.')}const crystalIds=new Set();for(const c of s.device.crystals){if(!c||!Object.hasOwn(CRYSTALS,c.type)||typeof c.uid!=='string'||!/^crystal-\d+$/.test(c.uid)||crystalIds.has(c.uid))throw Error('Invalid crystal.');if(c.rarity!==undefined&&!Object.hasOwn(CRYSTAL_RARITIES,c.rarity))throw Error('Invalid crystal rarity.');crystalIds.add(c.uid)}if(s.device.slots.some(id=>id!==null&&!crystalIds.has(id))||new Set(s.device.slots.filter(Boolean)).size!==s.device.slots.filter(Boolean).length)throw Error('Invalid sockets.');if(s.battle)throw Error('Save transfer is available between encounters only.');s.name='Adventurer';return s}
 function normalizeElementalCards(s){
  const legacy=s.pool.filter(c=>/^counter_(fire|water|earth|air)$/.test(c.id));
  if(!legacy.length)return false;
@@ -395,7 +572,7 @@ function grantNeonCovenant(){
  if(state.neonGift)return false;
  state.neonGift=true;
  if(state.pool.some(c=>c.id==='neonCovenant'))return false;
- state.pool.push(make('neonCovenant'));return true;
+ state.pool.push(make('neonCovenant',0,true));return true;
 }
 function restoreGame(s){const countersMigrated=normalizeElementalCards(s);const starterHealed=healStarterProtection(s);state=s;uid=Math.max(1,...s.pool.map(c=>c.uid+1));if(state.bosses.includes('crownSentinel'))grantNeonCovenant();configureRegion(state.region);state.regionVisits[state.region]=state.visited;keys={};$('startOverlay').classList.add('hidden');$('battleOverlay').classList.add('hidden');$('menuOverlay').classList.add('hidden');save();renderWorld();if(countersMigrated)toast('Elemental counters combined into one Prismatic Counter type.');else if(starterHealed)toast('One of each starter card type is now protected from loss.')}
 function exportSave(){if(!state)return toast('Begin or load a journey first.');if(state.battle)return toast('Finish the encounter before exporting.');const payload={format:'cardbound-save',version:3,state,materials:materials()},blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='cardbound-'+state.region+'-level-'+state.playerLevel+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Save exported.')}
@@ -403,7 +580,7 @@ async function importSave(file){try{if(!file||file.size>2000000)throw Error('Cho
 function showMainMenu(){keys={};openMenu('<div class="eyebrow">CARDBOUND</div><h2>Main menu</h2><p>Save transfer is available between encounters.</p><button id="exportSave">Export save file</button> <button id="importSave">Import save file</button><p><button id="backToGame">Return to game</button> <button id="restartJourney" class="danger">New journey</button></p>');$('exportSave').onclick=exportSave;$('importSave').onclick=()=>$('saveFile').click();$('backToGame').onclick=closeMenu;$('restartJourney').onclick=()=>{if(confirm('Start a new journey? Export your current save first if you want to keep it.'))newGame()}}
 const baseShowCharacter=showCharacter;
 showCharacter=function(){baseShowCharacter();const portrait=document.querySelector('.sheet-portrait');if(portrait){portrait.src='assets/characters/character-portal.webp';portrait.style.maxHeight='none';portrait.style.aspectRatio='16 / 9';portrait.style.objectFit='cover'}const info=document.createElement('p');info.className='notice';info.textContent='Aetherlink: '+deviceSlots()+' sockets · Critical strike '+talentRank('critical')*3+'% · Every level grants +1 max HP and heals 5 HP.';$('menuModal').append(info)};
-objective=function(){if(activeRegion==='vespera')return 'Explore Stormglass Reach. Reserve Prismatic Counter for charged attacks.';if(activeRegion==='elaris')return state.bosses.includes('bloomTyrant')?'The Vespera portal is open in Elderbloom Sanctuary.':'Defeat the Bloom Tyrant in Elderbloom Sanctuary. Reserve your counter for charged strikes.';if(state.bosses.includes('thornWarden'))return 'The Warden portal is open. Return to Warden Mainframe to enter Elaris.';if(!hasRelic('ember'))return state.room==='0,5'?'Head east into Scrapfire Alley to begin the search for the Ember Sigil.':'Explore the city to recover the Ember Sigil.';if(!hasRelic('boots'))return 'Clear Cable Market to recover the Briarstep Boots.';if(!hasRelic('lens'))return 'Find the Moon Lens in the Drowned Archive.';return 'Defeat the Thorn Warden to unlock Ice and Elaris.'};
+objective=function(){if(activeRegion==='vespera')return state.bosses.includes('stormTyrant')?'All three worlds are conquered. Vespera\'s storm has broken.':'Cross the storm to the Eye of the Tempest and defeat the Tempest Colossus. Reserve Prismatic Counter for charged strikes.';if(activeRegion==='elaris')return state.bosses.includes('bloomTyrant')?'The Vespera portal is open in Elderbloom Sanctuary.':'Defeat the Bloom Tyrant in Elderbloom Sanctuary. Reserve your counter for charged strikes.';if(state.bosses.includes('thornWarden'))return 'The Warden portal is open. Return to Warden Mainframe to enter Elaris.';if(!hasRelic('ember'))return state.room==='0,5'?'Head east into Scrapfire Alley to begin the search for the Ember Sigil.':'Explore the city to recover the Ember Sigil.';if(!hasRelic('boots'))return 'Clear Cable Market to recover the Briarstep Boots.';if(!hasRelic('lens'))return 'Find the Moon Lens in the Drowned Archive.';return 'Defeat the Thorn Warden to unlock Ice and Elaris.'};
 function relicName(id){for(const r of Object.values(rooms))if(r.relic&&r.relic[0]===id)return r.relic[2]+' '+r.relic[1];return id}
 // The map now reads as an actually-drawn map, not a data grid: only areas
 // you've genuinely visited render at all (a real fog of war — the OLD
@@ -489,7 +666,7 @@ showMap=function(){
  openMenu('<div class="eyebrow">'+(activeRegion==='city'?'NEON AFTERMATH':activeRegion==='vespera'?'VESPERA':'ELARIS')+' · '+pct+'% COMPLETE</div><h2>Exploration map</h2><div class="map-canvas"><svg class="map-links" viewBox="0 0 100 100" preserveAspectRatio="none">'+linksSVG.join('')+'</svg>'+cellsHTML.join('')+'</div><p>'+discovered+'/'+keys.length+' areas visited · '+chestsFound+'/'+allChests.length+' hidden chests found · '+relicsFound+'/'+allRelics.length+' relics claimed.</p><button id="mapReturn">Return</button>');
  $('mapReturn').onclick=closeMenu;
 };
-const style=document.createElement('style');style.textContent='.device-core{font-size:90px;text-align:center;color:#78fff1;text-shadow:0 0 30px #41cdfc}.combat-tools{padding:6px 10px;border:1px solid #529baf;margin-bottom:6px;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}.combat-tools p{margin:0}.region-portal{position:absolute;left:340px;top:340px;width:120px;height:95px;border:2px solid #9dffff;border-radius:50%;background:radial-gradient(#cdfff1,#215ca0,#22113d);box-shadow:0 0 35px #86e5e8;font-size:42px;z-index:7;animation:pulse 3s infinite}.region-portal small{display:block;font:12px system-ui}.elite .monster-sprite{filter:drop-shadow(0 0 8px #ffc958)}.map-canvas{position:relative;width:100%;aspect-ratio:16/10;background:radial-gradient(ellipse at 50% 40%,#16283a,#070d14 75%);border:1px solid #2c4356;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 60px #00000066}.map-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.map-link{fill:none;stroke:#5c8fa8;stroke-width:.5;stroke-linecap:round;stroke-dasharray:1.2 1.6;opacity:.75}.map-link.locked{stroke:#c25a6a;stroke-dasharray:.5 1.1}.map-link.map-stub{stroke:#3c5468;opacity:.55;stroke-dasharray:.8 1.4}.map-canvas .panel{position:absolute;min-width:92px;min-height:66px;padding:12px 10px 8px;font:11px system-ui;background:linear-gradient(160deg,#1c3247,#0f1c29);border:1px solid #3f6178;border-radius:6px;box-shadow:0 0 0 1px #0009,0 4px 14px #0007;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px}.map-canvas .panel b{font-size:12px;text-shadow:0 0 6px #4aa3ff55}.map-canvas small{display:block;color:#9edcae;letter-spacing:.4px}.current-room{border-color:#fff189!important;box-shadow:0 0 0 1px #fff18988,0 0 22px #fff18966!important}.map-canvas .boss-room{border-color:#e0524f!important;box-shadow:0 0 0 1px #e0524f88,0 0 18px #e0524f55!important}.map-canvas .boss-room small{color:#ff9d9a}.map-canvas .room-tag-badge{position:absolute;top:-13px;right:10%;font:8px system-ui;letter-spacing:.3px;padding:2px 6px;border-radius:4px;background:#16283a;border:1px solid #3f6178;color:#fff;white-space:nowrap;z-index:2}.map-canvas .lock-hint{font-size:9px;color:#e0a0a0;white-space:nowrap}.wildlife{position:absolute;pointer-events:none;z-index:3;color:#ceffee;font-size:19px;animation:wildlifeDrift 12s ease-in-out infinite}@keyframes wildlifeDrift{50%{transform:translate(50px,-20px)}}select{max-width:100%;background:#152e40;color:#e3faf7;padding:10px}.loot-chest-wrap{text-align:center}.loot-chest-graphic{display:inline-block;width:170px;height:170px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 16px #7fd8ff99);animation:chestGlow 2.4s ease-in-out infinite}@keyframes chestGlow{50%{filter:drop-shadow(0 0 28px #a6e8ffcc);transform:scale(1.04)}}.armor-tag{color:#9dd6ff;text-shadow:0 0 6px #4aa3ff88}.armor-note{font-size:11px;margin:2px 0 0}.block-tag{color:#a8e6a1;text-shadow:0 0 6px #5ecb5088}.enemy-level{font-size:14px;font-weight:700;vertical-align:middle}.map-chest{position:absolute;transform:translate(-50%,-50%);width:46px;height:46px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 10px #7fd8ff99);z-index:5;animation:mapChestGlow 2.4s ease-in-out infinite;pointer-events:none}@keyframes mapChestGlow{50%{filter:drop-shadow(0 0 18px #a6e8ffcc);transform:translate(-50%,-50%) scale(1.04)}}';document.head.append(style);
+const style=document.createElement('style');style.textContent='.device-core{font-size:90px;text-align:center;color:#78fff1;text-shadow:0 0 30px #41cdfc}.combat-tools{padding:6px 10px;border:1px solid #529baf;margin-bottom:6px;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}.combat-tools p{margin:0}.region-portal{position:absolute;left:340px;top:340px;width:120px;height:95px;border:2px solid #9dffff;border-radius:50%;background:radial-gradient(#cdfff1,#215ca0,#22113d);box-shadow:0 0 35px #86e5e8;font-size:42px;z-index:7;animation:pulse 3s infinite}.region-portal small{display:block;font:12px system-ui}.elite .monster-sprite{filter:drop-shadow(0 0 8px #ffc958)}.map-canvas{position:relative;width:100%;aspect-ratio:16/10;max-height:calc(94vh - 190px);background:radial-gradient(ellipse at 50% 40%,#16283a,#070d14 75%);border:1px solid #2c4356;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 60px #00000066}.map-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.map-link{fill:none;stroke:#5c8fa8;stroke-width:.5;stroke-linecap:round;stroke-dasharray:1.2 1.6;opacity:.75}.map-link.locked{stroke:#c25a6a;stroke-dasharray:.5 1.1}.map-link.map-stub{stroke:#3c5468;opacity:.55;stroke-dasharray:.8 1.4}.map-canvas .panel{position:absolute;min-width:92px;min-height:66px;padding:12px 10px 8px;font:11px system-ui;background:linear-gradient(160deg,#1c3247,#0f1c29);border:1px solid #3f6178;border-radius:6px;box-shadow:0 0 0 1px #0009,0 4px 14px #0007;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px}.map-canvas .panel b{font-size:12px;text-shadow:0 0 6px #4aa3ff55}.map-canvas small{display:block;color:#9edcae;letter-spacing:.4px}.current-room{border-color:#fff189!important;box-shadow:0 0 0 1px #fff18988,0 0 22px #fff18966!important}.map-canvas .boss-room{border-color:#e0524f!important;box-shadow:0 0 0 1px #e0524f88,0 0 18px #e0524f55!important}.map-canvas .boss-room small{color:#ff9d9a}.map-canvas .room-tag-badge{position:absolute;top:-13px;right:10%;font:8px system-ui;letter-spacing:.3px;padding:2px 6px;border-radius:4px;background:#16283a;border:1px solid #3f6178;color:#fff;white-space:nowrap;z-index:2}.map-canvas .lock-hint{font-size:9px;color:#e0a0a0;white-space:nowrap}.wildlife{position:absolute;pointer-events:none;z-index:3;color:#ceffee;font-size:19px;animation:wildlifeDrift 12s ease-in-out infinite}@keyframes wildlifeDrift{50%{transform:translate(50px,-20px)}}select{max-width:100%;background:#152e40;color:#e3faf7;padding:10px}.loot-chest-wrap{text-align:center}.loot-chest-graphic{display:inline-block;width:170px;height:170px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 16px #7fd8ff99);animation:chestGlow 2.4s ease-in-out infinite}@keyframes chestGlow{50%{filter:drop-shadow(0 0 28px #a6e8ffcc);transform:scale(1.04)}}.armor-tag{color:#9dd6ff;text-shadow:0 0 6px #4aa3ff88}.armor-note{font-size:11px;margin:2px 0 0}.block-tag{color:#a8e6a1;text-shadow:0 0 6px #5ecb5088}.enemy-level{font-size:14px;font-weight:700;vertical-align:middle}.map-chest{position:absolute;transform:translate(-50%,-50%);width:46px;height:46px;background-image:url(\'assets/items/loot-chest.png\');background-repeat:no-repeat;background-size:contain;background-position:center;filter:drop-shadow(0 0 10px #7fd8ff99);z-index:5;animation:mapChestGlow 2.4s ease-in-out infinite;pointer-events:none}@keyframes mapChestGlow{50%{filter:drop-shadow(0 0 18px #a6e8ffcc);transform:translate(-50%,-50%) scale(1.04)}}';document.head.append(style);
 const navDevice=document.createElement('button');navDevice.textContent='Aetherlink';navDevice.onclick=showDevice;$('nav').append(navDevice);const navMenu=document.createElement('button');navMenu.textContent='Menu';navMenu.onclick=showMainMenu;$('nav').append(navMenu);
 const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='.json,application/json';fileInput.id='saveFile';fileInput.hidden=true;fileInput.onchange=()=>{importSave(fileInput.files[0]);fileInput.value=''};document.body.append(fileInput);
 const importButton=document.createElement('button');importButton.textContent='Import save file';importButton.onclick=()=>fileInput.click();$('startOverlay').querySelector('section').append(importButton);

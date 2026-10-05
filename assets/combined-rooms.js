@@ -1,7 +1,13 @@
 'use strict';
 // Save coordinates stay local; joined areas share one continuous illustrated background.
 const JOINED_AREAS={
- vespera:[{name:'Stormglass Reach',art:'stormglass',cells:['0,0','1,0','0,1','1,1']}],
+ // Round 38: Vespera grew to 42 rooms; the two parked art districts
+ // (foundry 2x2, promenade 2-cell) found homes here.
+ vespera:[
+  {name:'Stormglass Reach',art:'stormglass',cells:['0,0','1,0','0,1','1,1']},
+  {name:'Prism Bazaar',art:'promenade',cells:['4,3','5,3']},
+  {name:'Stormforge Foundry',art:'foundry',cells:['8,3','9,3','8,4','9,4']}
+ ],
  // Round 29: city rebuilt again to match the user's own hand-designed
  // maze layout (a long main corridor with two looping branches to mini-
  // bosses, not a simple spine). Crown Mainframe District is the only
@@ -57,7 +63,7 @@ const originalAreaCellRender=NeonCity.render;
 NeonCity.render=function(container,key,r){
  const area=joinedArea(key);
  if(!area.art)return originalAreaCellRender(container,key,r);
- container.innerHTML='';container.dataset.environment=activeRegion==='city'?'neon':'elaris';
+ container.innerHTML='';container.dataset.environment=activeRegion==='city'?'neon':activeRegion;
  for(const dir of ['n','s','e','w']){
   if(joinedExit(dir,key))continue;
   const raw=r.exits[dir],info=typeof raw==='string'?{to:raw}:raw;

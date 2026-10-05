@@ -236,7 +236,8 @@ state.room='1,5';const nearHeavy=enemyPlan(battleStub,3).damage;
 state.room=trueEdgeRoom;const farHeavy=enemyPlan(battleStub,3).damage;
 assert(farHeavy>nearHeavy,'a heavy hit does more damage far from the start than near it, same base attack (near='+nearHeavy+' far='+farHeavy+')');
 assert(nearHeavy<=Math.round(10*1.7),'near the start, the heavy-hit multiplier stays close to its original 1.5x (got '+nearHeavy+')');
-assert.equal(farHeavy,Math.round(10*2.5),'at the actual map edge ('+trueEdgeRoom+'), the heavy-hit multiplier reaches its full 2.5x (got '+farHeavy+')');
+const fullHeavy=balanceFor('heavyBase')+balanceFor('heavyDistance');
+assert.equal(farHeavy,Math.round(10*fullHeavy),'at the actual map edge ('+trueEdgeRoom+'), the heavy-hit multiplier reaches its full BALANCE value '+fullHeavy+'x (got '+farHeavy+')');
 
 // --- Armor visibility: the UI now shows the enemy's armor stat, and the
 // combat log explains the reduction in one line instead of two separate
@@ -890,19 +891,24 @@ run(`
 newGame();state.playerLevel=30;
 const cloneNode=TALENT_BRANCHES.resolve.nodes.find(n=>n.id==='cloneCore');
 assert(cloneNode,'Mirror Array exists in the Resolve branch');
-assert.equal(cloneNode.tier,4,'it sits at tier 4, one past every existing tier');
+assert.equal(cloneNode.tier,7,'Round 40: on the 9-row grid it sits at row 7 (the old tier 4)');
 assert.deepEqual(cloneNode.req,['echo',1],'it requires Echo Protocol itself, not just a point threshold');
-assert.equal(TALENT_TIERS[4],15,'tier 4 has a real point threshold, not left undefined');
+assert.equal(TALENT_TIERS[7],16,'row 7 has a real point threshold, not left undefined');
 
 // Max out the full Resolve chain up to and including Echo, then confirm
 // Mirror Array is locked until Echo is actually learned, not just until
 // 15 points are spent some other way.
 state.talents={retainCore:1,plating:5,vitality:5,recovery:3};
-assert.equal(branchSpent('resolve'),14,'14 points spent so far, one short of the tier-4 threshold');
+assert.equal(branchSpent('resolve'),14,'14 points spent so far, short of the row-7 threshold');
 assert(!talentAvailable('resolve',cloneNode),'Mirror Array is not available yet (under the point threshold AND Echo not learned)');
 state.talents.echo=1;
-assert.equal(branchSpent('resolve'),15,'learning Echo brings total Resolve spend to exactly 15');
-assert(talentAvailable('resolve',cloneNode),'Mirror Array becomes available once Echo is learned and the tier-4 threshold is met');
+assert.equal(branchSpent('resolve'),15,'learning Echo brings total Resolve spend to 15');
+assert(!talentAvailable('resolve',cloneNode),'still one point short of the 16-point row');
+state.talents.bulwark=1;
+assert(talentAvailable('resolve',cloneNode),'Mirror Array becomes available once Echo is learned and the row-7 threshold (16) is met');
+delete state.talents.echo;
+assert(!talentAvailable('resolve',cloneNode),'16 points without Echo itself is not enough');
+state.talents.echo=1;
 state.talents.cloneCore=1;
 
 // --- The actual gameplay effect: cloning adds a real, playable duplicate

@@ -1814,6 +1814,84 @@ understood state doesn't need new coverage of its own. Verified directly:
 card renders at 174px again, and all 8 test files pass clean across 3
 full runs.
 
+## Round 39 — world rebalance, Vespera rebuilt, unique mini-boss cards
+
+**Balance in one place.** Every enemy-strength setting now lives in the
+`BALANCE` block at the top of `assets/expansion.js` (per-world level growth,
+world multipliers, elite and boss modifiers, heavy and charged-strike
+multipliers, per-boss health). `enemyStats()` is the single source of truth
+for an enemy's health and attack, used by battles and by `compendium.html`.
+
+- Removed double scaling (Elaris/Vespera multipliers stacked on rising levels).
+- Boss heavy hits capped at 1.3x and boss charged strikes at 1.5x, so a single
+  hit no longer decides a boss fight.
+- Tuned with `tests/balance-sim.cjs` (real engine, talent-using bot, 4 builds
+  x 2 play styles, player level = enemy level). At that fair-fight level a
+  typical build beats every final boss ~39% of the time (Thorn Warden, Bloom
+  Tyrant, Tempest Colossus) and every mini-boss ~50%; overall about 5-10
+  points harder than the previous pass.
+
+**Vespera rebuilt to the city's scale.** 42 rooms (was 4), 8 zones at levels
+19-26, generated from a hand-designed maze graph (45 links, 4 loops, all rooms
+reachable). Stormglass Reach (start) is unchanged, so existing Vespera saves
+load; the parked Promenade and Foundry art became the Prism Bazaar and
+Stormforge Foundry districts. Eight storm-touched enemy types (recolored
+borrowed sprites), two mini-bosses on side branches with crystal chests (Arc
+Sentinel, Lv 21; Resonant Phantom, Lv 25) and a final boss at the far end (the
+Tempest Colossus, Lv 27, shifting water/air every 4 turns). Storm visuals:
+tinted ground, rain, lightning flashes (disabled under reduced motion).
+Element-shifting is now generic (`enemies[id].shift`), no longer Bloom-only.
+
+**Unique mini-boss cards.** Each of the six mini-bosses drops its own card the
+first time it is beaten: Soulbound 25% of the time, otherwise the same card
+Impermanent. Lunar Edict, Neon Covenant (moved from always-Soulbound to this
+rule), Tidebound Aegis, Sovereign Gale, Arc Bulwark, Phantom Resonance. New
+card art from `tools/generate_unique_card_art.py` (pixel-art stand-ins; drop
+in hand-made art under the same filenames to replace them).
+
+**Also fixed.** Nine eastern city rooms used undefined districts and froze the
+screen; tap/click near a room edge now walks through that exit (phones crop
+the side exits off screen); compendium shows all cards with all four levels
+and live boss dossiers; "Exhaust." no longer duplicated on lightning cards.
+
+## Round 40 — expanded talent trees
+
+Each tree is roughly twice as deep (5 -> 9 rows) and twice as wide (2-3 -> 4-6
+paths): Surge 6 -> 17 talents, Disruption 7 -> 17, Resolve 6 -> 16. Rows
+unlock at 0/1/3/5/7/10/13/16/20 points spent in that tree; with 29 points in
+total no build can take everything. Existing talent ids, ranks and
+prerequisites are unchanged (only their row moved), so saved builds stay valid.
+Full-clear costs stay within 4 points of each other (36/34/32).
+
+- Surge: Boost & Overdrive · Critical strikes (Lethal Focus, Adrenaline Loop,
+  Executioner) · Elemental (Attunement, Kindling, Exploit Weakness,
+  Stormcaller) · Momentum combos (Momentum, Flurry) · Armor breaking
+  (Sunder, Shatterpoint).
+- Disruption: Weaken & Silence (Suppression Field, Static Silence, Dominion)
+  · Draw engine (Foresight, Recycler) · Energy (Surge Battery) · Deck ·
+  Counter mastery (Counter Weave, Resonant Rebound, Reflux, Null Field).
+- Resolve: Armor/Echo/Mirror · Block & retaliation (Bulwark Doctrine,
+  Retaliation Coil, Fortress Protocol, Unbreakable) · Life steal (Siphon
+  Edge, Second Wind, Undying Core) · Retained-card tempo (Preparation, Total
+  Recall, Steady Mind).
+
+Effects live in `assets/talent-matrix.js` and hook the engine through
+`cardEffect()` hooks plus wrappers on playCard/endTurn/enemyPlan/startBattle/
+loseBattle/stat. `tests/talent-matrix.test.cjs` checks every new talent with
+exact numbers. One tree shows at a time on every screen (tabs show points
+spent; path chips under each tree); wide trees scroll sideways on phones.
+
+Balance: 16 builds (4 original + 4 per tree, one per new path) simulated
+across all three worlds; new talents tuned over six passes (e.g. Preparation
+originally cut a card's cost every turn and pushed builds to 100%). "Typical"
+in tests/balance-sim.cjs is now the 16-build average, and every boss's health
+was retuned against it: final bosses ~39%, mini-bosses ~50%. Build averages
+across all areas: Surge paths 59-68%, Disruption 62-75%, Resolve 78-93%.
+
+Also fixed: deep trees could centre a node on a quarter column, which CSS
+grids drop (rounded to the half-column grid); the talent detail panel was
+empty when a tab's selected talent belonged to another tree.
+
 ## Testing
 
 ```

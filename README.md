@@ -60,6 +60,7 @@ The integrated world uses an original colorful fantasy-steampunk style:
 - The three-branch Neural Talent Matrix offers ranked, incremental card-battle upgrades: Surge improves offense and Power Boost, Disruption improves Weaken, draw, energy, deck capacity, and copy limits, and Resolve improves Retain, Block, health, and potion strength.
 - Deeper talent rows require points invested in that branch, with capstone upgrades available after ten branch points.
 - Talent choices can be freely recompiled outside active encounters, making it practical to test different builds.
+- Round 40 expanded each tree to 9 rows and 4-6 build paths (16-17 talents per tree, 50 in total); see CHANGES.md for every path.
 - Bosses have a 10% chance to drop an exclusive Soulbound card.
 - Normal encounters have a 10% material chance; bosses guarantee one material.
 
