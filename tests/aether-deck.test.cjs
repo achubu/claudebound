@@ -1,0 +1,138 @@
+// Round 44: pitching, Aether, the side deck, and every enemy affliction, through the real engine.
+const { run } = require('./expansion.test.cjs');
+run(`{
+const realRandom = Math.random;
+function setup(id, hand, opts = {}) {
+  newGame(); state.playerLevel = 10; state.talents = {}; syncTalentVitals(false); state.hp = state.maxHp = 100;
+  state.room = '1,5'; state.cooldowns = {};
+  startBattle(roomSpawns(state.room).find(s => !s.boss).uid);
+  const b = state.battle;
+  b.id = id; b.enemy = { ...b.enemy, element: null, armor: 0, guard: 0, hp: 300, maxHp: 300, attack: 10, boss: false, elite: false, ...(opts.enemy || {}) };
+  b.hand = hand.map(h => make(h)); b.draw = Array.from({ length: 12 }, () => make('guard')); b.discard = []; b.exhaust = [];
+  b.energy = opts.energy ?? 3; b.block = 0; b.turn = opts.turn ?? 1; b.counter = null; b.freeze = 0;
+  return b;
+}
+
+// ---------- Starter side deck, pitching, drawing ----------
+newGame(); ensureSide();
+assert.deepEqual(state.side.pool.map(c => c.id), ['purify', 'aegis', 'dispel'], 'new journeys start with a 3-card side kit');
+assert.equal(state.side.deck.length, 3, 'the kit starts in the side deck');
+let b = setup('thornling', ['strike', 'strike', 'cleave', 'spark']);
+assert.equal(b.aether, AETHER_START, 'encounters start with 2 Aether'); assert.equal(b.sideDraw.length, 3);
+assert.equal(pitchValue(b.hand[0]), 2, 'a 1-cost card pitches for 2'); assert.equal(pitchValue(b.hand[2]), 3, 'a 2-cost card for 3'); assert.equal(pitchValue(b.hand[3]), 1, 'a 0-cost card for 1');
+togglePitch(b.hand[0].uid); togglePitch(b.hand[1].uid);
+assert.equal(pendingAether(b), 4);
+const pitchedUids = b.pitch.slice(); endTurn();
+assert.equal(b.aether, AETHER_START + 4, 'two pitched 1-cost cards give 4 Aether at the end of the turn');
+assert(pitchedUids.every(u => b.exhaust.some(c => c.uid === u)), 'pitched cards burn away for the encounter');
+assert(pitchedUids.every(u => !b.discard.some(c => c.uid === u) && !b.draw.some(c => c.uid === u)));
+// Choosing a side card.
+const top2 = b.sideDraw.slice(0, 2).map(c => c.id);
+drawSide(); assert.equal(b.aether, AETHER_START, 'drawing costs 4 Aether'); assert.deepEqual(b.sideChoice.map(c => c.id), top2, 'reveals the top two');
+chooseSide(1); assert.equal(b.sideHand[0].id, top2[1]); assert.equal(b.sideDraw.at(-1).id, top2[0], 'the other goes to the bottom'); assert.equal(b.sideChoice, null);
+drawSide(); assert.equal(b.sideChoice, null, 'cannot draw without 4 Aether');
+// Aether cap and the minimum cycle.
+b.aether = 7; b.hand = [make('cleave'), make('cleave')]; b.draw = [make('guard'), make('guard'), make('guard')]; b.discard = [];
+togglePitch(b.hand[0].uid); assert.equal(b.pitch.length, 1);
+togglePitch(b.hand[1].uid); assert.equal(b.pitch.length, 1, 'cannot pitch below ' + MIN_CYCLE + ' cards in the encounter');
+b.savedUid = b.hand[1].uid; assert(!canPitch(b, b.hand[1]), 'a retained card cannot be pitched'); b.savedUid = null;
+ENEMY_AFFLICTIONS.thornling = []; endTurn(); assert.equal(b.aether, AETHER_MAX, 'Aether caps at ' + AETHER_MAX);
+ENEMY_AFFLICTIONS.thornling = ['frail'];
+
+// ---------- Schedules ----------
+b = setup('emberling', []);
+assert.deepEqual([1, 2, 3, 4, 5, 6, 7, 8].map(t => riderAt(b, t)), [null, 'bleed', null, null, 'bleed', null, null, 'bleed'], 'regular enemies: every third turn from turn 2');
+b.enemy.elite = true; assert.deepEqual([1, 2, 3, 4].map(t => riderAt(b, t)), [null, 'bleed', null, 'bleed'], 'elites: every other turn');
+b = setup('moonKnight', [], { enemy: { boss: true, element: 'water' } });
+assert.deepEqual([2, 5, 8, 11].map(t => scheduledRider(b, t)), ['rend', 'shackle', 'rend', 'shackle'], 'mini-bosses alternate two afflictions every 3rd turn');
+b = setup('thornWarden', [], { enemy: { boss: true, element: 'earth' } });
+assert.deepEqual([2, 5, 8].map(t => scheduledRider(b, t)), ['barrier', 'bleed', 'crush'], 'final bosses cycle three');
+b.enemy.hp = 100; assert.deepEqual([2, 3, 4, 6].map(t => scheduledRider(b, t)), ['barrier', null, 'bleed', 'crush'], 'enraged final bosses: every 2nd turn');
+// Strike riders scheduled on a guard turn carry to the next attack.
+b = setup('burrower', []);
+assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(t => riderAt(b, t)), [null, null, null, 'rend', null, null, 'rend'], 'a regular strike affliction lands on plain attacks (4, 7 …), not heavies');
+assert.equal(enemyPlanBeforeAether(b, 4).kind, 'attack'); assert(enemyPlan(b, 4).name.includes('Rend'), 'the telegraph names the affliction');
+b = setup('thornWarden', [], { enemy: { boss: true, element: 'earth' } });
+assert.equal(scheduledRider(b, 8), 'crush'); assert.equal(enemyPlanBeforeAether(b, 8).kind, 'guard');
+assert.equal(riderAt(b, 8), null); assert.equal(riderAt(b, 9), 'crush', 'a boss strike affliction on a guard turn carries to the next attack');
+
+// ---------- Every affliction ----------
+// Bleed (hex on a guard turn): ticks at the end of the next turns, decaying.
+b = setup('emberling', [], { turn: 2 }); endTurn(); assert.equal(b.bleed, 2);
+let hp = state.hp; b.block = 999; endTurn(); assert.equal(hp - state.hp, 2, 'Bleed 2'); assert.equal(b.bleed, 1);
+hp = state.hp; b.block = 999; endTurn(); assert.equal(hp - state.hp, 1); assert.equal(b.bleed, 0);
+b.bleed = 50; state.hp = 5; b.block = 999; endTurn(); assert.equal(state.hp, 1, 'Bleed never drops you below 1');
+// Frail: 25% less card damage for two turns.
+b = setup('thornling', [], { turn: 2 }); endTurn(); b.enemy.guard = 0; b.hand = [make('strike'), make('strike'), make('strike')]; b.energy = 3;
+let e = b.enemy.hp; playCard(0); assert.equal(e - b.enemy.hp, 6 - 2, 'Frail: 6 damage becomes 4 (rounded 25% cut)');
+b.block = 999; endTurn(); b.enemy.guard = 0; b.hand = [make('strike')]; b.energy = 3; e = b.enemy.hp; playCard(0); assert.equal(e - b.enemy.hp, 4, 'still Frail the second turn');
+b.block = 999; endTurn(); b.enemy.guard = 0; b.hand = [make('strike')]; b.energy = 3; e = b.enemy.hp; playCard(0); assert.equal(e - b.enemy.hp, 6, 'Frail wears off');
+// Shackle: one less energy.
+b = setup('vespShade', [], { turn: 2 }); endTurn(); assert.equal(b.energy, maxEnergy() - 1, 'Shackle: −1 energy'); assert(b.shackledNow);
+// Fog: one fewer card.
+b = setup('shade', [], { turn: 2 }); endTurn(); assert.equal(b.hand.length, 3, 'Fog: draw 3 instead of 4');
+// Static: unplayable junk, pitchable for 1.
+b = setup('cryptWisp', [], { turn: 2 }); const drawBefore = b.draw.length; endTurn();
+const statics = [...b.draw, ...b.hand].filter(isJunk); assert.equal(statics.length, 1, 'Static Flood adds 1 Static in the city');
+b.hand.unshift(makeStatic()); const handLen = b.hand.length; playCard(0); assert.equal(b.hand.length, handLen, 'Static cannot be played');
+assert.equal(pitchValue(b.hand[0]), 1); assert(canPitch(b, b.hand[0]));
+// Empower and Barrier.
+b = setup('crownSentinel', [], { turn: 5, enemy: { boss: true, element: 'air' } }); b.enemy.boss = true;
+const atk = b.enemy.attack; b.block = 999; endTurn(); assert.equal(b.enemy.attack, atk + 2, 'Empower +2 in the city'); assert.equal(b.empower, 2);
+applyHex(b, 'empower'); applyHex(b, 'empower'); assert.equal(b.empower, 4, 'Empower stacks once, to double');
+b.bleed = 0; applyHex(b, 'bleed'); applyHex(b, 'bleed'); applyHex(b, 'bleed'); assert.equal(b.bleed, 4, 'Bleed stacks to double');
+b = setup('vineguard', [], { turn: 2 }); endTurn(); b.enemy.guard = 0; assert.equal(b.enemy.barrier, 5, 'Barrier 5 in the city');
+applyHex(b, 'barrier'); assert.equal(b.enemy.barrier, 5, 'Barrier refreshes rather than stacking');
+b.hand = [make('cleave')]; b.energy = 3; e = b.enemy.hp; playCard(0); assert.equal(e - b.enemy.hp, 13 - 5, 'Barrier absorbs card damage'); assert.equal(b.enemy.barrier, 0);
+// Rend.
+b = setup('burrower', [], { turn: 4 }); const rendHit = enemyPlan(b).damage; b.block = 6; hp = state.hp; endTurn(); assert.equal(hp - state.hp, Math.max(0, rendHit - 3), 'Rend cuts through half your Block');
+// Crush.
+b = setup('forgeBeast', [], { turn: 4 }); assert.equal(enemyPlan(b).damage, Math.round(enemyPlanBeforeAether(b, 4).damage * 1.3), 'Crush +30%');
+// Siphon.
+b = setup('drownedHeron', [], { turn: 2, enemy: { element: 'water', hp: 200 } });
+assert.equal(enemyPlanBeforeAether(b, 4).kind, 'guard'); assert.equal(riderAt(b, 5), 'siphon', 'Siphon carries from the guard turn onto the next attack');
+b.turn = 5; const sip = enemyPlan(b).damage; e = b.enemy.hp; hp = state.hp; endTurn(); assert.equal(hp - state.hp, sip, 'the siphoning strike lands in full'); assert.equal(b.enemy.hp - e, sip, 'Siphon heals the enemy by the damage dealt');
+// Barrage: three hits, Block and Armor on each.
+b = setup('cinderFox', [], { turn: 5, enemy: { element: 'fire' } }); const per = enemyPlan(b).damage; assert.equal(enemyPlan(b).hits, 3);
+assert.equal(per, Math.max(1, Math.round(enemyPlanBeforeAether(b, 5).damage * .45)));
+state.talents = { plating: 1 }; b.block = 5; hp = state.hp; endTurn();
+const net = per - 1; let blk = 5, taken = 0; for (let k = 0; k < 3; k++) { const s = Math.min(blk, net); blk -= s; taken += net - s; }
+assert.equal(hp - state.hp, taken, 'Barrage: 3 hits, Armor and Block each time');
+state.talents = {};
+
+// ---------- Every side card ----------
+const give = (b, id) => { b.sideHand.push({ uid: 'sx' + id, id }); return b.sideHand.length - 1; };
+b = setup('thornling', []); b.bleed = 3; b.frail = 2; b.playerPoison = 2; b.playerBurn = 2; b.drained = true; b.exposed = 2; b.shackledNow = true; b.energy = 2; b.draw.push(makeStatic()); b.discard.push(makeStatic());
+playSide(give(b, 'purify')); assert.equal(b.bleed + b.frail + b.playerPoison + b.playerBurn + b.exposed, 0, 'Purifying Light cleanses'); assert.equal(b.energy, 3, 'and gives back Shackle\\'s energy');
+assert.equal([...b.draw, ...b.discard].filter(isJunk).length, 0, 'and purges Static');
+b = setup('thornling', []); b.empower = 4; b.enemy.attack += 4; b.enemy.barrier = 10; e = b.enemy.hp;
+playSide(give(b, 'dispel')); assert.equal(b.enemy.attack, 10); assert.equal(b.enemy.barrier, 0); assert.equal(e - b.enemy.hp, dispelDamage(), 'Dispel Lance strips buffs and deals piercing damage');
+b = setup('burrower', [], { turn: 4 }); playSide(give(b, 'aegis')); assert.equal(b.block, aegisBlock()); hp = state.hp; const hit = enemyPlan(b).damage; endTurn();
+assert.equal(hp - state.hp, Math.max(0, hit - aegisBlock()), 'Aegis Ward Block holds against Rend');
+b = setup('vineguard', [], { turn: 2 }); b.energy = 1; playSide(give(b, 'anchor')); assert.equal(b.energy, 0, 'Null Anchor costs 1');
+assert.equal(enemyPlan(b).anchored, 'barrier'); endTurn(); assert.equal(b.enemy.barrier || 0, 0, 'Null Anchor prevents the affliction'); assert.equal(b.anchor, false, 'and is used up');
+b = setup('thornling', []); state.hp = 50; b.bleed = 4; playSide(give(b, 'restore')); assert.equal(state.hp, 50 + restoreHeal()); assert.equal(b.bleed, 0);
+b = setup('blightAntler', [], { turn: 3, enemy: { element: 'earth' } }); assert.equal(enemyPlan(b).kind, 'elemental');
+playSide(give(b, 'ground')); e = b.enemy.hp; hp = state.hp; endTurn(); assert.equal(hp - state.hp, 0, 'Grounding Rod cancels the charged strike'); assert.equal(e - b.enemy.hp, 6);
+b = setup('thornling', [], { turn: 3 }); b.energy = 2; playSide(give(b, 'mirror')); const full = enemyPlan(b).mirrored; assert(full > 0);
+hp = state.hp; e = b.enemy.hp; endTurn(); assert.equal(hp - state.hp, Math.ceil(full / 2), 'Mirror Sigil: you take half'); assert.equal(e - b.enemy.hp, full, 'and the enemy takes it all');
+b = setup('burrower', [], { turn: 1 }); playSide(give(b, 'phase'));
+assert.equal(enemyPlan(b, 1).damage, 0, 'Phase Veil negates the next damaging action'); hp = state.hp; endTurn(); assert.equal(hp - state.hp, 0); assert.equal(b.veil, false);
+b = setup('thornling', []); const handN = b.hand.length; playSide(give(b, 'overflow')); assert.equal(b.energy, 4); assert.equal(b.hand.length, handN + 1); assert.equal(b.aether, AETHER_START + 1);
+b = setup('thornling', []); playSide(give(b, 'stasis')); assert.equal(b.energy, 1, 'Stasis Field costs 2'); hp = state.hp; endTurn(); assert.equal(hp - state.hp, 0, 'Stasis Field: the enemy skips its action');
+b = setup('thornling', []); b.energy = 0; give(b, 'anchor'); playSide(0); assert.equal(b.sideHand.length, 1, 'side cards still need energy');
+
+// ---------- Rewards, workshop rules, saves ----------
+newGame(); b = setup('thornling', []); b.phase = 'reward'; b.special = [];
+const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .99), null, 'regular: 12% chance'); assert(rollSideDrop(b, .05), 'regular drop under 12%'); assert.equal(state.side.pool.length, n0 + 1);
+b.enemy.boss = true; assert(rollSideDrop(b, .999), 'bosses always drop one');
+assert(sidePoolFor(0).every(id => SIDE_CARDS[id].tier === 0), 'city drops city-tier side cards'); assert(sidePoolFor(2).includes('phase'));
+newGame(); for (let k = 0; k < 6; k++) addSideCard('purify');
+assert(state.side.deck.length <= SIDE_DECK_MAX); assert.equal(sideCopies('purify'), SIDE_COPIES, 'at most 2 copies per side card');
+const saved = JSON.parse(JSON.stringify(state)); validateImport(saved);
+const bad = JSON.parse(JSON.stringify(state)); bad.side.pool.push({ uid: 'x9', id: 'purify' }); assert.throws(() => validateImport(bad), /side/);
+const bad2 = JSON.parse(JSON.stringify(state)); bad2.side.pool.push({ uid: 's900', id: 'nope' }); assert.throws(() => validateImport(bad2), /side/);
+const old = JSON.parse(JSON.stringify(state)); delete old.side; validateImport(old); restoreGame(old); assert.equal(state.side.deck.length, 3, 'older saves receive the starter kit');
+Math.random = realRandom;
+console.log('PASS: pitching, Aether, side-deck draws, all 11 enemy afflictions, schedules, all 10 side cards, drops, deck rules and save migration.');
+}`);

@@ -3,7 +3,7 @@ run(`{
 newGame();state.playerLevel=10;state.talents={retainCore:1,plating:3};
 state.room='1,5';startBattle(roomSpawns(state.room)[0].uid);
 assert.equal(state.battle.block,crystalOpeningBlock(),'Plating no longer grants opening Block');
-state.battle.enemy.element=null;state.hp=state.maxHp=100;
+ENEMY_AFFLICTIONS[state.battle.id]=[];state.battle.enemy.element=null;state.hp=state.maxHp=100;
 for(let turn=0;turn<3;turn++){
  const b=state.battle,raw=enemyPlan(b).damage,block=turn===1?2:0;
  b.block=block;const before=state.hp;endTurn();

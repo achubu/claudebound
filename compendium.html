@@ -257,6 +257,7 @@
 
     <nav>
         <a href="#cards">Cards</a>
+        <a href="#side">Side deck</a>
         <a href="#bosses">Bosses</a>
         <a href="#monsters">Bestiary</a>
         <a href="#mechanics">Attack guide</a>
@@ -268,6 +269,12 @@
             <h2>Player Cards &amp; Upgrades</h2>
             <p class="lead">Every card has four forms: Level 0 plus three upgrades. Tap a level to see its artwork and what it does.</p>
             <div class="grid" id="card-grid"></div>
+        </section>
+
+        <section id="side">
+            <h2>Side Deck &amp; Aether</h2>
+            <p class="lead" id="side-lead">Pitch cards at the end of your turn for Aether, then spend Aether to draw utility counters from your side deck.</p>
+            <div class="grid" id="side-grid"></div>
         </section>
 
         <section id="bosses">
@@ -320,7 +327,13 @@
                             bossPatterns: get('typeof BOSS_PATTERNS !== "undefined" ? BOSS_PATTERNS : {}'),
                             counters: get('typeof COUNTERS !== "undefined" ? COUNTERS : {}'),
                             miniBossCards: get('typeof MINI_BOSS_CARDS !== "undefined" ? MINI_BOSS_CARDS : {}'),
-                            soulChance: get('typeof MINI_BOSS_SOULBOUND_CHANCE !== "undefined" ? MINI_BOSS_SOULBOUND_CHANCE : 0.25')
+                            soulChance: get('typeof MINI_BOSS_SOULBOUND_CHANCE !== "undefined" ? MINI_BOSS_SOULBOUND_CHANCE : 0.25'),
+                            afflictions: get('typeof AFFLICTIONS !== "undefined" ? AFFLICTIONS : null'),
+                            enemyAfflictions: get('typeof ENEMY_AFFLICTIONS !== "undefined" ? ENEMY_AFFLICTIONS : {}'),
+                            afflictionText: get('typeof afflictionText === "function" ? afflictionText : null'),
+                            sideCards: get('typeof SIDE_CARDS !== "undefined" ? SIDE_CARDS : null'),
+                            sideArtPath: get('typeof sideArtPath === "function" ? sideArtPath : null'),
+                            aether: get('typeof AETHER_MAX !== "undefined" ? { max: AETHER_MAX, draw: SIDE_DRAW_COST, hold: SIDE_HAND_MAX, deck: SIDE_DECK_MAX, copies: SIDE_COPIES } : null')
                         });
                     } catch (e) { console.warn('Compendium: could not read game data', e); done(null); }
                 };
@@ -370,7 +383,7 @@
             const stat = game ? game.stat : window.stat;
             if (!defs) { grid.innerHTML = '<p class="dim">No card data found.</p>'; return; }
             const order = { Attack: 0, Defense: 1, Skill: 2, Healing: 3 };
-            const list = Object.entries(defs).map(([id, c]) => ({ id, ...c }))
+            const list = Object.entries(defs).map(([id, c]) => ({ id, ...c })).filter(c => !c.hidden)
                 .sort((a, b) => (!!a.soulbound - !!b.soulbound) || ((order[a.kind] ?? 9) - (order[b.kind] ?? 9)) || a.name.localeCompare(b.name));
             grid.innerHTML = list.map(c => {
                 const levels = [0, 1, 2, 3].map(level => {
@@ -468,6 +481,13 @@
             const dropId = game.miniBossCards && game.miniBossCards[id];
             if (dropId && game.defs[dropId]) notes.push(`<b>Unique drop:</b> ${esc(game.defs[dropId].name)} — Soulbound ${Math.round(game.soulChance * 100)}% of the time, otherwise Impermanent. Drops once, the first time you win.`);
             if (e.armor) notes.push(`<b>Armor ${e.armor}:</b> blocks ${e.armor} damage from every hit except Pierce cards.`);
+            const affl = (game.enemyAfflictions && game.enemyAfflictions[id]) || [];
+            if (affl.length && game.afflictions) {
+                const ri = { city: 0, elaris: 1, vespera: 2 }[region.id] || 0;
+                const strikeOnly = affl.length === 1 && game.afflictions[affl[0]].type === 'strike';
+                const when = e.boss ? (e.miniBoss ? 'every 3rd turn (2, 5, 8…), alternating' : 'every 3rd turn in order, and <b>every 2nd turn once enraged</b>') : (strikeOnly ? 'on its plain attacks every 3rd turn (4, 7, 10…)' : 'every 3rd turn (2, 5, 8…)') + '; elites every 2nd turn';
+                notes.push(`<b>Afflictions</b> — ${when}:<br>` + affl.map(a => { const A = game.afflictions[a]; const answer = A.answer.map(x => x === 'pitch' ? 'pitching' : (game.sideCards && game.sideCards[x] ? game.sideCards[x].name : x)).join(', '); return `${A.icon} <b>${esc(A.name)}</b>: ${esc(game.afflictionText ? game.afflictionText(a, ri) : A.name)} <i>Answer: ${esc(answer)}.</i>`; }).join('<br>'));
+            }
             const fixedCycle = opts.full ? `<ol class="pattern">${steps}</ol><p class="cycle-note">Repeats every ${pattern.length} turns.</p>` :
                 `<p class="mini-pattern">${pattern.map(k => `<span class="chip k-${k}">${k === 'elemental' ? 'charged strike' : k}</span>`).join('<i>→</i>')}</p>`;
             return `
@@ -495,7 +515,7 @@
                 const msg = '<p class="dim">Enemy data loads from the game itself. Open this page from the hosted site or a local web server rather than straight from a file.</p>';
                 bossList.innerHTML = monsterList.innerHTML = msg; return;
             }
-            const bossNote = 'Stats at each boss\'s own level. Matching that level is a fair fight: a typical build beats a mini-boss about half the time and a final boss about 4 times in 10; a strong build wins most of the time.';
+            const bossNote = 'Stats at each boss\'s own level. Matching that level is a fair fight: a typical build beats a mini-boss about 4 times in 10 and a final boss about 3 times in 10; a strong build that answers its afflictions wins most of the time.';
             bossList.innerHTML = REGIONS.map(r => {
                 const ids = [...r.miniBosses, r.boss].filter(Boolean);
                 return `<div class="region"><h3 class="region-title">${esc(r.name)}</h3><p class="dim">${r.blurb} ${ids.length ? bossNote : ''}</p>
@@ -504,6 +524,28 @@
             monsterList.innerHTML = REGIONS.map(r => `<div class="region"><h3 class="region-title">${esc(r.name)}</h3>
                 <p class="dim">Enemies here are level ${r.levels[0]}–${r.levels[1]}, getting tougher the further you go; stats show that range. Elites have extra health and +2 attack.</p>
                 <div class="grid">${r.regular.map(id => enemyCard(game, id, r)).join('')}</div></div>`).join('');
+        }
+
+        // Side deck cards: read live from SIDE_CARDS in assets/aether-deck.js.
+        function renderSide(game) {
+            const grid = document.getElementById('side-grid');
+            if (!game || !game.sideCards) { grid.innerHTML = '<p class="dim">Side deck data loads from the game itself.</p>'; return; }
+            const a = game.aether || { max: 8, draw: 4, hold: 2, deck: 6, copies: 2 };
+            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Spend ${a.draw} Aether to look at the top 2 side cards and keep one. Build a side deck of up to ${a.deck} (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
+            const where = ['Starter or any world', 'Elaris and Vespera', 'Vespera', 'Final bosses only'];
+            grid.innerHTML = Object.entries(game.sideCards).map(([id, c]) => {
+                let text = ''; try { text = c.text(); } catch (e) {}
+                const art = game.sideArtPath ? game.sideArtPath(id) : '';
+                return `<article class="card game-card side">
+                    <img src="${art}" alt="${esc(c.name)}" class="card-img main-art" onerror="handleImageError(this, '${esc(c.name)}')">
+                    <div class="card-content">
+                        <div class="card-type">Side deck · ${esc(c.kind)}</div>
+                        <h3 class="card-title">${c.icon} ${esc(c.name)}</h3>
+                        <p class="card-desc">${esc(text)}</p>
+                        <ul class="stats-list"><li><span>Cost:</span> <strong class="badge">${c.cost} Energy</strong></li><li><span>Found:</span> <strong class="badge">${where[c.tier] || ''}</strong></li></ul>
+                    </div>
+                </article>`;
+            }).join('');
         }
 
         function renderMechanics() {
@@ -515,6 +557,9 @@
                 ['Charged strike', 'About 1.8× attack (1.5× for bosses) plus a status effect if any damage gets through. An armed Prismatic Counter cancels it and reflects 6 damage.'],
                 ...Object.entries(ELEMENT_EFFECT).map(([el, t]) => [`${ELEMENT_ICON[el]} ${cap(el)} strike`, t]),
                 ['Enraged', 'Bosses and mini-bosses below 50% health deal +2 damage on every attack.'],
+                ['Afflictions', 'Every enemy adds telegraphed riders to some of its actions: debuffs on you, buffs on itself, or nastier strikes. The battle screen shows this turn\'s and next turn\'s. A strike affliction scheduled on a turn without an attack moves to the next attack.'],
+                ['Pitch & Aether', 'Mark cards in hand to pitch. When you end the turn they burn away for the rest of the encounter and give Aether equal to cost + 1. You must keep at least 4 cards cycling. Aether carries over between turns, up to 8.'],
+                ['Side deck', 'Spend 4 Aether to look at the top 2 cards of your side deck and take one (the other goes to the bottom). You can hold 2 side cards; they wait until you play them and cost their own energy.'],
                 ['Weaken', 'Talent ability: lowers enemy attack for the whole encounter, which reduces every number above.']
             ];
             document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');
@@ -525,6 +570,7 @@
             const game = await loadGameData();
             renderCards(game);
             renderEnemies(game);
+            renderSide(game);
             renderMechanics();
         });
     </script>

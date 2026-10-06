@@ -1997,3 +1997,41 @@ or main, both regions) spawns exactly the boss and nothing else, that no
 chest sits on either region's mandatory spine, and confirmed with a real
 Chromium render that connector lines are genuinely straight between
 cardinally-aligned rooms.
+
+## Round 42 — Card Mastery doubling
+
+- Soulbound cards now need 50 uses for Level 1, 100 for Level 2 and 200 for Level 3 (plus 1 Upgrade Crystal each). Impermanent cards still auto-upgrade every 100 uses.
+- Battle hand, deck workshop (Ready filter, upgrade button, tooltips) and save import all use the per-level requirement.
+- New test: tests/mastery-doubling.test.cjs.
+
+## Round 43 — Regular enemies 10% tougher
+
+- Every regular and elite enemy in all three worlds has 10% more health (`BALANCE.normalHp`). Mini-bosses and final bosses are unchanged.
+- Simulated (balance-sim, 30 fights × 16 builds × 2 styles): typical regular-fight win rates fall about 6–8 points; boss and mini-boss win rates identical. Adding +10% attack too was tested and rejected — it compounds to ~21% and drops some city zones below 20%.
+
+## Round 44 — Pitch, Aether, the side deck and enemy afflictions
+
+New file `assets/aether-deck.js` (+ `assets/aether-deck.css`), loaded after talent-matrix.js. It wraps enemyPlan, endTurn, playCard, cardEffect, startBattle, winBattle, renderBattle, showDeck, newGame, restoreGame and validateImport.
+
+**Pitch & Aether.** Every hand card has a *Pitch* toggle. When you end the turn, marked cards burn away for the rest of the encounter (exhausted) and give Aether = energy cost + 1 (0-cost 1, 1-cost 2, 2-cost 3). Aether carries between turns (max 8); every encounter starts with 2, so one pitched card buys the first draw and later draws take a couple. At least 4 cards must stay cycling, and the retained card can't be pitched.
+
+**Side deck.** A second, player-built deck (up to 6 cards, 2 copies each) managed in the Deck Workshop. Spend 4 Aether to look at its top 2 cards and keep one (the other goes to the bottom). Up to 2 side cards wait in their own row until played; they cost their own energy. New journeys and old saves get Purifying Light, Aegis Ward and Dispel Lance. Drops: 12% from regular enemies, 35% from elites, guaranteed from every boss (final bosses may drop Stasis Field). Pool by world: city tier (Purifying Light, Dispel Lance, Aegis Ward, Null Anchor, Verdant Restore), Elaris adds Grounding Rod and Mirror Sigil, Vespera adds Phase Veil and Aether Overflow.
+
+| Side card | Cost | Effect |
+|---|---|---|
+| Purifying Light | 0 | Cleanse all debuffs and purge Static; undo this turn's Shackle / Fog |
+| Dispel Lance | 0 | Strip Empower and Barrier, 4/7/10 piercing damage by world |
+| Aegis Ward | 0 | 4 + level/2 Block; Rend can't cut it this turn |
+| Null Anchor | 1 | Prevent the next affliction, whatever it is |
+| Verdant Restore | 0 | Heal 5 + level/3, cleanse Bleed |
+| Grounding Rod | 0 | Arm a counter for the enemy's current element |
+| Mirror Sigil | 1 | Next damaging action: you take half, enemy takes all of it |
+| Phase Veil | 1 | Negate all damage of the next damaging action |
+| Aether Overflow | 0 | +1 energy, draw 1, +1 Aether |
+| Stasis Field | 2 | Enemy skips its next action (final-boss drop) |
+
+**Afflictions.** Riders on enemy actions, telegraphed on the intent panel for this turn and next, each with the side cards that answer it. Hexes: Lacerate (Bleed 2/3/4, stacks to double, never below 1 HP), Enfeeble (Frail: −25% card damage for 2 turns), Shackle (−1 energy), Mind Fog (draw 1 fewer), Static Flood (unplayable Static cards; pitch for 1 Aether), Empower (+2/3/4 attack, stacks once), Aether Barrier (5/10/16, refreshes). Strikes: Rend (cuts half your Block), Crushing Blow (+30%), Siphon (enemy heals the damage), Barrage (3 hits at 45%, Block and Armor per hit). Regular enemies carry one, mini-bosses two, final bosses three; they land every 3rd turn (elites and enraged final bosses every 2nd). A regular enemy's strike affliction lands on its plain attacks (turns 4, 7 …) instead of stacking onto a heavy hit; a boss strike affliction scheduled on a guard/charge turn carries to its next attack.
+
+**Balance.** Simulated with the bot taught to pitch, draw and play side cards (`tests/talent-sim.cjs`; `NO_SIDE=1` turns that off). Typical-build win rates vs Round 43 (30 fights × 16 builds × 2 styles, fair-fight levels): city regulars Lv3 93→66%, Lv7 89→69%, Lv8 41→22% (Crown Observer uses Mind Fog — Shackle there measured 10%); Elaris regulars down 5–17 points; Vespera regulars down 2–20, except Lv26 79→31% (Thunder Mauler's Rend). Mini-bosses: Lunar 47%, Crown Sentinel 42%, Tidebound 49%, Gale 46%, Arc 38%, Resonant 37%. Final bosses: Thorn Warden 31%, Bloom Tyrant 29%, Tempest Colossus 33%. Boss health was retuned with every affliction active so a typical build wins about 40% against mini-bosses and 28% against final bosses (was ~50% / ~39%): perEnemy hp moonKnight .6, crownSentinel .69, thornWarden .64, tidewardenElaris .8, bloomTyrant .46, arcSentinel .64, resonantPhantom .96, stormTyrant .45 (galeSovereign unchanged). balance-sim targets now zone 30–100, mini 34–50, boss 22–36.
+
+Also: compendium gains a Side Deck section, per-enemy affliction notes (with answers) and new attack-guide entries; side-card and Static art via `tools/generate_side_card_art.py`; new `tests/aether-deck.test.cjs` covers pitching, Aether, draws, all 11 afflictions and schedules, all 10 side cards, drops, deck rules and save migration; `tests/trace-fight.cjs` prints one fight's log for debugging.

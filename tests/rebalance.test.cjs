@@ -647,7 +647,7 @@ assert.equal(enemyPlan(state.battle,state.battle.turn).kind,'guard','turn 2 of t
 assert.equal(state.battle.enemy.guard,0,'Block is NOT yet active during the turn that telegraphs it (matches every other enemy action resolving at end-of-turn, e.g. charge)');
 endTurn();
 assert.equal(state.battle.enemy.guard,5,'Block becomes active only once the guard turn has actually resolved, i.e. starting the following turn');
-const guardTelegraphLog=state.battle.logs[state.battle.logs.length-1];
+const guardTelegraphLog=state.battle.logs.filter(l=>l.startsWith('Rootguard')).at(-1)||'';
 assert(guardTelegraphLog.includes('starting next turn')||guardTelegraphLog.includes('next turn'),'the telegraph message explicitly says this Block applies starting next turn, not immediately (old message: "Rootguard: 5 enemy Block." read as already-active)');
 
 // --- Starter card protection now heals on load, not just on a fresh game

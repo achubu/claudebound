@@ -52,7 +52,7 @@ The integrated world uses an original colorful fantasy-steampunk style:
 - Build a 4–6 card active deck from the owned card pool, then invest in Deck Matrix to reach ten cards.
 - Decks allow three copies of a card by default; Pattern Replication raises the limit to five.
 - Every physical card starts at Level 0 and tracks its own uses.
-- Fifty uses plus one open-world upgrade material unlock each of three card levels.
+- Soulbound cards need 50, then 100, then 200 uses plus one Upgrade Crystal per level; Impermanent cards auto-upgrade every 100 uses.
 - Purple Soulbound cards cannot be destroyed or lost.
 - Every defeat destroys one random active Impermanent card; Soulbound boss cards are always protected.
 - Normal victories award 25 player XP; bosses award 50; defeats award 10.
@@ -61,6 +61,9 @@ The integrated world uses an original colorful fantasy-steampunk style:
 - Deeper talent rows require points invested in that branch, with capstone upgrades available after ten branch points.
 - Talent choices can be freely recompiled outside active encounters, making it practical to test different builds.
 - Round 40 expanded each tree to 9 rows and 4-6 build paths (16-17 talents per tree, 50 in total); see CHANGES.md for every path.
+- **Pitch & Aether (Round 44):** mark cards in hand to pitch; when you end the turn they burn away for that encounter and give Aether (cost + 1, up to 8 stored). At least 4 cards must stay in the encounter.
+- **Side deck:** a second, player-built deck of up to 6 utility counters (2 copies each). Spend 4 Aether to look at its top 2 cards and keep one; hold up to 2. Every journey starts with Purifying Light, Aegis Ward and Dispel Lance; more drop from enemies (12%), elites (35%) and every boss.
+- **Enemy afflictions:** every enemy telegraphs riders a turn ahead — Bleed, Frail, Shackle, Fog, Static, Empower, Barrier, Rend, Crush, Siphon and Barrage. Regular enemies have one, mini-bosses two and final bosses three, each landing every 3rd turn (elites and enraged final bosses every 2nd); Empower and Bleed stack once, so stalling is punished. See the compendium for which side card answers what.
 - Bosses have a 10% chance to drop an exclusive Soulbound card.
 - Normal encounters have a 10% material chance; bosses guarantee one material.
 

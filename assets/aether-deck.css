@@ -1,0 +1,36 @@
+/* Round 44: Aether, pitching, the side deck and enemy afflictions. */
+.aether-panel{margin:10px 0 0;padding:8px 10px;border:1px solid #7d6bd1;border-radius:7px;background:linear-gradient(145deg,#1b1838,#101a2b)}
+.aether-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.aether-row b{color:#d9ccff;font:700 13px system-ui;letter-spacing:.04em}
+.aether-row small{color:#b9b2df;font:11px system-ui}
+.aether-row #sideDraw{margin-left:auto}
+.aether-pips{display:inline-flex;gap:3px}
+.aether-pips i{width:11px;height:11px;border-radius:50%;border:1px solid #9c8cf0;background:#151330}
+.aether-pips i.on{background:radial-gradient(circle,#fff6c9,#b49cff 60%,#6b4fd8);box-shadow:0 0 6px #b49cff}
+.aether-pips i.pending{background:#4b3d8f;border-style:dashed}
+.side-choice-title{margin:8px 0 4px;color:#e8defc;font:12px system-ui}
+.side-hand,.side-choice{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.side-card{border-color:#9c8cf0!important;background:linear-gradient(160deg,#241d4d,#121a33)!important}
+.side-card .ownership{color:#d3c7ff}
+.side-card .cost{background:#5b45b8}
+.side-choice .side-card{outline:2px dashed #c9b8ff;outline-offset:2px}
+.side-workshop{grid-column:1/-1}
+.card.pitched{opacity:.55;outline:2px dashed #b49cff;outline-offset:2px}
+.card.junk{filter:grayscale(.85) contrast(.9);border-style:dashed!important}
+.ability.pitch{border-color:#9c8cf0}
+.ability.pitch.selected{background:#4b3d8f}
+.affliction{margin:5px 0 0;font:11px/1.4 system-ui;color:#ffe0e6}
+.affliction b{color:#fff}
+.affliction.strike{color:#ffd2b8}
+.affliction.anchored{color:#cfe8ff}
+.affliction .answer{display:block;color:#c9b8ff;opacity:.95}
+.compact-tags .debuff-tag,.compact-tags .buff-tag,.compact-tags .ward-tag{font-size:10px;padding:1px 5px;border-radius:3px}
+.compact-tags .debuff-tag{background:#4a1d2a;color:#ffc7d2}
+.compact-tags .buff-tag{background:#4a3a14;color:#ffe3a1}
+.compact-tags .ward-tag{background:#1d2f4a;color:#cfe3ff}
+.touch-mode .aether-panel{padding:6px 8px}
+.touch-mode .side-hand,.touch-mode .side-choice{flex-wrap:nowrap;overflow-x:auto}
+.touch-mode .side-hand .card-wrap,.touch-mode .side-choice .card-wrap{min-width:150px;flex:0 0 150px}
+.touch-mode .side-card{min-height:220px}
+.touch-mode .affliction{font-size:10.5px}
+.aether-extra{display:contents}

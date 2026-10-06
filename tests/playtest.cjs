@@ -15,7 +15,7 @@ function makeContext(){
  for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
  run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
  run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));
- run(fs.readFileSync(path.join(root,'assets/encounter-depth.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/talent-matrix.js'),'utf8'));
+ run(fs.readFileSync(path.join(root,'assets/encounter-depth.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/talent-matrix.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/aether-deck.js'),'utf8'));
  return {context,run};
 }
 

@@ -16,7 +16,7 @@ let M = Number(process.argv[2]) || 40;
 const overrides = require.main === module && process.argv[3] ? JSON.parse(process.argv[3]) : {};
 // Judged on the AVERAGE win rate across all 16 talent builds and both play
 // styles (a typical player), not the single best combination.
-const TARGET = { zone: [45, 100], mini: [44, 60], boss: [32, 46] };
+const TARGET = { zone: [30, 100], mini: [34, 50], boss: [22, 36] }; // Round 44: afflictions + side deck
 
 const SPILL = [['plating', 5], ['jammer', 5], ['amplifier', 5], ['vitality', 5], ['edge', 5], ['quickdraw', 2], ['capacitor', 1], ['overcharge', 1], ['recovery', 3], ['deckMatrix', 4]];
 // 16 builds: the 4 original archetypes plus 4 per tree covering every
@@ -47,7 +47,7 @@ function deckFor(region, L) {
 }
 
 const { context, run } = makeContext();
-run(BOT);
+run(BOT);if(process.env.NO_SIDE)run('globalThis.NO_SIDE=1');
 const REGIONS = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera' };
 function evaluate(over, only = null, quiet = false) {
 const log = quiet ? () => {} : console.log;
