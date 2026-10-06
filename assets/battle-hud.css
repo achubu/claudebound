@@ -1,0 +1,73 @@
+/* Round 47: readable, viewport-scaled battle HUD. Sizes are in em so the
+   whole encounter scales with --hud-size, which follows the window. */
+#battleModal.hud-v2 .battle-compact{font-size:clamp(14px,1.35vw,19px);--hud-size:1em}
+#battleModal.hud-v2 .compact-bar{gap:.5em;margin-bottom:.5em}
+#battleModal.hud-v2 .compact-bar .badge{font-size:.82em;padding:.35em .7em}
+#battleModal.hud-v2 .compact-bar button{font-size:.8em;padding:.4em .8em}
+#battleModal.hud-v2 .compact-combatants{gap:.6em}
+#battleModal.hud-v2 .compact-side{padding:.55em .7em;gap:.35em;border-radius:10px}
+#battleModal.hud-v2 .compact-head b{font-size:1em;letter-spacing:.02em}
+#battleModal.hud-v2 .compact-monster{width:3.4em;height:3.4em}
+#battleModal.hud-v2 .enemy-level{font-size:.85em}
+
+/* Energy */
+.energy-hud{display:inline-flex;align-items:center;gap:.45em;padding:.25em .7em .25em .4em;border:1px solid #f2c94c;border-radius:999px;background:linear-gradient(180deg,#3a2c0b,#1c1606);box-shadow:0 0 12px #f2c94c44,inset 0 0 0 1px #fff2}
+.energy-hud .bolt svg{width:1.35em;height:1.35em;display:block;fill:#ffd84a;filter:drop-shadow(0 0 4px #ffcf33)}
+.energy-hud .orbs{display:inline-flex;gap:.28em}
+.energy-hud .orb{width:.95em;height:.95em;border-radius:50%;display:block}
+.energy-hud .orb.on{background:radial-gradient(circle at 35% 30%,#fffbe0 0,#ffe066 30%,#f0a400 70%,#9a5a00 100%);box-shadow:0 0 8px #ffcf33}
+.energy-hud .orb.on.bonus{background:radial-gradient(circle at 35% 30%,#fff 0,#b8f4ff 30%,#38c7f0 70%,#0a6d93 100%);box-shadow:0 0 8px #5fd8ff}
+.energy-hud .orb.off{background:#120d03;box-shadow:inset 0 0 0 2px #6b5313}
+.energy-hud .num{font:800 1.15em/1 system-ui;color:#fff5cc;text-shadow:0 0 6px #ffb800}
+.energy-hud .num small{font-size:.65em;color:#d9c27a;font-weight:700}
+
+/* Health */
+.hp-row{display:flex;align-items:center;gap:.4em;min-width:0}
+.hp-row .hud-meter{flex:1;min-width:0}
+.hp-icon svg{width:1.55em;height:1.55em;display:block}
+.hp-row.you .hp-icon svg path:first-child{fill:#ff4d6d}
+.hp-row.you .hp-icon svg{filter:drop-shadow(0 0 4px #ff4d6d99)}
+.hp-row.you .hp-icon .shine{stroke:#ffd0da}
+.hp-row.enemy .hp-icon svg path{fill:#c9655e}
+.hp-row.enemy .hp-icon .eye{fill:#ffe08a}
+.hp-row.enemy .hp-icon svg{filter:drop-shadow(0 0 4px #ff6b4a88)}
+#battleModal .compact-combatants .meter.hud-meter{height:1.55em;margin:0;border-radius:999px;background:#1a0f14;box-shadow:inset 0 2px 4px #000c,0 0 0 1px #ffffff26}
+#battleModal .compact-combatants .meter.hud-meter span{position:relative;border-radius:999px;transition:width .35s ease}
+#battleModal .compact-combatants .meter.hud-meter span::after{content:"";position:absolute;left:4px;right:4px;top:2px;height:35%;border-radius:999px;background:linear-gradient(#ffffff70,#fff0)}
+#battleModal .meter.you.hud-meter.high span{background:linear-gradient(90deg,#1f9d55,#5ee07a)}
+#battleModal .meter.you.hud-meter.mid span{background:linear-gradient(90deg,#c48a12,#f4d03f)}
+#battleModal .meter.you.hud-meter.low span{background:linear-gradient(90deg,#a3122a,#ff4d6d);animation:hudPulse 1s ease-in-out infinite}
+#battleModal .meter.enemy.hud-meter span{background:linear-gradient(90deg,#8e1f2a,#e2574c)}
+#battleModal .compact-combatants .meter.hud-meter .meter-label{font:800 .92em/1 system-ui;letter-spacing:.03em;color:#fff;text-shadow:0 1px 0 #000,0 0 4px #000}
+@keyframes hudPulse{50%{filter:brightness(1.35)}}
+
+/* Armor and Block */
+#battleModal .compact-tags{gap:.5em;align-items:center}
+#battleModal .compact-tags .hud-stat{display:inline-flex;align-items:center;gap:.3em;background:none!important;padding:0!important;font-size:1em!important}
+.hud-cap{font:700 .7em/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:#c9d6e2}
+.hud-shield{display:inline-block;filter:drop-shadow(0 1px 3px #000c)}
+.hud-shield .rim{display:grid;place-items:center;width:1.9em;height:2.15em;clip-path:polygon(50% 0,100% 14%,93% 60%,50% 100%,7% 60%,0 14%);background:linear-gradient(160deg,#ffe7a3,#b0852f 60%,#6b4c12)}
+.hud-shield .face{display:grid;place-items:center;width:1.62em;height:1.86em;clip-path:polygon(50% 0,100% 14%,93% 60%,50% 100%,7% 60%,0 14%);background:linear-gradient(160deg,#eef4fb,#93a9c2 45%,#3d526b)}
+.hud-shield b{font:900 .9em/1 system-ui;color:#0b1622;margin-top:-.15em}
+.hud-crystal{display:inline-block;filter:drop-shadow(0 0 5px #5fe3ff)}
+.hud-crystal .gem{display:grid;place-items:center;width:2em;height:2.1em;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(150deg,#e9fdff 0,#7ae8ff 30%,#1aa3cf 65%,#0b4f78)}
+.hud-crystal b{font:900 .9em/1 system-ui;color:#04263a;text-shadow:0 1px 0 #ffffff80}
+.compact-side.enemy .hud-stat.block .hud-crystal{filter:drop-shadow(0 0 5px #ff9b7a)}
+.compact-side.enemy .hud-stat.block .gem{background:linear-gradient(150deg,#fff1e9 0,#ffb08f 30%,#d9573a 65%,#7a2014)}
+
+/* Text elsewhere in the encounter scales too. */
+#battleModal.hud-v2 .intent-bubble{font-size:.95em}
+#battleModal.hud-v2 .intent-bubble .when{font-size:.9em}
+#battleModal.hud-v2 .intent-bubble .what{font-size:1.12em}
+#battleModal.hud-v2 .compact-tags .debuff-tag,#battleModal.hud-v2 .compact-tags .buff-tag,#battleModal.hud-v2 .compact-tags .ward-tag{font-size:.75em;padding:.2em .5em}
+#battleModal.hud-v2 .aether-row b{font-size:clamp(13px,1.2vw,17px)}
+#battleModal.hud-v2 .aether-pips i{width:clamp(11px,1vw,15px);height:clamp(11px,1vw,15px)}
+#battleModal.hud-v2 #combatLog{font-size:clamp(12px,1.05vw,15px)}
+#battleModal.hud-v2 .hand-title h2{font-size:clamp(18px,1.8vw,26px)}
+
+/* Phones: the two combatants stack so bars and numbers stay large. */
+@media (max-width:560px){
+  #battleModal.hud-v2 .battle-compact{font-size:15px}
+  #battleModal.hud-v2 .compact-combatants{grid-template-columns:1fr}
+  #battleModal.hud-v2 .compact-head b{white-space:normal}
+}

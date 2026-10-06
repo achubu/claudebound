@@ -432,7 +432,7 @@ renderBattle = function () {
   if (box) {
     const status = box.querySelector('.encounter-status'), statusHTML = status && status.outerHTML ? status.outerHTML : '';
     box.classList.add('intent-split');
-    box.innerHTML = '<div class="intent-bubbles">' + intentBubble(plan, 'now', 'When you end this turn', b.freeze > 0) + intentBubble(next, 'later', 'The turn after', false) + '</div>' + statusHTML;
+    box.innerHTML = '<div class="intent-bubbles">' + intentBubble(plan, 'now', 'Enemy move next turn:', b.freeze > 0) + intentBubble(next, 'later', 'Enemy move the turn after:', false) + '</div>' + statusHTML;
   }
   // Status tags.
   const youTags = m.querySelector('.compact-side.you .compact-tags'), foeTags = m.querySelector('.compact-side.enemy .compact-tags');

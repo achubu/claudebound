@@ -96,7 +96,7 @@
 #hud,.modal,#minimap{border-color:#418b9d;background:linear-gradient(145deg,#091d30ef,#140e23ef)}#nav button{border-color:#408fa5}.room-title,.modal h1,.modal h2{color:#acf0ed}.eyebrow{color:#79d8e6}.primary{background:linear-gradient(#286476,#213a58);border-color:#75c9df}.enemy-node,.enemy-node.boss,.monster-emberling,.monster-thornling,.monster-vineguard,.monster-moonKnight,.monster-cryptWisp,.monster-shade,.monster-forgeBeast,.monster-burrower,.monster-crownEye,.monster-thornWarden{background:transparent;border:0;box-shadow:none}.enemy-node:after{top:calc(100% + 24px);font-size:9px}.enemy-node.boss:after{top:calc(100% + 30px)}.world-map{border-color:#477e9b;background:radial-gradient(circle,#123b50,#090d20 74%)}
 .map-surface{position:absolute;left:50%;top:50%;width:880px;height:560px;transform-origin:center}.map-surface .map-room{width:102px;min-height:54px;font-size:10px}.map-surface .map-room .map-status{display:block}.minimap-grid{width:126px;height:82px}
 .defeat-summary{max-width:680px;margin:auto}.defeat-summary h2{color:#ffb5ac}.defeat-loss{padding:16px;margin:16px 0;border:1px solid #d7766d;border-radius:10px;background:#351d25}.defeat-card{display:flex;gap:16px;align-items:center}.defeat-card img{width:88px;height:88px;object-fit:cover;border-radius:8px}.defeat-card p{font:13px/1.5 system-ui;margin:6px 0}.defeat-summary button{width:100%;min-height:48px}.defeat-summary .panel p{line-height:1.6}
-</style><link rel="stylesheet" href="assets/mobile-crystals.css"><link rel="stylesheet" href="assets/talents.css?v=2"><link rel="stylesheet" href="assets/aether-deck.css"></head><body>
+</style><link rel="stylesheet" href="assets/mobile-crystals.css"><link rel="stylesheet" href="assets/talents.css?v=2"><link rel="stylesheet" href="assets/aether-deck.css"><link rel="stylesheet" href="assets/battle-hud.css"></head><body>
 <div id="game">
  <div id="world"></div>
  <div id="hud"></div>
@@ -486,6 +486,7 @@ requestAnimationFrame(loop);
 <script src="assets/encounter-depth.js?v=plating-armor"></script>
 <script src="assets/talent-matrix.js"></script>
 <script src="assets/aether-deck.js"></script>
+<script src="assets/battle-hud.js"></script>
 <script src="assets/combined-rooms.js"></script>
 <script src="assets/touch-controls.js"></script>
 </body></html>

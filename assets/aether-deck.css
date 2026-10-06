@@ -38,7 +38,7 @@
 .intent.intent-split{background:none!important;border:0!important;padding:0!important}
 .intent-bubbles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .intent-bubble{position:relative;padding:8px 10px 9px;border-radius:12px;border:1px solid;font:12px/1.35 system-ui}
-.intent-bubble .when{display:block;font:700 10px/1.2 system-ui;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.intent-bubble .when{display:block;font:700 11px/1.2 system-ui;letter-spacing:.02em;margin-bottom:3px}
 .intent-bubble .what{display:block;font-size:13px;color:#fff}
 .intent-bubble .dmg{display:block;margin-top:2px}
 .intent-bubble .dmg em{font-style:normal;font-weight:700;color:#ffe08a}

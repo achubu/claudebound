@@ -2044,3 +2044,15 @@ Also: compendium gains a Side Deck section, per-enemy affliction notes (with ans
 
 - Static junk cards can no longer be pitched for Aether. Each one in your hand has a **Cleanse · 2 ✦** button that spends 2 Aether to remove it for the rest of the encounter; Purifying Light still purges every Static at once, and Null Anchor still prevents Static Flood. Card text, telegraph answers and the compendium say so.
 - The simulation bot cleanses Static when it has the Aether. Test coverage: Static can't be pitched, cleansing needs 2 Aether, removes the card from every pile and spends the Aether.
+
+## Round 47 — Readable battle HUD
+
+- New `assets/battle-hud.js` + `assets/battle-hud.css` (visual only; restyles what renderBattle draws). Encounter text scales with the window (`clamp(14px, 1.35vw, 19px)`), so it grows on big screens and stays legible on phones, where the two combatants now stack.
+- Health: tall rounded bars with a gloss highlight, large bold numbers, a heart icon for you and a fanged skull for the enemy. Your bar turns green → amber (≤50%) → pulsing red (≤25%).
+- Energy: a gold pill with a lightning bolt and one glowing orb per point (empty sockets for spent energy, blue orbs for bonus energy above your maximum) and a big "2/3" count.
+- Armor: a steel shield with a gold rim and the number on it. Block: a glowing cyan crystal (orange for enemy Block).
+- Intent bubbles, Aether row, combat log and hand title also scale up.
+
+## Round 48 — Intent labels
+
+- The two intent bubbles are now labelled "Enemy move next turn:" (rose) and "Enemy move the turn after:" (blue), in normal case and a little larger.
