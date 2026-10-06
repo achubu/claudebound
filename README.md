@@ -56,7 +56,7 @@ The integrated world uses an original colorful fantasy-steampunk style:
 - Purple Soulbound cards cannot be destroyed or lost.
 - Every defeat destroys one random active Impermanent card; Soulbound boss cards are always protected.
 - Normal victories award 25 player XP; bosses award 50; defeats award 10.
-- Player progression now spans Levels 1–30, with one talent point earned at every level from 2 onward.
+- Player progression spans Levels 1–60, with one talent point earned at every level from 2 onward (59 points at the cap).
 - The three-branch Neural Talent Matrix offers ranked, incremental card-battle upgrades: Surge improves offense and Power Boost, Disruption improves Weaken, draw, energy, deck capacity, and copy limits, and Resolve improves Retain, Block, health, and potion strength.
 - Deeper talent rows require points invested in that branch, with capstone upgrades available after ten branch points.
 - Talent choices can be freely recompiled outside active encounters, making it practical to test different builds.
@@ -76,7 +76,7 @@ Automated logic checks cover:
 - Ember Sigil, Briarstep Boots, and Moon Lens route gates
 - Normal-enemy three-room respawning
 - Integrated physical-card mastery
-- Player XP, the Level 30 cap, talent points, branch gates, deck capacity, copy limits, and derived combat bonuses
+- Player XP, the Level 60 cap, talent points, branch gates, deck capacity, copy limits, and derived combat bonuses
 - Boss material guarantees and the 10% Soulbound boundary
 - Impermanent defeat loss and Soulbound protection
 - Healing-potion drops and fresh-save initialization

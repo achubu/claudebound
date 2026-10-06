@@ -1892,6 +1892,14 @@ Also fixed: deep trees could centre a node on a quarter column, which CSS
 grids drop (rounded to the half-column grid); the talent detail panel was
 empty when a tab's selected talent belonged to another tree.
 
+## Round 41 — level cap 60
+
+`MAX_PLAYER_LEVEL` is now 60 (was 30). One talent point per level from level 2,
+so 59 points at the cap (was 29). XP stops at the cap; save imports accept
+levels 1-60. Aetherlink sockets now unlock every 12 levels (1, 12, 24, 36, 48;
+was 1, 6, 12, 20, 30), defined once in `AETHERLINK_SOCKET_LEVELS`. Enemy levels
+still top out at 27 in Vespera, so levels 28-60 are headroom for future content.
+
 ## Testing
 
 ```

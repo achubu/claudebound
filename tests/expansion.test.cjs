@@ -26,7 +26,7 @@ assert.equal(state.pool.length,6);assert(active().some(c=>c.id==='mend'));
 assert.equal(maxDeckSize(),6);assert.equal(deviceSlots(),1);
 state.hp=10;gainXP(100);assert.equal(state.hp,15);assert.equal(state.maxHp,31);
 gainXP(200);assert.equal(state.hp,25);assert.equal(state.maxHp,33);
-state.playerLevel=30;syncTalentVitals();assert.equal(state.maxHp,59);assert.equal(deviceSlots(),5);
+state.playerLevel=30;syncTalentVitals();assert.equal(state.maxHp,59);assert.equal(deviceSlots(),3,'sockets unlock at 1/12/24/36/48');state.playerLevel=47;assert.equal(deviceSlots(),4);state.playerLevel=48;assert.equal(deviceSlots(),5);state.playerLevel=30;
 state.device.crystals=[{uid:'crystal-1',type:'capacity'},{uid:'crystal-2',type:'assault'},{uid:'crystal-3',type:'aegis'}];
 state.device.slots=['crystal-1','crystal-2','crystal-3',null,null];
 assert.equal(maxDeckSize(),7);assert.equal(deviceBonus('assault'),1);assert.equal(deviceBonus('aegis'),1);

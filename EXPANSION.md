@@ -33,7 +33,7 @@ The integrated adventure (`index.html`) now loads `assets/expansion.js` after it
 
 Elite patrols have an 8% chance to drop one device crystal. Ordinary enemies and bosses do not roll device crystals. Capacity adds one deck slot, Assault adds one damage per attack-card effect, and Aegis adds one Block per defense-card effect. Crystals remain separate from physical-card upgrade materials.
 
-Socket counts unlock at levels 1, 6, 12, 20, and 30. Crystals can be moved or removed outside active fights. Removing capacity may require reducing the active deck before the next encounter.
+Socket counts unlock at levels 1, 12, 24, 36, and 48. Crystals can be moved or removed outside active fights. Removing capacity may require reducing the active deck before the next encounter.
 
 ## Saves
 

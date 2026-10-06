@@ -4,7 +4,7 @@ run(fs.readFileSync(path.join(__dirname,'../assets/combined-rooms.js'),'utf8'));
 run(fs.readFileSync(path.join(__dirname,'../assets/touch-controls.js'),'utf8'));
 run(`
 {
-newGame();state.playerLevel=30;
+newGame();state.playerLevel=AETHERLINK_SOCKET_LEVELS.at(-1); // all five sockets unlocked
 assert.equal(rollUpgradeCrystal('assault',.79).rarity,'uncommon');assert.equal(rollUpgradeCrystal('aegis',.80).rarity,'rare');assert.equal(rollUpgradeCrystal('capacity',.97).rarity,'epic');
 state.device.crystals=Array.from({length:5},(_,i)=>({uid:'crystal-'+(i+1),type:'assault',rarity:'epic'}));state.device.slots=state.device.crystals.map(c=>c.uid);
 state.device.next=1;assert(!state.device.crystals.some(c=>c.uid===rollUpgradeCrystal('capacity',.5).uid),'new drops must not reuse imported IDs');assert.equal(deviceBonus('assault'),3);assert.equal(crystalOpeningBlock(),2,'rarity shields never stack');
