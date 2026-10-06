@@ -75,7 +75,10 @@ b = setup('shade', [], { turn: 2 }); endTurn(); assert.equal(b.hand.length, 3, '
 b = setup('cryptWisp', [], { turn: 2 }); const drawBefore = b.draw.length; endTurn();
 const statics = [...b.draw, ...b.hand].filter(isJunk); assert.equal(statics.length, 1, 'Static Flood adds 1 Static in the city');
 b.hand.unshift(makeStatic()); const handLen = b.hand.length; playCard(0); assert.equal(b.hand.length, handLen, 'Static cannot be played');
-assert.equal(pitchValue(b.hand[0]), 1); assert(canPitch(b, b.hand[0]));
+assert(!canPitch(b, b.hand[0]), 'Static cannot be pitched for Aether'); togglePitch(b.hand[0].uid); assert.equal(b.pitch.length, 0);
+b.aether = 1; let junkUid = b.hand[0].uid; cleanseStatic(junkUid); assert(b.hand.some(c => c.uid === junkUid), 'cleansing needs ' + STATIC_CLEANSE_COST + ' Aether');
+b.aether = 3; cleanseStatic(junkUid); assert(!b.hand.some(c => c.uid === junkUid), 'cleansing removes the Static'); assert.equal(b.aether, 3 - STATIC_CLEANSE_COST, 'and costs Aether');
+assert(![...b.draw, ...b.discard, ...b.exhaust].some(c => c.uid === junkUid), 'it is gone for the encounter');
 // Empower and Barrier.
 b = setup('crownSentinel', [], { turn: 5, enemy: { boss: true, element: 'air' } }); b.enemy.boss = true;
 const atk = b.enemy.attack; b.block = 999; endTurn(); assert.equal(b.enemy.attack, atk + 2, 'Empower +2 in the city'); assert.equal(b.empower, 2);

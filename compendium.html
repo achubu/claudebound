@@ -486,7 +486,7 @@
                 const ri = { city: 0, elaris: 1, vespera: 2 }[region.id] || 0;
                 const strikeOnly = affl.length === 1 && game.afflictions[affl[0]].type === 'strike';
                 const when = e.boss ? (e.miniBoss ? 'every 3rd turn (2, 5, 8…), alternating' : 'every 3rd turn in order, and <b>every 2nd turn once enraged</b>') : (strikeOnly ? 'on its plain attacks every 3rd turn (4, 7, 10…)' : 'every 3rd turn (2, 5, 8…)') + '; elites every 2nd turn';
-                notes.push(`<b>Afflictions</b> — ${when}:<br>` + affl.map(a => { const A = game.afflictions[a]; const answer = A.answer.map(x => x === 'pitch' ? 'pitching' : (game.sideCards && game.sideCards[x] ? game.sideCards[x].name : x)).join(', '); return `${A.icon} <b>${esc(A.name)}</b>: ${esc(game.afflictionText ? game.afflictionText(a, ri) : A.name)} <i>Answer: ${esc(answer)}.</i>`; }).join('<br>'));
+                notes.push(`<b>Afflictions</b> — ${when}:<br>` + affl.map(a => { const A = game.afflictions[a]; const answer = A.answer.map(x => x === 'cleanse' ? 'spending 2 Aether to cleanse it' : (game.sideCards && game.sideCards[x] ? game.sideCards[x].name : x)).join(', '); return `${A.icon} <b>${esc(A.name)}</b>: ${esc(game.afflictionText ? game.afflictionText(a, ri) : A.name)} <i>Answer: ${esc(answer)}.</i>`; }).join('<br>'));
             }
             const fixedCycle = opts.full ? `<ol class="pattern">${steps}</ol><p class="cycle-note">Repeats every ${pattern.length} turns.</p>` :
                 `<p class="mini-pattern">${pattern.map(k => `<span class="chip k-${k}">${k === 'elemental' ? 'charged strike' : k}</span>`).join('<i>→</i>')}</p>`;

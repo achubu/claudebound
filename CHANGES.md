@@ -2035,3 +2035,12 @@ New file `assets/aether-deck.js` (+ `assets/aether-deck.css`), loaded after tale
 **Balance.** Simulated with the bot taught to pitch, draw and play side cards (`tests/talent-sim.cjs`; `NO_SIDE=1` turns that off). Typical-build win rates vs Round 43 (30 fights × 16 builds × 2 styles, fair-fight levels): city regulars Lv3 93→66%, Lv7 89→69%, Lv8 41→22% (Crown Observer uses Mind Fog — Shackle there measured 10%); Elaris regulars down 5–17 points; Vespera regulars down 2–20, except Lv26 79→31% (Thunder Mauler's Rend). Mini-bosses: Lunar 47%, Crown Sentinel 42%, Tidebound 49%, Gale 46%, Arc 38%, Resonant 37%. Final bosses: Thorn Warden 31%, Bloom Tyrant 29%, Tempest Colossus 33%. Boss health was retuned with every affliction active so a typical build wins about 40% against mini-bosses and 28% against final bosses (was ~50% / ~39%): perEnemy hp moonKnight .6, crownSentinel .69, thornWarden .64, tidewardenElaris .8, bloomTyrant .46, arcSentinel .64, resonantPhantom .96, stormTyrant .45 (galeSovereign unchanged). balance-sim targets now zone 30–100, mini 34–50, boss 22–36.
 
 Also: compendium gains a Side Deck section, per-enemy affliction notes (with answers) and new attack-guide entries; side-card and Static art via `tools/generate_side_card_art.py`; new `tests/aether-deck.test.cjs` covers pitching, Aether, draws, all 11 afflictions and schedules, all 10 side cards, drops, deck rules and save migration; `tests/trace-fight.cjs` prints one fight's log for debugging.
+
+## Round 45 — Two-bubble enemy intent
+
+- The enemy intent panel is now two bubbles: a rose one for **when you end this turn** and a blue one for **the turn after**. Each shows the action, its damage (or "no attack", "3 × N" for Barrage, "frozen", "negated by Phase Veil"), a counter-window marker, and its own affliction with the answers. Side by side on desktop, stacked on phones.
+
+## Round 46 — Static must be cleansed
+
+- Static junk cards can no longer be pitched for Aether. Each one in your hand has a **Cleanse · 2 ✦** button that spends 2 Aether to remove it for the rest of the encounter; Purifying Light still purges every Static at once, and Null Anchor still prevents Static Flood. Card text, telegraph answers and the compendium say so.
+- The simulation bot cleanses Static when it has the Aether. Test coverage: Static can't be pitched, cleansing needs 2 Aether, removes the card from every pile and spends the Aether.

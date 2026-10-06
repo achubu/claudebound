@@ -66,9 +66,10 @@ function botSide(){
 }
 function botPitch(){
  const b=state.battle;if(!b||b.phase!=='fight'||!sideOn())return;aetherInit(b);
+ for(const j of b.hand.filter(isJunk))if(b.aether>=STATIC_CLEANSE_COST)cleanseStatic(j.uid);
  for(const c of b.hand.slice().sort((x,y)=>pitchValue(x)-pitchValue(y))){
   if(c.uid===b.savedUid||b.pitch.includes(c.uid))continue;
-  if(isJunk(c)){b.pitch.push(c.uid);continue}
+  if(isJunk(c))continue;
   if(!b.sideDraw.length||b.aether+pendingAether(b)>=SIDE_DRAW_COST)continue;
   const marked=b.hand.filter(h=>b.pitch.includes(h.uid)&&!isJunk(h)).length;
   if(cycleCount(b)-marked-1>=5&&canPitch(b,c))b.pitch.push(c.uid);

@@ -18,7 +18,7 @@
 // afflictionCadence for how often). Each is
 // shown one turn ahead, so you can pitch now and answer it next turn.
 // =====================================================================
-const AETHER_START = 2, AETHER_MAX = 8, SIDE_DRAW_COST = 4, SIDE_HAND_MAX = 2, SIDE_DECK_MAX = 6, SIDE_COPIES = 2, MIN_CYCLE = 4;
+const STATIC_CLEANSE_COST = 2, AETHER_START = 2, AETHER_MAX = 8, SIDE_DRAW_COST = 4, SIDE_HAND_MAX = 2, SIDE_DECK_MAX = 6, SIDE_COPIES = 2, MIN_CYCLE = 4;
 const regionIndex = () => ({ city: 0, elaris: 1, vespera: 2 })[typeof activeRegion === 'string' ? activeRegion : 'city'] || 0;
 
 // ---------------------------------------------------------------------
@@ -29,7 +29,7 @@ const AFFLICTIONS = {
   frail:   { name: 'Enfeeble', icon: '⤓', type: 'hex', desc: () => 'Frail for 2 turns: your cards deal 25% less damage.', answer: ['purify', 'anchor'] },
   shackle: { name: 'Shackle', icon: '⛓', type: 'hex', desc: () => 'Shackled: 1 less energy next turn.', answer: ['purify', 'anchor'] },
   fog:     { name: 'Mind Fog', icon: '☁', type: 'hex', desc: () => 'Fog: you draw 1 fewer card next turn.', answer: ['purify', 'anchor'] },
-  static:  { name: 'Static Flood', icon: '≈', type: 'hex', amount: [1, 2, 2], desc: n => 'Shuffles ' + n + ' unplayable Static card' + (n > 1 ? 's' : '') + ' into your draw pile.', answer: ['purify', 'anchor', 'pitch'] },
+  static:  { name: 'Static Flood', icon: '≈', type: 'hex', amount: [1, 2, 2], desc: n => 'Shuffles ' + n + ' unplayable Static card' + (n > 1 ? 's' : '') + ' into your draw pile.', answer: ['purify', 'anchor', 'cleanse'] },
   empower: { name: 'Empower', icon: '▲', type: 'hex', amount: [2, 3, 4], desc: n => 'Empower: the enemy gains +' + n + ' attack for the rest of the fight (stacks once, to +' + n * 2 + ').', answer: ['dispel', 'anchor'] },
   barrier: { name: 'Aether Barrier', icon: '⬡', type: 'hex', amount: [5, 10, 16], desc: n => 'Barrier ' + n + ': absorbs damage from your cards until broken (refreshes, does not stack).', answer: ['dispel', 'anchor'] },
   rend:    { name: 'Rend', icon: '✂', type: 'strike', desc: () => 'Rend: this hit cuts through half your Block (Armor still applies).', answer: ['aegis', 'phase', 'mirror', 'anchor'] },
@@ -166,7 +166,7 @@ const isJunk = c => !!(c && defs[c.id] && defs[c.id].unplayable);
 let staticSerial = 1;
 function makeStatic() { return { uid: 'static-' + staticSerial++, id: 'static', level: 0, uses: 0, soulbound: false, junk: true }; }
 const rulesBeforeAether = rules;
-rules = function (c) { return defs[c.id] && defs[c.id].unplayable ? 'Unplayable. Pitch it for 1 Aether, or purge it with Purifying Light.' : rulesBeforeAether(c); };
+rules = function (c) { return defs[c.id] && defs[c.id].unplayable ? 'Unplayable and cannot be pitched. Spend ' + STATIC_CLEANSE_COST + ' Aether to cleanse it, or purge every Static with Purifying Light.' : rulesBeforeAether(c); };
 
 // ---------------------------------------------------------------------
 // Battle state
@@ -178,11 +178,11 @@ function aetherInit(b) {
   b.sideDraw = shuffle(state.side.deck.map(u => state.side.pool.find(c => c.uid === u)).filter(Boolean).map(c => ({ ...c })));
   b.bleed = 0; b.frail = 0; b.empower = 0; b.anchor = false; b.veil = false; b.mirror = false; b.rendProof = false;
 }
-function pitchValue(c) { return isJunk(c) ? 1 : (defs[c.id]?.cost ?? 1) + 1; }
+function pitchValue(c) { return isJunk(c) ? 0 : (defs[c.id]?.cost ?? 1) + 1; }
 function cycleCount(b) { return [...b.draw, ...b.discard, ...b.hand].filter(c => !isJunk(c)).length; }
 function canPitch(b, c) {
   if (!c || b.savedUid === c.uid) return false;
-  if (isJunk(c)) return true;
+  if (isJunk(c)) return false;
   const marked = b.hand.filter(h => b.pitch.includes(h.uid) && !isJunk(h)).length;
   return cycleCount(b) - marked - 1 >= MIN_CYCLE;
 }
@@ -203,6 +203,14 @@ function resolvePitch(b) {
   b.exhaust.push(...pitched.filter(c => !isJunk(c)));
   b.aether = Math.min(AETHER_MAX, b.aether + gain);
   b.logs.push('Pitched ' + pitched.map(c => stat(c).name).join(', ') + ': +' + (b.aether - before) + ' Aether.');
+}
+function cleanseStatic(uid) {
+  const b = state.battle; if (!b || b.phase !== 'fight') return; aetherInit(b);
+  const c = b.hand.find(h => h.uid === uid); if (!c || !isJunk(c)) return;
+  if (b.aether < STATIC_CLEANSE_COST) return toast('Cleansing Static costs ' + STATIC_CLEANSE_COST + ' Aether.');
+  b.aether -= STATIC_CLEANSE_COST; b.hand = b.hand.filter(h => h !== c); b.pitch = b.pitch.filter(u => u !== uid);
+  b.logs.push('Cleansed a Static card (−' + STATIC_CLEANSE_COST + ' Aether).');
+  save(); renderBattle();
 }
 function drawSide() {
   const b = state.battle; if (!b || b.phase !== 'fight') return; aetherInit(b);
@@ -278,7 +286,7 @@ cardEffect = function (c, empowered, doubleAttack) {
 const playCardBeforeAether = playCard;
 playCard = function (i) {
   const b = state.battle, c = b && b.hand[i];
-  if (c && isJunk(c)) return toast('Static is unplayable. Pitch it for 1 Aether.');
+  if (c && isJunk(c)) return toast('Static is unplayable. Spend ' + STATIC_CLEANSE_COST + ' Aether to cleanse it.');
   if (b && c) { aetherInit(b); b.pitch = b.pitch.filter(u => u !== c.uid); }
   return playCardBeforeAether(i);
 };
@@ -392,12 +400,19 @@ function sideCardElement(card, onClick, disabled = false) {
   wrap.append(btn); return wrap;
 }
 function addHTML(el, html) { if (!html) return; const span = document.createElement('span'); span.className = 'aether-extra'; span.innerHTML = html; el.append(span); }
-function answerNames(id) { return AFFLICTIONS[id].answer.map(a => a === 'pitch' ? 'pitching' : SIDE_CARDS[a].name).join(', '); }
+function answerNames(id) { return AFFLICTIONS[id].answer.map(a => a === 'cleanse' ? 'spending ' + STATIC_CLEANSE_COST + ' Aether to cleanse it' : SIDE_CARDS[a].name).join(', '); }
 function afflictionLine(plan, label) {
   if (plan.anchored) return '<p class="affliction anchored">⚓ ' + label + AFFLICTIONS[plan.anchored].name + ' will be prevented by Null Anchor.</p>';
   if (!plan.rider) return '';
   const a = AFFLICTIONS[plan.rider];
-  return '<p class="affliction ' + a.type + '">' + a.icon + ' ' + label + '<b>' + a.name + '</b> — ' + afflictionText(plan.rider) + ' <span class="answer">Answer: ' + answerNames(plan.rider) + '.</span></p>';
+  const text = afflictionText(plan.rider), body = label ? label + '<b>' + a.name + '</b> — ' + text : text.replace(/^([^:]+):/, '<b>$1:</b>');
+  return '<p class="affliction ' + a.type + '">' + a.icon + ' ' + body + ' <span class="answer">Answer: ' + answerNames(plan.rider) + '.</span></p>';
+}
+function intentBubble(plan, cls, label, frozen) {
+  const dmg = frozen ? 'frozen · skips its action' : plan.kind === 'silenced' ? 'silenced · no action' : plan.veiled ? 'negated by Phase Veil' : plan.damage > 0 ? (plan.hits > 1 ? plan.hits + ' × ' + plan.damage + ' damage' : plan.damage + ' damage') : 'no attack';
+  return '<div class="intent-bubble ' + cls + '"><span class="when">' + label + '</span><b class="what">' + plan.name + '</b><span class="dmg">' + dmg + (plan.kind === 'elemental' && !frozen ? ' · <em>counter window</em>' : '') + '</span>'
+    + afflictionLine(plan, '')
+    + (plan.mirrored ? '<p class="affliction anchored">◐ Mirror Sigil: you take half, the enemy takes ' + plan.mirrored + '.</p>' : '') + '</div>';
 }
 const renderBattleBeforeAether = renderBattle;
 renderBattle = function () {
@@ -411,11 +426,13 @@ renderBattle = function () {
   }
   if (b.phase !== 'fight') return;
   aetherInit(b);
-  // Telegraph: this turn's and next turn's afflictions.
+  // Telegraph: two bubbles — what the enemy does when you end this turn,
+  // and what it does the turn after — each with its own affliction.
   const plan = enemyPlan(b), next = enemyPlan(b, b.turn + 1), box = m.querySelector('.intent');
   if (box) {
-    if (plan.hits > 1) { const head = box.querySelector('b'); if (head) head.textContent = plan.name + ' (' + plan.hits + ' × ' + plan.damage + ')'; }
-    addHTML(box, afflictionLine(plan, 'This turn: ') + afflictionLine(next, 'Next turn: ') + (plan.veiled ? '<p class="affliction anchored">◌ Phase Veil will negate this attack.</p>' : '') + (plan.mirrored ? '<p class="affliction anchored">◐ Mirror Sigil: you take half, the enemy takes ' + plan.mirrored + '.</p>' : ''));
+    const status = box.querySelector('.encounter-status'), statusHTML = status && status.outerHTML ? status.outerHTML : '';
+    box.classList.add('intent-split');
+    box.innerHTML = '<div class="intent-bubbles">' + intentBubble(plan, 'now', 'When you end this turn', b.freeze > 0) + intentBubble(next, 'later', 'The turn after', false) + '</div>' + statusHTML;
   }
   // Status tags.
   const youTags = m.querySelector('.compact-side.you .compact-tags'), foeTags = m.querySelector('.compact-side.enemy .compact-tags');
@@ -426,6 +443,13 @@ renderBattle = function () {
   document.querySelectorAll('#hand .card-wrap').forEach((wrap, i) => {
     const c = b.hand[i]; if (!c) return;
     if (isJunk(c)) { const card = wrap.querySelector('.card'); if (card) { card.classList.add('junk'); const own = card.querySelector('.ownership'); if (own) own.textContent = '≈ STATIC · JUNK'; const cost = card.querySelector('.cost'); if (cost) cost.textContent = '✕'; card.querySelector('.mastery-label')?.remove(); card.querySelector('.track')?.remove(); } }
+    if (isJunk(c)) {
+      const clean = document.createElement('button'); clean.className = 'ability cleanse';
+      clean.textContent = 'Cleanse · ' + STATIC_CLEANSE_COST + ' ✦'; clean.disabled = b.aether < STATIC_CLEANSE_COST;
+      clean.title = 'Spend ' + STATIC_CLEANSE_COST + ' Aether to remove this Static from the encounter.';
+      clean.onclick = e => { e.stopPropagation?.(); cleanseStatic(c.uid); };
+      wrap.append(clean); return;
+    }
     const marked = b.pitch.includes(c.uid), btn = document.createElement('button');
     btn.className = 'ability pitch' + (marked ? ' selected' : '');
     btn.textContent = marked ? '✓ Pitching · +' + pitchValue(c) + ' ✦' : 'Pitch · +' + pitchValue(c) + ' ✦';

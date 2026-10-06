@@ -34,3 +34,21 @@
 .touch-mode .side-card{min-height:220px}
 .touch-mode .affliction{font-size:10.5px}
 .aether-extra{display:contents}
+/* Enemy intent: two bubbles, this turn (rose) and the turn after (blue). */
+.intent.intent-split{background:none!important;border:0!important;padding:0!important}
+.intent-bubbles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.intent-bubble{position:relative;padding:8px 10px 9px;border-radius:12px;border:1px solid;font:12px/1.35 system-ui}
+.intent-bubble .when{display:block;font:700 10px/1.2 system-ui;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.intent-bubble .what{display:block;font-size:13px;color:#fff}
+.intent-bubble .dmg{display:block;margin-top:2px}
+.intent-bubble .dmg em{font-style:normal;font-weight:700;color:#ffe08a}
+.intent-bubble.now{background:linear-gradient(135deg,#7a2440,#4a1f38);border-color:#ff8aa3;box-shadow:0 0 0 1px #ff8aa333,0 4px 14px #0006}
+.intent-bubble.now .when{color:#ffc2cf}
+.intent-bubble.now .dmg{color:#ffe1e8}
+.intent-bubble.later{background:linear-gradient(135deg,#1f3560,#1a2442);border-color:#7fb2ff;opacity:.92}
+.intent-bubble.later .when{color:#b9d4ff}
+.intent-bubble.later .dmg{color:#d7e6ff}
+.intent-bubble.later .affliction{color:#d7e6ff}
+.intent-bubble.later .affliction b{color:#fff}
+.intent-split .encounter-status{margin:6px 2px 0}
+@media (max-width:520px){.intent-bubbles{grid-template-columns:1fr}}
