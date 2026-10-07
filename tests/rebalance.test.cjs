@@ -582,13 +582,13 @@ if(_origNExit2===undefined)delete rooms['2,1'].exits.n;else rooms['2,1'].exits.n
 // --- roomTag correctly identifies special room types used for map badges
 assert.equal(roomTag('0,5').label,'Safe','the starting safe room is tagged Safe');
 const bossKey=Object.keys(rooms).find(k=>rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss&&rooms[k].enemy[0]==='thornWarden');
-assert(bossKey&&roomTag(bossKey).label==='Boss','the Thorn Warden room is tagged Boss');
+assert(bossKey&&roomTag(bossKey)===null,'an unexplored boss room is not tagged on the map');state.visited.push(bossKey);assert(roomTag(bossKey).label==='Boss','once seen, the Thorn Warden room is tagged Boss');
 // 'boots' specifically, not 'ember'/'lens' — those two now live in the
 // mini-boss branch rooms (Round 26), where roomTag()'s Boss check takes
 // precedence over Relic regardless of collection state, so a boss room
 // with an uncollected relic still correctly shows "Boss", not "Relic".
 const relicKey=Object.keys(rooms).find(k=>rooms[k].relic&&rooms[k].relic[0]==='boots');
-assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic (and no boss) is tagged Relic');
+state.visited.push(relicKey);assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic (and no boss) is tagged Relic');
 state.relics=['boots'];
 assert.notEqual(roomTag(relicKey)&&roomTag(relicKey).label,'Relic','once the relic is collected it is no longer tagged as an available Relic');
 

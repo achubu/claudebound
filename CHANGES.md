@@ -2113,3 +2113,38 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 ## Round 55 — Show the unspent-energy Aether
 
 - The unspent-energy rule (Round 49: end a turn with energy left → +1 Aether) was working but invisible until after the turn. The Aether row now counts it in the pending pips and says "+N at end of turn (incl. +1 from unspent energy)"; with nothing pending it reads "Pitch cards or end the turn with energy left to gain Aether".
+
+## Round 56 — Stacked copies in the Deck Workshop
+
+- Copies of the same card at the same level and ownership (Soulbound or Impermanent) now show as one tile with a gold ×N badge and "k of N copies in deck". Buttons work on one copy at a time: Add a copy / Remove a copy / Upgrade a copy / Destroy a copy (destroys the least-used copy not in your deck first). The tile shows the most-used copy's mastery (or a copy that's ready to upgrade).
+- The active-deck list stacks the same way ("Sundering Arc · Lv 0 ×2").
+- Soulbound and Impermanent copies stay separate stacks because one can be lost and the other can't; different levels stay separate too.
+
+## Round 57 — Weaken button
+
+- The Weaken ability is now a large glowing magenta button with a cracked-blade icon, "WEAKEN" and "Enemy attack −N · once per fight", pulsing while available and lifting on hover. After use it turns into a dimmed "WEAKENED · Enemy attack −N" plate, and the enemy gets a "▼ −N attack" chip. Visual only (battle-hud.js / battle-hud.css).
+
+## Round 58 — View the side deck any time
+
+- The Aether row has a **▾ View side deck** toggle that expands the cards still left in your side deck for this encounter, sorted by name so the draw order stays hidden. They are shown dimmed and can't be played or taken from there. A note says how many are left and whether you have the 4 Aether needed to draw ("You need 4 Aether to draw — you have 2."). Drawing still only happens through the Side deck button, which stays disabled until you have enough Aether.
+
+## Round 59 — The map only shows what you've seen
+
+- Room tags (Boss, Relic, Chest, Crystal, points of interest, the merchant) appear only for areas you have visited; an unexplored area is never tagged.
+- The map footer no longer reveals totals: "N areas explored · X hidden chests found · Y relics claimed", and "Points of interest found: N" (with lore read and Shards). The merchant's location is listed only once you've seen its area. (This replaces Round 52's always-named merchant.)
+
+## Round 60 — Upgrade Crystal pickup image
+
+- New `assets/pickups.js`. Every Upgrade Crystal you receive now shows the up-arrow crystal from `assets/items/upgrade-crystals.png` (popping in, then floating) with "You now have N":
+  - in the victory screen for loot-chest crystals and the guaranteed mini-boss crystal (beside any card or side-card reward);
+  - in an "Item found" window for hidden crystal chests and the Memory Annex crystal in the world.
+
+## Round 61 — Map without overlaps, doorways to the unknown; campfire clarity
+
+- The exploration map is laid out on fixed-size grid cells (150 × 104 px) instead of squeezing the whole explored area into one fixed box, so room panels never overlap. A large map scrolls, and it opens centred on the room you're in.
+- Paths leading to areas you haven't explored end in a small glowing **doorway** marker just outside the room — you can see there's a way through without the map revealing what's beyond it.
+- Campfires (already single-use) now say so: "The fire burns out after one use", the toast confirms it burned out, a used campfire reads "The campfire has burned out. Each campfire can be used once — to rest or to train one card", and the buttons ignore repeat clicks.
+
+## Round 62 — Damage-over-time per turn
+
+- Both combatants show a "☠ −N HP / turn" badge whenever damage-over-time is active, with the breakdown underneath: on you, Bleed + Burn + Poison (red); on the enemy, Poison + Burn (green). The total matches what actually ticks at the end of the turn (checked in the browser: −5 on you, −7 on the enemy).

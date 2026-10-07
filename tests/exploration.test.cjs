@@ -77,7 +77,8 @@ state.pos = { x: cp.x, y: cp.y }; poiArmed = null; checkWorldInteractions(); ass
 closeMenu(); checkWorldInteractions(); assert($('menuOverlay').classList.contains('hidden'), 'standing still does not reopen it');
 state.pos = { x: cp.x + 100, y: cp.y }; checkWorldInteractions(); state.pos = { x: cp.x, y: cp.y }; checkWorldInteractions(); assert(!$('menuOverlay').classList.contains('hidden'), 'stepping back on reopens it'); closeMenu();
 // Map tag and saves
-assert(roomTag(cp.key), 'rooms with a point of interest are tagged on the map');
+state.visited = state.visited.filter(k => !getJoinedArea(cp.key).cells.includes(k)); assert.equal(roomTag(cp.key), null, 'unseen points of interest are not shown on the map');
+state.visited.push(cp.key); assert(roomTag(cp.key), 'rooms with a point of interest are tagged once seen');
 const save1 = JSON.parse(JSON.stringify(state)); validateImport(save1);
 const bad = JSON.parse(JSON.stringify(state)); bad.shards = -3; assert.throws(() => validateImport(bad), /shards/i);
 const bad2 = JSON.parse(JSON.stringify(state)); bad2.blessing = 'nope'; assert.throws(() => validateImport(bad2), /blessing/i);

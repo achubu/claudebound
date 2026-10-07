@@ -56,6 +56,12 @@ newGame(); const offers = offerArrivalCard(); assert.equal(offers.length, 3); as
 const ramp = lv => enemyStats('stormMoth', { region: 'elaris', level: lv }).hp / (enemies.stormMoth.hp * balanceFor('regionHp', 'elaris') * (1 + (lv - 1) * balanceFor('hpPerLevel', 'elaris')) * BALANCE.perEnemy.stormMoth.hp * balanceFor('normalHp', 'elaris'));
 assert(ramp(10) < ramp(12) && ramp(12) < ramp(14) && Math.abs(ramp(14) - 1) < .02, 'Elaris regular health ramps up over levels 10-13');
 assert.equal(enemyStats('bloomTyrant', { region: 'elaris', level: 10, boss: true }).hp, Math.round(enemies.bloomTyrant.hp * balanceFor('regionHp', 'elaris') * (1 + 9 * balanceFor('hpPerLevel', 'elaris')) * BALANCE.perEnemy.bloomTyrant.hp), 'bosses are not ramped');
+// Deck Workshop stacks copies (same card, level and Soulbound/Impermanent).
+{ const list = [make('cleave', 0, false), make('cleave', 0, false), make('cleave', 1, false), make('cleave', 0, true), make('strike', 0, false)];
+  list[1].uses = 40; const g = stackCards(list);
+  assert.equal(g.length, 4, 'copies stack; a different level or ownership is its own stack');
+  assert.equal(g.find(x => x.key === 'cleave|0|0').cards.length, 2, 'two identical Impermanent copies form one ×2 stack');
+  assert.equal(g.find(x => x.key === 'cleave|0|0').cards[0].uses, 40, 'the most-used copy represents the stack'); }
 // City regulars eased.
 assert.equal(balanceFor('normalHp', 'city'), .95); assert.equal(balanceFor('normalHp', 'elaris'), 1.1);
 Math.random = realRandom;
