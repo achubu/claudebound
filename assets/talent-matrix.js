@@ -43,6 +43,7 @@ TALENT_BRANCHES.disruption.nodes.push(
   // Suppression path (from Deep Interference)
   { id: 'suppression', name: 'Suppression Field', icon: '▼', max: 3, tier: 3, req: ['jammer', 2], desc: 'Enemy heavy attacks and charged strikes deal 7% less damage per rank.' },
   { id: 'silence', name: 'Static Silence', icon: '⊘', max: 1, tier: 7, req: ['suppression', 3], desc: 'Once per encounter: cancel the enemy\'s next action.' },
+  { id: 'reserve', name: 'Jammer Reserve', icon: '⌁', max: 2, tier: 3, req: ['jammer', 3], desc: '+1 Weaken charge per encounter for every rank (up to 3 charges). One Weaken at a time: a new charge is ready once the last one wears off.' },
   { id: 'dominion', name: 'Dominion', icon: '♛', max: 1, tier: 8, req: ['silence', 1], desc: 'While Weaken is active, the enemy also loses 2 Armor.' },
   // Draw-engine path (from Predictive Draw)
   { id: 'foresight', name: 'Foresight', icon: '◈', max: 1, tier: 5, req: ['quickdraw', 1], desc: 'Draw 1 extra card at the start of each turn after the first.' },
@@ -79,7 +80,7 @@ Object.assign(TALENT_BRANCHES.resolve, { subtitle: 'Defense: survive, retain and
 Object.assign(TALENT_ART, {
   lethal: 'precision', adrenaline: 'precision', executioner: 'precision', momentum: 'precision', flurry: 'precision', sunder: 'precision', shatterpoint: 'precision',
   attunement: 'power', kindle: 'power', weakpoint: 'power', stormcaller: 'power',
-  suppression: 'jammer', silence: 'jammer', dominion: 'jammer', foresight: 'cards', cycle: 'cards', battery: 'clockwork',
+  suppression: 'jammer', reserve: 'jammer', silence: 'jammer', dominion: 'jammer', foresight: 'cards', cycle: 'cards', battery: 'clockwork',
   counterWeave: 'mirror', resonance: 'mirror', reflux: 'mirror', nullField: 'mirror',
   bulwark: 'aegis', thorns: 'aegis', fortress: 'aegis', unbreakable: 'aegis', leech: 'aegis', secondWind: 'aegis', undying: 'aegis',
   preparation: 'cards', recall: 'cards', steadyMind: 'clockwork'

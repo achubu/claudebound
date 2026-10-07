@@ -40,13 +40,13 @@ renderBattle = function () {
   const weaken = m.querySelector('#weaken');
   if (weaken && !weaken.dataset.hud) {
     weaken.dataset.hud = '1'; weaken.className = 'weaken-hud';
-    weaken.title = 'Once per encounter: the enemy\'s next attack deals ' + weakenAmount() + ' less damage.';
-    weaken.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKEN</b><small>Next enemy attack −' + weakenAmount() + ' · once per fight</small></span>';
+    weaken.title = 'The enemy\'s next attack deals ' + weakenAmount() + ' less damage. Charges this fight: ' + (weakenCharges() - (b.weakenUses || 0)) + ' of ' + weakenCharges() + '.';
+    weaken.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKEN</b><small>Next enemy attack −' + weakenAmount() + ' · ' + (weakenCharges() > 1 ? (weakenCharges() - (b.weakenUses || 0)) + ' of ' + weakenCharges() + ' charges left' : 'once per fight') + '</small></span>';
   }
   // Round 64: an always-visible debuff strip on both sides, listing every
   // active debuff (or "None") plus the damage over time it deals each turn.
   const weakened = [...m.querySelectorAll('.compact-side.you .soul-legend')].find(x => /Weaken/.test(x.textContent || ''));
-  if (weakened) { weakened.className = 'weaken-hud spent'; weakened.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text">' + (b.enemyDebuff ? '<b>WEAKENED</b><small>Next enemy attack −' + b.enemyDebuff + '</small>' : '<b>WEAKEN USED</b><small>Once per fight</small>') + '</span>'; }
+  if (weakened) { weakened.className = 'weaken-hud spent'; weakened.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text">' + (b.enemyDebuff ? '<b>WEAKENED</b><small>Next enemy attack −' + b.enemyDebuff + (weakenCharges() > 1 ? ' · ' + (weakenCharges() - (b.weakenUses || 0)) + ' charge(s) left' : '') + '</small>' : '<b>WEAKEN USED</b><small>' + (weakenCharges() > 1 ? 'All ' + weakenCharges() + ' charges spent' : 'Once per fight') + '</small>') + '</span>'; }
   const t = s => s === 1 ? '1 turn' : s + ' turns';
   const youDebuffs = [
     b.bleed && ['🩸', 'Bleed ' + b.bleed, 'Lose ' + b.bleed + ' HP at the end of your turn; falls by 1 each turn.'],

@@ -2181,3 +2181,10 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 - Side cards cost Aether only, never energy: 4 plus the card's listed cost, so the minimum is 4. Purifying Light, Dispel Lance, Aegis Ward, Verdant Restore, Grounding Rod and Aether Overflow cost 4. Null Anchor, Mirror Sigil and Phase Veil cost 5. Stasis Field costs 6.
 - The cost badge on each side card shows its Aether price. Cards you can't afford are greyed out. The panel can be collapsed with "Hide side deck".
 - Updated the Deck Workshop text, the compendium (side cards list their Aether cost), the tests and the simulation bot. Balance was not re-simulated.
+
+## Round 68: Jammer Reserve, extra Weaken charges
+
+- New Disruption talent, **Jammer Reserve**: 2 ranks, needs Deep Interference 3, sits beside Suppression Field. Each rank adds +1 Weaken charge per encounter, for up to 3 charges.
+- Only one Weaken is active at a time. When it wears off after the enemy's next attack, the button comes back if you have charges left.
+- The Weaken button shows "N of M charges left". The WEAKENED plate shows the charges remaining, and once all charges are spent it reads "All 3 charges spent".
+- Weaken now runs through a shared `useWeaken()` function. New talent tests cover the charges, one-at-a-time use, and wearing off. The sim bot can use the extra charges.

@@ -25,7 +25,7 @@ const BOT = `
 function botIntent(){try{return enemyPlan()}catch(e){return{kind:'attack',damage:intent()}}}
 function useTalentsAtStart(){
  const b=state.battle;
- if(hasTalent('weakenCore')&&!b.debuffUsed){b.debuffUsed=true;b.enemyDebuff=weakenAmount()}
+ if(hasTalent('weakenCore')&&!b.debuffUsed&&!b.enemyDebuff){b.weakenUses=(b.weakenUses||0)+1;b.debuffUsed=b.weakenUses>=weakenCharges();b.enemyDebuff=weakenAmount()}
 }
 function chooseBoosts(){
  const b=state.battle;if(!hasTalent('powerCore'))return;

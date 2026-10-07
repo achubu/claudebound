@@ -46,6 +46,11 @@ assert.equal(plainHeavy.kind, 'heavy'); assert.equal(enemyPlan(b, 3).damage, Mat
 assert.equal(enemyPlan(b, 1).damage, enemyPlan(setup({}, []), 1).damage, 'Suppression leaves normal strikes alone');
 b = setup({ weakenCore: 1, jammer: 3, suppression: 3, silence: 1 }, []); b.silenceUsed = true; b.silenceTurn = 1; let hp0 = state.hp;
 assert.equal(enemyPlan(b).kind, 'silenced'); endTurn(); assert.equal(state.hp, hp0, 'Static Silence cancels the next action'); assert.equal(b.turn, 2);
+// Jammer Reserve: extra Weaken charges, one active at a time.
+b = setup({ weakenCore: 1 }, []); assert.equal(weakenCharges(), 1); useWeaken(); assert.equal(b.enemyDebuff, 3); assert(b.debuffUsed, 'one charge without Jammer Reserve');
+b = setup({ weakenCore: 1, jammer: 3, reserve: 2 }, [], { turn: 1 }); assert.equal(weakenCharges(), 3, 'Jammer Reserve: +1 charge per rank');
+useWeaken(); assert.equal(b.enemyDebuff, weakenAmount()); assert(!b.debuffUsed); useWeaken(); assert.equal(b.weakenUses, 1, 'only one Weaken at a time');
+b.block = 999; endTurn(); assert.equal(b.enemyDebuff, 0, 'it wears off after the attack'); useWeaken(); assert.equal(b.weakenUses, 2); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 3); assert(b.debuffUsed, 'all 3 charges spent');
 b = setup({ weakenCore: 1, dominion: 1 }, ['strike'], { enemy: { armor: 4 } }); b.enemyDebuff = 2; assert.equal(dealt(b), 6 - 2, 'Dominion: Weaken removes 2 Armor');
 b = setup({ weakenCore: 1, jammer: 3, quickdraw: 1, foresight: 1 }, []); endTurn(); assert.equal(b.hand.length, 4 + 1, 'Foresight draws 1 extra card per turn');
 b = setup({ weakenCore: 1, jammer: 3, quickdraw: 1, foresight: 1, cycle: 1 }, ['spark', 'spark']); playCard(0); assert.equal(b.hand.length, 1 + 1, 'Recycler: a 0-energy card draws 1'); playCard(0); assert.equal(b.hand.length, 1, 'Recycler rank 1: once per turn');
@@ -73,5 +78,5 @@ b = setup({ retainCore: 1, preparation: 1, recall: 2 }, ['strike', 'guard']); b.
 const kept = b.hand.find(c => c.id === 'strike'); assert(kept, 'Memory Buffer retained the strike');
 assert.equal(stat(kept).cost, 1, 'Preparation no longer changes cost'); const idx = b.hand.indexOf(kept); assert.equal(dealt(b, idx), 6 + 2 + 2, 'Preparation +2 and Total Recall +1 per rank on the retained card');
 Math.random = realRandom;
-console.log('PASS: all 31 new talents verified (Surge 11, Disruption 10, Resolve 10) with exact numbers through the real engine.');
+console.log('PASS: all 32 new talents verified (Surge 11, Disruption 11 incl. Jammer Reserve charges, Resolve 10) with exact numbers through the real engine.');
 }`);
