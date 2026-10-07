@@ -160,8 +160,10 @@ renderHUD = function () {
   line.innerHTML = '<span>◇ ' + state.shards + ' Shards</span>' + (state.blessing ? '<span class="blessing-chip" title="' + BLESSINGS[state.blessing].text() + '">✧ ' + BLESSINGS[state.blessing].name + '</span>' : '');
   hud.append(line);
 };
+function areaSeen(key) { const cells = typeof getJoinedArea === 'function' ? getJoinedArea(key).cells : [key]; return cells.some(c => state.visited.includes(c)); }
 const roomTagBeforeExplore = roomTag;
 roomTag = function (key) {
+  if (state && !areaSeen(key)) return null; // nothing is tagged until you've seen that area
   const tag = roomTagBeforeExplore(key); if (tag || !state) return tag;
   ensureExplore();
   const shop = merchantRoom(); if (shop && shop.key === key) return { color: '#ffd27a', label: '🛒 Merchant' };
@@ -172,11 +174,12 @@ roomTag = function (key) {
 const showMapBeforeExplore = showMap;
 showMap = function () {
   showMapBeforeExplore(); ensureExplore();
-  const all = Object.values(worldPOIs()), found = all.filter(p => state.visited.includes(p.key)).length, used = all.filter(poiUsed).length;
+  // Round 59: the map only mentions what you have actually seen.
+  const all = Object.values(worldPOIs()), seen = all.filter(p => areaSeen(p.key)), used = all.filter(poiUsed).length;
   const lore = state.poi.lore.filter(id => id.startsWith(activeRegion + ':')).length;
   const p = document.createElement('p'); p.className = 'map-poi-summary';
-  p.textContent = 'Points of interest: ' + found + '/' + all.length + ' found, ' + used + ' used · ' + LORE_NAMES[activeRegion][1] + 's read ' + lore + '/' + LORE_PER_WORLD + ' · ◇ ' + state.shards + ' Shards.';
-  const shop = merchantRoom(); if (shop) p.textContent += ' 🛒 Merchant: ' + (typeof getJoinedArea === 'function' ? getJoinedArea(shop.key).name : rooms[shop.key].name) + '.';
+  const shop = merchantRoom(), shopSeen = shop && areaSeen(shop.key);
+  p.textContent = 'Points of interest found: ' + seen.length + (used ? ' (' + used + ' used)' : '') + (lore ? ' · ' + LORE_NAMES[activeRegion][1] + 's read: ' + lore : '') + ' · ◇ ' + state.shards + ' Shards' + (shopSeen ? ' · 🛒 Merchant: ' + (typeof getJoinedArea === 'function' ? getJoinedArea(shop.key).name : rooms[shop.key].name) : '') + '.';
   const ret = $('mapReturn'); if (ret && ret.before) ret.before(p);
 };
 
@@ -203,7 +206,7 @@ function finishPOI(p, msg) { if (p && !state.poi.used.includes(p.id)) state.poi.
 function openPOI(p) {
   if (p.type === 'merchant') return openMerchant(p);
   const d = poiDisplay(p);
-  if (poiUsed(p)) return poiMenu(d.icon + ' ' + d.name, '<p class="muted">You have already used this.' + (p.type === 'lore' ? '</p><blockquote class="lore">' + LORE[activeRegion][p.loreIndex] + '</blockquote>' : '</p>'), [{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
+  if (poiUsed(p)) return poiMenu(d.icon + ' ' + d.name, '<p class="muted">' + (p.type === 'campfire' ? 'The campfire has burned out. Each campfire can be used once — to rest or to train one card.' : 'You have already used this.') + (p.type === 'lore' ? '</p><blockquote class="lore">' + LORE[activeRegion][p.loreIndex] + '</blockquote>' : '</p>'), [{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
   if (p.type === 'shrine') {
     const rand = seeded(hashSeed(p.id + state.seed)), offers = Object.keys(BLESSINGS).sort(() => rand() - .5).slice(0, 3);
     return poiMenu('⛩ Aether Shrine', '<p>The shrine offers one blessing for your next fight.' + (state.blessing ? ' It replaces <b>' + BLESSINGS[state.blessing].name + '</b>.' : '') + '</p>' + offers.map(id => '<p class="poi-option"><b>' + BLESSINGS[id].name + '</b> — ' + BLESSINGS[id].text() + '</p>').join(''),
@@ -211,10 +214,10 @@ function openPOI(p) {
   }
   if (p.type === 'campfire') {
     const heal = Math.ceil(state.maxHp * .35), deck = active().filter(c => c.level < 3);
-    poiMenu('🔥 Campfire', '<p>Rest and recover <b>' + heal + ' HP</b>, or train one card in your active deck for <b>+15 mastery uses</b> (tap a card).</p><div class="cards" id="trainCards"></div>',
-      [{ id: 'poiRest', label: 'Rest · +' + heal + ' HP', primary: true, disabled: state.hp >= state.maxHp, onclick: () => { state.hp = Math.min(state.maxHp, state.hp + heal); finishPOI(p, 'You rest by the fire: +' + heal + ' HP.'); } }, { id: 'poiLeave', label: 'Leave', onclick: closeMenu }]);
+    poiMenu('🔥 Campfire', '<p>Rest and recover <b>' + heal + ' HP</b>, <i>or</i> train one card in your active deck for <b>+15 mastery uses</b> (tap a card). The fire burns out after one use.</p><div class="cards" id="trainCards"></div>',
+      [{ id: 'poiRest', label: 'Rest · +' + heal + ' HP', primary: true, disabled: state.hp >= state.maxHp, onclick: () => { if (poiUsed(p)) return; state.hp = Math.min(state.maxHp, state.hp + heal); finishPOI(p, 'You rest by the fire: +' + heal + ' HP. The campfire burns out.'); } }, { id: 'poiLeave', label: 'Leave', onclick: closeMenu }]);
     const host = $('trainCards');
-    if (host && host.append) deck.forEach(c => host.append(cardElement(c, () => { trainCard(c); finishPOI(p, stat(c).name + ' trained: +15 mastery uses.'); })));
+    if (host && host.append) deck.forEach(c => host.append(cardElement(c, () => { if (poiUsed(p)) return; trainCard(c); finishPOI(p, stat(c).name + ' trained: +15 mastery uses. The campfire burns out.'); })));
     return;
   }
   if (p.type === 'lore') {

@@ -5,6 +5,7 @@
 const HUD_ICONS = {
   heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.6 4.5c2.1 0 3.6 1.1 5.4 3 1.8-1.9 3.3-3 5.4-3 3.6 0 5.7 3.7 4.2 7.2C19.5 16.4 12 21 12 21z"/><path class="shine" d="M6.5 7.2c-1.6.3-2.6 1.8-2.2 3.4" fill="none" stroke-width="1.6" stroke-linecap="round"/></svg>',
   fang: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.5 2 3 5.8 3 10.5c0 2.8 1.3 4.6 3 5.7V20l2.5-1.5L10 21l2-2 2 2 1.5-2.5L18 20v-3.8c1.7-1.1 3-2.9 3-5.7C21 5.8 17.5 2 12 2z"/><circle class="eye" cx="8.6" cy="10.6" r="2.1"/><circle class="eye" cx="15.4" cy="10.6" r="2.1"/></svg>',
+  weaken: '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="blade" d="M14.5 2.5l7 7-9.5 9.5-2-2 7.5-7.5-3-3L7 14l-2-2z"/><path class="crack" d="M11 6l2 3-2 1 2.5 3" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path class="arrow" d="M5 15v6M2 18l3 3 3-3" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   bolt: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 1 4 13.5h6.2L9 23l10-13.2h-6.4z"/></svg>'
 };
 function hudNumber(el) { const m = /(\d+)/.exec(el.textContent || ''); return m ? Number(m[1]) : 0; }
@@ -35,6 +36,31 @@ renderBattle = function () {
     row.innerHTML = '<span class="hp-icon">' + (you ? HUD_ICONS.heart : HUD_ICONS.fang) + '</span>';
     meter.replaceWith(row); row.append(meter);
   });
+  // Weaken: a big glowing hex button instead of a small text button.
+  const weaken = m.querySelector('#weaken');
+  if (weaken && !weaken.dataset.hud) {
+    weaken.dataset.hud = '1'; weaken.className = 'weaken-hud';
+    weaken.title = 'Once per encounter: the enemy\'s attack drops by ' + weakenAmount() + ' for the rest of the fight.';
+    weaken.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKEN</b><small>Enemy attack −' + weakenAmount() + ' · once per fight</small></span>';
+  }
+  const weakened = [...m.querySelectorAll('.compact-side.you .soul-legend')].find(x => /Weaken/.test(x.textContent || ''));
+  if (weakened && b.enemyDebuff) {
+    weakened.className = 'weaken-hud spent'; weakened.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKENED</b><small>Enemy attack −' + b.enemyDebuff + '</small></span>';
+    const foe = m.querySelector('.compact-side.enemy .compact-tags');
+    if (foe && foe.append) { const chip = document.createElement('b'); chip.className = 'weakened-chip'; chip.textContent = '▼ −' + b.enemyDebuff + ' attack'; chip.title = 'Weakened for the rest of the fight.'; foe.append(chip); }
+  }
+  // Round 62: damage-over-time per turn, on both sides.
+  const dot = (parts, side) => {
+    const total = parts.reduce((n, p) => n + p[1], 0); if (!total) return;
+    const host = m.querySelector('.compact-side.' + side + ' .compact-tags'); if (!host || !host.append) return;
+    const chip = document.createElement('b'); chip.className = 'dot-hud ' + side;
+    chip.innerHTML = '<span class="dot-drop">☠</span><span class="dot-num">−' + total + '</span><span class="dot-cap">HP / turn</span>';
+    chip.title = parts.filter(p => p[1]).map(p => p[0] + ' ' + p[1]).join(' + ') + ' = ' + total + ' damage at the end of each turn';
+    const det = document.createElement('small'); det.className = 'dot-detail'; det.textContent = parts.filter(p => p[1]).map(p => p[0] + ' ' + p[1]).join(' · ');
+    chip.append(det); host.append(chip);
+  };
+  dot([['Bleed', b.bleed || 0], ['Burn', b.playerBurn > 0 ? 2 : 0], ['Poison', b.playerPoison || 0]], 'you');
+  dot([['Poison', b.poison || 0], ['Burn', b.burnTurns > 0 ? (b.burn || 0) : 0]], 'enemy');
   // Armor: a steel shield; Block: a glowing crystal.
   m.querySelectorAll('.compact-tags .armor-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'armor'); t.innerHTML = hudShield(n, t.title || ''); });
   m.querySelectorAll('.compact-tags .block-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'block'); t.innerHTML = hudBlock(n); });

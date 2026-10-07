@@ -52,3 +52,10 @@
 .intent-bubble.later .affliction b{color:#fff}
 .intent-split .encounter-status{margin:6px 2px 0}
 @media (max-width:520px){.intent-bubbles{grid-template-columns:1fr}}
+/* Round 58: view the side deck at any time (cards can only be drawn with enough Aether). */
+.side-view{margin-top:8px;padding:8px;border:1px dashed #7d6bd1;border-radius:8px;background:#120f26}
+.side-view-note{margin:0 0 6px;font:12px system-ui;color:#d9ccff}
+.side-view-cards{display:flex;flex-wrap:wrap;gap:8px}
+.side-view-cards .card-wrap.view-only .card{opacity:.8;filter:saturate(.75);cursor:default}
+.touch-mode .side-view-cards{flex-wrap:nowrap;overflow-x:auto}
+.touch-mode .side-view-cards .card-wrap{min-width:150px;flex:0 0 150px}
