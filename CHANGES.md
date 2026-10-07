@@ -2109,3 +2109,7 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 ## Round 54 — Card choice at 40%
 
 - Loot chests: card choice **40%**, potion 35%, empty 20%, Upgrade Crystal 4%, Soulbound 1%. (Side-card drops stay at 5% from regular and elite enemies.)
+
+## Round 55 — Show the unspent-energy Aether
+
+- The unspent-energy rule (Round 49: end a turn with energy left → +1 Aether) was working but invisible until after the turn. The Aether row now counts it in the pending pips and says "+N at end of turn (incl. +1 from unspent energy)"; with nothing pending it reads "Pitch cards or end the turn with energy left to gain Aether".
