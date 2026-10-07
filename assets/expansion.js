@@ -25,8 +25,12 @@ const BALANCE={
  bossHp:1,bossAttack:0,         // extra for region bosses only
  miniBossHp:1,miniBossAttack:0, // extra for mini-bosses only
  // Round 43: regular and elite enemies have 10% more health; bosses and mini-bosses unchanged.
+ // Round 49: city regulars eased to 0.95 (early city fights ran ~23 turns).
  // (+10% attack as well was simulated and proved far too steep: ~+21% total strength.)
- normalHp:1.1,normalAttack:1,
+ normalHp:{city:.95,elaris:1.1,vespera:1.1},normalAttack:1,
+ // Round 51: regular enemies in a world's first levels ease in instead of
+ // jumping at the portal (you arrive with your old world's deck).
+ entryRamp:{elaris:{10:{hp:.9,attack:-1},11:{hp:.88,attack:-1},12:{hp:.9,attack:-1},13:{hp:.95,attack:0}}},
  // Heavy hit = attack x (heavyBase + heavyDistance x distance from start, 0..1).
  heavyBase:1.5,heavyDistance:.25,
  bossHeavyMax:1.3,              // bosses' heavy hits are capped, so one hit can't decide the fight
@@ -35,12 +39,15 @@ const BALANCE={
  // Individual health tuning, set with tests/balance-sim.cjs so that at a
  // fair-fight level (player level = boss level) a typical build beats each
  // final boss about 28 times in 100 and each mini-boss about 40, with every
- // Round 44 affliction active and the bot using pitch + side deck. "Typical"
- // is the average over 16 builds covering every talent path.
+ // Round 44 affliction active, the bot using pitch + side deck, and (Round 49)
+ // decks that include the new reward cards. "Typical" is the average over 16
+ // builds covering every talent path.
  perEnemy:{
-  moonKnight:{hp:0.6},crownSentinel:{hp:0.69},thornWarden:{hp:0.64},
-  tidewardenElaris:{hp:0.8},galeSovereign:{hp:0.59},bloomTyrant:{hp:0.46},
-  arcSentinel:{hp:0.64},resonantPhantom:{hp:0.96},stormTyrant:{hp:0.45}
+  moonKnight:{hp:0.73},crownSentinel:{hp:0.72},thornWarden:{hp:0.95},
+  tidewardenElaris:{hp:1.4},galeSovereign:{hp:0.79},bloomTyrant:{hp:0.77},
+  arcSentinel:{hp:0.72},resonantPhantom:{hp:0.82},stormTyrant:{hp:0.46},
+  // Round 51: the Drowned Heron (water, Siphon) was the worst early Elaris fight.
+  drownedHeron:{hp:0.85},stormMoth:{hp:0.9}
  }
 };
 
@@ -52,7 +59,8 @@ function enemyStats(id,{region=activeRegion,level=1,elite=false,boss=!!enemies[i
  const base=enemies[id],mini=boss&&!!base.miniBoss,final=boss&&!base.miniBoss,tune=BALANCE.perEnemy[id]||{},get=k=>balanceFor(k,region);
  const hp=base.hp*(get('regionHp')??1)*(elite?get('eliteHp'):1)*(1+(level-1)*get('hpPerLevel'))*(tune.hp??1)*(final?get('bossHp'):mini?get('miniBossHp'):get('normalHp')??1);
  const attack=base.attack+(get('regionAttack')??0)+(elite?get('eliteAttack'):0)+Math.round((level-1)*get('attackPerLevel'))+(final?get('bossAttack'):mini?get('miniBossAttack'):0)+(tune.attack??0);
- return{hp:Math.round(hp),attack:boss?attack:Math.round(attack*(get('normalAttack')??1))};
+ const ramp=!boss&&BALANCE.entryRamp&&BALANCE.entryRamp[region]&&BALANCE.entryRamp[region][level]||{hp:1,attack:0};
+ return{hp:Math.round(hp*ramp.hp),attack:boss?attack:Math.max(1,Math.round(attack*(get('normalAttack')??1))+ramp.attack)};
 }
 // Elaris expansion: world generation and combat share the adventure's existing state.
 const EXPANSION_VERSION=3;
@@ -484,7 +492,8 @@ endTurn=function(){const b=state.battle;if(!b||b.phase!=='fight')return;const do
 // loot chest gives a renewable trickle without making crystals feel free —
 // roughly comparable to the existing 8% elite device-crystal rate, but not
 // gated behind fighting (rarer) elites specifically.
-const LOOT_CHEST_ODDS={soulbound:.01,crystal:.05,empty:.29,potion:.645};
+// Round 54: card choice 40% of chests, potions 35%, empty 20%.
+const LOOT_CHEST_ODDS={soulbound:.01,crystal:.05,empty:.25,potion:.60};
 const LOOT_THIEVES=['a scavenging fox','a wiry alley cat','a startled crow','a masked raccoon','a quick sewer rat','a one-eared stray dog'];
 function rollLootChest(){const r=Math.random();return r<LOOT_CHEST_ODDS.soulbound?'soulbound':r<LOOT_CHEST_ODDS.crystal?'crystal':r<LOOT_CHEST_ODDS.empty?'empty':r<LOOT_CHEST_ODDS.potion?'potion':'card'}
 winBattle=function(){const b=state.battle;if(b.phase!=='fight')return;b.phase='reward';state.wins++;const levels=gainXP(b.enemy.boss?50:b.enemy.elite?40:25);if(b.enemy.boss){if(!state.bosses.includes(b.id))state.bosses.push(b.id)}else state.cooldowns[b.spawnId]=3;

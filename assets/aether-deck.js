@@ -178,7 +178,7 @@ function aetherInit(b) {
   b.sideDraw = shuffle(state.side.deck.map(u => state.side.pool.find(c => c.uid === u)).filter(Boolean).map(c => ({ ...c })));
   b.bleed = 0; b.frail = 0; b.empower = 0; b.anchor = false; b.veil = false; b.mirror = false; b.rendProof = false;
 }
-function pitchValue(c) { return isJunk(c) ? 0 : (defs[c.id]?.cost ?? 1) + 1; }
+function pitchValue(c) { return isJunk(c) ? 0 : defs[c.id]?.pitchAether ?? ((defs[c.id]?.cost ?? 1) + 1); }
 function cycleCount(b) { return [...b.draw, ...b.discard, ...b.hand].filter(c => !isJunk(c)).length; }
 function canPitch(b, c) {
   if (!c || b.savedUid === c.uid) return false;
@@ -281,7 +281,7 @@ cardEffect = function (c, empowered, doubleAttack) {
   cardEffectBeforeAether(c, empowered, doubleAttack);
   let dealt = before - b.enemy.hp; if (dealt <= 0) return;
   if (b.frail > 0) { const cut = Math.round(dealt * .25); if (cut) { b.enemy.hp += cut; dealt -= cut; b.logs.push('Frail: −' + cut + ' damage.'); } }
-  if (b.enemy.barrier > 0 && dealt > 0) { const soak = Math.min(b.enemy.barrier, dealt); b.enemy.hp += soak; b.enemy.barrier -= soak; b.logs.push('Barrier absorbs ' + soak + (b.enemy.barrier ? ' (' + b.enemy.barrier + ' left).' : ' and breaks.')); }
+  if (b.enemy.barrier > 0 && dealt > 0 && !stat(c).pierceBarrier) { const soak = Math.min(b.enemy.barrier, dealt); b.enemy.hp += soak; b.enemy.barrier -= soak; b.logs.push('Barrier absorbs ' + soak + (b.enemy.barrier ? ' (' + b.enemy.barrier + ' left).' : ' and breaks.')); }
 };
 const playCardBeforeAether = playCard;
 playCard = function (i) {
@@ -306,6 +306,8 @@ const endTurnBeforeAether = endTurn;
 endTurn = function () {
   const b = state.battle; if (!b || b.phase !== 'fight') return;
   aetherInit(b);
+  // Round 49: up to 1 unspent energy turns into Aether.
+  if (b.energy > 0 && b.aether < AETHER_MAX) { b.aether += 1; b.logs.push('Unspent energy: +1 Aether.'); }
   resolvePitch(b);
   if (b.bleed > 0) { const loss = Math.max(0, Math.min(b.bleed, state.hp - 1)); state.hp -= loss; b.logs.push('Bleed: ' + loss + ' HP.'); b.bleed--; }
   if (b.frail > 0) b.frail--;
@@ -353,7 +355,7 @@ startBattle = function (spawnId) {
 // ---------------------------------------------------------------------
 function rollSideDrop(b, roll = Math.random()) {
   const final = b.enemy.boss && !(enemies[b.id] || {}).miniBoss;
-  const chance = b.enemy.boss ? 1 : b.enemy.elite ? .35 : .12;
+  const chance = b.enemy.boss ? 1 : .05; // Round 53: 5% from regular and elite enemies; bosses always
   if (roll >= chance) return null;
   ensureSide();
   const owned = id => state.side.pool.filter(c => c.id === id).length;
@@ -477,7 +479,7 @@ showDeck = function () {
   showDeckBeforeAether(); ensureSide();
   const host = document.querySelector('#menuModal .workshop'); if (!host) return;
   const panel = document.createElement('div'); panel.className = 'panel side-workshop';
-  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + SIDE_DECK_MAX + '</b><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Spend ' + SIDE_DRAW_COST + ' Aether to look at the top 2 side cards and take one. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from enemies (12%), elites (35%) and every boss.</p><div class="cards" id="sidePoolCards"></div>';
+  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + SIDE_DECK_MAX + '</b><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Spend ' + SIDE_DRAW_COST + ' Aether to look at the top 2 side cards and take one. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
   host.append(panel);
   const list = $('sidePoolCards');
   [...state.side.pool].sort((a, c) => SIDE_CARDS[a.id].tier - SIDE_CARDS[c.id].tier || a.id.localeCompare(c.id)).forEach(card => {
