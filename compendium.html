@@ -273,7 +273,7 @@
 
         <section id="side">
             <h2>Side Deck &amp; Aether</h2>
-            <p class="lead" id="side-lead">Pitch cards at the end of your turn for Aether, then spend Aether to play utility counters from your side deck.</p>
+            <p class="lead" id="side-lead">Pitch cards at the end of your turn for Aether, then spend it to play utility counters straight from your side deck (4 Aether minimum).</p>
             <div class="grid" id="side-grid"></div>
         </section>
 
@@ -531,7 +531,7 @@
             const grid = document.getElementById('side-grid');
             if (!game || !game.sideCards) { grid.innerHTML = '<p class="dim">Side deck data loads from the game itself.</p>'; return; }
             const a = game.aether || { max: 8, draw: 4, hold: 2, deck: 6, copies: 2 };
-            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Look at the top 2 side cards and keep one for free; playing a side card costs ${a.draw} Aether plus its energy. Unspent energy turns into Aether 1 for 1. Build a side deck of up to ${a.deck} (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
+            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Build a side deck of up to ${a.deck} (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
             const where = ['Starter or any world', 'Elaris and Vespera', 'Vespera', 'Final bosses only'];
             grid.innerHTML = Object.entries(game.sideCards).map(([id, c]) => {
                 let text = ''; try { text = c.text(); } catch (e) {}
@@ -542,7 +542,7 @@
                         <div class="card-type">Side deck · ${esc(c.kind)}</div>
                         <h3 class="card-title">${c.icon} ${esc(c.name)}</h3>
                         <p class="card-desc">${esc(text)}</p>
-                        <ul class="stats-list"><li><span>Cost:</span> <strong class="badge">${c.cost} Energy</strong></li><li><span>Found:</span> <strong class="badge">${where[c.tier] || ''}</strong></li></ul>
+                        <ul class="stats-list"><li><span>Cost:</span> <strong class="badge">${(a.draw || 4) + (c.cost || 0)} Aether</strong></li><li><span>Found:</span> <strong class="badge">${where[c.tier] || ''}</strong></li></ul>
                     </div>
                 </article>`;
             }).join('');
@@ -563,8 +563,8 @@
                 ['Shards & the merchant', 'Enemies drop Shards: 1-2 from regulars, 3 from elites, 6 from mini-bosses, 10 from final bosses. The Wandering Merchant (one in every world, shown on the map) sells three wares for Shards: always a side card and a card upgrade (an upgraded Impermanent card or an upgrade pack), plus a potion, card bundle or blessing. It never sells Soulbound cards or Upgrade Crystals, and moves to a new room whenever you enter a world or fall in battle.'],
                 ['Card rewards', 'A loot chest that holds a card offers three from the current world\'s pool. Take one, or leave them all.'],
                 ['Unspent energy', 'Each point of energy left when you end your turn becomes 1 Aether.'],
-                ['Side deck', 'Look at the top 2 cards of your side deck for free and take one (the other goes to the bottom), or put both back. You can hold 2 side cards. Aether is only spent when you play one: 4 Aether plus the card\'s own energy.'],
-                ['Weaken', 'Talent ability: lowers enemy attack for the whole encounter, which reduces every number above.']
+                ['Side deck', 'Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
+                ['Weaken', 'Talent ability, once per encounter: the enemy\'s next attack deals 3 less damage (+3 per Deep Interference rank), then it wears off.']
             ];
             document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');
         }

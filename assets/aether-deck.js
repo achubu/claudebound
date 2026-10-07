@@ -9,8 +9,8 @@
 // AETHER_START, so one pitch is enough for the first side draw.
 //
 // Side deck: a separate, player-built deck of utility counters. Spend
-// Looking at the top 2 side cards and taking one is free (Round 65);
-// playing a side card costs SIDE_DRAW_COST Aether plus its energy.
+// Round 67: the side deck is always open; side cards cost Aether only
+// (SIDE_DRAW_COST + their listed cost, so at least 4).
 // Side cards wait in their own row (up to 2) until you play them.
 //
 // Afflictions: every enemy now carries telegraphed riders on some of its
@@ -239,18 +239,26 @@ function sideUsable(b, id) {
   if (id === 'ground') { const p = enemyPlan(b); return !!(p.element || b.enemy.element); }
   return true;
 }
-function playSide(i) {
-  const b = state.battle; if (!b || b.phase !== 'fight') return;
-  const card = b.sideHand[i]; if (!card) return;
-  const def = SIDE_CARDS[card.id];
-  if (b.aether < SIDE_DRAW_COST) return toast('Playing a side card costs ' + SIDE_DRAW_COST + ' Aether.');
-  if (def.cost > b.energy) return toast('Not enough energy.');
+// Round 67: the side deck is always open. Every side card left this
+// encounter can be played straight from it, paid in Aether only:
+// SIDE_DRAW_COST (4) plus the card's old energy cost, so never below 4.
+function sideAetherCost(id) { return SIDE_DRAW_COST + (SIDE_CARDS[id]?.cost || 0); }
+function sideAvailable(b) { return [...(b.sideHand || []), ...(b.sideChoice || []), ...(b.sideDraw || [])]; }
+function playSideCard(uid) {
+  const b = state.battle; if (!b || b.phase !== 'fight') return; aetherInit(b);
+  const card = sideAvailable(b).find(c => c.uid === uid); if (!card) return;
+  const cost = sideAetherCost(card.id);
+  if (b.aether < cost) return toast(SIDE_CARDS[card.id].name + ' costs ' + cost + ' Aether. You have ' + b.aether + '.');
   if (!sideUsable(b, card.id)) return toast('This enemy has no element to ground.');
-  b.energy -= def.cost; b.aether -= SIDE_DRAW_COST; b.sideHand.splice(i, 1);
+  b.aether -= cost;
+  for (const k of ['sideHand', 'sideChoice', 'sideDraw']) if (Array.isArray(b[k])) b[k] = b[k].filter(c => c.uid !== uid);
+  if (b.sideChoice && !b.sideChoice.length) b.sideChoice = null;
+  b.logs.push('Side deck: ' + SIDE_CARDS[card.id].name + ' (−' + cost + ' Aether).');
   sideEffect(b, card.id);
   if (!b.enemy.hp) winBattle();
   save(); renderBattle();
 }
+function playSide(i) { const b = state.battle; const card = b && b.sideHand && b.sideHand[i]; if (card) playSideCard(card.uid); }
 function purgeStatic(b) {
   let n = 0;
   for (const k of ['hand', 'draw', 'discard']) { const before = b[k].length; b[k] = b[k].filter(c => !isJunk(c)); n += before - b[k].length; }
@@ -403,8 +411,8 @@ validateImport = function (s) {
 function sideCardElement(card, onClick, disabled = false) {
   const def = SIDE_CARDS[card.id], wrap = document.createElement('div'); wrap.className = 'card-wrap side-wrap';
   const btn = document.createElement('button'); btn.className = 'card side-card'; btn.disabled = disabled; btn.onclick = onClick;
-  btn.innerHTML = '<span class="ownership">✦ SIDE DECK · ' + def.kind.toUpperCase() + '</span><span class="cost">' + def.cost + '</span><span class="aether-cost" title="Playing it costs ' + SIDE_DRAW_COST + ' Aether">' + SIDE_DRAW_COST + ' ✦</span><span class="card-name">' + def.name + '</span><span class="art"><img src="' + sideArtPath(card.id) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"><span class="art-glyph">' + def.icon + '</span></span><span class="rules"><span class="kind-badge">' + def.icon + '</span><span class="type">' + def.kind.toUpperCase() + '</span>' + def.text() + '</span>';
-  btn.setAttribute('aria-label', 'Side card ' + def.name + ', ' + def.cost + ' energy and ' + SIDE_DRAW_COST + ' Aether. ' + def.text());
+  btn.innerHTML = '<span class="ownership">✦ SIDE DECK · ' + def.kind.toUpperCase() + '</span><span class="cost aether" title="Costs ' + sideAetherCost(card.id) + ' Aether">' + sideAetherCost(card.id) + '✦</span><span class="card-name">' + def.name + '</span><span class="art"><img src="' + sideArtPath(card.id) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"><span class="art-glyph">' + def.icon + '</span></span><span class="rules"><span class="kind-badge">' + def.icon + '</span><span class="type">' + def.kind.toUpperCase() + '</span>' + def.text() + '</span>';
+  btn.setAttribute('aria-label', 'Side card ' + def.name + ', ' + sideAetherCost(card.id) + ' Aether. ' + def.text());
   wrap.append(btn); return wrap;
 }
 function addHTML(el, html) { if (!html) return; const span = document.createElement('span'); span.className = 'aether-extra'; span.innerHTML = html; el.append(span); }
@@ -470,16 +478,14 @@ renderBattle = function () {
   // Aether panel and side hand.
   const panel = document.createElement('div'); panel.className = 'aether-panel';
   const energyBonus = Math.max(0, b.energy), pend = pendingAether(b) + energyBonus, pips = Array.from({ length: AETHER_MAX }, (_, k) => '<i class="' + (k < b.aether ? 'on' : k < Math.min(AETHER_MAX, b.aether + pend) ? 'pending' : '') + '"></i>').join('');
-  const canDraw = !b.sideChoice && b.sideHand.length < SIDE_HAND_MAX && b.sideDraw.length > 0;
-  panel.innerHTML = '<div class="aether-row"><b>✦ Aether ' + b.aether + '/' + AETHER_MAX + '</b><span class="aether-pips" aria-hidden="true">' + pips + '</span>' + (pend ? '<small>+' + Math.min(pend, AETHER_MAX - b.aether) + ' at end of turn' + (energyBonus ? ' (incl. +' + energyBonus + ' from unspent energy)' : '') + '</small>' : '<small>Pitch cards or end the turn with energy left to gain Aether</small>') + '<button id="sideDraw" class="ability small"' + (canDraw ? '' : ' disabled') + '>Draw side card · free <span class="muted">(' + b.sideDraw.length + ' left)</span></button><button id="sideView" class="ability small side-view-toggle' + (b.sideView ? ' selected' : '') + '">' + (b.sideView ? '▴ Hide side deck' : '▾ View side deck') + '</button></div>' + (b.sideView ? '<div class="side-view"><p class="side-view-note">' + (b.sideDraw.length ? b.sideDraw.length + ' card' + (b.sideDraw.length > 1 ? 's' : '') + ' left in your side deck (draw order stays hidden). ' + (b.aether >= SIDE_DRAW_COST ? 'You have enough Aether to play a side card.' : 'Playing a side card costs ' + SIDE_DRAW_COST + ' Aether — you have ' + b.aether + '.') : 'Your side deck is empty for this encounter.') + '</p><div class="cards side-view-cards" id="sideViewCards"></div></div>' : '') + (b.sideChoice ? '<p class="side-choice-title">Choose one side card (free). The other goes to the bottom. <button id="sidePutBack" class="ability small">Put both back</button></p><div class="cards side-choice" id="sideChoice"></div>' : '') + (b.sideHand.length ? '<div class="cards side-hand" id="sideHand"></div>' : '');
+  const avail = sideAvailable(b).slice().sort((x, y) => sideAetherCost(x.id) - sideAetherCost(y.id) || SIDE_CARDS[x.id].name.localeCompare(SIDE_CARDS[y.id].name));
+  panel.innerHTML = '<div class="aether-row"><b>✦ Aether ' + b.aether + '/' + AETHER_MAX + '</b><span class="aether-pips" aria-hidden="true">' + pips + '</span>' + (pend ? '<small>+' + Math.min(pend, AETHER_MAX - b.aether) + ' at end of turn' + (energyBonus ? ' (incl. +' + energyBonus + ' from unspent energy)' : '') + '</small>' : '<small>Pitch cards or end the turn with energy left to gain Aether</small>') + '<button id="sideView" class="ability small side-view-toggle' + (b.sideCollapsed ? '' : ' selected') + '">' + (b.sideCollapsed ? '▾ Show side deck (' + avail.length + ')' : '▴ Hide side deck') + '</button></div>'
+    + (b.sideCollapsed ? '' : '<div class="side-view"><p class="side-view-note">' + (avail.length ? 'Side deck · ' + avail.length + ' card' + (avail.length > 1 ? 's' : '') + ' left this encounter. Play any of them for Aether (4 minimum); each can be used once per fight.' : 'Your side deck is used up for this encounter.') + '</p><div class="cards side-hand" id="sideHand"></div></div>');
   const handTitle = m.querySelector('.hand-title');
   if (handTitle && handTitle.before) handTitle.before(panel); else m.append(panel);
-  $('sideDraw').onclick = drawSide;
-  $('sideView').onclick = () => { b.sideView = !b.sideView; renderBattle(); };
-  if (b.sideView) { const host = $('sideViewCards'); if (host && host.append) [...b.sideDraw].sort((x, y) => SIDE_CARDS[x.id].name.localeCompare(SIDE_CARDS[y.id].name)).forEach(card => { const el = sideCardElement(card, () => {}, true); el.classList.add('view-only'); host.append(el); }); }
-  if ($('sidePutBack')) $('sidePutBack').onclick = putBackSide;
-  if (b.sideChoice) b.sideChoice.forEach((card, i) => $('sideChoice').append(sideCardElement(card, () => chooseSide(i))));
-  if (b.sideHand.length) b.sideHand.forEach((card, i) => $('sideHand').append(sideCardElement(card, () => playSide(i), SIDE_CARDS[card.id].cost > b.energy || b.aether < SIDE_DRAW_COST || !sideUsable(b, card.id))));
+  $('sideView').onclick = () => { b.sideCollapsed = !b.sideCollapsed; renderBattle(); };
+  const host = $('sideHand');
+  if (host && host.append) avail.forEach(card => host.append(sideCardElement(card, () => playSideCard(card.uid), b.aether < sideAetherCost(card.id) || !sideUsable(b, card.id))));
 };
 
 // Deck Workshop: the side deck panel.
@@ -488,7 +494,7 @@ showDeck = function () {
   showDeckBeforeAether(); ensureSide();
   const host = document.querySelector('#menuModal .workshop'); if (!host) return;
   const panel = document.createElement('div'); panel.className = 'panel side-workshop';
-  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + SIDE_DECK_MAX + '</b><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Looking at the top 2 side cards and taking one is free; playing a side card costs ' + SIDE_DRAW_COST + ' Aether plus its energy. Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
+  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + SIDE_DECK_MAX + '</b><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
   host.append(panel);
   const list = $('sidePoolCards');
   [...state.side.pool].sort((a, c) => SIDE_CARDS[a.id].tier - SIDE_CARDS[c.id].tier || a.id.localeCompare(c.id)).forEach(card => {

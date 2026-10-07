@@ -63,3 +63,6 @@
 /* Round 65: side cards show their Aether cost. */
 .side-card .aether-cost{position:absolute;top:66px;right:10px;z-index:3;padding:2px 6px;border-radius:999px;background:#2a1c5c;border:1px solid #b9a2ff;color:#e9e0ff;font:800 11px/1.2 system-ui;box-shadow:0 0 8px #8f6bff88}
 .side-choice-title .ability{margin-left:8px}
+
+/* Round 67: side cards are priced in Aether. */
+.side-card .cost.aether{background:radial-gradient(circle at 35% 30%,#e9e0ff,#8f6bff 55%,#3b228f);color:#fff;font-size:12px;min-width:30px;border-radius:999px;box-shadow:0 0 8px #8f6bffaa}

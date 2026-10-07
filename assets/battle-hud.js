@@ -40,13 +40,13 @@ renderBattle = function () {
   const weaken = m.querySelector('#weaken');
   if (weaken && !weaken.dataset.hud) {
     weaken.dataset.hud = '1'; weaken.className = 'weaken-hud';
-    weaken.title = 'Once per encounter: the enemy\'s attack drops by ' + weakenAmount() + ' for the rest of the fight.';
-    weaken.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKEN</b><small>Enemy attack −' + weakenAmount() + ' · once per fight</small></span>';
+    weaken.title = 'Once per encounter: the enemy\'s next attack deals ' + weakenAmount() + ' less damage.';
+    weaken.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKEN</b><small>Next enemy attack −' + weakenAmount() + ' · once per fight</small></span>';
   }
   // Round 64: an always-visible debuff strip on both sides, listing every
   // active debuff (or "None") plus the damage over time it deals each turn.
   const weakened = [...m.querySelectorAll('.compact-side.you .soul-legend')].find(x => /Weaken/.test(x.textContent || ''));
-  if (weakened && b.enemyDebuff) { weakened.className = 'weaken-hud spent'; weakened.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKENED</b><small>Enemy attack −' + b.enemyDebuff + '</small></span>'; }
+  if (weakened) { weakened.className = 'weaken-hud spent'; weakened.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text">' + (b.enemyDebuff ? '<b>WEAKENED</b><small>Next enemy attack −' + b.enemyDebuff + '</small>' : '<b>WEAKEN USED</b><small>Once per fight</small>') + '</span>'; }
   const t = s => s === 1 ? '1 turn' : s + ' turns';
   const youDebuffs = [
     b.bleed && ['🩸', 'Bleed ' + b.bleed, 'Lose ' + b.bleed + ' HP at the end of your turn; falls by 1 each turn.'],
@@ -61,7 +61,7 @@ renderBattle = function () {
   const foeDebuffs = [
     b.poison && ['☣', 'Poison ' + b.poison, 'Takes ' + b.poison + ' damage at the end of each turn.'],
     b.burnTurns > 0 && b.burn && ['🔥', 'Burn ' + b.burn + ' · ' + t(b.burnTurns), 'Takes ' + b.burn + ' damage at the end of each turn for ' + t(b.burnTurns) + '.'],
-    b.enemyDebuff && ['▼', 'Weakened −' + b.enemyDebuff, 'Attack lowered by ' + b.enemyDebuff + ' for the rest of the fight.'],
+    b.enemyDebuff && ['▼', 'Weakened −' + b.enemyDebuff, 'Its next attack deals ' + b.enemyDebuff + ' less damage.'],
     b.bind && ['🌿', 'Rootbind −' + b.bind, 'Its next attack deals ' + b.bind + ' less damage.'],
     b.freeze > 0 && ['❄', 'Frozen · ' + t(b.freeze), 'Skips its next ' + (b.freeze === 1 ? 'action' : b.freeze + ' actions') + '.'],
     b.silenceTurn === b.turn && ['🔇', 'Silenced', 'Its next action is cancelled.']
@@ -80,4 +80,17 @@ renderBattle = function () {
   // Armor: a steel shield; Block: a glowing crystal.
   m.querySelectorAll('.compact-tags .armor-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'armor'); t.innerHTML = hudShield(n, t.title || ''); });
   m.querySelectorAll('.compact-tags .block-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'block'); t.innerHTML = hudBlock(n); });
+};
+
+// Round 66: Weaken is a one-shot. It lowers only the enemy's next attack
+// (by 3x the old amount) and is then used up.
+const endTurnBeforeWeaken = endTurn;
+endTurn = function () {
+  const b = state && state.battle;
+  if (!b || b.phase !== 'fight' || !b.enemyDebuff) return endTurnBeforeWeaken();
+  let attacks = false;
+  try { const p = enemyPlan(b); attacks = !(b.freeze > 0) && !['charge', 'guard', 'silenced'].includes(p.kind) && p.damage > 0; } catch (e) {}
+  const turn = b.turn;
+  endTurnBeforeWeaken();
+  if (attacks && state.battle === b && b.turn > turn && b.enemyDebuff) { b.enemyDebuff = 0; b.logs.push('Weaken wears off.'); if (b.phase === 'fight') { save(); renderBattle(); } }
 };

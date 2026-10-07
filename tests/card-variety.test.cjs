@@ -63,7 +63,7 @@ assert.equal(enemyStats('bloomTyrant', { region: 'elaris', level: 10, boss: true
   assert.equal(g.find(x => x.key === 'cleave|0|0').cards.length, 2, 'two identical Impermanent copies form one ×2 stack');
   assert.equal(g.find(x => x.key === 'cleave|0|0').cards[0].uses, 40, 'the most-used copy represents the stack'); }
 // Signal Amplifier and Deep Interference: +1 per rank.
-for (let r = 0; r <= 5; r++) { state.talents = { amplifier: r, jammer: r }; assert.equal(boostAmount(), 1 + r, 'Boost +1 per Signal Amplifier rank'); assert.equal(weakenAmount(), 1 + r, 'Weaken +1 per Deep Interference rank'); }
+for (let r = 0; r <= 5; r++) { state.talents = { amplifier: r, jammer: r }; assert.equal(boostAmount(), 1 + r, 'Boost +1 per Signal Amplifier rank'); assert.equal(weakenAmount(), 3 * (1 + r), 'Weaken is tripled: 3 per Deep Interference rank'); }
 state.talents = {};
 // City regulars eased.
 assert.equal(balanceFor('normalHp', 'city'), .95); assert.equal(balanceFor('normalHp', 'elaris'), 1.1);

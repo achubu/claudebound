@@ -27,10 +27,10 @@ assert(leftover > 1); assert.equal(b.aether, Math.min(AETHER_MAX, AETHER_START +
 assert(pitchedUids.every(u => b.exhaust.some(c => c.uid === u)), 'pitched cards burn away for the encounter');
 assert(pitchedUids.every(u => !b.discard.some(c => c.uid === u) && !b.draw.some(c => c.uid === u)));
 // Choosing a side card.
-const top2 = b.sideDraw.slice(0, 2).map(c => c.id);
-const aBefore = b.aether; drawSide(); assert.equal(b.aether, aBefore, 'looking at the side deck is free'); assert.deepEqual(b.sideChoice.map(c => c.id), top2, 'reveals the top two');
-chooseSide(1); assert.equal(b.sideHand[0].id, top2[1]); assert.equal(b.sideDraw.at(-1).id, top2[0], 'the other goes to the bottom'); assert.equal(b.sideChoice, null);
-b.aether = 0; b.sideHand = []; const top = b.sideDraw.slice(0, 2).map(c => c.id); drawSide(); assert(b.sideChoice, 'drawing needs no Aether'); putBackSide(); assert.equal(b.sideChoice, null); assert.deepEqual(b.sideDraw.slice(0, 2).map(c => c.id), top, 'putting both back keeps the order'); assert.equal(b.aether, 0);
+// Round 67: the side deck is always open; side cards cost Aether only (4 minimum).
+for (const id of Object.keys(SIDE_CARDS)) assert(sideAetherCost(id) >= 4 && sideAetherCost(id) === 4 + SIDE_CARDS[id].cost, id + ' costs at least 4 Aether');
+{ const all = sideAvailable(b).length; assert.equal(all, b.sideDraw.length, 'every side card is available'); const c = b.sideDraw[1]; b.aether = sideAetherCost(c.id) - 1; playSideCard(c.uid); assert.equal(sideAvailable(b).length, all, 'not enough Aether: nothing happens');
+  if (sideUsable(b, c.id)) { b.aether = sideAetherCost(c.id); const en = b.energy; playSideCard(c.uid); assert.equal(sideAvailable(b).length, all - 1, 'played straight from the side deck, once per fight'); assert.equal(b.energy, en + (c.id === 'overflow' ? 1 : 0), 'no energy cost'); } }
 // Aether cap and the minimum cycle.
 b.aether = 7; b.hand = [make('cleave'), make('cleave')]; b.draw = [make('guard'), make('guard'), make('guard')]; b.discard = [];
 togglePitch(b.hand[0].uid); assert.equal(b.pitch.length, 1);
@@ -106,9 +106,9 @@ assert.equal(hp - state.hp, taken, 'Barrage: 3 hits, Armor and Block each time')
 state.talents = {};
 
 // ---------- Every side card ----------
-const give = (b, id) => { b.sideHand.push({ uid: 'sx' + id, id }); b.aether = (b.aether || 0) + SIDE_DRAW_COST; return b.sideHand.length - 1; };
+const give = (b, id) => { b.sideHand.push({ uid: 'sx' + id, id }); b.aether = (b.aether || 0) + sideAetherCost(id); return b.sideHand.length - 1; };
 // Round 65: playing a side card is what costs Aether.
-{ const b0 = setup('thornling', []); const i0 = give(b0, 'overflow'); b0.aether = SIDE_DRAW_COST - 1; playSide(i0); assert.equal(b0.sideHand.length, 1, 'playing a side card needs ' + SIDE_DRAW_COST + ' Aether'); b0.aether = SIDE_DRAW_COST; playSide(i0); assert.equal(b0.sideHand.length, 0); assert.equal(b0.aether, 1, 'and spends it (Overflow then gives +1)'); }
+{ const b0 = setup('thornling', []); const i0 = give(b0, 'overflow'); b0.aether = sideAetherCost('overflow') - 1; playSide(i0); assert.equal(b0.sideHand.length, 1, 'playing a side card needs ' + SIDE_DRAW_COST + ' Aether'); b0.aether = sideAetherCost('overflow'); playSide(i0); assert.equal(b0.sideHand.length, 0); assert.equal(b0.aether, 1, 'and spends it (Overflow then gives +1)'); }
 b = setup('thornling', []); b.bleed = 3; b.frail = 2; b.playerPoison = 2; b.playerBurn = 2; b.drained = true; b.exposed = 2; b.shackledNow = true; b.energy = 2; b.draw.push(makeStatic()); b.discard.push(makeStatic());
 playSide(give(b, 'purify')); assert.equal(b.bleed + b.frail + b.playerPoison + b.playerBurn + b.exposed, 0, 'Purifying Light cleanses'); assert.equal(b.energy, 3, 'and gives back Shackle\\'s energy');
 assert.equal([...b.draw, ...b.discard].filter(isJunk).length, 0, 'and purges Static');
@@ -116,7 +116,7 @@ b = setup('thornling', []); b.empower = 4; b.enemy.attack += 4; b.enemy.barrier 
 playSide(give(b, 'dispel')); assert.equal(b.enemy.attack, 10); assert.equal(b.enemy.barrier, 0); assert.equal(e - b.enemy.hp, dispelDamage(), 'Dispel Lance strips buffs and deals piercing damage');
 b = setup('burrower', [], { turn: 4 }); playSide(give(b, 'aegis')); assert.equal(b.block, aegisBlock()); hp = state.hp; const hit = enemyPlan(b).damage; endTurn();
 assert.equal(hp - state.hp, Math.max(0, hit - aegisBlock()), 'Aegis Ward Block holds against Rend');
-b = setup('vineguard', [], { turn: 2 }); b.energy = 1; playSide(give(b, 'anchor')); assert.equal(b.energy, 0, 'Null Anchor costs 1');
+b = setup('vineguard', [], { turn: 2 }); b.energy = 1; const a0 = b.aether; playSide(give(b, 'anchor')); assert.equal(b.energy, 1, 'side cards cost no energy'); assert.equal(b.aether, a0, 'Null Anchor costs 5 Aether');
 assert.equal(enemyPlan(b).anchored, 'barrier'); endTurn(); assert.equal(b.enemy.barrier || 0, 0, 'Null Anchor prevents the affliction'); assert.equal(b.anchor, false, 'and is used up');
 b = setup('thornling', []); state.hp = 50; b.bleed = 4; playSide(give(b, 'restore')); assert.equal(state.hp, 50 + restoreHeal()); assert.equal(b.bleed, 0);
 b = setup('blightAntler', [], { turn: 3, enemy: { element: 'earth' } }); assert.equal(enemyPlan(b).kind, 'elemental');
@@ -126,8 +126,8 @@ hp = state.hp; e = b.enemy.hp; endTurn(); assert.equal(hp - state.hp, Math.ceil(
 b = setup('burrower', [], { turn: 1 }); playSide(give(b, 'phase'));
 assert.equal(enemyPlan(b, 1).damage, 0, 'Phase Veil negates the next damaging action'); hp = state.hp; endTurn(); assert.equal(hp - state.hp, 0); assert.equal(b.veil, false);
 b = setup('thornling', []); const handN = b.hand.length; playSide(give(b, 'overflow')); assert.equal(b.energy, 4); assert.equal(b.hand.length, handN + 1); assert.equal(b.aether, AETHER_START + 1);
-b = setup('thornling', []); playSide(give(b, 'stasis')); assert.equal(b.energy, 1, 'Stasis Field costs 2'); hp = state.hp; endTurn(); assert.equal(hp - state.hp, 0, 'Stasis Field: the enemy skips its action');
-b = setup('thornling', []); b.energy = 0; give(b, 'anchor'); playSide(0); assert.equal(b.sideHand.length, 1, 'side cards still need energy');
+b = setup('thornling', []); playSide(give(b, 'stasis')); assert.equal(b.energy, 3, 'Stasis Field costs no energy'); assert.equal(sideAetherCost('stasis'), 6, 'Stasis Field costs 6 Aether'); hp = state.hp; endTurn(); assert.equal(hp - state.hp, 0, 'Stasis Field: the enemy skips its action');
+b = setup('thornling', []); b.energy = 0; give(b, 'anchor'); b.aether = 4; playSide(0); assert.equal(b.sideHand.length, 1, 'Null Anchor needs 5 Aether');
 
 // ---------- Rewards, workshop rules, saves ----------
 newGame(); b = setup('thornling', []); b.phase = 'reward'; b.special = [];

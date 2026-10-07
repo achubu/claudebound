@@ -2168,3 +2168,16 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 - Playing a side card is what costs Aether: 4, plus the card's own energy. Side cards show a "4 ✦" badge and are greyed out until you can afford them.
 - Unspent energy converts 1:1. Each energy left when you end your turn gives 1 Aether, up to the 8 cap. The Aether preview shows the exact amount.
 - Updated the Deck Workshop text, the compendium, the tests, and the simulation bot. Bosses stay in target: Thorn Warden 31%, Bloom Tyrant 30%, Tempest Colossus 34% (SEED=11, 30 runs).
+
+## Round 66: Weaken is a one-shot, tripled
+
+- Weaken (once per encounter) now lowers only the enemy's **next attack**, then wears off. It used to last the rest of the fight.
+- Its value is tripled: 3 base, +3 per Deep Interference rank, up to 18. Charge turns, guard turns, Silenced turns and frozen turns don't use it up.
+- Updated the button, the "WEAKENED" plate (it shows "WEAKEN USED" once spent), the debuff strip, the talent descriptions and the compendium. Balance was not re-simulated, as requested.
+
+## Round 67: the side deck is always open, 4 Aether minimum
+
+- There's no more draw, choose or put-back step. In every fight, every side card in your side deck is shown and can be played directly, once per encounter.
+- Side cards cost Aether only, never energy: 4 plus the card's listed cost, so the minimum is 4. Purifying Light, Dispel Lance, Aegis Ward, Verdant Restore, Grounding Rod and Aether Overflow cost 4. Null Anchor, Mirror Sigil and Phase Veil cost 5. Stasis Field costs 6.
+- The cost badge on each side card shows its Aether price. Cards you can't afford are greyed out. The panel can be collapsed with "Hide side deck".
+- Updated the Deck Workshop text, the compendium (side cards list their Aether cost), the tests and the simulation bot. Balance was not re-simulated.
