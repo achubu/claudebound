@@ -2148,3 +2148,8 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 ## Round 62 — Damage-over-time per turn
 
 - Both combatants show a "☠ −N HP / turn" badge whenever damage-over-time is active, with the breakdown underneath: on you, Bleed + Burn + Poison (red); on the enemy, Poison + Burn (green). The total matches what actually ticks at the end of the turn (checked in the browser: −5 on you, −7 on the enemy).
+
+## Round 63 — Signal Amplifier and Deep Interference: +1 per rank
+
+- Signal Amplifier now adds +1 Power Boost per rank (Boost = 1 + rank, up to +6 at rank 5; was +1 at ranks 1/3/5, max +4). Deep Interference adds +1 Weaken per rank (Weaken = 1 + rank, up to −6 enemy attack; was max −4). Talent descriptions updated.
+- Simulated effect (20 fights × 16 builds × 2 styles): bosses and mini-bosses about 3–13 points easier (e.g. Thorn Warden 27→35%, Crown Sentinel 38→51%, Arc Sentinel 41→54%, Tempest Colossus 32→41%); regular fights a little easier too. Boss health not retuned.
