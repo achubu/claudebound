@@ -22,22 +22,22 @@ assert.equal(b.aether, AETHER_START, 'encounters start with 2 Aether'); assert.e
 assert.equal(pitchValue(b.hand[0]), 2, 'a 1-cost card pitches for 2'); assert.equal(pitchValue(b.hand[2]), 3, 'a 2-cost card for 3'); assert.equal(pitchValue(b.hand[3]), 1, 'a 0-cost card for 1');
 togglePitch(b.hand[0].uid); togglePitch(b.hand[1].uid);
 assert.equal(pendingAether(b), 4);
-const pitchedUids = b.pitch.slice(); endTurn();
-assert.equal(b.aether, AETHER_START + 4 + 1, 'two pitched 1-cost cards give 4 Aether, and unspent energy gives 1 more');
+const pitchedUids = b.pitch.slice(), leftover = b.energy; endTurn();
+assert(leftover > 1); assert.equal(b.aether, Math.min(AETHER_MAX, AETHER_START + 4 + leftover), 'two pitched 1-cost cards give 4 Aether, and each unspent energy gives 1 more');
 assert(pitchedUids.every(u => b.exhaust.some(c => c.uid === u)), 'pitched cards burn away for the encounter');
 assert(pitchedUids.every(u => !b.discard.some(c => c.uid === u) && !b.draw.some(c => c.uid === u)));
 // Choosing a side card.
 const top2 = b.sideDraw.slice(0, 2).map(c => c.id);
-drawSide(); assert.equal(b.aether, AETHER_START + 1, 'drawing costs 4 Aether'); assert.deepEqual(b.sideChoice.map(c => c.id), top2, 'reveals the top two');
+const aBefore = b.aether; drawSide(); assert.equal(b.aether, aBefore, 'looking at the side deck is free'); assert.deepEqual(b.sideChoice.map(c => c.id), top2, 'reveals the top two');
 chooseSide(1); assert.equal(b.sideHand[0].id, top2[1]); assert.equal(b.sideDraw.at(-1).id, top2[0], 'the other goes to the bottom'); assert.equal(b.sideChoice, null);
-b.aether = 3; drawSide(); assert.equal(b.sideChoice, null, 'cannot draw without 4 Aether');
+b.aether = 0; b.sideHand = []; const top = b.sideDraw.slice(0, 2).map(c => c.id); drawSide(); assert(b.sideChoice, 'drawing needs no Aether'); putBackSide(); assert.equal(b.sideChoice, null); assert.deepEqual(b.sideDraw.slice(0, 2).map(c => c.id), top, 'putting both back keeps the order'); assert.equal(b.aether, 0);
 // Aether cap and the minimum cycle.
 b.aether = 7; b.hand = [make('cleave'), make('cleave')]; b.draw = [make('guard'), make('guard'), make('guard')]; b.discard = [];
 togglePitch(b.hand[0].uid); assert.equal(b.pitch.length, 1);
 togglePitch(b.hand[1].uid); assert.equal(b.pitch.length, 1, 'cannot pitch below ' + MIN_CYCLE + ' cards in the encounter');
 b.savedUid = b.hand[1].uid; assert(!canPitch(b, b.hand[1]), 'a retained card cannot be pitched'); b.savedUid = null;
 ENEMY_AFFLICTIONS.thornling = []; endTurn(); assert.equal(b.aether, AETHER_MAX, 'Aether caps at ' + AETHER_MAX);
-b = setup('thornling', [], { energy: 2 }); ENEMY_AFFLICTIONS.thornling = []; endTurn(); assert.equal(b.aether, AETHER_START + 1, 'unspent energy gives at most 1 Aether');
+b = setup('thornling', [], { energy: 2 }); ENEMY_AFFLICTIONS.thornling = []; endTurn(); assert.equal(b.aether, AETHER_START + 2, 'unspent energy gives 1 Aether per point');
 b = setup('thornling', [], { energy: 0 }); endTurn(); assert.equal(b.aether, AETHER_START, 'no unspent energy, no Aether');
 ENEMY_AFFLICTIONS.thornling = ['frail'];
 
@@ -106,7 +106,9 @@ assert.equal(hp - state.hp, taken, 'Barrage: 3 hits, Armor and Block each time')
 state.talents = {};
 
 // ---------- Every side card ----------
-const give = (b, id) => { b.sideHand.push({ uid: 'sx' + id, id }); return b.sideHand.length - 1; };
+const give = (b, id) => { b.sideHand.push({ uid: 'sx' + id, id }); b.aether = (b.aether || 0) + SIDE_DRAW_COST; return b.sideHand.length - 1; };
+// Round 65: playing a side card is what costs Aether.
+{ const b0 = setup('thornling', []); const i0 = give(b0, 'overflow'); b0.aether = SIDE_DRAW_COST - 1; playSide(i0); assert.equal(b0.sideHand.length, 1, 'playing a side card needs ' + SIDE_DRAW_COST + ' Aether'); b0.aether = SIDE_DRAW_COST; playSide(i0); assert.equal(b0.sideHand.length, 0); assert.equal(b0.aether, 1, 'and spends it (Overflow then gives +1)'); }
 b = setup('thornling', []); b.bleed = 3; b.frail = 2; b.playerPoison = 2; b.playerBurn = 2; b.drained = true; b.exposed = 2; b.shackledNow = true; b.energy = 2; b.draw.push(makeStatic()); b.discard.push(makeStatic());
 playSide(give(b, 'purify')); assert.equal(b.bleed + b.frail + b.playerPoison + b.playerBurn + b.exposed, 0, 'Purifying Light cleanses'); assert.equal(b.energy, 3, 'and gives back Shackle\\'s energy');
 assert.equal([...b.draw, ...b.discard].filter(isJunk).length, 0, 'and purges Static');

@@ -546,9 +546,7 @@ $('continueReward').onclick=finishBattle;return}baseRenderBattle();if(b.phase!==
 // enemies are tougher" tip, which doesn't need repeating every battle.
 const statusBits=[];
 if(b.enemy.element)statusBits.push('Element: <b>'+b.enemy.element+'</b> · reserve Prismatic Counter');
-if(b.freeze)statusBits.push('Freeze '+b.freeze);
-if(b.burnTurns)statusBits.push('Burn '+b.burnTurns+' turns');
-if(b.poison)statusBits.push('Poison '+b.poison);
+// Round 64: Freeze, Burn and Poison now live in the always-visible debuff strips.
 if(b.counter)statusBits.push('Armed: '+b.counter);
 const talentButtons=(hasTalent('doublePower')?'<button id="overdrive" class="ability small" '+(b.doubleUsed?'disabled':'')+'>'+ (b.doubleUsed?'Overdrive spent':b.doubleArmed?'✓ Overdrive armed':'Overdrive ×2')+'</button>':'')+(hasTalent('echo')?'<button id="echoCard" class="ability small" '+(b.echoUsed?'disabled':'')+'>'+(b.echoUsed?'Echo spent':b.echoArmed?'✓ Echo armed':'Echo · play twice')+'</button>':'')+(hasTalent('overload')?'<button id="overloadCard" class="ability small" '+(b.overloadUsed?'disabled':'')+'>'+(b.overloadUsed?'Overload spent':b.overloadArmed?'✓ Overload armed':'Overload · free card')+'</button>':'');
 if(statusBits.length||talentButtons)tools.innerHTML=(statusBits.length?'<p>'+statusBits.join(' · ')+'</p>':'')+talentButtons;

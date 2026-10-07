@@ -2153,3 +2153,18 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 
 - Signal Amplifier now adds +1 Power Boost per rank (Boost = 1 + rank, up to +6 at rank 5; was +1 at ranks 1/3/5, max +4). Deep Interference adds +1 Weaken per rank (Weaken = 1 + rank, up to −6 enemy attack; was max −4). Talent descriptions updated.
 - Simulated effect (20 fights × 16 builds × 2 styles): bosses and mini-bosses about 3–13 points easier (e.g. Thorn Warden 27→35%, Crown Sentinel 38→51%, Arc Sentinel 41→54%, Tempest Colossus 32→41%); regular fights a little easier too. Boss health not retuned.
+
+## Round 64: compact burgundy Weaken, always-visible debuffs
+
+- The Weaken button (and the WEAKENED plate) is half its old size and burgundy instead of purple.
+- Both combatants have a **Debuffs** strip that is always visible and shows "None" when nothing is active. It lists every active debuff with a tooltip, plus the total HP lost per turn.
+  - You: Bleed, Poison, Burn (turns left), Frail, Shackled, Drained, Exposed, Fogged.
+  - Enemy: Poison, Burn (amount and turns), Weakened, Rootbind, Frozen, Silenced.
+- The scattered duplicates are gone: the top status line, the intent status text and the loose debuff tags.
+
+## Round 65: Aether is only spent when you play a side card
+
+- Drawing from the side deck is free: look at the top 2 side cards, then take one or put both back on top. Viewing the side deck, opening Character, and drawing never cost Aether.
+- Playing a side card is what costs Aether: 4, plus the card's own energy. Side cards show a "4 ✦" badge and are greyed out until you can afford them.
+- Unspent energy converts 1:1. Each energy left when you end your turn gives 1 Aether, up to the 8 cap. The Aether preview shows the exact amount.
+- Updated the Deck Workshop text, the compendium, the tests, and the simulation bot. Bosses stay in target: Thorn Warden 31%, Bloom Tyrant 30%, Tempest Colossus 34% (SEED=11, 30 runs).

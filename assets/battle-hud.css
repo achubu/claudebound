@@ -72,24 +72,31 @@
   #battleModal.hud-v2 .compact-head b{white-space:normal}
 }
 
-/* Round 57: Weaken — a big glowing hex button. */
-#battleModal .weaken-hud{display:inline-flex;align-items:center;gap:.55em;margin-top:.35em;padding:.5em 1.1em .5em .6em;border:2px solid #ff7ad1;border-radius:14px;background:radial-gradient(120% 140% at 0% 0%,#ff7ad155,transparent 55%),linear-gradient(135deg,#4b1255,#26103d 60%,#170a26);color:#ffe8fb;font:inherit;cursor:pointer;box-shadow:0 0 0 1px #ff7ad133,0 0 18px #e04bd066,inset 0 0 12px #ff7ad122;animation:wkPulse 2.2s ease-in-out infinite;transition:transform .12s ease,box-shadow .12s ease;text-align:left}
-#battleModal .weaken-hud:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 0 1px #ff9ce0,0 0 28px #ff5fd6aa,inset 0 0 14px #ff9ce033}
+/* Round 57, resized in Round 64: Weaken is a compact burgundy button. */
+#battleModal .weaken-hud{display:inline-flex;align-items:center;gap:.3em;margin-top:.2em;padding:.25em .6em .25em .3em;border:1px solid #c0485f;border-radius:8px;background:radial-gradient(120% 140% at 0% 0%,#c0485f44,transparent 55%),linear-gradient(135deg,#5c1324,#3a0b17 60%,#22060d);color:#ffe3e8;font:inherit;font-size:.6em;cursor:pointer;box-shadow:0 0 0 1px #c0485f33,0 0 9px #a0203c66;animation:wkPulse 2.2s ease-in-out infinite;transition:transform .12s ease,box-shadow .12s ease;text-align:left}
+#battleModal .weaken-hud:hover{transform:translateY(-1px) scale(1.04);box-shadow:0 0 0 1px #e0687e,0 0 14px #c0304caa}
 #battleModal .weaken-hud:active{transform:scale(.97)}
-#battleModal .weaken-hud .wk-icon{display:grid;place-items:center;width:2.2em;height:2.2em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffd1f2,#c23aa8 60%,#5a0f52);box-shadow:0 0 10px #ff6fd8}
-#battleModal .weaken-hud .wk-icon svg{width:1.4em;height:1.4em}
+#battleModal .weaken-hud .wk-icon{display:grid;place-items:center;width:1.9em;height:1.9em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffc9d2,#a3283f 60%,#4a0a18);box-shadow:0 0 6px #d0405a}
+#battleModal .weaken-hud .wk-icon svg{width:1.2em;height:1.2em}
 #battleModal .weaken-hud .wk-icon .blade{fill:#fff}
-#battleModal .weaken-hud .wk-icon .crack{stroke:#5a0f52}
-#battleModal .weaken-hud .wk-icon .arrow{stroke:#2b0628}
+#battleModal .weaken-hud .wk-icon .crack{stroke:#4a0a18}
+#battleModal .weaken-hud .wk-icon .arrow{stroke:#2a0610}
 #battleModal .weaken-hud .wk-text{display:flex;flex-direction:column;line-height:1.15}
-#battleModal .weaken-hud .wk-text b{font:900 1.05em/1.1 system-ui;letter-spacing:.12em;color:#fff;text-shadow:0 0 8px #ff6fd8}
-#battleModal .weaken-hud .wk-text small{font:600 .72em/1.2 system-ui;color:#ffc9f1}
-#battleModal .weaken-hud.spent{cursor:default;animation:none;border-color:#8b4f86;background:linear-gradient(135deg,#2a1530,#170d1f);box-shadow:none;opacity:.85}
-#battleModal .weaken-hud.spent .wk-icon{background:radial-gradient(circle at 35% 30%,#d9b5d3,#7a3f74 60%,#3a1736);box-shadow:none}
-#battleModal .weaken-hud.spent .wk-text b{text-shadow:none;color:#e9cfe6}
-#battleModal .weakened-chip{font-size:.75em;padding:.2em .55em;border-radius:6px;background:#4a1255;color:#ffc9f1;border:1px solid #ff7ad1}
-@keyframes wkPulse{50%{box-shadow:0 0 0 1px #ff7ad155,0 0 26px #e04bd0aa,inset 0 0 14px #ff7ad133}}
+#battleModal .weaken-hud .wk-text b{font:900 1em/1.1 system-ui;letter-spacing:.1em;color:#fff;text-shadow:0 0 5px #d0405a}
+#battleModal .weaken-hud .wk-text small{font:600 .75em/1.2 system-ui;color:#f3b8c3}
+#battleModal .weaken-hud.spent{cursor:default;animation:none;border-color:#7a3a47;background:linear-gradient(135deg,#2e1218,#1c0a0f);box-shadow:none;opacity:.85}
+#battleModal .weaken-hud.spent .wk-icon{background:radial-gradient(circle at 35% 30%,#d8b0b8,#743442 60%,#36121b);box-shadow:none}
+#battleModal .weaken-hud.spent .wk-text b{text-shadow:none;color:#ecccd2}
+@keyframes wkPulse{50%{box-shadow:0 0 0 1px #c0485f55,0 0 14px #a0203caa}}
 
+/* Round 64: always-visible debuff strip. */
+#battleModal .debuff-strip{display:flex;flex-wrap:wrap;align-items:center;gap:.35em;margin-top:.3em;padding:.3em .45em;border-radius:8px;border:1px dashed #ffffff26;background:#0006;min-height:1.9em}
+#battleModal .debuff-strip .ds-cap{font:700 .66em/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:#9fb0c0}
+#battleModal .debuff-strip .ds-none{font-size:.75em;color:#7d8a96;font-style:italic}
+#battleModal .debuff-strip .ds-item{display:inline-flex;align-items:center;gap:.25em;font:700 .78em/1 system-ui;padding:.28em .5em;border-radius:6px;cursor:help}
+#battleModal .debuff-strip .ds-item i{font-style:normal}
+#battleModal .debuff-strip.you .ds-item{background:#4a1220;border:1px solid #d9536b;color:#ffd5dc}
+#battleModal .debuff-strip.enemy .ds-item{background:#1b3a17;border:1px solid #7fcf5f;color:#dcffcf}
 /* Round 62: damage over time per turn. */
 #battleModal .dot-hud{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:.25em;padding:.25em .6em;border-radius:8px;border:1px solid;font:inherit}
 #battleModal .dot-hud.you{background:linear-gradient(135deg,#5a1424,#2b0c16);border-color:#ff6b81;color:#ffd0d8;box-shadow:0 0 10px #ff3b5c44}

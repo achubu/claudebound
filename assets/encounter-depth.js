@@ -126,7 +126,7 @@ renderBattle=function(){
  depthBattleRender();const b=state?.battle;if(!b||b.phase!=='fight')return;
  const plan=enemyPlan(b),next=enemyPlan(b,b.turn+1),box=$('battleModal').querySelector('.intent');
  if(box)box.innerHTML='<b>'+plan.name+'</b>'+(plan.damage?' · '+plan.damage+' damage':' · no attack')+(plan.kind==='elemental'?' · COUNTER WINDOW':'')+'<small>Next: '+next.name+(next.damage?' · '+next.damage+' damage':'')+'</small>';
- const statusText=(plan.enraged?'ENRAGED · ':'')+(b.enemy.guard?'Enemy Block '+b.enemy.guard+' · ':'')+(b.disrupted?'Lightning disruption armed · ':'')+(b.playerPoison?'Poison '+b.playerPoison+' · ':'')+(b.playerBurn?'Burn '+b.playerBurn+' · ':'');
+ const statusText=(plan.enraged?'ENRAGED · ':'')+(b.enemy.guard?'Enemy Block '+b.enemy.guard+' · ':'')+(b.disrupted?'Lightning disruption armed · ':'');
  if(statusText){const status=document.createElement('p');status.className='encounter-status';status.textContent=statusText.replace(/ · $/,'');box?.append(status)}
  const tips=$('battleModal').querySelector('.battle-footer>.muted');if(tips)tips.textContent='Reserve one counter for a charged elemental strike. Other cards need Memory Buffer.';
  document.querySelectorAll('#hand .card-wrap').forEach((wrap,i)=>{

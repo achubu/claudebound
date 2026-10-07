@@ -61,8 +61,8 @@ function sideWant(id,plan){
 function botSide(){
  const b=state.battle;if(!b||b.phase!=='fight'||!sideOn())return;aetherInit(b);
  const plan=botIntent(),next=botIntentFor(b.turn+1),score=c=>c?(sideWant(c.id,plan)?3:sideWant(c.id,next)?2:1):0;
- if(b.aether>=SIDE_DRAW_COST&&b.sideHand.length<SIDE_HAND_MAX&&b.sideDraw.length){drawSide();if(b.sideChoice)chooseSide(score(b.sideChoice[0])>=score(b.sideChoice[1])?0:1)}
- for(let k=0;k<3;k++){const p=botIntent(),i=b.sideHand.findIndex(c=>SIDE_CARDS[c.id].cost<=b.energy&&sideWant(c.id,p)&&sideUsable(b,c.id));if(i<0)break;playSide(i);if(!state.battle||state.battle.phase!=='fight')return}
+ if(b.sideHand.length<SIDE_HAND_MAX&&b.sideDraw.length){drawSide();if(b.sideChoice)chooseSide(score(b.sideChoice[0])>=score(b.sideChoice[1])?0:1)}
+ for(let k=0;k<3;k++){const p=botIntent(),i=b.sideHand.findIndex(c=>SIDE_CARDS[c.id].cost<=b.energy&&b.aether>=SIDE_DRAW_COST&&sideWant(c.id,p)&&sideUsable(b,c.id));if(i<0)break;playSide(i);if(!state.battle||state.battle.phase!=='fight')return}
 }
 function botPitch(){
  const b=state.battle;if(!b||b.phase!=='fight'||!sideOn())return;aetherInit(b);
@@ -70,7 +70,7 @@ function botPitch(){
  for(const c of b.hand.slice().sort((x,y)=>pitchValue(x)-pitchValue(y))){
   if(c.uid===b.savedUid||b.pitch.includes(c.uid))continue;
   if(isJunk(c))continue;
-  if(!b.sideDraw.length||b.aether+pendingAether(b)>=SIDE_DRAW_COST)continue;
+  if((!b.sideDraw.length&&!b.sideHand.length)||b.aether+pendingAether(b)+Math.max(0,b.energy)>=SIDE_DRAW_COST)continue;
   const marked=b.hand.filter(h=>b.pitch.includes(h.uid)&&!isJunk(h)).length;
   if(cycleCount(b)-marked-1>=5&&canPitch(b,c))b.pitch.push(c.uid);
  }

@@ -43,24 +43,40 @@ renderBattle = function () {
     weaken.title = 'Once per encounter: the enemy\'s attack drops by ' + weakenAmount() + ' for the rest of the fight.';
     weaken.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKEN</b><small>Enemy attack −' + weakenAmount() + ' · once per fight</small></span>';
   }
+  // Round 64: an always-visible debuff strip on both sides, listing every
+  // active debuff (or "None") plus the damage over time it deals each turn.
   const weakened = [...m.querySelectorAll('.compact-side.you .soul-legend')].find(x => /Weaken/.test(x.textContent || ''));
-  if (weakened && b.enemyDebuff) {
-    weakened.className = 'weaken-hud spent'; weakened.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKENED</b><small>Enemy attack −' + b.enemyDebuff + '</small></span>';
-    const foe = m.querySelector('.compact-side.enemy .compact-tags');
-    if (foe && foe.append) { const chip = document.createElement('b'); chip.className = 'weakened-chip'; chip.textContent = '▼ −' + b.enemyDebuff + ' attack'; chip.title = 'Weakened for the rest of the fight.'; foe.append(chip); }
-  }
-  // Round 62: damage-over-time per turn, on both sides.
-  const dot = (parts, side) => {
-    const total = parts.reduce((n, p) => n + p[1], 0); if (!total) return;
-    const host = m.querySelector('.compact-side.' + side + ' .compact-tags'); if (!host || !host.append) return;
-    const chip = document.createElement('b'); chip.className = 'dot-hud ' + side;
-    chip.innerHTML = '<span class="dot-drop">☠</span><span class="dot-num">−' + total + '</span><span class="dot-cap">HP / turn</span>';
-    chip.title = parts.filter(p => p[1]).map(p => p[0] + ' ' + p[1]).join(' + ') + ' = ' + total + ' damage at the end of each turn';
-    const det = document.createElement('small'); det.className = 'dot-detail'; det.textContent = parts.filter(p => p[1]).map(p => p[0] + ' ' + p[1]).join(' · ');
-    chip.append(det); host.append(chip);
+  if (weakened && b.enemyDebuff) { weakened.className = 'weaken-hud spent'; weakened.innerHTML = '<span class="wk-icon">' + HUD_ICONS.weaken + '</span><span class="wk-text"><b>WEAKENED</b><small>Enemy attack −' + b.enemyDebuff + '</small></span>'; }
+  const t = s => s === 1 ? '1 turn' : s + ' turns';
+  const youDebuffs = [
+    b.bleed && ['🩸', 'Bleed ' + b.bleed, 'Lose ' + b.bleed + ' HP at the end of your turn; falls by 1 each turn.'],
+    b.playerPoison && ['☣', 'Poison ' + b.playerPoison, 'Lose ' + b.playerPoison + ' HP at the end of each turn.'],
+    b.playerBurn > 0 && ['🔥', 'Burn · ' + t(b.playerBurn), 'Lose 2 HP at the end of each turn for ' + t(b.playerBurn) + '.'],
+    b.frail && ['⤓', 'Frail ' + b.frail, 'Your cards deal 25% less damage.'],
+    b.shackledNow && ['⛓', 'Shackled', '1 less energy this turn.'],
+    b.drained && ['💧', 'Drained', '1 less energy next turn.'],
+    b.exposed && ['◎', 'Exposed +' + b.exposed, 'The next enemy hit deals ' + b.exposed + ' more damage.'],
+    b.foggedNow && ['☁', 'Fogged', 'You drew 1 fewer card this turn.']
+  ].filter(Boolean);
+  const foeDebuffs = [
+    b.poison && ['☣', 'Poison ' + b.poison, 'Takes ' + b.poison + ' damage at the end of each turn.'],
+    b.burnTurns > 0 && b.burn && ['🔥', 'Burn ' + b.burn + ' · ' + t(b.burnTurns), 'Takes ' + b.burn + ' damage at the end of each turn for ' + t(b.burnTurns) + '.'],
+    b.enemyDebuff && ['▼', 'Weakened −' + b.enemyDebuff, 'Attack lowered by ' + b.enemyDebuff + ' for the rest of the fight.'],
+    b.bind && ['🌿', 'Rootbind −' + b.bind, 'Its next attack deals ' + b.bind + ' less damage.'],
+    b.freeze > 0 && ['❄', 'Frozen · ' + t(b.freeze), 'Skips its next ' + (b.freeze === 1 ? 'action' : b.freeze + ' actions') + '.'],
+    b.silenceTurn === b.turn && ['🔇', 'Silenced', 'Its next action is cancelled.']
+  ].filter(Boolean);
+  const strip = (side, list, dot) => {
+    const host = m.querySelector('.compact-side.' + side + ' .compact-tags'); if (!host || !host.after) return;
+    const old = host.parentNode && host.parentNode.querySelector && host.parentNode.querySelector('.debuff-strip'); if (old) old.remove();
+    const total = dot.reduce((n, p) => n + p[1], 0);
+    const el = document.createElement('div'); el.className = 'debuff-strip ' + side;
+    el.innerHTML = '<span class="ds-cap">Debuffs</span>' + (list.length ? list.map(d => '<b class="ds-item" title="' + d[2] + '"><i>' + d[0] + '</i>' + d[1] + '</b>').join('') : '<span class="ds-none">None</span>')
+      + (total ? '<b class="dot-hud ' + side + '" title="' + dot.filter(p => p[1]).map(p => p[0] + ' ' + p[1]).join(' + ') + ' = ' + total + ' damage at the end of each turn"><span class="dot-drop">☠</span><span class="dot-num">−' + total + '</span><span class="dot-cap">HP / turn</span></b>' : '');
+    host.after(el);
   };
-  dot([['Bleed', b.bleed || 0], ['Burn', b.playerBurn > 0 ? 2 : 0], ['Poison', b.playerPoison || 0]], 'you');
-  dot([['Poison', b.poison || 0], ['Burn', b.burnTurns > 0 ? (b.burn || 0) : 0]], 'enemy');
+  strip('you', youDebuffs, [['Bleed', b.bleed || 0], ['Burn', b.playerBurn > 0 ? 2 : 0], ['Poison', b.playerPoison || 0]]);
+  strip('enemy', foeDebuffs, [['Poison', b.poison || 0], ['Burn', b.burnTurns > 0 ? (b.burn || 0) : 0]]);
   // Armor: a steel shield; Block: a glowing crystal.
   m.querySelectorAll('.compact-tags .armor-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'armor'); t.innerHTML = hudShield(n, t.title || ''); });
   m.querySelectorAll('.compact-tags .block-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'block'); t.innerHTML = hudBlock(n); });
