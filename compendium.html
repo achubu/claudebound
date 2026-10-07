@@ -389,7 +389,7 @@
                 const levels = [0, 1, 2, 3].map(level => {
                     let text = '', cost = c.cost, name = c.name;
                     try { text = rules({ id: c.id, level }); } catch (e) { text = c.desc || ''; }
-                    try { const s = stat({ id: c.id, level }); cost = s.cost; name = s.name; } catch (e) {}
+                    try { const s = stat({ id: c.id, level }); cost = c.xCost ? 'X' : s.cost; name = s.name; } catch (e) {}
                     return { level, text, cost, name, art: artPath(c.id, level) };
                 });
                 const thumbs = levels.map(l => `
@@ -559,6 +559,10 @@
                 ['Enraged', 'Bosses and mini-bosses below 50% health deal +2 damage on every attack.'],
                 ['Afflictions', 'Every enemy adds telegraphed riders to some of its actions: debuffs on you, buffs on itself, or nastier strikes. The battle screen shows this turn\'s and next turn\'s. A strike affliction scheduled on a turn without an attack moves to the next attack.'],
                 ['Pitch & Aether', 'Mark cards in hand to pitch. When you end the turn they burn away for the rest of the encounter and give Aether equal to cost + 1. You must keep at least 4 cards cycling. Aether carries over between turns, up to 8.'],
+                ['Points of interest', 'About a third of ordinary rooms hold one: Aether Shrines (choose a blessing for your next fight), Campfires (rest, or train a card +15 mastery uses), Supply Caches (Shards), Sealed Caches (risk HP for more Shards) and five lore finds per world (read all five for 15 Shards and a side card).'],
+                ['Shards & the merchant', 'Enemies drop Shards: 1-2 from regulars, 3 from elites, 6 from mini-bosses, 10 from final bosses. The Wandering Merchant (one in every world, shown on the map) sells three wares for Shards: always a side card and a card upgrade (an upgraded Impermanent card or an upgrade pack), plus a potion, card bundle or blessing. It never sells Soulbound cards or Upgrade Crystals, and moves to a new room whenever you enter a world or fall in battle.'],
+                ['Card rewards', 'A loot chest that holds a card offers three from the current world\'s pool. Take one, or leave them all.'],
+                ['Unspent energy', 'Ending your turn with energy left over gives 1 Aether.'],
                 ['Side deck', 'Spend 4 Aether to look at the top 2 cards of your side deck and take one (the other goes to the bottom). You can hold 2 side cards; they wait until you play them and cost their own energy.'],
                 ['Weaken', 'Talent ability: lowers enemy attack for the whole encounter, which reduces every number above.']
             ];

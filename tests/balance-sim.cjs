@@ -41,9 +41,13 @@ let BUILDS = {
 };
 if (process.env.BUILDS_JSON) BUILDS = JSON.parse(require('node:fs').readFileSync(process.env.BUILDS_JSON, 'utf8'));
 const cardLevelFor = L => Math.min(3, Math.floor((L - 1) / 6));
+// Round 49: decks include the new cards a player would pick from card rewards
+// (BASIC_DECKS=1 reproduces the pre-Round-49 decks for comparison).
 function deckFor(region, L) {
-  if (region === 'city') return L <= 3 ? ['strike', 'strike', 'guard', 'guard', 'focus', 'mend'] : ['strike', 'cleave', 'riposte', 'bastion', 'shatter', 'mend', 'cleave', 'bastion', 'riposte', 'shatter'];
-  return ['cleave', 'counter', 'bastion', 'cinder', 'venom', 'riposte', 'shatter', 'cleave', 'bastion', 'counter', 'mend', 'strike'];
+  const basic = !!process.env.BASIC_DECKS;
+  if (region === 'city') return L <= 3 ? ['strike', 'strike', 'guard', 'guard', 'focus', 'mend'] : basic ? ['strike', 'cleave', 'riposte', 'bastion', 'shatter', 'mend', 'cleave', 'bastion', 'riposte', 'shatter'] : ['strike', 'cleave', 'bastion', 'breachSpike', 'shatter', 'staticShield', 'riposte', 'mend', 'bulwarkBash', 'arcJab'];
+  if (basic || region === 'elaris') return basic ? ['cleave', 'counter', 'bastion', 'cinder', 'venom', 'riposte', 'shatter', 'cleave', 'bastion', 'counter', 'mend', 'strike'] : ['cleave', 'counter', 'bastion', 'cinder', 'thornlash', 'rootbind', 'riposte', 'wildfire', 'shatter', 'bastion', 'mend', 'tidecall'];
+  return ['cleave', 'counter', 'bastion', 'chainLightning', 'prismLance', 'cinder', 'mirrorguard', 'bastion', 'venom', 'counter', 'mend', 'stormBattery'];
 }
 
 const { context, run } = makeContext();

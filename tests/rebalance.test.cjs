@@ -28,7 +28,7 @@ for(let i=0;i<8000;i++){
  state.battle={phase:'fight',enemy:{hp:0,boss:false,elite:false},logs:[]};
  activeRegion='elaris';
  winBattle();
- if(state.battle.reward)seen.add(state.battle.reward.id);
+ if(state.battle.reward)seen.add(state.battle.reward.id);if(state.battle.offers)state.battle.offers.forEach(c=>seen.add(c.id));
 }
 assert(seen.has('bastion'),'Elaris reward pool now offers Bastion (block)');
 assert(seen.has('mend'),'Elaris reward pool now offers Mend (healing)');
@@ -88,10 +88,10 @@ assert.equal(forceRoll(.0099).lootType,'soulbound','just under 1% is still Soulb
 assert.equal(forceRoll(.01).lootType,'crystal','exactly 1% rolls over into the Upgrade Crystal band');
 assert.equal(forceRoll(.0499).lootType,'crystal','just under 5% is still an Upgrade Crystal');
 assert.equal(forceRoll(.05).lootType,'empty','exactly 5% rolls over into the empty-chest band');
-assert.equal(forceRoll(.2899).lootType,'empty','just under 29% is still empty');
-assert.equal(forceRoll(.29).lootType,'potion','exactly 29% rolls over into potion');
-assert.equal(forceRoll(.6449).lootType,'potion','just under 64.5% is still potion');
-assert.equal(forceRoll(.645).lootType,'card','exactly 64.5% rolls over into card');
+assert.equal(forceRoll(.2499).lootType,'empty','just under 25% is still empty');
+assert.equal(forceRoll(.25).lootType,'potion','exactly 25% rolls over into potion');
+assert.equal(forceRoll(.5999).lootType,'potion','just under 60% is still potion');
+assert.equal(forceRoll(.60).lootType,'choice','exactly 60% rolls over into a card choice (40% of chests)');
 forceRoll(0);assert(state.pool.some(c=>['phoenix','oath','verdict'].includes(c.id)),'Soulbound jackpot actually grants a Soulbound card');
 const materialsBefore=materials();forceRoll(.03);assert.equal(materials(),materialsBefore+1,'the Upgrade Crystal outcome actually increments the persistent materials() count');
 assert(typeof forceRoll(.15).thief==='string'&&forceRoll(.15).thief.length,'an empty chest names the animal that looted it');

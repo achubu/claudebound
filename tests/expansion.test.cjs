@@ -19,7 +19,7 @@ run(fs.readFileSync(path.join(root,'assets/cards.js'),'utf8'));
 for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
 run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
 run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));
-run(fs.readFileSync(path.join(root,'assets/encounter-depth.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/talent-matrix.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/aether-deck.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/battle-hud.js'),'utf8'));
+run(fs.readFileSync(path.join(root,'assets/encounter-depth.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/talent-matrix.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/aether-deck.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/card-variety.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/battle-hud.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/exploration.js'),'utf8'));
 run(`
 newGame();
 assert.equal(state.pool.length,6);assert(active().some(c=>c.id==='mend'));
@@ -36,7 +36,7 @@ state.battle.turn=3;state.battle.enemy.element='fire';state.battle.hand=[make('c
 state.talents.echo=1;state.battle.echoArmed=true;state.battle.hand=[make('guard')];state.battle.energy=3;state.battle.block=0;playCard(0);assert.equal(state.battle.block,12);assert.equal(state.battle.energy,2);assert(state.battle.echoUsed);
 state.talents.doublePower=1;state.battle.doubleArmed=true;state.battle.enemy.hp=100;state.battle.enemy.armor=0;state.battle.hand=[make('strike')];state.battle.energy=3;playCard(0);assert.equal(state.battle.enemy.hp,86);assert(state.battle.doubleUsed);
 state.battle.hand=[make('venom')];state.battle.energy=3;playCard(0);assert.equal(state.battle.poison,2);
-const before=state.pool.length;const _r=Math.random;Math.random=()=>.9;winBattle();Math.random=_r;assert.equal(state.pool.length,before+1);assert(state.battle.reward);assert.equal(state.cooldowns[s.uid],3);
+const before=state.pool.length;const _r=Math.random;Math.random=()=>.9;winBattle();Math.random=_r;assert.equal(state.battle.lootType,'choice','card chests offer a choice');assert.equal(state.battle.offers.length,3);assert.equal(state.pool.length,before,'nothing is added until you choose');chooseCardReward(1);assert.equal(state.pool.length,before+1);assert(state.battle.reward);assert.equal(state.cooldowns[s.uid],3);
 finishBattle();state.battle=null;state.talents={};save();assert(load());assert.equal(state.room,'1,5');
 startBattle(roomSpawns(state.room)[1].uid);const turn=state.battle.turn;save();assert(load());assert.equal(state.battle.turn,turn);assert.equal(state.battle.phase,'fight');
 state.battle=null;state.room='10,6';const boss=roomSpawns(state.room).find(x=>x.boss);assert(boss);startBattle(boss.uid);winBattle();assert(state.pool.some(c=>c.id==='glacial'));assert(state.bosses.includes('thornWarden'));finishBattle();travelPortal();assert.equal(state.region,'elaris');assert.equal(Object.keys(rooms).length,30);assert.equal(maxDeckSize(),11);assert.equal(state.pool.filter(c=>c.id==='counter').length,1);assert(!state.pool.some(c=>c.id.startsWith('counter_')));

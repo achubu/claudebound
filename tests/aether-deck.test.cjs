@@ -23,20 +23,22 @@ assert.equal(pitchValue(b.hand[0]), 2, 'a 1-cost card pitches for 2'); assert.eq
 togglePitch(b.hand[0].uid); togglePitch(b.hand[1].uid);
 assert.equal(pendingAether(b), 4);
 const pitchedUids = b.pitch.slice(); endTurn();
-assert.equal(b.aether, AETHER_START + 4, 'two pitched 1-cost cards give 4 Aether at the end of the turn');
+assert.equal(b.aether, AETHER_START + 4 + 1, 'two pitched 1-cost cards give 4 Aether, and unspent energy gives 1 more');
 assert(pitchedUids.every(u => b.exhaust.some(c => c.uid === u)), 'pitched cards burn away for the encounter');
 assert(pitchedUids.every(u => !b.discard.some(c => c.uid === u) && !b.draw.some(c => c.uid === u)));
 // Choosing a side card.
 const top2 = b.sideDraw.slice(0, 2).map(c => c.id);
-drawSide(); assert.equal(b.aether, AETHER_START, 'drawing costs 4 Aether'); assert.deepEqual(b.sideChoice.map(c => c.id), top2, 'reveals the top two');
+drawSide(); assert.equal(b.aether, AETHER_START + 1, 'drawing costs 4 Aether'); assert.deepEqual(b.sideChoice.map(c => c.id), top2, 'reveals the top two');
 chooseSide(1); assert.equal(b.sideHand[0].id, top2[1]); assert.equal(b.sideDraw.at(-1).id, top2[0], 'the other goes to the bottom'); assert.equal(b.sideChoice, null);
-drawSide(); assert.equal(b.sideChoice, null, 'cannot draw without 4 Aether');
+b.aether = 3; drawSide(); assert.equal(b.sideChoice, null, 'cannot draw without 4 Aether');
 // Aether cap and the minimum cycle.
 b.aether = 7; b.hand = [make('cleave'), make('cleave')]; b.draw = [make('guard'), make('guard'), make('guard')]; b.discard = [];
 togglePitch(b.hand[0].uid); assert.equal(b.pitch.length, 1);
 togglePitch(b.hand[1].uid); assert.equal(b.pitch.length, 1, 'cannot pitch below ' + MIN_CYCLE + ' cards in the encounter');
 b.savedUid = b.hand[1].uid; assert(!canPitch(b, b.hand[1]), 'a retained card cannot be pitched'); b.savedUid = null;
 ENEMY_AFFLICTIONS.thornling = []; endTurn(); assert.equal(b.aether, AETHER_MAX, 'Aether caps at ' + AETHER_MAX);
+b = setup('thornling', [], { energy: 2 }); ENEMY_AFFLICTIONS.thornling = []; endTurn(); assert.equal(b.aether, AETHER_START + 1, 'unspent energy gives at most 1 Aether');
+b = setup('thornling', [], { energy: 0 }); endTurn(); assert.equal(b.aether, AETHER_START, 'no unspent energy, no Aether');
 ENEMY_AFFLICTIONS.thornling = ['frail'];
 
 // ---------- Schedules ----------
@@ -127,7 +129,7 @@ b = setup('thornling', []); b.energy = 0; give(b, 'anchor'); playSide(0); assert
 
 // ---------- Rewards, workshop rules, saves ----------
 newGame(); b = setup('thornling', []); b.phase = 'reward'; b.special = [];
-const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .99), null, 'regular: 12% chance'); assert(rollSideDrop(b, .05), 'regular drop under 12%'); assert.equal(state.side.pool.length, n0 + 1);
+const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .05), null, 'regular: 5% chance'); assert(rollSideDrop(b, .04), 'regular drop under 5%'); b.enemy.elite = true; assert.equal(rollSideDrop(b, .05), null, 'elites: 5% too'); b.enemy.elite = false; assert.equal(state.side.pool.length, n0 + 1);
 b.enemy.boss = true; assert(rollSideDrop(b, .999), 'bosses always drop one');
 assert(sidePoolFor(0).every(id => SIDE_CARDS[id].tier === 0), 'city drops city-tier side cards'); assert(sidePoolFor(2).includes('phase'));
 newGame(); for (let k = 0; k < 6; k++) addSideCard('purify');

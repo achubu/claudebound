@@ -56,11 +56,11 @@ loseBattle();assert.equal(state.hp,31,'defeat recovery restores full health');
 
 function lootRoll(roll){newGame();state.talents={};state.battle={id:'test',spawnId:'test',phase:'fight',enemy:{hp:0,boss:false,elite:false},logs:[]};const old=Math.random;Math.random=()=>roll;winBattle();Math.random=old;return state.battle}
 assert.equal(lootRoll(.005).lootType,'soulbound','under 1% rolls the Soulbound jackpot');
-assert.equal(lootRoll(.15).lootType,'empty','1%-26% rolls an empty (looted) chest');
-assert.equal(lootRoll(.40).lootType,'potion','26%-63% rolls a potion');
+assert.equal(lootRoll(.15).lootType,'empty','5%-25% rolls an empty (looted) chest');
+assert.equal(lootRoll(.40).lootType,'potion','25%-60% rolls a potion');
 assert.equal(lootRoll(.40).potionDrop,true);
-assert.equal(lootRoll(.75).lootType,'card','63%+ rolls a card');
-assert(lootRoll(.75).reward,'a card roll actually grants a card');
+assert.equal(lootRoll(.75).lootType,'choice','60%+ (40% of chests) rolls a card choice');
+{const lr=lootRoll(.75);assert(lr.offers&&lr.offers.length===3,'a card roll offers three cards to choose from');}
 
 const legacy={pool:[],deck:[],battle:null};
 for(const element of ELEMENTS){const card=make('counter_'+element);legacy.pool.push(card);legacy.deck.push(card.uid)}

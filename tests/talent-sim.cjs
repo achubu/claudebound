@@ -17,7 +17,7 @@ function makeContext() {
   for (const m of fs.readFileSync(path.join(root, 'index.html'), 'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g)) run(m[1]);
   run(fs.readFileSync(path.join(root, 'assets/elaris-wildlife.js'), 'utf8'));
   run(fs.readFileSync(path.join(root, 'assets/expansion.js'), 'utf8'));
-  run(fs.readFileSync(path.join(root, 'assets/encounter-depth.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/talent-matrix.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/aether-deck.js'), 'utf8'));
+  run(fs.readFileSync(path.join(root, 'assets/encounter-depth.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/talent-matrix.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/aether-deck.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/card-variety.js'), 'utf8'));
   return { context, run };
 }
 
@@ -83,10 +83,11 @@ function botTurn(){
  let guard=0;
  while(guard++<20&&state.battle&&state.battle.phase==='fight'){
   const plan=botIntent();
-  const affordable=b.hand.map((c,i)=>({c,i,d:stat(c)})).filter(x=>x.d.cost<=b.energy&&!x.d.unplayable);
+  let affordable=b.hand.map((c,i)=>({c,i,d:stat(c)})).filter(x=>x.d.cost<=b.energy&&!x.d.unplayable&&!(x.d.xCost&&b.energy<1));
+  if(affordable.some(x=>!x.d.xCost))affordable=affordable.filter(x=>!x.d.xCost); // X-cost cards spend the leftover energy last
   if(!affordable.length)break;
   const rawOf=x=>(x.d.damage||0)+((x.d.damage||0)>0?attackBonus():0)+(boostedCardUids(b).includes(x.c.uid)?boostAmount():0);
-  const dmgOf=x=>{const r=rawOf(x);return r>0?(x.d.pierce?r:Math.max(0,r-(b.enemy.armor||0)))+(x.d.burn?x.d.burn*2:0)+(x.d.poison?x.d.poison*2:0):0};
+  const dmgOf=x=>{const r=rawOf(x);return r>0?(x.d.pierce?r:Math.max(0,r-(b.enemy.armor||0)))*(x.d.hits||1)+(x.d.burn?x.d.burn*2:0)+(x.d.poison?x.d.poison*2:0)+(x.d.kindle?x.d.kindle*2:0):0};
   const lethal=affordable.find(x=>dmgOf(x)>0&&dmgOf(x)>=b.enemy.hp+(b.enemy.guard||0));
   if(lethal){playCard(lethal.i);continue}
   if((plan.kind==='charge'||plan.kind==='elemental')&&!b.counter){const cc=affordable.find(x=>x.d.counter);if(cc){playCard(cc.i);continue}}

@@ -91,7 +91,7 @@ async function session(name, ctxOpts) {
       await shot(`04-battle${fight}-end`); await overflow('battle end');
       if (res.phase === 'fight') issues.push(`[gameplay] fight ${fight} did not finish within 40 turns`);
       // Leave the result screen via whatever button exists.
-      for (const sel of ['#battleModal button:has-text("Open Chest")', '#offers .card', '#randomReward .card', '#skipReward', '#continueReward', '#returnWorld', '#closeMenu', '#battleModal button.primary']) {
+      for (const sel of ['#battleModal button:has-text("Open Chest")', '#offers .card', '#cardOffers .card', '#randomReward .card', '#skipReward', '#continueReward', '#returnWorld', '#closeMenu', '#battleModal button.primary']) {
         const el = await page.$(sel);
         if (el && await el.isVisible()) { await el.click().catch(() => {}); await sleep(400); await shot(`05-after-${fight}-${sel.replace(/[^a-z]/gi,'')}`); }
         if (await page.evaluate(() => !state.battle)) break;

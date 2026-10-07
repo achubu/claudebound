@@ -2056,3 +2056,56 @@ Also: compendium gains a Side Deck section, per-enemy affliction notes (with ans
 ## Round 48 — Intent labels
 
 - The two intent bubbles are now labelled "Enemy move next turn:" (rose) and "Enemy move the turn after:" (blue), in normal case and a little larger.
+
+## Round 49 — Card variety, card choice, energy → Aether, faster city
+
+New file `assets/card-variety.js` (loaded after aether-deck.js); art from `tools/generate_variety_card_art.py`; tests in `tests/card-variety.test.cjs`.
+
+- **Choose your card reward.** A loot chest that holds a card now offers three different cards from the current world's pool; take one or leave them all ("Leave them"). Pools: city 11 cards, Elaris 13, Vespera 13 (Vespera finally has its own).
+- **15 new cards, 5 per world, 4 levels each:**
+  - City: Arc Jab (0: 3 dmg, +1 Aether), Bulwark Bash (1: damage = your Block), Overclock (0: +1 energy, exhaust; pitches for 3 Aether), Static Shield (1: 6 Block, cleanse 1 debuff), Breach Spike (1: 5 dmg, enemy −2 Armor for the fight).
+  - Elaris: Thornlash (1: 4 dmg, Poison 3, doubled if already poisoned), Wildfire (2: 8 dmg, Burn 3 or double an existing Burn, max 10), Rootbind (1: 5 Block, next enemy attack −4), Tidecall (1: draw 2, +1 card next turn), Verdant Pact (0: heal 4, +1 Aether, exhaust).
+  - Vespera: Chain Lightning (2: 5 dmg × 3, Armor per hit), Storm Battery (1: +2 Aether, draw 1), Mirrorguard (2: 10 Block, reflect half of what Block stops), Tempest Surge (X: 7 dmg per energy spent), Prism Lance (2: 12 piercing, ignores Barrier).
+- **Unspent energy → Aether.** Ending a turn with energy left gives 1 Aether. City side-deck use went from ~0–0.3 to ~0.7–1.5 plays per fight in simulation.
+- **Faster early city.** City regular enemies' extra health eased from ×1.1 to ×0.95. Simulated level-3 city fights: ~23 → ~17 turns; level-7: ~12.5 → ~10.
+- **Balance.** The simulator's decks now include the new cards a player would pick (BASIC_DECKS=1 restores the old decks), and the bot understands X-cost and multi-hit cards. Boss health retuned so a typical build still wins ~40% vs mini-bosses and ~28% vs final bosses: moonKnight .73, crownSentinel .72, thornWarden .95, tidewardenElaris 1.4, galeSovereign .79, bloomTyrant .77, arcSentinel .72, resonantPhantom .82, stormTyrant .46. Final typical win rates: Lunar 38%, Crown Sentinel 38%, Thorn Warden 27%, Tidebound 45%, Gale 44%, Bloom Tyrant 25%, Arc 41%, Resonant 40%, Tempest Colossus 32%. Regular fights mostly 65–100%; the last Vespera zone (Lv 26) is the hardest at 27%.
+
+## Round 50 — Exploration: points of interest and the Wandering Merchant
+
+New file `assets/exploration.js` (loaded after combined-rooms.js); tests in `tests/exploration.test.cjs`.
+
+- **Points of interest.** About a third (36%) of ordinary rooms in each world (never the start, a boss room or a chest room) get one, placed from the journey seed on a reachable spot at least 150px from patrol homes. Each world has five lore finds plus at least one of each other kind:
+  - ⛩ **Aether Shrine** — choose 1 of 3 blessings for your next fight: Ward of Glass (6 + level/2 opening Block), Surge Rite (+1 energy, +1 card on turn 1), Aether Well (+3 Aether), Keen Edge (+3 damage on every attack), Vigil (heal 30% after the win).
+  - 🔥 **Campfire** — rest for 35% max HP, or train an active card for +15 mastery uses.
+  - ⌨/◈/ϟ **Lore** (Data Terminal / Whispering Stone / Storm Glyph) — five short story fragments per world, +2 Shards each; reading all five gives +15 Shards and a side card.
+  - ⬙ **Supply Cache** — 3–6 Shards, 25% chance of a potion.
+  - ⚠ **Sealed Cache** — optional risk: 50% +9 Shards, 50% lose 15% max HP (never below 1).
+  Each is single-use; walking onto it opens it (step away to reopen). Used ones dim. The map tags rooms with their point of interest and shows found/used counts and lore progress.
+- **Shards** (new currency, shown in the HUD): 1–2 per regular win, 3 per elite, 6 per mini-boss, 10 per final boss.
+- **Wandering Merchant** 🛒 — sets up in a random ordinary room, with a new room and stock each time you enter a world or are defeated. Three wares from: side-deck card (10), healing potion (5), card bundle (choose 1 of 3, 8), Upgrade Crystal (25), bottled blessing (4); always includes a side card. Each sells once.
+- Saves: `shards`, `blessing`, `poi` are validated on import; older saves start with empty exploration data.
+
+## Round 51 — Smoother start in Elaris
+
+Problem (simulated, all 16 builds, player level = enemy level, arriving with the city deck): Elaris Lv 10 regulars won 42%, Lv 11 35%, Lv 12 36%; Drowned Heron 4–9% at Lv 11–12, Storm Moth 22–27%.
+
+- **Entry ramp** (`BALANCE.entryRamp.elaris`): regular and elite enemies (never bosses) at Lv 10/11/12/13 have ×0.90/0.88/0.90/0.95 health and −1/−1/−1/0 attack, so difficulty climbs from the portal instead of jumping.
+- **Drowned Heron** health ×0.85 and **Storm Moth** ×0.9 (the two worst early fights).
+- **Elaris attunement:** arriving from the city for the first time offers a choice of 1 of 3 Elaris cards (Cinder Lance, Venom Bloom, Gale Cut, Thornlash, Wildfire, Rootbind, Tidecall, Verdant Pact); it joins the active deck if there's room.
+- Result with the city deck: Lv 10 **78%**, Lv 11 **66%**, Lv 12 **65%** (Heron 81/59/53%, Moth 61/54/61%). With an Elaris deck after a few rewards: 95/89/88%, then Lv 13 ~70%+. Bosses unchanged.
+
+## Round 52 — Store rules
+
+- The Wandering Merchant no longer sells Upgrade Crystals, and never sells Soulbound cards: card bundles and upgraded cards are always Impermanent.
+- New wares: **Upgraded card** (12 Shards — choose 1 of 3 Impermanent cards from this world at level 1, level 2 in Vespera) and **Card upgrade pack** (15 Shards — raise one of your Impermanent cards by a level; mastery starts fresh; can't be bought if you have none to upgrade).
+- Every stock is a side card + a card upgrade (upgraded card or pack) + one of potion / card bundle / blessing.
+- Every world always has a store: if no ordinary room is free, the merchant sets up in the safe start room. The map now names the area the merchant is in.
+
+## Round 53 — Drop rates
+
+- Loot chests: a card choice is now the most common outcome at **55%** (was 35.5%). Potions 25% (was 35.5%), empty 15% (was 24%); Soulbound jackpot 1% and Upgrade Crystal 4% unchanged.
+- Side-deck card drops: **5%** from regular and elite enemies (was 12% / 35%). Bosses still always drop one, lore sets pay one, and the merchant always stocks one.
+
+## Round 54 — Card choice at 40%
+
+- Loot chests: card choice **40%**, potion 35%, empty 20%, Upgrade Crystal 4%, Soulbound 1%. (Side-card drops stay at 5% from regular and elite enemies.)
