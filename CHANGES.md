@@ -2212,3 +2212,16 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 - **Side deck fix.** In battle the side deck is now a compact row of chips showing each card's icon, name and Aether price, with the full text on hover. Chips you can afford glow and play with one click. "Card details" opens the full cards.
 - On phones, the fighters and both enemy-move bubbles now sit side by side, so your hand is visible without scrolling.
 - New tests in tests/pacing.test.cjs, and the compendium is updated.
+
+## Round 71: the side deck grows from 2 to 6
+
+- New journeys start with room for **2** side cards: Purifying Light and Aegis Ward are equipped, and Dispel Lance waits in your collection to swap in.
+- You gain **+1 slot** for each of these bosses, reaching 6 by late Vespera:
+  - Crown Sentinel (city), which takes you to 3
+  - Gale Sovereign (Elaris), 4
+  - Bloom Tyrant (Elaris), 5
+  - Resonant Phantom (Vespera), 6
+- When a slot opens, the victory screen says so, and an unequipped side card is equipped into it automatically.
+- The Deck Workshop shows "Room for N of 6 cards" and names the boss that opens the next slot. Adding a card beyond the current room explains how to expand it.
+- Battles only bring the cards that fit. Older saves with more cards equipped than they have room for are trimmed to fit.
+- Updated the tests (aether-deck) and the compendium.

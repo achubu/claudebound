@@ -131,6 +131,13 @@ const SIDE_CARDS = {
   stasis:   { name: 'Stasis Field', icon: '⌛', cost: 2, tier: 3, kind: 'Control', text: () => 'The enemy skips its next action entirely. Only final bosses drop this.' }
 };
 const SIDE_STARTER = ['purify', 'aegis', 'dispel'];
+// Round 71: the side deck starts with room for 2 cards and grows to 6
+// (SIDE_DECK_MAX) over the game: +1 for each of these bosses.
+const SIDE_START_SLOTS = 2, SIDE_GROWTH_BOSSES = ['crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'];
+function sideDeckMax(s = state) { const beaten = (s && Array.isArray(s.bosses)) ? s.bosses : []; return Math.min(SIDE_DECK_MAX, SIDE_START_SLOTS + SIDE_GROWTH_BOSSES.filter(id => beaten.includes(id)).length); }
+function fillSideDeck(s = state) { // equip unequipped side cards into newly opened slots
+  for (const c of s.side.pool) { if (s.side.deck.length >= sideDeckMax(s)) break; if (!s.side.deck.includes(c.uid) && s.side.deck.map(u => s.side.pool.find(x => x.uid === u)).filter(x => x && x.id === c.id).length < SIDE_COPIES) s.side.deck.push(c.uid); }
+}
 function sidePoolFor(region = regionIndex()) { return Object.keys(SIDE_CARDS).filter(id => SIDE_CARDS[id].tier <= region); }
 function sideArtPath(id) { return 'assets/cards/side/' + id + '.png'; }
 
@@ -138,21 +145,22 @@ function ensureSide(s = state) {
   if (!s) return;
   if (!s.side || !Array.isArray(s.side.pool) || !Array.isArray(s.side.deck)) {
     s.side = { pool: [], deck: [], next: 1 };
-    for (const id of SIDE_STARTER) { const card = { uid: 's' + s.side.next++, id }; s.side.pool.push(card); s.side.deck.push(card.uid); }
+    for (const id of SIDE_STARTER) { const card = { uid: 's' + s.side.next++, id }; s.side.pool.push(card); if (s.side.deck.length < sideDeckMax(s)) s.side.deck.push(card.uid); }
   }
+  if (s.side.deck.length > sideDeckMax(s)) s.side.deck = s.side.deck.slice(0, sideDeckMax(s));
   s.side.next = Math.max(s.side.next || 1, ...s.side.pool.map(c => Number(String(c.uid).slice(1)) + 1));
 }
 const sideCopies = id => state.side.deck.map(u => state.side.pool.find(c => c.uid === u)).filter(c => c && c.id === id).length;
 function addSideCard(id) {
   ensureSide(); const card = { uid: 's' + state.side.next++, id }; state.side.pool.push(card);
-  if (state.side.deck.length < SIDE_DECK_MAX && sideCopies(id) < SIDE_COPIES) state.side.deck.push(card.uid);
+  if (state.side.deck.length < sideDeckMax() && sideCopies(id) < SIDE_COPIES) state.side.deck.push(card.uid);
   return card;
 }
 function toggleSideCard(uid) {
   const card = state.side.pool.find(c => c.uid === uid); if (!card) return;
   if (state.side.deck.includes(uid)) state.side.deck = state.side.deck.filter(u => u !== uid);
   else {
-    if (state.side.deck.length >= SIDE_DECK_MAX) return toast('The side deck holds ' + SIDE_DECK_MAX + ' cards.');
+    if (state.side.deck.length >= sideDeckMax()) return toast('Your side deck holds ' + sideDeckMax() + ' cards right now. Beat bosses to expand it (up to ' + SIDE_DECK_MAX + ').');
     if (sideCopies(card.id) >= SIDE_COPIES) return toast('Up to ' + SIDE_COPIES + ' copies of ' + SIDE_CARDS[card.id].name + '.');
     state.side.deck.push(uid);
   }
@@ -176,7 +184,7 @@ function aetherInit(b) {
   if (!b || b.aetherReady) return;
   ensureSide();
   b.aetherReady = true; b.aether = b.aether ?? AETHER_START; b.pitch = []; b.sideHand = []; b.sideChoice = null;
-  b.sideDraw = shuffle(state.side.deck.map(u => state.side.pool.find(c => c.uid === u)).filter(Boolean).map(c => ({ ...c })));
+  b.sideDraw = shuffle(state.side.deck.slice(0, sideDeckMax()).map(u => state.side.pool.find(c => c.uid === u)).filter(Boolean).map(c => ({ ...c })));
   b.bleed = 0; b.frail = 0; b.empower = 0; b.anchor = false; b.veil = false; b.mirror = false; b.rendProof = false;
 }
 function pitchValue(c) { return isJunk(c) ? 0 : defs[c.id]?.pitchAether ?? ((defs[c.id]?.cost ?? 1) + 1); }
@@ -503,7 +511,7 @@ showDeck = function () {
   showDeckBeforeAether(); ensureSide();
   const host = document.querySelector('#menuModal .workshop'); if (!host) return;
   const panel = document.createElement('div'); panel.className = 'panel side-workshop';
-  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + SIDE_DECK_MAX + '</b><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
+  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + sideDeckMax() + '</b><p class="muted">Room for ' + sideDeckMax() + ' of ' + SIDE_DECK_MAX + ' cards. ' + (sideDeckMax() < SIDE_DECK_MAX ? 'Next slot: beat ' + SIDE_GROWTH_BOSSES.filter(id => !state.bosses.includes(id)).map(id => enemies[id] ? enemies[id].name : id)[0] + '. ' : 'Fully expanded. ') + '</p><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
   host.append(panel);
   const list = $('sidePoolCards');
   [...state.side.pool].sort((a, c) => SIDE_CARDS[a.id].tier - SIDE_CARDS[c.id].tier || a.id.localeCompare(c.id)).forEach(card => {
@@ -513,4 +521,13 @@ showDeck = function () {
     btn.onclick = () => { toggleSideCard(card.uid); showDeck(); };
     const actions = document.createElement('div'); actions.className = 'actions'; actions.append(btn); wrap.append(actions); list.append(wrap);
   });
+};
+
+// Round 71: beating a growth boss opens a side deck slot (and fills it).
+const winBattleBeforeSideGrowth = winBattle;
+winBattle = function () {
+  const b = state.battle, before = sideDeckMax();
+  winBattleBeforeSideGrowth();
+  const after = sideDeckMax();
+  if (after > before && state.side) { fillSideDeck(); if (b && Array.isArray(b.special)) b.special.push('✦ Side deck expanded: room for ' + after + ' of ' + SIDE_DECK_MAX + ' side cards.'); save(); }
 };

@@ -16,9 +16,9 @@ function setup(id, hand, opts = {}) {
 // ---------- Starter side deck, pitching, drawing ----------
 newGame(); ensureSide();
 assert.deepEqual(state.side.pool.map(c => c.id), ['purify', 'aegis', 'dispel'], 'new journeys start with a 3-card side kit');
-assert.equal(state.side.deck.length, 3, 'the kit starts in the side deck');
+assert.equal(state.side.pool.length, 3, 'three starter side cards'); assert.equal(state.side.deck.length, 2, 'the side deck starts with room for 2');
 let b = setup('thornling', ['strike', 'strike', 'cleave', 'spark']);
-assert.equal(b.aether, AETHER_START, 'encounters start with 2 Aether'); assert.equal(b.sideDraw.length, 3);
+assert.equal(b.aether, AETHER_START, 'encounters start with 2 Aether'); assert.equal(b.sideDraw.length, 2, 'two side cards in the first fights');
 assert.equal(pitchValue(b.hand[0]), 2, 'a 1-cost card pitches for 2'); assert.equal(pitchValue(b.hand[2]), 3, 'a 2-cost card for 3'); assert.equal(pitchValue(b.hand[3]), 1, 'a 0-cost card for 1');
 togglePitch(b.hand[0].uid); togglePitch(b.hand[1].uid);
 assert.equal(pendingAether(b), 4);
@@ -134,12 +134,19 @@ newGame(); b = setup('thornling', []); b.phase = 'reward'; b.special = [];
 const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .05), null, 'regular: 5% chance'); assert(rollSideDrop(b, .04), 'regular drop under 5%'); b.enemy.elite = true; assert.equal(rollSideDrop(b, .05), null, 'elites: 5% too'); b.enemy.elite = false; assert.equal(state.side.pool.length, n0 + 1);
 b.enemy.boss = true; assert(rollSideDrop(b, .999), 'bosses always drop one');
 assert(sidePoolFor(0).every(id => SIDE_CARDS[id].tier === 0), 'city drops city-tier side cards'); assert(sidePoolFor(2).includes('phase'));
-newGame(); for (let k = 0; k < 6; k++) addSideCard('purify');
+newGame(); state.bosses.push('crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'); for (let k = 0; k < 6; k++) addSideCard('purify');
 assert(state.side.deck.length <= SIDE_DECK_MAX); assert.equal(sideCopies('purify'), SIDE_COPIES, 'at most 2 copies per side card');
 const saved = JSON.parse(JSON.stringify(state)); validateImport(saved);
 const bad = JSON.parse(JSON.stringify(state)); bad.side.pool.push({ uid: 'x9', id: 'purify' }); assert.throws(() => validateImport(bad), /side/);
 const bad2 = JSON.parse(JSON.stringify(state)); bad2.side.pool.push({ uid: 's900', id: 'nope' }); assert.throws(() => validateImport(bad2), /side/);
-const old = JSON.parse(JSON.stringify(state)); delete old.side; validateImport(old); restoreGame(old); assert.equal(state.side.deck.length, 3, 'older saves receive the starter kit');
+const old = JSON.parse(JSON.stringify(state)); delete old.side; validateImport(old); restoreGame(old); assert.equal(state.side.deck.length, Math.min(3, sideDeckMax()), 'older saves receive the starter kit');
 Math.random = realRandom;
+// Round 71: side deck capacity grows 2 -> 6 with bosses.
+newGame(); assert.equal(sideDeckMax(), 2); state.side.pool.push({ uid: 's90', id: 'restore' }, { uid: 's91', id: 'anchor' }, { uid: 's92', id: 'mirror' }, { uid: 's93', id: 'phase' });
+toggleSideCard('s90'); assert.equal(state.side.deck.length, 2, 'cannot exceed the current capacity');
+const grow = ['crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'];
+grow.forEach((id, i) => { state.bosses.push(id); assert.equal(sideDeckMax(), 3 + i); }); state.bosses.push('stormTyrant'); assert.equal(sideDeckMax(), 6, 'never above 6');
+state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '4,0'; const sp = roomSpawns(state.room).find(s => s.type === 'crownSentinel'); if (sp) { state.side.deck = state.side.deck.slice(0, 5); startBattle(sp.uid); state.battle.enemy.hp = 0; winBattle(); assert.equal(sideDeckMax(), 6); assert.equal(state.side.deck.length, 6, 'a new slot is filled automatically'); assert(state.battle.special.some(t => /Side deck expanded/.test(t))); }
+newGame(); state.side.deck = state.side.pool.map(c => c.uid); ensureSide(); assert.equal(state.side.deck.length, 2, 'over-capacity side decks are trimmed');
 console.log('PASS: pitching, Aether, side-deck draws, all 11 enemy afflictions, schedules, all 10 side cards, drops, deck rules and save migration.');
 }`);

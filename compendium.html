@@ -531,7 +531,7 @@
             const grid = document.getElementById('side-grid');
             if (!game || !game.sideCards) { grid.innerHTML = '<p class="dim">Side deck data loads from the game itself.</p>'; return; }
             const a = game.aether || { max: 8, draw: 4, hold: 2, deck: 6, copies: 2 };
-            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Build a side deck of up to ${a.deck} (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
+            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Your side deck starts with room for 2 cards and grows to ${a.deck} (+1 for beating the Crown Sentinel, the Gale Sovereign, the Bloom Tyrant and the Resonant Phantom). Build it (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
             const where = ['Starter or any world', 'Elaris and Vespera', 'Vespera', 'Final bosses only'];
             grid.innerHTML = Object.entries(game.sideCards).map(([id, c]) => {
                 let text = ''; try { text = c.text(); } catch (e) {}
@@ -566,7 +566,7 @@
                 ['Waystones', 'Elaris and Vespera each have a waystone pair: one at the landing, one mid-world. Touch the far stone once to attune it, then travel between the two whenever you like.'],
                 ['Experience', 'Enemies at or above your level give full XP (25, elites 40, bosses 50). Each level you are above an enemy takes 20% off, down to 10% at five or more levels.'],
                 ['Unspent energy', 'Each point of energy left when you end your turn becomes 1 Aether.'],
-                ['Side deck', 'Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
+                ['Side deck', 'Room for 2 side cards at first, growing to 6 as you beat the Crown Sentinel, Gale Sovereign, Bloom Tyrant and Resonant Phantom. Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
                 ['Weaken', 'Talent ability, once per encounter: the enemy\'s next attack deals 3 less damage (+3 per Deep Interference rank), then it wears off.']
             ];
             document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');
