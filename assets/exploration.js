@@ -68,6 +68,7 @@ function ensureExplore(s = state) {
   if (!Array.isArray(s.poi.bought)) s.poi.bought = [];
   if (!Number.isInteger(s.poi.merchantMoves)) s.poi.merchantMoves = 0;
   if (!Array.isArray(s.poi.waystones)) s.poi.waystones = [];
+  if (!Array.isArray(s.poi.nexus)) s.poi.nexus = [];
   if (s.blessing && !Object.hasOwn(BLESSINGS, s.blessing)) s.blessing = null;
 }
 
@@ -362,17 +363,19 @@ document.head.append(exploreStyles);
 
 // =====================================================================
 // Round 70: pacing for Elaris and Vespera — quiet rooms with events, and
-// waystone shortcuts. Quiet rooms have no enemies; each holds an event with
-// a choice. A waystone pair links the landing to a room mid-world: touch the
+// shortcuts. Quiet rooms have no enemies; each holds an event with
+// a choice. (Round 70's waystone pair became Nexus Waypoints in Round 73:
 // far stone once to attune it, then travel between the two from either end.
 // =====================================================================
 const QUIET_ROOMS = {
   elaris: ['2,2', '5,6', '10,7'],
   vespera: ['2,4', '6,4', '10,5']
 };
-const WAYSTONES = {
-  elaris: { far: '7,6', home: '0,0' },
-  vespera: { far: '8,2', home: '0,0' }
+// Round 73: Nexus Waypoints at the start and middle of every world (see below).
+const NEXUS_POINTS = {
+  city: { start: '0,5', mid: '5,6' },
+  elaris: { start: '0,0', mid: '7,6' },
+  vespera: { start: '0,0', mid: '8,2' }
 };
 const pct = f => Math.max(1, Math.ceil(state.maxHp * f));
 function randomImpermanent() { const t = upgradeTargets().filter(c => state.deck.includes(c.uid)); const list = t.length ? t : upgradeTargets(); return list[Math.floor(Math.random() * list.length)] || null; }
@@ -406,14 +409,14 @@ const EVENTS = {
 };
 const EVENT_POOLS = { elaris: ['spring', 'ranger', 'seedpod', 'vines'], vespera: ['shelter', 'conduit', 'scavenger', 'prism'] };
 POI_INFO.event = { icon: '❖', name: 'Event' };
-POI_INFO.waystone = { icon: '⟟', name: 'Waystone' };
+POI_INFO.nexus = { icon: '⟟', name: 'Nexus Waypoint' };
 function isQuietRoom(key, region = activeRegion) { return (QUIET_ROOMS[region] || []).includes(key); }
 // Quiet rooms never spawn enemies (bosses are never in them).
 const roomSpawnsBeforeQuiet = roomSpawns;
 roomSpawns = function (key) { const list = roomSpawnsBeforeQuiet(key); return isQuietRoom(key) ? list.filter(s => s.boss) : list; };
-// Events and waystones take their rooms before the ordinary POIs are placed.
+// Events and mid-world Nexus Waypoints take their rooms before the ordinary POIs are placed.
 const poiEligibleBeforePacing = poiEligible;
-poiEligible = function (key) { return poiEligibleBeforePacing(key) && !isQuietRoom(key) && !(WAYSTONES[activeRegion] && WAYSTONES[activeRegion].far === key); };
+poiEligible = function (key) { return poiEligibleBeforePacing(key) && !isQuietRoom(key) && !(NEXUS_POINTS[activeRegion] && NEXUS_POINTS[activeRegion].mid === key); };
 const worldPOIsBeforePacing = worldPOIs;
 worldPOIs = function (region = activeRegion) {
   const out = worldPOIsBeforePacing(region);
@@ -424,30 +427,29 @@ worldPOIs = function (region = activeRegion) {
     const rand = seeded(hashSeed(state.seed + region + 'events')), order = pool.slice().sort(() => rand() - .5);
     quiet.forEach((key, i) => { if (!rooms[key]) return; const spot = poiSpot(key) || [400, 250]; out[key] = { key, type: 'event', event: order[i % order.length], x: spot[0], y: spot[1], id: region + ':event:' + key }; });
   }
-  const ws = WAYSTONES[region];
-  if (ws && rooms[ws.far]) {
-    const spot = poiSpot(ws.far) || [400, 250];
-    out[ws.far] = { key: ws.far, type: 'waystone', x: spot[0], y: spot[1], id: region + ':waystone:far', target: ws.home };
+  const nx = NEXUS_POINTS[region];
+  if (nx && rooms[nx.mid]) {
+    const spot = poiSpot(nx.mid) || [400, 250];
+    out[nx.mid] = { key: nx.mid, type: 'nexus', x: spot[0], y: spot[1], id: region + ':nexus:' + nx.mid };
   }
   return out;
 };
-// The landing's waystone sits beside the start (the start room is not an ordinary POI room).
+// The start room's waypoint sits beside the landing (the start room is not an ordinary POI room).
 const poiAtBeforePacing = poiAt;
 poiAt = function (key) {
-  const ws = WAYSTONES[activeRegion];
-  if (ws && key === ws.home) return { key, type: 'waystone', x: 250, y: 250, id: activeRegion + ':waystone:home', target: ws.far };
+  const nx = NEXUS_POINTS[activeRegion];
+  if (nx && key === nx.start) return { key, type: 'nexus', x: 250, y: 250, id: activeRegion + ':nexus:' + key };
   return poiAtBeforePacing(key);
 };
-function waystoneAttuned(region = activeRegion) { ensureExplore(); return (state.poi.waystones || []).includes(region); }
 const poiDisplayBeforePacing = poiDisplay;
 poiDisplay = function (p) {
   if (p.type === 'event') { const e = EVENTS[p.event]; return { icon: e.icon, name: e.name }; }
-  if (p.type === 'waystone') return { icon: '⟟', name: 'Waystone' + (waystoneAttuned() ? ' → ' + rooms[p.target].name : '') };
+  if (p.type === 'nexus') return { icon: '⟟', name: 'Nexus Waypoint' };
   return poiDisplayBeforePacing(p);
 };
-// Waystones are never "used up"; events are.
+// Nexus Waypoints are never "used up"; events are.
 const poiUsedBeforePacing = poiUsed;
-poiUsed = function (p) { return p.type === 'waystone' ? false : poiUsedBeforePacing(p); };
+poiUsed = function (p) { return p.type === 'nexus' ? false : poiUsedBeforePacing(p); };
 const openPOIBeforePacing = openPOI;
 openPOI = function (p) {
   if (p.type === 'event') {
@@ -457,20 +459,85 @@ openPOI = function (p) {
       e.choices().map((c, i) => ({ id: 'event' + i, label: c.label, primary: i === 0, disabled: !!c.disabled, onclick: () => { if (poiUsed(p)) return; const msg = c.run(); finishPOI(p, msg); } }))
         .concat([{ id: 'poiLeave', label: 'Not now', onclick: closeMenu }]));
   }
-  if (p.type === 'waystone') {
-    ensureExplore(); state.poi.waystones ||= [];
-    const far = p.id.endsWith(':far');
-    if (far && !waystoneAttuned()) { state.poi.waystones.push(activeRegion); save(); }
-    if (!waystoneAttuned()) return poiMenu('⟟ Waystone', '<p>The stone is dark. Its twin lies deeper in this world: touch that one to attune the pair.</p>', [{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
-    return poiMenu('⟟ Waystone', '<p>' + (far ? 'The stone hums to life — <b>attuned</b>. ' : '') + 'Step through to <b>' + rooms[p.target].name + '</b>. You can travel back and forth any time.</p>',
-      [{ id: 'wayTravel', label: 'Travel to ' + rooms[p.target].name, primary: true, onclick: () => travelWaystone(p.target) }, { id: 'poiLeave', label: 'Stay', onclick: closeMenu }]);
-  }
+  if (p.type === 'nexus') { discoverNexus(); return openNexusMenu(); }
   return openPOIBeforePacing(p);
 };
-function travelWaystone(target) {
-  if (!state || state.battle || !rooms[target]) return;
-  if (typeof tickCooldowns === 'function') tickCooldowns();
-  state.room = target; state.pos = { x: 400, y: 300 };
-  if (!state.visited.includes(target)) state.visited.push(target);
-  poiArmed = null; closeMenu(); save(); renderWorld(); toast('The waystone carries you to ' + rooms[target].name + '.');
+
+// =====================================================================
+// Round 73: Nexus Waypoints. Every world has one at its start and one in
+// its middle. Walking into a waypoint's room discovers it; after that you
+// can teleport to any discovered waypoint — in any world — from the map or
+// by stepping on a waypoint.
+// =====================================================================
+function nexusId(region, key) { return region + ':' + key; }
+function nexusList() {
+  ensureExplore();
+  const out = [];
+  for (const [region, nx] of Object.entries(NEXUS_POINTS)) for (const which of ['start', 'mid']) {
+    const key = nx[which], id = nexusId(region, key);
+    if (state.poi.nexus.includes(id)) out.push({ region, key, which, id });
+  }
+  return out;
 }
+const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera' };
+function nexusRoomName(region, key) {
+  if (region === activeRegion) return rooms[key] ? rooms[key].name : key;
+  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : null;
+  return (src && src[key] && src[key].name) || ({ elaris: { '0,0': 'Dawnroot Landing', '7,6': 'Mistbound Thicket' } }[region] || {})[key] || key;
+}
+function discoverNexus() {
+  if (!state) return false; ensureExplore();
+  const nx = NEXUS_POINTS[activeRegion]; if (!nx || ![nx.start, nx.mid].includes(state.room)) return false;
+  // Older saves: an attuned Round 70 waystone counts as both of that world's points.
+  const id = nexusId(activeRegion, state.room); if (state.poi.nexus.includes(id)) return false;
+  state.poi.nexus.push(id); save();
+  if (state.room === nx.mid) toast('⟟ Nexus Waypoint discovered: ' + rooms[state.room].name + '. Teleport here from the map.');
+  return true;
+}
+function migrateWaystones() {
+  ensureExplore();
+  for (const region of state.poi.waystones || []) { const nx = NEXUS_POINTS[region]; if (!nx) continue; for (const key of [nx.start, nx.mid]) if (!state.poi.nexus.includes(nexusId(region, key))) state.poi.nexus.push(nexusId(region, key)); }
+}
+function nexusTravel(region, key) {
+  if (!state || state.battle || !NEXUS_POINTS[region]) return;
+  if (!state.poi.nexus.includes(nexusId(region, key))) return toast('You have not discovered that Nexus Waypoint yet.');
+  if (typeof tickCooldowns === 'function') tickCooldowns();
+  if (region !== activeRegion) {
+    state.regionVisits[activeRegion] = state.visited;
+    state.region = region; configureRegion(region);
+    state.visited = state.regionVisits[region] || [key]; state.regionVisits[region] = state.visited;
+  }
+  state.room = key; state.pos = { x: 400, y: 300 };
+  if (!state.visited.includes(key)) state.visited.push(key);
+  poiArmed = null; closeMenu(); save(); renderWorld();
+  toast('⟟ The Nexus carries you to ' + rooms[key].name + (region !== 'city' || activeRegion !== 'city' ? ' · ' + NEXUS_WORLD_NAMES[region] : '') + '.');
+}
+function nexusButtonsHTML() {
+  const list = nexusList();
+  if (!list.length) return '<p class="muted">No Nexus Waypoints discovered yet.</p>';
+  return Object.keys(NEXUS_POINTS).filter(r => list.some(n => n.region === r)).map(r => '<div class="nexus-world"><b>' + NEXUS_WORLD_NAMES[r] + '</b><div class="nexus-buttons">' +
+    list.filter(n => n.region === r).map(n => { const here = n.region === activeRegion && n.key === state.room; return '<button class="nexus-go' + (here ? ' here' : '') + '" data-region="' + n.region + '" data-key="' + n.key + '"' + (here ? ' disabled' : '') + '>⟟ ' + nexusRoomName(n.region, n.key) + ' <small>' + (n.which === 'start' ? 'start' : 'mid-world') + (here ? ' · you are here' : '') + '</small></button>'; }).join('') + '</div></div>').join('');
+}
+function wireNexusButtons(root) {
+  const nodes = root && root.querySelectorAll ? root.querySelectorAll('.nexus-go') : [];
+  for (const b of nodes) if (!b.disabled) b.onclick = () => nexusTravel(b.dataset.region, b.dataset.key);
+}
+function openNexusMenu() {
+  poiMenu('⟟ Nexus Waypoint', '<p>The waypoint hums. Choose a discovered waypoint to teleport to — in any world you have reached. You can also teleport from the map.</p><div class="nexus-list">' + nexusButtonsHTML() + '</div>', [{ id: 'poiLeave', label: 'Stay', primary: true, onclick: closeMenu }]);
+  wireNexusButtons($('menuModal'));
+}
+// Discover on arrival (any way you get there: walking, portals, loading a save).
+const renderWorldBeforeNexus = renderWorld;
+renderWorld = function () { if (state) { migrateWaystones(); discoverNexus(); } renderWorldBeforeNexus(); };
+// The map lists every discovered waypoint as a teleport button.
+const showMapBeforeNexus = showMap;
+showMap = function () {
+  showMapBeforeNexus(); if (!state) return;
+  const box = document.createElement('div'); box.className = 'nexus-map';
+  box.innerHTML = '<h3>⟟ Nexus Waypoints</h3>' + nexusButtonsHTML() + (state.battle ? '<p class="muted">Finish the fight before teleporting.</p>' : '');
+  const ret = $('mapReturn'); if (ret && ret.before) ret.before(box);
+  wireNexusButtons(box);
+};
+const nexusStyles = document.createElement('style');
+nexusStyles.textContent = '.nexus-map,.nexus-list{margin:10px 0;padding:10px 12px;border:1px solid #5fd8ff55;border-radius:10px;background:linear-gradient(135deg,#0d2533,#0a1520)}.nexus-map h3{margin:0 0 6px;font:800 15px system-ui;color:#9fe8ff;letter-spacing:.04em}.nexus-world{margin:6px 0}.nexus-world>b{display:block;font:700 12px system-ui;color:#c9d6e2;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}.nexus-buttons{display:flex;flex-wrap:wrap;gap:6px}.nexus-go{padding:6px 12px;border-radius:8px;border:1px solid #5fd8ff;background:#0f3346;color:#e4f8ff;font:600 13px system-ui;cursor:pointer;box-shadow:0 0 8px #5fd8ff44}.nexus-go:hover{background:#15465f}.nexus-go small{color:#8fcbe0;font-weight:500;margin-left:4px}.nexus-go.here{opacity:.55;cursor:default;box-shadow:none}';
+document.head.append(nexusStyles);

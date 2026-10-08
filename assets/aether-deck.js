@@ -487,21 +487,25 @@ renderBattle = function () {
   const panel = document.createElement('div'); panel.className = 'aether-panel';
   const energyBonus = Math.max(0, b.energy), pend = pendingAether(b) + energyBonus, pips = Array.from({ length: AETHER_MAX }, (_, k) => '<i class="' + (k < b.aether ? 'on' : k < Math.min(AETHER_MAX, b.aether + pend) ? 'pending' : '') + '"></i>').join('');
   const avail = sideAvailable(b).slice().sort((x, y) => sideAetherCost(x.id) - sideAetherCost(y.id) || SIDE_CARDS[x.id].name.localeCompare(SIDE_CARDS[y.id].name));
-  panel.innerHTML = '<div class="aether-row"><b>✦ Aether ' + b.aether + '/' + AETHER_MAX + '</b><span class="aether-pips" aria-hidden="true">' + pips + '</span>' + (pend ? '<small>+' + Math.min(pend, AETHER_MAX - b.aether) + ' at end of turn' + (energyBonus ? ' (incl. +' + energyBonus + ' from unspent energy)' : '') + '</small>' : '<small>Pitch cards or end the turn with energy left to gain Aether</small>') + '<button id="sideView" class="ability small side-view-toggle' + (b.sideExpanded ? ' selected' : '') + '" title="Show the full side cards">' + (b.sideExpanded ? '▴ Compact' : '▾ Card details') + '</button></div>'
-    + (avail.length ? '<div class="side-strip' + (b.sideExpanded ? ' expanded' : '') + '" id="sideHand" aria-label="Side deck: ' + avail.length + ' cards, play any for Aether"></div>' : '<p class="side-view-note">Your side deck is used up for this encounter.</p>');
+  panel.innerHTML = '<div class="aether-row"><b>✦ Aether ' + b.aether + '/' + AETHER_MAX + '</b><span class="aether-pips" aria-hidden="true">' + pips + '</span>' + (pend ? '<small>+' + Math.min(pend, AETHER_MAX - b.aether) + ' at end of turn' + (energyBonus ? ' (incl. +' + energyBonus + ' from unspent energy)' : '') + '</small>' : '<small>Pitch cards or end the turn with energy left to gain Aether</small>') + '</div>';
   const handTitle = m.querySelector('.hand-title');
   if (handTitle && handTitle.before) handTitle.before(panel); else m.append(panel);
-  $('sideView').onclick = () => { b.sideExpanded = !b.sideExpanded; renderBattle(); };
+  // Round 72: the side deck is its own column beside your hand — one card per
+  // row, scrolling up and down.
+  const hand = $('hand');
+  if (!hand || !hand.parentNode || !hand.before) return;
+  const row = document.createElement('div'); row.className = 'hand-row';
+  hand.before(row); row.append(hand);
+  const col = document.createElement('aside'); col.className = 'side-column'; col.setAttribute('aria-label', 'Side deck');
+  const ready = avail.filter(c => b.aether >= sideAetherCost(c.id) && sideUsable(b, c.id)).length;
+  col.innerHTML = '<div class="side-col-head"><b>✦ Side deck</b><small>' + (avail.length ? avail.length + ' left · ' + ready + ' playable' : 'used up this fight') + '</small></div><div class="side-col-list" id="sideHand"></div>';
+  row.append(col);
   const host = $('sideHand');
   if (host && host.append) avail.forEach(card => {
     const off = b.aether < sideAetherCost(card.id) || !sideUsable(b, card.id);
-    if (b.sideExpanded) return host.append(sideCardElement(card, () => playSideCard(card.uid), off));
-    // Round 70: compact chip — icon, name and Aether price; the full text is in the tooltip.
-    const def = SIDE_CARDS[card.id], chip = document.createElement('button');
-    chip.className = 'side-chip' + (off ? '' : ' ready'); chip.disabled = off; chip.onclick = () => playSideCard(card.uid);
-    chip.title = def.name + ' · ' + sideAetherCost(card.id) + ' Aether — ' + def.text() + (off && b.aether < sideAetherCost(card.id) ? ' (need ' + sideAetherCost(card.id) + ' Aether)' : '');
-    chip.innerHTML = '<span class="sc-icon">' + def.icon + '</span><span class="sc-name">' + def.name + '</span><span class="sc-cost">' + sideAetherCost(card.id) + '✦</span>';
-    host.append(chip);
+    const el = sideCardElement(card, () => playSideCard(card.uid), off);
+    if (off && b.aether < sideAetherCost(card.id)) el.title = 'Needs ' + sideAetherCost(card.id) + ' Aether (you have ' + b.aether + ').';
+    host.append(el);
   });
 };
 

@@ -2225,3 +2225,24 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 - The Deck Workshop shows "Room for N of 6 cards" and names the boss that opens the next slot. Adding a card beyond the current room explains how to expand it.
 - Battles only bring the cards that fit. Older saves with more cards equipped than they have room for are trimmed to fit.
 - Updated the tests (aether-deck) and the compendium.
+
+## Round 72: the side deck gets its own column beside your hand
+
+- In battle, the side deck now sits in its own column to the right of your hand instead of in a row above it.
+- Side cards are stacked one per row, and the column scrolls up and down. The list is capped at 430px on desktop and 300px on phones.
+- The column header shows how many side cards are left and how many you can afford right now. Cards you can't afford are greyed out, and their tooltip says how much Aether they need.
+- The Aether bar stays above your hand.
+- On phones the column is narrower and its cards are compact: name, Aether price and text, with no art.
+- The Round 70 "Card details" toggle is gone. The column always shows the full card text.
+
+## Round 73: Nexus Waypoints, with teleporting from the map
+
+- Every world now has a **Nexus Waypoint** at its start and another in its middle:
+  - Neon Aftermath: Afterlight Refuge and Tunnelworks Corridor
+  - Elaris: Dawnroot Landing and Mistbound Thicket
+  - Vespera: Stormglass Landing and Glasswind Reach
+- **Walking into a waypoint's room discovers it.** The start waypoints are discovered as soon as you arrive in a world.
+- **Teleporting:** the map has a "Nexus Waypoints" panel listing every waypoint you've discovered, grouped by world. Click one to teleport, including to another world you've already reached. Stepping on a waypoint opens the same list. You can't teleport during a fight.
+- Teleporting into another world remembers where you'd been there.
+- These replace the Round 70 waystones. Older saves with an attuned waystone get both of that world's waypoints.
+- Updated tests/pacing.test.cjs, tests/exploration.test.cjs and the compendium.

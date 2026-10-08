@@ -77,3 +77,31 @@
 .side-chip .sc-icon{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#3b2a7a;font-size:13px}
 .side-chip .sc-cost{padding:1px 6px;border-radius:999px;background:#5b45b8;color:#fff;font-weight:800;font-size:11px}
 @media (max-width:560px){.side-chip{font-size:12px;padding:4px 8px 4px 4px}.side-chip .sc-name{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+/* Round 72: the side deck sits in its own column beside the hand, one card per
+   row, scrolling vertically. */
+#battleModal .hand-row{display:flex;align-items:flex-start;gap:14px}
+#battleModal .hand-row > #hand{flex:1 1 auto;min-width:0}
+#battleModal .side-column{flex:0 0 196px;display:flex;flex-direction:column;border:1px solid #6a55b8;border-radius:12px;background:linear-gradient(180deg,#1d1440,#100b24);box-shadow:inset 0 0 0 1px #ffffff0d,0 0 14px #5b45b833}
+#battleModal .side-col-head{display:flex;flex-direction:column;gap:2px;padding:8px 10px 6px;border-bottom:1px solid #6a55b866}
+#battleModal .side-col-head b{color:#e2d8ff;font:800 13px/1.2 system-ui;letter-spacing:.04em}
+#battleModal .side-col-head small{color:#a99bd6;font:600 11px/1.2 system-ui}
+#battleModal .side-col-list{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 8px;max-height:430px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#8f6bff #1d1440}
+#battleModal .side-col-list .side-wrap{width:172px;flex:0 0 auto}
+#battleModal .side-col-list .card{width:172px;min-width:172px}
+@media (max-width:560px){
+  #battleModal .hand-row{gap:8px}
+  #battleModal .side-column{flex:0 0 118px}
+  #battleModal .side-col-list{max-height:300px;padding:6px 4px;gap:6px}
+  #battleModal .side-col-list .side-wrap,#battleModal .side-col-list .card{width:108px;min-width:108px}
+  #battleModal .side-col-list .card{min-height:0;padding:26px 5px 6px}
+  #battleModal .side-col-list .card .art{display:none}
+  #battleModal .side-col-list .card .card-name{font-size:11px;min-height:0}
+  #battleModal .side-col-list .card .rules{font-size:10px;min-height:0;padding:4px}
+}
+@media (max-width:560px){
+  #battleModal .side-col-list .card .ownership{display:none}
+  #battleModal .side-col-list .card{padding-top:8px}
+  #battleModal .side-col-list .card .cost{top:4px;right:4px;transform:scale(.8);transform-origin:top right}
+  #battleModal .side-col-list .card .card-name{padding-right:30px;line-height:1.15}
+}

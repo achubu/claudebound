@@ -6,7 +6,7 @@ const click = id => { const el = $(id); assert(el && typeof el.onclick === 'func
 newGame(); state.seed = 4242;
 for (const region of ['city', 'elaris', 'vespera']) {
   configureRegion(region); state.region = region;
-  const pois = Object.values(worldPOIs()).filter(p => !['event', 'waystone'].includes(p.type)), eligible = Object.keys(rooms).filter(poiEligible).length;
+  const pois = Object.values(worldPOIs()).filter(p => !['event', 'nexus'].includes(p.type)), eligible = Object.keys(rooms).filter(poiEligible).length;
   assert(pois.length >= Math.round(eligible * .3) && pois.length <= Math.max(Math.round(eligible * POI_SHARE), LORE_PER_WORLD + 4), region + ': about a third of ordinary rooms have a point of interest (' + pois.length + '/' + eligible + ')');
   assert.equal(pois.filter(p => p.type === 'lore').length, LORE_PER_WORLD, region + ': five lore finds');
   for (const t of ['shrine', 'campfire', 'cache']) assert(pois.some(p => p.type === t), region + ' has a ' + t);
