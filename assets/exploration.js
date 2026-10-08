@@ -51,10 +51,10 @@ const BLESSINGS = {
 };
 const MERCHANT_ITEMS = {
   side:    { name: 'Side deck card', cost: 10, text: 'A random side card from this world.' },
-  potion:  { name: 'Healing potion', cost: 5, text: 'One small healing potion.' },
+  potion:  { name: 'Healing potion', cost: 4, repeatable: true, text: 'One small healing potion. Always in stock.' },
   pick:    { name: 'Card bundle', cost: 8, text: 'Choose one of three Impermanent cards from this world.' },
   upgraded:{ name: 'Upgraded card', cost: 12, text: 'Choose one of three Impermanent cards from this world, already upgraded.' },
-  upgradePack: { name: 'Card upgrade pack', cost: 15, text: 'Raise one of your Impermanent cards by one level.' },
+  upgradePack: { name: 'Card upgrade', cost: 12, repeatable: true, text: 'Raise one of your Impermanent cards by one level: ◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3. Always available.' },
   bless:   { name: 'Bottled blessing', cost: 4, text: 'A random shrine blessing for your next fight.' }
 };
 
@@ -67,6 +67,7 @@ function ensureExplore(s = state) {
   if (!Array.isArray(s.poi.loreRewards)) s.poi.loreRewards = [];
   if (!Array.isArray(s.poi.bought)) s.poi.bought = [];
   if (!Number.isInteger(s.poi.merchantMoves)) s.poi.merchantMoves = 0;
+  if (!Array.isArray(s.poi.waystones)) s.poi.waystones = [];
   if (s.blessing && !Object.hasOwn(BLESSINGS, s.blessing)) s.blessing = null;
 }
 
@@ -92,7 +93,7 @@ function worldPOIs(region = activeRegion) {
   const rand = seeded(hashSeed(state.seed + region + 'poi'));
   const order = keys.map(k => [rand(), k]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
   const out = {}; let lore = 0; const guaranteed = ['shrine', 'campfire', 'cache', 'sealed'].sort(() => rand() - .5);
-  const target = Math.round(keys.length * POI_SHARE);
+  const target = Math.max(Math.round(keys.length * POI_SHARE), LORE_PER_WORLD + 4); // always room for all lore and one of each kind
   for (const key of order) {
     if (Object.keys(out).length >= target) break;
     const spot = poiSpot(key); if (!spot) continue;
@@ -123,8 +124,9 @@ function merchantStock() {
   const rand = seeded(hashSeed(state.seed + activeRegion + 'stock' + state.poi.merchantMoves));
   // Always a side card and a card upgrade (an upgraded card or an upgrade pack), plus one other ware.
   // The merchant never sells Soulbound cards or Upgrade Crystals.
-  const upgrade = rand() < .5 ? 'upgraded' : 'upgradePack', others = ['potion', 'pick', 'bless'];
-  return ['side', upgrade, others[Math.floor(rand() * others.length)]];
+  // Round 69: potions and card upgrades are always in stock and never sell out.
+  const others = ['upgraded', 'pick', 'bless'];
+  return ['side', 'potion', 'upgradePack', others[Math.floor(rand() * others.length)]];
 }
 function poiDisplay(p) {
   if (p.type === 'lore') { const [icon, name] = LORE_NAMES[activeRegion] || LORE_NAMES.city; return { icon, name }; }
@@ -249,14 +251,15 @@ function readLore(p) {
   finishPOI(p, msg);
 }
 function openMerchant(p) {
-  const stock = merchantStock(), bought = id => state.poi.bought.includes(p.id + ':' + id);
-  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + MERCHANT_ITEMS[id].cost + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join(''),
-    stock.map((id, i) => ({ id: 'buy' + i, label: (bought(id) ? 'Sold · ' : 'Buy ') + MERCHANT_ITEMS[id].name + ' · ◇ ' + MERCHANT_ITEMS[id].cost, disabled: bought(id) || state.shards < MERCHANT_ITEMS[id].cost || (id === 'upgradePack' && !upgradeTargets().length), onclick: () => buyItem(p, id) })).concat([{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]));
+  const stock = merchantStock(), bought = id => !MERCHANT_ITEMS[id].repeatable && state.poi.bought.includes(p.id + ':' + id);
+  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + (id === 'upgradePack' ? '12–30' : MERCHANT_ITEMS[id].cost) + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join(''),
+    stock.map((id, i) => ({ id: 'buy' + i, label: (bought(id) ? 'Sold · ' : id === 'upgradePack' ? 'Choose a card to upgrade · ◇ ' + cheapestUpgrade() : 'Buy ') + (id === 'upgradePack' ? '' : MERCHANT_ITEMS[id].name + ' · ◇ ' + MERCHANT_ITEMS[id].cost), disabled: bought(id) || state.shards < (id === 'upgradePack' ? cheapestUpgrade() : MERCHANT_ITEMS[id].cost) || (id === 'upgradePack' && !upgradeTargets().length), onclick: () => buyItem(p, id) })).concat([{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]));
 }
 function buyItem(p, id) {
   const item = MERCHANT_ITEMS[id], tag = p.id + ':' + id;
-  if (state.poi.bought.includes(tag) || state.shards < item.cost || (id === 'upgradePack' && !upgradeTargets().length)) return;
-  state.shards -= item.cost; state.poi.bought.push(tag);
+  if (id === 'upgradePack') { if (upgradeTargets().length && state.shards >= cheapestUpgrade()) openUpgradePack(p); return; } // paid per card
+  if ((!item.repeatable && state.poi.bought.includes(tag)) || state.shards < item.cost) return;
+  state.shards -= item.cost; if (!item.repeatable) state.poi.bought.push(tag);
   let msg = 'Bought ' + item.name + '.';
   if (id === 'side') { const pool = sidePoolFor().filter(x => x !== 'stasis'), card = addSideCard(pool[Math.floor(Math.random() * pool.length)]); msg = 'Bought the side card ' + SIDE_CARDS[card.id].name + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : '. Add it in the Deck Workshop.'); }
   if (id === 'potion') state.potions++;
@@ -269,10 +272,26 @@ function buyItem(p, id) {
 }
 function upgradedLevel() { return activeRegion === 'vespera' ? 2 : 1; }
 function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound) && c.level < 3); }
+// Round 69: upgrades are unlimited and priced by the level they reach.
+// The playthrough averaged ~1.5 Shards per regular fight and 150-180 per
+// world, with hundreds left unspent; 12/20/30 makes a full 0→3 upgrade
+// (62 Shards) roughly a third of a world's income.
+const UPGRADE_PRICES = [12, 20, 30];
+function upgradePrice(c) { return UPGRADE_PRICES[Math.min(2, c.level || 0)]; }
+function cheapestUpgrade() { const t = upgradeTargets(); return t.length ? Math.min(...t.map(upgradePrice)) : UPGRADE_PRICES[0]; }
 function openUpgradePack(p) {
-  poiMenu('Card upgrade pack', '<p>Choose one Impermanent card to raise by one level. Its mastery progress starts fresh at the new level.</p><div class="cards" id="packCards"></div>', []);
+  poiMenu('Card upgrade', '<p>Choose one Impermanent card to raise by one level. Its mastery progress starts fresh at the new level.</p><p>You have <b>◇ ' + state.shards + ' Shards</b>. Level 1 costs ◇ 12, level 2 ◇ 20, level 3 ◇ 30.</p><div class="cards" id="packCards"></div>', [{ id: 'packBack', label: 'Back to the merchant', primary: true, onclick: () => p ? openMerchant(p) : closeMenu() }]);
   const host = $('packCards');
-  if (host && host.append) upgradeTargets().forEach(c => host.append(cardElement(c, () => applyUpgradePack(c))));
+  if (host && host.append) upgradeTargets().sort((a, b) => upgradePrice(a) - upgradePrice(b)).forEach(c => {
+    const el = cardElement(c, () => buyUpgrade(c, p), state.shards < upgradePrice(c));
+    const tag = document.createElement('div'); tag.className = 'actions'; tag.textContent = '◇ ' + upgradePrice(c) + ' → level ' + (c.level + 1); el.append(tag); host.append(el);
+  });
+}
+function buyUpgrade(c, p) {
+  const card = owned(c.uid) || c, price = upgradePrice(card);
+  if (card.soulbound || card.level >= 3 || state.shards < price) return;
+  state.shards -= price; applyUpgradePack(card);
+  if (p && upgradeTargets().length && state.shards >= cheapestUpgrade()) openUpgradePack(p);
 }
 function applyUpgradePack(c) {
   const card = owned(c.uid) || c; if (card.soulbound || card.level >= 3) return;
@@ -340,3 +359,118 @@ validateImport = function (s) {
 const exploreStyles = document.createElement('style');
 exploreStyles.textContent = '.poi-node{position:absolute;width:46px;height:46px;transform:translate(-50%,-50%);z-index:5;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,#2b1f4ccc,#140f26cc);border:2px solid #c9a7ff;box-shadow:0 0 16px #b58cff88;animation:poiBob 2.4s ease-in-out infinite}.poi-node::after{content:attr(data-name);position:absolute;top:50px;white-space:nowrap;font:700 10px system-ui;color:#efe6ff;text-shadow:0 1px 2px #000;pointer-events:none}.poi-glyph{font-size:22px;line-height:1;filter:drop-shadow(0 0 4px #fff8)}.poi-node.used{opacity:.45;animation:none;filter:grayscale(.7)}.poi-merchant{border-color:#ffd27a;box-shadow:0 0 18px #ffbf4a99;background:radial-gradient(circle,#4a3410cc,#1e1406cc)}.poi-campfire{border-color:#ff9b5a;box-shadow:0 0 18px #ff7a3a88}.poi-shrine{border-color:#8fe3ff;box-shadow:0 0 18px #6fd6ff88}.poi-sealed{border-color:#ff6b6b}@keyframes poiBob{50%{transform:translate(-50%,calc(-50% - 4px))}}.explore-row{margin-top:4px}.blessing-chip{color:#d9c8ff}.poi-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.poi-option{margin:6px 0}.lore{margin:10px 0;padding:10px 14px;border-left:3px solid #c9a7ff;background:#1a1530;color:#e8e0ff;font-style:italic}.map-poi-summary{color:#d9c8ff}';
 document.head.append(exploreStyles);
+
+// =====================================================================
+// Round 70: pacing for Elaris and Vespera — quiet rooms with events, and
+// waystone shortcuts. Quiet rooms have no enemies; each holds an event with
+// a choice. A waystone pair links the landing to a room mid-world: touch the
+// far stone once to attune it, then travel between the two from either end.
+// =====================================================================
+const QUIET_ROOMS = {
+  elaris: ['2,2', '5,6', '10,7'],
+  vespera: ['2,4', '6,4', '10,5']
+};
+const WAYSTONES = {
+  elaris: { far: '7,6', home: '0,0' },
+  vespera: { far: '8,2', home: '0,0' }
+};
+const pct = f => Math.max(1, Math.ceil(state.maxHp * f));
+function randomImpermanent() { const t = upgradeTargets().filter(c => state.deck.includes(c.uid)); const list = t.length ? t : upgradeTargets(); return list[Math.floor(Math.random() * list.length)] || null; }
+const EVENTS = {
+  // Elaris
+  spring: { icon: '❦', name: 'Moonlit Spring', text: () => 'Cold, clear water pools between the roots. Nothing here wants to fight you.',
+    choices: () => [{ label: 'Rest and drink · heal ' + pct(.5) + ' HP', run: () => { state.hp = Math.min(state.maxHp, state.hp + pct(.5)); return 'You rest by the spring: +' + pct(.5) + ' HP.'; } },
+                    { label: 'Fill your flasks · +2 potions', run: () => { state.potions += 2; return 'You fill two flasks: +2 healing potions.'; } }] },
+  ranger: { icon: '⚕', name: 'Wounded Ranger', text: () => 'A ranger leans against a tree, bleeding through a makeshift bandage.',
+    choices: () => [{ label: 'Give a potion · she shares a side card', disabled: !state.potions, run: () => { state.potions--; const pool = sidePoolFor().filter(x => x !== 'stasis'), c = addSideCard(pool[Math.floor(Math.random() * pool.length)]); return 'The ranger thanks you with ' + SIDE_CARDS[c.id].name + ' (side deck).'; } },
+                    { label: 'Bind the wound yourself · −' + pct(.1) + ' HP, +8 Shards', run: () => { state.hp = Math.max(1, state.hp - pct(.1)); state.shards += 8; return 'She presses 8 Shards into your hand.'; } }] },
+  seedpod: { icon: '✿', name: 'Glowing Seedpod', text: () => 'A seedpod the size of a lantern pulses with Aether.',
+    choices: () => [{ label: 'Absorb it · Aether Well blessing', run: () => { state.blessing = 'aether'; return 'Aether Well: start your next fight with 3 extra Aether.'; } },
+                    { label: 'Crack it open · 60%: heal ' + pct(.4) + ' HP, 40%: −' + pct(.1) + ' HP', run: () => { if (Math.random() < .6) { state.hp = Math.min(state.maxHp, state.hp + pct(.4)); return 'Sweet sap: +' + pct(.4) + ' HP.'; } state.hp = Math.max(1, state.hp - pct(.1)); return 'Bitter spores: −' + pct(.1) + ' HP.'; } }] },
+  vines: { icon: '❧', name: 'Strangling Vines', text: () => 'Vines have overgrown an old satchel. Something inside glints.',
+    choices: () => [{ label: 'Cut through · −' + pct(.15) + ' HP, upgrade a random Impermanent card', disabled: !upgradeTargets().length, run: () => { state.hp = Math.max(1, state.hp - pct(.15)); const c = randomImpermanent(); applyUpgradePack(c); return stat(c).name + ' rose to level ' + c.level + '.'; } },
+                    { label: 'Pry the satchel loose · +5 Shards', run: () => { state.shards += 5; return '+5 Shards.'; } }] },
+  // Vespera
+  shelter: { icon: '⛺', name: 'Storm Shelter', text: () => 'A glass dome keeps the storm out. The silence is almost loud.',
+    choices: () => [{ label: 'Sleep · heal ' + pct(.5) + ' HP', run: () => { state.hp = Math.min(state.maxHp, state.hp + pct(.5)); return 'You sleep through the storm: +' + pct(.5) + ' HP.'; } },
+                    { label: 'Search the lockers · +2 potions', run: () => { state.potions += 2; return '+2 healing potions.'; } }] },
+  conduit: { icon: 'ϟ', name: 'Humming Conduit', text: () => 'Raw current arcs from a cracked conduit.',
+    choices: () => [{ label: 'Channel it · −' + pct(.2) + ' HP, +15 Shards', run: () => { state.hp = Math.max(1, state.hp - pct(.2)); state.shards += 15; return 'The current crystallises: +15 Shards.'; } },
+                    { label: 'Ground it safely · Surge Rite blessing', run: () => { state.blessing = 'surge'; return 'Surge Rite: next fight +1 energy and +1 card on turn 1.'; } }] },
+  scavenger: { icon: '⚙', name: 'Glass Scavenger', text: () => 'A scavenger with mirrored goggles offers a trade.',
+    choices: () => [{ label: 'Trade 10 Shards · upgrade a random Impermanent card', disabled: state.shards < 10 || !upgradeTargets().length, run: () => { state.shards -= 10; const c = randomImpermanent(); applyUpgradePack(c); return stat(c).name + ' rose to level ' + c.level + '.'; } },
+                    { label: 'Trade a potion · +6 Shards', disabled: !state.potions, run: () => { state.potions--; state.shards += 6; return '+6 Shards.'; } }] },
+  prism: { icon: '◈', name: 'Echoing Prism', text: () => 'Your reflection in the prism moves a moment before you do.',
+    choices: () => [{ label: 'Study it · train your whole deck +10 uses', run: () => { active().forEach(c => { for (let k = 0; k < 10; k++) recordCardUse(owned(c.uid) || c); }); return 'Every card in your deck gains 10 mastery uses.'; } },
+                    { label: 'Shatter it · Keen Edge blessing', run: () => { state.blessing = 'edge'; return 'Keen Edge: every attack deals +3 damage next fight.'; } }] }
+};
+const EVENT_POOLS = { elaris: ['spring', 'ranger', 'seedpod', 'vines'], vespera: ['shelter', 'conduit', 'scavenger', 'prism'] };
+POI_INFO.event = { icon: '❖', name: 'Event' };
+POI_INFO.waystone = { icon: '⟟', name: 'Waystone' };
+function isQuietRoom(key, region = activeRegion) { return (QUIET_ROOMS[region] || []).includes(key); }
+// Quiet rooms never spawn enemies (bosses are never in them).
+const roomSpawnsBeforeQuiet = roomSpawns;
+roomSpawns = function (key) { const list = roomSpawnsBeforeQuiet(key); return isQuietRoom(key) ? list.filter(s => s.boss) : list; };
+// Events and waystones take their rooms before the ordinary POIs are placed.
+const poiEligibleBeforePacing = poiEligible;
+poiEligible = function (key) { return poiEligibleBeforePacing(key) && !isQuietRoom(key) && !(WAYSTONES[activeRegion] && WAYSTONES[activeRegion].far === key); };
+const worldPOIsBeforePacing = worldPOIs;
+worldPOIs = function (region = activeRegion) {
+  const out = worldPOIsBeforePacing(region);
+  if (out.__pacing) return out;
+  Object.defineProperty(out, '__pacing', { value: true, enumerable: false });
+  const quiet = QUIET_ROOMS[region] || [], pool = EVENT_POOLS[region] || [];
+  if (quiet.length) {
+    const rand = seeded(hashSeed(state.seed + region + 'events')), order = pool.slice().sort(() => rand() - .5);
+    quiet.forEach((key, i) => { if (!rooms[key]) return; const spot = poiSpot(key) || [400, 250]; out[key] = { key, type: 'event', event: order[i % order.length], x: spot[0], y: spot[1], id: region + ':event:' + key }; });
+  }
+  const ws = WAYSTONES[region];
+  if (ws && rooms[ws.far]) {
+    const spot = poiSpot(ws.far) || [400, 250];
+    out[ws.far] = { key: ws.far, type: 'waystone', x: spot[0], y: spot[1], id: region + ':waystone:far', target: ws.home };
+  }
+  return out;
+};
+// The landing's waystone sits beside the start (the start room is not an ordinary POI room).
+const poiAtBeforePacing = poiAt;
+poiAt = function (key) {
+  const ws = WAYSTONES[activeRegion];
+  if (ws && key === ws.home) return { key, type: 'waystone', x: 250, y: 250, id: activeRegion + ':waystone:home', target: ws.far };
+  return poiAtBeforePacing(key);
+};
+function waystoneAttuned(region = activeRegion) { ensureExplore(); return (state.poi.waystones || []).includes(region); }
+const poiDisplayBeforePacing = poiDisplay;
+poiDisplay = function (p) {
+  if (p.type === 'event') { const e = EVENTS[p.event]; return { icon: e.icon, name: e.name }; }
+  if (p.type === 'waystone') return { icon: '⟟', name: 'Waystone' + (waystoneAttuned() ? ' → ' + rooms[p.target].name : '') };
+  return poiDisplayBeforePacing(p);
+};
+// Waystones are never "used up"; events are.
+const poiUsedBeforePacing = poiUsed;
+poiUsed = function (p) { return p.type === 'waystone' ? false : poiUsedBeforePacing(p); };
+const openPOIBeforePacing = openPOI;
+openPOI = function (p) {
+  if (p.type === 'event') {
+    const e = EVENTS[p.event];
+    if (poiUsed(p)) return poiMenu(e.icon + ' ' + e.name, '<p class="muted">You have already been here. The room is quiet.</p>', [{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
+    return poiMenu(e.icon + ' ' + e.name, '<p>' + e.text() + '</p><p class="muted">A quiet room: no enemies here. Choose one.</p>',
+      e.choices().map((c, i) => ({ id: 'event' + i, label: c.label, primary: i === 0, disabled: !!c.disabled, onclick: () => { if (poiUsed(p)) return; const msg = c.run(); finishPOI(p, msg); } }))
+        .concat([{ id: 'poiLeave', label: 'Not now', onclick: closeMenu }]));
+  }
+  if (p.type === 'waystone') {
+    ensureExplore(); state.poi.waystones ||= [];
+    const far = p.id.endsWith(':far');
+    if (far && !waystoneAttuned()) { state.poi.waystones.push(activeRegion); save(); }
+    if (!waystoneAttuned()) return poiMenu('⟟ Waystone', '<p>The stone is dark. Its twin lies deeper in this world: touch that one to attune the pair.</p>', [{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
+    return poiMenu('⟟ Waystone', '<p>' + (far ? 'The stone hums to life — <b>attuned</b>. ' : '') + 'Step through to <b>' + rooms[p.target].name + '</b>. You can travel back and forth any time.</p>',
+      [{ id: 'wayTravel', label: 'Travel to ' + rooms[p.target].name, primary: true, onclick: () => travelWaystone(p.target) }, { id: 'poiLeave', label: 'Stay', onclick: closeMenu }]);
+  }
+  return openPOIBeforePacing(p);
+};
+function travelWaystone(target) {
+  if (!state || state.battle || !rooms[target]) return;
+  if (typeof tickCooldowns === 'function') tickCooldowns();
+  state.room = target; state.pos = { x: 400, y: 300 };
+  if (!state.visited.includes(target)) state.visited.push(target);
+  poiArmed = null; closeMenu(); save(); renderWorld(); toast('The waystone carries you to ' + rooms[target].name + '.');
+}

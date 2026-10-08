@@ -496,7 +496,13 @@ endTurn=function(){const b=state.battle;if(!b||b.phase!=='fight')return;const do
 const LOOT_CHEST_ODDS={soulbound:.01,crystal:.05,empty:.25,potion:.60};
 const LOOT_THIEVES=['a scavenging fox','a wiry alley cat','a startled crow','a masked raccoon','a quick sewer rat','a one-eared stray dog'];
 function rollLootChest(){const r=Math.random();return r<LOOT_CHEST_ODDS.soulbound?'soulbound':r<LOOT_CHEST_ODDS.crystal?'crystal':r<LOOT_CHEST_ODDS.empty?'empty':r<LOOT_CHEST_ODDS.potion?'potion':'card'}
-winBattle=function(){const b=state.battle;if(b.phase!=='fight')return;b.phase='reward';state.wins++;const levels=gainXP(b.enemy.boss?50:b.enemy.elite?40:25);if(b.enemy.boss){if(!state.bosses.includes(b.id))state.bosses.push(b.id)}else state.cooldowns[b.spawnId]=3;
+// Round 70: less XP for enemies below your level, so you don't outgrow a
+// world just by clearing it. Full XP at or above your level; each level you
+// are above the enemy takes 20% off, down to 10% at 5+ levels.
+const XP_BASE={regular:25,elite:40,boss:50},XP_GAP_MULT=[1,.8,.6,.4,.25,.1];
+function xpMultiplier(enemyLevel,playerLevel=state.playerLevel){const gap=playerLevel-(Number(enemyLevel)||playerLevel);return gap<=0?1:XP_GAP_MULT[Math.min(gap,XP_GAP_MULT.length-1)]}
+function xpReward(b){const base=b.enemy.boss?XP_BASE.boss:b.enemy.elite?XP_BASE.elite:XP_BASE.regular;return Math.max(1,Math.round(base*xpMultiplier(b.enemy.level)))}
+winBattle=function(){const b=state.battle;if(b.phase!=='fight')return;b.phase='reward';state.wins++;const levels=gainXP(b.xpGain=xpReward(b));if(b.enemy.boss){if(!state.bosses.includes(b.id))state.bosses.push(b.id)}else state.cooldowns[b.spawnId]=3;
 const isMiniBoss=b.enemy.boss&&enemies[b.id]&&enemies[b.id].miniBoss;
 b.lootType=rollLootChest();
 // A mini-boss already guarantees its own Upgrade Crystal below — if the
@@ -533,7 +539,7 @@ if(!b.chestOpened){
  return;
 }
 const head=b.lootType==='card'?'<h2>'+stat(b.reward).name+'</h2><p>The loot chest held a new Impermanent card.</p>':b.lootType==='potion'?'<h2>⚗ Small Healing Potion</h2><p>The loot chest held a potion. You now have '+state.potions+'.</p>':b.lootType==='crystal'?'<h2>◆ Upgrade Crystal</h2><p>The loot chest held an Upgrade Crystal — spend it in the Deck Workshop on a mastered card. You now have '+materials()+'.</p>':b.lootType==='soulbound'?'<h2>◆ '+stat(b.reward).name+'</h2><p class="notice">Jackpot! The loot chest held a rare Soulbound card (1% odds).</p>':'<h2>🐾 Empty Chest</h2><p>You open the chest to find '+b.thief+' already inside — it bolts off into the ruins with everything that was in there.</p>';
-m.innerHTML='<div class="eyebrow">VICTORY · LOOT CHEST</div>'+head+'<div id="randomReward" class="cards"></div>'+b.special.map(s=>'<p class="notice">'+s+'</p>').join('')+(b.levels.length?'<p>Level '+state.playerLevel+'! +'+b.levels.length+' maximum HP, +'+b.levels.length*5+' healing, and +'+b.levels.length+' talent point(s).</p>':'')+'<button id="continueReward" class="primary">Continue</button>';
+m.innerHTML='<div class="eyebrow">VICTORY · LOOT CHEST</div>'+head+'<div id="randomReward" class="cards"></div>'+b.special.map(s=>'<p class="notice">'+s+'</p>').join('')+((b.xpGain?'<p class="xp-gain">+'+b.xpGain+' XP'+(xpMultiplier(b.enemy.level,state.playerLevel-(b.levels||[]).length)<1?' <span class="muted">(reduced: this enemy is below your level)</span>':'')+'</p>':'')+b.levels.length?'<p>Level '+state.playerLevel+'! +'+b.levels.length+' maximum HP, +'+b.levels.length*5+' healing, and +'+b.levels.length+' talent point(s).</p>':'')+'<button id="continueReward" class="primary">Continue</button>';
 if(b.lootType==='card'||b.lootType==='soulbound')$('randomReward').append(cardElement(b.reward,()=>{},true));
 if(b.uniqueDrop){const u=state.pool.find(c=>c.uid===b.uniqueDrop);if(u)$('randomReward').append(cardElement(u,()=>{},true))}
 if(b.crystalDrop){const c=state.device.crystals.find(c=>c.uid===b.crystalDrop);if(c){const art=document.createElement('div');art.className='crystal-reward';art.innerHTML=crystalArt(c)+'<b>'+crystalLabel(c)+'</b>';$('randomReward').append(art)}}

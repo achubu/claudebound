@@ -51,7 +51,7 @@
 .intent-bubble.later .affliction{color:#d7e6ff}
 .intent-bubble.later .affliction b{color:#fff}
 .intent-split .encounter-status{margin:6px 2px 0}
-@media (max-width:520px){.intent-bubbles{grid-template-columns:1fr}}
+@media (max-width:360px){.intent-bubbles{grid-template-columns:1fr}}
 /* Round 58: view the side deck at any time (cards can only be drawn with enough Aether). */
 .side-view{margin-top:8px;padding:8px;border:1px dashed #7d6bd1;border-radius:8px;background:#120f26}
 .side-view-note{margin:0 0 6px;font:12px system-ui;color:#d9ccff}
@@ -66,3 +66,14 @@
 
 /* Round 67: side cards are priced in Aether. */
 .side-card .cost.aether{background:radial-gradient(circle at 35% 30%,#e9e0ff,#8f6bff 55%,#3b228f);color:#fff;font-size:12px;min-width:30px;border-radius:999px;box-shadow:0 0 8px #8f6bffaa}
+
+/* Round 70: the side deck is a compact strip so your hand stays on screen. */
+.side-strip{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.side-strip.expanded{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;justify-items:center}
+.side-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:999px;border:1px solid #6a55b8;background:linear-gradient(135deg,#2a1d55,#170f33);color:#d9cff9;font:600 13px/1.1 system-ui;cursor:pointer;opacity:.55}
+.side-chip.ready{opacity:1;border-color:#b9a2ff;box-shadow:0 0 10px #8f6bff66}
+.side-chip.ready:hover{transform:translateY(-1px);box-shadow:0 0 14px #8f6bffaa}
+.side-chip:disabled{cursor:not-allowed}
+.side-chip .sc-icon{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#3b2a7a;font-size:13px}
+.side-chip .sc-cost{padding:1px 6px;border-radius:999px;background:#5b45b8;color:#fff;font-weight:800;font-size:11px}
+@media (max-width:560px){.side-chip{font-size:12px;padding:4px 8px 4px 4px}.side-chip .sc-name{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}

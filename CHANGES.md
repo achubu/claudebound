@@ -2188,3 +2188,27 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 - Only one Weaken is active at a time. When it wears off after the enemy's next attack, the button comes back if you have charges left.
 - The Weaken button shows "N of M charges left". The WEAKENED plate shows the charges remaining, and once all charges are spent it reads "All 3 charges spent".
 - Weaken now runs through a shared `useWeaken()` function. New talent tests cover the charges, one-at-a-time use, and wearing off. The sim bot can use the extra charges.
+
+## Round 69: the merchant always sells potions and unlimited card upgrades
+
+- Every Wandering Merchant now stocks a side card, **healing potions** and **card upgrades**, plus one more ware (an upgraded card, a card bundle or a blessing).
+- **Potions** cost ◇ 4 and never sell out. That's about two regular fights of Shards. A potion heals 5 HP (plus 1 per Recovery Protocol rank), so it's priced to be a cheap top-up.
+- **Card upgrades** are unlimited. You pay when you pick the card, and the price depends on the level reached: ◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3. Taking one card from 0 to 3 costs ◇ 62.
+  - Why these prices: in the playthrough, a world paid about 150–180 Shards, roughly 1.5 per regular fight, 3 per elite and 6–10 per boss, and runs ended with 200–600 Shards left over. At these prices a world's income buys about three full card upgrades, or about ten single steps.
+- The upgrade screen lists your Impermanent cards with their price, cheapest first. Cards you can't afford are greyed out, and you can buy several in a row. Opening it is free, and "Back to the merchant" returns to the shop.
+- Updated the exploration tests and the compendium.
+
+## Round 70: XP by level gap, quiet rooms and waystones, compact side deck
+
+- **Less XP for enemies below your level.** Enemies at or above your level give full XP: 25, elites 40, bosses 50. Each level you are above the enemy takes 20% off (80%, 60%, 40%, 25%), with a 10% floor at five or more levels. The victory screen shows "+N XP" and says when it was reduced. In the playthrough, players left the city at level 20–25 against level 1–9 enemies; now clearing a world no longer outruns it.
+- **Quiet rooms with events in Elaris and Vespera.**
+  - Three rooms per world have no enemies: Elaris 2,2 / 5,6 / 10,7 and Vespera 2,4 / 6,4 / 10,5.
+  - Each holds an event with two choices, three different events per world.
+  - Elaris events: Moonlit Spring, Wounded Ranger, Glowing Seedpod and Strangling Vines.
+  - Vespera events: Storm Shelter, Humming Conduit, Glass Scavenger and Echoing Prism.
+  - The choices cover resting, potions, Shards, risky card upgrades, deck training and blessings. Each event can be used once.
+- **Waystone shortcuts.** Each world has a waystone at the landing and its twin mid-world: Elaris at Mistbound Thicket (level 15), Vespera at Glasswind Reach (level 22). The landing stone stays dark until you touch the far one. After that you can travel between them any time, for example to go back to the start and the merchant.
+- Lore and the four kinds of points of interest are still guaranteed in every world. The minimum number of points of interest was raised so Elaris still fits all of them.
+- **Side deck fix.** In battle the side deck is now a compact row of chips showing each card's icon, name and Aether price, with the full text on hover. Chips you can afford glow and play with one click. "Card details" opens the full cards.
+- On phones, the fighters and both enemy-move bubbles now sit side by side, so your hand is visible without scrolling.
+- New tests in tests/pacing.test.cjs, and the compendium is updated.

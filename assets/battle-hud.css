@@ -105,3 +105,16 @@
 #battleModal .dot-hud .dot-num{font:900 1.05em/1 system-ui}
 #battleModal .dot-hud .dot-cap{font:700 .62em/1 system-ui;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
 #battleModal .dot-hud .dot-detail{flex-basis:100%;font:600 .62em/1.2 system-ui;opacity:.85}
+
+/* Round 70: phones — tighter encounter header so the hand is closer to view. */
+@media (max-width:560px){
+  #battleModal.hud-v2 .battle-compact{font-size:13px}
+  #battleModal.hud-v2 .intent-bubbles{grid-template-columns:1fr 1fr;gap:6px}
+  #battleModal.hud-v2 .intent-bubble{font-size:.85em;padding:6px 8px}
+  #battleModal.hud-v2 .intent-bubble .what{font-size:1em}
+  #battleModal .debuff-strip{min-height:0;padding:.2em .4em;margin-top:.2em}
+  #battleModal.hud-v2 .compact-side{padding:.4em .55em;gap:.25em}
+  #battleModal.hud-v2 .compact-combatants{grid-template-columns:1fr 1fr;gap:.4em}
+  #battleModal.hud-v2 .compact-monster{width:2.4em;height:2.4em}
+  #battleModal .compact-combatants .meter.hud-meter{height:1.35em}
+}
