@@ -51,20 +51,20 @@ TALENT_BRANCHES.disruption.nodes.push(
   // Energy path (from Flux Capacitor)
   { id: 'battery', name: 'Surge Battery', icon: '🔋', max: 1, tier: 7, req: ['capacitor', 1], desc: 'Carry up to 1 unspent energy into your next turn.' },
   // Counter path
-  { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals +2 damage per rank.' },
+  { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals +2 damage per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
   { id: 'resonance', name: 'Resonant Rebound', icon: '↺', max: 1, tier: 3, req: ['counterWeave', 2], desc: 'A successful counter gives you +1 energy next turn.' },
-  { id: 'reflux', name: 'Reflux', icon: '♥', max: 3, tier: 5, req: ['resonance', 1], desc: 'A successful counter heals 2 HP per rank.' },
+  { id: 'reflux', name: 'Reflux', icon: '♥', max: 3, tier: 5, req: ['resonance', 1], desc: 'A successful counter heals 2 HP per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
   { id: 'nullField', name: 'Null Field', icon: '∅', max: 1, tier: 8, req: ['reflux', 1], desc: 'Enemy charged strikes can no longer burn, poison, drain or expose you.' }
 );
 
 TALENT_BRANCHES.resolve.nodes.push(
   // Block path
-  { id: 'bulwark', name: 'Bulwark Doctrine', icon: '▣', max: 3, tier: 1, desc: 'Defense cards grant +1 more Block per rank.' },
-  { id: 'thorns', name: 'Retaliation Coil', icon: '✺', max: 3, tier: 3, req: ['bulwark', 2], desc: 'When your Block absorbs an enemy hit, deal 1 damage back per rank.' },
+  { id: 'bulwark', name: 'Bulwark Doctrine', icon: '▣', max: 3, tier: 1, desc: 'Defense cards grant +1 more Block per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
+  { id: 'thorns', name: 'Retaliation Coil', icon: '✺', max: 3, tier: 3, req: ['bulwark', 2], desc: 'When your Block absorbs an enemy hit, deal 1 damage back per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
   { id: 'fortress', name: 'Fortress Protocol', icon: '⛫', max: 1, tier: 5, req: ['thorns', 1], desc: 'Keep half of your unused Block (up to 6) into the next turn.' },
   { id: 'unbreakable', name: 'Unbreakable', icon: '⬢', max: 1, tier: 8, req: ['fortress', 1], desc: 'Begin every encounter with 6 Block.' },
   // Sustain path (from Vital Mesh)
-  { id: 'leech', name: 'Siphon Edge', icon: '❦', max: 2, tier: 3, req: ['vitality', 1], desc: 'Your first attack each turn heals 1 HP per rank.' },
+  { id: 'leech', name: 'Siphon Edge', icon: '❦', max: 2, tier: 3, req: ['vitality', 1], desc: 'Your first attack each turn heals 1 HP per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
   { id: 'secondWind', name: 'Second Wind', icon: '❂', max: 1, tier: 5, req: ['leech', 2], desc: 'The first time you fall below half health in an encounter, heal 6 HP.' },
   { id: 'undying', name: 'Undying Core', icon: '✚', max: 1, tier: 8, req: ['secondWind', 1], desc: 'Once per encounter, a hit that would defeat you leaves you at 1 HP instead.' },
   // Retain path (from Memory Buffer)
@@ -116,12 +116,12 @@ const talentMatrix = {
     return damage;
   },
   armorIgnore(b) { return 2 * talentRank('sunder') + (hasTalent('dominion') && b.enemyDebuff > 0 ? 2 : 0); },
-  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? talentRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0); },
+  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0); },
   dotBonus() { return 2 * talentRank('kindle'); },
   afterCard(c, d, b, damage) {
     const f = turnFlags(b);
     if (d.damage) {
-      if (!f.leech && hasTalent('leech')) { const heal = talentRank('leech'); state.hp = Math.min(state.maxHp, state.hp + heal); b.logs.push('Siphon Edge: +' + heal + ' HP.'); f.leech = true; }
+      if (!f.leech && hasTalent('leech')) { const heal = scaledRank('leech'); state.hp = Math.min(state.maxHp, state.hp + heal); b.logs.push('Siphon Edge: +' + heal + ' HP.'); f.leech = true; }
       f.attacks++;
     }
     checkSecondWind(b);
@@ -196,7 +196,7 @@ endTurn = function () {
   const b = state.battle; if (!b || b.phase !== 'fight') return;
   const plan = enemyPlan(b), startTurn = b.turn;
   const before = { block: b.block, energy: b.energy };
-  const plating = talentRank('plating');
+  const plating = scaledRank('plating');
   const incoming = plan.kind === 'charge' || plan.kind === 'guard' || plan.kind === 'silenced' ? 0 : Math.max(0, (b.disrupted ? Math.ceil(plan.damage / 2) : plan.damage) - plating);
   const counterHit = plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter;
   const retainedUid = b.savedUid;
@@ -207,14 +207,14 @@ endTurn = function () {
   if (!live) { if (b.phase === 'fight') { save(); renderBattle(); } return; }
   const absorbed = counterHit ? 0 : Math.min(before.block, incoming);
   // Retaliation Coil
-  const thorns = talentRank('thorns');
+  const thorns = scaledRank('thorns');
   if (thorns && absorbed > 0 && b.enemy.hp > 0) { const dmg = thorns; b.enemy.hp = Math.max(0, b.enemy.hp - dmg); b.logs.push('Retaliation Coil: ' + dmg + ' damage back.'); }
   // Counter mastery
   if (counterHit) {
-    const weave = talentRank('counterWeave');
+    const weave = scaledRank('counterWeave');
     if (weave && b.enemy.hp > 0) { b.enemy.hp = Math.max(0, b.enemy.hp - 2 * weave); b.logs.push('Counter Weave: +' + 2 * weave + ' damage.'); }
     if (hasTalent('resonance')) { b.energy += 1; b.logs.push('Resonant Rebound: +1 energy.'); }
-    const reflux = talentRank('reflux');
+    const reflux = scaledRank('reflux');
     if (reflux) { state.hp = Math.min(state.maxHp, state.hp + 2 * reflux); b.logs.push('Reflux: +' + 2 * reflux + ' HP.'); }
   }
   if (!b.enemy.hp) { winBattle(); save(); renderBattle(); return; }

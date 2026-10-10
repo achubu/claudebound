@@ -2246,3 +2246,154 @@ Problem (simulated, all 16 builds, player level = enemy level, arriving with the
 - Teleporting into another world remembers where you'd been there.
 - These replace the Round 70 waystones. Older saves with an attuned waystone get both of that world's waypoints.
 - Updated tests/pacing.test.cjs, tests/exploration.test.cjs and the compendium.
+
+## Round 74: click a waypoint on the map to teleport
+
+- On the exploration map, every Nexus Waypoint you've discovered in the current world has a cyan glow and a "⟟ Teleport" badge. Click it, or focus it and press Enter or Space, to teleport there.
+- The waypoint you're standing at is labelled "⟟ Waypoint" and can't be clicked. Waypoints you haven't discovered aren't clickable, and nothing on the map teleports during a fight.
+- The "Nexus Waypoints" button list under the map stays, for waypoints in other worlds.
+- Map room panels now carry a `data-cells` attribute so map features can find their rooms.
+
+## Round 75: playtest fixes
+
+- **Fixed: phantom level-up line on victory screens.** Since Round 70, every potion or empty-chest victory showed "Level N! +0 maximum HP, +0 healing, and +0 talent point(s)" and hid the XP gained. A missing pair of brackets made the level-up line always appear. Victory screens now show "+N XP" (and say when it was reduced) and only mention a level-up when one happens.
+- **Fixed: card-choice chests didn't show XP at all.** They now show the same "+N XP" line.
+- **Fixed: Elaris and Vespera maps started at "34% complete".** Worlds with no relics counted that part as already done. The percentage now averages only the parts a world actually has.
+- **Simulation harness:** fights now start with the progress a player would have by then, meaning bosses already beaten (so side deck room grows) and the side cards picked up along the way. Before this, every simulated fight used a 2-card starter side deck.
+  - With that fixed, the Bloom Tyrant comes out at 22%, back in its target range, instead of 9%.
+  - Late Vespera is still a little too hard: level 26 regulars 28%, the Arc Sentinel 30%, the Tempest Colossus 21%.
+- New regression test in tests/pacing.test.cjs for the victory screen.
+
+## Round 76: build balance, elite rewards, city events, bounties, full-exploration reward
+
+- **Talent builds balanced late game.** Defensive and control talents gave flat amounts that couldn't keep up with Vespera's numbers. Reactive Plating, Bulwark Doctrine, Retaliation Coil, Siphon Edge, Counter Weave, Reflux and Weaken now scale with the world: ×1.3 in Elaris and ×1.6 in Vespera. Simulated with SEED=7, 20 fights per build, comparing the worst build before and after (✓ means the average is now in its target range):
+
+  | Fight | Average win rate | Worst builds before | Worst builds now |
+  |---|---|---|---|
+  | Vespera level 26 regulars | 28% → 50% ✓ | 0% | 5–25% |
+  | Arc Sentinel | 30% → 43% ✓ | 0% | 0–15% |
+  | Tempest Colossus | 21% → 33% ✓ | 0% | 0–25% |
+
+  - Resolve builds such as R·Retain went from 10–20% to 80–90%. Elemental is still strongest, but no longer the only build that works.
+  - Elaris checked: Bloom Tyrant 33%, Tidebound Warden 45%. The Gale Sovereign came out at 52%, so its health went up from 0.79 to 0.82.
+  - The talent descriptions mention the scaling.
+- **Elites are worth fighting.** An elite's loot chest always gives a card choice instead of an empty chest or a potion (crystal and Soulbound rolls still win). Elites drop 6 Shards instead of 3.
+- **City quiet rooms and events.** Overgrown Alley, Wisplight Row and Corrupted Passage have no enemies. Each holds a city event, three of these four per journey:
+  - Abandoned Terminal: hack it for Shards, or train your deck.
+  - Street Medic: pay for a heal, or get a free potion.
+  - Busted Vending Machine: kick it for potions, or pay for one.
+  - Lost Courier: return the parcel for a blessing and Shards, or open it for a chance at a side card.
+- **Bounties.** Every fight has one optional bounty, shown as a chip in the top bar that turns green when done or grey and crossed out when missed. Victory screens say whether you earned it. The four bounties:
+  - Swift: win within 4 turns (5 for elites, 7 for bosses).
+  - Untouched: lose no HP.
+  - Self-reliant: play no side card.
+  - Overkill: deal 15+ damage with one card.
+  - Rewards: +3 Shards, +5 for elites, +8 for bosses.
+- **Full exploration reward.** Visiting every room and finding every chest and relic in a world gives +20 Shards and a side card, once per world. The map shows a note with the goal.
+- New tests in tests/round76.test.cjs, and the compendium is updated.
+
+## Round 77: Chronospire, the fourth world, and the ⏳ Suspend mechanic
+
+**Suspend** comes from Magic: The Gathering.
+- A card marked ⏳ Suspend N can be played normally, or set aside for 0 energy with its own **⏳ Suspend · free** button.
+- A suspended card waits in the **⏳ Suspended** tray with a big countdown. The number drops by 1 each time you end your turn.
+- At 0 the card plays itself at the start of your turn, for free, with its charged bonus. For example, Temporal Barrage deals 14 + 8 = 22 damage.
+- You can have up to 3 suspended cards at once.
+
+Making it clear on screen:
+- Every Suspend card has a gold "⏳ SUSPEND N" badge. Its rules text spells out the whole rule, including when it fires and its exact charge.
+- The Suspend button says when the card will play itself and what bonus it gets.
+- The tray shows each card's countdown, when it fires and its charge. After a card fires, a green banner shows what it did, including the damage.
+- **How Suspend works** is a 3-step guide. It opens on arrival in Chronospire and the first time you hold a Suspend card, and the tray's button reopens it any time.
+- The combat log also records each suspend and each auto-play.
+
+The new cards (all Impermanent, with art from tools/generate_chrono_card_art.py):
+- Temporal Barrage, Suspend 2: 14 damage, charged +8.
+- Delayed Bulwark, Suspend 1: 9 Block, charged +6.
+- Clockwork Volley, Suspend 2: 3 hits of 4, charged +2 per hit.
+- Future Sight, Suspend 1: draw 2, charged +1 card.
+- Rewind Mend, Suspend 2: heal 7, charged +6. Exhausts.
+- Chrono Spike, Suspend 1: 7 piercing damage, charged +4.
+- Accelerate, costs 0: all suspended countdowns drop by 1, and anything that reaches 0 fires immediately.
+
+New enemy affliction:
+- ⟲ **Rewind** adds 1 turn to every suspended countdown. If nothing is suspended, you lose 1 Aether instead.
+- It can be stopped with Purifying Light or Null Anchor.
+
+**Chronospire**, a clockwork citadel where time is broken:
+- **Getting there:** a rift opens in the Eye of the Tempest after you beat the Tempest Colossus.
+- **Layout:** 34 rooms, all two-way, at levels 28–36.
+- **Enemies:** 8 new regular enemies (Gearhound, Tick Moth, Brass Sentry, Lag Wraith, Hourglass Heron, Pendulum Stag, Rust Wisp, Cog Mauler). They reuse existing sprites, recoloured in brass.
+- **Bosses:**
+  - The Clockwarden, a mini-boss at level 30.
+  - The Paradox Twin, a mini-boss at level 33.
+  - The Chronarch, the final boss at level 36. It switches element every 4 turns.
+- **Points of interest:**
+  - Nexus Waypoints at Chronospire Gate and Hourglass Hall.
+  - Three quiet rooms with four new events: Clockmaker's Bench, Paradox Pool, Giant Hourglass and Echoing Corridor.
+  - Five Chrono Inscription lore entries, two crystal chests and a merchant.
+- **On arrival** you get Temporal Barrage and Chrono Spike, plus the Suspend guide.
+- **Other numbers:** talents scale ×1.9 here, and side cards drop from all tiers. Card rewards come from the Suspend cards plus late-game staples.
+
+Balance (simulated with SEED=7, 10–12 fights per build; the bot suspends every Suspend card that costs 2 or more):
+- Average win rates: regulars 98% at level 28 and 56% at level 35; mini-bosses 48% and 49%; the Chronarch 30%. All are inside their target ranges.
+- If the bot never uses Suspend, level 35 regulars drop to 9% and the Chronarch to 1%, so this world is built around the mechanic.
+
+Fixed along the way:
+- Elaris, Vespera and Chronospire enemies were invisible in the small battle portrait, because their sprites had no size there.
+- The full-exploration map note read "every room, chest here". It now reads "Find every room and hidden chest in this world".
+
+Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEND=1 turns the bot's Suspend use off.
+
+## Round 78: Diagonal shortcuts in Neon Aftermath and Elaris
+
+- New `assets/diagonals.js`. Wherever the old path bent around a corner
+  (A → B → C), A and C now also get a direct diagonal road. The old route still
+  works. Neon Aftermath gains 25 shortcuts and Elaris gains 14. Boss rooms and
+  the joined districts don't get them.
+- Rooms with a diagonal road use the new 8-way roundabout art
+  (`assets/environment/diagonal/neon-8way.webp` and `jungle-8way.webp`).
+- Walk into a corner along the painted diagonal road to cross, or click or tap
+  the gold corner label (↗ ↖ ↘ ↙ plus the room name). You arrive at the
+  matching corner of the next room. The exploration map draws the diagonal
+  links.
+- Enemy levels and room distances are unchanged; they are still measured on the
+  original grid.
+- The industrial foundry maps are saved in `assets/environment/industrial/` for
+  a later world.
+
+## Round 79: Purpose-made roundabout art for Neon Aftermath diagonals
+
+- Each Neon Aftermath diagonal room now shows a painting with **only its open
+  corner roads**. There are 12 variants in `assets/environment/diagonal/city/`,
+  named by their open corners (e.g. `ne-sw.webp`). They were built by combining
+  the quadrants of two matching paintings: one with all four diagonals, one with
+  none.
+- Collision follows the painting: you walk on the roads, sidewalks and
+  roundabout, never on rooftops. The walkable area is a 4-pixel trace stored in
+  `diagonals.js` (`DIAG_MASK_SRC`).
+- You arrive a few steps in along the diagonal you came from. Hidden chests
+  whose usual spot is now inside a building move to the nearest pavement.
+- Tests: the diagonal connectivity check now flood-fills from the centre to
+  each open corner. The chest walkability check accounts for chest relocation.
+- Elaris still uses the earlier jungle art until its matching paintings arrive.
+- Removed the unused squashed `neon-8way.webp`.
+
+## Round 80: Purpose-made jungle crossroads for Elaris diagonals
+
+- Elaris diagonal rooms now use the new jungle crossroads paintings. There are 9
+  variants in `assets/environment/diagonal/elaris/`, built the same way as the
+  city ones: each shows only the paths that are open.
+- Collision follows the dirt paths, the stepping stones and the clearing around
+  the spring. Moss-covered stone curbs and the planted blocks are solid.
+- In painted rooms, the walkable area is exactly the traced paths, with no extra
+  body-width margin, because jungle paths are only about 45px wide.
+- Reaching the room edge near an open corner now counts as taking that diagonal.
+  The painted jungle paths don't always meet the exact corner pixel.
+- Arrival points sit clear of the corner zones, so you can't bounce straight
+  back. Tap-to-move only steps between grid points when the ground in between
+  is open, so it routes around thin wall tips.
+- Corner labels always show their direction arrow.
+- Tests: an arrival must be walkable and outside any corner zone. Corner
+  reachability uses the corner zones.
+- Removed the unused `jungle-8way.webp`.

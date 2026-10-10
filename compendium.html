@@ -353,7 +353,9 @@
               regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth'],
               miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
             { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 42 rooms, levels 19–27.', levels: [19, 26], bossLevels: { arcSentinel: 21, resonantPhantom: 25, stormTyrant: 27 },
-              regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' }
+              regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' },
+            { id: 'chronospire', name: 'Chronospire', blurb: 'A clockwork citadel where time is broken, through the rift in the Eye of the Tempest: 34 rooms, levels 28–36. Home of the ⏳ Suspend mechanic.', levels: [28, 35], bossLevels: { clockwarden: 30, paradoxTwin: 33, chronarch: 36 },
+              regular: ['chronoHound', 'chronoMoth', 'chronoSentry', 'chronoWraith', 'chronoHeron', 'chronoStag', 'chronoWisp', 'chronoMauler'], miniBosses: ['clockwarden', 'paradoxTwin'], boss: 'chronarch' }
         ];
         const ELEMENT_EFFECT = {
             fire: 'Burn: 2 damage at the end of each of your next 2 turns.',
@@ -483,7 +485,7 @@
             if (e.armor) notes.push(`<b>Armor ${e.armor}:</b> blocks ${e.armor} damage from every hit except Pierce cards.`);
             const affl = (game.enemyAfflictions && game.enemyAfflictions[id]) || [];
             if (affl.length && game.afflictions) {
-                const ri = { city: 0, elaris: 1, vespera: 2 }[region.id] || 0;
+                const ri = { city: 0, elaris: 1, vespera: 2, chronospire: 3 }[region.id] || 0;
                 const strikeOnly = affl.length === 1 && game.afflictions[affl[0]].type === 'strike';
                 const when = e.boss ? (e.miniBoss ? 'every 3rd turn (2, 5, 8…), alternating' : 'every 3rd turn in order, and <b>every 2nd turn once enraged</b>') : (strikeOnly ? 'on its plain attacks every 3rd turn (4, 7, 10…)' : 'every 3rd turn (2, 5, 8…)') + '; elites every 2nd turn';
                 notes.push(`<b>Afflictions</b> — ${when}:<br>` + affl.map(a => { const A = game.afflictions[a]; const answer = A.answer.map(x => x === 'cleanse' ? 'spending 2 Aether to cleanse it' : (game.sideCards && game.sideCards[x] ? game.sideCards[x].name : x)).join(', '); return `${A.icon} <b>${esc(A.name)}</b>: ${esc(game.afflictionText ? game.afflictionText(a, ri) : A.name)} <i>Answer: ${esc(answer)}.</i>`; }).join('<br>'));
@@ -562,7 +564,12 @@
                 ['Points of interest', 'About a third of ordinary rooms hold one: Aether Shrines (choose a blessing for your next fight), Campfires (rest, or train a card +15 mastery uses), Supply Caches (Shards), Sealed Caches (risk HP for more Shards) and five lore finds per world (read all five for 15 Shards and a side card).'],
                 ['Shards & the merchant', 'Enemies drop Shards: 1-2 from regulars, 3 from elites, 6 from mini-bosses, 10 from final bosses. The Wandering Merchant (one in every world, shown on the map) sells for Shards: a side card, healing potions (◇ 4, never sell out), unlimited card upgrades for Impermanent cards (◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3), plus an upgraded card, card bundle or blessing. It never sells Soulbound cards or Upgrade Crystals, and moves to a new room whenever you enter a world or fall in battle.'],
                 ['Card rewards', 'A loot chest that holds a card offers three from the current world\'s pool. Take one, or leave them all.'],
-                ['Quiet rooms & events', 'Elaris and Vespera each have three quiet rooms with no enemies. Each holds an event with a choice: rest, gather potions, trade Shards, take a risk for a card upgrade, or earn a blessing.'],
+                ['⏳ Suspend (Chronospire)', 'Cards marked ⏳ Suspend N have a second button: <b>⏳ Suspend · free</b>. Press it and the card leaves your hand for 0 energy and waits in the ⏳ Suspended tray with a countdown of N. Each time you end your turn the countdown drops by 1; at 0 the card plays itself at the start of your turn, for free, with its charged bonus (e.g. Temporal Barrage: 14 + 8 = 22 damage). Up to 3 at once. ⟲ Rewind (an enemy affliction) adds 1 to every countdown; ⏩ Accelerate takes 1 off.'],
+                ['Bounties', 'Every fight comes with one optional bounty: Swift (win within 4 turns, 5 for elites, 7 for bosses), Untouched (lose no HP), Self-reliant (play no side card) or Overkill (deal 15+ damage with one card). Completing it pays +3 Shards (elites +5, bosses +8).'],
+                ['Elites', 'Elites always leave a card choice (unless the chest rolls something rarer) and drop 6 Shards.'],
+                ['Full exploration', 'Explore every room, chest and relic in a world for +20 Shards and a side card, once per world. The map shows your progress.'],
+                ['World-scaled talents', 'Reactive Plating, Bulwark Doctrine, Retaliation Coil, Siphon Edge, Counter Weave, Reflux and Weaken grow ×1.3 in Elaris and ×1.6 in Vespera, so defensive and control builds keep up late.'],
+                ['Quiet rooms & events', 'Every world has three quiet rooms with no enemies. Each holds an event with a choice: rest, gather potions, trade Shards, take a risk for a card upgrade, or earn a blessing.'],
                 ['Nexus Waypoints', 'Every world has a Nexus Waypoint at its start and another in its middle (Tunnelworks Corridor, Mistbound Thicket, Glasswind Reach). Walking into one discovers it. Then teleport to any discovered waypoint, in any world you have reached, from the map or by stepping on a waypoint.'],
                 ['Experience', 'Enemies at or above your level give full XP (25, elites 40, bosses 50). Each level you are above an enemy takes 20% off, down to 10% at five or more levels.'],
                 ['Unspent energy', 'Each point of energy left when you end your turn becomes 1 Aether.'],

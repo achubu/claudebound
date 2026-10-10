@@ -118,3 +118,7 @@
   #battleModal.hud-v2 .compact-monster{width:2.4em;height:2.4em}
   #battleModal .compact-combatants .meter.hud-meter{height:1.35em}
 }
+
+/* Round 77: wildlife-style sprites (Elaris, Vespera, Chronospire) were invisible
+   in the compact battle portrait — give them a size and their first frame. */
+#battleModal .compact-monster .wildlife-sprite{display:block;width:100%;height:100%;background-repeat:no-repeat;background-size:400% 100%;background-position:0 0;image-rendering:pixelated}

@@ -20,7 +20,7 @@
 // shown one turn ahead, so you can pitch now and answer it next turn.
 // =====================================================================
 const STATIC_CLEANSE_COST = 2, AETHER_START = 2, AETHER_MAX = 8, SIDE_DRAW_COST = 4, SIDE_HAND_MAX = 2, SIDE_DECK_MAX = 6, SIDE_COPIES = 2, MIN_CYCLE = 4;
-const regionIndex = () => ({ city: 0, elaris: 1, vespera: 2 })[typeof activeRegion === 'string' ? activeRegion : 'city'] || 0;
+const regionIndex = () => ({ city: 0, elaris: 1, vespera: 2, chronospire: 3 })[typeof activeRegion === 'string' ? activeRegion : 'city'] || 0;
 
 // ---------------------------------------------------------------------
 // Enemy afflictions
@@ -338,7 +338,7 @@ endTurn = function () {
   const dot = (b.poison || 0) + (b.burnTurns > 0 ? b.burn : 0);
   const countered = plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter;
   const acts = !(b.freeze > 0) && plan.kind !== 'silenced' && !countered && dot < b.enemy.hp;
-  const plating = talentRank('plating');
+  const plating = scaledRank('plating');
   let siphon = 0;
   if (acts) {
     if (rider === 'rend') { if (b.rendProof) b.logs.push('Aegis Ward holds against Rend.'); else { const cut = Math.ceil(b.block / 2); b.block -= cut; if (cut) b.logs.push('Rend: cuts through ' + cut + ' of your Block.'); } }

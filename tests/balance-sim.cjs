@@ -47,12 +47,18 @@ function deckFor(region, L) {
   const basic = !!process.env.BASIC_DECKS;
   if (region === 'city') return L <= 3 ? ['strike', 'strike', 'guard', 'guard', 'focus', 'mend'] : basic ? ['strike', 'cleave', 'riposte', 'bastion', 'shatter', 'mend', 'cleave', 'bastion', 'riposte', 'shatter'] : ['strike', 'cleave', 'bastion', 'breachSpike', 'shatter', 'staticShield', 'riposte', 'mend', 'bulwarkBash', 'arcJab'];
   if (basic || region === 'elaris') return basic ? ['cleave', 'counter', 'bastion', 'cinder', 'venom', 'riposte', 'shatter', 'cleave', 'bastion', 'counter', 'mend', 'strike'] : ['cleave', 'counter', 'bastion', 'cinder', 'thornlash', 'rootbind', 'riposte', 'wildfire', 'shatter', 'bastion', 'mend', 'tidecall'];
+  if (region === 'chronospire') return ['temporalBarrage', 'chronoSpike', 'delayedBulwark', 'counter', 'bastion', 'chainLightning', 'prismLance', 'mirrorguard', 'clockworkVolley', 'rewindMend', 'cleave', 'accelerate'];
   return ['cleave', 'counter', 'bastion', 'chainLightning', 'prismLance', 'cinder', 'mirrorguard', 'bastion', 'venom', 'counter', 'mend', 'stormBattery'];
 }
 
+// Round 75: fights see the progress a player would have by then — bosses
+// already beaten (side deck capacity grows with them) and the side cards
+// that drop along the way. Earlier sims always used capacity 2 and the kit.
+const PRIOR_BOSSES = { city: [], elaris: ['moonKnight', 'crownSentinel', 'thornWarden'], vespera: ['moonKnight', 'crownSentinel', 'thornWarden', 'tidewardenElaris', 'galeSovereign', 'bloomTyrant'], chronospire: ['moonKnight', 'crownSentinel', 'thornWarden', 'tidewardenElaris', 'galeSovereign', 'bloomTyrant', 'arcSentinel', 'resonantPhantom', 'stormTyrant'] };
+const PRIOR_SIDE = { city: [], elaris: ['restore', 'anchor'], vespera: ['restore', 'anchor', 'ground', 'mirror'], chronospire: ['restore', 'anchor', 'ground', 'mirror', 'phase'] };
 const { context, run } = makeContext();
-run(BOT);if(process.env.NO_SIDE)run('globalThis.NO_SIDE=1');
-const REGIONS = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera' };
+run(BOT);if(process.env.NO_SIDE)run('globalThis.NO_SIDE=1');if(process.env.NO_SUSPEND)run('globalThis.NO_SUSPEND=1');
+const REGIONS = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera', chronospire: 'Chronospire' };
 function evaluate(over, only = null, quiet = false) {
 const log = quiet ? () => {} : console.log;
 run(`Object.assign(BALANCE, JSON.parse(JSON.stringify(globalThis.__BASE_BALANCE ||= JSON.parse(JSON.stringify(BALANCE)))), ${JSON.stringify(over)})`);
@@ -81,7 +87,7 @@ for (const [region, regionName] of Object.entries(REGIONS)) {
         run(`Math.random=(()=>{let s=${(i + 1 + Number(process.env.SEED || 0) * 1000) * 48271 + lv};return()=>{s=(s*16807)%2147483647;return (s-1)/2147483646}})();
           newGame();configureRegion('${region}');state.region='${region}';state.playerLevel=${Math.max(1, lv + Number(process.env.LEVEL_DELTA || 0))};allocate(${JSON.stringify(plan)});syncTalentVitals(false);state.hp=state.maxHp;
           state.pool=${JSON.stringify(deckFor(region, L))}.slice(0,maxDeckSize()).map(id=>{const c=make(id);c.level=${cardLevelFor(Math.max(1, lv + Number(process.env.LEVEL_DELTA || 0)))};return c});
-          state.deck=state.pool.map(c=>c.uid);state.cooldowns={};state.bosses=[];state.cleared=[];state.room='${room}';state.pos={x:400,y:300};startBattle('${uid}');
+          state.deck=state.pool.map(c=>c.uid);state.cooldowns={};state.bosses=${JSON.stringify(PRIOR_BOSSES[region]||[])};ensureSide();for(const id of ${JSON.stringify(PRIOR_SIDE[region]||[])})state.side.pool.push({uid:'s'+(state.side.next++),id});if(typeof fillSideDeck==='function')fillSideDeck();state.cleared=[];state.room='${room}';state.pos={x:400,y:300};startBattle('${uid}');
           globalThis.__r=state.battle?playOutBattle():{won:false,aborted:true};`);
         if (context.__r.aborted) throw new Error('fight did not start: ' + region + ' ' + room);
         if (context.__r.won) wins++;

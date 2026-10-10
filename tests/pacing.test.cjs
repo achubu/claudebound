@@ -8,6 +8,9 @@ newGame(); state.playerLevel = 10; state.xp = 0; state.room = '1,5'; startBattle
 let b = state.battle; b.enemy.level = 3; b.enemy.elite = false; b.enemy.boss = false; b.enemy.hp = 0; winBattle();
 assert.equal(b.xpGain, Math.round(25 * .1)); assert.equal(state.xp, b.xpGain, 'a level-3 enemy gives a level-10 player 10% XP');
 newGame(); state.room = '1,5'; startBattle(roomSpawns(state.room).find(s => !s.boss).uid); b = state.battle; b.enemy.level = 1; b.enemy.hp = 0; winBattle(); assert.equal(b.xpGain, b.enemy.elite ? 40 : 25, 'same level: full XP');
+// Round 75 regression: the reward screen shows the XP and no phantom level-up line.
+for (const loot of ['potion', 'empty']) { newGame(); state.room = '1,5'; startBattle(roomSpawns(state.room).find(s => !s.boss).uid); const bb = state.battle; bb.enemy.hp = 0; winBattle(); bb.lootType = loot; bb.chestOpened = true; renderBattle();
+  const html = document.getElementById('battleModal').innerHTML; assert(/[+][0-9]+ XP/.test(html), loot + ': the reward screen shows the XP gained'); assert(!/maximum HP, [+]0 healing/.test(html), loot + ': no level-up line without a level-up'); }
 // Quiet rooms, events and waystones in Elaris and Vespera.
 for (const region of ['elaris', 'vespera']) {
   newGame(); state.seed = 99; state.region = region; configureRegion(region); state.room = '0,0'; state.visited = ['0,0']; ensureExplore();

@@ -15,6 +15,15 @@ function touchGrid(area){
  }
  const grid={step,cols,rows,valid};touchGridCache.set(cacheKey,grid);return grid;
 }
+// Painted rooms can have thin wall tips between two open grid points, so a
+// step is only allowed when the ground between the two cell centres is open.
+function touchEdgeOpen(area,step,cols,a,b){
+ for(const f of [.25,.5,.75]){
+  const x=((a%cols)+((b%cols)-(a%cols))*f)*step+10,y=(Math.floor(a/cols)+(Math.floor(b/cols)-Math.floor(a/cols))*f)*step+10,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
+  if(area.cells.includes(key)&&!walkable(key,x-cx*800,y-cy*500,0))return false;
+ }
+ return true;
+}
 function findTouchPath(area,start,target){
  const {step,cols,rows,valid}=touchGrid(area),point=i=>({x:Math.max(12,Math.min(area.width-12,(i%cols)*step+10)),y:Math.max(12,Math.min(area.height-12,Math.floor(i/cols)*step+10))});
  function nearest(p){let best=-1,distance=Infinity;for(let i=0;i<valid.length;i++)if(valid[i]){const q=point(i),d=(q.x-p.x)**2+(q.y-p.y)**2;if(d<distance){best=i;distance=d}}return{index:best,distance}}
@@ -22,7 +31,7 @@ function findTouchPath(area,start,target){
  const previous=new Int32Array(valid.length);previous.fill(-2);previous[source.index]=-1;
  const queue=[source.index];for(let head=0;head<queue.length&&previous[goal.index]===-2;head++){
   const at=queue[head],x=at%cols,y=Math.floor(at/cols);
-  for(const next of [x>0?at-1:-1,x<cols-1?at+1:-1,y>0?at-cols:-1,y<rows-1?at+cols:-1])if(next>=0&&valid[next]&&previous[next]===-2){previous[next]=at;queue.push(next)}
+  for(const next of [x>0?at-1:-1,x<cols-1?at+1:-1,y>0?at-cols:-1,y<rows-1?at+cols:-1])if(next>=0&&valid[next]&&previous[next]===-2&&touchEdgeOpen(area,step,cols,at,next)){previous[next]=at;queue.push(next)}
  }
  if(previous[goal.index]===-2)return null;
  const result=[];for(let at=goal.index;at!==-1;at=previous[at])result.push(point(at));return result.reverse();

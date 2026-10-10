@@ -271,7 +271,7 @@ function buyItem(p, id) {
   if (id === 'upgradePack') return openUpgradePack(p);
   toast(msg); openMerchant(p);
 }
-function upgradedLevel() { return activeRegion === 'vespera' ? 2 : 1; }
+function upgradedLevel() { return activeRegion === 'vespera' || activeRegion === 'chronospire' ? 2 : 1; }
 function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound) && c.level < 3); }
 // Round 69: upgrades are unlimited and priced by the level they reach.
 // The playthrough averaged ~1.5 Shards per regular fight and 150-180 per
@@ -306,7 +306,7 @@ function openBundle(level = 0) {
 }
 
 // --- Shards from fights, blessings in fights, merchant moving on ---
-function shardDrop(b) { return b.enemy.boss ? ((enemies[b.id] || {}).miniBoss ? 6 : 10) : b.enemy.elite ? 3 : 1 + (Math.random() < .5 ? 1 : 0); }
+function shardDrop(b) { return b.enemy.boss ? ((enemies[b.id] || {}).miniBoss ? 6 : 10) : b.enemy.elite ? 6 : 1 + (Math.random() < .5 ? 1 : 0); } // Round 76: elites 3 → 6
 const winBattleBeforeExplore = winBattle;
 winBattle = function () {
   const b = state.battle; if (!b || b.phase !== 'fight') return;
@@ -368,6 +368,7 @@ document.head.append(exploreStyles);
 // far stone once to attune it, then travel between the two from either end.
 // =====================================================================
 const QUIET_ROOMS = {
+  city: ['2,3', '4,2', '7,7'], // Round 76
   elaris: ['2,2', '5,6', '10,7'],
   vespera: ['2,4', '6,4', '10,5']
 };
@@ -380,6 +381,19 @@ const NEXUS_POINTS = {
 const pct = f => Math.max(1, Math.ceil(state.maxHp * f));
 function randomImpermanent() { const t = upgradeTargets().filter(c => state.deck.includes(c.uid)); const list = t.length ? t : upgradeTargets(); return list[Math.floor(Math.random() * list.length)] || null; }
 const EVENTS = {
+  // Neon Aftermath (Round 76)
+  terminal: { icon: '⌨', name: 'Abandoned Terminal', text: () => 'A cracked terminal still flickers with a security prompt.',
+    choices: () => [{ label: 'Hack it · −' + pct(.1) + ' HP, +10 Shards', run: () => { state.hp = Math.max(1, state.hp - pct(.1)); state.shards += 10; return 'The lock shocks you, but the vault opens: +10 Shards.'; } },
+                    { label: 'Download combat logs · train your deck +10 uses', run: () => { active().forEach(c => { for (let k = 0; k < 10; k++) recordCardUse(owned(c.uid) || c); }); return 'Every card in your deck gains 10 mastery uses.'; } }] },
+  medic: { icon: '✚', name: 'Street Medic', text: () => 'A medic has set up a clinic in a burned-out kiosk.',
+    choices: () => [{ label: 'Pay ◇ 6 · heal ' + pct(.5) + ' HP', disabled: state.shards < 6, run: () => { state.shards -= 6; state.hp = Math.min(state.maxHp, state.hp + pct(.5)); return 'Patched up: +' + pct(.5) + ' HP.'; } },
+                    { label: 'Ask for supplies · +1 potion', run: () => { state.potions++; return 'She hands you a healing potion.'; } }] },
+  vending: { icon: '▣', name: 'Busted Vending Machine', text: () => 'A vending machine hums, its glass cracked. Potions glint inside.',
+    choices: () => [{ label: 'Kick it · 60%: +2 potions, 40%: −' + pct(.1) + ' HP', run: () => { if (Math.random() < .6) { state.potions += 2; return 'Two potions clatter out.'; } state.hp = Math.max(1, state.hp - pct(.1)); return 'It sparks and bites back: −' + pct(.1) + ' HP.'; } },
+                    { label: 'Pay ◇ 3 · +1 potion', disabled: state.shards < 3, run: () => { state.shards -= 3; state.potions++; return '+1 healing potion.'; } }] },
+  courier: { icon: '✉', name: 'Lost Courier', text: () => 'A sealed parcel lies next to a dropped delivery drone.',
+    choices: () => [{ label: 'Return it · Ward of Glass blessing, +4 Shards', run: () => { state.blessing = 'ward'; state.shards += 4; return 'The drone chirps thanks: +4 Shards and Ward of Glass for your next fight.'; } },
+                    { label: 'Open it · 50%: a side card', run: () => { if (Math.random() < .5) { const pool = sidePoolFor().filter(x => x !== 'stasis'), c = addSideCard(pool[Math.floor(Math.random() * pool.length)]); return 'Inside: ' + SIDE_CARDS[c.id].name + ' (side deck).'; } return 'Empty packing foam. Someone got here first.'; } }] },
   // Elaris
   spring: { icon: '❦', name: 'Moonlit Spring', text: () => 'Cold, clear water pools between the roots. Nothing here wants to fight you.',
     choices: () => [{ label: 'Rest and drink · heal ' + pct(.5) + ' HP', run: () => { state.hp = Math.min(state.maxHp, state.hp + pct(.5)); return 'You rest by the spring: +' + pct(.5) + ' HP.'; } },
@@ -407,7 +421,7 @@ const EVENTS = {
     choices: () => [{ label: 'Study it · train your whole deck +10 uses', run: () => { active().forEach(c => { for (let k = 0; k < 10; k++) recordCardUse(owned(c.uid) || c); }); return 'Every card in your deck gains 10 mastery uses.'; } },
                     { label: 'Shatter it · Keen Edge blessing', run: () => { state.blessing = 'edge'; return 'Keen Edge: every attack deals +3 damage next fight.'; } }] }
 };
-const EVENT_POOLS = { elaris: ['spring', 'ranger', 'seedpod', 'vines'], vespera: ['shelter', 'conduit', 'scavenger', 'prism'] };
+const EVENT_POOLS = { city: ['terminal', 'medic', 'vending', 'courier'], elaris: ['spring', 'ranger', 'seedpod', 'vines'], vespera: ['shelter', 'conduit', 'scavenger', 'prism'] };
 POI_INFO.event = { icon: '❖', name: 'Event' };
 POI_INFO.nexus = { icon: '⟟', name: 'Nexus Waypoint' };
 function isQuietRoom(key, region = activeRegion) { return (QUIET_ROOMS[region] || []).includes(key); }
@@ -482,7 +496,7 @@ function nexusList() {
 const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera' };
 function nexusRoomName(region, key) {
   if (region === activeRegion) return rooms[key] ? rooms[key].name : key;
-  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : null;
+  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : null;
   return (src && src[key] && src[key].name) || ({ elaris: { '0,0': 'Dawnroot Landing', '7,6': 'Mistbound Thicket' } }[region] || {})[key] || key;
 }
 function discoverNexus() {
@@ -537,7 +551,115 @@ showMap = function () {
   box.innerHTML = '<h3>⟟ Nexus Waypoints</h3>' + nexusButtonsHTML() + (state.battle ? '<p class="muted">Finish the fight before teleporting.</p>' : '');
   const ret = $('mapReturn'); if (ret && ret.before) ret.before(box);
   wireNexusButtons(box);
+  // Round 74: discovered waypoints on the map itself are clickable too.
+  const modal = $('menuModal');
+  if (modal && modal.querySelectorAll) for (const n of nexusList().filter(n => n.region === activeRegion)) {
+    const panel = [...modal.querySelectorAll('.panel[data-cells]')].find(el => (el.dataset.cells || '').split(' ').includes(n.key));
+    if (!panel) continue;
+    const here = n.key === state.room || (typeof getJoinedArea === 'function' && getJoinedArea(n.key).cells.includes(state.room));
+    panel.classList.add('nexus-node'); if (here) panel.classList.add('nexus-here');
+    panel.title = here ? 'Nexus Waypoint · you are here' : 'Nexus Waypoint · click to teleport here';
+    if (!here && !state.battle) { panel.setAttribute('role', 'button'); panel.tabIndex = 0; panel.onclick = () => nexusTravel(n.region, n.key); panel.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nexusTravel(n.region, n.key); } }; }
+    const badge = document.createElement('i'); badge.className = 'nexus-badge'; badge.textContent = here ? '⟟ Waypoint' : '⟟ Teleport'; panel.append(badge);
+  }
 };
 const nexusStyles = document.createElement('style');
-nexusStyles.textContent = '.nexus-map,.nexus-list{margin:10px 0;padding:10px 12px;border:1px solid #5fd8ff55;border-radius:10px;background:linear-gradient(135deg,#0d2533,#0a1520)}.nexus-map h3{margin:0 0 6px;font:800 15px system-ui;color:#9fe8ff;letter-spacing:.04em}.nexus-world{margin:6px 0}.nexus-world>b{display:block;font:700 12px system-ui;color:#c9d6e2;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}.nexus-buttons{display:flex;flex-wrap:wrap;gap:6px}.nexus-go{padding:6px 12px;border-radius:8px;border:1px solid #5fd8ff;background:#0f3346;color:#e4f8ff;font:600 13px system-ui;cursor:pointer;box-shadow:0 0 8px #5fd8ff44}.nexus-go:hover{background:#15465f}.nexus-go small{color:#8fcbe0;font-weight:500;margin-left:4px}.nexus-go.here{opacity:.55;cursor:default;box-shadow:none}';
+nexusStyles.textContent = '.nexus-map,.nexus-list{margin:10px 0;padding:10px 12px;border:1px solid #5fd8ff55;border-radius:10px;background:linear-gradient(135deg,#0d2533,#0a1520)}.nexus-map h3{margin:0 0 6px;font:800 15px system-ui;color:#9fe8ff;letter-spacing:.04em}.nexus-world{margin:6px 0}.nexus-world>b{display:block;font:700 12px system-ui;color:#c9d6e2;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}.nexus-buttons{display:flex;flex-wrap:wrap;gap:6px}.nexus-go{padding:6px 12px;border-radius:8px;border:1px solid #5fd8ff;background:#0f3346;color:#e4f8ff;font:600 13px system-ui;cursor:pointer;box-shadow:0 0 8px #5fd8ff44}.nexus-go:hover{background:#15465f}.nexus-go small{color:#8fcbe0;font-weight:500;margin-left:4px}.nexus-go.here{opacity:.55;cursor:default;box-shadow:none}.panel.nexus-node{box-shadow:0 0 0 2px #5fd8ff,0 0 14px #5fd8ff88}.panel.nexus-node:not(.nexus-here){cursor:pointer}.panel.nexus-node:not(.nexus-here):hover{box-shadow:0 0 0 2px #9fefff,0 0 22px #5fd8ffcc;filter:brightness(1.15)}.nexus-badge{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);padding:1px 7px;border-radius:999px;background:#0f3346;border:1px solid #5fd8ff;color:#bff3ff;font:700 9px/1.4 system-ui;font-style:normal;white-space:nowrap;pointer-events:none}';
 document.head.append(nexusStyles);
+
+// =====================================================================
+// Round 76: Bounties — every fight offers one optional challenge for
+// bonus Shards — and a reward for exploring a world to 100%.
+// =====================================================================
+const BOUNTIES = {
+  swift:     { name: 'Swift', text: b => 'Win within ' + bountyTurns(b) + ' turns', check: b => b.turn <= bountyTurns(b) },
+  untouched: { name: 'Untouched', text: () => 'Win without losing any HP', check: b => !b.bountyHurt },
+  selfReliant: { name: 'Self-reliant', text: () => 'Win without playing a side card', check: b => !b.bountySide },
+  overkill:  { name: 'Overkill', text: () => 'Deal 15+ damage with a single card', check: b => (b.bountyBigHit || 0) >= 15 }
+};
+function bountyTurns(b) { return b.enemy.boss ? 7 : b.enemy.elite ? 5 : 4; }
+function bountyReward(b) { return b.enemy.boss ? 8 : b.enemy.elite ? 5 : 3; }
+const startBattleBeforeBounty = startBattle;
+startBattle = function (spawnId) {
+  startBattleBeforeBounty(spawnId);
+  const b = state && state.battle; if (!b || b.phase !== 'fight' || b.bounty) return;
+  const ids = Object.keys(BOUNTIES); b.bounty = ids[Math.floor(Math.random() * ids.length)];
+  b.bountyHurt = false; b.bountySide = 0; b.bountyBigHit = 0;
+  if (typeof save === 'function') save();
+};
+const endTurnBeforeBounty = endTurn;
+endTurn = function () {
+  const b = state && state.battle, hp = state ? state.hp : 0;
+  endTurnBeforeBounty();
+  if (b && state && state.hp < hp) b.bountyHurt = true;
+};
+const playCardBeforeBounty = playCard;
+playCard = function (i) {
+  const b = state && state.battle, hp = b && b.enemy ? b.enemy.hp + (b.enemy.guard || 0) + (b.enemy.barrier || 0) : 0;
+  const r = playCardBeforeBounty(i);
+  if (b && b.enemy) { const dealt = hp - (b.enemy.hp + (b.enemy.guard || 0) + (b.enemy.barrier || 0)); if (dealt > (b.bountyBigHit || 0)) b.bountyBigHit = dealt; }
+  return r;
+};
+const playSideCardBeforeBounty = playSideCard;
+playSideCard = function (uid) {
+  const b = state && state.battle, before = b ? sideAvailable(b).length : 0;
+  playSideCardBeforeBounty(uid);
+  if (b && sideAvailable(b).length < before) b.bountySide = (b.bountySide || 0) + 1;
+};
+const winBattleBeforeBounty = winBattle;
+winBattle = function () {
+  const b = state && state.battle; if (!b || b.phase !== 'fight') return winBattleBeforeBounty();
+  winBattleBeforeBounty();
+  if (b.phase !== 'reward' || !b.bounty || b.bountyPaid != null) return;
+  const def = BOUNTIES[b.bounty]; if (!def) return;
+  const ok = !!def.check(b), reward = bountyReward(b); b.bountyPaid = ok ? reward : 0;
+  if (ok) state.shards += reward;
+  if (Array.isArray(b.special)) b.special.push(ok ? '★ Bounty complete — ' + def.name + ': +' + reward + ' Shards.' : '☆ Bounty missed — ' + def.name + ' (' + def.text(b).toLowerCase() + ').');
+  save();
+};
+// Show the bounty in the fight: a chip in the top bar that tracks its state.
+const renderBattleBeforeBounty = renderBattle;
+renderBattle = function () {
+  renderBattleBeforeBounty();
+  const b = state && state.battle; if (!b || b.phase !== 'fight' || !b.bounty) return;
+  const def = BOUNTIES[b.bounty], bar = document.querySelector && document.querySelector('#battleModal .compact-bar'); if (!def || !bar || !bar.append) return;
+  const failed = (b.bounty === 'swift' && b.turn > bountyTurns(b)) || (b.bounty === 'untouched' && b.bountyHurt) || (b.bounty === 'selfReliant' && b.bountySide);
+  const met = b.bounty === 'overkill' && (b.bountyBigHit || 0) >= 15;
+  const chip = document.createElement('span'); chip.className = 'bounty-chip' + (failed ? ' failed' : met ? ' met' : '');
+  chip.title = 'Optional bounty: ' + def.text(b) + ' for +' + bountyReward(b) + ' Shards.';
+  chip.innerHTML = (failed ? '☆' : '★') + ' <b>' + def.name + '</b> · ' + def.text(b) + ' · ◇' + bountyReward(b) + (failed ? ' · missed' : met ? ' · done' : b.bounty === 'overkill' ? ' · best ' + (b.bountyBigHit || 0) : '');
+  bar.append(chip);
+};
+
+// --- 100% exploration reward ---
+function worldCompletion() {
+  const keys = Object.keys(rooms); if (!keys.length) return 0;
+  const discovered = state.visited.filter(k => rooms[k]).length;
+  const chests = keys.map(chestFor).filter(Boolean), chestsFound = chests.filter(c => state.chests.includes(c.id)).length;
+  const relics = Object.values(rooms).filter(r => r.relic && r.relic[0] !== 'material'), relicsFound = relics.filter(r => state.relics.includes(r.relic[0])).length;
+  const parts = [discovered / keys.length]; if (chests.length) parts.push(chestsFound / chests.length); if (relics.length) parts.push(relicsFound / relics.length);
+  return Math.round(parts.reduce((x, y) => x + y, 0) / parts.length * 100);
+}
+const COMPLETION_SHARDS = 20;
+function checkWorldCompletion() {
+  if (!state || state.battle) return false; ensureExplore(); state.poi.completed ||= [];
+  if (state.poi.completed.includes(activeRegion) || worldCompletion() < 100) return false;
+  state.poi.completed.push(activeRegion); state.shards += COMPLETION_SHARDS;
+  const pool = sidePoolFor().filter(x => x !== 'stasis'), card = addSideCard(pool[Math.floor(Math.random() * pool.length)]);
+  save();
+  poiMenu('🗺 World fully explored', '<p>You have explored every corner of <b>' + NEXUS_WORLD_NAMES[activeRegion] + '</b>.</p><p class="notice">Reward: <b>+' + COMPLETION_SHARDS + ' Shards</b> and the side card <b>' + SIDE_CARDS[card.id].name + '</b>' + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : ' (add it in the Deck Workshop).') + '</p>', [{ id: 'poiLeave', label: 'Continue', primary: true, onclick: closeMenu }]);
+  return true;
+}
+const renderWorldBeforeCompletion = renderWorld;
+renderWorld = function () { renderWorldBeforeCompletion(); if (state && !state.battle && $('menuOverlay') && $('menuOverlay').classList.contains('hidden')) checkWorldCompletion(); };
+const showMapBeforeCompletion = showMap;
+showMap = function () {
+  showMapBeforeCompletion(); if (!state) return;
+  const done = (state.poi.completed || []).includes(activeRegion), p = document.createElement('p'); p.className = 'map-completion-note';
+  const goals = ['room'].concat(Object.keys(rooms).some(chestFor) ? ['hidden chest'] : [], Object.values(rooms).some(r => r.relic && r.relic[0] !== 'material') ? ['relic'] : []);
+  p.textContent = done ? '🗺 Fully explored — reward claimed.' : '🗺 Find every ' + (goals.length > 1 ? goals.slice(0, -1).join(', ') + ' and ' + goals.at(-1) : goals[0]) + ' in this world for +' + COMPLETION_SHARDS + ' Shards and a side card.';
+  const ret = $('mapReturn'); if (ret && ret.before) ret.before(p);
+};
+const bountyStyles = document.createElement('style');
+bountyStyles.textContent = '.bounty-chip{display:inline-flex;align-items:center;gap:.3em;padding:.3em .7em;border-radius:999px;border:1px solid #f2c94c;background:linear-gradient(135deg,#3a2c0b,#1c1606);color:#ffe9a8;font:600 .78em/1.2 system-ui}.bounty-chip b{color:#fff3c4}.bounty-chip.met{border-color:#7fe08a;background:linear-gradient(135deg,#123a1a,#0a1f0e);color:#c9ffd0}.bounty-chip.failed{border-color:#6b6b6b;background:#1a1a1a;color:#9a9a9a;text-decoration:line-through}.map-completion-note{color:#c9d6e2;font-size:.9em}';
+document.head.append(bountyStyles);

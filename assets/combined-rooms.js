@@ -3,6 +3,7 @@
 const JOINED_AREAS={
  // Round 38: Vespera grew to 42 rooms; the two parked art districts
  // (foundry 2x2, promenade 2-cell) found homes here.
+ chronospire:[],
  vespera:[
   {name:'Stormglass Reach',art:'stormglass',cells:['0,0','1,0','0,1','1,1']},
   {name:'Prism Bazaar',art:'promenade',cells:['4,3','5,3']},

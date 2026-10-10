@@ -72,8 +72,8 @@ applyUpgradePack(imp); assert.equal(imp.level, 1); assert.equal(imp.uses, 0); ap
 const keep = state.pool; state.pool = [soul]; const sh0 = state.shards; buyItem({ ...shop, id: 'nopack' }, 'upgradePack'); assert.equal(state.shards, sh0, 'no pack sale without an Impermanent card to upgrade'); state.pool = keep;
 state.shards = 1; buyItem({ ...shop, id: 'x' }, 'potion'); assert.equal(state.shards, 1, 'cannot buy without Shards');
 // Shards from fights
-state.room = '1,5'; state.cooldowns = {}; startBattle(roomSpawns('1,5').find(x => !x.boss).uid); let before = state.shards; state.battle.enemy.hp = 0; winBattle(); assert([1, 2].includes(state.shards - before), 'regular: 1-2 Shards');
-state.battle = null; state.room = '2,9'; startBattle(roomSpawns('2,9').find(x => x.boss).uid); before = state.shards; state.battle.enemy.hp = 0; winBattle(); assert.equal(state.shards - before, 6, 'mini-boss: 6 Shards');
+state.room = '1,5'; state.cooldowns = {}; startBattle(roomSpawns('1,5').find(x => !x.boss).uid); state.battle.bounty = null; let before = state.shards; state.battle.enemy.hp = 0; winBattle(); assert([1, 2].includes(state.shards - before), 'regular: 1-2 Shards');
+state.battle = null; state.room = '2,9'; startBattle(roomSpawns('2,9').find(x => x.boss).uid); state.battle.bounty = null; before = state.shards; state.battle.enemy.hp = 0; winBattle(); assert.equal(state.shards - before, 6, 'mini-boss: 6 Shards');
 state.battle = null;
 // Walking onto a point of interest opens it once until you step away.
 const cp = of('cache'); state.room = cp.key; state.poi.used = state.poi.used.filter(x => x !== cp.id); closeMenu();

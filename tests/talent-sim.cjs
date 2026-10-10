@@ -17,7 +17,7 @@ function makeContext() {
   for (const m of fs.readFileSync(path.join(root, 'index.html'), 'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g)) run(m[1]);
   run(fs.readFileSync(path.join(root, 'assets/elaris-wildlife.js'), 'utf8'));
   run(fs.readFileSync(path.join(root, 'assets/expansion.js'), 'utf8'));
-  run(fs.readFileSync(path.join(root, 'assets/encounter-depth.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/talent-matrix.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/aether-deck.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/card-variety.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/battle-hud.js'), 'utf8'));
+  run(fs.readFileSync(path.join(root, 'assets/encounter-depth.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/talent-matrix.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/aether-deck.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/card-variety.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/battle-hud.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/exploration.js'), 'utf8'));run(fs.readFileSync(path.join(root, 'assets/chronospire.js'), 'utf8'));
   return { context, run };
 }
 
@@ -78,6 +78,8 @@ function botPitch(){
 function botIntentFor(t){try{return enemyPlan(state.battle,t)}catch(e){return{kind:'attack',damage:0}}}
 function botTurn(){
  const b=state.battle;if(!b||b.phase!=='fight')return;
+ // Round 77: suspend expensive Suspend cards (free now, charged later).
+ if(typeof suspendCard==='function'&&!globalThis.NO_SUSPEND)for(const c of b.hand.slice()){if((b.suspended||[]).length>=3)break;const info=suspendInfo(c);if(info&&stat(c).cost>=2)suspendCard(c.uid)}
  chooseBoosts();
  botSide();if(!state.battle||state.battle.phase!=='fight')return;
  let guard=0;

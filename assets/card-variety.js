@@ -131,7 +131,7 @@ enemyPlan = function (b = state.battle, turn = b?.turn) {
 const endTurnBeforeVariety = endTurn;
 endTurn = function () {
   const b = state.battle; if (!b || b.phase !== 'fight') return;
-  const plan = enemyPlan(b), plating = talentRank('plating');
+  const plan = enemyPlan(b), plating = scaledRank('plating');
   const hitsOn = !(b.freeze > 0) && plan.kind !== 'silenced' && plan.damage > 0;
   const incoming = hitsOn ? Math.max(0, (b.disrupted ? Math.ceil(plan.damage / 2) : plan.damage) - plating) * (plan.hits || 1) : 0;
   const stopped = b.mirrorBlock ? Math.min(b.block, incoming) : 0;
@@ -173,7 +173,7 @@ function chooseCardReward(i) {
   b.offers = null; save(); renderBattle();
 }
 function rewardExtrasHTML(b) {
-  return (b.special || []).map(s => '<p class="notice">' + s + '</p>').join('') + (b.levels && b.levels.length ? '<p>Level ' + state.playerLevel + '! +' + b.levels.length + ' maximum HP, +' + b.levels.length * 5 + ' healing, and +' + b.levels.length + ' talent point(s).</p>' : '');
+  return (b.special || []).map(s => '<p class="notice">' + s + '</p>').join('') + (b.xpGain ? '<p class="xp-gain">+' + b.xpGain + ' XP' + (typeof xpMultiplier === 'function' && xpMultiplier(b.enemy.level, state.playerLevel - (b.levels || []).length) < 1 ? ' <span class="muted">(reduced: this enemy is below your level)</span>' : '') + '</p>' : '') + (b.levels && b.levels.length ? '<p>Level ' + state.playerLevel + '! +' + b.levels.length + ' maximum HP, +' + b.levels.length * 5 + ' healing, and +' + b.levels.length + ' talent point(s).</p>' : '');
 }
 const renderBattleBeforeVariety = renderBattle;
 renderBattle = function () {
