@@ -17,7 +17,7 @@ const ORGANIC_AREAS = {};
 const organicBits = {};
 function organicDef(key) {
   if (!rooms[key] || typeof joinedArea !== 'function') return null;
-  const area = joinedArea(key), def = area.art && ORGANIC_AREAS[activeRegion + ':' + area.art];
+  const area = joinedArea(key), def = rooms[key].world && ORGANIC_AREAS['world:' + activeRegion] || area.art && ORGANIC_AREAS[activeRegion + ':' + area.art];
   return def ? { def, area } : null;
 }
 function organicMask(def) {
@@ -29,6 +29,7 @@ function organicMask(def) {
 }
 // Area-pixel lookup (the area is scaled onto the 400x250 mask).
 function organicAt(o, ax, ay) {
+  if (o.def.at) return o.def.at(o, ax, ay); // a world map supplies its own lookup (Round 91)
   const mx = Math.floor(ax / o.area.width * ORGANIC_MASK_W), my = Math.floor(ay / o.area.height * ORGANIC_MASK_H);
   if (mx < 0 || my < 0 || mx >= ORGANIC_MASK_W || my >= ORGANIC_MASK_H) return false;
   return organicMask(o.def)[my * ORGANIC_MASK_W + mx] === 1;
@@ -60,7 +61,10 @@ function organicDoor(key, dir) {
   const edgeCoord = dir === 'w' ? 6 : dir === 'e' ? area.width - 6 : dir === 'n' ? 6 : area.height - 6;
   const runs = []; let start = null;
   for (let t = lo; t <= hi; t += 4) {
-    const open = t < hi && (horiz ? organicAreaWalk(o, edgeCoord, t) : organicAreaWalk(o, t, edgeCoord));
+    const outside = dir === 'w' ? -6 : dir === 'e' ? area.width + 6 : dir === 'n' ? -6 : area.height + 6;
+    // On a continuous world map a door must also be street on the far side of the edge.
+    const open = t < hi && (horiz ? organicAreaWalk(o, edgeCoord, t) : organicAreaWalk(o, t, edgeCoord))
+      && (!o.def.world || (horiz ? o.def.at(o, outside, t) : o.def.at(o, t, outside)));
     if (open && start === null) start = t;
     if (!open && start !== null) { runs.push([start, t]); start = null; }
   }
@@ -163,10 +167,21 @@ if (typeof document !== 'undefined' && document.getElementById) {
   }, true);
 }
 // --- Patrols, chests and POIs move onto the paths.
+// Walkable 10px grid points per room, cached (Round 91: spawn placement over a whole painted world).
+const organicPoints = {};
+function organicGrid(key) {
+  const o = organicDef(key), ck = activeRegion + ':' + key + ':' + (o ? o.def.src : '-');
+  if (organicPoints[ck]) return organicPoints[ck];
+  const pts = [];
+  for (let py = 40; py <= 460; py += 10) for (let px = 30; px <= 770; px += 10) if (walkable(key, px, py)) pts.push(px, py);
+  return organicPoints[ck] = pts;
+}
 function organicSpot(key, x, y, avoid = [], gap = 0) {
   let best = null, bd = Infinity;
-  for (let py = 40; py <= 460; py += 10) for (let px = 30; px <= 770; px += 10) {
-    if (!walkable(key, px, py) || avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
+  const pts = organicGrid(key);
+  for (let i = 0; i < pts.length; i += 2) {
+    const px = pts[i], py = pts[i + 1];
+    if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
     const d = Math.hypot(px - x, py - y); if (d < bd) { bd = d; best = { x: px, y: py }; }
   }
   return best;
@@ -183,7 +198,7 @@ roomSpawns = function (key) {
   if (list.organicPlaced) return list;
   const doors = ['n', 's', 'e', 'w'].map(d => organicExternalExit(key, d) && organicDoor(key, d)).filter(Boolean).map(d => d.inward), placed = [];
   for (const s of list) {
-    const spot = organicSpot(key, s.x, s.y, placed.concat(doors), 110) || organicSpot(key, s.x, s.y, placed, 60) || organicSpot(key, s.x, s.y);
+    const spot = organicSpot(key, s.x, s.y, placed.concat(doors), 125) || organicSpot(key, s.x, s.y, placed, 60) || organicSpot(key, s.x, s.y);
     if (spot) { s.x = spot.x; s.y = spot.y; } placed.push({ x: s.x, y: s.y });
   }
   Object.defineProperty(list, 'organicPlaced', { value: true });

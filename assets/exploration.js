@@ -368,13 +368,13 @@ document.head.append(exploreStyles);
 // far stone once to attune it, then travel between the two from either end.
 // =====================================================================
 const QUIET_ROOMS = {
-  city: ['2,3', '4,2', '7,7'], // Round 76
+  city: ['1,6', '3,8', '7,9'], // Round 91: Fountain Row, Koi Garden, South Lot
   elaris: ['2,2', '5,6', '10,7'],
   vespera: ['2,4', '6,4', '10,5']
 };
 // Round 73: Nexus Waypoints at the start and middle of every world (see below).
 const NEXUS_POINTS = {
-  city: { start: '0,5', mid: '5,6' },
+  city: { start: '0,5', mid: '4,5' }, // Round 91: Neon Square
   elaris: { start: '0,0', mid: '7,6' },
   vespera: { start: '0,0', mid: '8,2' }
 };

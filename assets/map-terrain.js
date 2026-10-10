@@ -37,7 +37,8 @@ function mapRoomTile(key, onReady) {
     }
   }
   // A painted city block whose image is still loading (Round 87).
-  if (holder.querySelector && holder.querySelector('canvas[data-pending]')) { complete = false; if (typeof cityBlockTile === 'function') whenImageLoads(cityBlockImage(cityBlockTile(key).art.src), onReady); }
+  const pend = holder.querySelector && holder.querySelector('canvas[data-pending]');
+  if (pend) { complete = false; const img = pend.pendingImage || (typeof cityBlockTile === 'function' && usesCityPainting(key) ? cityBlockImage(cityBlockTile(key).art.src) : null); if (img) whenImageLoads(img, onReady); }
   if (complete) mapTileCache[ck] = tile;
   return tile;
 }
@@ -112,7 +113,7 @@ function drawMapTerrain(canvasEl, tileW) {
   //    cross-fade instead of meeting at a hard line. Mirroring keeps every road
   //    exactly where it is, so streets run straight through the join.
   const O = Math.round(26 * k), strip = document.createElement('canvas'), S = strip.getContext('2d');
-  for (const [key, s] of Object.entries(source)) {
+  for (const [key, s] of Object.entries(source)) { if (rooms[key] && rooms[key].world) continue; // Round 91: the painted world is already continuous
     const [kx, ky] = XY(key), [x, y] = at(kx, ky), fx = s.sw / TW, fy = s.sh / TH;
     for (const [side, [dx, dy]] of Object.entries(MAP_SIDES)) {
       const n = K(kx + dx, ky + dy); if (!source[n] || sameArea(key, n)) continue;
@@ -132,7 +133,7 @@ function drawMapTerrain(canvasEl, tileW) {
   // 4) Closed roads: two explored rooms side by side with no exit between them
   //    get a barricade where their roads would meet, so a continuous-looking
   //    street never lies about a connection.
-  for (const key of Object.keys(source)) {
+  for (const key of Object.keys(source)) { if (rooms[key] && rooms[key].world) continue; // Round 91: the painted world is already continuous
     const [kx, ky] = XY(key), [x, y] = at(kx, ky), ex = rooms[key].exits;
     for (const side of ['e', 's']) {
       const [dx, dy] = MAP_SIDES[side], n = K(kx + dx, ky + dy);

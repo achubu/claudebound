@@ -41,7 +41,7 @@ function usesCityPainting(key) {
 function paintCityBlock(canvas, key) {
   const t = cityBlockTile(key), img = cityBlockImage(t.art.src);
   if (!(img.complete && img.naturalWidth)) {
-    if (canvas.dataset) canvas.dataset.pending = '1';
+    if (canvas.dataset) canvas.dataset.pending = '1'; canvas.pendingImage = img;
     if (img.addEventListener) img.addEventListener('load', () => { if (canvas.isConnected) paintCityBlock(canvas, key); if (state && !state.battle && state.room === key) renderWorld(); }, { once: true });
     return false;
   }

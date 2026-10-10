@@ -164,7 +164,8 @@ move=function(dt){
  const len=Math.hypot(dx,dy),nx=state.pos.x+dx/len*175*dt,ny=state.pos.y+dy/len*175*dt;
  if(!collides(nx,state.pos.y))state.pos.x=nx;if(!collides(state.pos.x,ny))state.pos.y=ny;
  const v=state.pos.y>180&&state.pos.y<320,h=state.pos.x>330&&state.pos.x<470;
- const dir=state.pos.x<(joinedExit('w')?0:10)&&v?'w':state.pos.x>(joinedExit('e')?800:790)&&v?'e':state.pos.y<(joinedExit('n')?0:10)&&h?'n':state.pos.y>(joinedExit('s')?500:490)&&h?'s':null;
+ // Round 91: crossing into another room of the same district works anywhere along the seam (organic paths rarely cross at the middle).
+ const dir=state.pos.x<(joinedExit('w')?0:10)&&(v||joinedExit('w'))?'w':state.pos.x>(joinedExit('e')?800:790)&&(v||joinedExit('e'))?'e':state.pos.y<(joinedExit('n')?0:10)&&(h||joinedExit('n'))?'n':state.pos.y>(joinedExit('s')?500:490)&&(h||joinedExit('s'))?'s':null;
  if(dir&&transition(dir))return;
  state.pos.x=Math.max(joinedExit('w')?-24:12,Math.min(joinedExit('e')?824:788,state.pos.x));state.pos.y=Math.max(joinedExit('n')?-24:12,Math.min(joinedExit('s')?524:488,state.pos.y));
  const player=$('player');player.style.left=state.pos.x+'px';player.style.top=state.pos.y+'px';checkWorldInteractions();updateAreaCamera();
