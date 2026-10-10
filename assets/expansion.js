@@ -635,7 +635,7 @@ function mapAreaFootprint(key,minX,maxX,minY,maxY){
  return{x,y,width,height,area};
 }
 // Round 61: the map canvas is sized by grid cells (scrolls if large) so rooms never overlap.
-const MAP_CELL_W=150,MAP_CELL_H=104;
+const MAP_CELL_W=176,MAP_CELL_H=110; // Round 82: 16:10 cells so the room art tiles keep their shape
 showMap=function(){
  const keys=Object.keys(rooms);
  // The viewport frames only the explored bounding box (plus one ring of
@@ -683,8 +683,7 @@ showMap=function(){
     const stubId=fp.id+'>'+to;if(doneLinks.has(stubId))continue;doneLinks.add(stubId);
     const dx=toFp.x-fp.x,dy=toFp.y-fp.y,len=Math.hypot(dx,dy)||1,horiz=Math.abs(dx)>=Math.abs(dy),stepX=100/(maxX-minX+1.8),stepY=100/(maxY-minY+1.8),stubLen=Math.min(len*0.5,(horiz?fp.width/2+stepX*0.22:fp.height/2+stepY*0.22));
     const sx=fp.x+dx/len*stubLen,sy=fp.y+dy/len*stubLen;
-    // Round 61: a doorway marker shows there is a path, without revealing the room beyond it.
-    cellsHTML.push('<i class="map-door '+(horiz?'h':'v')+'" style="left:'+sx+'%;top:'+sy+'%" title="Unexplored path"></i>');
+    // Round 81: the dotted stub alone marks an unexplored path (the oval door markers were removed).
     linksSVG.push('<path d="M'+fp.x+' '+fp.y+' L '+sx+' '+sy+'" class="map-link map-stub"/>');
    }
   }

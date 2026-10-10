@@ -2397,3 +2397,38 @@ Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEN
 - Tests: an arrival must be walkable and outside any corner zone. Corner
   reachability uses the corner zones.
 - Removed the unused `jungle-8way.webp`.
+
+## Round 81: Cleaner exploration map
+
+- Removed the oval door markers on unexplored paths. A short dotted line
+  leading off a room now marks a path you haven't taken yet.
+
+## Round 82: The exploration map is a giant city
+
+- New `assets/map-terrain.js`. The map paints each explored room's own ground
+  art onto the grid, edge to edge: street blocks, the diagonal roundabouts, the
+  joined-district paintings and the jungle clearings. Explored Neon Aftermath
+  reads as one continuous city, and Elaris as one jungle.
+- Unexplored rooms stay dark (fog of war). Your current room has a gold glow.
+- Room names are now compact floating tags over their tile, and connection
+  lines are thin dotted guides.
+- Map cells are 16:10 (176×110) so the art keeps its shape. Room tiles are
+  cached after their first draw, and paintings that are still loading redraw
+  the map when they finish.
+- New `tests/map-terrain.test.cjs`.
+
+## Round 83: Map frontier and seamless joins
+
+- **Seamless joins:** where two explored rooms touch, each tile's edge is
+  mirrored a short way into its neighbour and cross-faded. The pictures blend
+  instead of meeting at a hard line, and because the edges are mirrored, every
+  road stays exactly where it is and runs straight through the join.
+- **Frontier:** edges facing unexplored ground are softly dimmed and blurred
+  into the fog, with no outline. A blurred, darkened copy of the explored land
+  sits underneath, and the sharp art fades out over it near the edges. The
+  frontier shape is gently irregular and continuous around corners.
+- **Fog:** unexplored ground is dark with a faint survey grid.
+- Room name tags are 40% opaque, and the connection lines 30% opaque, so more of the art shows through.
+- **Closed roads:** two explored rooms side by side with no path between them
+  get a small striped barricade where their roads would meet. This happens in
+  Vespera and Chronospire.
