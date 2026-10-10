@@ -13,8 +13,10 @@ const realCreate=document.createElement;document.createElement=tag=>tag==='canva
 for(const region of ['city','elaris']){
  configureRegion(region);state.visited=Object.keys(rooms).slice(0,12);state.room=state.visited[0];
  const b=mapBounds();assert(b.minX<=b.maxX&&b.minY<=b.maxY);
- const c=document.createElement('canvas');drawMapTerrain(c);
- assert.equal(c.width,Math.round((b.maxX-b.minX+1.8)*MAP_TILE_W),'terrain canvas spans the map grid');
+ const c=document.createElement('canvas');drawMapTerrain(c,300);
+ assert.equal(c.width,Math.round((b.maxX-b.minX+1.8)*300),'terrain is drawn at the on-screen tile size');
+ assert.equal(c.height,Math.round((b.maxY-b.minY+1.8)*300*0.625),'and always at 16:10, never stretched');
+ const huge=document.createElement('canvas');drawMapTerrain(huge,5000);assert(huge.width*huge.height<=MAP_MAX_PIXELS*1.01,'zoomed-in terrain stays under the canvas size limit');
  assert.equal(MAP_TILE_W/MAP_TILE_H,1.6,'tiles keep the 800x500 room shape');
  showMap();
 }

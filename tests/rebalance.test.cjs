@@ -624,10 +624,10 @@ newGame();configureRegion('city');
 const cityChest=chestFor('2,9');
 assert.notEqual(cityChest.x,400,'chest x is off the main north-south thoroughfare');
 let allWalkable=true;
-for(const key of Object.keys(rooms)){if(usesDiagMask(key)){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement
+for(const key of Object.keys(rooms)){if(usesDiagMask(key)||CROSSROAD_ARTS[joinedArea(key).art]){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement
 assert(allWalkable,'the chest position is walkable in every city room');
 configureRegion('elaris');
-for(const key of Object.keys(rooms)){if(usesDiagMask(key)){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement
+for(const key of Object.keys(rooms)){if(usesDiagMask(key)||CROSSROAD_ARTS[joinedArea(key).art]){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement
 assert(allWalkable,'the chest position is also walkable in every Elaris room');
 
 // --- Enemy Block timing is now honestly telegraphed: the message shown

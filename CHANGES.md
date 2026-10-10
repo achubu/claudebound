@@ -2432,3 +2432,93 @@ Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEN
 - **Closed roads:** two explored rooms side by side with no path between them
   get a small striped barricade where their roads would meet. This happens in
   Vespera and Chronospire.
+
+## Round 84: Smaller world enemies, danger-coloured names
+
+- New `assets/enemy-labels.js`. Enemies in the world are drawn 20% smaller in
+  every world, and their name bubbles are 30% smaller.
+- An enemy whose level is 2 or more above yours has its name shown in red. It
+  goes back to normal once you catch up.
+- New `tests/enemy-labels.test.cjs`.
+
+## Round 85: Sharper map with zoom
+
+- The map terrain is drawn at the screen's real pixel size, device pixel ratio
+  included, so it's crisp on high-DPI screens. It redraws at the new resolution
+  whenever you zoom. Room art is cached at 400×250, half the room's size.
+- The terrain is never stretched. It's always drawn at 16:10 per room, and the
+  map no longer widens to fill the panel when only a few rooms are explored.
+- **Zoom:** the − / + buttons, a percentage readout and "Fit" sit above the
+  map. Ctrl or ⌘ + scroll and trackpad pinch zoom around the cursor, and
+  two-finger pinch works on touch screens. The range is 30% to 300%, and the
+  zoom is remembered between openings.
+- Very large zooms are capped at about 16 megapixels so mobile Safari can still
+  draw them.
+
+## Round 86: New Crown Mainframe and Prism Bazaar art
+
+- Crown Mainframe District (Neon Aftermath, 4 rooms) and Prism Bazaar
+  (Vespera, 2 rooms) now use the new crossroads paintings: violet crystal
+  citadel for the Mainframe, garden bazaar for Prism Bazaar.
+- Each room in a district gets the crossroads. Neighbouring rooms are mirror
+  images, so every road and kerb meets its twin exactly at the shared edge and
+  the district reads as one continuous place.
+- Collision follows the painted roads: the east–west and north–south streets
+  with their pavements, plus the roundabout. Buildings, towers, ponds and trees
+  are solid. Hidden chests in these rooms use the pavement fallback spots.
+- The 8-way versions are saved as `mainframe-8way.webp` and
+  `promenade-8way.webp`, ready for when those districts get diagonals.
+
+## Round 87: Painted Neon Aftermath streets and a new Crown Mainframe
+
+- **Crown Mainframe District** has a new single 2×2 painting: violet citadels,
+  waterfalls and crystal roundabouts. It's calibrated onto the district's
+  streets band by band, like the other districts, and replaces the mirrored
+  crossroads from Round 86.
+- **Plain city rooms are now painted.** The 13 Neon Aftermath rooms with no
+  diagonal roads and no district use quarters of two new neon street paintings
+  (`assets/environment/city-blocks/neon-a.webp` and `neon-b.webp`): 8
+  different crossroads, chosen per room. Each quarter's roads are stretched onto
+  the room's existing street corridor, so exits, spawns and points of interest
+  stay where they were. Only the four corner blocks are solid; the old loose
+  street props are gone with the procedural texture.
+- New `assets/city-paintings.js`. The exploration map picks the paintings up
+  automatically and redraws once they've loaded.
+- New `tests/city-paintings.test.cjs`.
+
+## Round 88: Painted Elaris rooms and the organic-path engine
+
+- **Painted Elaris rooms:** the 7 plain Elaris rooms (no diagonals, not in a
+  district) now use quarters of the new jungle crossroads painting
+  (`city-blocks/elaris-a.webp`). The sandy roads are fitted onto the existing
+  path corridor, so exits, spawns and points of interest are unchanged.
+  `city-paintings.js` now takes a painting list per world.
+- **Organic-path engine** (`assets/organic-paths.js`): a district can be one
+  free-form landscape with winding paths. `tools/build_organic_area.py` traces
+  the dirt paths into a walk mask and registers it in `assets/organic-areas.js`.
+  Inside such a district:
+  - you walk only on the paths;
+  - each exit sits where a path meets that edge, and its label is drawn there;
+  - you arrive at that door when you come in;
+  - patrols and chests move onto the paths;
+  - tapping a door label walks you there.
+  The engine is off until a fitted painting is registered; it's covered by
+  `tests/organic-paths.test.cjs` with a synthetic winding-path district.
+- Saved for later: the first organic Elaris draft and the medieval town map
+  (`assets/environment/later/`).
+
+## Round 89: Emerald Expanse becomes an organic jungle
+
+- Elaris's Emerald Expanse district (4 rooms) is now one free-form jungle
+  painting with winding sandy paths, wooden bridges, waterfalls and temple
+  ruins, the first district on the organic-path engine.
+- You walk only on the paths and bridges. The three exits (west to Drowned
+  Thicket, south to Stormlit Marsh, south to Galeward Shallows) sit where the
+  paths leave the painting, with their labels there, and you arrive on the path
+  when you come in. Patrols are placed on the paths.
+- "Path closed" signs are hidden in organic districts; the painting shows where
+  the paths end.
+- `build_organic_area.py` accepts several path colours and `--clear` boxes, used
+  here to drop a sunbeam the tracer mistook for path.
+- Tests: the real painting's three doors must all connect along the paths, and
+  every patrol must stand on a path.
