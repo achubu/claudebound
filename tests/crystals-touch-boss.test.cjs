@@ -24,11 +24,11 @@ assert(state.bosses.includes('bloomTyrant'));assert.equal(state.pool.filter(c=>c
 finishBattle();assert.equal(portalTarget().region,'vespera');travelPortal();assert.equal(state.region,'vespera');assert.equal(Object.keys(rooms).length,42,'Vespera matches the city at 42 rooms');assert.equal(joinedArea().cells.length,4);
 save();state=null;assert(load());assert.equal(state.region,'vespera');validateImport(JSON.parse(JSON.stringify(state)));travelPortal();assert.equal(state.region,'elaris');assert.equal(state.room,'10,9');
 // Touch route crosses joined room seams using normal collision and movement.
-state.room='1,0';state.pos={x:760,y:250};state.battle=null;keys={};assert(setTouchDestination({x:860,y:250}));
+state.room='1,0';state.pos={x:760,y:190};state.battle=null;keys={};assert(setTouchDestination({x:860,y:190})); // on the Sunpetal path (organic since Round 90)
 for(let i=0;i<200&&touchRoute;i++)move(.033);
 assert.equal(state.room,'2,0');assert(Math.abs(state.pos.x-50)<=1);assert(!touchRoute);
-state.room='5,4';state.pos={x:400,y:450};assert(setTouchDestination({x:400,y:550}));for(let i=0;i<250&&touchRoute;i++)move(.033);assert.equal(state.room,'5,5');assert(!touchRoute);
-assert(setTouchDestination({x:400,y:700}));keys={ArrowLeft:true};move(.033);assert.equal(touchRoute,null);keys={};
+state.room='5,4';state.pos={x:670,y:440};assert(setTouchDestination({x:670,y:560}));for(let i=0;i<250&&touchRoute;i++)move(.033);assert.equal(state.room,'5,5');assert(!touchRoute);
+assert(setTouchDestination({x:670,y:620}));keys={ArrowLeft:true};move(.033);assert.equal(touchRoute,null);keys={};
 console.log('PASS: bounded crystal rarities, counter reservation/timing/status prevention, Lightning disruption, boss unlock, third-region saves, touch seams and manual override.');
 }
 `);

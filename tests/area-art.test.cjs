@@ -12,6 +12,7 @@ for(const region of ['city','elaris','vespera']){
  configureRegion(region);
  for(const group of JOINED_AREAS[region]){
   const area=joinedArea(group.cells[0]),draws=[];
+  if(ORGANIC_AREAS[region+':'+area.art])continue; // organic districts: see organic-paths.test
   if(CROSSROAD_ARTS[area.art]){
    // Round 86: one mirrored crossroads painting per room.
    const ops=[];paintJoinedArea({getContext:()=>({save(){},restore(){},translate:(x,y)=>ops.push(['t',x,y]),scale:(a,b)=>ops.push(['s',a,b]),drawImage:(...a)=>ops.push(['d',...a]) })},area,{naturalWidth:2624,naturalHeight:1632});

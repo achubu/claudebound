@@ -146,7 +146,7 @@ newGame(); assert.equal(sideDeckMax(), 2); state.side.pool.push({ uid: 's90', id
 toggleSideCard('s90'); assert.equal(state.side.deck.length, 2, 'cannot exceed the current capacity');
 const grow = ['crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'];
 grow.forEach((id, i) => { state.bosses.push(id); assert.equal(sideDeckMax(), 3 + i); }); state.bosses.push('stormTyrant'); assert.equal(sideDeckMax(), 6, 'never above 6');
-state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '4,0'; const sp = roomSpawns(state.room).find(s => s.type === 'crownSentinel'); if (sp) { state.side.deck = state.side.deck.slice(0, 5); startBattle(sp.uid); state.battle.enemy.hp = 0; winBattle(); assert.equal(sideDeckMax(), 6); assert.equal(state.side.deck.length, 6, 'a new slot is filled automatically'); assert(state.battle.special.some(t => /Side deck expanded/.test(t))); }
+state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '8,9'; const sp = roomSpawns(state.room).find(s => s.type === 'crownSentinel'); if (sp) { state.side.deck = state.side.deck.slice(0, 5); startBattle(sp.uid); state.battle.enemy.hp = 0; winBattle(); assert.equal(sideDeckMax(), 6); assert.equal(state.side.deck.length, 6, 'a new slot is filled automatically'); assert(state.battle.special.some(t => /Side deck expanded/.test(t))); }
 newGame(); state.side.deck = state.side.pool.map(c => c.uid); ensureSide(); assert.equal(state.side.deck.length, 2, 'over-capacity side decks are trimmed');
 console.log('PASS: pitching, Aether, side-deck draws, all 11 enemy afflictions, schedules, all 10 side cards, drops, deck rules and save migration.');
 }`);

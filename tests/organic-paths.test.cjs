@@ -12,6 +12,7 @@ const stroke=(pts,r)=>{for(let i=1;i<pts.length;i++){const [a,b]=[pts[i-1],pts[i
 stroke([[0,75],[60,90],[120,70],[200,110],[260,150],[330,170],[325,249]],6); // west → winding → south-east
 stroke([[200,110],[150,170],[90,200],[62,249]],6);                        // branch → south-west
 const abc='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';let s='';for(let i=0;i<bits.length;i+=6){let v=0;for(let j=0;j<6;j++)v=v<<1|(bits[i+j]||0);s+=abc[v]}
+const realEmerald=ORGANIC_AREAS['elaris:emerald'];for(const c of [organicDoorCache,organicBits,spawnCatalog])for(const k in c)delete c[k];
 ORGANIC_AREAS['elaris:emerald']={src:'test-organic',mask:s};
 const cells=JOINED_AREAS.elaris.find(g=>g.art==='emerald').cells;
 assert(organicDef('5,4')&&organicDef('6,5')&&!organicDef('0,0'),'only the district is organic');
@@ -29,7 +30,7 @@ for(const k of cells)for(const sp of roomSpawns(k))assert(walkable(k,sp.x,sp.y),
 state.room='4,4';state.pos={x:770,y:250};assert(transition('e'));assert.equal(state.room,'5,4');
 assert.deepEqual(state.pos,w.inward,'arrive at the west door');
 state.pos={x:14,y:w.along-22};move(0);assert.equal(state.room,'4,4','walking into the door leaves the district');
-delete ORGANIC_AREAS['elaris:emerald'];
+ORGANIC_AREAS['elaris:emerald']=realEmerald;for(const c of [organicDoorCache,spawnCatalog])for(const k in c)delete c[k];
 console.log('PASS: organic districts walk on traced paths with doors where paths meet the edges.');
 }`);
 // Round 89/90: every real organic painting — each door has a path, arrivals land on a path, all doors connect.
@@ -50,6 +51,6 @@ for(const region of ['city','elaris','vespera']){state.region=region;configureRe
   for(let i=0;i<doors.length;i++)for(let j=i+1;j<doors.length;j++)assert(findTouchPath(area,doors[i],doors[j]),g.name+': doors '+i+' and '+j+' connect');
   for(const k of area.cells)for(const sp of roomSpawns(k))assert(walkable(k,sp.x,sp.y),g.name+': patrol on path');
  }}
-assert.equal(checked,6,'six organic districts');
+assert.equal(checked,5,'five organic districts (Crown Mainframe joined the continuous city in Round 91)');
 console.log('PASS: six organic districts: every door on a connected path, arrivals and patrols on paths.');
 }`);

@@ -31,9 +31,9 @@ for (const id of Object.keys(EVENTS)) {
 newGame(); state.region = 'elaris'; configureRegion('elaris'); state.room = '0,0'; state.visited = ['0,0']; ensureExplore(); const p = poiAt(QUIET_ROOMS.elaris[0]); openPOI(p); document.getElementById('event1').onclick(); assert(poiUsed(p), 'an event is used once chosen');
 // Round 73: Nexus Waypoints — discover by arriving, teleport from the map, across worlds.
 newGame(); renderWorld(); assert.deepEqual(nexusList().map(n => n.id), ['city:0,5'], 'the city start waypoint is discovered at once');
-nexusTravel('city', '5,6'); assert.equal(state.room, '0,5', 'cannot teleport to an undiscovered waypoint');
-state.room = '5,6'; renderWorld(); assert(nexusList().some(n => n.id === 'city:5,6'), 'arriving discovers the mid-world waypoint');
-nexusTravel('city', '0,5'); assert.equal(state.room, '0,5'); nexusTravel('city', '5,6'); assert.equal(state.room, '5,6', 'teleport both ways');
+nexusTravel('city', '4,5'); assert.equal(state.room, '0,5', 'cannot teleport to an undiscovered waypoint');
+state.room = '4,5'; renderWorld(); assert(nexusList().some(n => n.id === 'city:4,5'), 'arriving discovers the mid-world waypoint');
+nexusTravel('city', '0,5'); assert.equal(state.room, '0,5'); nexusTravel('city', '4,5'); assert.equal(state.room, '4,5', 'teleport both ways');
 showMap(); assert(document.querySelectorAll('.nexus-go').length >= 0);
 state.poi.nexus.push('elaris:7,6'); nexusTravel('elaris', '7,6'); assert.equal(activeRegion, 'elaris'); assert.equal(state.room, '7,6'); assert(state.visited.includes('7,6'), 'teleport into another world');
 nexusTravel('city', '0,5'); assert.equal(activeRegion, 'city'); assert.equal(state.room, '0,5'); assert(state.regionVisits.elaris.includes('7,6'), 'that world remembers where you have been');

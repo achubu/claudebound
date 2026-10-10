@@ -3,7 +3,7 @@ const {run}=require('./expansion.test.cjs');
 run(`
 newGame();
 state.talents.powerCore=1;
-state.room='2,1';let spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
+state.room='3,7';let spawn=roomSpawns(state.room)[0];startBattle(spawn.uid);
 state.battle.enemy.armor=0;
 let strike=owned(state.deck.find(id=>owned(id).id==='strike')),strikeUid=strike.uid;
 state.battle.boostedUids=[strikeUid];

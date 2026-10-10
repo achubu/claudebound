@@ -2546,3 +2546,71 @@ Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEN
   painting.
 - Tests: all six real paintings must have every door on a path, landing points
   on a path, all doors connected, and every patrol on a path.
+
+## Round 91: Neon Aftermath becomes one continuous painted city
+
+- **The map:** the first world is rebuilt on your six district paintings, laid
+  out as a 3×2 map. Each painting covers 3×3 rooms, so the city is 54 rooms
+  (it was 42):
+  - Harbor Ruins (start)
+  - Neon Square
+  - Crystal Citadel
+  - Overgrown Park
+  - Lantern Quarter
+  - Junkyard Lots
+- **Streets:** `tools/build_world_map.py` stitches the paintings and traces
+  every street, plaza and park path into one connected walk mask (8 px
+  cells, in `assets/neon-world.js`).
+  - The tracer had to bridge Neon Square's puddled plaza and the Junkyard
+    arena, and a few hand-placed links join the plaza steps, the temple
+    courtyards and the junkyard spur.
+  - It drops the pools and waterfalls the tracer mistook for paving, and
+    slivers where a street only grazes a room's edge.
+  - `tools/build_world_rooms.py` turns the result into rooms, with exits
+    wherever a street crosses a room edge.
+- **Each room is an 800×500 window onto the map.** You walk only on the
+  painted streets. Leave by any street that crosses the room's edge and you
+  arrive at the matching spot in the next room, so walking feels continuous.
+  The edge you came in by stays shut briefly so you can't bounce straight
+  back.
+- **Exit labels** sit on each side's main street, and that street must
+  continue on the far side. Tapping a label walks you there.
+- **Placement:** patrols, chests, relics, points of interest and the merchant
+  are all placed on the streets. You're snapped onto the nearest street if a
+  fixed arrival point (portal, waypoint, defeat) lands inside a building.
+- **Progression:**
+  - The Thorn Warden is at the Warden's Crown, the Crystal Citadel's
+    hilltop arena. It also holds the portal to Elaris.
+  - The Crown Sentinel guards the Scrap Fortress in the Junkyard (with a
+    crystal chest).
+  - The Lunar Enforcer guards the Moon Temple in the Lantern Quarter (with
+    the Ember Sigil and a crystal chest).
+  - Briarstep Boots are in the park's Statue Garden, the Moon Lens on the
+    Billboard Steps above Neon Square, and the Upgrade Crystal on the
+    Lighthouse Pier.
+- **Gates:**
+  - The Ember Sigil opens the Crystal Citadel.
+  - Briarstep Boots open the Junkyard.
+  - The Moon Lens opens the park's lake-bridge shortcut into the Lantern
+    Quarter.
+  - Enemy zones (1–8) follow walking distance from the Afterlight Refuge.
+  - Nexus Waypoints are at the Refuge and in Neon Square.
+- **Retired for the city:** the old Crown Mainframe district, the diagonal
+  roundabouts and the painted crossroads. That art stays in use in Elaris.
+- **Old saves:** they keep the character, deck, levels, relics and boss kills;
+  Neon Aftermath exploration restarts at the Refuge. Imports migrate the same
+  way.
+- **Map:** the exploration map shows the painted city seamlessly, without
+  barricades or cross-fades.
+- **Engine and fixes:**
+  - The organic-path engine now supports whole-world maps, caches walkable
+    spots per room, and keeps patrols at least 125 px from doors.
+  - Bug fix: crossing between rooms of the same district now works anywhere
+    along the seam, not only near the middle. This affected organic districts.
+- **Tests:**
+  - New: `tests/neon-world.test.cjs` (two-way doors, continuous streets,
+    gates and progression, everything on the streets, the portal) and
+    `tests/neon-world-migrate.test.cjs`.
+  - The harness now loads the page scripts in page order and skips duplicate
+    loads.
+  - City room references in the older tests were moved to the new layout.
