@@ -39,29 +39,52 @@ function organicWalk(key, x, y) {
   return organicAt(o, off.x + Math.max(0, Math.min(799, x)), off.y + Math.max(0, Math.min(499, y + 22)));
 }
 // --- Doors: where a path meets the room edge for an exit leaving the district.
+// Searched along the district's outer edge in area coordinates. Each door
+// looks along its own room's stretch of that edge first, and may reach up to
+// DOOR_REACH px into a neighbouring room of the same district (when that room
+// has no exit of its own on that side), so a painted path that leaves right on
+// the line between two rooms still works. Door positions are given in the
+// owning room's local coordinates and may lie just outside 0..800 / 0..500.
+const DOOR_REACH = 220;
 const organicDoorCache = {};
+function organicAreaWalk(o, ax, ay) { return organicAt(o, Math.max(0, Math.min(o.area.width - 1, ax)), Math.max(0, Math.min(o.area.height - 1, ay))); }
 function organicDoor(key, dir) {
   const o = organicDef(key); if (!o) return null;
   const ck = activeRegion + ':' + key + ':' + dir; if (ck in organicDoorCache) return organicDoorCache[ck];
-  const horiz = dir === 'e' || dir === 'w', len = horiz ? 500 : 800, runs = []; let start = null;
-  for (let t = 0; t <= len; t += 4) {
-    const x = horiz ? (dir === 'w' ? 6 : 794) : t, y = horiz ? t : (dir === 'n' ? 6 : 494);
-    const open = t < len && organicWalk(key, x, y - 22);
+  const area = o.area, off = cellOffset(key, area), horiz = dir === 'e' || dir === 'w';
+  const span = horiz ? 500 : 800, base = horiz ? off.y : off.x, areaLen = horiz ? area.height : area.width;
+  // How far the search may spill into each neighbour along the edge.
+  const [kx, ky] = key.split(',').map(Number), step = horiz ? [0, 1] : [1, 0];
+  const reach = sgn => { const n = (kx + step[0] * sgn) + ',' + (ky + step[1] * sgn); return area.cells.includes(n) && !organicExternalExit(n, dir) ? DOOR_REACH : 0; };
+  const lo = Math.max(0, base - reach(-1)), hi = Math.min(areaLen, base + span + reach(1));
+  const edgeCoord = dir === 'w' ? 6 : dir === 'e' ? area.width - 6 : dir === 'n' ? 6 : area.height - 6;
+  const runs = []; let start = null;
+  for (let t = lo; t <= hi; t += 4) {
+    const open = t < hi && (horiz ? organicAreaWalk(o, edgeCoord, t) : organicAreaWalk(o, t, edgeCoord));
     if (open && start === null) start = t;
     if (!open && start !== null) { runs.push([start, t]); start = null; }
   }
-  // The widest path wins; ties go to the one nearest the middle of the side.
-  runs.sort((a, b) => (b[1] - b[0]) - (a[1] - a[0]) || Math.abs((a[0] + a[1]) / 2 - len / 2) - Math.abs((b[0] + b[1]) / 2 - len / 2));
-  const r = runs[0]; if (!r) return organicDoorCache[ck] = null;
-  const c = (r[0] + r[1]) / 2, half = Math.max(24, (r[1] - r[0]) / 2);
+  // Prefer the run that overlaps this room's own stretch most, then the widest.
+  const own = r => Math.max(0, Math.min(r[1], base + span) - Math.max(r[0], base));
+  runs.sort((a, b) => own(b) - own(a) || (b[1] - b[0]) - (a[1] - a[0]));
+  const r = runs.find(r => r[1] - r[0] >= 12); if (!r) return organicDoorCache[ck] = null;
+  const cA = (r[0] + r[1]) / 2, c = cA - base, half = Math.max(24, (r[1] - r[0]) / 2);
   const edge = horiz ? { x: dir === 'w' ? 14 : 786, y: c } : { x: c, y: dir === 'n' ? 14 : 486 };
-  // Step inward along the path until clear of the edge trigger.
+  // Step inward along the path until clear of the edge trigger (area walk, foot point).
   let inward = null;
-  for (let d = 34; d < 160 && !inward; d += 6) {
-    const p = horiz ? { x: dir === 'w' ? d : 800 - d, y: c } : { x: c, y: dir === 'n' ? d : 500 - d };
-    if (organicWalk(key, p.x, p.y - 22)) inward = { x: p.x, y: p.y - 22 };
+  for (let d = 40; d < 200 && !inward; d += 6) {
+    const lx = horiz ? (dir === 'w' ? d : 800 - d) : c, ly = horiz ? c : (dir === 'n' ? d : 500 - d);
+    if (organicAreaWalk(o, off.x + lx, off.y + ly)) inward = { x: lx, y: ly - 22 };
   }
   return organicDoorCache[ck] = { edge, inward: inward || { x: edge.x, y: edge.y - 22 }, half, along: c };
+}
+// Put a position given in some room's local coordinates into the room of the
+// district that actually contains it.
+function organicNormalize(key, pos) {
+  const o = organicDef(key); if (!o) return { key, pos };
+  const off = cellOffset(key, o.area), ax = off.x + pos.x, ay = off.y + pos.y;
+  const cell = o.area.cells.find(c => { const q = cellOffset(c, o.area); return ax >= q.x && ax < q.x + 800 && ay >= q.y && ay < q.y + 500; }) || key;
+  const q = cellOffset(cell, o.area); return { key: cell, pos: { x: ax - q.x, y: ay - q.y } };
 }
 function organicExternalExit(key, dir) {
   const raw = rooms[key] && rooms[key].exits[dir]; if (!raw) return null;
@@ -81,12 +104,16 @@ const moveBeforeOrganic = move;
 move = function (dt) {
   moveBeforeOrganic(dt);
   if (!state || state.battle || !organicDef(state.room)) return;
-  const p = state.pos, near = { w: p.x <= 16, e: p.x >= 784, n: p.y <= 16, s: p.y >= 484 };
-  for (const dir of ['n', 's', 'e', 'w']) {
-    if (!near[dir] || !organicExternalExit(state.room, dir)) continue;
-    const door = organicDoor(state.room, dir); if (!door) continue;
-    const along = dir === 'e' || dir === 'w' ? p.y + 22 : p.x;
-    if (Math.abs(along - door.along) <= door.half + 20) { transition(dir); return; }
+  const o = organicDef(state.room), here = cellOffset(state.room, o.area), ax = here.x + state.pos.x, ay = here.y + state.pos.y + 22;
+  const near = { w: ax <= 16, e: ax >= o.area.width - 16, n: ay - 22 <= 16, s: ay - 22 >= o.area.height - 16 };
+  for (const cell of o.area.cells) for (const dir of ['n', 's', 'e', 'w']) {
+    if (!near[dir] || !organicExternalExit(cell, dir)) continue;
+    const door = organicDoor(cell, dir); if (!door) continue;
+    const q = cellOffset(cell, o.area), along = dir === 'e' || dir === 'w' ? ay - q.y : ax - q.x;
+    if (Math.abs(along - door.along) <= door.half + 20) {
+      // Leave from the room that owns this door.
+      state.room = cell; state.pos = { x: ax - q.x, y: ay - 22 - q.y }; transition(dir); return;
+    }
   }
 };
 const transitionBeforeOrganic = transition;
@@ -94,7 +121,11 @@ transition = function (dir) {
   const from = state.room, ok = transitionBeforeOrganic(dir);
   if (ok && state.room !== from && organicDef(state.room) && !(organicDef(from) && organicDef(from).area.cells.includes(state.room))) {
     const opp = { n: 's', s: 'n', e: 'w', w: 'e' }[dir], door = organicDoor(state.room, opp);
-    if (door) { state.pos = { ...door.inward }; save(); renderWorld(); }
+    if (door) {
+      const n = organicNormalize(state.room, door.inward);
+      state.room = n.key; state.pos = n.pos; if (!state.visited.includes(n.key)) state.visited.push(n.key);
+      save(); renderWorld();
+    }
   }
   return ok;
 };
