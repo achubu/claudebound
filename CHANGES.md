@@ -2522,3 +2522,27 @@ Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEN
   here to drop a sunbeam the tracer mistook for path.
 - Tests: the real painting's three doors must all connect along the paths, and
   every patrol must stand on a path.
+
+## Round 90: Five more organic districts
+
+- Five more districts are now organic paintings with winding paths:
+  - **Crown Mainframe District** (Neon Aftermath): rain-soaked neon walkways.
+  - **Sunpetal Wilds** (Elaris): sunflower-meadow trails.
+  - **Stormglass Reach** (Vespera): storm-cliff flagstones.
+  - **Prism Bazaar** (Vespera): cobbled market lanes.
+  - **Stormforge Foundry** (Vespera): catwalks over molten channels.
+  Six districts in total use the engine now. Wide two-room paintings keep their
+  own 3.2:1 shape.
+- **Doors on room boundaries:** a door can now sit on a path that leaves the
+  district right on the line between two of its rooms. The search may reach up
+  to 220 px into a neighbouring district room that has no exit of its own on
+  that side. Leaving through such a door hands you to the room that owns the
+  exit, and arriving puts you in whichever room the landing spot is in.
+- **`build_organic_area.py`:**
+  - `--close N` to seal seams and bridge joints;
+  - edge-padded closing, so paths keep touching the border;
+  - keeps only the largest connected path network.
+  Shaded or lightning-lit catwalk colours and bridge colours were added per
+  painting.
+- Tests: all six real paintings must have every door on a path, landing points
+  on a path, all doors connected, and every patrol on a path.

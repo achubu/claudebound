@@ -32,16 +32,24 @@ state.pos={x:14,y:w.along-22};move(0);assert.equal(state.room,'4,4','walking int
 delete ORGANIC_AREAS['elaris:emerald'];
 console.log('PASS: organic districts walk on traced paths with doors where paths meet the edges.');
 }`);
-// Round 89: the real Emerald Expanse painting — every door has a path and they all connect.
+// Round 89/90: every real organic painting — each door has a path, arrivals land on a path, all doors connect.
 run(fs.readFileSync(path.join(__dirname,'../assets/organic-areas.js'),'utf8'));
 run(fs.readFileSync(path.join(__dirname,'../assets/touch-controls.js'),'utf8'));
 run(`{
 for(const c of [organicDoorCache,organicBits,spawnCatalog])for(const k in c)delete c[k];
-newGame();state.region='elaris';configureRegion('elaris');
-const area=joinedArea('5,4'),doors=[];
-for(const k of area.cells)for(const d of ['n','s','e','w'])if(organicExternalExit(k,d)){const door=organicDoor(k,d);assert(door,'door for '+k+' '+d);assert(walkable(k,door.inward.x,door.inward.y),'arrival on path');const o=cellOffset(k,area);doors.push({x:o.x+door.inward.x,y:o.y+door.inward.y})}
-assert.equal(doors.length,3,'Emerald Expanse has three doors');
-for(let i=0;i<doors.length;i++)for(let j=i+1;j<doors.length;j++)assert(findTouchPath(area,doors[i],doors[j]),'doors '+i+' and '+j+' connect along the paths');
-for(const k of area.cells)for(const s of roomSpawns(k))assert(walkable(k,s.x,s.y),'patrol on path');
-console.log('PASS: Emerald Expanse organic painting: three connected doors, patrols on paths.');
+newGame();let checked=0;
+for(const region of ['city','elaris','vespera']){state.region=region;configureRegion(region);
+ for(const g of JOINED_AREAS[region]){if(!ORGANIC_AREAS[region+':'+g.art])continue;checked++;
+  const area=joinedArea(g.cells[0]),doors=[];
+  for(const k of area.cells)for(const d of ['n','s','e','w'])if(organicExternalExit(k,d)){
+   const door=organicDoor(k,d);assert(door,'door for '+region+' '+k+' '+d);
+   const n=organicNormalize(k,door.inward);assert(walkable(n.key,n.pos.x,n.pos.y),'arrival on path '+region+' '+k+' '+d);
+   const o=cellOffset(k,area);doors.push({x:o.x+door.inward.x,y:o.y+door.inward.y});
+  }
+  assert(doors.length>=2,g.name+' has doors');
+  for(let i=0;i<doors.length;i++)for(let j=i+1;j<doors.length;j++)assert(findTouchPath(area,doors[i],doors[j]),g.name+': doors '+i+' and '+j+' connect');
+  for(const k of area.cells)for(const sp of roomSpawns(k))assert(walkable(k,sp.x,sp.y),g.name+': patrol on path');
+ }}
+assert.equal(checked,6,'six organic districts');
+console.log('PASS: six organic districts: every door on a connected path, arrivals and patrols on paths.');
 }`);

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Trace the walkable paths of an organic district painting (Round 88).
 
-Usage: python3 tools/build_organic_area.py <painting> <region> <art> [--path-rgb R,G,B[;R,G,B...]] [--tol N] [--clear x0,y0,x1,y1 ...]
+Usage: python3 tools/build_organic_area.py <painting> <region> <art> [--path-rgb R,G,B[;R,G,B...]] [--tol N] [--clear x0,y0,x1,y1 ...] [--close N]
   --clear: fractions of the image to force non-walkable (e.g. a sunbeam the tracer mistook for path).
   e.g. python3 tools/build_organic_area.py emerald.jpg elaris emerald
 
@@ -23,12 +23,13 @@ if '--path-rgb' in args: path_rgb = [tuple(int(v) for v in c.split(',')) for c i
 if '--tol' in args: tol = int(args[args.index('--tol') + 1])
 
 img = Image.open(src).convert('RGB')
-img.resize((1600, 1000), Image.LANCZOS).save(f'assets/environment/areas/{art}.webp', quality=86)
+img.resize((1600, round(1600 * img.height / img.width)), Image.LANCZOS).save(f'assets/environment/areas/{art}.webp', quality=86)  # keep the painting's own shape
 a = np.asarray(img.resize((800, 500), Image.LANCZOS)).astype(int)
 path = np.zeros(a.shape[:2], bool)
 for c in path_rgb: path |= np.sqrt(((a - np.array(c)) ** 2).sum(2)) < tol
 path = nd.binary_opening(path, iterations=1)              # drop speckles (sand on rocks, flowers)
-path = nd.binary_closing(path, iterations=3)              # bridge pebbles and puddles on the path
+close = int(args[args.index('--close') + 1]) if '--close' in args else 3
+path = nd.binary_closing(np.pad(path, close + 2, mode='edge'), iterations=close)[close + 2:-close - 2, close + 2:-close - 2]          # bridge pebbles, puddles and seams on the path
 lab, n = nd.label(path)
 sizes = nd.sum(path, lab, range(1, n + 1))
 keep = np.isin(lab, [i + 1 for i, s in enumerate(sizes) if s > 1500])  # only real path networks
@@ -39,6 +40,8 @@ for i, arg in enumerate(args):
             x0, y0, x1, y1 = (float(v) for v in box.split(','))
             walk[int(y0 * 500):int(y1 * 500), int(x0 * 800):int(x1 * 800)] = False
 cells = walk.reshape(250, 2, 400, 2).mean((1, 3)) >= .5
+lab, n = nd.label(cells)
+if n > 1: cells = lab == (np.argmax(nd.sum(cells, lab, range(1, n + 1))) + 1)  # one connected network only
 bits = np.packbits(cells.flatten())
 abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 flat = cells.flatten().astype(int)
