@@ -78,7 +78,12 @@ NeonCity.render=function(container,key,r){
 // procedural props, which are not present in the new full-area paintings.
 const originalAreaBlocked=NeonCity.blocked;
 NeonCity.blocked=function(key,x,y){
- if(!joinedArea(key).art)return originalAreaBlocked(key,x,y);
+ const area=joinedArea(key);if(!area.art)return originalAreaBlocked(key,x,y);
+ if(CROSSROAD_ARTS[area.art]){
+  // Mirrored cells keep the same (symmetric) road layout, so one shape fits all.
+  const fx=x,fy=y+25,w=CROSSROAD_WALK,d=Math.hypot(fx-400,fy-250);
+  return !((fy>=w.band.y[0]&&fy<=w.band.y[1])||(fx>=w.band.x[0]&&fx<=w.band.x[1])||d<=w.plaza.r);
+ }
  return [[0,0,292,157],[500,0,300,157],[0,322,292,178],[500,322,300,178]]
   .some(([l,t,w,h])=>x>l-12&&x<l+w+12&&y+25>t-5&&y+25<t+h+5);
 };
@@ -90,14 +95,28 @@ const AREA_ART_GUIDES={
  burnout:{x:[0,.205,.29,.71,.795,1],y:[0,.405,.605,1]},
  promenade:{x:[0,.195,.282,.716,.809,1],y:[0,.38,.61,1]},
  foundry:{x:[0,.20,.275,.73,.80,1],y:[0,.17,.27,.69,.80,1]},
- mainframe:{x:[0,.215,.285,.715,.785,1],y:[0,.19,.30,.70,.80,1]},
+ mainframe:{x:[0,.215,.295,.71,.79,1],y:[0,.185,.30,.69,.81,1]}, // Round 87: new single 2x2 painting
  sunpetal:{x:[0,.225,.275,.725,.775,1],y:[0,.42,.56,1]},
  emerald:{x:[0,.23,.29,.71,.77,1],y:[0,.16,.25,.75,.83,1]}
 };
 const areaPaintings={};
 function areaArtBands(area){return {x:[0,292,500,1092,1300,1600],y:area.height===500?[0,157,322,500]:[0,157,322,657,822,1000]}}
+// Round 86: districts painted as one crossroads per room. Neighbouring rooms
+// are mirror images of each other, so every road and kerb meets its twin
+// exactly at the shared edge.
+const CROSSROAD_ARTS={promenade:true}; // Round 87: Crown Mainframe has its own 2x2 painting again
+// Walkable road + pavement of those crossroads (room coordinates, foot point).
+const CROSSROAD_WALK={band:{y:[200,292],x:[352,448]},plaza:{r:78}}; // the low fountain rim can be walked over, like the other roundabouts
+function paintCrossroadArea(ctx,area,texture){
+ for(const key of area.cells){
+  const [x,y]=key.split(',').map(Number),cx=x-area.left,cy=y-area.top,fx=cx%2===1,fy=cy%2===1;
+  ctx.save();ctx.translate(cx*800+(fx?800:0),cy*500+(fy?500:0));ctx.scale(fx?-1:1,fy?-1:1);
+  ctx.drawImage(texture,0,0,texture.naturalWidth,texture.naturalHeight,0,0,800,500);ctx.restore();
+ }
+}
 function paintJoinedArea(canvas,area,texture){
  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+ if(CROSSROAD_ARTS[area.art]){ctx.imageSmoothingEnabled=true;return paintCrossroadArea(ctx,area,texture)}
  const from=AREA_ART_GUIDES[area.art],to=areaArtBands(area);
  const sx=from.x.map(v=>Math.round(v*texture.naturalWidth)),sy=from.y.map(v=>Math.round(v*texture.naturalHeight));
  for(let x=0;x<sx.length-1;x++)for(let y=0;y<sy.length-1;y++)

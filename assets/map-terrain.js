@@ -7,7 +7,8 @@
 // continuous giant city or jungle. Unexplored rooms stay dark (fog of war).
 // The room labels shrink to small tags floating over their tile.
 // =====================================================================
-const MAP_TILE_W = 256, MAP_TILE_H = 160; // terrain resolution per room (16:10, matches 800x500)
+const MAP_TILE_W = 400, MAP_TILE_H = 250; // cached art per room (16:10, half of the 800x500 room)
+const MAP_MAX_PIXELS = 16e6; // stay under mobile Safari's canvas size limit
 const mapTileCache = {};
 const mapImageCache = {};
 function whenImageLoads(img, fn) { if (fn && img.addEventListener) img.addEventListener('load', fn, { once: true }); }
@@ -35,6 +36,8 @@ function mapRoomTile(key, onReady) {
       if (img.complete && img.naturalWidth) ctx.drawImage(img, 0, 0, MAP_TILE_W, MAP_TILE_H); else complete = false;
     }
   }
+  // A painted city block whose image is still loading (Round 87).
+  if (holder.querySelector && holder.querySelector('canvas[data-pending]')) { complete = false; if (typeof cityBlockTile === 'function') whenImageLoads(cityBlockImage(cityBlockTile(key).art.src), onReady); }
   if (complete) mapTileCache[ck] = tile;
   return tile;
 }
@@ -71,12 +74,17 @@ function mapCurve(c, pts, move = true) {
   for (let i = 1; i < pts.length - 1; i++) c.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
   c.lineTo(...pts[pts.length - 1]);
 }
-function drawMapTerrain(canvasEl) {
-  const { minX, maxX, minY, maxY } = mapBounds(), cols = maxX - minX + 1.8, rows = maxY - minY + 1.8, TW = MAP_TILE_W, TH = MAP_TILE_H;
+// tileW is the on-screen device-pixel width of one room, so the terrain is
+// drawn 1:1 with the screen (sharp at any zoom) and always at exactly 16:10.
+function drawMapTerrain(canvasEl, tileW) {
+  const { minX, maxX, minY, maxY } = mapBounds(), cols = maxX - minX + 1.8, rows = maxY - minY + 1.8;
+  let TW = Math.round(tileW || MAP_TILE_W * 0.64);
+  TW = Math.max(64, Math.min(TW, Math.floor(Math.sqrt(MAP_MAX_PIXELS / (cols * rows * 0.625)))));
+  const TH = TW * 0.625, k = TW / 256; // k scales the hand-tuned edge sizes
   const W = Math.round(cols * TW), H = Math.round(rows * TH), theme = MAP_THEME[activeRegion] || MAP_THEME.city;
   canvasEl.width = W; canvasEl.height = H;
   const ctx = canvasEl.getContext('2d'); if (!ctx) return;
-  const redraw = () => { if (canvasEl.isConnected) drawMapTerrain(canvasEl); };
+  const redraw = () => { if (canvasEl.isConnected) drawMapTerrain(canvasEl, tileW); };
   const at = (x, y) => [(x - minX + 0.4) * TW, (y - minY + 0.4) * TH];
   const explored = new Set(Object.keys(rooms).filter(k => state.visited.includes(k)));
   const K = (x, y) => x + ',' + y, XY = k => k.split(',').map(Number);
@@ -103,7 +111,7 @@ function drawMapTerrain(canvasEl) {
   //    short way into its neighbour and faded out, so the two pictures
   //    cross-fade instead of meeting at a hard line. Mirroring keeps every road
   //    exactly where it is, so streets run straight through the join.
-  const O = 26, strip = document.createElement('canvas'), S = strip.getContext('2d');
+  const O = Math.round(26 * k), strip = document.createElement('canvas'), S = strip.getContext('2d');
   for (const [key, s] of Object.entries(source)) {
     const [kx, ky] = XY(key), [x, y] = at(kx, ky), fx = s.sw / TW, fy = s.sh / TH;
     for (const [side, [dx, dy]] of Object.entries(MAP_SIDES)) {
@@ -131,7 +139,7 @@ function drawMapTerrain(canvasEl) {
       if (!source[n] || sameArea(key, n)) continue;
       const linked = Object.values(ex).some(e => (typeof e === 'string' ? e : e.to) === n); if (linked) continue;
       L.save(); L.translate(side === 'e' ? x + TW : x + TW / 2, side === 'e' ? y + TH / 2 : y + TH); if (side === 'e') L.rotate(Math.PI / 2);
-      const bw = TW * 0.2, bh = 7; L.fillStyle = theme.barrier[1]; L.fillRect(-bw / 2 - 2, -bh / 2 - 2, bw + 4, bh + 4);
+      const bw = TW * 0.2, bh = 7 * k; L.fillStyle = theme.barrier[1]; L.fillRect(-bw / 2 - 2, -bh / 2 - 2, bw + 4, bh + 4);
       for (let i = 0; i < 6; i++) { L.fillStyle = i % 2 ? theme.barrier[1] : theme.barrier[0]; L.fillRect(-bw / 2 + i * bw / 6, -bh / 2, bw / 6, bh); }
       L.restore();
     }
@@ -141,7 +149,7 @@ function drawMapTerrain(canvasEl) {
   // Each frontier edge ends exactly where its neighbouring edge begins (a fixed
   // inset at the ends, jitter only in between), so the frontier is one unbroken shape
   // that turns cleanly around outer and inner corners.
-  const F = 64, D0 = 11, fades = [], has = (x, y) => !!source[K(x, y)];
+  const F = 64 * k, D0 = 11 * k, fades = [], has = (x, y) => !!source[K(x, y)];
   L.globalCompositeOperation = 'destination-out';
   for (const key of Object.keys(source)) {
     const [kx, ky] = XY(key), [x, y] = at(kx, ky), rand = seeded(hashSeed(activeRegion + key + 'frontier'));
@@ -159,7 +167,7 @@ function drawMapTerrain(canvasEl) {
       const s0 = endOffset(-1), s1 = endOffset(1), steps = 9, pts = [];
       for (let i = 0; i <= steps; i++) {
         const t = i / steps, along = base + s0 + (s1 - s0) * t;
-        const d = i === 0 || i === steps ? D0 : 6 + rand() * 12 + Math.sin(t * Math.PI * 3 + rand()) * 3;
+        const d = i === 0 || i === steps ? D0 : (6 + rand() * 12 + Math.sin(t * Math.PI * 3 + rand()) * 3) * k;
         pts.push(horiz ? [dx > 0 ? x + TW - d : x + d, along] : [along, dy > 0 ? y + TH - d : y + d]);
       }
       const edge = horiz ? (dx > 0 ? x + TW : x) : (dy > 0 ? y + TH : y), a0 = Math.min(base, base + s0), a1 = Math.max(base + span, base + s1); // outer corners erase all the way to the tile corner
@@ -176,7 +184,7 @@ function drawMapTerrain(canvasEl) {
   //    sits underneath, and the sharp land fades out over it near the edges,
   //    so explored ground melts into the fog. The blur is a down-and-up scale,
   //    which works in every browser.
-  const small = document.createElement('canvas'), q = 8; small.width = Math.max(1, Math.round(W / q)); small.height = Math.max(1, Math.round(H / q));
+  const small = document.createElement('canvas'), q = Math.max(4, Math.round(8 * k)); small.width = Math.max(1, Math.round(W / q)); small.height = Math.max(1, Math.round(H / q));
   const SM = small.getContext('2d'); SM.imageSmoothingEnabled = true; SM.drawImage(land, 0, 0, small.width, small.height);
   SM.globalCompositeOperation = 'source-atop'; SM.fillStyle = 'rgba(0,0,0,.5)'; SM.fillRect(0, 0, small.width, small.height);
   ctx.save(); ctx.imageSmoothingEnabled = true; ctx.drawImage(small, 0, 0, W, H); ctx.restore();
@@ -192,19 +200,81 @@ function drawMapTerrain(canvasEl) {
   ctx.drawImage(land, 0, 0);
   // Where you are.
   const [hx, hy] = at(...XY(state.room));
-  ctx.save(); ctx.strokeStyle = '#ffd27acc'; ctx.lineWidth = 5; ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 18;
-  ctx.strokeRect(hx + 3, hy + 3, TW - 6, TH - 6); ctx.restore();
+  ctx.save(); ctx.strokeStyle = '#ffd27acc'; ctx.lineWidth = 5 * k; ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 18 * k;
+  ctx.strokeRect(hx + 3 * k, hy + 3 * k, TW - 6 * k, TH - 6 * k); ctx.restore();
+}
+// --- Zoom ---
+// The map keeps its own zoom between openings. Zooming resizes the map
+// (labels stay readable at their normal size) and redraws the terrain at the
+// new on-screen resolution so it stays sharp.
+let mapZoom = 1;
+try { mapZoom = Number(localStorage.getItem('cardbound-map-zoom')) || 1; } catch (e) { mapZoom = 1; }
+const MAP_ZOOM_MIN = 0.3, MAP_ZOOM_MAX = 3;
+function applyMapZoom(map, scroller, zoom, focus) {
+  zoom = Math.max(MAP_ZOOM_MIN, Math.min(MAP_ZOOM_MAX, zoom));
+  const baseW = Number(map.dataset.baseW), baseH = Number(map.dataset.baseH);
+  // Keep the point under the cursor (or the centre) where it is.
+  const fx = focus ? focus.x : scroller.clientWidth / 2, fy = focus ? focus.y : scroller.clientHeight / 2;
+  const relX = (scroller.scrollLeft + fx) / (map.offsetWidth || 1), relY = (scroller.scrollTop + fy) / (map.offsetHeight || 1);
+  mapZoom = zoom; try { localStorage.setItem('cardbound-map-zoom', String(zoom)); } catch (e) { /* private mode */ }
+  map.style.width = Math.round(baseW * zoom) + 'px'; map.style.height = Math.round(baseH * zoom) + 'px';
+  scroller.scrollLeft = relX * map.offsetWidth - fx; scroller.scrollTop = relY * map.offsetHeight - fy;
+  const label = document.querySelector('.map-zoom-level'); if (label) label.textContent = Math.round(zoom * 100) + '%';
+  clearTimeout(applyMapZoom.timer);
+  applyMapZoom.timer = setTimeout(() => { const t = map.querySelector('.map-terrain'); if (t) drawMapTerrain(t, mapTileScreenWidth(map)); }, 140);
+}
+function mapTileScreenWidth(map) {
+  const { minX, maxX } = mapBounds(), dpr = (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1;
+  return (map.offsetWidth || Number(map.dataset.baseW) * mapZoom) / (maxX - minX + 1.8) * dpr;
 }
 const showMapBeforeTerrain = showMap;
 showMap = function () {
   showMapBeforeTerrain();
   const map = document.querySelector && document.querySelector('.map-canvas'); if (!map || !state) return;
+  const scroller = map.parentElement;
   map.classList.add('map-city');
+  // Base size = the 16:10 grid the map was laid out on (never stretched to fill).
+  map.dataset.baseW = parseFloat(map.style.width) || 0; map.dataset.baseH = parseFloat(map.style.height) || 0;
   const terrain = document.createElement('canvas'); terrain.className = 'map-terrain'; terrain.setAttribute('aria-hidden', 'true');
-  map.prepend(terrain); drawMapTerrain(terrain);
+  map.prepend(terrain);
+  // Zoom controls just above the map.
+  if (scroller && scroller.before) {
+    const bar = document.createElement('div'); bar.className = 'map-zoom';
+    bar.innerHTML = '<button type="button" class="map-zoom-out" aria-label="Zoom out">−</button><span class="map-zoom-level">100%</span><button type="button" class="map-zoom-in" aria-label="Zoom in">+</button><button type="button" class="map-zoom-reset">Fit</button><small>Ctrl + scroll or pinch to zoom</small>';
+    scroller.before(bar);
+    bar.querySelector('.map-zoom-in').onclick = () => applyMapZoom(map, scroller, mapZoom * 1.25);
+    bar.querySelector('.map-zoom-out').onclick = () => applyMapZoom(map, scroller, mapZoom / 1.25);
+    bar.querySelector('.map-zoom-reset').onclick = () => {
+      const fit = Math.min(scroller.clientWidth / Number(map.dataset.baseW), scroller.clientHeight / Number(map.dataset.baseH));
+      applyMapZoom(map, scroller, fit);
+    };
+    if (scroller.addEventListener) {
+      // Trackpad pinch and Ctrl+wheel arrive as wheel events with ctrlKey.
+      scroller.addEventListener('wheel', e => {
+        if (!e.ctrlKey && !e.metaKey) return; e.preventDefault();
+        const r = scroller.getBoundingClientRect();
+        applyMapZoom(map, scroller, mapZoom * Math.exp(-Math.max(-60, Math.min(60, e.deltaY)) * 0.004), { x: e.clientX - r.left, y: e.clientY - r.top });
+      }, { passive: false });
+      // Two-finger pinch on touch screens.
+      let pinch = null;
+      const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+      scroller.addEventListener('touchstart', e => { if (e.touches.length === 2) pinch = { d: dist(e.touches), z: mapZoom }; }, { passive: true });
+      scroller.addEventListener('touchmove', e => {
+        if (!pinch || e.touches.length !== 2) return; e.preventDefault();
+        const r = scroller.getBoundingClientRect(), cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+        applyMapZoom(map, scroller, pinch.z * dist(e.touches) / pinch.d, { x: cx, y: cy });
+      }, { passive: false });
+      scroller.addEventListener('touchend', () => { pinch = null; });
+    }
+  }
+  map.style.width = Math.round(Number(map.dataset.baseW) * mapZoom) + 'px'; map.style.height = Math.round(Number(map.dataset.baseH) * mapZoom) + 'px';
+  const label = document.querySelector('.map-zoom-level'); if (label) label.textContent = Math.round(mapZoom * 100) + '%';
+  drawMapTerrain(terrain, mapTileScreenWidth(map));
+  const here = map.querySelector('.current-room'); if (here && here.scrollIntoView) here.scrollIntoView({ block: 'center', inline: 'center' });
 };
 const mapTerrainStyles = document.createElement('style');
-mapTerrainStyles.textContent = '.map-city{background:#070b10}'
+mapTerrainStyles.textContent = '.map-canvas.map-city{background:#070b10;min-width:0;flex:none}'
+  + '.map-zoom{display:flex;align-items:center;gap:6px;margin:0 0 6px}.map-zoom button{min-width:32px;padding:3px 10px}.map-zoom .map-zoom-level{min-width:46px;text-align:center;font:12px system-ui;color:#bfe6ff}.map-zoom small{opacity:.6;margin-left:6px}'
   + '.map-terrain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:auto}'
   + '.map-city .map-links{z-index:1}'
   + '.map-city .panel{z-index:2;width:auto!important;height:auto!important;min-width:0;min-height:0;padding:5px 9px 4px;text-align:center;background:rgba(7,13,20,.4);border-color:#5d86a066;border-radius:8px;box-shadow:0 2px 10px #000a;backdrop-filter:blur(2px)}'
