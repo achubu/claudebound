@@ -4,7 +4,7 @@ Cardbound is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 94) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 96) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -48,6 +48,20 @@ change set.
   prompts: `assets/cards/art-refresh.md` and `tools/art-refresh/`. When art
   paths change, bump the `cards.js?v=` tag in `index.html` and
   `compendium.html`.
+
+## Folder layout
+
+- Repo root: `index.html`, `compendium.html`, `arena.html` and the design
+  notes (`*.md`).
+- `assets/`: everything the game loads. That is the scripts and stylesheets,
+  plus image folders `cards/`, `characters/`, `environment/`, `items/`,
+  `monsters/` and `talents/`.
+- `unused assets/`: graphics the game no longer loads, kept under their old
+  paths, with a README. Don't reference it from game code. Move a file back
+  into `assets/` when it is wired in again.
+- `tests/` and `tools/`.
+- Don't add top-level copies of `assets/` folders. Owner uploads sometimes
+  create them, so fold the files into `assets/` instead.
 
 ## Tests
 

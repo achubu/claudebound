@@ -1,7 +1,7 @@
 # Fixed cast
 
 - `protagonist.jpeg`: user-provided male main character. Used on the start screen, character sheet, and in the world. Display name remains Adventurer until the author supplies a name.
-- `story-character.jpeg`: user-provided female character, reserved for future story implementation. Not selectable or spawned.
+- `story-character.jpeg` (now in `unused assets/assets/characters/`): user-provided female character, reserved for future story implementation. Not selectable or spawned.
 
 Original JPEG references are preserved unchanged. Their checkerboard backgrounds are baked into the images, not transparency. The world uses `protagonist-walk.png`, a transparent 4×4 animation sheet generated from the male reference. Rows: down, left, right, up. Columns: neutral, step, neutral, opposite step. Walking advances at 120 ms per frame only while position changes; idle retains facing and gently breathes. Menus, battles, and collisions stop the gait. Story names, dialogue, and relationships are intentionally undefined.
 

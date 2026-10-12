@@ -3,8 +3,8 @@
 .talent-header{align-items:center}.talent-header h2{margin-bottom:5px}.talent-header p{font:12px/1.5 system-ui}
 .talent-tree{gap:14px;align-items:start}.talent-branch{--branch:#f3b665;min-width:0;border:1px solid #66513b;padding:12px;background:linear-gradient(160deg,#252a30,#0b1723);border-radius:12px}
 .talent-branch.disruption{--branch:#78dfff;border-color:#355e72}.talent-branch.resolve{--branch:#7be3bc;border-color:#356052}
-.talent-branch h3{color:var(--branch);letter-spacing:2px;padding:17px 10px;margin:0;border-bottom:1px solid var(--branch);background:linear-gradient(90deg,#09131eef,#09131e70),url('Talent Graphics/talent3.jpg') center/cover;border-radius:6px}
-.talent-branch.disruption h3{background-image:linear-gradient(90deg,#09131eef,#09131e70),url('Talent Graphics/talent1.jpg')}.talent-branch.resolve h3{background-image:linear-gradient(90deg,#09131eef,#09131e70),url('talents/aegis.webp')}
+.talent-branch h3{color:var(--branch);letter-spacing:2px;padding:17px 10px;margin:0;border-bottom:1px solid var(--branch);background:linear-gradient(90deg,#09131eef,#09131e70),url('talents/talent3.jpg') center/cover;border-radius:6px}
+.talent-branch.disruption h3{background-image:linear-gradient(90deg,#09131eef,#09131e70),url('talents/talent1.jpg')}.talent-branch.resolve h3{background-image:linear-gradient(90deg,#09131eef,#09131e70),url('talents/aegis.webp')}
 .branch-spend{min-height:38px;margin:10px 0!important;font:11px/1.5 system-ui!important;color:#bdccd5}
 .talent-lane{gap:32px;padding:14px 2px 20px;background:radial-gradient(ellipse at top,#243b4666,#08121ecc)}
 .talent-row{gap:10px;justify-content:space-evenly}

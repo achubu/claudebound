@@ -1,6 +1,6 @@
 # Talent artwork
 
-The illustrated talent tree uses the uploaded `assets/Talent Graphics` images directly for card manipulation, precision, power, mirror effects, and clockwork energy. Originals are preserved.
+The illustrated talent tree uses the uploaded `talent*.jpg/jpeg` images in this folder directly for card manipulation, precision, power, mirror effects, and clockwork energy. Originals are preserved.
 
 Two additional icons were generated with the built-in image generation tool on 2026-10-04:
 

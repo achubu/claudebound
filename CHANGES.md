@@ -2740,3 +2740,32 @@ using exit labels alone.
   shipping a new round.
 - Added `CLAUDE.md`, handoff notes that Claude reads automatically in new
   sessions.
+
+## Round 96: tidy folders and set aside unused art
+
+- claudebound is now the primary repo (see `CLAUDE.md`). Achubu/Cardbound is
+  worked on by ChatGPT and is only a source of image assets.
+- Deleted files the game never loads:
+  - The nested `Cardbound/` copy of the project. It held older code, and
+    images byte-identical to `assets/`.
+  - Root-level duplicates of `assets/` content: `characters/`,
+    `environment/`, `items/`, `monsters/`, and the `.js`/`.css` copies.
+  - `.DS_Store` files.
+  - `assets/environment/meadowrest.js`, which `index.html` no longer loads.
+- Moved graphics the game no longer uses into `unused assets/`, keeping their
+  old paths. `unused assets/README.md` lists what is there and why. Usage was
+  checked against:
+  - every literal path in the page code;
+  - `cardArtPath()` for every card and level;
+  - `talentArt()`;
+  - the district paintings `JOINED_AREAS` actually uses;
+  - `diagArtFor()` across every room in every region.
+- Merged `assets/Talent Graphics/` into `assets/talents/`, so all talent art
+  lives in one folder. Updated `talentArt()` and `talents.css`.
+- `tests/area-art.test.cjs` now derives the district paintings to check from
+  `JOINED_AREAS` instead of a fixed list that still named `burnout`.
+- Cache tags bumped to `?v=round96`.
+- Verified that the full test suite passes, and that a browser run through all
+  four regions, every card's art, the talent art and the compendium makes no
+  failed requests.
+
