@@ -1,4 +1,4 @@
-# Round 91: stitch the six Neon Aftermath district paintings (assets/environment/world/) into one 9x6-room world
+# Round 91/92: stitch the six Neon Aftermath district paintings (assets/environment/world/) into one 9x6-room world
 # and trace its walkable streets into walk.npy (4px cells); preview.png shows the result.
 from PIL import Image,ImageDraw;import numpy as np
 from scipy import ndimage as nd
@@ -13,7 +13,7 @@ world.save('world.png')
 # walk mask at 4px
 small=np.asarray(world.resize((TW*3//4,TH*2//4),Image.LANCZOS)).astype(int)
 R,G,B=small[...,0],small[...,1],small[...,2]
-walk=(G>R+18)&(np.abs(B-G)<26)&(G>95)&(G<200)&(R<150)
+walk=(G>R+18)&(np.abs(B-G)<26)&(G>95)&(G<200)&(R<150)&(R>55)  # Round 92: R>55 keeps teal water (R near 0) off the streets
 walk=nd.binary_opening(walk,iterations=1)
 CLOSE=[[4,9,4],[4,4,8]]  # per tile: the plaza and arena have puddles, stalls and junk breaking the paving
 out=np.zeros_like(walk);th,tw=TH//4,TW//4
@@ -29,7 +29,7 @@ y=th;band=walk[y-12:y+12,:];walk[y-12:y+12,:]=nd.binary_closing(np.pad(band,6,mo
 # hand-placed links where the art clearly continues (plaza steps, courtyards, junkyard spur) — mask coords
 from PIL import ImageDraw as _D
 m=Image.fromarray((walk*255).astype(np.uint8));d=_D.Draw(m)
-for a,b in [((905,255),(905,325)),((812,232),(812,325)),((1000,280),(1000,335)),((1702,470),(1690,650)),((1605,585),(1640,618)),((665,490),(665,555)),((1085,495),(1085,528))]:
+for a,b in [((875,112),(875,180)),((968,112),(968,180)),((905,255),(905,325)),((812,232),(812,325)),((1000,280),(1000,335)),((1702,470),(1690,650)),((1605,585),(1640,618)),((665,490),(665,555)),((1085,495),(1085,528))]:
   d.line([a,b],fill=255,width=14)
 for box in [(1308,108,1415,268),(1345,55,1440,90)]:  # Crystal Citadel pools and waterfalls
   d.rectangle(box,fill=0)

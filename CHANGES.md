@@ -2614,3 +2614,119 @@ Tests: tests/chronospire.test.cjs. The sims now cover Chronospire, and NO_SUSPEN
   - The harness now loads the page scripts in page order and skips duplicate
     loads.
   - City room references in the older tests were moved to the new layout.
+
+## Round 92: Neon Aftermath pathing playtest and fixes
+
+A full pathing playtest of the painted city with the real controls (now
+`tests/neon-world-pathing.test.cjs`). It walks across 1,600+ street crossings
+and back, taps from every exit to every other exit, enemy, point of interest,
+relic and chest, random-walks with keyboard and taps, and reaches every room
+using exit labels alone.
+
+**Fixed**
+- **Junkyard sealed off:** the Scrap Fortress, Collapsed Freeway and Overpass
+  Ramp couldn't be entered. The street joining them was traced narrower than
+  the link threshold. Links are now found on the cleaned 8px mask (24px or
+  wider).
+- **Thorn Warden unreachable by tapping:** the road out of the Warden's Crown
+  hugs the room edge. The walk mask now grows by one 8px cell, so narrow
+  necks are passable and tappable.
+- **Signal Tower unreachable by tapping:** a side street had two crossings
+  into it but only one label. Each side now gets a label for every separate
+  street crossing (150px+ apart), and labels follow the patch of street you're
+  on. Exits you can't reach from where you stand aren't labelled.
+- **Arrivals inside buildings:** landings within the 12px margin the movement
+  clamps to pushed you into scenery. Landings now stay inside it, and a clamp
+  that would put you on scenery is undone.
+- **Sideways landings:** crossing could drop you a few streets over, so you
+  couldn't walk straight back. Crossings now continue the same street. You
+  enter right at the edge and walk in while it stays street, with only 12px
+  of sideways slack. If the street doesn't carry on, there's no crossing.
+- **Accidental crossings:** a tap-to-move route could stray over a room edge
+  on its way somewhere. Routes now cross only at the end, through the exit
+  they were sent to. Edge crossings also only fire while you're heading that
+  way (no auto-bounce), which replaces the old 0.7s guard.
+- **Traced artefacts:**
+  - Water in the Crystal Citadel was traced as street; teal water is now
+    excluded.
+  - Thin park paths that touched only corner-to-corner are joined, since
+    movement is axis by axis.
+  - Small isolated scraps of street are removed.
+  - The Neon Square plaza steps are joined to the tower plaza.
+- **Spots you can't reach:** enemies, points of interest, relics, chests and
+  the merchant are never placed on a patch of street with no exit of its own.
+  You also never land on one.
+- **Doors:** a door must be a spot you can stand on (14px from an edge) and
+  must land you on a reachable street.
+- **Tap-to-move:**
+  - Painted and organic rooms use a finer 8px grid, aligned to the walk
+    mask, so narrow streets route.
+  - Routes try the other axis before giving up on a kerb corner.
+  - Organic districts' internal seams are unaffected.
+
+## Round 93: wider paths, interactables beside the paths
+
+- **Wider paths (about 20%):** every walkable path grows by 10% of its local
+  width on each side, capped at 28px a side (`tools/widen_paths.py`).
+  - Neon Aftermath's painted city gains about 18% more walkable ground. The
+    widening is done on the 4px trace before the game mask is built, in
+    `tools/build_world_rooms.py`.
+  - The five organic districts' masks (Emerald, Sunpetal, Foundry, Promenade,
+    Stormglass) are widened the same way, gaining 17–23% more ground.
+- **Interactables off the path:** chests, relics, points of interest, events,
+  the Wandering Merchant and Nexus Waypoints in painted and organic rooms now
+  stand beside the street rather than on it.
+  - A spot is used when it is not walkable itself, the nearest street is
+    12–28px away (aiming for 20px), and that street is one you can reach.
+    Interaction radii are 38–48px, so you can always use the item.
+  - Spots keep 90px clear of exit doors. Points of interest and the merchant
+    also keep 150px from patrols. Chests keep clear of the room's relic and
+    boss.
+  - Tapping an item routes you to the street beside it.
+  - Bosses and patrols still stand on the paths.
+  - Code: `organicItemSpot()` in `organic-paths.js`; wrappers for `poiSpot`,
+    `poiAt` and relics (applied on `configureRegion`) in `neon-world.js`.
+- **Room links match where you can stand:** feet sit 22px below your position
+  and movement is clamped to a 12px margin. That leaves a band at the top of
+  each room, and the outermost column, where you can never stand.
+  - The world generator now works out pockets and links on the cells you can
+    actually stand on.
+  - Before, a street that only joined up inside that band (a sliver at the
+    top of Scrap Fortress) looked connected but wasn't.
+  - One new real link: Ruined Tower Lot ↔ Collapsed Freeway. Relic gates and
+    progression are unchanged.
+- **Tests:**
+  - New `tests/item-placement.test.cjs` checks every item in organic rooms
+    across three seeds and three worlds: beside a reachable path, within
+    reach, and tap-routable.
+  - neon-world and exploration tests now expect items beside the street.
+  - The pathing playtest only starts crossings from street you can reach.
+
+## Round 94: refreshed card illustrations
+
+- Integrated the new pixel-art card illustrations added to the repo: 27
+  paintings, 512×512 WebP, in `assets/cards/level0`–`level3`.
+  - Arc Jab, Breach Spike, Bulwark Bash, Chain Lightning and Overclock have
+    all four levels.
+  - Static Shield has levels 0, 2 and 3; Thornlash has 0, 1 and 2; Wildfire
+    has level 1.
+- `cardArtPath()` in `assets/cards.js` uses them in battles, the deck
+  workshop and the compendium.
+  - A level without its own painting borrows the nearest lower painted stage,
+    or the first painted stage if there's none lower. Stats always follow the
+    real level.
+  - Every other card keeps its existing art.
+- The card script's cache tag is bumped (`?v=art-refresh-27`) in `index.html`
+  and `compendium.html`, so browsers fetch the new resolver.
+- Brought over `assets/cards/art-refresh.md` (status and follow-up list) and
+  `tools/art-refresh/` (prompts and packaging script).
+- Left out:
+  - `.DS_Store` files.
+  - The duplicate `Cardbound/` and top-level `characters/`, `environment/`
+    and `monsters/` folders. These are copies of files that already live
+    under `assets/`.
+  - A 500px `level2/stormglass.png`; the game keeps the 2048px `.jpeg`.
+  - The older world/room data in `origin/main`, because Round 93's map is
+    newer.
+- New `tests/card-art.test.cjs` checks that all 51 cards × 4 levels resolve
+  to an existing image and that the refreshed paintings are wired in.
