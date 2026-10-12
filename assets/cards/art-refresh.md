@@ -1,7 +1,7 @@
 # Card illustration refresh
 
 Replaces the simple procedural emblems imported from Claudebound with detailed
-pixel-art scenes matching the original Cardbound card illustrations.
+pixel-art scenes matching the original Aethercede card illustrations.
 
 Generated with the built-in image generation tool. The style reference is
 `assets/cards/level0/strike.png`: crisp pixel clusters, richly shaded materials,

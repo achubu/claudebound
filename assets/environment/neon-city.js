@@ -1,4 +1,4 @@
-/* Background atlas generated for Cardbound. Stable room IDs preserve existing saves. */
+/* Background atlas generated for Aethercede. Stable room IDs preserve existing saves. */
 const NeonCity=(()=>{
  const districts=[{name:'REFUGE',color:'#52ead7',light:'#14313c'},{name:'NEON STRIP',color:'#f279e7',light:'#291830'},{name:'TRANSIT',color:'#a5cce7',light:'#182734'},{name:'FLOODLINE',color:'#58ceff',light:'#102b37'},{name:'POWER GRID',color:'#ffb46e',light:'#382319'},{name:'CITADEL',color:'#b0a2ff',light:'#242039'}];
  // Round 29: rebuilt to match the user's own hand-designed maze

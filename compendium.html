@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cardbound — Compendium & Database</title>
+    <title>Aethercede — Compendium & Database</title>
     <style>
         :root {
             --bg-color: #0f111a;
@@ -246,12 +246,12 @@
          read from the running game (see loadGameData below), because
          expansion.js / encounter-depth.js depend on the game's own globals
          and crashed here, silently dropping 10 of the 23 cards. -->
-    <script src="assets/cards.js?v=round96" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/cards.js?v=round97" onerror="console.warn('assets/cards.js not found')"></script>
 </head>
 <body>
 
     <header>
-        <h1>Cardbound Compendium</h1>
+        <h1>Aethercede Compendium</h1>
         <div class="subtitle">Card upgrades, bestiary &amp; boss dossiers</div>
     </header>
 
@@ -296,7 +296,7 @@
     </div>
 
     <footer>
-        <p>Cardbound Compendium &mdash; card and enemy data is read live from the game.</p>
+        <p>Aethercede Compendium &mdash; card and enemy data is read live from the game.</p>
     </footer>
 
     <script>
@@ -310,7 +310,7 @@
         function loadGameData() {
             return new Promise(resolve => {
                 const frame = document.createElement('iframe');
-                frame.src = 'index.html?v=round96';
+                frame.src = 'index.html?v=round97';
                 frame.setAttribute('aria-hidden', 'true');
                 frame.tabIndex = -1;
                 frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';

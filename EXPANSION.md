@@ -37,7 +37,7 @@ Socket counts unlock at levels 1, 12, 24, 36, and 48. Crystals can be moved or r
 
 ## Saves
 
-This build starts a fresh expansion save (`cardbound-expansion-v3`). Automatic local saves include combat state. Menu → Export/Import transfers JSON between encounters, including map seed, region progress, cards, talents, device, and card-upgrade materials. Imports are checked before replacing the active run. New Journey is available from the menu if card losses end a run.
+This build starts a fresh expansion save (`aethercede-expansion-v3`). Automatic local saves include combat state. Menu → Export/Import transfers JSON between encounters, including map seed, region progress, cards, talents, device, and card-upgrade materials. Imports are checked before replacing the active run. New Journey is available from the menu if card losses end a run.
 
 ## Verification
 

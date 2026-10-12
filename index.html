@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cardbound — Neon Aftermath</title>
+<title>Aethercede — Neon Aftermath</title>
 <style>
 :root{color-scheme:dark;font-family:Georgia,serif;background:#071019;color:#f5e9c9}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#071019;overflow:hidden}button,input{font:inherit}button{cursor:pointer;color:#f7edd4;background:#24384a;border:1px solid #8e835f;border-radius:5px;padding:9px 13px}button:hover:not(:disabled){background:#38516a;transform:translateY(-1px)}button:disabled{opacity:.42;cursor:not-allowed}.primary{background:#9a7333;border-color:#e2c477}.danger{background:#572c33;border-color:#b76a71}.hidden{display:none!important}
 #game{position:fixed;inset:0;background:#0c1b22}#world{position:absolute;width:800px;height:500px;left:50%;top:50%;overflow:hidden;background:#172d2d;transform:translate(-50%,-50%) scale(var(--world-scale,1));transform-origin:center}.room-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,var(--light),var(--dark) 72%)}.tile{position:absolute;border:2px solid #0c1718;background:var(--rock);box-shadow:inset 0 0 0 2px #ffffff12}.door{position:absolute;background:#0a0e14;border:3px solid #b6a06b}.door.locked{background:repeating-linear-gradient(90deg,#54282f 0 8px,#2a1720 8px 16px);border-color:#dd987f}.door.hidden-door{opacity:.25;border-style:dashed}.door.n,.door.s{width:130px;height:22px;left:calc(50% - 65px)}.door.n{top:0}.door.s{bottom:0}.door.e,.door.w{width:22px;height:130px;top:calc(50% - 65px)}.door.e{right:0}.door.w{left:0}
@@ -97,7 +97,7 @@
 .map-surface{position:absolute;left:50%;top:50%;width:880px;height:560px;transform-origin:center}.map-surface .map-room{width:102px;min-height:54px;font-size:10px}.map-surface .map-room .map-status{display:block}.minimap-grid{width:126px;height:82px}
 .defeat-summary{max-width:680px;margin:auto}.defeat-summary h2{color:#ffb5ac}.defeat-loss{padding:16px;margin:16px 0;border:1px solid #d7766d;border-radius:10px;background:#351d25}.defeat-card{display:flex;gap:16px;align-items:center}.defeat-card img{width:88px;height:88px;object-fit:cover;border-radius:8px}.defeat-card p{font:13px/1.5 system-ui;margin:6px 0}.defeat-summary button{width:100%;min-height:48px}.defeat-summary .panel p{line-height:1.6}
 .stack-count-badge{position:absolute;right:-8px;top:-8px;z-index:4;min-width:30px;height:30px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font:800 14px system-ui;color:#1b1206;background:radial-gradient(circle at 35% 30%,#fff3c4,#f2c94c 60%,#b27d10);border:2px solid #fff4c8;box-shadow:0 2px 8px #000a}.card-wrap{position:relative}.stack-info{margin:4px 2px 0;font:11px system-ui;color:#b9c9d6}.deck-slot .stack-count{color:#f2c94c}
-</style><link rel="stylesheet" href="assets/mobile-crystals.css?v=round96"><link rel="stylesheet" href="assets/talents.css?v=round96"><link rel="stylesheet" href="assets/aether-deck.css?v=round96"><link rel="stylesheet" href="assets/battle-hud.css?v=round96"></head><body>
+</style><link rel="stylesheet" href="assets/mobile-crystals.css?v=round97"><link rel="stylesheet" href="assets/talents.css?v=round97"><link rel="stylesheet" href="assets/aether-deck.css?v=round97"><link rel="stylesheet" href="assets/battle-hud.css?v=round97"></head><body>
 <div id="game">
  <div id="world"></div>
  <div id="hud"></div>
@@ -107,14 +107,15 @@
  <div class="hint">Move: WASD / arrows · M: full map · Explore, backtrack, and collide with enemies</div>
  <div id="toast" class="hidden"></div>
 </div>
-<div id="startOverlay" class="overlay"><section class="modal small"><div class="eyebrow">CARDBOUND</div><h1>Neon Aftermath</h1><p class="muted">Explore a neon city in ruins. Traverse shattered streets, flooded districts, and abandoned transit lines. Recover relics and master your cards.</p><img class="hero-portrait opening-portrait" src="assets/characters/opening-cast.webp" alt="The protagonist and his future story ally stand together in a rain-soaked neon city in ruins"><p><button id="newBtn" class="primary">Begin new journey</button> <button id="resumeBtn" class="hidden">Continue saved journey</button></p></section></div>
+<div id="startOverlay" class="overlay"><section class="modal small"><div class="eyebrow">AETHERCEDE</div><h1>Neon Aftermath</h1><p class="muted">Explore a neon city in ruins. Traverse shattered streets, flooded districts, and abandoned transit lines. Recover relics and master your cards.</p><img class="hero-portrait opening-portrait" src="assets/characters/opening-cast.webp" alt="The protagonist and his future story ally stand together in a rain-soaked neon city in ruins"><p><button id="newBtn" class="primary">Begin new journey</button> <button id="resumeBtn" class="hidden">Continue saved journey</button></p></section></div>
 <div id="battleOverlay" class="overlay hidden"><section class="modal" id="battleModal"></section></div>
 <div id="menuOverlay" class="overlay hidden"><section class="modal" id="menuModal"></section></div>
-<script src="assets/environment/neon-city.js?v=round96"></script>
-<script src="assets/cards.js?v=round96"></script>
+<script src="assets/save-migration.js?v=round97"></script>
+<script src="assets/environment/neon-city.js?v=round97"></script>
+<script src="assets/cards.js?v=round97"></script>
 <script>
 'use strict';
-const SAVE_KEY='cardbound-integrated-v2',MATERIAL_KEY='cardbound-upgrade-materials-v2',MIN_DECK=4,BASE_MAX_DECK=6,USES=50,$=id=>document.getElementById(id);
+const SAVE_KEY='aethercede-integrated-v2',MATERIAL_KEY='aethercede-upgrade-materials-v2',MIN_DECK=4,BASE_MAX_DECK=6,USES=50,$=id=>document.getElementById(id);
 const dirs={n:{dx:0,dy:-1,op:'s'},s:{dx:0,dy:1,op:'n'},e:{dx:1,dy:0,op:'w'},w:{dx:-1,dy:0,op:'e'}};
 const rooms={
 // Round 91: Neon Aftermath is one continuous painted city (6 districts, 9x6 rooms).
@@ -514,23 +515,23 @@ if(localStorage.getItem(SAVE_KEY))$('resumeBtn').classList.remove('hidden');
 addEventListener('resize',()=>{fitWorld();fitMap();renderTalentConnectors()});fitWorld();
 requestAnimationFrame(loop);
 </script>
-<script src="assets/elaris-wildlife.js?v=round96"></script>
-<script src="assets/expansion.js?v=round96"></script>
-<script src="assets/encounter-depth.js?v=round96"></script>
-<script src="assets/talent-matrix.js?v=round96"></script>
-<script src="assets/aether-deck.js?v=round96"></script>
-<script src="assets/card-variety.js?v=round96"></script>
-<script src="assets/battle-hud.js?v=round96"></script>
-<script src="assets/combined-rooms.js?v=round96"></script>
-<script src="assets/diagonals.js?v=round96"></script>
-<script src="assets/city-paintings.js?v=round96"></script>
-<script src="assets/organic-paths.js?v=round96"></script>
-<script src="assets/organic-areas.js?v=round96"></script>
-<script src="assets/exploration.js?v=round96"></script>
-<script src="assets/neon-world.js?v=round96"></script>
-<script src="assets/chronospire.js?v=round96"></script>
-<script src="assets/pickups.js?v=round96"></script>
-<script src="assets/touch-controls.js?v=round96"></script>
-<script src="assets/map-terrain.js?v=round96"></script>
-<script src="assets/enemy-labels.js?v=round96"></script>
+<script src="assets/elaris-wildlife.js?v=round97"></script>
+<script src="assets/expansion.js?v=round97"></script>
+<script src="assets/encounter-depth.js?v=round97"></script>
+<script src="assets/talent-matrix.js?v=round97"></script>
+<script src="assets/aether-deck.js?v=round97"></script>
+<script src="assets/card-variety.js?v=round97"></script>
+<script src="assets/battle-hud.js?v=round97"></script>
+<script src="assets/combined-rooms.js?v=round97"></script>
+<script src="assets/diagonals.js?v=round97"></script>
+<script src="assets/city-paintings.js?v=round97"></script>
+<script src="assets/organic-paths.js?v=round97"></script>
+<script src="assets/organic-areas.js?v=round97"></script>
+<script src="assets/exploration.js?v=round97"></script>
+<script src="assets/neon-world.js?v=round97"></script>
+<script src="assets/chronospire.js?v=round97"></script>
+<script src="assets/pickups.js?v=round97"></script>
+<script src="assets/touch-controls.js?v=round97"></script>
+<script src="assets/map-terrain.js?v=round97"></script>
+<script src="assets/enemy-labels.js?v=round97"></script>
 </body></html>

@@ -1,10 +1,10 @@
 # Neon Covenant artwork
 
-Created with the built-in image generation tool for Cardbound. Four independent square illustrations, optimized to 512 × 512 WebP for the game.
+Created with the built-in image generation tool for Aethercede. Four independent square illustrations, optimized to 512 × 512 WebP for the game.
 
 Assets: `level0/neonCovenant.webp`, `level1/neonCovenant.webp`, `level2/neonCovenant.webp`, `level3/neonCovenant.webp`.
 
-Shared prompt: Use case: stylized-concept. Create one square fantasy cyberpunk trading-card artwork, edge-to-edge illustration only, no border, no lettering, no numbers. Cardbound Neon Covenant evolution stage [0–3]. [Stage description below.] Rain-soaked ruined neon city softly out of focus behind it. Painterly premium collectible card illustration, intricate metal, vivid lighting, dark navy backdrop, centered silhouette readable at thumbnail size. No people, no watermark.
+Shared prompt: Use case: stylized-concept. Create one square fantasy cyberpunk trading-card artwork, edge-to-edge illustration only, no border, no lettering, no numbers. Aethercede Neon Covenant evolution stage [0–3]. [Stage description below.] Rain-soaked ruined neon city softly out of focus behind it. Painterly premium collectible card illustration, intricate metal, vivid lighting, dark navy backdrop, centered silhouette readable at thumbnail size. No people, no watermark.
 
 Stage 0: A small mysterious cyan crystal reactor held inside a single dark titanium crescent, restrained cyan sparks, dormant potential.
 

@@ -2,7 +2,7 @@
 // Screen taps are converted through the same camera transform as rendering.
 let touchRoute=null,touchFacing=null,selectedTouchCard=null;
 const touchGridCache=new Map();
-function touchMode(){const saved=localStorage.getItem('cardbound-touch-mode');return saved?saved==='on':innerWidth<=720||(typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches)}
+function touchMode(){const saved=localStorage.getItem('aethercede-touch-mode');return saved?saved==='on':innerWidth<=720||(typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches)}
 function syncTouchMode(){document.body.classList.toggle('touch-mode',touchMode());const hint=document.querySelector('.hint');if(hint)hint.textContent=touchMode()?'Tap a path to move · Tap an enemy to approach':'Click a path to move · WASD / arrows · M: map'}
 function cancelTouchRoute(){touchRoute=null;touchFacing=null;document.querySelector('.move-marker')?.remove()}
 function touchWorldPoint(){const area=joinedArea(),offset=cellOffset(state.room,area);return{x:offset.x+state.pos.x,y:offset.y+state.pos.y}}
@@ -121,7 +121,7 @@ addEventListener('blur',cancelTouchRoute);addEventListener('pagehide',cancelTouc
 addEventListener('keydown',e=>{if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','w','a','s','d'].includes(e.key))cancelTouchRoute()});
 document.querySelectorAll('#touch button').forEach(button=>{const down=button.onpointerdown;button.onpointerdown=e=>{cancelTouchRoute();down(e)}});
 const touchMenu=showMainMenu;
-showMainMenu=function(){cancelTouchRoute();touchMenu();const toggle=document.createElement('button');toggle.textContent='Touch controls: '+(touchMode()?'On':'Off');toggle.onclick=()=>{localStorage.setItem('cardbound-touch-mode',touchMode()?'off':'on');syncTouchMode();showMainMenu()};$('menuModal').append(toggle)};
+showMainMenu=function(){cancelTouchRoute();touchMenu();const toggle=document.createElement('button');toggle.textContent='Touch controls: '+(touchMode()?'On':'Off');toggle.onclick=()=>{localStorage.setItem('aethercede-touch-mode',touchMode()?'off':'on');syncTouchMode();showMainMenu()};$('menuModal').append(toggle)};
 navMenu.onclick=showMainMenu;
 const touchBattle=renderBattle;
 renderBattle=function(){

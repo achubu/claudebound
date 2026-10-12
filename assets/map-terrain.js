@@ -209,7 +209,7 @@ function drawMapTerrain(canvasEl, tileW) {
 // (labels stay readable at their normal size) and redraws the terrain at the
 // new on-screen resolution so it stays sharp.
 let mapZoom = 1;
-try { mapZoom = Number(localStorage.getItem('cardbound-map-zoom')) || 1; } catch (e) { mapZoom = 1; }
+try { mapZoom = Number(localStorage.getItem('aethercede-map-zoom')) || 1; } catch (e) { mapZoom = 1; }
 const MAP_ZOOM_MIN = 0.3, MAP_ZOOM_MAX = 3;
 function applyMapZoom(map, scroller, zoom, focus) {
   zoom = Math.max(MAP_ZOOM_MIN, Math.min(MAP_ZOOM_MAX, zoom));
@@ -217,7 +217,7 @@ function applyMapZoom(map, scroller, zoom, focus) {
   // Keep the point under the cursor (or the centre) where it is.
   const fx = focus ? focus.x : scroller.clientWidth / 2, fy = focus ? focus.y : scroller.clientHeight / 2;
   const relX = (scroller.scrollLeft + fx) / (map.offsetWidth || 1), relY = (scroller.scrollTop + fy) / (map.offsetHeight || 1);
-  mapZoom = zoom; try { localStorage.setItem('cardbound-map-zoom', String(zoom)); } catch (e) { /* private mode */ }
+  mapZoom = zoom; try { localStorage.setItem('aethercede-map-zoom', String(zoom)); } catch (e) { /* private mode */ }
   map.style.width = Math.round(baseW * zoom) + 'px'; map.style.height = Math.round(baseH * zoom) + 'px';
   scroller.scrollLeft = relX * map.offsetWidth - fx; scroller.scrollTop = relY * map.offsetHeight - fy;
   const label = document.querySelector('.map-zoom-level'); if (label) label.textContent = Math.round(zoom * 100) + '%';

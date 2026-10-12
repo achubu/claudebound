@@ -2769,3 +2769,26 @@ using exit labels alone.
   four regions, every card's art, the talent art and the compendium makes no
   failed requests.
 
+## Round 97: the game is now Aethercede
+
+- Renamed Cardbound to Aethercede everywhere it appears:
+  - page titles, the start screen, the main menu, the Battle Lab and the
+    compendium;
+  - credits, docs and the art-generation prompts.
+- The GitHub repo name `achubu/Cardbound` and its Pages URL are left as they
+  are, because they name the real repository. Earlier CHANGES.md entries are
+  history and keep the old name.
+- localStorage keys moved from `cardbound-` to `aethercede-`. New
+  `assets/save-migration.js` runs first in `index.html` and `arena.html`. It
+  copies every old key to its new name once, never overwriting a new key, so
+  these carry over:
+  - adventure saves;
+  - shared upgrade materials;
+  - Battle Lab progress;
+  - map zoom and the touch-mode setting.
+- Exported save files now use format `aethercede-save`. Import still accepts
+  older `cardbound-save` files.
+- Test harness env var `CARDBOUND_RENDER` is now `AETHERCEDE_RENDER`.
+- Removed a stray tracked `tools/__pycache__` file.
+- New `tests/save-migration.test.cjs`. Cache tags bumped to `?v=round97`.
+

@@ -1,17 +1,18 @@
-# Cardbound: notes for Claude sessions
+# Aethercede: notes for Claude sessions
 
-Cardbound is a browser card-battler/exploration game in vanilla JS with no
+Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 96) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 97) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
 ## How the code is put together
 
 - **Script order matters (see `index.html`):**
-  - `neon-city.js`, then `cards.js`, then the inline game script, which holds
+  - `save-migration.js` (copies old `cardbound-` storage keys to
+    `aethercede-`), then `neon-city.js`, then `cards.js`, then the inline game script, which holds
     the `rooms` literal for Neon Aftermath.
   - Then `elaris-wildlife`, `expansion`, `encounter-depth`, `talent-matrix`,
     `aether-deck`, `card-variety`, `battle-hud`.
@@ -92,7 +93,8 @@ change set.
 - Owner: Aleksey (GitHub `achubu`). Repos: `achubu/claudebound` is Claude's
   repo and the most up-to-date code; work and push here. `achubu/Cardbound`
   is worked on by ChatGPT; use it only as a source of up-to-date image assets
-  and don't push code there.
+  and don't push code there. The repo keeps its old name; the game is
+  Aethercede.
 - Art comes from the owner's image generator (Gemini). When integrating, skip
   `.DS_Store` files and duplicate top-level folders.
 - Painted dead ends at room edges are intentional. A street that ends at an

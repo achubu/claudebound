@@ -1,4 +1,4 @@
-# Cardbound Battle Lab
+# Aethercede Battle Lab
 
 Play `arena.html` to work exclusively on card battles. `index.html` now contains the integrated Shattered Wilds adventure using the same card and player-progression systems. A valid Battle Lab v3 save is imported when a new integrated journey begins.
 
@@ -55,7 +55,7 @@ The Character button is available from both combat and the Deck Workshop. It ope
 
 ## Open-world upgrade materials
 
-- Upgrade materials are shared through `cardbound-upgrade-materials-v1` localStorage.
+- Upgrade materials are shared through `aethercede-upgrade-materials-v1` localStorage.
 - Battle Lab victories and card destruction do not create upgrade materials.
 - Regular open-world monsters have a 10% chance to drop one material.
 - The open-world Thorn Warden guarantees one material.
@@ -77,7 +77,7 @@ The Character button is available from both combat and the Deck Workshop. It ope
 - Defeat can permanently remove one random Impermanent card from the active deck.
 - Defeat does not reduce the active deck below its four-card playable minimum.
 
-Progress uses `cardbound-battle-lab-v3` localStorage and remains separate from adventure saves, while the upgrade-material balance is shared between both modes.
+Progress uses `aethercede-battle-lab-v3` localStorage and remains separate from adventure saves, while the upgrade-material balance is shared between both modes.
 
 ## Validation
 
