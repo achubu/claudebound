@@ -27,7 +27,15 @@ const defs={
 // in `tiers`, and `rules()` is what turns that into readable text).
 let stat=c=>({...defs[c.id],...defs[c.id].tiers[c.level]});
 function rules(c){const d=stat(c),p=[];if(d.damage)p.push('Deal '+d.damage+' damage.'+(d.pierce?' Pierce: ignores enemy armor.':''));if(d.block)p.push('Gain '+d.block+' block.');if(d.heal)p.push('Heal '+d.heal+' HP.');if(d.draw)p.push('Draw '+d.draw+'.');if(d.energy)p.push('Gain '+d.energy+' energy.');if(d.exhaust)p.push('Exhaust.');return p.join(' ')}
-function cardArtPath(id,level){return 'assets/cards/level'+level+'/'+id+(id==='neonCovenant'?'.webp':id==='stormglass'&&level===2?'.jpeg':'.png')}
+// Round 94: refreshed pixel-art illustrations (512x512 WebP, see
+// assets/cards/art-refresh.md). Stages not yet painted reuse the nearest lower
+// painted stage (or the first one); stats always follow the real level.
+const refreshedCardArt={arcJab:[0,1,2,3],breachSpike:[0,1,2,3],bulwarkBash:[0,1,2,3],chainLightning:[0,1,2,3],overclock:[0,1,2,3],staticShield:[0,2,3],thornlash:[0,1,2],wildfire:[1]};
+function cardArtPath(id,level){
+ const stages=refreshedCardArt[id];
+ if(stages){const artLevel=stages.filter(n=>n<=level).at(-1)??stages[0];return 'assets/cards/level'+artLevel+'/'+id+'.webp'}
+ return 'assets/cards/level'+level+'/'+id+(id==='neonCovenant'?'.webp':id==='stormglass'&&level===2?'.jpeg':'.png');
+}
 // `const`/function declarations at top level create lexical globals
 // (plain `defs`/`stat`/`rules`/`cardArtPath` all work fine from index.
 // html's own inline script, in the same document) but do NOT create
