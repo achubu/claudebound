@@ -2730,3 +2730,13 @@ using exit labels alone.
     newer.
 - New `tests/card-art.test.cjs` checks that all 51 cards × 4 levels resolve
   to an existing image and that the refreshed paintings are wired in.
+
+## Round 95: cache tags and a small handoff bundle
+
+- Every local script and stylesheet in `index.html`, and the compendium's
+  game frame, now loads with `?v=round94`. Browsers (and GitHub Pages
+  visitors) then fetch the new files instead of stale cached ones. This
+  matches the cache-busting `origin/main` already used. Bump the tag when
+  shipping a new round.
+- Added `CLAUDE.md`, handoff notes that Claude reads automatically in new
+  sessions.
