@@ -19,6 +19,8 @@ const reach=held=>{const seen=new Set(['0,5']),q=['0,5'];while(q.length){const k
 const r0=reach([]);assert(!r0.has('8,4')&&!r0.has('8,9'),'both far districts start sealed');
 for(const [relic,k] of [['boots','0,9'],['ember','5,7'],['lens','5,4']])assert.equal(rooms[k].relic[0],relic);
 assert(r0.has('0,9')&&r0.has('5,7')&&r0.has('5,4'),'Briarstep Boots, the Ember Sigil and the Moon Lens are reachable without other relics');
+// Round 98: the hidden Upgrade Crystal sits mid-map near the Citadel gate (Broadcast Row), not beside the start.
+assert.deepEqual(Object.keys(rooms).filter(k=>rooms[k].relic&&rooms[k].relic[0]==='material'),['5,6'],'one hidden Upgrade Crystal, on Broadcast Row');assert(r0.has('5,6'),'reachable without any relic');
 assert(reach(['ember']).has('8,4'),'the Ember Sigil opens the Crystal Citadel');assert(!reach(['ember']).has('8,9'),'but not the Junkyard');
 assert(reach(['boots']).has('8,9'),'Briarstep Boots open the Junkyard');assert.equal(reach(['ember','boots','lens']).size,54,'everything is reachable with all three');
 // Bosses and patrols stand on the streets; relics and chests just beside them (Round 93).

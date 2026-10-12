@@ -2792,3 +2792,21 @@ using exit labels alone.
 - Removed a stray tracked `tools/__pycache__` file.
 - New `tests/save-migration.test.cjs`. Cache tags bumped to `?v=round97`.
 
+
+## Round 98: hidden Upgrade Crystal moved to mid-map
+
+- The hidden Upgrade Crystal in Neon Aftermath moved from Lighthouse Pier
+  (`2,4`), two rooms from the start, to Broadcast Row (`5,6`).
+  - Broadcast Row sits in the central row, at the east edge of the open city.
+  - It is next to the Moon Temple and the Ember Sigil gate into the sealed
+    Citadel/Junkyard half, where the final boss waits.
+  - It is still reachable without any relic.
+- It sits at (444, 254), just off the street, and the `organicItemSpot()`
+  placement check confirms that spot is beside the street.
+- `tools/build_world_rooms.py` now places it there too, so a map rebuild
+  keeps the new spot.
+- The objective hint now points to Broadcast Row instead of the old "Memory
+  Annex" name.
+- `tests/neon-world.test.cjs` asserts there is exactly one hidden crystal, on
+  `5,6`, reachable from the start with no relics.
+- Cache tags bumped to `?v=round98`.

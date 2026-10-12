@@ -28,7 +28,7 @@ renderBattle = function () {
   if (host && host.insertAdjacentHTML) host.insertAdjacentHTML('afterbegin', upgradeCrystalHTML(b.crystalGain));
 };
 
-// In the world: hidden crystal chests and the Memory Annex crystal.
+// In the world: hidden crystal chests and the Broadcast Row crystal (moved from Lighthouse Pier in Round 98).
 const checkWorldInteractionsBeforePickups = checkWorldInteractions;
 checkWorldInteractions = function () {
   const before = state ? materials() : 0, room = state && state.room;

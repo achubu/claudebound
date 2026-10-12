@@ -116,7 +116,7 @@ def spot(cx,cy,tx=400,ty=250):
         d=(x-tx)**2+(y-ty)**2
         if d<bd: bd=d;best=[x,y]
   return best
-RELICS={(0,5):['boots','Briarstep Boots','♜'],(5,3):['ember','Ember Sigil','✹'],(5,0):['lens','Moon Lens','◉'],(2,0):['material','Upgrade Crystal','◆']}
+RELICS={(0,5):['boots','Briarstep Boots','♜'],(5,3):['ember','Ember Sigil','✹'],(5,0):['lens','Moon Lens','◉'],(5,2):['material','Upgrade Crystal','◆']}  # Round 98: moved from Lighthouse Pier (2,0)
 rooms={};places={}
 for cy in range(6):
   for cx in range(9):
