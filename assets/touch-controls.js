@@ -8,9 +8,10 @@ function cancelTouchRoute(){touchRoute=null;touchFacing=null;document.querySelec
 function touchWorldPoint(){const area=joinedArea(),offset=cellOffset(state.room,area);return{x:offset.x+state.pos.x,y:offset.y+state.pos.y}}
 function touchGrid(area){
  const cacheKey=activeRegion+':'+area.cells.join('|');if(touchGridCache.has(cacheKey))return touchGridCache.get(cacheKey);
- const step=20,cols=area.width/step,rows=area.height/step,valid=new Uint8Array(cols*rows);
+ // Painted/organic rooms have narrow winding streets, so they get a finer 10px grid (Round 92).
+ const step=typeof organicDef==='function'&&area.cells.some(c=>organicDef(c))?8:20,cols=area.width/step,rows=area.height/step,valid=new Uint8Array(cols*rows);
  for(let iy=0;iy<rows;iy++)for(let ix=0;ix<cols;ix++){
-  const x=ix*step+10,y=iy*step+10,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
+  const x=ix*step+step/2,y=iy*step+step/2,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
   valid[iy*cols+ix]=area.cells.includes(key)&&walkable(key,x-cx*800,y-cy*500,8)?1:0;
  }
  const grid={step,cols,rows,valid};touchGridCache.set(cacheKey,grid);return grid;
@@ -19,13 +20,13 @@ function touchGrid(area){
 // step is only allowed when the ground between the two cell centres is open.
 function touchEdgeOpen(area,step,cols,a,b){
  for(const f of [.25,.5,.75]){
-  const x=((a%cols)+((b%cols)-(a%cols))*f)*step+10,y=(Math.floor(a/cols)+(Math.floor(b/cols)-Math.floor(a/cols))*f)*step+10,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
+  const x=((a%cols)+((b%cols)-(a%cols))*f)*step+step/2,y=(Math.floor(a/cols)+(Math.floor(b/cols)-Math.floor(a/cols))*f)*step+step/2,cx=Math.floor(x/800),cy=Math.floor(y/500),key=(area.left+cx)+','+(area.top+cy);
   if(area.cells.includes(key)&&!walkable(key,x-cx*800,y-cy*500,0))return false;
  }
  return true;
 }
 function findTouchPath(area,start,target){
- const {step,cols,rows,valid}=touchGrid(area),point=i=>({x:Math.max(12,Math.min(area.width-12,(i%cols)*step+10)),y:Math.max(12,Math.min(area.height-12,Math.floor(i/cols)*step+10))});
+ const {step,cols,rows,valid}=touchGrid(area),point=i=>({x:Math.max(12,Math.min(area.width-12,(i%cols)*step+step/2)),y:Math.max(12,Math.min(area.height-12,Math.floor(i/cols)*step+step/2))});
  function nearest(p){let best=-1,distance=Infinity;for(let i=0;i<valid.length;i++)if(valid[i]){const q=point(i),d=(q.x-p.x)**2+(q.y-p.y)**2;if(d<distance){best=i;distance=d}}return{index:best,distance}}
  const source=nearest(start),goal=nearest(target);if(source.index<0||goal.distance>90*90)return null;
  const previous=new Int32Array(valid.length);previous.fill(-2);previous[source.index]=-1;
@@ -108,6 +109,8 @@ move=function(dt){
  if(Math.abs(dx)<1&&Math.abs(dy)<1){touchRoute.points.shift();return}
  const horizontal=Math.abs(dx)>=1,delta=horizontal?dx:dy,key=horizontal?(dx>0?'ArrowRight':'ArrowLeft'):(dy>0?'ArrowDown':'ArrowUp');
  touchFacing=key;const original=keys;keys={[key]:true};keyboardMove(Math.min(dt,Math.abs(delta)/175));keys=original;
+ // Round 92: on narrow painted streets one axis can be blocked by a kerb corner; try the other before giving up.
+ {const moved=touchWorldPoint();if(Math.hypot(moved.x-pos.x,moved.y-pos.y)<.001){const alt=horizontal?dy:dx;if(Math.abs(alt)>=1){const k2=horizontal?(dy>0?'ArrowDown':'ArrowUp'):(dx>0?'ArrowRight':'ArrowLeft');keys={[k2]:true};keyboardMove(Math.min(dt,Math.abs(alt)/175));keys=original}else{touchRoute.points.shift();if(touchRoute.points.length)return}}}
  if(state.battle){cancelTouchRoute();return}
  const now=touchWorldPoint();if(Math.hypot(now.x-pos.x,now.y-pos.y)<.001){cancelTouchRoute();toast('Path blocked. Tap a different spot.');return}
  drawMoveMarker();
@@ -138,3 +141,6 @@ renderBattle=function(){
  action.append(summary,play);$('battleModal').querySelector('.battle-footer')?.prepend(action);if($('hand'))$('hand').scrollLeft=handScroll;
 };
 addEventListener('resize',syncTouchMode);syncTouchMode();
+
+// Round 92: lets other modules ask whether a tap-to-move route is in progress.
+function activeTouchRoute(){return touchRoute}

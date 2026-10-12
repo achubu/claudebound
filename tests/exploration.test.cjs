@@ -12,7 +12,7 @@ for (const region of ['city', 'elaris', 'vespera']) {
   for (const t of ['shrine', 'campfire', 'cache']) assert(pois.some(p => p.type === t), region + ' has a ' + t);
   for (const p of pois) {
     assert(!isStartRoom(p.key) && !roomSpawns(p.key).some(s => s.boss) && !chestFor(p.key), 'never in start, boss or chest rooms');
-    assert(walkable(p.key, p.x, p.y, 30), 'reachable spot');
+    assert(organicDef(p.key) ? organicBesideStreet(p.key, p) : walkable(p.key, p.x, p.y, 30), 'reachable spot (beside the path in organic rooms)');
     assert(roomSpawns(p.key).every(s => Math.hypot(s.x - p.x, s.y - p.y) > 150), 'clear of patrols');
   }
   const shop = merchantRoom(); assert(shop, region + ' has a merchant'); assert(!worldPOIs()[shop.key], 'merchant is not on a point of interest');

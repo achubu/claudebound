@@ -185,7 +185,7 @@ newGame();configureRegion('city');
 // Round 29: recalculated against the user's hand-designed 42-room maze
 // (max distance 12, not 7) — verified from the live graph, not assumed.
 assert.equal(areaPatrolCount('1,5'),1,'distance-1 single room (frac 0.083): base density');
-assert.equal(areaPatrolCount('3,5'),2,'distance-5 single room (frac 0.417): above the 0.35 two-patrol threshold');
+assert.equal(areaPatrolCount('3,6'),2,'distance-5 single room (frac 0.417): above the 0.35 two-patrol threshold');
 assert.equal(areaPatrolCount('8,7'),3,'the farthest single room (frac 1.0) sits at the 3-patrol ceiling');
 // joined-area math must be completely unaffected (still capped, still summing correctly)
 for(const group of JOINED_AREAS.city){

@@ -47,21 +47,25 @@ function organicWalk(key, x, y) {
 // the line between two rooms still works. Door positions are given in the
 // owning room's local coordinates and may lie just outside 0..800 / 0..500.
 const DOOR_REACH = 220;
-const organicDoorCache = {};
+const organicDoorCache = {}, organicDoorsCache = {};
+// All labelled crossings on one side of a room for a given patch of street.
+function organicDoors(key, dir, pocket = 0) { const d = organicDoor(key, dir, pocket); const ck = activeRegion + ':' + key + ':' + dir + ':' + pocket; return organicDoorsCache[ck] || (d ? [d] : []); }
 function organicAreaWalk(o, ax, ay) { return organicAt(o, Math.max(0, Math.min(o.area.width - 1, ax)), Math.max(0, Math.min(o.area.height - 1, ay))); }
-function organicDoor(key, dir) {
+function organicDoor(key, dir, pocket = 0, checkLanding = true) {
   const o = organicDef(key); if (!o) return null;
-  const ck = activeRegion + ':' + key + ':' + dir; if (ck in organicDoorCache) return organicDoorCache[ck];
+  const ck = activeRegion + ':' + key + ':' + dir + ':' + pocket + (checkLanding ? '' : ':raw'); if (ck in organicDoorCache) return organicDoorCache[ck];
   const area = o.area, off = cellOffset(key, area), horiz = dir === 'e' || dir === 'w';
   const span = horiz ? 500 : 800, base = horiz ? off.y : off.x, areaLen = horiz ? area.height : area.width;
   // How far the search may spill into each neighbour along the edge.
   const [kx, ky] = key.split(',').map(Number), step = horiz ? [0, 1] : [1, 0];
   const reach = sgn => { const n = (kx + step[0] * sgn) + ',' + (ky + step[1] * sgn); return area.cells.includes(n) && !organicExternalExit(n, dir) ? DOOR_REACH : 0; };
   const lo = Math.max(0, base - reach(-1)), hi = Math.min(areaLen, base + span + reach(1));
-  const edgeCoord = dir === 'w' ? 6 : dir === 'e' ? area.width - 6 : dir === 'n' ? 6 : area.height - 6;
+  // Foot positions the player can actually stand on next to each edge (Round 92).
+  const edgeCoord = dir === 'w' ? 14 : dir === 'e' ? area.width - 14 : dir === 'n' ? 34 : area.height - 6;
   const runs = []; let start = null;
   for (let t = lo; t <= hi; t += 4) {
-    const outside = dir === 'w' ? -6 : dir === 'e' ? area.width + 6 : dir === 'n' ? -6 : area.height + 6;
+    // ...and where you land on the far side of a painted-world edge (see neonLanding).
+    const outside = dir === 'w' ? -14 : dir === 'e' ? area.width + 14 : dir === 'n' ? -1 : area.height + 36;
     // On a continuous world map a door must also be street on the far side of the edge.
     const open = t < hi && (horiz ? organicAreaWalk(o, edgeCoord, t) : organicAreaWalk(o, t, edgeCoord))
       && (!o.def.world || (horiz ? o.def.at(o, outside, t) : o.def.at(o, t, outside)));
@@ -71,16 +75,38 @@ function organicDoor(key, dir) {
   // Prefer the run that overlaps this room's own stretch most, then the widest.
   const own = r => Math.max(0, Math.min(r[1], base + span) - Math.max(r[0], base));
   runs.sort((a, b) => own(b) - own(a) || (b[1] - b[0]) - (a[1] - a[0]));
-  const r = runs.find(r => r[1] - r[0] >= 12); if (!r) return organicDoorCache[ck] = null;
-  const cA = (r[0] + r[1]) / 2, c = cA - base, half = Math.max(24, (r[1] - r[0]) / 2);
-  const edge = horiz ? { x: dir === 'w' ? 14 : 786, y: c } : { x: c, y: dir === 'n' ? 14 : 486 };
-  // Step inward along the path until clear of the edge trigger (area walk, foot point).
-  let inward = null;
-  for (let d = 40; d < 200 && !inward; d += 6) {
-    const lx = horiz ? (dir === 'w' ? d : 800 - d) : c, ly = horiz ? c : (dir === 'n' ? d : 500 - d);
-    if (organicAreaWalk(o, off.x + lx, off.y + ly)) inward = { x: lx, y: ly - 22 };
+  const doorFor = r => {
+    const cA = (r[0] + r[1]) / 2, c = cA - base, half = Math.max(24, (r[1] - r[0]) / 2);
+    const edge = horiz ? { x: dir === 'w' ? 14 : 786, y: c } : { x: c, y: dir === 'n' ? 14 : 486 };
+    // Step inward along the path until clear of the edge trigger (area walk, foot point).
+    let inward = null;
+    for (let d = 40; d < 200 && !inward; d += 6) {
+      const lx = horiz ? (dir === 'w' ? d : 800 - d) : c, ly = horiz ? c : (dir === 'n' ? d : 500 - d);
+      if (organicAreaWalk(o, off.x + lx, off.y + ly)) inward = { x: lx, y: ly - 22 };
+    }
+    return { edge, inward: inward || { x: edge.x, y: edge.y - 22 }, half, along: c };
+  };
+  // Wide enough to use, and centred where the player can actually stand (head 14..486 / 14..786).
+  // Clip each run to where the player can actually stand (head 14..486 / x 14..786); keep it if 8px+ remain.
+  const lo2 = base + (horiz ? 36 : 14), hi2 = base + (horiz ? 508 : 786);
+  const usable = runs.map(r => area.cells.length > 1 ? r : [Math.max(r[0], lo2), Math.min(r[1], hi2)]).filter(r => r[1] - r[0] >= (area.cells.length > 1 ? 12 : 8));
+  if (!usable.length) return organicDoorCache[ck] = null;
+  // Round 92: in a single painted room, prefer a street that joins the room's
+  // main walkable area, so the exit label is never on a stub you can't reach.
+  if (area.cells.length === 1) {
+    const pockets = organicPockets(key), want = pockets[pocket] || pockets[0] || new Set();
+    let mine = usable.map(doorFor).filter(d => organicPocketNear(key, d.inward) === pocket || (pocket === 0 && want.has(organicGridKey(d.inward))));
+    // On the painted world, only crossings that land you somewhere useful on the far side.
+    const raw = rooms[key].exits[dir], to = raw && (typeof raw === 'string' ? raw : raw.to);
+    if (checkLanding && o.def.world && to && typeof neonLanding === 'function') mine = mine.filter(d => neonLanding(to, neonMirror(dir, { x: d.edge.x, y: d.edge.y - 22 }), dir));
+    // Every separate street crossing this side from here (Round 92), at least 150px apart.
+    const all = []; for (const d of mine) if (all.every(e => Math.abs(e.along - d.along) >= 150)) all.push({ ...d, inPocket: true });
+    organicDoorsCache[ck] = all;
+    const good = mine[0];
+    if (good) return organicDoorCache[ck] = { ...good, inPocket: true };
+    return organicDoorCache[ck] = { ...doorFor(usable[0]), inPocket: false };
   }
-  return organicDoorCache[ck] = { edge, inward: inward || { x: edge.x, y: edge.y - 22 }, half, along: c };
+  return organicDoorCache[ck] = doorFor(usable[0]);
 }
 // Put a position given in some room's local coordinates into the room of the
 // district that actually contains it.
@@ -100,7 +126,9 @@ const blockedBeforeOrganic = NeonCity.blocked;
 NeonCity.blocked = function (key, x, y) { const w = organicWalk(key, x, y); return w === null ? blockedBeforeOrganic(key, x, y) : !w; };
 const walkableBeforeOrganic = walkable;
 walkable = function (key, x, y, margin) {
-  if (organicDef(key)) return x >= 0 && x <= 800 && y >= 0 && y <= 500 && !NeonCity.blocked(key, x, y); // paths are the walkable area; no body margin
+  // Round 92: only where room movement can actually stand (it clamps to a 12px margin).
+  const od = organicDef(key);
+  if (od) return (od.area.cells.length > 1 ? x >= 0 && x <= 800 && y >= 0 && y <= 500 : x >= 12 && x <= 788 && y >= 12 && y <= 488) && !NeonCity.blocked(key, x, y); // paths are the walkable area; no body margin
   return walkableBeforeOrganic(key, x, y, margin);
 };
 // --- Leaving and arriving through doors
@@ -112,6 +140,7 @@ move = function (dt) {
   const near = { w: ax <= 16, e: ax >= o.area.width - 16, n: ay - 22 <= 16, s: ay - 22 >= o.area.height - 16 };
   for (const cell of o.area.cells) for (const dir of ['n', 's', 'e', 'w']) {
     if (!near[dir] || !organicExternalExit(cell, dir)) continue;
+    if (typeof keys === 'object' && keys && !({ n: keys.ArrowUp || keys.w, s: keys.ArrowDown || keys.s, e: keys.ArrowRight || keys.d, w: keys.ArrowLeft || keys.a })[dir]) continue; // only while heading that way
     const door = organicDoor(cell, dir); if (!door) continue;
     const q = cellOffset(cell, o.area), along = dir === 'e' || dir === 'w' ? ay - q.y : ax - q.x;
     if (Math.abs(along - door.along) <= door.half + 20) {
@@ -149,10 +178,15 @@ NeonCity.render = function (container, key, r) {
     const dir = ['n', 's', 'e', 'w'].find(d => node.classList.contains(d)); if (!dir) continue;
     // The painting shows where paths end; a 'closed' sign on a blank edge is just noise.
     if (node.classList.contains('closed') || !organicExternalExit(key, dir)) { node.remove(); continue; }
-    const door = organicDoor(key, dir); if (!door) continue;
-    node.classList.add('organic-door');
-    Object.assign(node.style, { left: door.edge.x + 'px', top: door.edge.y + 'px', right: 'auto', bottom: 'auto',
-      transform: 'translate(' + (dir === 'w' ? '0' : dir === 'e' ? '-100%' : '-50%') + ',' + (dir === 'n' ? '0' : dir === 's' ? '-100%' : '-50%') + ')' });
+    const door = organicDoor(key, dir, key === state.room ? organicPocketAt(key, state.pos) : 0); if (!door) continue;
+    // Round 92: an exit you can't reach from the patch of street you're on isn't labelled here.
+    if (key === state.room && door.inPocket === false) { node.remove(); continue; }
+    const place = (el, d) => { el.classList.add('organic-door'); el.dataset.along = String(d.along);
+      Object.assign(el.style, { left: d.edge.x + 'px', top: d.edge.y + 'px', right: 'auto', bottom: 'auto',
+        transform: 'translate(' + (dir === 'w' ? '0' : dir === 'e' ? '-100%' : '-50%') + ',' + (dir === 'n' ? '0' : dir === 's' ? '-100%' : '-50%') + ')' }); };
+    const doors = key === state.room ? organicDoors(key, dir, organicPocketAt(key, state.pos)) : [door];
+    place(node, doors[0] || door);
+    for (const extra of doors.slice(1)) { const twin = node.cloneNode(true); place(twin, extra); node.after(twin); }
   }
   return out;
 };
@@ -161,7 +195,8 @@ if (typeof document !== 'undefined' && document.getElementById) {
   if (world && world.addEventListener) world.addEventListener('click', e => {
     const label = e.target && e.target.closest && e.target.closest('.city-exit.organic-door'); if (!label || !state || state.battle) return;
     const key = (label.closest('.area-cell') && label.closest('.area-cell').dataset.room) || state.room, dir = ['n', 's', 'e', 'w'].find(d => label.classList.contains(d));
-    const door = dir && organicDoor(key, dir); if (!door || typeof setTouchDestination !== 'function') return;
+    const pocket = key === state.room ? organicPocketAt(key, state.pos) : 0, along = Number(label.dataset && label.dataset.along);
+    const door = dir && ((Number.isFinite(along) && organicDoors(key, dir, pocket).find(d => d.along === along)) || organicDoor(key, dir, pocket)); if (!door || typeof setTouchDestination !== 'function') return;
     e.stopPropagation(); e.preventDefault();
     const o = cellOffset(key, joinedArea()); setTouchDestination({ x: o.x + door.edge.x, y: o.y + door.edge.y - 22 }, { dir, key });
   }, true);
@@ -173,19 +208,117 @@ function organicGrid(key) {
   const o = organicDef(key), ck = activeRegion + ':' + key + ':' + (o ? o.def.src : '-');
   if (organicPoints[ck]) return organicPoints[ck];
   const pts = [];
-  for (let py = 40; py <= 460; py += 10) for (let px = 30; px <= 770; px += 10) if (walkable(key, px, py)) pts.push(px, py);
+  // 8px grid aligned to the 8px walk masks (feet at mask-cell centres) so narrow necks aren't missed.
+  for (let py = 14; py <= 486; py += 8) for (let px = 12; px <= 788; px += 8) if (walkable(key, px, py)) pts.push(px, py);
   return organicPoints[ck] = pts;
 }
+// The largest 4-connected patch of a room's walkable grid points.
+const organicMains = {};
+function organicGridKey(p) { return (Math.round((p.x - 12) / 8) * 8 + 12) + ',' + (Math.round((p.y - 14) / 8) * 8 + 14); }
+// Index of the patch a spot belongs to: the nearest grid point within 30px, else -1.
+function organicPocketNear(key, p) {
+  const pockets = organicPockets(key);
+  const [gx, gy] = organicGridKey(p).split(',').map(Number);
+  for (let r = 0; r <= 32; r += 8) for (let dx = -r; dx <= r; dx += 8) for (let dy = -r; dy <= r; dy += 8) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+    const g = (gx + dx) + ',' + (gy + dy);
+    const i = pockets.findIndex(set => set.has(g)); if (i >= 0) return i;
+  }
+  return -1;
+}
+// A room's separate walkable patches (4-connected on the 10px grid), largest first.
+function organicPockets(key) {
+  const o = organicDef(key), ck = activeRegion + ':' + key + ':' + (o ? o.def.src : '-');
+  if (organicMains[ck]) return organicMains[ck];
+  const pts = organicGrid(key), all = new Set(), seen = new Set(), out = [];
+  for (let i = 0; i < pts.length; i += 2) all.add(pts[i] + ',' + pts[i + 1]);
+  for (const s0 of all) {
+    if (seen.has(s0)) continue;
+    const comp = new Set([s0]), q = [s0]; seen.add(s0);
+    while (q.length) {
+      const [x, y] = q.pop().split(',').map(Number);
+      for (const [dx, dy] of [[8, 0], [-8, 0], [0, 8], [0, -8]]) {
+        const n = (x + dx) + ',' + (y + dy);
+        if (all.has(n) && !seen.has(n)) { seen.add(n); comp.add(n); q.push(n); }
+      }
+    }
+    out.push(comp);
+  }
+  return organicMains[ck] = out.sort((a, b) => b.size - a.size);
+}
+function organicMainPocket(key) { return organicPockets(key)[0] || new Set(); }
+// Which patch a spot belongs to (nearest grid point), so exit labels follow
+// the patch the player is actually standing on.
+function organicPocketAt(key, p) {
+  const pockets = organicPockets(key); if (pockets.length < 2) return 0;
+  let best = 0, bd = Infinity;
+  pockets.forEach((set, i) => { for (const s of set) { const [x, y] = s.split(',').map(Number), d = (x - p.x) ** 2 + (y - p.y) ** 2; if (d < bd) { bd = d; best = i; } } });
+  return best;
+}
+// Patches of street you can actually get to: ones with an exit of their own
+// (single painted rooms can contain a sliver of street fenced off from every
+// crossing). Joined districts and ordinary rooms count everything.
+const organicReach = {};
+function organicReachable(key) {
+  const o = organicDef(key), ck = activeRegion + ':' + key + ':' + (o ? o.def.src : '-');
+  if (organicReach[ck]) return organicReach[ck];
+  const pockets = organicPockets(key);
+  if (!o || o.area.cells.length > 1 || pockets.length < 2) return organicReach[ck] = null;
+  const ok = new Set();
+  pockets.forEach((set, i) => { if (Object.keys(rooms[key].exits).some(d => { const door = organicDoor(key, d, i, false); return door && door.inPocket !== false; })) for (const p of set) ok.add(p); });
+  if (isStartRoomKey(key)) { const st = organicPocketAt(key, { x: 400, y: 300 }); for (const p of pockets[st]) ok.add(p); }
+  return organicReach[ck] = ok;
+}
+function isStartRoomKey(key) { return activeRegion === 'city' ? key === '0,5' : key === '0,0'; }
+function organicReachableAt(key, p) { const r = organicReachable(key); if (!r) return true; const i = organicPocketNear(key, p); return i >= 0 && r.has([...organicPockets(key)[i]][0]); }
 function organicSpot(key, x, y, avoid = [], gap = 0) {
   let best = null, bd = Infinity;
-  const pts = organicGrid(key);
+  const pts = organicGrid(key), reach = organicReachable(key);
   for (let i = 0; i < pts.length; i += 2) {
     const px = pts[i], py = pts[i + 1];
+    if (reach && !reach.has(px + ',' + py)) continue;
     if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
     const d = Math.hypot(px - x, py - y); if (d < bd) { bd = d; best = { x: px, y: py }; }
   }
   return best;
 }
+// Round 93: chests, relics, points of interest, the merchant and Nexus
+// Waypoints stand just off the street (on the verge, a doorstep, the edge of a
+// plaza) rather than in the middle of the path, yet always within reach of a
+// patch of street you can get to. A spot qualifies when it is not walkable
+// itself, the nearest walkable ground is ITEM_OFF.min–max px away, and that
+// nearest ground belongs to a reachable patch (so a tap on the item routes
+// there). Spots keep clear of exit doors and of anything in `avoid`.
+const ITEM_OFF = { min: 12, max: 28, ideal: 20 };
+const organicItemCache = {};
+function organicItemSpot(key, x, y, avoid = [], gap = 0) {
+  const o = organicDef(key); if (!o) return null;
+  const ck = activeRegion + ':' + key + ':' + o.def.src + ':' + Math.round(x) + ',' + Math.round(y) + ':' + gap + ':' + avoid.map(a => Math.round(a.x) + ',' + Math.round(a.y)).join(';');
+  if (ck in organicItemCache) return organicItemCache[ck];
+  const pts = organicGrid(key), reach = organicReachable(key), any = new Set(), ok = new Set();
+  for (let i = 0; i < pts.length; i += 2) { const g = pts[i] + ',' + pts[i + 1]; any.add(g); if (!reach || reach.has(g)) ok.add(g); }
+  const doors = ['n', 's', 'e', 'w'].filter(d => rooms[key].exits[d]).flatMap(d => organicDoors(key, d)).map(d => d.inward || d.edge).filter(Boolean);
+  const offs = [];
+  for (let dx = -32; dx <= 32; dx += 8) for (let dy = -32; dy <= 32; dy += 8) offs.push([dx, dy, Math.hypot(dx, dy)]);
+  offs.sort((a, b) => a[2] - b[2]);
+  let best = null, bs = Infinity;
+  for (let py = 38; py <= 462; py += 8) for (let px = 28; px <= 772; px += 8) {
+    if (any.has(px + ',' + py) || walkable(key, px, py)) continue;
+    // Nearest walkable grid point: it must be reachable and inside the band.
+    let near = null;
+    for (const [dx, dy, d] of offs) { const g = (px + dx) + ',' + (py + dy); if (any.has(g)) { near = { g, d }; break; } }
+    if (!near || near.d < ITEM_OFF.min || near.d > ITEM_OFF.max || !ok.has(near.g)) continue;
+    if (doors.some(d => Math.hypot(d.x - px, d.y - py) < 90)) continue;
+    if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
+    const s = Math.hypot(px - x, py - y) + 6 * Math.abs(near.d - ITEM_OFF.ideal);
+    if (s < bs) { bs = s; best = { x: px, y: py }; }
+  }
+  return organicItemCache[ck] = best;
+}
+// The walkable spot a player would stand on to use an item, and how far away it is.
+function organicItemStand(key, p) { const q = organicSpot(key, p.x, p.y); return q ? { ...q, d: Math.hypot(q.x - p.x, q.y - p.y) } : null; }
+// An item is "beside the street": not on walkable ground, but a reachable street is within reach.
+function organicBesideStreet(key, p, reach = 30) { const q = organicItemStand(key, p); return !walkable(key, p.x, p.y) && !!q && q.d <= reach; }
 let organicSpawnPass = false;
 const walkableForSpawns = walkable;
 const roomSpawnsBeforeOrganic = roomSpawns;
@@ -209,8 +342,12 @@ walkable = (function (inner) {
 })(walkableForSpawns);
 const chestForBeforeOrganic = chestFor;
 chestFor = function (key) {
-  const c = chestForBeforeOrganic(key); if (!c || !organicDef(key) || walkable(key, c.x, c.y)) return c;
-  const s = organicSpot(key, c.x, c.y); return s ? { ...c, x: s.x, y: s.y } : c;
+  const c = chestForBeforeOrganic(key); if (!c || !organicDef(key)) return c;
+  // Round 93: beside the street, clear of the room's relic and its patrols.
+  const r = rooms[key], avoid = r && r.relic ? [{ x: r.relic[3], y: r.relic[4] }] : [];
+  if (typeof state !== 'undefined' && state && state.seed != null) for (const s of roomSpawns(key)) avoid.push({ x: s.x, y: s.y });
+  const s = organicItemSpot(key, c.x, c.y, avoid, 120) || organicItemSpot(key, c.x, c.y, avoid, 70) || organicItemSpot(key, c.x, c.y, avoid.slice(0, 1), 60) || organicSpot(key, c.x, c.y);
+  return s ? { ...c, x: s.x, y: s.y } : c;
 };
 const organicStyles = document.createElement('style');
 organicStyles.textContent = '.city-exit.organic-door{white-space:nowrap}';
