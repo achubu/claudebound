@@ -34,14 +34,14 @@ state.playerLevel=30;syncTalentVitals();assert.equal(state.maxHp,59);assert.equa
 state.device.crystals=[{uid:'crystal-1',type:'capacity'},{uid:'crystal-2',type:'assault'},{uid:'crystal-3',type:'aegis'}];
 state.device.slots=['crystal-1','crystal-2','crystal-3',null,null];
 assert.equal(maxDeckSize(),7);assert.equal(deviceBonus('assault'),1);assert.equal(deviceBonus('aegis'),1);
-state.room='3,6';const s=roomSpawns(state.room)[0];startBattle(s.uid);assert(state.battle);assert.equal(state.battle.spawnId,s.uid);
+state.room='3,5';const s=roomSpawns(state.room)[0];startBattle(s.uid);assert(state.battle);assert.equal(state.battle.spawnId,s.uid);
 state.battle.hand=[make('glacial')];state.battle.energy=3;playCard(0);const hp=state.hp;endTurn();assert.equal(state.hp,hp);assert.equal(state.battle.freeze,0);
 state.battle.turn=3;state.battle.enemy.element='fire';state.battle.hand=[make('counter_water')];state.battle.energy=3;playCard(0);const ehp=state.battle.enemy.hp;endTurn();assert.equal(state.hp,hp);assert.equal(state.battle.enemy.hp,ehp-6);assert.equal(state.battle.counter,null);
 state.talents.echo=1;state.battle.echoArmed=true;state.battle.hand=[make('guard')];state.battle.energy=3;state.battle.block=0;playCard(0);assert.equal(state.battle.block,12);assert.equal(state.battle.energy,2);assert(state.battle.echoUsed);
 state.talents.doublePower=1;state.battle.doubleArmed=true;state.battle.enemy.hp=100;state.battle.enemy.armor=0;state.battle.hand=[make('strike')];state.battle.energy=3;playCard(0);assert.equal(state.battle.enemy.hp,86);assert(state.battle.doubleUsed);
 state.battle.hand=[make('venom')];state.battle.energy=3;playCard(0);assert.equal(state.battle.poison,2);
 const before=state.pool.length;const _r=Math.random;Math.random=()=>.9;winBattle();Math.random=_r;assert.equal(state.battle.lootType,'choice','card chests offer a choice');assert.equal(state.battle.offers.length,3);assert.equal(state.pool.length,before,'nothing is added until you choose');chooseCardReward(1);assert.equal(state.pool.length,before+1);assert(state.battle.reward);assert.equal(state.cooldowns[s.uid],3);
-finishBattle();state.battle=null;state.talents={};save();assert(load());assert.equal(state.room,'3,6');
+finishBattle();state.battle=null;state.talents={};save();assert(load());assert.equal(state.room,'3,5');
 startBattle(roomSpawns(state.room)[1].uid);const turn=state.battle.turn;save();assert(load());assert.equal(state.battle.turn,turn);assert.equal(state.battle.phase,'fight');
 state.battle=null;state.room='8,4';const boss=roomSpawns(state.room).find(x=>x.boss);assert(boss);startBattle(boss.uid);winBattle();assert(state.pool.some(c=>c.id==='glacial'));assert(state.bosses.includes('thornWarden'));finishBattle();travelPortal();assert.equal(state.region,'elaris');assert.equal(Object.keys(rooms).length,30);assert.equal(maxDeckSize(),11);assert.equal(state.pool.filter(c=>c.id==='counter').length,1);assert(!state.pool.some(c=>c.id.startsWith('counter_')));
 const giftCount=state.pool.length;travelPortal();travelPortal();assert.equal(state.pool.length,giftCount);

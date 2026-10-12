@@ -1,0 +1,107 @@
+/* Round 44: Aether, pitching, the side deck and enemy afflictions. */
+.aether-panel{margin:10px 0 0;padding:8px 10px;border:1px solid #7d6bd1;border-radius:7px;background:linear-gradient(145deg,#1b1838,#101a2b)}
+.aether-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.aether-row b{color:#d9ccff;font:700 13px system-ui;letter-spacing:.04em}
+.aether-row small{color:#b9b2df;font:11px system-ui}
+.aether-row #sideDraw{margin-left:auto}
+.aether-pips{display:inline-flex;gap:3px}
+.aether-pips i{width:11px;height:11px;border-radius:50%;border:1px solid #9c8cf0;background:#151330}
+.aether-pips i.on{background:radial-gradient(circle,#fff6c9,#b49cff 60%,#6b4fd8);box-shadow:0 0 6px #b49cff}
+.aether-pips i.pending{background:#4b3d8f;border-style:dashed}
+.side-choice-title{margin:8px 0 4px;color:#e8defc;font:12px system-ui}
+.side-hand,.side-choice{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.side-card{border-color:#9c8cf0!important;background:linear-gradient(160deg,#241d4d,#121a33)!important}
+.side-card .ownership{color:#d3c7ff}
+.side-card .cost{background:#5b45b8}
+.side-choice .side-card{outline:2px dashed #c9b8ff;outline-offset:2px}
+.side-workshop{grid-column:1/-1}
+.card.pitched{opacity:.55;outline:2px dashed #b49cff;outline-offset:2px}
+.card.junk{filter:grayscale(.85) contrast(.9);border-style:dashed!important}
+.ability.pitch{border-color:#9c8cf0}
+.ability.pitch.selected{background:#4b3d8f}
+.affliction{margin:5px 0 0;font:11px/1.4 system-ui;color:#ffe0e6}
+.affliction b{color:#fff}
+.affliction.strike{color:#ffd2b8}
+.affliction.anchored{color:#cfe8ff}
+.affliction .answer{display:block;color:#c9b8ff;opacity:.95}
+.compact-tags .debuff-tag,.compact-tags .buff-tag,.compact-tags .ward-tag{font-size:10px;padding:1px 5px;border-radius:3px}
+.compact-tags .debuff-tag{background:#4a1d2a;color:#ffc7d2}
+.compact-tags .buff-tag{background:#4a3a14;color:#ffe3a1}
+.compact-tags .ward-tag{background:#1d2f4a;color:#cfe3ff}
+.touch-mode .aether-panel{padding:6px 8px}
+.touch-mode .side-hand,.touch-mode .side-choice{flex-wrap:nowrap;overflow-x:auto}
+.touch-mode .side-hand .card-wrap,.touch-mode .side-choice .card-wrap{min-width:150px;flex:0 0 150px}
+.touch-mode .side-card{min-height:220px}
+.touch-mode .affliction{font-size:10.5px}
+.aether-extra{display:contents}
+/* Enemy intent: two bubbles, this turn (rose) and the turn after (blue). */
+.intent.intent-split{background:none!important;border:0!important;padding:0!important}
+.intent-bubbles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.intent-bubble{position:relative;padding:8px 10px 9px;border-radius:12px;border:1px solid;font:12px/1.35 system-ui}
+.intent-bubble .when{display:block;font:700 11px/1.2 system-ui;letter-spacing:.02em;margin-bottom:3px}
+.intent-bubble .what{display:block;font-size:13px;color:#fff}
+.intent-bubble .dmg{display:block;margin-top:2px}
+.intent-bubble .dmg em{font-style:normal;font-weight:700;color:#ffe08a}
+.intent-bubble.now{background:linear-gradient(135deg,#7a2440,#4a1f38);border-color:#ff8aa3;box-shadow:0 0 0 1px #ff8aa333,0 4px 14px #0006}
+.intent-bubble.now .when{color:#ffc2cf}
+.intent-bubble.now .dmg{color:#ffe1e8}
+.intent-bubble.later{background:linear-gradient(135deg,#1f3560,#1a2442);border-color:#7fb2ff;opacity:.92}
+.intent-bubble.later .when{color:#b9d4ff}
+.intent-bubble.later .dmg{color:#d7e6ff}
+.intent-bubble.later .affliction{color:#d7e6ff}
+.intent-bubble.later .affliction b{color:#fff}
+.intent-split .encounter-status{margin:6px 2px 0}
+@media (max-width:360px){.intent-bubbles{grid-template-columns:1fr}}
+/* Round 58: view the side deck at any time (cards can only be drawn with enough Aether). */
+.side-view{margin-top:8px;padding:8px;border:1px dashed #7d6bd1;border-radius:8px;background:#120f26}
+.side-view-note{margin:0 0 6px;font:12px system-ui;color:#d9ccff}
+.side-view-cards{display:flex;flex-wrap:wrap;gap:8px}
+.side-view-cards .card-wrap.view-only .card{opacity:.8;filter:saturate(.75);cursor:default}
+.touch-mode .side-view-cards{flex-wrap:nowrap;overflow-x:auto}
+.touch-mode .side-view-cards .card-wrap{min-width:150px;flex:0 0 150px}
+
+/* Round 65: side cards show their Aether cost. */
+.side-card .aether-cost{position:absolute;top:66px;right:10px;z-index:3;padding:2px 6px;border-radius:999px;background:#2a1c5c;border:1px solid #b9a2ff;color:#e9e0ff;font:800 11px/1.2 system-ui;box-shadow:0 0 8px #8f6bff88}
+.side-choice-title .ability{margin-left:8px}
+
+/* Round 67: side cards are priced in Aether. */
+.side-card .cost.aether{background:radial-gradient(circle at 35% 30%,#e9e0ff,#8f6bff 55%,#3b228f);color:#fff;font-size:12px;min-width:30px;border-radius:999px;box-shadow:0 0 8px #8f6bffaa}
+
+/* Round 70: the side deck is a compact strip so your hand stays on screen. */
+.side-strip{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.side-strip.expanded{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;justify-items:center}
+.side-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;border-radius:999px;border:1px solid #6a55b8;background:linear-gradient(135deg,#2a1d55,#170f33);color:#d9cff9;font:600 13px/1.1 system-ui;cursor:pointer;opacity:.55}
+.side-chip.ready{opacity:1;border-color:#b9a2ff;box-shadow:0 0 10px #8f6bff66}
+.side-chip.ready:hover{transform:translateY(-1px);box-shadow:0 0 14px #8f6bffaa}
+.side-chip:disabled{cursor:not-allowed}
+.side-chip .sc-icon{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#3b2a7a;font-size:13px}
+.side-chip .sc-cost{padding:1px 6px;border-radius:999px;background:#5b45b8;color:#fff;font-weight:800;font-size:11px}
+@media (max-width:560px){.side-chip{font-size:12px;padding:4px 8px 4px 4px}.side-chip .sc-name{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+/* Round 72: the side deck sits in its own column beside the hand, one card per
+   row, scrolling vertically. */
+#battleModal .hand-row{display:flex;align-items:flex-start;gap:14px}
+#battleModal .hand-row > #hand{flex:1 1 auto;min-width:0}
+#battleModal .side-column{flex:0 0 196px;display:flex;flex-direction:column;border:1px solid #6a55b8;border-radius:12px;background:linear-gradient(180deg,#1d1440,#100b24);box-shadow:inset 0 0 0 1px #ffffff0d,0 0 14px #5b45b833}
+#battleModal .side-col-head{display:flex;flex-direction:column;gap:2px;padding:8px 10px 6px;border-bottom:1px solid #6a55b866}
+#battleModal .side-col-head b{color:#e2d8ff;font:800 13px/1.2 system-ui;letter-spacing:.04em}
+#battleModal .side-col-head small{color:#a99bd6;font:600 11px/1.2 system-ui}
+#battleModal .side-col-list{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 8px;max-height:430px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#8f6bff #1d1440}
+#battleModal .side-col-list .side-wrap{width:172px;flex:0 0 auto}
+#battleModal .side-col-list .card{width:172px;min-width:172px}
+@media (max-width:560px){
+  #battleModal .hand-row{gap:8px}
+  #battleModal .side-column{flex:0 0 118px}
+  #battleModal .side-col-list{max-height:300px;padding:6px 4px;gap:6px}
+  #battleModal .side-col-list .side-wrap,#battleModal .side-col-list .card{width:108px;min-width:108px}
+  #battleModal .side-col-list .card{min-height:0;padding:26px 5px 6px}
+  #battleModal .side-col-list .card .art{display:none}
+  #battleModal .side-col-list .card .card-name{font-size:11px;min-height:0}
+  #battleModal .side-col-list .card .rules{font-size:10px;min-height:0;padding:4px}
+}
+@media (max-width:560px){
+  #battleModal .side-col-list .card .ownership{display:none}
+  #battleModal .side-col-list .card{padding-top:8px}
+  #battleModal .side-col-list .card .cost{top:4px;right:4px;transform:scale(.8);transform-origin:top right}
+  #battleModal .side-col-list .card .card-name{padding-right:30px;line-height:1.15}
+}

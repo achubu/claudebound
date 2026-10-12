@@ -1,0 +1,656 @@
+{
+ "N": 60,
+ "order": [
+  "Lv 1",
+  "Lv 2",
+  "Lv 3",
+  "Lv 4",
+  "Lv 5",
+  "Lv 6",
+  "Lv 7",
+  "Lv 8",
+  "BOSS:moonKnight",
+  "BOSS:crownSentinel",
+  "BOSS:thornWarden"
+ ],
+ "builds": [
+  "No talents",
+  "Surge (offense)",
+  "Disruption (control)",
+  "Resolve (defense)",
+  "Hybrid"
+ ],
+ "results": {
+  "Lv 1": {
+   "No talents": {
+    "win": 100,
+    "hp": 93,
+    "turns": 5.3,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 100,
+    "hp": 94,
+    "turns": 5.3,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 100,
+    "hp": 94,
+    "turns": 5.3,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 100,
+    "hp": 89,
+    "turns": 5.3,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 100,
+    "hp": 92,
+    "turns": 5.2,
+    "talents": "{}",
+    "policy": "careful"
+   }
+  },
+  "Lv 2": {
+   "No talents": {
+    "win": 100,
+    "hp": 63,
+    "turns": 5.3,
+    "talents": "{}",
+    "policy": "race"
+   },
+   "Surge (offense)": {
+    "win": 100,
+    "hp": 77,
+    "turns": 5.5,
+    "talents": "{\"powerCore\":1}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 100,
+    "hp": 82,
+    "turns": 6.4,
+    "talents": "{\"weakenCore\":1}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 100,
+    "hp": 77,
+    "turns": 6.8,
+    "talents": "{\"retainCore\":1}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 100,
+    "hp": 81,
+    "turns": 6.3,
+    "talents": "{\"weakenCore\":1}",
+    "policy": "careful"
+   }
+  },
+  "Lv 3": {
+   "No talents": {
+    "win": 92,
+    "hp": 54,
+    "turns": 8.6,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 93,
+    "hp": 50,
+    "turns": 8.3,
+    "talents": "{\"powerCore\":1,\"amplifier\":1}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 100,
+    "hp": 69,
+    "turns": 8.6,
+    "talents": "{\"weakenCore\":1,\"jammer\":1}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 80,
+    "hp": 85,
+    "turns": 8.8,
+    "talents": "{\"retainCore\":1,\"plating\":1}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 87,
+    "hp": 87,
+    "turns": 8.4,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1}",
+    "policy": "careful"
+   }
+  },
+  "Lv 4": {
+   "No talents": {
+    "win": 13,
+    "hp": 19,
+    "turns": 10.5,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 55,
+    "hp": 15,
+    "turns": 6.6,
+    "talents": "{\"powerCore\":1,\"amplifier\":2}",
+    "policy": "race"
+   },
+   "Disruption (control)": {
+    "win": 77,
+    "hp": 46,
+    "turns": 9.8,
+    "talents": "{\"weakenCore\":1,\"jammer\":2}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 65,
+    "hp": 25,
+    "turns": 9.9,
+    "talents": "{\"retainCore\":1,\"plating\":2}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 70,
+    "hp": 52,
+    "turns": 10.4,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1}",
+    "policy": "careful"
+   }
+  },
+  "Lv 5": {
+   "No talents": {
+    "win": 0,
+    "hp": 0,
+    "turns": 6,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 5.8,
+    "talents": "{\"powerCore\":1,\"amplifier\":3}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 8.8,
+    "talents": "{\"weakenCore\":1,\"jammer\":3}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 7.8,
+    "talents": "{\"retainCore\":1,\"plating\":3}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 0,
+    "hp": 0,
+    "turns": 7.8,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1,\"plating\":1}",
+    "policy": "careful"
+   }
+  },
+  "Lv 6": {
+   "No talents": {
+    "win": 0,
+    "hp": 0,
+    "turns": 5.8,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 5,
+    "hp": 15,
+    "turns": 5.9,
+    "talents": "{\"powerCore\":1,\"amplifier\":4}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 8,
+    "hp": 6,
+    "turns": 8.3,
+    "talents": "{\"weakenCore\":1,\"jammer\":4}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 13,
+    "hp": 20,
+    "turns": 7.3,
+    "talents": "{\"retainCore\":1,\"plating\":4}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 5,
+    "hp": 26,
+    "turns": 7.2,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1,\"plating\":2}",
+    "policy": "careful"
+   }
+  },
+  "Lv 7": {
+   "No talents": {
+    "win": 0,
+    "hp": 0,
+    "turns": 4.7,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 5,
+    "talents": "{\"powerCore\":1,\"amplifier\":5}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 6.3,
+    "talents": "{\"weakenCore\":1,\"jammer\":5}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 6,
+    "talents": "{\"retainCore\":1,\"plating\":5}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 0,
+    "hp": 0,
+    "turns": 6.3,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1,\"plating\":2,\"jammer\":1}",
+    "policy": "careful"
+   }
+  },
+  "Lv 8": {
+   "No talents": {
+    "win": 0,
+    "hp": 0,
+    "turns": 3,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 3,
+    "talents": "{\"powerCore\":1,\"amplifier\":5,\"edge\":1}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 4.8,
+    "talents": "{\"weakenCore\":1,\"jammer\":5,\"quickdraw\":1}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 4.9,
+    "talents": "{\"retainCore\":1,\"plating\":5,\"vitality\":1}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 0,
+    "hp": 0,
+    "turns": 4.5,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1,\"plating\":2,\"jammer\":2}",
+    "policy": "careful"
+   }
+  },
+  "BOSS:moonKnight": {
+   "No talents": {
+    "win": 0,
+    "hp": 0,
+    "turns": 11.2,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 10.1,
+    "talents": "{\"powerCore\":1,\"amplifier\":2}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 15.2,
+    "talents": "{\"weakenCore\":1,\"jammer\":2}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 14.9,
+    "talents": "{\"retainCore\":1,\"plating\":2}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 0,
+    "hp": 0,
+    "turns": 13.7,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1}",
+    "policy": "careful"
+   }
+  },
+  "BOSS:crownSentinel": {
+   "No talents": {
+    "win": 0,
+    "hp": 0,
+    "turns": 7.9,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 2,
+    "hp": 11,
+    "turns": 7.9,
+    "talents": "{\"powerCore\":1,\"amplifier\":4}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 2,
+    "hp": 20,
+    "turns": 11,
+    "talents": "{\"weakenCore\":1,\"jammer\":4}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 28,
+    "hp": 11,
+    "turns": 12,
+    "talents": "{\"retainCore\":1,\"plating\":4}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 73,
+    "hp": 12,
+    "turns": 12,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1,\"plating\":2}",
+    "policy": "careful"
+   }
+  },
+  "BOSS:thornWarden": {
+   "No talents": {
+    "win": 0,
+    "hp": 0,
+    "turns": 3,
+    "talents": "{}",
+    "policy": "careful"
+   },
+   "Surge (offense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 3,
+    "talents": "{\"powerCore\":1,\"amplifier\":5,\"edge\":2}",
+    "policy": "careful"
+   },
+   "Disruption (control)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 3.9,
+    "talents": "{\"weakenCore\":1,\"jammer\":5,\"quickdraw\":2}",
+    "policy": "careful"
+   },
+   "Resolve (defense)": {
+    "win": 0,
+    "hp": 0,
+    "turns": 5.7,
+    "talents": "{\"retainCore\":1,\"plating\":5,\"vitality\":2}",
+    "policy": "careful"
+   },
+   "Hybrid": {
+    "win": 0,
+    "hp": 0,
+    "turns": 3.1,
+    "talents": "{\"weakenCore\":1,\"retainCore\":1,\"powerCore\":1,\"plating\":2,\"jammer\":2,\"amplifier\":1}",
+    "policy": "careful"
+   }
+  }
+ },
+ "targets": {
+  "Lv 1": 2,
+  "Lv 2": 10,
+  "Lv 3": 8,
+  "Lv 4": 14,
+  "Lv 5": 16,
+  "Lv 6": 8,
+  "Lv 7": 14,
+  "Lv 8": 4,
+  "BOSS:moonKnight": 1,
+  "BOSS:crownSentinel": 1,
+  "BOSS:thornWarden": 1
+ },
+ "cardTable": {
+  "Lv 1": {
+   "0": {
+    "win": 100,
+    "build": "No"
+   },
+   "1": {
+    "win": 100,
+    "build": "No"
+   },
+   "2": {
+    "win": 100,
+    "build": "No"
+   },
+   "3": {
+    "win": 100,
+    "build": "No"
+   },
+   "enemyLevel": 1
+  },
+  "Lv 2": {
+   "0": {
+    "win": 100,
+    "build": "No"
+   },
+   "1": {
+    "win": 100,
+    "build": "No"
+   },
+   "2": {
+    "win": 100,
+    "build": "No"
+   },
+   "3": {
+    "win": 100,
+    "build": "No"
+   },
+   "enemyLevel": 2
+  },
+  "Lv 3": {
+   "0": {
+    "win": 93,
+    "build": "Disruption"
+   },
+   "1": {
+    "win": 100,
+    "build": "Surge"
+   },
+   "2": {
+    "win": 100,
+    "build": "No"
+   },
+   "3": {
+    "win": 100,
+    "build": "No"
+   },
+   "enemyLevel": 3
+  },
+  "Lv 4": {
+   "0": {
+    "win": 55,
+    "build": "Hybrid"
+   },
+   "1": {
+    "win": 100,
+    "build": "Resolve"
+   },
+   "2": {
+    "win": 100,
+    "build": "No"
+   },
+   "3": {
+    "win": 100,
+    "build": "No"
+   },
+   "enemyLevel": 4
+  },
+  "Lv 5": {
+   "0": {
+    "win": 0,
+    "build": ""
+   },
+   "1": {
+    "win": 72,
+    "build": "Resolve"
+   },
+   "2": {
+    "win": 100,
+    "build": "Resolve"
+   },
+   "3": {
+    "win": 100,
+    "build": "Disruption"
+   },
+   "enemyLevel": 5
+  },
+  "Lv 6": {
+   "0": {
+    "win": 0,
+    "build": ""
+   },
+   "1": {
+    "win": 10,
+    "build": "Resolve"
+   },
+   "2": {
+    "win": 78,
+    "build": "Disruption"
+   },
+   "3": {
+    "win": 97,
+    "build": "Resolve"
+   },
+   "enemyLevel": 6
+  },
+  "Lv 7": {
+   "0": {
+    "win": 0,
+    "build": ""
+   },
+   "1": {
+    "win": 0,
+    "build": ""
+   },
+   "2": {
+    "win": 42,
+    "build": "Hybrid"
+   },
+   "3": {
+    "win": 97,
+    "build": "Disruption"
+   },
+   "enemyLevel": 7
+  },
+  "Lv 8": {
+   "0": {
+    "win": 0,
+    "build": ""
+   },
+   "1": {
+    "win": 0,
+    "build": ""
+   },
+   "2": {
+    "win": 0,
+    "build": ""
+   },
+   "3": {
+    "win": 50,
+    "build": "Disruption"
+   },
+   "enemyLevel": 8
+  },
+  "BOSS:moonKnight": {
+   "0": {
+    "win": 0,
+    "build": ""
+   },
+   "1": {
+    "win": 70,
+    "build": "Disruption"
+   },
+   "2": {
+    "win": 100,
+    "build": "Disruption"
+   },
+   "3": {
+    "win": 100,
+    "build": "No"
+   },
+   "enemyLevel": 4
+  },
+  "BOSS:crownSentinel": {
+   "0": {
+    "win": 0,
+    "build": ""
+   },
+   "1": {
+    "win": 67,
+    "build": "Hybrid"
+   },
+   "2": {
+    "win": 83,
+    "build": "Hybrid"
+   },
+   "3": {
+    "win": 100,
+    "build": "No"
+   },
+   "enemyLevel": 6
+  },
+  "BOSS:thornWarden": {
+   "0": {
+    "win": 0,
+    "build": ""
+   },
+   "1": {
+    "win": 0,
+    "build": ""
+   },
+   "2": {
+    "win": 0,
+    "build": ""
+   },
+   "3": {
+    "win": 0,
+    "build": ""
+   },
+   "enemyLevel": 9
+  }
+ }
+}

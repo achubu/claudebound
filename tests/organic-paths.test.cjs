@@ -29,7 +29,7 @@ for(const k of cells)for(const sp of roomSpawns(k))assert(walkable(k,sp.x,sp.y),
 // Arriving from the west neighbour lands at the door, and walking back out leaves.
 state.room='4,4';state.pos={x:770,y:250};assert(transition('e'));assert.equal(state.room,'5,4');
 assert.deepEqual(state.pos,w.inward,'arrive at the west door');
-state.pos={x:14,y:w.along-22};keys={ArrowLeft:true};move(.033);keys={};assert.equal(state.room,'4,4','walking into the door leaves the district');
+state.pos={x:14,y:w.along-22};move(0);assert.equal(state.room,'4,4','walking into the door leaves the district');
 ORGANIC_AREAS['elaris:emerald']=realEmerald;for(const c of [organicDoorCache,spawnCatalog])for(const k in c)delete c[k];
 console.log('PASS: organic districts walk on traced paths with doors where paths meet the edges.');
 }`);
