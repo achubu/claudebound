@@ -2907,3 +2907,10 @@ using exit labels alone.
 - The mask is one continuous world, so streets run cleanly from room to room.
 - Other worlds keep their art-based map.
 - Cache tags bumped to `?v=round102`.
+
+## Round 103: new Sunken Warehouses painting
+
+- Room `2,5` (Sunken Warehouses) is repainted with a fountain roundabout, a
+  quay and the city edge. The fountain island is part of the walkable plaza.
+- Its item spot moved to the open quay paving beside the crane, (250, 233).
+- Cache tags bumped to `?v=round103`.
