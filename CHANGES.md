@@ -2895,3 +2895,15 @@ using exit labels alone.
   It also checks that the points of interest, the relic and the waypoint use
   spots, and that the markers are small.
 - Cache tags bumped to `?v=round101`.
+
+## Round 102: the Neon Aftermath map is drawn from the streets
+
+- The exploration map (M) no longer pastes room paintings together, because
+  separately painted rooms don't line up as one picture. Each explored Neon
+  Aftermath room is drawn from the walk mask instead (`mapPathTile()` in
+  `assets/map-terrain.js`):
+  - a dark street surface with a one-cell neon rim and a soft glow;
+  - set on dark ground with faint city blocks.
+- The mask is one continuous world, so streets run cleanly from room to room.
+- Other worlds keep their art-based map.
+- Cache tags bumped to `?v=round102`.

@@ -42,6 +42,31 @@ function mapRoomTile(key, onReady) {
   if (complete) mapTileCache[ck] = tile;
   return tile;
 }
+// Round 102: Neon Aftermath's map is drawn from its traced streets rather than
+// its paintings (separately painted rooms don't line up as one picture): the
+// walkable ground as rounded neon streets on dark ground. Rooms meet cleanly
+// because the walk mask is one continuous world.
+const MAP_PATH_STYLE = { ground: '#070f18', block: 'rgba(56,214,255,.045)', glow: 'rgba(56,214,255,.16)', edge: '#4fe0ff', street: '#123545' };
+function mapPathTile(key) {
+  const r = rooms[key]; if (activeRegion !== 'city' || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
+  const ck = 'paths:' + activeRegion + ':' + key; if (mapTileCache[ck]) return mapTileCache[ck];
+  const W = 800, H = 500, C = 8, [cx, cy] = r.world, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
+  const ctx = tile.getContext('2d'); if (!ctx) return null;
+  ctx.fillStyle = MAP_PATH_STYLE.ground; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = MAP_PATH_STYLE.block; // faint city blocks between the streets
+  for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28);
+  const cells = [];
+  for (let y = C / 2; y < H; y += C) for (let x = C / 2; x < W; x += C) if (neonWorldWalk(cx * 800 + x, cy * 500 + y)) cells.push(x, y);
+  // Neon outline: a soft glow, a bright rim, then the dark street surface inset from it.
+  // Round dabs on every 8px cell give smooth, rounded paths.
+  const dabs = (style, rad) => { ctx.fillStyle = style; ctx.beginPath(); for (let i = 0; i < cells.length; i += 2) { ctx.moveTo(cells[i] + rad, cells[i + 1]); ctx.arc(cells[i], cells[i + 1], rad, 0, Math.PI * 2); } ctx.fill(); };
+  dabs(MAP_PATH_STYLE.glow, C * 1.5); dabs(MAP_PATH_STYLE.edge, C * 0.95);
+  // The dark surface covers only cells with street all round them, leaving a one-cell neon rim.
+  const all = cells, inner = [], walk = (x, y) => neonWorldWalk(cx * 800 + x, cy * 500 + y);
+  for (let i = 0; i < all.length; i += 2) { const x = all[i], y = all[i + 1]; if ([[-C, 0], [C, 0], [0, -C], [0, C], [-C, -C], [C, C], [-C, C], [C, -C]].every(([dx, dy]) => walk(x + dx, y + dy))) inner.push(x, y); }
+  cells.length = 0; cells.push(...inner); dabs(MAP_PATH_STYLE.street, C * 0.95);
+  return mapTileCache[ck] = tile;
+}
 // A joined district's single painting, spanning all of its cells.
 function mapAreaTile(area, onReady) {
   const ck = activeRegion + ':' + area.cells.join('|'); if (mapTileCache[ck]) return mapTileCache[ck];
@@ -97,7 +122,7 @@ function drawMapTerrain(canvasEl, tileW) {
     if (area.art && area.cells.length > 1) {
       const tile = mapAreaTile(area, redraw); if (!tile) continue;
       const [kx, ky] = XY(key); source[key] = { img: tile, sx: (kx - area.left) * tile.width / (area.width / 800), sy: (ky - area.top) * tile.height / (area.height / 500), sw: tile.width / (area.width / 800), sh: tile.height / (area.height / 500) };
-    } else { const tile = mapRoomTile(key, redraw); if (tile) source[key] = { img: tile, sx: 0, sy: 0, sw: tile.width, sh: tile.height }; }
+    } else { const tile = mapPathTile(key) || mapRoomTile(key, redraw); if (tile) source[key] = { img: tile, sx: 0, sy: 0, sw: tile.width, sh: tile.height }; }
   }
   // 1) Fog beyond the frontier: dark ground with a faint survey grid.
   ctx.fillStyle = theme.fog; ctx.fillRect(0, 0, W, H);
