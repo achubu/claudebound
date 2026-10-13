@@ -2810,3 +2810,14 @@ using exit labels alone.
 - `tests/neon-world.test.cjs` asserts there is exactly one hidden crystal, on
   `5,6`, reachable from the start with no relics.
 - Cache tags bumped to `?v=round98`.
+
+## Round 99: live site link
+
+- Merged `main`'s new `CNAME` (`aethercede.com`). The README's live-build
+  link now points to https://aethercede.com/ instead of the old Cardbound
+  Pages URL.
+- The only remaining `cardbound` strings are intentional:
+  - the save migration, which reads old `cardbound-` storage keys;
+  - import of old `cardbound-save` files;
+  - the `achubu/Cardbound` repo name;
+  - CHANGES.md history.

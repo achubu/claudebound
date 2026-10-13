@@ -94,4 +94,4 @@ A full installed-Chromium visual pass was unavailable in the build workspace, so
 
 GitHub Pages deploys the repository root from `main`. The live build is available at:
 
-https://achubu.github.io/Cardbound/
+https://aethercede.com/
