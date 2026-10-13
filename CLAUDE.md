@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 100) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 101) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -39,6 +39,11 @@ change set.
     Crossings to or from these rooms are loose: any street reaching the edge
     lands on the nearest street across (`neonLandingFrom`). Rooms without an
     image use the old district slices.
+  - Round 101+: each painted room also lists hand-checked open-ground spots
+    beside the street (`NOOKS` in the build tool), each with a footpath.
+    Chests, relics and points of interest stand there as small markers. When
+    adding rooms, pick 2-3 spots on open ground 30-100px off the road (never on
+    roofs, props or water), add them to `NOOKS`, and re-run the tool.
   - Old rebuild pipeline (district paintings): `tools/build_world_map.py`, then
     `tools/build_world_rooms.py`, then the step that writes the rooms literal
     and mask into `index.html` and `neon-world.js`. Paths are widened with

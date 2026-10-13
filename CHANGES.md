@@ -2862,3 +2862,36 @@ using exit labels alone.
   - it is drawn at full resolution.
 - `tests/neon-world.test.cjs` now checks landings with `neonLandingFrom()`.
 - Cache tags bumped to `?v=round100`.
+
+## Round 101: small chests and objects on their own spots off the road
+
+- Chests, relics and every point of interest are now small markers, about a
+  third of their old size. That includes data terminals, shrines, campfires,
+  caches, events, the merchant and Nexus Waypoints. Labels are 9px.
+  - Chests: 20px.
+  - Points of interest: 20px.
+  - Relics: 24px.
+  - Hidden crystal: 14×18.
+- In painted Neon Aftermath rooms they stand on hand-checked open ground off
+  the road (`NOOKS` in `tools/build_room_masks.py`, written to `NEON_NOOKS`).
+  - Spots were found by growing outline-free ground out from the road edge,
+    since buildings and props in the pixel art have dark outlines.
+  - Every spot was then checked by eye. Spots on roofs, props, rails or
+    container stacks were dropped, as were any closer than 30px to the road.
+  - The three Citadel rooms' spots were picked by hand on their paved
+    courtyards.
+- Each spot has its own footpath from the street:
+  - baked into the walk mask, starting 12px inside the road;
+  - ending 16px short of the object's base, so you stand in front of it;
+  - drawn as a faint dotted trail over the painting.
+- Order per room: relic first, then chest, then the room's point of interest.
+  A point of interest moves on to a later spot to stay 150px clear of patrols.
+  The start waypoint and the Moon Lens use spots too.
+- `tests/room-art.test.cjs` now also checks every spot:
+  - it is off the road;
+  - it is not walkable itself;
+  - it is within reach of its path;
+  - it is reachable.
+  It also checks that the points of interest, the relic and the waypoint use
+  spots, and that the markers are small.
+- Cache tags bumped to `?v=round101`.

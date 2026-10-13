@@ -73,6 +73,57 @@ def keep_exits(w, exits):
     return np.isin(l, list(keep))
 
 
+# Round 101: hand-checked open-ground spots beside the street in each painted room (800x500
+# room px), for chests, relics and points of interest. Each gets a short footpath from the
+# nearest street, baked into the walk mask and drawn as a faint trail in the game.
+# Found by tracing outline-free ground next to the road, then checked by eye; a spot must be
+# on open ground, never on a roof, prop, water or another object.
+NOOKS = {
+    '0,4': [(652, 63)],
+    '0,5': [(658, 383), (675, 138)],
+    '1,4': [(509, 430), (295, 443)],
+    '1,5': [(173, 353), (197, 151), (478, 132)],
+    '2,4': [(274, 439), (648, 341)],
+    '2,5': [(548, 63)],
+    '3,4': [(510, 427), (133, 165), (682, 161)],
+    '4,4': [(498, 274), (132, 165), (399, 407)],
+    '5,4': [(476, 214), (320, 220), (510, 427)],
+    '6,4': [(300, 430), (510, 430)],
+    '7,4': [(295, 435), (505, 445)],
+    '8,4': [(290, 440), (560, 445)],
+}
+NOOK_STOP = 16   # the path ends this far short of the object's base (you stand beside it, not on it)
+NOOK_WIDTH = 22
+FOOT = 22        # the game tests walkability at the feet, 22px below a position
+
+
+def nook_paths(key, road):
+    """For each nook: [x, y, ax, ay, ex, ey]. (x, y) is where the object is drawn, (ax, ay) the
+    nearest street point, and (ex, ey) where the footpath ends, short of the object's base."""
+    _, idx = nd.distance_transform_edt(~road, return_indices=True)
+    out = []
+    for x, y in NOOKS.get(key, []):
+        bx, by = x, min(499, y + FOOT)
+        ax, ay = int(idx[1][by, bx]), int(idx[0][by, bx])
+        L = max(1.0, float(np.hypot(bx - ax, by - ay)))
+        out.append([x, y, ax, ay, round(bx - (bx - ax) / L * NOOK_STOP), round(by - (by - ay) / L * NOOK_STOP)])
+    return out
+
+
+def bake_paths(w, nooks):
+    """Walkable footpath from each nook's street point to its end, short of the object."""
+    im = Image.fromarray((w * 255).astype(np.uint8))
+    d = ImageDraw.Draw(im)
+    r = NOOK_WIDTH // 2
+    for x, y, ax, ay, ex, ey in nooks:
+        # Start a little inside the street so the path joins it across whole mask cells.
+        L = max(1.0, float(np.hypot(ex - ax, ey - ay)))
+        sx, sy = ax - (ex - ax) / L * 12, ay - (ey - ay) / L * 12
+        d.line((sx, sy, ex, ey), fill=255, width=NOOK_WIDTH)
+        d.ellipse((ex - r, ey - r, ex + r, ey + r), fill=255)
+    return np.asarray(im) > 0
+
+
 def room_exits():
     """Exit directions per room key from the rooms literal in index.html."""
     out = {}
@@ -86,14 +137,16 @@ def main():
     W, H = int(re.search(r'maskW: (\d+)', src).group(1)), int(re.search(r'maskH: (\d+)', src).group(1))
     mask = re.search(r"mask: '([^']+)'", src).group(1)
     bits = np.array([int(b) for ch in mask for b in format(ABC.index(ch), '06b')])[:W * H].reshape(H, W).astype(bool)
-    exits, art = room_exits(), []
+    exits, art, nooks = room_exits(), [], {}
     for path in sorted(glob.glob('assets/environment/rooms/room-*.webp')):
         cx, cy = map(int, re.match(r'room-(\d+)-(\d+)\.webp', os.path.basename(path)).groups())
         key = f'{cx},{cy}'
         if key not in exits:
             print('skip (no such room)', key)
             continue
-        w = keep_exits(axis_bridges(trace(path)), exits[key])
+        road = keep_exits(axis_bridges(trace(path)), exits[key])
+        nooks[key] = nook_paths(key, road)
+        w = bake_paths(road, nooks[key])
         wy = cy - 4  # world row of this room
         # Each 8px cell belongs to the room that holds its centre; sample the room mask there.
         for r in range(H):
@@ -108,6 +161,7 @@ def main():
     enc = ''.join(ABC[int(''.join(map(str, flat[i:i + 6])), 2)] for i in range(0, len(flat), 6))
     src = re.sub(r"mask: '[^']+'", "mask: '" + enc + "'", src, count=1)
     src = re.sub(r'const NEON_ROOM_ART = \[[^\]]*\];', 'const NEON_ROOM_ART = ' + json.dumps(art) + ';', src, count=1)
+    src = re.sub(r'const NEON_NOOKS = \{[^;]*\};', 'const NEON_NOOKS = ' + json.dumps(nooks, separators=(',', ':')) + ';', src, count=1)
     open(JS, 'w').write(src)
     print(len(art), 'rooms with their own painting')
 

@@ -30,4 +30,24 @@ const canvas=JSON.parse(run(`(()=>{const c={width:800,height:500,style:{},datase
  const img=neonRoomImage('0,5');img.complete=true;img.naturalWidth=2000;img.naturalHeight=1250;
  paintNeonWorld(c,'0,5');return JSON.stringify({w:c.width,h:c.height,src:img.src})})()`));
 assert.equal(canvas.w,2000);assert.equal(canvas.h,1250);assert(/rooms\/room-0-5\.webp$/.test(canvas.src));
+// Round 101: chests, relics and points of interest in painted rooms stand on hand-checked open
+// ground off the road, each with its own footpath from the street; the markers are small.
+const nk=JSON.parse(run(`(()=>{const out={bad:[],used:[],count:0};
+ for(const k of NEON_ROOM_ART){for(const [x,y,ax,ay,ex,ey] of NEON_NOOKS[k]||[]){out.count++;
+  const stand=organicItemStand(k,{x,y});
+  if(walkable(k,x,y))out.bad.push(k+' on path');
+  else if(!stand||stand.d>30)out.bad.push(k+' too far '+(stand&&stand.d));
+  else if(!organicReachableAt(k,stand))out.bad.push(k+' unreachable');
+  if(Math.hypot(x-ax,y+22-ay)<30)out.bad.push(k+' not off the road');}}
+ for(const p of Object.values(worldPOIs()))if(neonNooks(p.key))out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)?'nook':p.key+' not on a nook');
+ const q=rooms['5,4'].relic;out.relic=NEON_NOOKS['5,4'].some(n=>n[0]===q[3]&&n[1]===q[4]);
+ const nx=poiAt('0,5');out.nexus=NEON_NOOKS['0,5'].some(n=>n[0]===nx.x&&n[1]===nx.y);
+ return JSON.stringify(out)})()`));
+assert(nk.count>=24,'about two spots per painted room');
+assert.deepEqual(nk.bad,[],'every spot is off the road, beside its own footpath, and reachable');
+assert(nk.used.length&&nk.used.every(u=>u==='nook'),'points of interest in painted rooms use the spots: '+nk.used.join(', '));
+assert(nk.relic,'the Moon Lens sits on a spot');assert(nk.nexus,'the start waypoint sits on a spot');
+const css=fs.readFileSync(path.join(__dirname,'../assets/neon-world.js'),'utf8');
+for(const sel of ['.map-chest{width:20px','.poi-node{width:20px','.relic{width:24px'])assert(css.includes(sel),'small marker: '+sel);
+console.log('PASS: '+nk.count+' off-road spots with footpaths; points of interest, relic and waypoint use them; small markers.');
 console.log('PASS: '+art.length+' rooms with their own painting: images present, exits reachable, crossings land on streets both ways, drawn at full resolution.');
