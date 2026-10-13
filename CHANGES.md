@@ -2821,3 +2821,44 @@ using exit labels alone.
   - import of old `cardbound-save` files;
   - the `achubu/Cardbound` repo name;
   - CHANGES.md history.
+
+## Round 100: Neon Aftermath rooms painted one image each (first 12)
+
+- Neon Aftermath is being repainted one room per image, so each room gets about
+  three times the detail of a 3×3-room district painting.
+  - Rooms with their own painting live in `assets/environment/rooms/room-X-Y.webp`.
+  - The first 12: the whole top row (`0,4`–`8,4`) and the three harbor rooms
+    `0,5`, `1,5` and `2,5`.
+  - Every other room keeps its slice of the old district painting until it is
+    repainted.
+- `paintNeonWorld()` draws a room's own painting onto a full-resolution canvas
+  (2000×1250, still shown at 800×500 by CSS), so it stays sharp when scaled up
+  on large and high-DPI screens.
+- New `tools/build_room_masks.py`:
+  - traces each room image's pale teal streets (plus crosswalk and lane paint);
+  - joins pieces split by a short straight gap, such as the Spire Gate arch and
+    tower or the Warden's Crown crosswalk;
+  - keeps only street that reaches the room's exits;
+  - writes the result into the world walk mask and the `NEON_ROOM_ART` list in
+    `assets/neon-world.js`.
+  - Re-run it after adding room images.
+- Looser crossings (`neonLoose()` / `neonLandingFrom()`):
+  - Separately painted rooms don't line their streets up exactly with their
+    neighbours.
+  - Between two rooms where either has its own painting, any street reaching
+    the shared edge is a door, and you arrive on the nearest street along the
+    far edge.
+  - Old district rooms keep the strict street-to-street rule, so their painted
+    dead ends stay closed.
+- Mask cells straddling a room boundary: rooms are 500px tall but mask cells
+  are 8px. Lookups inside a room now never read past the room's own last full
+  cell, so a room's bottom edge no longer reads the street of the room below.
+- Points of interest keep the base rule of standing 150px clear of patrols.
+  The 100px fallback is gone, and a room with no such spot gets none.
+- New `tests/room-art.test.cjs` checks every painted room:
+  - its image exists;
+  - its exits have usable doors;
+  - crossings land on a street, both ways;
+  - it is drawn at full resolution.
+- `tests/neon-world.test.cjs` now checks landings with `neonLandingFrom()`.
+- Cache tags bumped to `?v=round100`.

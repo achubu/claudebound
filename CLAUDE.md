@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 99) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 100) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -32,7 +32,14 @@ change set.
     `cx,(cy+4)` and the start room is `'0,5'`.
   - The walk mask lives in `assets/neon-world.js` (8px cells). The foot point
     is y+22.
-  - Rebuild pipeline: `tools/build_world_map.py`, then
+  - Round 100+: rooms are being repainted one image each in
+    `assets/environment/rooms/room-X-Y.webp` (16:10, about 2000x1250). After
+    adding room images, run `python3 tools/build_room_masks.py`. It traces the
+    streets into the walk mask and lists the rooms in `NEON_ROOM_ART`.
+    Crossings to or from these rooms are loose: any street reaching the edge
+    lands on the nearest street across (`neonLandingFrom`). Rooms without an
+    image use the old district slices.
+  - Old rebuild pipeline (district paintings): `tools/build_world_map.py`, then
     `tools/build_world_rooms.py`, then the step that writes the rooms literal
     and mask into `index.html` and `neon-world.js`. Paths are widened with
     `tools/widen_paths.py`.
@@ -76,6 +83,7 @@ change set.
   - `organic-paths`
   - `item-placement`
   - `card-art`
+  - `room-art` (per-room Neon Aftermath paintings)
   - `exploration`
   - `rebalance`
 - Browser check: serve with `python3 -m http.server 8123` and drive it with

@@ -62,13 +62,17 @@ function organicDoor(key, dir, pocket = 0, checkLanding = true) {
   const lo = Math.max(0, base - reach(-1)), hi = Math.min(areaLen, base + span + reach(1));
   // Foot positions the player can actually stand on next to each edge (Round 92).
   const edgeCoord = dir === 'w' ? 14 : dir === 'e' ? area.width - 14 : dir === 'n' ? 34 : area.height - 6;
+  // Round 100: across an edge where either room has its own painting, the far side
+  // need not be street at the same spot (see neonLandingFrom).
+  const exitRaw = rooms[key] && rooms[key].exits[dir], exitTo = exitRaw && (typeof exitRaw === 'string' ? exitRaw : exitRaw.to);
+  const loose = o.def.world && exitTo && typeof neonLoose === 'function' && neonLoose(key, exitTo);
   const runs = []; let start = null;
   for (let t = lo; t <= hi; t += 4) {
     // ...and where you land on the far side of a painted-world edge (see neonLanding).
     const outside = dir === 'w' ? -14 : dir === 'e' ? area.width + 14 : dir === 'n' ? -1 : area.height + 36;
     // On a continuous world map a door must also be street on the far side of the edge.
     const open = t < hi && (horiz ? organicAreaWalk(o, edgeCoord, t) : organicAreaWalk(o, t, edgeCoord))
-      && (!o.def.world || (horiz ? o.def.at(o, outside, t) : o.def.at(o, t, outside)));
+      && (!o.def.world || loose || (horiz ? o.def.at(o, outside, t) : o.def.at(o, t, outside)));
     if (open && start === null) start = t;
     if (!open && start !== null) { runs.push([start, t]); start = null; }
   }
@@ -98,7 +102,7 @@ function organicDoor(key, dir, pocket = 0, checkLanding = true) {
     let mine = usable.map(doorFor).filter(d => organicPocketNear(key, d.inward) === pocket || (pocket === 0 && want.has(organicGridKey(d.inward))));
     // On the painted world, only crossings that land you somewhere useful on the far side.
     const raw = rooms[key].exits[dir], to = raw && (typeof raw === 'string' ? raw : raw.to);
-    if (checkLanding && o.def.world && to && typeof neonLanding === 'function') mine = mine.filter(d => neonLanding(to, neonMirror(dir, { x: d.edge.x, y: d.edge.y - 22 }), dir));
+    if (checkLanding && o.def.world && to && typeof neonLandingFrom === 'function') mine = mine.filter(d => neonLandingFrom(key, to, neonMirror(dir, { x: d.edge.x, y: d.edge.y - 22 }), dir));
     // Every separate street crossing this side from here (Round 92), at least 150px apart.
     const all = []; for (const d of mine) if (all.every(e => Math.abs(e.along - d.along) >= 150)) all.push({ ...d, inPocket: true });
     organicDoorsCache[ck] = all;

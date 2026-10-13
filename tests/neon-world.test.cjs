@@ -12,7 +12,7 @@ assert.equal(state.room,'0,5');renderWorld();assert(walkable('0,5',state.pos.x,s
 for(const k of allKeys)for(const [d,raw] of Object.entries(rooms[k].exits)){
  const to=typeof raw==='string'?raw:raw.to,door=organicDoor(k,d);assert(door,'door '+k+' '+d);
  const back=Object.entries(rooms[to].exits).find(([,r])=>(typeof r==='string'?r:r.to)===k);assert(back,'two-way link '+k+'>'+to);
- const land=neonLanding(to,neonMirror(d,{x:door.edge.x,y:door.edge.y-22}),d);assert(land&&walkable(to,land.x,land.y),'continuous street '+k+' '+d);
+ const land=neonLandingFrom(k,to,neonMirror(d,{x:door.edge.x,y:door.edge.y-22}),d);assert(land&&walkable(to,land.x,land.y),'continuous street '+k+' '+d);
 }
 // Progression: with no relics, the Citadel and the Junkyard are sealed; collecting them opens everything.
 const reach=held=>{const seen=new Set(['0,5']),q=['0,5'];while(q.length){const k=q.shift();for(const raw of Object.values(rooms[k].exits)){const to=typeof raw==='string'?raw:raw.to;if(typeof raw==='object'&&raw.requires&&!held.includes(raw.requires))continue;if(!seen.has(to)){seen.add(to);q.push(to)}}}return seen};
