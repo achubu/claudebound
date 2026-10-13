@@ -2914,3 +2914,33 @@ using exit labels alone.
   quay and the city edge. The fountain island is part of the walkable plaza.
 - Its item spot moved to the open quay paving beside the crane, (250, 233).
 - Cache tags bumped to `?v=round103`.
+
+## Round 104: relaxed pathing in Neon Aftermath
+
+- Playtest finding: you could only walk on the painted asphalt, so sidewalks,
+  kerbs and plaza edges blocked you. On touch, any tap within 170px of a side
+  edge or 110px of the top/bottom (plus the outer 20% of the screen) was taken
+  as "leave the room", which made roads near the edges hard to use.
+- Streets are widened by `NEON_RELAX` = 2 mask cells (16px) on every side, at
+  load time in `assets/neon-world.js`.
+  - This covers sidewalks, kerbs, plaza edges and narrow necks.
+  - Widening happens only inside each room, never across a room boundary, and
+    not in the outer 16px band of a room, so the crossings between rooms are
+    exactly as before.
+  - Object spots stay off the path.
+- Touch controls (`assets/touch-controls.js`):
+  - Only a tap within 44px (sides) or 34px (top/bottom) of an edge, or the outer
+    5% of the screen, means "exit".
+  - Exits, from a tap at an edge or on an exit sign, head for the street that
+    actually leaves on that side (`organicDoor`), not the middle of the edge.
+  - A tap on a spot that can't be reached walks you to the closest reachable
+    spot within 90px, instead of "Tap an open path nearby".
+  - The bottom hint bar no longer swallows taps (`pointer-events:none`).
+- Playtested in the browser across all 12 painted rooms:
+  - keyboard movement in four directions;
+  - tap-to-move to 12 street points per room (all reached, apart from taps right
+    at an exit, which correctly take you through);
+  - walking by exit signs from the start through the harbor.
+- The pathing playtest test passes.
+- New checks in `tests/room-art.test.cjs`.
+- Cache tags bumped to `?v=round104`.

@@ -60,6 +60,33 @@ function neonRoomArt(key) { return activeRegion === 'city' && NEON_ROOM_ART.incl
 // Chests, relics and points of interest stand there, small and off the road.
 const NEON_NOOKS = {"0,4":[[652,63,652,119,652,101]],"0,5":[[658,383,658,283,658,389],[675,138,672,211,674,176]],"1,4":[[509,430,448,459,493,454],[295,443,356,458,311,463]],"1,5":[[173,353,185,284,175,359],[197,151,191,217,195,189],[478,132,439,151,462,153]],"2,4":[[274,439,343,458,290,460],[648,341,647,295,648,347]],"2,5":[[250,233,280,227,262,244]],"3,4":[[510,427,448,459,494,452],[133,165,133,228,133,203],[682,161,682,228,682,199]],"4,4":[[498,274,455,283,483,291],[132,165,132,228,132,203],[399,407,399,324,399,413]],"5,4":[[476,214,442,237,460,236],[320,220,356,245,336,243],[510,427,443,449,494,449]],"6,4":[[300,430,347,452,316,452],[510,430,452,452,494,452]],"7,4":[[295,435,347,457,311,457],[505,445,452,467,489,467]],"8,4":[[290,440,347,462,306,462],[560,445,452,467,544,467]]};
 function neonNooks(key) { return neonRoomArt(key) && NEON_NOOKS[key] || null; }
+// Round 104: relaxed pathing. Streets are widened by NEON_RELAX cells (8px each) on every side,
+// so sidewalks, kerbs, plaza edges and narrow necks are walkable too; being able to reach a bit
+// more is better than being blocked. Each object's own spot stays clear, so it is still off the path.
+const NEON_RELAX = 2;
+(function relaxNeonWorld() {
+  const W = NEON_WORLD.maskW, H = NEON_WORLD.maskH, src = neonWorldBits.slice(), R = NEON_RELAX;
+  const offs = []; for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) if (dx * dx + dy * dy <= R * R + 1) offs.push([dx, dy]);
+  // Widen within each room only, so one room's street never bleeds a sliver across the edge into the next.
+  const roomOf = (x, y) => Math.floor(x / 100) + ',' + Math.floor((y * 8 + 4) / 500);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (src[y * W + x]) continue;
+    // Room edges stay exactly as traced (they decide how rooms connect); widen inside rooms only.
+    const lx = x % 100, ly = y * 8 + 4 - Math.floor((y * 8 + 4) / 500) * 500;
+    if (lx < R || lx >= 100 - R || ly < R * 8 || ly >= 500 - R * 8) continue;
+    const here = roomOf(x, y);
+    for (const [dx, dy] of offs) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H && src[yy * W + xx] && roomOf(xx, yy) === here) { neonWorldBits[y * W + x] = 1; break; } }
+  }
+  // Keep each object's base (its foot point, 22px below) off the path.
+  for (const [key, nooks] of Object.entries(NEON_NOOKS)) {
+    const [cx, cy] = key.split(',').map(Number), oy = (cy - NEON_WORLD.keyOffsetY) * 500;
+    for (const [x, y] of nooks) {
+      const bx = cx * 800 + x, by = oy + y + 22;
+      for (let my = Math.floor((by - 14) / 8); my <= Math.floor((by + 14) / 8); my++) for (let mx = Math.floor((bx - 14) / 8); mx <= Math.floor((bx + 14) / 8); mx++)
+        if (Math.hypot(mx * 8 + 4 - bx, my * 8 + 4 - by) <= 14 && my >= 0 && mx >= 0 && my < H && mx < W) neonWorldBits[my * W + mx] = src[my * W + mx];
+    }
+  }
+})();
 const neonWorldImages = {};
 function neonRoomImage(key) {
   const name = 'room-' + key.replace(',', '-');

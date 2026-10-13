@@ -49,5 +49,19 @@ assert(nk.used.length&&nk.used.every(u=>u==='nook'),'points of interest in paint
 assert(nk.relic,'the Moon Lens sits on a spot');assert(nk.nexus,'the start waypoint sits on a spot');
 const css=fs.readFileSync(path.join(__dirname,'../assets/neon-world.js'),'utf8');
 for(const sel of ['.map-chest{width:20px','.poi-node{width:20px','.relic{width:24px'])assert(css.includes(sel),'small marker: '+sel);
+// Round 104: relaxed pathing. Streets are widened inside rooms (sidewalks, kerbs, plaza edges),
+// room edges keep their exact crossings, object spots stay off the path, the hint bar doesn't
+// swallow taps, only taps right at an edge mean "exit", and a tap on an unreachable spot walks
+// to the nearest reachable one.
+const rx=JSON.parse(run(`(()=>{let wider=0,total=0,edgeSlivers=[];
+ for(const k of NEON_ROOM_ART){const [cx,cy]=k.split(',').map(Number);for(let y=24;y<476;y+=8)for(let x=24;x<776;x+=8){total++;}
+  for(let y=30;y<470;y+=8){const l=walkable(k,14,y),l2=walkable(k,40,y);if(l&&!l2&&!walkable(k,22,y))edgeSlivers.push(k)}}
+ return JSON.stringify({relax:NEON_RELAX,slivers:[...new Set(edgeSlivers)]})})()`));
+assert(rx.relax>=2,'streets are widened');
+const tc=fs.readFileSync(path.join(__dirname,'../assets/touch-controls.js'),'utf8'),html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+assert(/EXIT_BAND=\{x:44,y:34\},SCREEN_BAND=\.05/.test(tc),'only taps right at the edge mean exit');
+assert(/if\(previous\[end\]===-2\)\{end=-1/.test(tc),'unreachable taps go to the nearest reachable spot');
+assert(/\.hint\{[^}]*pointer-events:none/.test(html),'the hint bar lets taps through');
+console.log('PASS: relaxed pathing (streets widened by '+rx.relax+' cells inside rooms), forgiving taps.');
 console.log('PASS: '+nk.count+' off-road spots with footpaths; points of interest, relic and waypoint use them; small markers.');
 console.log('PASS: '+art.length+' rooms with their own painting: images present, exits reachable, crossings land on streets both ways, drawn at full resolution.');

@@ -34,8 +34,11 @@ function findTouchPath(area,start,target){
   const at=queue[head],x=at%cols,y=Math.floor(at/cols);
   for(const next of [x>0?at-1:-1,x<cols-1?at+1:-1,y>0?at-cols:-1,y<rows-1?at+cols:-1])if(next>=0&&valid[next]&&previous[next]===-2&&touchEdgeOpen(area,step,cols,at,next)){previous[next]=at;queue.push(next)}
  }
- if(previous[goal.index]===-2)return null;
- const result=[];for(let at=goal.index;at!==-1;at=previous[at])result.push(point(at));return result.reverse();
+ // Round 104: if the exact spot can't be reached, go to the reachable spot closest to it (within 90px)
+ // instead of refusing the tap.
+ let end=goal.index;
+ if(previous[end]===-2){end=-1;let bd=90*90;for(const i of queue){const q=point(i),d=(q.x-target.x)**2+(q.y-target.y)**2;if(d<bd){bd=d;end=i}}if(end<0)return null}
+ const result=[];for(let at=end;at!==-1;at=previous[at])result.push(point(at));return result.reverse();
 }
 function setTouchDestination(target,exit=null){
  if(!state||state.battle||!$('menuOverlay').classList.contains('hidden')||!$('startOverlay').classList.contains('hidden'))return false;
@@ -56,7 +59,9 @@ function drawMoveMarker(){
 // of the visible screen on that side (as long as the exit is reasonably
 // close). Corner taps pick whichever side the tap is proportionally nearer.
 const EXIT_DOOR={n:{x:400,y:15},s:{x:400,y:485},e:{x:785,y:250},w:{x:15,y:250}};
-const EXIT_BAND={x:170,y:110},SCREEN_BAND=.2,SCREEN_REACH={x:560,y:360};
+// Round 104: only a tap right at a room's edge (or on its exit sign) means "leave this way";
+// anywhere else, a tap walks you to that spot, so roads near the edges stay usable.
+const EXIT_BAND={x:44,y:34},SCREEN_BAND=.05,SCREEN_REACH={x:90,y:70};
 function externalExit(key,dir,area){const raw=rooms[key]?.exits?.[dir];if(!raw)return null;if(typeof raw==='string'&&area.cells.includes(raw))return null;return raw}
 function edgeExitFor(t,clientX,clientY,area,bounds,scale){
  const cx=Math.floor(t.x/800),cy=Math.floor(t.y/500),key=(area.left+cx)+','+(area.top+cy);
@@ -77,7 +82,9 @@ function edgeExitFor(t,clientX,clientY,area,bounds,scale){
   if(!best||score<best.score)best={dir,key,score};
  }
  if(!best)return null;
- return{dir:best.dir,key:best.key,point:{x:o.x+EXIT_DOOR[best.dir].x,y:o.y+EXIT_DOOR[best.dir].y}};
+ // Painted/organic rooms: head for the street that actually leaves on that side (Round 104).
+ const door=typeof organicDef==='function'&&organicDef(best.key)&&organicDoor(best.key,best.dir),dp=door&&door.inPocket!==false?{x:door.edge.x,y:door.edge.y-22}:EXIT_DOOR[best.dir];
+ return{dir:best.dir,key:best.key,point:{x:o.x+dp.x,y:o.y+dp.y}};
 }
 $('world').onclick=e=>{
  if(e.target.closest('button,a,input,select'))return;
@@ -86,7 +93,8 @@ $('world').onclick=e=>{
  if(exit){
   if(exit.classList.contains('closed'))return toast('This path is closed.');
   const dir=['n','s','e','w'].find(d=>exit.classList.contains(d)),key=exit.closest('.area-cell')?.dataset.room||state.room,offset=cellOffset(key,area);
-  const local={n:{x:400,y:15},s:{x:400,y:485},e:{x:785,y:250},w:{x:15,y:250}}[dir];
+  const door=typeof organicDef==='function'&&organicDef(key)&&organicDoor(key,dir);
+  const local=door&&door.inPocket!==false?{x:door.edge.x,y:door.edge.y-22}:{n:{x:400,y:15},s:{x:400,y:485},e:{x:785,y:250},w:{x:15,y:250}}[dir];
   if(local)setTouchDestination({x:offset.x+local.x,y:offset.y+local.y},{dir,key});return;
  }
  const enemy=e.target.closest('.enemy-node');
