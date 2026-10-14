@@ -3000,3 +3000,12 @@ using exit labels alone.
   Candidates in the water, on a container, or with a footpath across props
   were rejected.
 - Cache tags bumped to `?v=round109`.
+
+## Round 110: Amethyst Causeway painting
+
+- Room `6,5` (Amethyst Causeway) has its own painting: a T-junction among the
+  Citadel waterfalls. That makes 17 painted rooms.
+- Streets reach its exits on the top, bottom and left (the east side has no
+  exit).
+- Its item spot is on open stone ground by the south gate, (520, 440).
+- Cache tags bumped to `?v=round110`.
