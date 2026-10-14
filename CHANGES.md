@@ -2957,3 +2957,7 @@ using exit labels alone.
 - Street stubs that reach an edge with no exit, or with no partner across it,
   are cut from the map. Gameplay pathing is unchanged.
 - Cache tags bumped to `?v=round105`.
+- Follow-up: connectors attach only to street patches of at least 120 mask
+  cells, so a thin sliver next to an edge can't capture a crossing. Smaller
+  patches are cut from the map. This fixes Lantern Market → Neon Arcade, which
+  had hooked onto an isolated sliver at the top of Neon Arcade.

@@ -50,14 +50,28 @@ const MAP_PATH_STYLE = { ground: '#070f18', block: 'rgba(56,214,255,.045)', glow
 // Round 105: streets are trimmed back from every room edge, and each real exit gets one
 // connector that both rooms draw to the same meeting point, so the map always lines up.
 // Street stubs that reach an edge with no exit (or no partner across it) are cut.
-const MAP_SEAM_DEPTH = 32;
+const MAP_SEAM_DEPTH = 32, MAP_MIN_PATCH = 120; // patches smaller than this (8px cells) are cut from the map
+const mapPatchCache = {};
+function mapPatches(cx, cy) {
+  // Connected street patches of one room's trimmed street cells: label per cell and size per label.
+  const ck = cx + ',' + cy; if (mapPatchCache[ck]) return mapPatchCache[ck];
+  const C = 8, D = MAP_SEAM_DEPTH, cols = 100, rows = 63, lab = new Int32Array(cols * rows), size = [0];
+  const ok = (i, j) => { const x = i * C + 4, y = j * C + 4; return x > D - 4 && x < 800 - D + 4 && y > D - 4 && y < 500 - D + 4 && neonWorldWalk(cx * 800 + x, cy * 500 + y); };
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    if (lab[j * cols + i] || !ok(i, j)) continue;
+    const id = size.length, q = [[i, j]]; lab[j * cols + i] = id; let n = 0;
+    while (q.length) { const [a, b] = q.pop(); n++; for (const [da, db] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const u = a + da, v = b + db; if (u >= 0 && v >= 0 && u < cols && v < rows && !lab[v * cols + u] && ok(u, v)) { lab[v * cols + u] = id; q.push([u, v]); } } }
+    size.push(n);
+  }
+  return mapPatchCache[ck] = { lab, size, at: (x, y) => { const id = lab[Math.min(rows - 1, Math.floor(y / C)) * cols + Math.min(cols - 1, Math.floor(x / C))]; return id ? size[id] : 0; } };
+}
 function mapEdgeRuns(cx, cy, dir) {
   // Street runs along a line MAP_SEAM_DEPTH px inside the given edge, as [start, end] along it.
   const D = MAP_SEAM_DEPTH, horiz = dir === 'e' || dir === 'w', len = horiz ? 500 : 800, runs = [];
   let st = null;
   for (let t = 2; t <= len; t += 4) {
-    const lx = horiz ? (dir === 'w' ? D : 800 - D) : t, ly = horiz ? t : (dir === 'n' ? D : 500 - D);
-    const open = t < len - 1 && neonWorldWalk(cx * 800 + lx, cy * 500 + ly);
+    const lx = horiz ? (dir === 'w' ? D + 4 : 800 - D - 4) : t, ly = horiz ? t : (dir === 'n' ? D + 4 : 500 - D - 4);
+    const open = t < len - 1 && mapPatches(cx, cy).at(lx, ly) >= MAP_MIN_PATCH;
     if (open && st === null) st = t;
     if (!open && st !== null) { if (t - st >= 12) runs.push([st, t]); st = null; }
   }
@@ -99,7 +113,8 @@ function mapPathTile(key) {
   const walk = (x, y) => neonWorldWalk(cx * 800 + x, cy * 500 + y);
   // Street cells, trimmed back from all four edges.
   const cells = [];
-  for (let y = C / 2; y < H; y += C) for (let x = C / 2; x < W; x += C) if (x > D - 4 && x < W - D + 4 && y > D - 4 && y < H - D + 4 && walk(x, y)) cells.push(x, y);
+  const patch = mapPatches(cx, cy);
+  for (let y = C / 2; y < H; y += C) for (let x = C / 2; x < W; x += C) if (patch.at(x, y) >= MAP_MIN_PATCH) cells.push(x, y);
   const inner = [];
   for (let i = 0; i < cells.length; i += 2) { const x = cells[i], y = cells[i + 1]; if ([[-C, 0], [C, 0], [0, -C], [0, C], [-C, -C], [C, C], [-C, C], [C, -C]].every(([dx, dy]) => walk(x + dx, y + dy))) inner.push(x, y); }
   // One connector per crossing, from the trimmed street to the shared meeting point on the edge.
