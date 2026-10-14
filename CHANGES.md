@@ -2989,3 +2989,14 @@ using exit labels alone.
 - A Nexus Waypoint now always takes its spot, even with a patrol within 150px
   (it is not a fight). Before, it fell back to the middle of the road.
 - Cache tags bumped to `?v=round108`.
+
+## Round 109: Harbor Gardens painting
+
+- Room `0,6` (Harbor Gardens) has its own painting: a bend in the harbor road
+  with the lighthouse and piers. That makes 16 painted rooms.
+- Streets reach its top and right exits. The street stub at the bottom edge
+  is a painted dead end.
+- Its item spot is on the concrete quay beside the crane, (330, 200).
+  Candidates in the water, on a container, or with a footpath across props
+  were rejected.
+- Cache tags bumped to `?v=round109`.
