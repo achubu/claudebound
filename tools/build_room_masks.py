@@ -95,7 +95,9 @@ NOOKS = {
     '6,4': [(300, 430), (510, 430)],
     '6,5': [(520, 440)],
     '7,4': [(295, 435), (505, 445)],
+    '7,5': [(300, 240)],
     '8,4': [(290, 440), (560, 445)],
+    '8,5': [(590, 175)],
 }
 NOOK_STOP = 16   # the path ends this far short of the object's base (you stand beside it, not on it)
 NOOK_WIDTH = 22

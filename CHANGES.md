@@ -3009,3 +3009,17 @@ using exit labels alone.
   exit).
 - Its item spot is on open stone ground by the south gate, (520, 440).
 - Cache tags bumped to `?v=round110`.
+
+## Round 111: Citadel Heart and Prism Steps paintings
+
+- Room `7,5` (Citadel Heart) has its own painting: a gothic-arched avenue with
+  a castle row on the east side. Streets reach its exits on the top, bottom
+  and right.
+- Room `8,5` (Prism Steps) has its own painting: a crossroads among crystal
+  spires and falls. Streets reach its exits on the top, bottom and left.
+- That makes 19 painted rooms.
+- Item spots:
+  - `7,5`: the terrace by the chapel door, (300, 240).
+  - `8,5`: the stone plaza in front of the twin falls, (590, 175).
+  - Candidates in a fenced pool and on rooftops were rejected.
+- Cache tags bumped to `?v=round111`.
