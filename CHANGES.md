@@ -2944,3 +2944,16 @@ using exit labels alone.
 - The pathing playtest test passes.
 - New checks in `tests/room-art.test.cjs`.
 - Cache tags bumped to `?v=round104`.
+
+## Round 105: map connections always line up
+
+- On the exploration map, every Neon Aftermath room's streets are trimmed back
+  32px from its edges.
+- Each real exit is redrawn as one connector (`mapSeam()`):
+  - Both rooms compute it from the same shared-edge data, so the two halves
+    meet at the same point and width.
+  - Further crossings on the same edge are kept only where the two rooms'
+    streets really meet (within 70px).
+- Street stubs that reach an edge with no exit, or with no partner across it,
+  are cut from the map. Gameplay pathing is unchanged.
+- Cache tags bumped to `?v=round105`.

@@ -47,24 +47,73 @@ function mapRoomTile(key, onReady) {
 // walkable ground as rounded neon streets on dark ground. Rooms meet cleanly
 // because the walk mask is one continuous world.
 const MAP_PATH_STYLE = { ground: '#070f18', block: 'rgba(56,214,255,.045)', glow: 'rgba(56,214,255,.16)', edge: '#4fe0ff', street: '#123545' };
+// Round 105: streets are trimmed back from every room edge, and each real exit gets one
+// connector that both rooms draw to the same meeting point, so the map always lines up.
+// Street stubs that reach an edge with no exit (or no partner across it) are cut.
+const MAP_SEAM_DEPTH = 32;
+function mapEdgeRuns(cx, cy, dir) {
+  // Street runs along a line MAP_SEAM_DEPTH px inside the given edge, as [start, end] along it.
+  const D = MAP_SEAM_DEPTH, horiz = dir === 'e' || dir === 'w', len = horiz ? 500 : 800, runs = [];
+  let st = null;
+  for (let t = 2; t <= len; t += 4) {
+    const lx = horiz ? (dir === 'w' ? D : 800 - D) : t, ly = horiz ? t : (dir === 'n' ? D : 500 - D);
+    const open = t < len - 1 && neonWorldWalk(cx * 800 + lx, cy * 500 + ly);
+    if (open && st === null) st = t;
+    if (!open && st !== null) { if (t - st >= 12) runs.push([st, t]); st = null; }
+  }
+  return runs;
+}
+const mapSeamCache = {};
+function mapSeam(key, dir) {
+  // Connectors across one side of a room: [{own, other, meet, width}] in positions along that edge.
+  const r = rooms[key], raw = r && r.exits[dir], to = raw && (typeof raw === 'string' ? raw : raw.to);
+  if (!to || !rooms[to] || !rooms[to].world) return [];
+  const opp = { n: 's', s: 'n', e: 'w', w: 'e' }[dir], first = dir === 'e' || dir === 's';
+  const ck = first ? key + dir : to + opp;
+  if (!(ck in mapSeamCache)) {
+    // Computed once per shared edge, from the west/north room's side, so both rooms agree.
+    const [A, B, dA] = first ? [key, to, dir] : [to, key, opp], [ax, ay] = rooms[A].world, [bx, by] = rooms[B].world;
+    const ra = mapEdgeRuns(ax, ay, dA), rb = mapEdgeRuns(bx, by, { n: 's', s: 'n', e: 'w', w: 'e' }[dA]);
+    const mid = q => (q[0] + q[1]) / 2, pairs = [];
+    for (const p of ra) for (const q of rb) pairs.push([Math.abs(mid(p) - mid(q)), p, q]);
+    pairs.sort((x, y) => x[0] - y[0]);
+    const used = new Set(), out = [];
+    for (const [d, p, q] of pairs) {
+      if (used.has(p) || used.has(q)) continue;
+      if (out.length && d > 70) continue; // further crossings only where the streets really meet
+      used.add(p); used.add(q);
+      out.push({ a: mid(p), b: mid(q), meet: Math.round((mid(p) + mid(q)) / 2), width: Math.max(20, Math.min(56, p[1] - p[0], q[1] - q[0])) });
+    }
+    mapSeamCache[ck] = out;
+  }
+  return mapSeamCache[ck].map(c => ({ own: first ? c.a : c.b, meet: c.meet, width: c.width }));
+}
 function mapPathTile(key) {
   const r = rooms[key]; if (activeRegion !== 'city' || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
   const ck = 'paths:' + activeRegion + ':' + key; if (mapTileCache[ck]) return mapTileCache[ck];
-  const W = 800, H = 500, C = 8, [cx, cy] = r.world, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
+  const W = 800, H = 500, C = 8, D = MAP_SEAM_DEPTH, [cx, cy] = r.world, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;
   ctx.fillStyle = MAP_PATH_STYLE.ground; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = MAP_PATH_STYLE.block; // faint city blocks between the streets
   for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28);
+  const walk = (x, y) => neonWorldWalk(cx * 800 + x, cy * 500 + y);
+  // Street cells, trimmed back from all four edges.
   const cells = [];
-  for (let y = C / 2; y < H; y += C) for (let x = C / 2; x < W; x += C) if (neonWorldWalk(cx * 800 + x, cy * 500 + y)) cells.push(x, y);
+  for (let y = C / 2; y < H; y += C) for (let x = C / 2; x < W; x += C) if (x > D - 4 && x < W - D + 4 && y > D - 4 && y < H - D + 4 && walk(x, y)) cells.push(x, y);
+  const inner = [];
+  for (let i = 0; i < cells.length; i += 2) { const x = cells[i], y = cells[i + 1]; if ([[-C, 0], [C, 0], [0, -C], [0, C], [-C, -C], [C, C], [-C, C], [C, -C]].every(([dx, dy]) => walk(x + dx, y + dy))) inner.push(x, y); }
+  // One connector per crossing, from the trimmed street to the shared meeting point on the edge.
+  const links = [];
+  for (const dir of ['n', 's', 'e', 'w']) for (const c of mapSeam(key, dir)) {
+    const pt = (depth, along) => dir === 'w' ? [depth, along] : dir === 'e' ? [W - depth, along] : dir === 'n' ? [along, depth] : [along, H - depth];
+    links.push({ width: c.width, pts: [pt(D + 4, c.own), pt(D - 6, c.own), pt(10, c.meet), pt(-4, c.meet)] });
+  }
+  const dabs = (style, rad, list) => { ctx.fillStyle = style; ctx.beginPath(); for (let i = 0; i < list.length; i += 2) { ctx.moveTo(list[i] + rad, list[i + 1]); ctx.arc(list[i], list[i + 1], rad, 0, Math.PI * 2); } ctx.fill(); };
+  const strokes = (style, extra) => { ctx.strokeStyle = style; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; for (const l of links) { ctx.lineWidth = Math.max(2, l.width + extra); ctx.beginPath(); ctx.moveTo(...l.pts[0]); for (const p of l.pts.slice(1)) ctx.lineTo(...p); ctx.stroke(); } };
   // Neon outline: a soft glow, a bright rim, then the dark street surface inset from it.
-  // Round dabs on every 8px cell give smooth, rounded paths.
-  const dabs = (style, rad) => { ctx.fillStyle = style; ctx.beginPath(); for (let i = 0; i < cells.length; i += 2) { ctx.moveTo(cells[i] + rad, cells[i + 1]); ctx.arc(cells[i], cells[i + 1], rad, 0, Math.PI * 2); } ctx.fill(); };
-  dabs(MAP_PATH_STYLE.glow, C * 1.5); dabs(MAP_PATH_STYLE.edge, C * 0.95);
-  // The dark surface covers only cells with street all round them, leaving a one-cell neon rim.
-  const all = cells, inner = [], walk = (x, y) => neonWorldWalk(cx * 800 + x, cy * 500 + y);
-  for (let i = 0; i < all.length; i += 2) { const x = all[i], y = all[i + 1]; if ([[-C, 0], [C, 0], [0, -C], [0, C], [-C, -C], [C, C], [-C, C], [C, -C]].every(([dx, dy]) => walk(x + dx, y + dy))) inner.push(x, y); }
-  cells.length = 0; cells.push(...inner); dabs(MAP_PATH_STYLE.street, C * 0.95);
+  dabs(MAP_PATH_STYLE.glow, C * 1.5, cells); strokes(MAP_PATH_STYLE.glow, 2 * C);
+  dabs(MAP_PATH_STYLE.edge, C * 0.95, cells); strokes(MAP_PATH_STYLE.edge, 0);
+  dabs(MAP_PATH_STYLE.street, C * 0.95, inner); strokes(MAP_PATH_STYLE.street, -2 * C);
   return mapTileCache[ck] = tile;
 }
 // A joined district's single painting, spanning all of its cells.
