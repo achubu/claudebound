@@ -2976,3 +2976,16 @@ using exit labels alone.
 - Its item spot is beside the scrap pile in the dock yard, (560, 420).
   Candidate spots on rooftops and planters were rejected.
 - Cache tags bumped to `?v=round107`.
+
+## Round 108: Neon Square painting
+
+- Room `4,5` (Neon Square) has its own painting: a T-junction lined with
+  shops. That makes 15 painted rooms.
+- Its sidewalks are walkable, so the only open ground off the path is a
+  storefront alcove between a kiosk and the planters, (236, 120).
+  - That spot holds the room's point of interest, including Neon Aftermath's
+    second Nexus Waypoint.
+  - Spots on café umbrellas and shop signs were rejected.
+- A Nexus Waypoint now always takes its spot, even with a patrol within 150px
+  (it is not a fight). Before, it fell back to the middle of the road.
+- Cache tags bumped to `?v=round108`.
