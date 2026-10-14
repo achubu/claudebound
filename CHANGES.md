@@ -2961,3 +2961,10 @@ using exit labels alone.
   cells, so a thin sliver next to an edge can't capture a crossing. Smaller
   patches are cut from the map. This fixes Lantern Market → Neon Arcade, which
   had hooked onto an isolated sliver at the top of Neon Arcade.
+
+## Round 106: Holo Stage painting
+
+- Room `5,5` (Holo Stage) has its own painting: a four-way crossroads with the
+  hologram stage. That makes 13 painted rooms.
+- Its item spot is in the open plaza in front of the stage, (118, 128).
+- Cache tags bumped to `?v=round106`.
