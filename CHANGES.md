@@ -2968,3 +2968,11 @@ using exit labels alone.
   hologram stage. That makes 13 painted rooms.
 - Its item spot is in the open plaza in front of the stage, (118, 128).
 - Cache tags bumped to `?v=round106`.
+
+## Round 107: Fountain Row painting
+
+- Room `1,6` (Fountain Row) has its own painting: a four-way crossroads with a
+  paved fountain plaza, which is walkable. That makes 14 painted rooms.
+- Its item spot is beside the scrap pile in the dock yard, (560, 420).
+  Candidate spots on rooftops and planters were rejected.
+- Cache tags bumped to `?v=round107`.
