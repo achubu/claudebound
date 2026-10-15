@@ -3130,3 +3130,10 @@ using exit labels alone.
   those files are unchanged.
 - Re-ran `tools/build_room_masks.py`. 47 painted rooms.
 - No item spots for the new rooms yet, per the owner's hold until every room is in.
+
+## Round 122: rooms without item spots fall back to beside-the-street placement
+
+- `neonNooks()` now treats a painted room with an empty spot list as having no spots. Before,
+  the Koi Garden (3,8) Nexus Waypoint stood in the middle of the crossroads. That broke the
+  neon-world, item-placement and exploration tests. Those rooms' points of interest, chests and
+  relics now use `organicItemSpot` beside the street until their spots are picked.
