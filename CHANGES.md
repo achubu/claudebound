@@ -3121,3 +3121,12 @@ using exit labels alone.
 - Re-ran `tools/build_room_masks.py`. 44 painted rooms.
 - The room-art test's "old rooms stay strict" pair moves to 3,9 / 4,9, which are still unpainted.
 - No item spots for these rooms yet, per the owner's hold until every room is in.
+
+## Round 121: rooms 8,8, 0,9 and 1,9 painted (Collapsed Freeway, Statue Garden, row 9)
+
+- Wired in three new room paintings. Their streets reach every exit the room needs
+  (8,8: top, bottom, left; 0,9: top and right; 1,9: top, left, right).
+- The 3,5 and 1,6 uploads in the same batch match the paintings already in the game, so
+  those files are unchanged.
+- Re-ran `tools/build_room_masks.py`. 47 painted rooms.
+- No item spots for the new rooms yet, per the owner's hold until every room is in.
