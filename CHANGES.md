@@ -3276,3 +3276,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - The objective hints name the exact rooms and say to beat the guards (Moon Temple, Statue
   Garden in the south-west of the park, Billboard Steps above the Holo Stage).
 - New `tests/relic-quest.test.cjs` plays the whole chain.
+
+## Round 137: painted sprites for points of interest
+
+- Five new owner sprites (Gemini, magenta background keyed out, cropped, 256px WebP with alpha)
+  in `assets/items/poi/`: Nexus Waypoint, Data Terminal, Sealed Cache, Supply Cache, Aether
+  Shrine.
+- In the world they replace the round emoji badges: 44px, standing on their spot (anchored near
+  the bottom), name label below, greyed out once used (end of `assets/pickups.js`).
+- The Data Terminal sprite is used for Neon Aftermath's lore points only; Elaris and Vespera
+  lore stones, the campfire and the merchant keep their badges until they get art.
+- New `tests/poi-art.test.cjs`.
