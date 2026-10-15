@@ -3320,3 +3320,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   (`destroySalvage` in `index.html`). The button shows the amount ("Destroy card · +◇ 15") and
   a message confirms it. Soulbound cards still can't be destroyed.
 - `tests/card-copies.test.cjs` checks the amounts. (First pushed as Upgrade Crystals; the owner meant Shards.)
+
+## Round 142: destroy salvage by level
+
+- Destroying a card now gives ◇ 5 / 20 / 50 / 100 Shards for Level 0 / 1 / 2 / 3
+  (`DESTROY_SHARDS` in `index.html`), replacing Round 141's 5 per level.
