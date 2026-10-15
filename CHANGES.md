@@ -3153,3 +3153,18 @@ using exit labels alone.
 - `drawMapTerrain(canvas, tileW, bounds)` takes optional bounds. `renderMinimap` is wrapped in
   `assets/map-terrain.js`, and redraws only when the room or the explored set changes.
 - `tests/map-terrain.test.cjs` checks the minimap framing and size.
+
+## Round 125: victory loot shows as pictures
+
+- Every piece of loot on the victory screen now has a graphic, not just a line of text
+  (end of `assets/pickups.js`):
+  - Cards won in the fight show as cards. That includes the covenant cards, boss Soulbound
+    cards and a side deck card offered alongside a card choice.
+  - Crystals keep their existing art.
+  - Potions, Shards, completed bounties, Vigil healing, XP, level-ups, new side deck slots and
+    an empty chest each get a small illustrated tile (inline SVG; the empty chest uses the
+    loot-chest image, greyed).
+- The text lines those tiles replace are removed. Story lines (a portal opening) and missed
+  bounties stay as text.
+- `winBattle` records the cards each win adds (`b.newCards`).
+- New `tests/loot-art.test.cjs` checks which lines become tiles and that won cards are tracked.
