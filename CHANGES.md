@@ -3254,3 +3254,11 @@ using exit labels alone.
 - In battle, the side deck column now sits on the left of your hand instead of the right
   (`row.prepend(col)` in `assets/aether-deck.js`), on desktop and phone.
 - `tests/aether-deck.test.cjs` checks the order.
+
+## Round 135: new Holo Stage painting (room 5,5)
+
+- Replaced the Holo Stage image with the owner's new version (concert stage in the south-west
+  block). The crossroads reaches all four exits.
+- New item spots on open ground in the concert lot, (268, 318) and (255, 440), replacing the
+  spot picked for the old painting.
+- Re-ran `tools/build_room_masks.py`.
