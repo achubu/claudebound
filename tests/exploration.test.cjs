@@ -52,8 +52,12 @@ const p2 = { ...p, id: 'city:test-sealed-2' }; Math.random = () => .9; state.hp 
 // Merchant
 const shop = merchantRoom(), stock = merchantStock(); assert.equal(stock.length, 4); assert(stock.includes('side') && stock.includes('potion') && stock.includes('upgradePack'), 'always stocks a side card, potions and card upgrades');
 state.shards = 0; openMerchant(shop); assert.equal($('buy0').disabled === undefined ? true : true, true);
-state.shards = 100; const sideN = state.side.pool.length; buyItem(shop, 'side'); assert.equal(state.shards, 100 - MERCHANT_ITEMS.side.cost); assert.equal(state.side.pool.length, sideN + 1);
-buyItem(shop, 'side'); assert.equal(state.side.pool.length, sideN + 1, 'each item sells once');
+// Round 144: side cards cost 100 and you choose which one.
+assert.equal(MERCHANT_ITEMS.side.cost, 100);
+state.shards = 150; const sideN = state.side.pool.length; buyItem(shop, 'side'); assert.equal(state.shards, 150, 'opening the side card picker costs nothing'); assert.equal(state.side.pool.length, sideN);
+const pickId = sidePoolFor().filter(x => x !== 'stasis')[0]; const bought1 = buySideCard(shop, pickId); assert(bought1 && bought1.id === pickId, 'you get the side card you chose'); assert.equal(state.shards, 50); assert.equal(state.side.pool.length, sideN + 1);
+state.shards = 200; assert.equal(buySideCard(shop, pickId), null, 'each item sells once'); assert.equal(state.side.pool.length, sideN + 1);
+{ const shop2 = { ...shop, id: 'pricecheck' }; state.shards = 99; assert.equal(buySideCard(shop2, pickId), null, 'needs 100 Shards'); }
 const pots = state.potions, shp = state.shards; for (let k = 0; k < 5; k++) buyItem(shop, 'potion'); assert.equal(state.potions, pots + 5, 'potions never sell out'); assert.equal(state.shards, shp - 5 * MERCHANT_ITEMS.potion.cost); assert.equal(MERCHANT_ITEMS.potion.cost, 4);
 const mats = materials();
 for (let m = 0; m < 40; m++) { state.poi.merchantMoves = m; const st = merchantStock(); assert(st.includes('side') && st.includes('potion') && st.includes('upgradePack'), 'always a side card, potions and card upgrades'); assert(!st.includes('crystal'), 'never Upgrade Crystals'); }

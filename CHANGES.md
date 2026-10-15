@@ -3330,3 +3330,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 
 - The merchant sprite is drawn at 72px (other points of interest stay 44px) with a warm glow
   so it stands out; its name label sits below it. `tests/poi-art.test.cjs` checks the size.
+
+## Round 144: choose your side card at the merchant (◇ 100)
+
+- The merchant's side deck card now costs ◇ 100 (was 10) and is no longer random: "Buy Side
+  deck card" opens a picker with every side card available in this world (as cards, with how
+  many you already own). Picking one pays and adds it; still one per merchant visit.
+- `buySideCard` / `openSidePicker` in `assets/exploration.js`; `tests/exploration.test.cjs`
+  covers the price, the free picker, getting the chosen card and the once-per-visit limit.

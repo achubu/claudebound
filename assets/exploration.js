@@ -50,7 +50,7 @@ const BLESSINGS = {
   vigil:  { name: 'Vigil', text: () => 'After you win your next fight, heal 30% of your maximum HP.' }
 };
 const MERCHANT_ITEMS = {
-  side:    { name: 'Side deck card', cost: 10, text: 'A random side card from this world.' },
+  side:    { name: 'Side deck card', cost: 100, text: 'Choose any side card from this world.' }, // Round 144: pick it yourself, 100 Shards
   potion:  { name: 'Healing potion', cost: 4, repeatable: true, text: 'One small healing potion. Always in stock.' },
   pick:    { name: 'Card bundle', cost: 8, text: 'Choose one of three Impermanent cards from this world.' },
   upgraded:{ name: 'Upgraded card', cost: 12, text: 'Choose one of three Impermanent cards from this world, already upgraded.' },
@@ -260,6 +260,7 @@ function buyItem(p, id) {
   const item = MERCHANT_ITEMS[id], tag = p.id + ':' + id;
   if (id === 'upgradePack') { if (upgradeTargets().length && state.shards >= cheapestUpgrade()) openUpgradePack(p); return; } // paid per card
   if ((!item.repeatable && state.poi.bought.includes(tag)) || state.shards < item.cost) return;
+  if (id === 'side') return openSidePicker(p); // Round 144: choose the card; paid when you pick
   state.shards -= item.cost; if (!item.repeatable) state.poi.bought.push(tag);
   let msg = 'Bought ' + item.name + '.';
   if (id === 'side') { const pool = sidePoolFor().filter(x => x !== 'stasis'), card = addSideCard(pool[Math.floor(Math.random() * pool.length)]); msg = 'Bought the side card ' + SIDE_CARDS[card.id].name + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : '. Add it in the Deck Workshop.'); }
@@ -270,6 +271,24 @@ function buyItem(p, id) {
   if (id === 'upgraded') return openBundle(upgradedLevel());
   if (id === 'upgradePack') return openUpgradePack(p);
   toast(msg); openMerchant(p);
+}
+// Round 144: the merchant lets you pick which side card to buy.
+function buySideCard(p, cardId) {
+  const item = MERCHANT_ITEMS.side, tag = p.id + ':side';
+  if (state.poi.bought.includes(tag) || state.shards < item.cost || !sidePoolFor().includes(cardId)) return null;
+  state.shards -= item.cost; state.poi.bought.push(tag);
+  const card = addSideCard(cardId); save();
+  toast('Bought the side card ' + SIDE_CARDS[card.id].name + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : '. Add it in the Deck Workshop.'));
+  openMerchant(p); return card;
+}
+function openSidePicker(p) {
+  poiMenu('Side deck card', '<p>Choose one side card for ◇ ' + MERCHANT_ITEMS.side.cost + '. You have <b>◇ ' + state.shards + ' Shards</b>.</p><div class="cards" id="sidePick"></div>', [{ id: 'sideBack', label: 'Back to the merchant', primary: true, onclick: () => openMerchant(p) }]);
+  const host = $('sidePick'); if (!host || !host.append) return;
+  const owned = id => state.side.pool.filter(c => c.id === id).length;
+  sidePoolFor().filter(x => x !== 'stasis').sort((a, b) => SIDE_CARDS[a].tier - SIDE_CARDS[b].tier || SIDE_CARDS[a].name.localeCompare(SIDE_CARDS[b].name)).forEach(id => {
+    const el = sideCardElement({ uid: 'shop-' + id, id }, () => buySideCard(p, id), state.shards < MERCHANT_ITEMS.side.cost);
+    const tag = document.createElement('div'); tag.className = 'actions'; tag.textContent = '◇ ' + MERCHANT_ITEMS.side.cost + (owned(id) ? ' · you own ' + owned(id) : ''); el.append(tag); host.append(el);
+  });
 }
 function upgradedLevel() { return activeRegion === 'vespera' || activeRegion === 'chronospire' ? 2 : 1; }
 function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound) && c.level < 3); }
