@@ -3176,4 +3176,4 @@ using exit labels alone.
 - Affects the talents that used it, rounded per rank total: Reactive Plating, Bulwark Doctrine,
   Retaliation Coil, Siphon Edge, Counter Weave, Reflux, and Weaken strength (Deep Interference).
 - Talent descriptions say "Boosted ×1.4" instead of the per-world multipliers.
-- Tests updated: round76, chronospire, talent-matrix.
+- Tests updated: round76, chronospire, talent-matrix, card-variety, plating-armor.
