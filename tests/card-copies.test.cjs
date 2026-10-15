@@ -21,8 +21,8 @@ assert.equal(r.threw,false,'the copies window opens');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 assert(/badge\.onclick=e=>\{e\.stopPropagation\(\);showCardCopies\(c\.id\)\}/.test(html),'tapping the copy count opens the window');
 console.log('PASS: the copy count opens every copy with level and mastery; choose which goes in the deck and which to upgrade.');
-// Round 141: destroying a card salvages Upgrade Crystals: 5 x (level + 1).
+// Round 141: destroying a card salvages Shards: 5 x (level + 1).
 const sv=JSON.parse(run(`JSON.stringify([0,1,2,3].map(l=>destroySalvage({level:l})))`));
 assert.deepEqual(sv,[5,10,15,20],'destroy salvage is 5 per level, starting at 5 for Level 0');
-assert(/const salvage=destroySalvage\(victim\);setMaterials\(materials\(\)\+salvage\)/.test(fs.readFileSync(path.join(__dirname,'../index.html'),'utf8')),'destroying a card adds the crystals');
-console.log('PASS: destroying a card gives 5/10/15/20 Upgrade Crystals for Level 0/1/2/3.');
+assert(/const salvage=destroySalvage\(victim\);state\.shards=\(state\.shards\|\|0\)\+salvage/.test(fs.readFileSync(path.join(__dirname,'../index.html'),'utf8')),'destroying a card adds the Shards');
+console.log('PASS: destroying a card gives 5/10/15/20 Shards for Level 0/1/2/3.');
