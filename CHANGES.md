@@ -3287,3 +3287,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - The Data Terminal sprite is used for Neon Aftermath's lore points only; Elaris and Vespera
   lore stones, the campfire and the merchant keep their badges until they get art.
 - New `tests/poi-art.test.cjs`.
+
+## Round 138: merchant, campfire and event sprites; Elaris map chest
+
+- Three more owner sprites in `assets/items/poi/` (magenta keyed out, cropped, 256px WebP):
+  Wandering Merchant, Campfire and the event marker (glowing "?" beacon). They replace those
+  emoji badges in every world.
+- Map chests in Elaris now use the new `elaris-chest.webp`. Map chests in the other worlds keep
+  the original `assets/items/loot-chest.png`, and the loot chest shown after a battle is
+  unchanged.
+- `tests/poi-art.test.cjs` covers the new sprites and the Elaris chest.

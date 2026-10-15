@@ -148,7 +148,7 @@ document.head.append(guardedRelicStyles);
 
 // Round 137: painted sprites for points of interest (assets/items/poi/), replacing the round
 // emoji badges. Types without art yet (campfire, merchant, other worlds' lore stones) keep theirs.
-const POI_ART = { nexus: 'nexus', sealed: 'sealed', cache: 'cache', shrine: 'shrine' };
+const POI_ART = { nexus: 'nexus', sealed: 'sealed', cache: 'cache', shrine: 'shrine', merchant: 'merchant', campfire: 'campfire', event: 'event' }; // Round 138: merchant, campfire, event
 function poiArt(p) { return p && (p.type === 'lore' ? (activeRegion === 'city' ? 'terminal' : null) : POI_ART[p.type]) || null; }
 if (typeof poiNode === 'function') {
   const poiNodeBeforeArt = poiNode;
@@ -162,3 +162,15 @@ const poiArtStyles = document.createElement('style');
 poiArtStyles.textContent = '.poi-node.poi-art{width:44px!important;height:44px!important;background:var(--poi-art) no-repeat center bottom/contain!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:translate(-50%,-78%)!important;filter:drop-shadow(0 0 4px #b48cff88)}'
   + '.poi-node.poi-art .poi-glyph{display:none}.poi-node.poi-art::after{top:46px!important}.poi-node.poi-art.used{filter:grayscale(.8) brightness(.7)}';
 document.head.append(poiArtStyles);
+
+// Round 138: map chests in Elaris use their own chest sprite; every other world keeps the
+// original loot-chest image, and the encounter loot chest is unchanged.
+const renderWorldBeforeElarisChest = renderWorld;
+renderWorld = function () {
+  renderWorldBeforeElarisChest();
+  if (activeRegion !== 'elaris' || !document.querySelectorAll) return;
+  for (const c of document.querySelectorAll('#world .map-chest')) c.classList.add('elaris-chest');
+};
+const elarisChestStyles = document.createElement('style');
+elarisChestStyles.textContent = '.map-chest.elaris-chest{background-image:url(assets/items/poi/elaris-chest.webp)!important;width:30px!important;height:30px!important}';
+document.head.append(elarisChestStyles);
