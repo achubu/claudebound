@@ -18,13 +18,13 @@ const res=JSON.parse(run(`(()=>{
   const back=[0,1,2,3].map(i=>organicDoor(to,OPP[d],i)).find(x=>x&&x.inPocket!==false);
   if(!back)out.oneWay.push(k+'>'+to);
  }
- // Old district rooms keep the strict rule: no loose crossing between two of them.
- out.strictStillStrict=!neonLoose('3,9','4,9');
+ // Round 132: every Neon Aftermath room has its own painting, so every crossing is loose.
+ out.strictStillStrict=Object.keys(rooms).every(k=>neonRoomArt(k));
  return JSON.stringify(out)})()`));
 assert.deepEqual(res.missing,[],'every exit of a painted room has a usable door');
 assert.deepEqual(res.noLand,[],'every such door lands on a street in the next room');
 assert.deepEqual(res.oneWay,[],'every crossing works both ways');
-assert(res.strictStillStrict,'old district rooms keep strict street-to-street crossings');
+assert(res.strictStillStrict,'all 54 Neon Aftermath rooms have their own painting');
 // The painting is drawn at full resolution, not squashed to 800x500.
 const canvas=JSON.parse(run(`(()=>{const c={width:800,height:500,style:{},dataset:{},getContext:()=>({drawImage(){} })};
  const img=neonRoomImage('0,5');img.complete=true;img.naturalWidth=2000;img.naturalHeight=1250;

@@ -3225,3 +3225,12 @@ using exit labels alone.
   interest, chests and relics fall back to beside-the-street placement until the item-spot pass
   once every room is in.
 - Re-ran `tools/build_room_masks.py`. Still 47 painted rooms.
+
+## Round 132: the last seven rooms are painted (row 9), all 54 done
+
+- Wired in Fountain Circle (2,9), Jade Alley (3,9), Paper Lantern Way (4,9), Red Lantern
+  Market (5,9), Tire Mountains (6,9), South Lot (7,9) and Scrap Fortress (8,9). Every street
+  reaches the exits its room needs.
+- Every Neon Aftermath room now has its own painting, so every crossing uses the loose rule.
+  The room-art test's "old rooms stay strict" check is now "all 54 rooms are painted".
+- Re-ran `tools/build_room_masks.py`. Next: the item-spot pass for the rooms that have none.
