@@ -3086,3 +3086,12 @@ using exit labels alone.
 - `tests/rebalance.test.cjs`: the Elaris chest check reused the city chest's
   position, which now depends on Moon Temple's painting. It now checks Elaris
   rooms at the default chest spot (330, 180).
+
+## Round 117: Parking Garage and Overpass Ramp painted
+
+- Room `7,7` Parking Garage has its own painting. Streets reach its exits on
+  the top and left. The top exit still needs the Ember Sigil.
+- Room `8,7` Overpass Ramp has its own painting. Its street reaches its bottom
+  exit. The overpass stubs at the top and right edges are painted dead ends.
+- Row 7 is complete; that makes 36 painted rooms.
+- Cache tags bumped to `?v=round117`.
