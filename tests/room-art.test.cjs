@@ -19,7 +19,7 @@ const res=JSON.parse(run(`(()=>{
   if(!back)out.oneWay.push(k+'>'+to);
  }
  // Old district rooms keep the strict rule: no loose crossing between two of them.
- out.strictStillStrict=!neonLoose('3,6','4,6');
+ out.strictStillStrict=!neonLoose('3,8','4,8');
  return JSON.stringify(out)})()`));
 assert.deepEqual(res.missing,[],'every exit of a painted room has a usable door');
 assert.deepEqual(res.noLand,[],'every such door lands on a street in the next room');

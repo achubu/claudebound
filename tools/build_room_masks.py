@@ -63,6 +63,28 @@ def axis_bridges(w, maxgap=90, thick=44):
         w = np.asarray(im) > 0
 
 
+def extend_to_edges(w, exits, reach=80):
+    """Round 114: some paintings have a dark border strip, so a street stops just short of an
+    exit edge. For each exit side with no street at the edge, carry every street that gets
+    within `reach` px of it straight out to the edge."""
+    w = w.copy()
+    H, W = w.shape
+    for d in exits:
+        edge = {'n': w[:6].any(0), 's': w[-6:].any(0), 'w': w[:, :6].any(1), 'e': w[:, -6:].any(1)}[d]
+        if edge.sum() >= 12:
+            continue
+        for i in range(W if d in 'ns' else H):
+            line = {'n': w[:reach, i], 's': w[H - reach:, i][::-1], 'w': w[i, :reach], 'e': w[i, W - reach:][::-1]}[d]
+            hit = np.argmax(line) if line.any() else -1
+            if hit <= 0:
+                continue
+            if d == 'n': w[:hit, i] = True
+            if d == 's': w[H - hit:, i] = True
+            if d == 'w': w[i, :hit] = True
+            if d == 'e': w[i, W - hit:] = True
+    return w
+
+
 def keep_exits(w, exits):
     """Only street that reaches one of the room's exits (no unreachable scraps)."""
     l, _ = nd.label(w)
@@ -152,7 +174,7 @@ def main():
         if key not in exits:
             print('skip (no such room)', key)
             continue
-        road = keep_exits(axis_bridges(trace(path)), exits[key])
+        road = keep_exits(extend_to_edges(axis_bridges(trace(path)), exits[key]), exits[key])
         nooks[key] = nook_paths(key, road)
         w = bake_paths(road, nooks[key])
         wy = cy - 4  # world row of this room

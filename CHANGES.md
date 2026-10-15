@@ -3042,3 +3042,17 @@ using exit labels alone.
   picked in one pass once every room is painted. Until then chests and relics
   use the automatic placement beside the road.
 - Cache tags bumped to `?v=round113`.
+
+## Round 114: the rest of row 6 painted
+
+- Rooms `3,6` Canal Walk, `4,6` Glowstep Lane, `5,6` Broadcast Row,
+  `6,6` Shattered Aqueduct, `7,6` Violet Crossing and `8,6` Crystal Falls have
+  their own paintings. That makes 27 painted rooms: rows 4, 5 and 6 are
+  complete.
+- `tools/build_room_masks.py` gained `extend_to_edges()`. Some paintings have a
+  dark border strip (10px in Glowstep Lane, 60px in Violet Crossing), so a
+  street stopped just short of its exit edge. Any street within 80px of an exit
+  side with no street at the edge is now carried straight out to it.
+- No item spots for these rooms yet. Spots for every room are picked in one
+  pass once all rooms are painted.
+- Cache tags bumped to `?v=round114`.
