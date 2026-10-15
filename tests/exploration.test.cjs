@@ -65,11 +65,12 @@ const offered = cardOffers().map(c => { c.soulbound = false; c.level = upgradedL
 const imp = make('cleave', 0, false), soul = make('strike', 0, true); state.pool.push(imp, soul);
 assert(upgradeTargets().includes(imp) && !upgradeTargets().includes(soul), 'only Impermanent cards can be upgraded by a pack');
 applyUpgradePack(imp); assert.equal(imp.level, 1); assert.equal(imp.uses, 0); applyUpgradePack(soul); assert.equal(soul.level, 0, 'Soulbound cards are refused');
-// Unlimited upgrades, priced by the level reached: 12 / 20 / 30.
-{ const c2 = make('strike', 0, false); state.pool.push(c2); state.shards = 61; buyUpgrade(c2); assert.equal(c2.level, 1); assert.equal(state.shards, 49);
-  buyUpgrade(c2); assert.equal(c2.level, 2); assert.equal(state.shards, 29); buyUpgrade(c2); assert.equal(c2.level, 2, 'level 3 costs 30'); state.shards = 30; buyUpgrade(c2); assert.equal(c2.level, 3); assert.equal(state.shards, 0);
+// Unlimited upgrades, priced by the level reached: 36 / 60 / 90 (Round 123: tripled).
+{ const c2 = make('strike', 0, false); state.pool.push(c2); state.shards = 183; buyUpgrade(c2); assert.equal(c2.level, 1); assert.equal(state.shards, 147);
+  buyUpgrade(c2); assert.equal(c2.level, 2); assert.equal(state.shards, 87); buyUpgrade(c2); assert.equal(c2.level, 2, 'level 3 costs 90'); state.shards = 90; buyUpgrade(c2); assert.equal(c2.level, 3); assert.equal(state.shards, 0);
   state.shards = 100; const sh1 = state.shards; buyItem(shop, 'upgradePack'); assert.equal(state.shards, sh1, 'opening the upgrade menu costs nothing'); closeMenu(); }
 const keep = state.pool; state.pool = [soul]; const sh0 = state.shards; buyItem({ ...shop, id: 'nopack' }, 'upgradePack'); assert.equal(state.shards, sh0, 'no pack sale without an Impermanent card to upgrade'); state.pool = keep;
+assert.deepEqual([...UPGRADE_PRICES], [36, 60, 90], 'market card upgrades cost triple the old 12/20/30'); assert.equal(MERCHANT_ITEMS.upgradePack.cost, 36);
 state.shards = 1; buyItem({ ...shop, id: 'x' }, 'potion'); assert.equal(state.shards, 1, 'cannot buy without Shards');
 // Shards from fights
 state.room = '1,5'; state.cooldowns = {}; startBattle(roomSpawns('1,5').find(x => !x.boss).uid); state.battle.bounty = null; let before = state.shards; state.battle.enemy.hp = 0; winBattle(); assert([1, 2].includes(state.shards - before), 'regular: 1-2 Shards');

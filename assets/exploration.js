@@ -54,7 +54,7 @@ const MERCHANT_ITEMS = {
   potion:  { name: 'Healing potion', cost: 4, repeatable: true, text: 'One small healing potion. Always in stock.' },
   pick:    { name: 'Card bundle', cost: 8, text: 'Choose one of three Impermanent cards from this world.' },
   upgraded:{ name: 'Upgraded card', cost: 12, text: 'Choose one of three Impermanent cards from this world, already upgraded.' },
-  upgradePack: { name: 'Card upgrade', cost: 12, repeatable: true, text: 'Raise one of your Impermanent cards by one level: ◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3. Always available.' },
+  upgradePack: { name: 'Card upgrade', cost: 36, repeatable: true, text: 'Raise one of your Impermanent cards by one level: ◇ 36 to level 1, ◇ 60 to level 2, ◇ 90 to level 3. Always available.' },
   bless:   { name: 'Bottled blessing', cost: 4, text: 'A random shrine blessing for your next fight.' }
 };
 
@@ -253,7 +253,7 @@ function readLore(p) {
 }
 function openMerchant(p) {
   const stock = merchantStock(), bought = id => !MERCHANT_ITEMS[id].repeatable && state.poi.bought.includes(p.id + ':' + id);
-  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + (id === 'upgradePack' ? '12–30' : MERCHANT_ITEMS[id].cost) + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join(''),
+  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + (id === 'upgradePack' ? '36–90' : MERCHANT_ITEMS[id].cost) + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join(''),
     stock.map((id, i) => ({ id: 'buy' + i, label: (bought(id) ? 'Sold · ' : id === 'upgradePack' ? 'Choose a card to upgrade · ◇ ' + cheapestUpgrade() : 'Buy ') + (id === 'upgradePack' ? '' : MERCHANT_ITEMS[id].name + ' · ◇ ' + MERCHANT_ITEMS[id].cost), disabled: bought(id) || state.shards < (id === 'upgradePack' ? cheapestUpgrade() : MERCHANT_ITEMS[id].cost) || (id === 'upgradePack' && !upgradeTargets().length), onclick: () => buyItem(p, id) })).concat([{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]));
 }
 function buyItem(p, id) {
@@ -277,11 +277,11 @@ function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs
 // The playthrough averaged ~1.5 Shards per regular fight and 150-180 per
 // world, with hundreds left unspent; 12/20/30 makes a full 0→3 upgrade
 // (62 Shards) roughly a third of a world's income.
-const UPGRADE_PRICES = [12, 20, 30];
+const UPGRADE_PRICES = [36, 60, 90];
 function upgradePrice(c) { return UPGRADE_PRICES[Math.min(2, c.level || 0)]; }
 function cheapestUpgrade() { const t = upgradeTargets(); return t.length ? Math.min(...t.map(upgradePrice)) : UPGRADE_PRICES[0]; }
 function openUpgradePack(p) {
-  poiMenu('Card upgrade', '<p>Choose one Impermanent card to raise by one level. Its mastery progress starts fresh at the new level.</p><p>You have <b>◇ ' + state.shards + ' Shards</b>. Level 1 costs ◇ 12, level 2 ◇ 20, level 3 ◇ 30.</p><div class="cards" id="packCards"></div>', [{ id: 'packBack', label: 'Back to the merchant', primary: true, onclick: () => p ? openMerchant(p) : closeMenu() }]);
+  poiMenu('Card upgrade', '<p>Choose one Impermanent card to raise by one level. Its mastery progress starts fresh at the new level.</p><p>You have <b>◇ ' + state.shards + ' Shards</b>. Level 1 costs ◇ 36, level 2 ◇ 60, level 3 ◇ 90.</p><div class="cards" id="packCards"></div>', [{ id: 'packBack', label: 'Back to the merchant', primary: true, onclick: () => p ? openMerchant(p) : closeMenu() }]);
   const host = $('packCards');
   if (host && host.append) upgradeTargets().sort((a, b) => upgradePrice(a) - upgradePrice(b)).forEach(c => {
     const el = cardElement(c, () => buyUpgrade(c, p), state.shards < upgradePrice(c));

@@ -3137,3 +3137,10 @@ using exit labels alone.
   the Koi Garden (3,8) Nexus Waypoint stood in the middle of the crossroads. That broke the
   neon-world, item-placement and exploration tests. Those rooms' points of interest, chests and
   relics now use `organicItemSpot` beside the street until their spots are picked.
+
+## Round 123: market card upgrades cost three times as much
+
+- The Wandering Merchant's card upgrades now cost ◇ 36 to level 1, ◇ 60 to level 2 and ◇ 90 to
+  level 3 (were 12 / 20 / 30), at the owner's request. The merchant's listing and the upgrade
+  menu show the new prices. Nothing else in the shop changes.
+- `tests/exploration.test.cjs` checks the new prices and the purchase amounts.
