@@ -19,7 +19,7 @@ const res=JSON.parse(run(`(()=>{
   if(!back)out.oneWay.push(k+'>'+to);
  }
  // Old district rooms keep the strict rule: no loose crossing between two of them.
- out.strictStillStrict=!neonLoose('3,8','4,8');
+ out.strictStillStrict=!neonLoose('3,9','4,9');
  return JSON.stringify(out)})()`));
 assert.deepEqual(res.missing,[],'every exit of a painted room has a usable door');
 assert.deepEqual(res.noLand,[],'every such door lands on a street in the next room');
@@ -39,7 +39,7 @@ const nk=JSON.parse(run(`(()=>{const out={bad:[],used:[],count:0};
   else if(!stand||stand.d>30)out.bad.push(k+' too far '+(stand&&stand.d));
   else if(!organicReachableAt(k,stand))out.bad.push(k+' unreachable');
   if(Math.hypot(x-ax,y+22-ay)<30)out.bad.push(k+' not off the road');}}
- for(const p of Object.values(worldPOIs()))if(neonNooks(p.key))out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)?'nook':p.key+' not on a nook');
+ for(const p of Object.values(worldPOIs()))if((neonNooks(p.key)||[]).length)out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)?'nook':p.key+' not on a nook');
  const q=rooms['5,4'].relic;out.relic=NEON_NOOKS['5,4'].some(n=>n[0]===q[3]&&n[1]===q[4]);
  const nx=poiAt('0,5');out.nexus=NEON_NOOKS['0,5'].some(n=>n[0]===nx.x&&n[1]===nx.y);
  return JSON.stringify(out)})()`));

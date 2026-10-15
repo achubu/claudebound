@@ -3113,3 +3113,11 @@ using exit labels alone.
 - Re-ran `tools/build_room_masks.py`. Still 39 painted rooms.
 - No item spots for this room yet. Per the owner, spots are picked in one pass once every
   room image is in place.
+
+## Round 120: rooms 3,8 to 7,8 painted (Koi Garden, Lantern Street, Noodle Row, Faded Lots, Ruined Tower Lot)
+
+- Wired in five new room paintings in row 8. The streets in each one reach every exit the
+  room needs (3,8 / 4,8 / 5,8: all four; 6,8: top, bottom, left; 7,8: right and bottom).
+- Re-ran `tools/build_room_masks.py`. 44 painted rooms.
+- The room-art test's "old rooms stay strict" pair moves to 3,9 / 4,9, which are still unpainted.
+- No item spots for these rooms yet, per the owner's hold until every room is in.
