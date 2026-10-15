@@ -3095,3 +3095,13 @@ using exit labels alone.
   exit. The overpass stubs at the top and right edges are painted dead ends.
 - Row 7 is complete; that makes 36 painted rooms.
 - Cache tags bumped to `?v=round117`.
+
+## Round 118: row 8 west third painted
+
+- Rooms `0,8` Willow Paths, `1,8` Old Oak Lawn and `2,8` Lake Bridge have their
+  own park paintings. Each reaches all of its exits. Lake Bridge's east exit
+  still needs the Moon Lens.
+- That makes 39 painted rooms.
+- Re-uploaded `2,6` and `8,7` were identical to the files already in, so
+  nothing changed for them.
+- Cache tags bumped to `?v=round118`.
