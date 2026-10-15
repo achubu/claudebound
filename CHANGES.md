@@ -3304,3 +3304,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   to 1.1: every enemy there (regulars, elites, mini-bosses and the Thorn Warden) has 10% more
   health and 10% more attack, rounded. Other worlds stay at 1.
 - Examples: Emberling 36/7 → 40/8, Moon Knight 73/13 → 80/14, Thorn Warden 149/17 → 164/19.
+
+## Round 140: Upgrade Crystals 1%, card choices 25%
+
+- Loot chest after a fight: Soulbound card 1% (unchanged), Upgrade Crystal 1% (was 4%), empty
+  20% (unchanged), healing potion 53% (was 47%), card choice 25% (was 28%).
+- Mini-bosses still always drop one Upgrade Crystal; elites still turn a potion or empty chest
+  into a card choice 70% of the time.
+- `tests/rebalance.test.cjs` checks the new boundaries.

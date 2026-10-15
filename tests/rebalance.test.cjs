@@ -86,15 +86,15 @@ function forceRoll(roll){newGame();state.talents={};state.battle={id:'test',spaw
 assert.equal(forceRoll(0).lootType,'soulbound','roll 0 is inside the 1% Soulbound band');
 assert.equal(forceRoll(.0099).lootType,'soulbound','just under 1% is still Soulbound');
 assert.equal(forceRoll(.01).lootType,'crystal','exactly 1% rolls over into the Upgrade Crystal band');
-assert.equal(forceRoll(.0499).lootType,'crystal','just under 5% is still an Upgrade Crystal');
-assert.equal(forceRoll(.05).lootType,'empty','exactly 5% rolls over into the empty-chest band');
-assert.equal(forceRoll(.2499).lootType,'empty','just under 25% is still empty');
-assert.equal(forceRoll(.25).lootType,'potion','exactly 25% rolls over into potion');
-assert.equal(forceRoll(.7199).lootType,'potion','just under 72% is still potion');
-assert.equal(forceRoll(.72).lootType,'choice','exactly 72% rolls over into a card choice (28% of chests, Round 130: 30% fewer cards)');
+assert.equal(forceRoll(.0199).lootType,'crystal','just under 2% is still an Upgrade Crystal (1% band, Round 140)');
+assert.equal(forceRoll(.02).lootType,'empty','exactly 2% rolls over into the empty-chest band');
+assert.equal(forceRoll(.2199).lootType,'empty','just under 22% is still empty');
+assert.equal(forceRoll(.22).lootType,'potion','exactly 22% rolls over into potion');
+assert.equal(forceRoll(.7499).lootType,'potion','just under 75% is still potion');
+assert.equal(forceRoll(.75).lootType,'choice','exactly 75% rolls over into a card choice (25% of chests, Round 140)');
 assert.equal(ELITE_CARD_ODDS,.7,'elites leave a card choice 70% of the time');
 forceRoll(0);assert(state.pool.some(c=>['phoenix','oath','verdict'].includes(c.id)),'Soulbound jackpot actually grants a Soulbound card');
-const materialsBefore=materials();forceRoll(.03);assert.equal(materials(),materialsBefore+1,'the Upgrade Crystal outcome actually increments the persistent materials() count');
+const materialsBefore=materials();forceRoll(.015);assert.equal(materials(),materialsBefore+1,'the Upgrade Crystal outcome actually increments the persistent materials() count');
 assert(typeof forceRoll(.15).thief==='string'&&forceRoll(.15).thief.length,'an empty chest names the animal that looted it');
 assert(!forceRoll(.15).reward,'an empty chest grants no card');
 

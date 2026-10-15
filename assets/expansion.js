@@ -502,7 +502,8 @@ endTurn=function(){const b=state.battle;if(!b||b.phase!=='fight')return;const do
 // gated behind fighting (rarer) elites specifically.
 // Round 54: card choice 40% of chests, potions 35%, empty 20%.
 // Round 130: card drops cut by 30% (40% of chests to 28%); the difference goes to potions.
-const LOOT_CHEST_ODDS={soulbound:.01,crystal:.05,empty:.25,potion:.72};
+// Round 140: Upgrade Crystal 1% (was 4%), card choice 25% (was 28%); potions take the rest.
+const LOOT_CHEST_ODDS={soulbound:.01,crystal:.02,empty:.22,potion:.75};
 const ELITE_CARD_ODDS=.7;
 const LOOT_THIEVES=['a scavenging fox','a wiry alley cat','a startled crow','a masked raccoon','a quick sewer rat','a one-eared stray dog'];
 function rollLootChest(){const r=Math.random();return r<LOOT_CHEST_ODDS.soulbound?'soulbound':r<LOOT_CHEST_ODDS.crystal?'crystal':r<LOOT_CHEST_ODDS.empty?'empty':r<LOOT_CHEST_ODDS.potion?'potion':'card'}
