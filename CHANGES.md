@@ -3195,3 +3195,15 @@ using exit labels alone.
   from the feet, so they still stand where the game puts them). The breathing animation keeps
   the smaller size, and the ground shadow is narrower to match. Movement and hit areas are
   unchanged.
+
+## Round 129: tap a card's copy count to see every copy
+
+- In the Deck Workshop, the ×N count on a card is now a button. It opens a window listing every
+  copy of that card (Soulbound and Impermanent, all levels). Each copy shows its art, type,
+  level, a mastery bar with uses so far, and whether it is in the active deck.
+- Each copy has its own buttons: put in deck / remove from deck (same deck size, copy limit and
+  minimum rules as before) and Upgrade · 1 crystal for a mastered Soulbound copy. Impermanent
+  copies show "Upgrades itself".
+- The count also appears on a single tile when other copies of the card exist at another level.
+- New helpers in `index.html`: `cardCopies`, `addCopyToDeck`, `removeCopyFromDeck`,
+  `upgradeCopy`, `showCardCopies`. New `tests/card-copies.test.cjs`.
