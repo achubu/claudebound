@@ -3207,3 +3207,12 @@ using exit labels alone.
 - The count also appears on a single tile when other copies of the card exist at another level.
 - New helpers in `index.html`: `cardCopies`, `addCopyToDeck`, `removeCopyFromDeck`,
   `upgradeCopy`, `showCardCopies`. New `tests/card-copies.test.cjs`.
+
+## Round 130: 30% fewer card drops
+
+- Loot chests now hold a card choice 28% of the time (was 40%). The 12 points go to healing
+  potions (35% to 47%). Soulbound jackpot, Upgrade Crystal and empty-chest odds are unchanged.
+- Elites used to turn every potion or empty chest into a card choice. Now they do it 70% of the
+  time (`ELITE_CARD_ODDS`), so their card drops are also cut by 30%.
+- Boss, mini-boss, covenant and side deck card drops are unchanged.
+- `tests/rebalance.test.cjs` checks the new 72% boundary and the elite odds.

@@ -498,7 +498,9 @@ endTurn=function(){const b=state.battle;if(!b||b.phase!=='fight')return;const do
 // roughly comparable to the existing 8% elite device-crystal rate, but not
 // gated behind fighting (rarer) elites specifically.
 // Round 54: card choice 40% of chests, potions 35%, empty 20%.
-const LOOT_CHEST_ODDS={soulbound:.01,crystal:.05,empty:.25,potion:.60};
+// Round 130: card drops cut by 30% (40% of chests to 28%); the difference goes to potions.
+const LOOT_CHEST_ODDS={soulbound:.01,crystal:.05,empty:.25,potion:.72};
+const ELITE_CARD_ODDS=.7;
 const LOOT_THIEVES=['a scavenging fox','a wiry alley cat','a startled crow','a masked raccoon','a quick sewer rat','a one-eared stray dog'];
 function rollLootChest(){const r=Math.random();return r<LOOT_CHEST_ODDS.soulbound?'soulbound':r<LOOT_CHEST_ODDS.crystal?'crystal':r<LOOT_CHEST_ODDS.empty?'empty':r<LOOT_CHEST_ODDS.potion?'potion':'card'}
 // Round 70: less XP for enemies below your level, so you don't outgrow a
@@ -511,7 +513,8 @@ winBattle=function(){const b=state.battle;if(b.phase!=='fight')return;b.phase='r
 const isMiniBoss=b.enemy.boss&&enemies[b.id]&&enemies[b.id].miniBoss;
 b.lootType=rollLootChest();
 // Round 76: elites always leave a card choice (rare crystals and Soulbound drops still win).
-if(b.enemy.elite&&!b.enemy.boss&&(b.lootType==='empty'||b.lootType==='potion'))b.lootType='card';
+// Round 130: elites leave a card choice 70% of the time (was always), 30% fewer card drops.
+if(b.enemy.elite&&!b.enemy.boss&&(b.lootType==='empty'||b.lootType==='potion')&&Math.random()<ELITE_CARD_ODDS)b.lootType='card';
 // A mini-boss already guarantees its own Upgrade Crystal below — if the
 // independent loot-chest roll ALSO happens to land on 'crystal' (its own
 // 4% chance, unrelated to the guarantee), that's a genuine double-grant

@@ -90,8 +90,9 @@ assert.equal(forceRoll(.0499).lootType,'crystal','just under 5% is still an Upgr
 assert.equal(forceRoll(.05).lootType,'empty','exactly 5% rolls over into the empty-chest band');
 assert.equal(forceRoll(.2499).lootType,'empty','just under 25% is still empty');
 assert.equal(forceRoll(.25).lootType,'potion','exactly 25% rolls over into potion');
-assert.equal(forceRoll(.5999).lootType,'potion','just under 60% is still potion');
-assert.equal(forceRoll(.60).lootType,'choice','exactly 60% rolls over into a card choice (40% of chests)');
+assert.equal(forceRoll(.7199).lootType,'potion','just under 72% is still potion');
+assert.equal(forceRoll(.72).lootType,'choice','exactly 72% rolls over into a card choice (28% of chests, Round 130: 30% fewer cards)');
+assert.equal(ELITE_CARD_ODDS,.7,'elites leave a card choice 70% of the time');
 forceRoll(0);assert(state.pool.some(c=>['phoenix','oath','verdict'].includes(c.id)),'Soulbound jackpot actually grants a Soulbound card');
 const materialsBefore=materials();forceRoll(.03);assert.equal(materials(),materialsBefore+1,'the Upgrade Crystal outcome actually increments the persistent materials() count');
 assert(typeof forceRoll(.15).thief==='string'&&forceRoll(.15).thief.length,'an empty chest names the animal that looted it');
