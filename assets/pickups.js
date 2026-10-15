@@ -111,3 +111,37 @@ lootArtStyles.textContent = '#randomReward{flex-wrap:wrap;justify-content:center
   + '.loot-potion{border-color:#ff7a8a}.loot-shards{border-color:#3fd4ff}.loot-bounty,.loot-xp{border-color:#f2c94c}.loot-heal{border-color:#ff5a7a}.loot-level{border-color:#6dffb0}.loot-slot{border-color:#c9a2ff}'
   + '.loot-empty{border-color:#8a6a4a}.loot-open-chest{background:url(assets/items/loot-chest.png) no-repeat center/contain;filter:grayscale(.7) brightness(.7)}';
 document.head.append(lootArtStyles);
+
+// Round 136: a relic used to stay invisible until every enemy in its room was beaten, so the
+// unlock items were hard to find. Now a guarded relic is always shown, dimmed with a lock, and
+// walking up to it says how many guards are left. Beating them works as before.
+function relicGuards(key) { return typeof roomSpawns === 'function' ? roomSpawns(key).filter(s => spawnAvailable(s)).length : 0; }
+function relicGuarded(key) {
+  const r = rooms[key], q = r && r.relic; if (!q) return false;
+  const owned = q[0] === 'material' ? state.cleared.includes('material') : hasRelic(q[0]);
+  return !owned && relicGuards(key) > 0;
+}
+const renderWorldBeforeGuardedRelic = renderWorld;
+renderWorld = function () {
+  renderWorldBeforeGuardedRelic();
+  if (!state || state.battle || !relicGuarded(state.room)) return;
+  const world = $('world'), q = room().relic; if (!world || !world.append || !document.createElement) return;
+  const n = relicGuards(state.room), node = document.createElement('div');
+  node.className = 'relic relic-guarded'; node.textContent = q[2]; node.dataset.name = q[1] + ' · guarded';
+  node.title = q[1] + ': defeat the ' + n + ' enem' + (n === 1 ? 'y' : 'ies') + ' in this area to claim it';
+  node.style.left = q[3] + 'px'; node.style.top = q[4] + 'px'; world.append(node);
+};
+let guardedRelicWarned = null;
+const checkWorldInteractionsBeforeGuardedRelic = checkWorldInteractions;
+checkWorldInteractions = function () {
+  checkWorldInteractionsBeforeGuardedRelic();
+  if (!state || state.battle || !relicGuarded(state.room)) return;
+  const q = room().relic, near = Math.hypot(state.pos.x - q[3], state.pos.y - q[4]) < 48, key = state.room + ':' + relicGuards(state.room);
+  if (!near) { if (guardedRelicWarned && guardedRelicWarned.startsWith(state.room + ':')) guardedRelicWarned = null; return; }
+  if (guardedRelicWarned === key) return; guardedRelicWarned = key;
+  const n = relicGuards(state.room);
+  toast(q[1] + ' is guarded. Defeat the ' + n + ' enem' + (n === 1 ? 'y' : 'ies') + ' in this area to claim it.');
+};
+const guardedRelicStyles = document.createElement('style');
+guardedRelicStyles.textContent = '.relic.relic-guarded{filter:grayscale(.6) brightness(.75);opacity:.85;animation:none}.relic.relic-guarded:after{content:"🔒";position:absolute;right:-8px;bottom:-6px;font-size:11px;line-height:1;filter:none}';
+document.head.append(guardedRelicStyles);

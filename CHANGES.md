@@ -3262,3 +3262,17 @@ using exit labels alone.
 - New item spots on open ground in the concert lot, (268, 318) and (255, 440), replacing the
   spot picked for the old painting.
 - Re-ran `tools/build_room_masks.py`.
+
+## Round 136: first-world unlock items are visible while guarded
+
+Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briarstep Boots 0,9):
+- All three relic rooms are reachable from the start, you can stand next to each relic, each is
+  collected once its room is cleared, and the six locked doors open with their relic. With all
+  three, every one of the 54 rooms is reachable.
+- The problem: a relic stayed invisible until every enemy in its room was beaten, and nothing
+  said so. Now a guarded relic is always shown, dimmed with a 🔒, and walking up to it says how
+  many enemies are left ("Briarstep Boots is guarded. Defeat the 2 enemies in this area to claim
+  it."). Picking it up still needs the room cleared (end of `assets/pickups.js`).
+- The objective hints name the exact rooms and say to beat the guards (Moon Temple, Statue
+  Garden in the south-west of the park, Billboard Steps above the Holo Stage).
+- New `tests/relic-quest.test.cjs` plays the whole chain.
