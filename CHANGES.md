@@ -3105,3 +3105,11 @@ using exit labels alone.
 - Re-uploaded `2,6` and `8,7` were identical to the files already in, so
   nothing changed for them.
 - Cache tags bumped to `?v=round118`.
+
+## Round 119: new Willow Paths painting (room 0,8)
+
+- Replaced `assets/environment/rooms/room-0-8.webp` with the owner's new Willow Paths
+  painting. Its streets reach the top, right and bottom exits, so all three crossings work.
+- Re-ran `tools/build_room_masks.py`. Still 39 painted rooms.
+- No item spots for this room yet. Per the owner, spots are picked in one pass once every
+  room image is in place.
