@@ -51,20 +51,20 @@ TALENT_BRANCHES.disruption.nodes.push(
   // Energy path (from Flux Capacitor)
   { id: 'battery', name: 'Surge Battery', icon: '🔋', max: 1, tier: 7, req: ['capacitor', 1], desc: 'Carry up to 1 unspent energy into your next turn.' },
   // Counter path
-  { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals +2 damage per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
+  { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals +2 damage per rank. Boosted ×1.4 (rounded).' },
   { id: 'resonance', name: 'Resonant Rebound', icon: '↺', max: 1, tier: 3, req: ['counterWeave', 2], desc: 'A successful counter gives you +1 energy next turn.' },
-  { id: 'reflux', name: 'Reflux', icon: '♥', max: 3, tier: 5, req: ['resonance', 1], desc: 'A successful counter heals 2 HP per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
+  { id: 'reflux', name: 'Reflux', icon: '♥', max: 3, tier: 5, req: ['resonance', 1], desc: 'A successful counter heals 2 HP per rank. Boosted ×1.4 (rounded).' },
   { id: 'nullField', name: 'Null Field', icon: '∅', max: 1, tier: 8, req: ['reflux', 1], desc: 'Enemy charged strikes can no longer burn, poison, drain or expose you.' }
 );
 
 TALENT_BRANCHES.resolve.nodes.push(
   // Block path
-  { id: 'bulwark', name: 'Bulwark Doctrine', icon: '▣', max: 3, tier: 1, desc: 'Defense cards grant +1 more Block per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
-  { id: 'thorns', name: 'Retaliation Coil', icon: '✺', max: 3, tier: 3, req: ['bulwark', 2], desc: 'When your Block absorbs an enemy hit, deal 1 damage back per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
+  { id: 'bulwark', name: 'Bulwark Doctrine', icon: '▣', max: 3, tier: 1, desc: 'Defense cards grant +1 more Block per rank. Boosted ×1.4 (rounded).' },
+  { id: 'thorns', name: 'Retaliation Coil', icon: '✺', max: 3, tier: 3, req: ['bulwark', 2], desc: 'When your Block absorbs an enemy hit, deal 1 damage back per rank. Boosted ×1.4 (rounded).' },
   { id: 'fortress', name: 'Fortress Protocol', icon: '⛫', max: 1, tier: 5, req: ['thorns', 1], desc: 'Keep half of your unused Block (up to 6) into the next turn.' },
   { id: 'unbreakable', name: 'Unbreakable', icon: '⬢', max: 1, tier: 8, req: ['fortress', 1], desc: 'Begin every encounter with 6 Block.' },
   // Sustain path (from Vital Mesh)
-  { id: 'leech', name: 'Siphon Edge', icon: '❦', max: 2, tier: 3, req: ['vitality', 1], desc: 'Your first attack each turn heals 1 HP per rank. Scales with the world: ×1.3 in Elaris, ×1.6 in Vespera.' },
+  { id: 'leech', name: 'Siphon Edge', icon: '❦', max: 2, tier: 3, req: ['vitality', 1], desc: 'Your first attack each turn heals 1 HP per rank. Boosted ×1.4 (rounded).' },
   { id: 'secondWind', name: 'Second Wind', icon: '❂', max: 1, tier: 5, req: ['leech', 2], desc: 'The first time you fall below half health in an encounter, heal 6 HP.' },
   { id: 'undying', name: 'Undying Core', icon: '✚', max: 1, tier: 8, req: ['secondWind', 1], desc: 'Once per encounter, a hit that would defeat you leaves you at 1 HP instead.' },
   // Retain path (from Memory Buffer)

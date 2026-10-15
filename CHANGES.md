@@ -3168,3 +3168,12 @@ using exit labels alone.
   bounties stay as text.
 - `winBattle` records the cards each win adds (`b.newCards`).
 - New `tests/loot-art.test.cjs` checks which lines become tiles and that won cards are tracked.
+
+## Round 126: talents use a fixed ×1.4, no world scaling
+
+- `talentScale()` is now a flat 1.4 in every world. It was ×1, ×1.3, ×1.6 and ×1.9 for Neon
+  Aftermath, Elaris, Vespera and Chronospire.
+- Affects the talents that used it, rounded per rank total: Reactive Plating, Bulwark Doctrine,
+  Retaliation Coil, Siphon Edge, Counter Weave, Reflux, and Weaken strength (Deep Interference).
+- Talent descriptions say "Boosted ×1.4" instead of the per-world multipliers.
+- Tests updated: round76, chronospire, talent-matrix.
