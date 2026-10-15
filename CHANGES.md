@@ -3056,3 +3056,14 @@ using exit labels alone.
 - No item spots for these rooms yet. Spots for every room are picked in one
   pass once all rooms are painted.
 - Cache tags bumped to `?v=round114`.
+
+## Round 115: row 7 west half painted
+
+- Rooms `0,7` Bandstand Ruins, `1,7` Blossom Grove, `2,7` Carousel Green,
+  `3,7` Pagoda Court and `4,7` Dragon Gate have their own paintings. Each
+  reaches all of its exits.
+- That makes 32 painted rooms.
+- The tracer also picks up the paved park footpaths in these garden rooms, so
+  they are walkable, in line with the relaxed pathing.
+- No item spots yet; they will be picked once all rooms are painted.
+- Cache tags bumped to `?v=round115`.
