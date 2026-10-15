@@ -3325,3 +3325,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 
 - Destroying a card now gives ◇ 5 / 20 / 50 / 100 Shards for Level 0 / 1 / 2 / 3
   (`DESTROY_SHARDS` in `index.html`), replacing Round 141's 5 per level.
+
+## Round 143: bigger Wandering Merchant
+
+- The merchant sprite is drawn at 72px (other points of interest stay 44px) with a warm glow
+  so it stands out; its name label sits below it. `tests/poi-art.test.cjs` checks the size.

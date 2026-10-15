@@ -160,6 +160,7 @@ if (typeof poiNode === 'function') {
 }
 const poiArtStyles = document.createElement('style');
 poiArtStyles.textContent = '.poi-node.poi-art{width:44px!important;height:44px!important;background:var(--poi-art) no-repeat center bottom/contain!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:translate(-50%,-78%)!important;filter:drop-shadow(0 0 4px #b48cff88)}'
+  + '.poi-node.poi-art.poi-merchant{width:72px!important;height:72px!important;filter:drop-shadow(0 0 6px #ffd27acc) drop-shadow(0 0 2px #000)}.poi-node.poi-art.poi-merchant::after{top:74px!important;font-size:10px!important}' // Round 143: merchant drawn larger
   + '.poi-node.poi-art .poi-glyph{display:none}.poi-node.poi-art::after{top:46px!important}.poi-node.poi-art.used{filter:grayscale(.8) brightness(.7)}';
 document.head.append(poiArtStyles);
 
