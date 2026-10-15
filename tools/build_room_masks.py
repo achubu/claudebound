@@ -85,6 +85,22 @@ def extend_to_edges(w, exits, reach=80):
     return w
 
 
+def fill_road_objects(w, width=50, span=170):
+    """Round 127: objects standing on a road (a gate arch, a bridge, a fountain, debris) count
+    as road. Along every row and column, a gap of up to `span` px between two stretches of wide
+    street (at least `width` px across, so alleys and paths between buildings don't count) is
+    filled in. Thin slivers along kerbs and walls are dropped; whole objects are kept."""
+    r = width // 2
+    yy, xx = np.mgrid[-r:r + 1, -r:r + 1]
+    wide = nd.binary_opening(w, structure=xx * xx + yy * yy <= r * r)
+    P = span
+    pw = np.pad(wide, P)
+    v = nd.binary_closing(pw, structure=np.ones((span, 1), bool))[P:-P, P:-P]
+    h = nd.binary_closing(pw, structure=np.ones((1, span), bool))[P:-P, P:-P]
+    yy, xx = np.mgrid[-6:7, -6:7]
+    return w | nd.binary_opening((v | h) & ~w, structure=xx * xx + yy * yy <= 36)
+
+
 def keep_exits(w, exits):
     """Only street that reaches one of the room's exits (no unreachable scraps)."""
     l, _ = nd.label(w)
@@ -174,7 +190,7 @@ def main():
         if key not in exits:
             print('skip (no such room)', key)
             continue
-        road = keep_exits(extend_to_edges(axis_bridges(trace(path)), exits[key]), exits[key])
+        road = keep_exits(fill_road_objects(extend_to_edges(axis_bridges(trace(path)), exits[key])), exits[key])
         nooks[key] = nook_paths(key, road)
         w = bake_paths(road, nooks[key])
         wy = cy - 4  # world row of this room
