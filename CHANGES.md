@@ -3032,3 +3032,13 @@ using exit labels alone.
 - Its item spot is on the shopfront pavement beside an arcade cabinet,
   (300, 395). A candidate on a vending machine was rejected.
 - Cache tags bumped to `?v=round112`.
+
+## Round 113: Tidewall Street painting
+
+- Room `2,6` (Tidewall Street) has its own painting: a harbor-side bend with
+  warehouses and piers. Streets reach its exits on the top and left.
+- That makes 21 painted rooms.
+- No item spot yet: from here on, rooms go in first and their spots are
+  picked in one pass once every room is painted. Until then chests and relics
+  use the automatic placement beside the road.
+- Cache tags bumped to `?v=round113`.
