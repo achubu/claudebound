@@ -631,7 +631,9 @@ let allWalkable=true;
 for(const key of Object.keys(rooms)){if(organicDef(key)){if(!organicGrid(key).length)allWalkable=false;continue}if(usesDiagMask(key)||CROSSROAD_ARTS[joinedArea(key).art]){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement
 assert(allWalkable,'the chest position is walkable in every city room');
 configureRegion('elaris');
-for(const key of Object.keys(rooms)){if(organicDef(key)){if(!organicGrid(key).length)allWalkable=false;continue}if(usesDiagMask(key)||CROSSROAD_ARTS[joinedArea(key).art]){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement
+// Round 116: Elaris rooms are checked at the default chest spot (330,180), not wherever the city's
+// Moon Temple painting happens to place its chest.
+for(const key of Object.keys(rooms)){if(organicDef(key)){if(!organicGrid(key).length)allWalkable=false;continue}if(usesDiagMask(key)||CROSSROAD_ARTS[joinedArea(key).art]){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,330,180,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement
 assert(allWalkable,'the chest position is also walkable in every Elaris room');
 
 // --- Enemy Block timing is now honestly telegraphed: the message shown

@@ -3067,3 +3067,22 @@ using exit labels alone.
   they are walkable, in line with the relaxed pathing.
 - No item spots yet; they will be picked once all rooms are painted.
 - Cache tags bumped to `?v=round115`.
+
+## Round 116: Moon Temple and Scrapyard Gate painted
+
+- Room `5,7` Moon Temple has its own painting: a wide temple plaza, which gives
+  room for the boss fight and holds the Ember Sigil relic and a chest. Streets
+  reach its exits on the left and bottom.
+- Room `6,7` Scrapyard Gate has its own painting: the junkyard entrance.
+  Streets reach its exits on the right and bottom. The street stub at the top
+  edge is a painted dead end.
+- That makes 34 painted rooms.
+- Re-uploaded `2,7`, `3,7` and `4,7` were byte-identical to the earlier files,
+  so nothing changed for them.
+- Item spots (including the Ember Sigil and the chest) will be picked once all
+  rooms are painted. Until then they use the automatic placement beside the
+  road.
+- Cache tags bumped to `?v=round116`.
+- `tests/rebalance.test.cjs`: the Elaris chest check reused the city chest's
+  position, which now depends on Moon Temple's painting. It now checks Elaris
+  rooms at the default chest spot (330, 180).
