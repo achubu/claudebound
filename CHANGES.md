@@ -3216,3 +3216,12 @@ using exit labels alone.
   time (`ELITE_CARD_ODDS`), so their card drops are also cut by 30%.
 - Boss, mini-boss, covenant and side deck card drops are unchanged.
 - `tests/rebalance.test.cjs` checks the new 72% boundary and the elite odds.
+
+## Round 131: new Sunken Warehouses (2,5) and Neon Square (4,5) paintings
+
+- Replaced both room images with the owner's new versions. Sunken Warehouses' street reaches
+  top and bottom; Neon Square's reaches left, right and bottom, as each room needs.
+- Their old item spots (picked for the old paintings) are removed. Those rooms' points of
+  interest, chests and relics fall back to beside-the-street placement until the item-spot pass
+  once every room is in.
+- Re-ran `tools/build_room_masks.py`. Still 47 painted rooms.
