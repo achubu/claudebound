@@ -3312,3 +3312,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Mini-bosses still always drop one Upgrade Crystal; elites still turn a potion or empty chest
   into a card choice 70% of the time.
 - `tests/rebalance.test.cjs` checks the new boundaries.
+
+## Round 141: destroying a card gives Upgrade Crystals
+
+- Destroying an Impermanent card in the Deck Workshop now salvages Upgrade Crystals:
+  5 × (level + 1), so Level 0 → 5, Level 1 → 10, Level 2 → 15, Level 3 → 20
+  (`destroySalvage` in `index.html`). The button shows the amount ("Destroy card · +15 ◆") and
+  a message confirms it. Soulbound cards still can't be destroyed.
+- `tests/card-copies.test.cjs` checks the amounts.
