@@ -3177,3 +3177,14 @@ using exit labels alone.
   Retaliation Coil, Siphon Edge, Counter Weave, Reflux, and Weaken strength (Deep Interference).
 - Talent descriptions say "Boosted ×1.4" instead of the per-world multipliers.
 - Tests updated: round76, chronospire, talent-matrix, card-variety, plating-armor.
+
+## Round 127: objects standing on a road count as road
+
+- `tools/build_room_masks.py` has a new `fill_road_objects` step. Along every row and column,
+  a gap of up to 170px between two stretches of wide street (at least 50px across) is filled
+  in, so a gate arch, a bridge, a fountain or debris lying across a street no longer blocks the
+  way. Alleys and paths between buildings are too narrow to count, so buildings stay blocked.
+  Thin slivers along kerbs and walls are dropped.
+- Prime example: the Dragon Gate (4,7) arch is now walked straight through. The fountain plaza
+  in Fountain Row (1,6) and debris on the Collapsed Freeway (8,8) also open up.
+- Re-ran the tool. `tests/room-art.test.cjs` checks the Dragon Gate.

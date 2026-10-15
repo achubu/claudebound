@@ -65,3 +65,7 @@ assert(/\.hint\{[^}]*pointer-events:none/.test(html),'the hint bar lets taps thr
 console.log('PASS: relaxed pathing (streets widened by '+rx.relax+' cells inside rooms), forgiving taps.');
 console.log('PASS: '+nk.count+' off-road spots with footpaths; points of interest, relic and waypoint use them; small markers.');
 console.log('PASS: '+art.length+' rooms with their own painting: images present, exits reachable, crossings land on streets both ways, drawn at full resolution.');
+// Round 127: objects standing on a road count as road (the Dragon Gate arch is walkable).
+const gate=JSON.parse(run(`newGame();configureRegion('city');JSON.stringify([[415,60],[415,100],[415,140],[370,120],[460,120]].map(([x,y])=>walkable('4,7',x,y)))`));
+assert(gate.every(Boolean),'you can walk straight through the Dragon Gate');
+console.log('PASS: objects on the road (Dragon Gate arch) are walkable.');
