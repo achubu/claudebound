@@ -3023,3 +3023,12 @@ using exit labels alone.
   - `8,5`: the stone plaza in front of the twin falls, (590, 175).
   - Candidates in a fenced pool and on rooftops were rejected.
 - Cache tags bumped to `?v=round111`.
+
+## Round 112: Neon Arcade painting
+
+- Room `3,5` (Neon Arcade) has its own painting: an arcade street with a side
+  road east. Streets reach its exits on the top, bottom and right.
+- That makes 20 painted rooms, and the top two rows are complete.
+- Its item spot is on the shopfront pavement beside an arcade cabinet,
+  (300, 395). A candidate on a vending machine was rejected.
+- Cache tags bumped to `?v=round112`.
