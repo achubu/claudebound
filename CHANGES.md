@@ -3188,3 +3188,10 @@ using exit labels alone.
 - Prime example: the Dragon Gate (4,7) arch is now walked straight through. The fountain plaza
   in Fountain Row (1,6) and debris on the Collapsed Freeway (8,8) also open up.
 - Re-ran the tool. `tests/room-art.test.cjs` checks the Dragon Gate.
+
+## Round 128: smaller hero
+
+- The main character is drawn 20% smaller in the world (`#player .hero-sprite` scaled to 0.8,
+  from the feet, so they still stand where the game puts them). The breathing animation keeps
+  the smaller size, and the ground shadow is narrower to match. Movement and hit areas are
+  unchanged.

@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 127) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 128) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
