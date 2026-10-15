@@ -3248,3 +3248,9 @@ using exit labels alone.
   placement.
 - `tests/room-art.test.cjs` now expects 100+ spots and that only 5,6 has none. Every spot passes
   the existing checks: off the path, its own footpath, reachable.
+
+## Round 134: side deck on the left of the hand
+
+- In battle, the side deck column now sits on the left of your hand instead of the right
+  (`row.prepend(col)` in `assets/aether-deck.js`), on desktop and phone.
+- `tests/aether-deck.test.cjs` checks the order.

@@ -150,3 +150,7 @@ state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '
 newGame(); state.side.deck = state.side.pool.map(c => c.uid); ensureSide(); assert.equal(state.side.deck.length, 2, 'over-capacity side decks are trimmed');
 console.log('PASS: pitching, Aether, side-deck draws, all 11 enemy afflictions, schedules, all 10 side cards, drops, deck rules and save migration.');
 }`);
+// Round 134: the side deck column sits on the left of the hand.
+{ const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/aether-deck.js'), 'utf8');
+  require('node:assert')(/row\.prepend\(col\)/.test(src) && !/row\.append\(col\)/.test(src), 'side deck column is on the left of the hand');
+  console.log('PASS: the side deck column sits on the left of the hand.'); }

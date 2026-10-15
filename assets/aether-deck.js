@@ -490,8 +490,8 @@ renderBattle = function () {
   panel.innerHTML = '<div class="aether-row"><b>✦ Aether ' + b.aether + '/' + AETHER_MAX + '</b><span class="aether-pips" aria-hidden="true">' + pips + '</span>' + (pend ? '<small>+' + Math.min(pend, AETHER_MAX - b.aether) + ' at end of turn' + (energyBonus ? ' (incl. +' + energyBonus + ' from unspent energy)' : '') + '</small>' : '<small>Pitch cards or end the turn with energy left to gain Aether</small>') + '</div>';
   const handTitle = m.querySelector('.hand-title');
   if (handTitle && handTitle.before) handTitle.before(panel); else m.append(panel);
-  // Round 72: the side deck is its own column beside your hand — one card per
-  // row, scrolling up and down.
+  // Round 72: the side deck is its own column beside your hand (left of it since Round 134),
+  // one card per row, scrolling up and down.
   const hand = $('hand');
   if (!hand || !hand.parentNode || !hand.before) return;
   const row = document.createElement('div'); row.className = 'hand-row';
@@ -499,7 +499,7 @@ renderBattle = function () {
   const col = document.createElement('aside'); col.className = 'side-column'; col.setAttribute('aria-label', 'Side deck');
   const ready = avail.filter(c => b.aether >= sideAetherCost(c.id) && sideUsable(b, c.id)).length;
   col.innerHTML = '<div class="side-col-head"><b>✦ Side deck</b><small>' + (avail.length ? avail.length + ' left · ' + ready + ' playable' : 'used up this fight') + '</small></div><div class="side-col-list" id="sideHand"></div>';
-  row.append(col);
+  row.prepend(col); // Round 134: the side deck sits on the left of your hand
   const host = $('sideHand');
   if (host && host.append) avail.forEach(card => {
     const off = b.aether < sideAetherCost(card.id) || !sideUsable(b, card.id);
