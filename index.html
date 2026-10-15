@@ -97,7 +97,7 @@
 .map-surface{position:absolute;left:50%;top:50%;width:880px;height:560px;transform-origin:center}.map-surface .map-room{width:102px;min-height:54px;font-size:10px}.map-surface .map-room .map-status{display:block}.minimap-grid{width:126px;height:82px}
 .defeat-summary{max-width:680px;margin:auto}.defeat-summary h2{color:#ffb5ac}.defeat-loss{padding:16px;margin:16px 0;border:1px solid #d7766d;border-radius:10px;background:#351d25}.defeat-card{display:flex;gap:16px;align-items:center}.defeat-card img{width:88px;height:88px;object-fit:cover;border-radius:8px}.defeat-card p{font:13px/1.5 system-ui;margin:6px 0}.defeat-summary button{width:100%;min-height:48px}.defeat-summary .panel p{line-height:1.6}
 .copies-overlay{z-index:120}.copies-modal{width:min(640px,96vw)}.copies-list{display:flex;flex-direction:column;gap:8px;margin:10px 0}.copy-row{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid #4d6a80;border-radius:10px;background:#0c1624}.copy-row.in-deck{border-color:#64dce7;box-shadow:0 0 0 1px #64dce755}.copy-row.soul{background:linear-gradient(90deg,#1d1638,#0c1624)}.copy-art{width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid #8cb8bf55;flex:none}.copy-info{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}.copy-info b{font:700 13px system-ui}.copy-info small{font:11px system-ui;color:#9fb6c8}.copy-mastery{display:block;height:6px;border-radius:3px;background:#1e2f40;overflow:hidden}.copy-mastery i{display:block;height:100%;background:linear-gradient(90deg,#64dce7,#f2c94c)}.copy-tag{align-self:flex-start;font:700 10px system-ui;color:#0b1422;background:#64dce7;border-radius:999px;padding:1px 8px}.copy-actions{display:flex;flex-direction:column;gap:5px;flex:none}.copy-actions button{font-size:12px;padding:5px 9px}@media(max-width:560px){.copy-row{flex-wrap:wrap}.copy-actions{flex-direction:row;width:100%}}button.stack-count-badge{cursor:pointer}.stack-count-badge{position:absolute;right:-8px;top:-8px;z-index:4;min-width:30px;height:30px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font:800 14px system-ui;color:#1b1206;background:radial-gradient(circle at 35% 30%,#fff3c4,#f2c94c 60%,#b27d10);border:2px solid #fff4c8;box-shadow:0 2px 8px #000a}.card-wrap{position:relative}.stack-info{margin:4px 2px 0;font:11px system-ui;color:#b9c9d6}.deck-slot .stack-count{color:#f2c94c}
-</style><link rel="stylesheet" href="assets/mobile-crystals.css?v=round132"><link rel="stylesheet" href="assets/talents.css?v=round132"><link rel="stylesheet" href="assets/aether-deck.css?v=round132"><link rel="stylesheet" href="assets/battle-hud.css?v=round132"></head><body>
+</style><link rel="stylesheet" href="assets/mobile-crystals.css?v=round133"><link rel="stylesheet" href="assets/talents.css?v=round133"><link rel="stylesheet" href="assets/aether-deck.css?v=round133"><link rel="stylesheet" href="assets/battle-hud.css?v=round133"></head><body>
 <div id="game">
  <div id="world"></div>
  <div id="hud"></div>
@@ -110,9 +110,9 @@
 <div id="startOverlay" class="overlay"><section class="modal small"><div class="eyebrow">AETHERCEDE</div><h1>Neon Aftermath</h1><p class="muted">Explore a neon city in ruins. Traverse shattered streets, flooded districts, and abandoned transit lines. Recover relics and master your cards.</p><img class="hero-portrait opening-portrait" src="assets/characters/opening-cast.webp" alt="The protagonist and his future story ally stand together in a rain-soaked neon city in ruins"><p><button id="newBtn" class="primary">Begin new journey</button> <button id="resumeBtn" class="hidden">Continue saved journey</button></p></section></div>
 <div id="battleOverlay" class="overlay hidden"><section class="modal" id="battleModal"></section></div>
 <div id="menuOverlay" class="overlay hidden"><section class="modal" id="menuModal"></section></div>
-<script src="assets/save-migration.js?v=round132"></script>
-<script src="assets/environment/neon-city.js?v=round132"></script>
-<script src="assets/cards.js?v=round132"></script>
+<script src="assets/save-migration.js?v=round133"></script>
+<script src="assets/environment/neon-city.js?v=round133"></script>
+<script src="assets/cards.js?v=round133"></script>
 <script>
 'use strict';
 const SAVE_KEY='aethercede-integrated-v2',MATERIAL_KEY='aethercede-upgrade-materials-v2',MIN_DECK=4,BASE_MAX_DECK=6,USES=50,$=id=>document.getElementById(id);
@@ -539,23 +539,23 @@ if(localStorage.getItem(SAVE_KEY))$('resumeBtn').classList.remove('hidden');
 addEventListener('resize',()=>{fitWorld();fitMap();renderTalentConnectors()});fitWorld();
 requestAnimationFrame(loop);
 </script>
-<script src="assets/elaris-wildlife.js?v=round132"></script>
-<script src="assets/expansion.js?v=round132"></script>
-<script src="assets/encounter-depth.js?v=round132"></script>
-<script src="assets/talent-matrix.js?v=round132"></script>
-<script src="assets/aether-deck.js?v=round132"></script>
-<script src="assets/card-variety.js?v=round132"></script>
-<script src="assets/battle-hud.js?v=round132"></script>
-<script src="assets/combined-rooms.js?v=round132"></script>
-<script src="assets/diagonals.js?v=round132"></script>
-<script src="assets/city-paintings.js?v=round132"></script>
-<script src="assets/organic-paths.js?v=round132"></script>
-<script src="assets/organic-areas.js?v=round132"></script>
-<script src="assets/exploration.js?v=round132"></script>
-<script src="assets/neon-world.js?v=round132"></script>
-<script src="assets/chronospire.js?v=round132"></script>
-<script src="assets/pickups.js?v=round132"></script>
-<script src="assets/touch-controls.js?v=round132"></script>
-<script src="assets/map-terrain.js?v=round132"></script>
-<script src="assets/enemy-labels.js?v=round132"></script>
+<script src="assets/elaris-wildlife.js?v=round133"></script>
+<script src="assets/expansion.js?v=round133"></script>
+<script src="assets/encounter-depth.js?v=round133"></script>
+<script src="assets/talent-matrix.js?v=round133"></script>
+<script src="assets/aether-deck.js?v=round133"></script>
+<script src="assets/card-variety.js?v=round133"></script>
+<script src="assets/battle-hud.js?v=round133"></script>
+<script src="assets/combined-rooms.js?v=round133"></script>
+<script src="assets/diagonals.js?v=round133"></script>
+<script src="assets/city-paintings.js?v=round133"></script>
+<script src="assets/organic-paths.js?v=round133"></script>
+<script src="assets/organic-areas.js?v=round133"></script>
+<script src="assets/exploration.js?v=round133"></script>
+<script src="assets/neon-world.js?v=round133"></script>
+<script src="assets/chronospire.js?v=round133"></script>
+<script src="assets/pickups.js?v=round133"></script>
+<script src="assets/touch-controls.js?v=round133"></script>
+<script src="assets/map-terrain.js?v=round133"></script>
+<script src="assets/enemy-labels.js?v=round133"></script>
 </body></html>

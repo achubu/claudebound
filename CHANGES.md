@@ -3234,3 +3234,17 @@ using exit labels alone.
 - Every Neon Aftermath room now has its own painting, so every crossing uses the loose rule.
   The room-art test's "old rooms stay strict" check is now "all 54 rooms are painted".
 - Re-ran `tools/build_room_masks.py`. Next: the item-spot pass for the rooms that have none.
+
+## Round 133: item spots for every painted room
+
+- With all 54 rooms painted, every room painted after Round 101 now has hand-checked item spots
+  (`NOOKS` in `tools/build_room_masks.py`): 35 rooms, 101 spots in all.
+- Candidates were traced automatically (open ground 40-85px from the street, away from water,
+  low texture), then checked by eye on each painting. Spots sit on open ground (dirt, grass,
+  sidewalks, docks, parking lots), never on roofs, statues, benches, stalls or water. Three
+  hand-placed spots on paving that counts as road were swapped out.
+- The Briarstep Boots relic in Statue Garden (0,9) now stands at the boots cave in the painting.
+- Broadcast Row (5,6) has no open ground beside its street, so it keeps beside-the-street
+  placement.
+- `tests/room-art.test.cjs` now expects 100+ spots and that only 5,6 has none. Every spot passes
+  the existing checks: off the path, its own footpath, reachable.
