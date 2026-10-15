@@ -18,6 +18,8 @@ const BALANCE={
  // Extra per-world strength on top of level (Round 38: about 5-10 points harder).
  regionHp:{city:1.08,elaris:1.8,vespera:2.35,chronospire:3.3},
  regionAttack:{city:0,elaris:5,vespera:16,chronospire:25},
+ // Round 139: overall difficulty per world, on top of everything else (health and attack).
+ difficulty:{city:1.1,elaris:1,vespera:1,chronospire:1},
  // Level of a region's start rooms when a room has no hand-set level.
  // Elaris rooms are hand-set to 10-18 and Vespera's to 19-27.
  regionLevelBase:{city:1,elaris:1,vespera:19,chronospire:28},
@@ -60,7 +62,8 @@ function enemyStats(id,{region=activeRegion,level=1,elite=false,boss=!!enemies[i
  const hp=base.hp*(get('regionHp')??1)*(elite?get('eliteHp'):1)*(1+(level-1)*get('hpPerLevel'))*(tune.hp??1)*(final?get('bossHp'):mini?get('miniBossHp'):get('normalHp')??1);
  const attack=base.attack+(get('regionAttack')??0)+(elite?get('eliteAttack'):0)+Math.round((level-1)*get('attackPerLevel'))+(final?get('bossAttack'):mini?get('miniBossAttack'):0)+(tune.attack??0);
  const ramp=!boss&&BALANCE.entryRamp&&BALANCE.entryRamp[region]&&BALANCE.entryRamp[region][level]||{hp:1,attack:0};
- return{hp:Math.round(hp*ramp.hp),attack:boss?attack:Math.max(1,Math.round(attack*(get('normalAttack')??1))+ramp.attack)};
+ const d=get('difficulty')??1,atk=boss?attack:Math.max(1,Math.round(attack*(get('normalAttack')??1))+ramp.attack);
+ return{hp:Math.round(hp*ramp.hp*d),attack:Math.max(1,Math.round(atk*d))};
 }
 // Elaris expansion: world generation and combat share the adventure's existing state.
 const EXPANSION_VERSION=3;

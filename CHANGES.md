@@ -3297,3 +3297,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   the original `assets/items/loot-chest.png`, and the loot chest shown after a battle is
   unchanged.
 - `tests/poi-art.test.cjs` covers the new sprites and the Elaris chest.
+
+## Round 139: Neon Aftermath 10% harder
+
+- New `BALANCE.difficulty` knob (per world, applied last in `enemyStats`). Neon Aftermath is set
+  to 1.1: every enemy there (regulars, elites, mini-bosses and the Thorn Warden) has 10% more
+  health and 10% more attack, rounded. Other worlds stay at 1.
+- Examples: Emberling 36/7 → 40/8, Moon Knight 73/13 → 80/14, Thorn Warden 149/17 → 164/19.
