@@ -3144,3 +3144,12 @@ using exit labels alone.
   level 3 (were 12 / 20 / 30), at the owner's request. The merchant's listing and the upgrade
   menu show the new prices. Nothing else in the shop changes.
 - `tests/exploration.test.cjs` checks the new prices and the purchase amounts.
+
+## Round 124: the minimap looks like the large map
+
+- The minimap now draws the same terrain as the exploration map: the stylized neon streets
+  (or each world's room art), the fog and survey grid, the ragged frontier and the gold frame
+  on your room. It is framed on the rooms around you (one room out, clamped to the world).
+- `drawMapTerrain(canvas, tileW, bounds)` takes optional bounds. `renderMinimap` is wrapped in
+  `assets/map-terrain.js`, and redraws only when the room or the explored set changes.
+- `tests/map-terrain.test.cjs` checks the minimap framing and size.

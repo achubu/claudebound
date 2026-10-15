@@ -166,15 +166,15 @@ function mapCurve(c, pts, move = true) {
 }
 // tileW is the on-screen device-pixel width of one room, so the terrain is
 // drawn 1:1 with the screen (sharp at any zoom) and always at exactly 16:10.
-function drawMapTerrain(canvasEl, tileW) {
-  const { minX, maxX, minY, maxY } = mapBounds(), cols = maxX - minX + 1.8, rows = maxY - minY + 1.8;
+function drawMapTerrain(canvasEl, tileW, bounds) {
+  const { minX, maxX, minY, maxY } = bounds || mapBounds(), cols = maxX - minX + 1.8, rows = maxY - minY + 1.8;
   let TW = Math.round(tileW || MAP_TILE_W * 0.64);
   TW = Math.max(64, Math.min(TW, Math.floor(Math.sqrt(MAP_MAX_PIXELS / (cols * rows * 0.625)))));
   const TH = TW * 0.625, k = TW / 256; // k scales the hand-tuned edge sizes
   const W = Math.round(cols * TW), H = Math.round(rows * TH), theme = MAP_THEME[activeRegion] || MAP_THEME.city;
   canvasEl.width = W; canvasEl.height = H;
   const ctx = canvasEl.getContext('2d'); if (!ctx) return;
-  const redraw = () => { if (canvasEl.isConnected) drawMapTerrain(canvasEl, tileW); };
+  const redraw = () => { if (canvasEl.isConnected) drawMapTerrain(canvasEl, tileW, bounds); };
   const at = (x, y) => [(x - minX + 0.4) * TW, (y - minY + 0.4) * TH];
   const explored = new Set(Object.keys(rooms).filter(k => state.visited.includes(k)));
   const K = (x, y) => x + ',' + y, XY = k => k.split(',').map(Number);
@@ -362,9 +362,36 @@ showMap = function () {
   drawMapTerrain(terrain, mapTileScreenWidth(map));
   const here = map.querySelector('.current-room'); if (here && here.scrollIntoView) here.scrollIntoView({ block: 'center', inline: 'center' });
 };
+// Round 124: the minimap draws the same terrain as the large map (street art,
+// fog, ragged frontier, gold frame on your room), framed on the rooms around you.
+// It is redrawn only when the room or the explored set changes.
+let minimapTerrain = null, minimapTerrainKey = '';
+function minimapBounds() {
+  const keys = Object.keys(rooms), X = k => Number(k.split(',')[0]), Y = k => Number(k.split(',')[1]), [cx, cy] = state.room.split(',').map(Number);
+  const lo = (v, all) => Math.max(v - 1, Math.min(...all)), hi = (v, all) => Math.min(v + 1, Math.max(...all));
+  return { minX: lo(cx, keys.map(X)), maxX: hi(cx, keys.map(X)), minY: lo(cy, keys.map(Y)), maxY: hi(cy, keys.map(Y)) };
+}
+if (typeof renderMinimap === 'function') {
+  const renderMinimapBeforeTerrain = renderMinimap;
+  renderMinimap = function () {
+    renderMinimapBeforeTerrain();
+    const box = typeof $ === 'function' && $('minimap'), grid = box && box.querySelector && box.querySelector('.minimap-grid');
+    if (!grid || !grid.replaceWith || !state || !rooms[state.room]) return;
+    const b = minimapBounds(), key = [activeRegion, state.room, state.visited.length, b.minX, b.maxX, b.minY, b.maxY].join('|');
+    if (!minimapTerrain || minimapTerrainKey !== key) {
+      const c = document.createElement('canvas'); c.className = 'minimap-terrain'; c.setAttribute('aria-hidden', 'true');
+      const dpr = (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1;
+      try { drawMapTerrain(c, 190 / (b.maxX - b.minX + 1.8) * dpr * 1.5, b); } catch (e) { return; }
+      minimapTerrain = c; minimapTerrainKey = key;
+    }
+    grid.replaceWith(minimapTerrain);
+    const legend = box.querySelector('.mini-legend'); if (legend) legend.textContent = 'Gold frame: you are here';
+  };
+}
 const mapTerrainStyles = document.createElement('style');
 mapTerrainStyles.textContent = '.map-canvas.map-city{background:#070b10;min-width:0;flex:none}'
   + '.map-zoom{display:flex;align-items:center;gap:6px;margin:0 0 6px}.map-zoom button{min-width:32px;padding:3px 10px}.map-zoom .map-zoom-level{min-width:46px;text-align:center;font:12px system-ui;color:#bfe6ff}.map-zoom small{opacity:.6;margin-left:6px}'
+  + '.minimap-terrain{display:block;width:190px;height:auto;border-radius:4px}@media(max-width:720px){.minimap-terrain{width:140px}}'
   + '.map-terrain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:auto}'
   + '.map-city .map-links{z-index:1}'
   + '.map-city .panel{z-index:2;width:auto!important;height:auto!important;min-width:0;min-height:0;padding:5px 9px 4px;text-align:center;background:rgba(7,13,20,.4);border-color:#5d86a066;border-radius:8px;box-shadow:0 2px 10px #000a;backdrop-filter:blur(2px)}'

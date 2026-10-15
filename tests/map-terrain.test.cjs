@@ -24,3 +24,15 @@ assert.equal(MAP_CELL_W/MAP_CELL_H,1.6,'map cells are 16:10 so the art is not sq
 document.createElement=realCreate;
 console.log('PASS: the exploration map is drawn from the explored rooms\\' own art.');
 `);
+// Round 124: the minimap draws the large map's terrain, framed on the rooms around you.
+run(`{
+newGame();configureRegion('city');state.room='1,5';
+const b=minimapBounds();assert.deepEqual(JSON.parse(JSON.stringify(b)),{minX:0,maxX:2,minY:4,maxY:6},'the minimap frames one room around you');
+const deep=()=>new Proxy(function(){},{get:(t,k)=>k==='canvas'?undefined:deep(),apply:()=>deep(),set:()=>true});
+const c={width:0,height:0,style:{},className:'',setAttribute(){},getContext:()=>deep()};
+const realCreate=document.createElement;document.createElement=tag=>tag==='canvas'?{width:0,height:0,style:{},getContext:()=>deep()}:realCreate(tag);
+drawMapTerrain(c,100,b);document.createElement=realCreate;
+assert.equal(c.width,Math.round(3.8*100),'the minimap terrain covers just the nearby rooms');assert.equal(c.height,Math.round(3.8*100*0.625));
+assert(/minimapTerrain/.test(String(renderMinimap)),'the minimap uses the large map terrain drawing');
+console.log('PASS: the minimap draws the large map terrain around the current room.');
+}`);
