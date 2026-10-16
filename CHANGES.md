@@ -3406,3 +3406,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   hit on a killing blow and set the enemy's HP once at the end. Hits that don't kill are
   unchanged.
 - `tests/card-variety.test.cjs` covers kills and non-kills with Block, Frail and Barrier.
+
+## Round 151: Solaris portal art; smaller, glowing portals
+
+- New owner painting `assets/environment/solaris-portal.webp` (magenta keyed out by flood fill
+  from the edges, so the neon signs inside the arch survive): a sandstone sun-gate with the
+  neon city inside. It replaces the old forest portal for the Solaris portal that leads back
+  to Neon Aftermath (`assets/solaris.js`).
+- Every portal is drawn at half its old size (48×72, the sun-gate 59×79) and pulses with a
+  soft glow (cyan; gold and cyan for the sun-gate). Reduced-motion players get a steady glow.
+- `tests/poi-art.test.cjs` checks the art and sizes.

@@ -75,3 +75,20 @@ NeonCity.render = function (container, key) {
 const solarisStyles = document.createElement('style');
 solarisStyles.textContent = '#world[data-environment="solaris"]{background:#e9b45a}#world[data-environment="solaris"] .city-landmark{color:#fff3d0;text-shadow:0 1px 3px #6a3a00}';
 document.head.append(solarisStyles);
+
+// Round 151: in Solaris, the portal home is a sandstone sun-gate showing the neon city inside.
+const renderWorldBeforeSolarisPortal = renderWorld;
+renderWorld = function () {
+  renderWorldBeforeSolarisPortal.apply(this, arguments);
+  if (activeRegion !== 'elaris' || !document.querySelector || typeof portalTarget !== 'function') return;
+  const t = portalTarget(), art = t && t.region === 'city' && document.querySelector('#world .portal-art');
+  if (art) { art.src = 'assets/environment/solaris-portal.webp'; art.classList.add('solaris-portal'); }
+};
+const solarisPortalStyles = document.createElement('style');
+// Round 151: every portal is drawn at half its old size and pulses with a glow.
+solarisPortalStyles.textContent = '.portal-art{width:48px!important;height:72px!important;animation:portalPulse 2.4s ease-in-out infinite!important}'
+  + '.portal-art.solaris-portal{width:59px!important;height:79px!important;image-rendering:auto;animation-name:solarPortalPulse!important}'
+  + '@keyframes portalPulse{0%,100%{filter:drop-shadow(0 0 4px #42bdd8) drop-shadow(0 0 10px #42bdd866)}50%{filter:drop-shadow(0 0 8px #86fff0) drop-shadow(0 0 20px #86fff0aa)}}'
+  + '@keyframes solarPortalPulse{0%,100%{filter:drop-shadow(0 0 4px #ffcf6a) drop-shadow(0 0 10px #5fe9ff66)}50%{filter:drop-shadow(0 0 8px #ffe39a) drop-shadow(0 0 20px #5fe9ffaa)}}'
+  + '@media(prefers-reduced-motion:reduce){.portal-art{animation:none!important;filter:drop-shadow(0 0 6px #86fff0)}}';
+document.head.append(solarisPortalStyles);

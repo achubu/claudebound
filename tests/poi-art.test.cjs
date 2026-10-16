@@ -13,3 +13,9 @@ assert(fs.existsSync(path.join(__dirname,'../assets/items/aetherlink-gauntlet.we
   assert(/g\.querySelector\('\.g-screen'\)\.append\(grid\)/.test(js),'the socket panels move onto the gauntlet screen');
   assert(/GAUNTLET_SCREEN = \{ left: 29\.28/.test(js),'screen position matches the painting'); }
 console.log('PASS: the Aetherlink interface sits on the gauntlet screen.');
+// Round 151: Solaris's portal home shows the neon city; all portals are half size and glow.
+{ const js=fs.readFileSync(path.join(__dirname,'../assets/solaris.js'),'utf8');
+  assert(fs.existsSync(path.join(__dirname,'../assets/environment/solaris-portal.webp')),'Solaris portal art');
+  assert(/t\.region === 'city'/.test(js)&&/solaris-portal\.webp/.test(js),'the Solaris portal home uses its own art');
+  assert(/\.portal-art\{width:48px!important;height:72px!important;animation:portalPulse/.test(js),'portals are half size and pulse');
+  console.log('PASS: Solaris sun-gate portal; portals half size with a pulsing glow.'); }
