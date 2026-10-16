@@ -3518,7 +3518,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   its club when it hits you and recoils when you hit it. If `sun-revenant-walk.png` is added, map
   patrols walk with it instead.
 - Also: the compendium's Solaris blurb now describes the desert city.
-- New `tests/sun-revenant.test.cjs`.
+- New `tests/sun-revenant.test.cjs`; `elaris-wildlife` now expects five Solaris species.
 
 ## Round 168: one thing per room
 
