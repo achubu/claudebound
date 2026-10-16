@@ -26,7 +26,7 @@ const a = JSON.stringify(worldPOIs()); for (const k in poiCache) delete poiCache
 const pois = Object.values(worldPOIs()), of = t => pois.find(p => p.type === t);
 
 // Cache
-let p = of('cache'), s0 = state.shards; openPOI(p); click('poiOpen'); assert(state.shards >= s0 + 3 && state.shards <= s0 + 6, 'cache gives 3-6 Shards'); assert(poiUsed(p));
+let p = of('cache'), s0 = state.shards; openPOI(p); click('poiOpen'); assert.equal(state.shards, s0 + 15, 'cache gives 15 Shards (Round 158)'); assert(poiUsed(p));
 const s1 = state.shards; openPOI(p); assert.equal(state.shards, s1, 'a used cache gives nothing');
 // Shrine + blessing in battle
 p = of('shrine'); openPOI(p); click('bless0'); assert(state.blessing, 'shrine grants a blessing'); assert(poiUsed(p));
@@ -47,7 +47,7 @@ for (const lp of pois.filter(x => x.type === 'lore')) { openPOI(lp); click('poiR
 assert.equal(state.shards, sh + 5 * 15 + 15, 'lore: +15 each (Round 157), +15 for all five'); assert.equal(state.side.pool.length, sideBefore + 1, 'and a side card'); assert(state.poi.loreRewards.includes('city'));
 // Sealed cache: risk
 p = of('sealed') || { ...of('cache'), type: 'sealed', id: 'city:test-sealed' };
-Math.random = () => .1; let sh2 = state.shards; openPOI(p); click('poiPry'); assert.equal(state.shards, sh2 + 9, 'lucky: +9 Shards');
+Math.random = () => .1; let sh2 = state.shards; openPOI(p); click('poiPry'); assert.equal(state.shards, sh2 + 25, 'lucky: +25 Shards (Round 158)');
 const p2 = { ...p, id: 'city:test-sealed-2' }; Math.random = () => .9; state.hp = 3; openPOI(p2); click('poiPry'); assert.equal(state.hp, 1, 'unlucky: lose HP, never below 1'); Math.random = realRandom;
 // Merchant
 const shop = merchantRoom(), stock = merchantStock(); assert.equal(stock.length, 4); assert(stock.includes('side') && stock.includes('potion') && stock.includes('upgradePack'), 'always stocks a side card, potions and card upgrades');

@@ -229,18 +229,20 @@ function openPOI(p) {
       [{ id: 'poiRead', label: 'Take it in · +' + LORE_SHARDS + ' Shards', primary: true, onclick: () => readLore(p) }]);
   }
   if (p.type === 'cache') {
-    const rand = seeded(hashSeed(p.id + state.seed + 'cache')), shards = 3 + Math.floor(rand() * 4), potion = rand() < .25;
+    const rand = seeded(hashSeed(p.id + state.seed + 'cache')), shards = CACHE_SHARDS, potion = rand() < .25;
     return poiMenu('⬙ Supply Cache', '<p>A cache left by earlier travellers.</p>', [{ id: 'poiOpen', label: 'Open it', primary: true, onclick: () => { state.shards += shards; if (potion) state.potions++; finishPOI(p, 'Cache: +' + shards + ' Shards' + (potion ? ' and a healing potion' : '') + '.'); } }]);
   }
   if (p.type === 'sealed') {
     const hurt = Math.ceil(state.maxHp * .15);
-    return poiMenu('⚠ Sealed Cache', '<p>The seal hums with stored charge. Prying it open might pay well — or discharge into you.</p><p class="poi-option">50%: <b>+9 Shards</b>. 50%: lose <b>' + hurt + ' HP</b> (never below 1) and the cache is ruined.</p>',
-      [{ id: 'poiPry', label: 'Pry it open', primary: true, onclick: () => { if (Math.random() < .5) { state.shards += 9; finishPOI(p, 'The seal gives: +9 Shards.'); } else { state.hp = Math.max(1, state.hp - hurt); finishPOI(p, 'The seal discharges: −' + hurt + ' HP.'); } } }, { id: 'poiLeave', label: 'Leave it', onclick: closeMenu }]);
+    return poiMenu('⚠ Sealed Cache', '<p>The seal hums with stored charge. Prying it open might pay well — or discharge into you.</p><p class="poi-option">50%: <b>+' + SEALED_SHARDS + ' Shards</b>. 50%: lose <b>' + hurt + ' HP</b> (never below 1) and the cache is ruined.</p>',
+      [{ id: 'poiPry', label: 'Pry it open', primary: true, onclick: () => { if (Math.random() < .5) { state.shards += SEALED_SHARDS; finishPOI(p, 'The seal gives: +' + SEALED_SHARDS + ' Shards.'); } else { state.hp = Math.max(1, state.hp - hurt); finishPOI(p, 'The seal discharges: −' + hurt + ' HP.'); } } }, { id: 'poiLeave', label: 'Leave it', onclick: closeMenu }]);
   }
 }
 function trainCard(c) { const o = owned(c.uid) || c; for (let k = 0; k < 15; k++) recordCardUse(o); }
 // Round 157: each lore point (Data Terminal, Sun Dial, Storm Glyph...) holds 15 Shards (was 2).
 const LORE_SHARDS = 15;
+// Round 158: a supply cache holds 15 Shards (was 3-6); a sealed cache, which can shock you, 25 (was 9).
+const CACHE_SHARDS = 15, SEALED_SHARDS = 25;
 function readLore(p) {
   state.shards += LORE_SHARDS; state.poi.lore.push(p.id);
   const read = state.poi.lore.filter(id => id.startsWith(activeRegion + ':')).length;

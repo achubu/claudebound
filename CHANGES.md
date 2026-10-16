@@ -3465,3 +3465,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   Vespera, and Chronospire's) now gives ◇ 15 Shards when read, up from 2 (`LORE_SHARDS` in
   `assets/exploration.js`). Reading all five in a world still adds ◇ 15 and a side card.
 - `tests/exploration.test.cjs` checks the new total.
+
+## Round 158: caches hold more Shards
+
+- Supply caches now give ◇ 15 Shards (was 3-6; the 25% chance of a potion is unchanged).
+- Sealed caches now give ◇ 25 on a good pry (was 9); the other 50% still shocks you for 15%
+  of your max HP. They stay worth more than a supply cache because of that risk.
+- `CACHE_SHARDS` / `SEALED_SHARDS` in `assets/exploration.js`; `tests/exploration.test.cjs`
+  checks both.
