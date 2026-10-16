@@ -3424,3 +3424,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   level and mastery uses; from then on it is protected and levels up the Soulbound way
   (mastery plus an Upgrade Crystal). `soulbindCard` / `SOULBIND_COST` in `index.html`.
 - `tests/card-copies.test.cjs` checks the price, the kept level and uses, and that it binds once.
+
+## Round 153: the Cardsmith
+
+- Every world now has a **Cardsmith** (⚒) in its start room, beside the Nexus Waypoint
+  (`assets/cardsmith.js`). Walk up to it to:
+  - upgrade an Impermanent card by one level (◇ 36 / 60 / 90, same prices as the merchant);
+  - make an Impermanent card Soulbound (◇ 500; it keeps its level and mastery).
+- The "Make Soulbound" buttons added to the Deck Workshop in Round 152 moved to the Cardsmith.
+  The merchant still sells card upgrades too.
+- New `tests/cardsmith.test.cjs`. CLAUDE.md now lists `solaris` and `cardsmith` in the script
+  order and notes that `elaris` is shown as Solaris.

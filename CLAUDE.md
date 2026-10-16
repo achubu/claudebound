@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 152) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 153) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -17,14 +17,16 @@ change set.
   - Then `elaris-wildlife`, `expansion`, `encounter-depth`, `talent-matrix`,
     `aether-deck`, `card-variety`, `battle-hud`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
-    `organic-areas`, `exploration`, `neon-world`, `chronospire`, `pickups`.
+    `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`, `pickups`,
+    `cardsmith`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`.
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.
   Prefer `function` declarations for new globals that other files test with
   `typeof`.
 - **Three worlds, swapped in by `configureRegion(region)`:**
   - `city` is Neon Aftermath.
-  - `elaris`.
+  - `elaris` is shown to players as **Solaris** (Round 149): 54 rooms built from
+    flipped tiles by `tools/build_solaris.py` into `assets/solaris-data.js`.
   - `vespera`.
   - `chronospire` is a fourth area.
 - **Neon Aftermath is one painted world map** (Round 91+):
