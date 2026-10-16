@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 169: the Sunwrapped Revenant, a tech mummy for Solaris
+
+- New Solaris patrol enemy, the **Sunwrapped Revenant** ☥: 50 HP, 9 attack, earth (its charged
+  strike poisons). It joins the Solaris wildlife pool (`assets/sun-revenant.js`, loaded after
+  `battle-hud`), and the compendium lists it.
+- **Entomb**, a new affliction and its signature move: when it lands, the strongest card in your
+  next hand is wrapped in linen and can't be played that turn. The card shows "☥ ENTOMBED".
+  Purifying Light unwraps it, and Null Anchor prevents it.
+- **Art:** the owner's 4-pose sheet, keyed off magenta (`assets/monsters/elaris/sun-revenant.png`).
+  The poses are separate stances, not a loop, so the Revenant stands with a breathing sway, swings
+  its club when it hits you and recoils when you hit it. If `sun-revenant-walk.png` is added, map
+  patrols walk with it instead.
+- Also: the compendium's Solaris blurb now describes the desert city.
+- New `tests/sun-revenant.test.cjs`.
+
 ## Round 168: one thing per room
 
 - No room holds two things any more. Waypoints, the Cardsmith, the merchant, points of

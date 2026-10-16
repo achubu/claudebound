@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 168) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 169) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -15,7 +15,7 @@ change set.
     `aethercede-`), then `neon-city.js`, then `cards.js`, then the inline game script, which holds
     the `rooms` literal for Neon Aftermath.
   - Then `elaris-wildlife`, `expansion`, `encounter-depth`, `talent-matrix`,
-    `aether-deck`, `card-variety`, `battle-hud`.
+    `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`, `pickups`,
     `cardsmith`. (`solaris-data.js` loads just before `expansion.js`.)
