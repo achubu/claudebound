@@ -16,7 +16,7 @@ from scipy import ndimage as nd
 SRC = 'assets/environment/solaris/src'
 OUT = 'assets/environment/solaris'
 # Tile name prefix -> the exits of the tile as painted.
-SHAPES = {'corner': 'ne', 't-bottom': 'esw', 't-right': 'nes', 'cross': 'nesw', 'dead-bottom': 's', 'dead-right': 'e', 'straight': 'ns'}
+SHAPES = {'corner': 'ne', 't-bottom': 'esw', 't-right': 'nes', 'cross': 'nesw', 'dead-bottom': 's', 'dead-right': 'e', 'dead-left': 'w', 'straight': 'ns'}
 FLIP_EXITS = {(0, 0): {}, (1, 0): {'e': 'w', 'w': 'e'}, (0, 1): {'n': 's', 's': 'n'}, (1, 1): {'e': 'w', 'w': 'e', 'n': 's', 's': 'n'}}
 ROAD = np.array([247, 227, 175])
 
@@ -40,7 +40,7 @@ def placeholders(tiles):
     if has('t-bottom') and not has('dead-bottom'):
         st = np.asarray(out.get('straight-ph') or first('straight')); top = np.asarray(first('t-bottom').resize((st.shape[1], st.shape[0])))
         a = st.copy(); cut = int(st.shape[0] * .44); a[:cut] = top[:cut]; out['dead-bottom-ph'] = Image.fromarray(a)
-    if has('t-right') and has('t-bottom') and not has('dead-right'):
+    if has('t-right') and has('t-bottom') and not has('dead-right') and not has('dead-left'):
         tb = np.asarray(first('t-bottom')); tr = np.asarray(first('t-right').resize((tb.shape[1], tb.shape[0])))
         a = tb.copy(); cut = int(tb.shape[1] * .44); a[:, :cut] = tr[:, :cut]
         a[int(tb.shape[0] * .56):, cut:int(tb.shape[1] * .56)] = tb[int(tb.shape[0] * .56):, int(tb.shape[1] * .56):int(tb.shape[1] * .56) + int(tb.shape[1] * .56) - cut]
@@ -70,6 +70,11 @@ MANUAL = {
     'straight-a': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
     'straight-b': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
 }
+# Traced tiles whose round plazas the tracer misses: these shapes are added to the traced roads.
+EXTRA = {
+    'cross-a': [('ellipse', (328, 176, 472, 320))],  # sun-dial roundabout at the crossing
+    'dead-left': [('ellipse', (448, 168, 604, 312))],  # round plaza at the end of the road
+}
 MANUAL['sol-miniboss'] = MANUAL['sol-boss']  # same stronghold yard, painted twice
 # room: (painting, exits as painted, flip x, flip y). Rooms are picked so most paintings need no
 # top-to-bottom flip (that would turn their buildings upside down).
@@ -87,7 +92,8 @@ def manual_mask(spec):
     from PIL import ImageDraw
     im = Image.new('L', (800, 500), 0); dr = ImageDraw.Draw(im)
     for sh in spec['shapes']:
-        if isinstance(sh, tuple): dr.rectangle(sh, fill=1)
+        if isinstance(sh, tuple) and sh[0] == 'ellipse': dr.ellipse(sh[1], fill=1)
+        elif isinstance(sh, tuple): dr.rectangle(sh, fill=1)
         else: dr.polygon(sh, fill=1)
     return np.asarray(im).astype(bool)
 
@@ -156,6 +162,8 @@ def main():
     shape_of = {n: next(s for s in sorted(SHAPES, key=len, reverse=True) if n.startswith(s)) for n in tiles}
     for n, im in {**tiles, **marks}.items(): im.save(f'{OUT}/{n}.webp', quality=88, method=6)
     masks = {n: manual_mask(MANUAL[n]) if n in MANUAL else trace(im, SHAPES[shape_of[n]]) for n, im in tiles.items()}
+    for n, shapes in EXTRA.items():
+        if n in masks: masks[n] = masks[n] | manual_mask({'shapes': shapes})
     masks.update({n: manual_mask(MANUAL[n]) for n in marks})
     rooms = neon_layout()
     # Pick a tile and flip for every room; spread variants so neighbours differ.

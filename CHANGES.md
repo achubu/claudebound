@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 166: Solaris crossroads and west dead end
+
+- The owner's `sol-cross-a` (sun-dial roundabout) and `sol-cross-b` (mirror towers) replace the
+  crossroads stand-in in 8 rooms, 4 each. `sol-dead-left` (collapsed solar tower) is the room that
+  only opens west (4,5). New shape `dead-left` in `tools/build_solaris.py`; the `cross-ph` and
+  `dead-right-ph` stand-ins are gone.
+- The tracer misses the round plazas, so `EXTRA` adds the roundabout and the dead end's plaza to
+  the traced roads.
+- `sol-start` in this upload is the colonnade avenue again, so it isn't used. The start camp
+  (right and bottom exits) is still to come. The north dead end is the last stand-in.
+
 ## Round 165: fewer upside-down Solaris rooms
 
 - `tools/build_solaris.py` now flips a tile top to bottom only when no unflipped or mirrored
