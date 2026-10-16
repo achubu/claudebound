@@ -1,7 +1,7 @@
 'use strict';
 // =====================================================================
-// Round 153: the CARDSMITH. Every world has one at its start room (safe
-// ground, next to the Nexus Waypoint). The cardsmith sells:
+// Round 153: the CARDSMITH. Every world has one; since Round 156 it stands in the
+// room of the world's middle Nexus Waypoint, about halfway in. The cardsmith sells:
 //   - card upgrades for Impermanent cards (◇ 36 / 60 / 90, the merchant's prices)
 //   - making an Impermanent card Soulbound (◇ 500, keeps its level and mastery)
 // =====================================================================
@@ -10,9 +10,10 @@ const cardsmithCache = {};
 function cardsmithSpot(key) {
   const ck = activeRegion + ':' + key; if (ck in cardsmithCache) return cardsmithCache[ck];
   const nexus = typeof poiAt === 'function' ? poiAt(key) : null, avoid = nexus ? [{ x: nexus.x, y: nexus.y }] : [];
-  const clear = (x, y) => avoid.every(a => Math.hypot(a.x - x, a.y - y) > 110) && Math.hypot(400 - x, 250 - y) > 70; // away from the waypoint and the arrival point
+  const spawns = typeof roomSpawns === 'function' ? roomSpawns(key).map(q => ({ x: q.x, y: q.y })) : [];
+  const clear = (x, y) => avoid.every(a => Math.hypot(a.x - x, a.y - y) > 110) && spawns.every(a => Math.hypot(a.x - x, a.y - y) > 120); // away from the waypoint and the patrols
   for (const [tx, ty] of [[560, 330], [560, 170], [240, 380], [640, 250], [300, 140]]) {
-    const q = typeof organicItemSpot === 'function' ? organicItemSpot(key, tx, ty, avoid, 110) : null;
+    const q = typeof organicItemSpot === 'function' ? organicItemSpot(key, tx, ty, avoid.concat(spawns), 110) : null;
     if (q && clear(q.x, q.y)) return cardsmithCache[ck] = { x: q.x, y: q.y };
   }
   for (let r = 0; r < 320; r += 12) for (let a = 0; a < 16; a++) {
@@ -22,7 +23,7 @@ function cardsmithSpot(key) {
   return cardsmithCache[ck] = { x: 560, y: 300 };
 }
 function cardsmithFor(region = activeRegion) {
-  const start = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS[region] ? NEXUS_POINTS[region].start : Object.keys(rooms).find(isStartRoom);
+  const start = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS[region] ? NEXUS_POINTS[region].mid : Object.keys(rooms).find(isStartRoom);
   if (!start || !rooms[start]) return null;
   const s = cardsmithSpot(start);
   return { key: start, x: s.x, y: s.y, type: 'cardsmith', id: region + ':cardsmith' };

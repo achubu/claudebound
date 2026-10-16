@@ -3451,3 +3451,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   the sunlit desert city inside. It replaces the old forest portal for the Neon Aftermath
   portal into Solaris (Warden's Crown), half size with the cyan pulsing glow
   (`assets/solaris.js`). `tests/poi-art.test.cjs` checks it.
+
+## Round 156: the Cardsmith moves to the middle of each world
+
+- The Cardsmith now stands in the room of each world's middle Nexus Waypoint instead of the
+  start room: Neon Square (city), Brass Yards (Solaris), Glasswind Reach (Vespera), Hourglass
+  Hall (Chronospire), about halfway in. Its spot keeps clear of the waypoint and the room's
+  patrols. `tests/cardsmith.test.cjs` checks the room and the clearance.
