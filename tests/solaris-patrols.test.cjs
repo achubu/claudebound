@@ -11,7 +11,7 @@ return JSON.stringify(out)})()`));
 const safe = { elaris: '0,0', city: '0,5' };
 for (const row of r.elaris) {
   if (row.k === safe.elaris || row.quiet || row.bossRoom) continue;
-  assert.strictEqual(row.regular, Math.max(0, row.base - 1), 'Solaris ' + row.k + ' has one fewer patrol');
+  assert.strictEqual(row.regular, row.base > 1 ? row.base - 1 : row.base, 'Solaris ' + row.k + ' patrol count');
 }
 for (const k of ['5,2', '8,0', '8,5']) assert.strictEqual(r.elaris.find(x => x.k === k).boss, 1, 'boss kept in ' + k);
 for (const row of r.city) {

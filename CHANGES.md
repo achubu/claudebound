@@ -3498,10 +3498,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 
 ## Round 162: fewer patrols in Solaris
 
-- Every Solaris room now spawns one fewer regular patrol than the shared distance formula
-  (`areaPatrolCount`) gives: near rooms 1→0, middle rooms 2→1, far rooms 3→2. Mini-boss and boss
-  rooms (`5,2`, `8,0`, `8,5`) keep their boss. Across the 54 rooms that takes the regular patrols
-  from 96 down to 49 (`roomSpawns` in `assets/expansion.js`). Other worlds are unchanged.
+- Solaris rooms with two or more regular patrols now spawn one fewer than the shared distance
+  formula (`areaPatrolCount`) gives: middle rooms 2→1, far rooms 3→2. Rooms that had a single
+  patrol keep it, so no ordinary room is left empty. Mini-boss and boss rooms (`5,2`, `8,0`,
+  `8,5`) keep their boss. Across the 54 rooms the regular patrols drop from 96 to 58
+  (`roomSpawns` in `assets/expansion.js`). Other worlds are unchanged.
 - New `tests/solaris-patrols.test.cjs` checks the count room by room, the bosses, and that the
   city still uses the full count.
 
