@@ -26,3 +26,7 @@ const sv=JSON.parse(run(`JSON.stringify([0,1,2,3].map(l=>destroySalvage({level:l
 assert.deepEqual(sv,[5,20,50,100],'destroy salvage: 5 / 20 / 50 / 100 Shards by level');
 assert(/const salvage=destroySalvage\(victim\);state\.shards=\(state\.shards\|\|0\)\+salvage/.test(fs.readFileSync(path.join(__dirname,'../index.html'),'utf8')),'destroying a card adds the Shards');
 console.log('PASS: destroying a card gives 5/20/50/100 Shards for Level 0/1/2/3.');
+// Round 152: an Impermanent card can be made Soulbound for 500 Shards.
+const sb=JSON.parse(run(`(()=>{newGame();const c=make('cleave');c.level=2;c.uses=40;state.pool.push(c);state.shards=499;const poor=soulbindCard(c);state.shards=520;const ok=soulbindCard(c),again=soulbindCard(c);return JSON.stringify({poor,ok,again,soul:c.soulbound,level:c.level,uses:c.uses,shards:state.shards})})()`));
+assert.deepEqual(sb,{poor:false,ok:true,again:false,soul:true,level:2,uses:40,shards:20},'500 Shards makes a card Soulbound, keeping its level and mastery; only once');
+console.log('PASS: Make Soulbound costs 500 Shards and keeps level and mastery.');

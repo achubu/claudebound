@@ -3416,3 +3416,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Every portal is drawn at half its old size (48×72, the sun-gate 59×79) and pulses with a
   soft glow (cyan; gold and cyan for the sun-gate). Reduced-motion players get a steady glow.
 - `tests/poi-art.test.cjs` checks the art and sizes.
+
+## Round 152: make a card Soulbound for 500 Shards
+
+- Impermanent cards get a "Make Soulbound · ◇ 500" button in the Deck Workshop (it binds the
+  most-used copy in the stack) and on each copy in the all-copies window. The card keeps its
+  level and mastery uses; from then on it is protected and levels up the Soulbound way
+  (mastery plus an Upgrade Crystal). `soulbindCard` / `SOULBIND_COST` in `index.html`.
+- `tests/card-copies.test.cjs` checks the price, the kept level and uses, and that it binds once.
