@@ -48,6 +48,50 @@ def placeholders(tiles):
     return out
 
 
+# Round 164: landmark rooms. Each painting in src/landmarks/ is used for one room only. Their
+# textured paving and sand plazas are beyond the colour tracer, so walk areas are drawn by hand:
+# rectangles and polygons in 800x500 coordinates on the painting as delivered. The same goes for
+# the straight tiles. LANDMARKS gives each landmark its room, exits as painted, and flip.
+MANUAL = {
+    'sol-relic-ember': {'shapes': [
+        [(0, 224), (348, 224), (444, 318), (444, 424), (420, 424), (420, 500), (352, 500), (352, 332), (328, 296), (0, 296)],
+        (444, 368, 640, 424), (592, 318, 640, 424), (484, 154, 748, 322), (600, 120, 650, 160)]},
+    'sol-relic-crystal': {'shapes': [
+        (300, 0, 376, 250), [(0, 218), (330, 218), (376, 190), (376, 288), (0, 288)],
+        (376, 150, 540, 322), (300, 318, 352, 350), (250, 345, 400, 478)]},
+    'sol-relic-lens': {'shapes': [
+        (352, 296, 448, 500), (348, 196, 452, 300), (240, 152, 556, 202),
+        (176, 12, 312, 160), (488, 12, 628, 160), (312, 112, 488, 160), (124, 276, 300, 448), (300, 300, 352, 440)]},
+    'sol-boss': {'shapes': [
+        (376, 0, 424, 90), [(280, 82), (496, 82), (580, 164), (580, 320), (536, 372), (260, 372), (200, 264), (200, 160)],
+        (0, 208, 210, 268), (580, 90, 656, 260), (120, 72, 200, 208)]},
+    'sol-relic-boots': {'shapes': [
+        (376, 0, 432, 276), (376, 216, 800, 276), (168, 240, 560, 320), (168, 320, 236, 470), (460, 112, 680, 216)]},
+    'straight-a': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
+    'straight-b': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
+}
+MANUAL['sol-miniboss'] = MANUAL['sol-boss']  # same stronghold yard, painted twice
+# room: (painting, exits as painted, flip x, flip y). Rooms are picked so most paintings need no
+# top-to-bottom flip (that would turn their buildings upside down).
+LANDMARKS = {
+    '8,5': ('sol-boss', 'nw', 0, 0),
+    '5,2': ('sol-miniboss', 'nw', 0, 0),
+    '8,0': ('sol-relic-ember', 'sw', 0, 0),
+    '0,2': ('sol-relic-boots', 'ne', 0, 0),
+    '6,2': ('sol-relic-crystal', 'nw', 1, 0),
+    '5,5': ('sol-relic-lens', 's', 0, 1),
+}
+
+
+def manual_mask(spec):
+    from PIL import ImageDraw
+    im = Image.new('L', (800, 500), 0); dr = ImageDraw.Draw(im)
+    for sh in spec['shapes']:
+        if isinstance(sh, tuple): dr.rectangle(sh, fill=1)
+        else: dr.polygon(sh, fill=1)
+    return np.asarray(im).astype(bool)
+
+
 def trace(im, exits):
     a = np.asarray(im.resize((800, 500), Image.LANCZOS)).astype(int)
     d = np.abs(a - ROAD).max(2)
@@ -66,7 +110,8 @@ def trace(im, exits):
 
 NAMES_A = ['Sunspire', 'Amber', 'Dune', 'Gilded', 'Mirage', 'Ember', 'Saffron', 'Halo', 'Glass', 'Copper', 'Solstice', 'Zenith', 'Cinder', 'Oasis', 'Brass', 'Radiant', 'Sandglass', 'Noon']
 NAMES_B = ['Bazaar', 'Terrace', 'Court', 'Steps', 'Arcade', 'Gardens', 'Row', 'Plaza', 'Quarter', 'Wells', 'Yards', 'Causeway', 'Promenade', 'Market', 'Walk', 'Crossing', 'Arches', 'Lanes']
-SPECIAL = {'0,0': 'Dawnfire Gate', '8,5': 'The Solar Crown', '5,2': 'Temple of the Noon Bell', '8,0': 'Mirror Fortress'}
+SPECIAL = {'0,0': 'Dawnfire Gate', '8,5': 'The Solar Crown', '5,2': 'Scrapwall Stronghold', '8,0': 'Temple of the Noon Bell',
+           '0,2': 'Statue Garden', '6,2': 'Shattered Array', '5,5': 'Brass Observatory'}
 
 
 def neon_layout():
@@ -107,14 +152,21 @@ def neon_layout():
 def main():
     tiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(SRC + '/*.*'))}
     tiles.update(placeholders(tiles))
+    marks = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(SRC + '/landmarks/*.*'))}
     shape_of = {n: next(s for s in sorted(SHAPES, key=len, reverse=True) if n.startswith(s)) for n in tiles}
-    for n, im in tiles.items(): im.save(f'{OUT}/{n}.webp', quality=88, method=6)
-    masks = {n: trace(im, SHAPES[shape_of[n]]) for n, im in tiles.items()}
+    for n, im in {**tiles, **marks}.items(): im.save(f'{OUT}/{n}.webp', quality=88, method=6)
+    masks = {n: manual_mask(MANUAL[n]) if n in MANUAL else trace(im, SHAPES[shape_of[n]]) for n, im in tiles.items()}
+    masks.update({n: manual_mask(MANUAL[n]) for n in marks})
     rooms = neon_layout()
     # Pick a tile and flip for every room; spread variants so neighbours differ.
     plan = {}
     for key in sorted(rooms, key=lambda k: (int(k.split(',')[1]), int(k.split(',')[0]))):
         want = set(rooms[key]['exits'])
+        if key in LANDMARKS:
+            n, ex, fx, fy = LANDMARKS[key]
+            if n not in marks: raise SystemExit('missing landmark painting ' + n)
+            if {FLIP_EXITS[(fx, fy)].get(d, d) for d in ex} != want: raise SystemExit('landmark ' + n + ' does not fit ' + key)
+            plan[key] = (n, (fx, fy)); continue
         opts = []
         for n in sorted(tiles):
             base = set(SHAPES[shape_of[n]])

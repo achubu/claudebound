@@ -256,8 +256,8 @@ function configureRegion(region){activeRegion=region;for(const key of Object.key
  // room key changed from '3,2' to '10,9' -- every hardcoded reference
  // (roomSpawns' isBossRoom/regionBoss checks, portalTarget() both
  // directions) was updated alongside this room block.
- // Round 149: Solaris rooms (world 2). Mini-bosses guard the Temple of the Noon Bell (5,2) and
- // the Mirror Fortress (8,0); the Bloom Tyrant holds the Solar Crown (8,5), the far corner.
+ // Round 149: Solaris rooms (world 2). Mini-bosses guard the Scrapwall Stronghold (5,2) and
+ // the Temple of the Noon Bell (8,0); the Bloom Tyrant holds the Solar Crown (8,5), the far corner.
  const SOLARIS_ENEMY={'5,2':'tidewardenElaris','8,0':'galeSovereign','8,5':'bloomTyrant'};
  const elarisRooms=Object.fromEntries(Object.entries(SOLARIS_LAYOUT).map(([k,r],i)=>[k,{name:r.name,exits:{...r.exits},district:0,landmark:'SOLARIS',cityIndex:i,world:[...r.world],...(r.zone?{zone:r.zone}:{}),...(r.level?{level:r.level}:{}),...(SOLARIS_ENEMY[k]?{enemy:[SOLARIS_ENEMY[k],400,250]}:{})}]));
  Object.assign(rooms,elarisRooms);

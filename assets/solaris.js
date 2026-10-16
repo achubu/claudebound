@@ -37,7 +37,8 @@ if (typeof CITY_BLOCK_ARTS !== 'undefined') delete CITY_BLOCK_ARTS.elaris;
 if (typeof regionDistanceCache !== 'undefined') delete regionDistanceCache.elaris;
 
 // --- Ground: the room's tile, flipped as planned. Tiles not painted yet use stand-ins cut
-// from the real tiles (SOLARIS_PLACEHOLDERS); drop a new painting into
+// from the real tiles (SOLARIS_PLACEHOLDERS), and landmark rooms have their own painting
+// (src/landmarks/, Round 164); drop a new painting into
 // assets/environment/solaris/src/ and re-run the tool to replace one.
 const solarisImages = {};
 function solarisTile(name) {

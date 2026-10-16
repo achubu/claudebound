@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 164: Solaris landmark rooms and the colonnade straight
+
+- Six of the owner's landmark paintings are now one-off rooms (`assets/environment/solaris/src/landmarks/`):
+
+  | Room | Painting | Notes |
+  |---|---|---|
+  | 8,5 The Solar Crown | `sol-boss` (arena stronghold) | Bloom Tyrant |
+  | 5,2 Scrapwall Stronghold | `sol-miniboss` | Tidebound Warden; was "Temple of the Noon Bell" |
+  | 8,0 Temple of the Noon Bell | `sol-relic-ember` (sun temple, brazier) | Gale Sovereign; was "Mirror Fortress" |
+  | 0,2 Statue Garden | `sol-relic-boots` | |
+  | 6,2 Shattered Array | `sol-relic-crystal` | mirrored left to right |
+  | 5,5 Brass Observatory | `sol-relic-lens` | flipped top to bottom (this room only opens north) |
+
+  Each painting went to a room whose exits fit it, preferring no top-to-bottom flip, which turns
+  buildings upside down. The two mini-boss room names were swapped to match their new art.
+- The colonnade avenue paintings are the real `straight` tiles (`straight-a`, `straight-b`), so
+  `straight-ph` is gone. The north dead ends are now cut from the real straight.
+- These paintings use textured paving and sand plazas the colour tracer can't follow, so
+  `tools/build_solaris.py` has hand-drawn walk areas (`MANUAL`) for them, and a `LANDMARKS` table
+  that pins each painting to its room and checks the exits fit.
+- Still placeholders: the crossroads (8 rooms), the north dead end (4 rooms) and the west dead end
+  (1 room).
+- New `tests/solaris-landmarks.test.cjs`.
+
 ## Round 163: deck size grows with each world conquered
 
 - Max deck size no longer gets a flat +4 outside Neon Aftermath. Instead it grows by +1, for
