@@ -347,7 +347,10 @@ function roomSpawns(key){
  // patrols sharing the space, regardless of what the distance-based
  // density formula would otherwise put there.
  const isBossRoom=(r.enemy&&enemies[r.enemy[0]]&&enemies[r.enemy[0]].boss)||(activeRegion==='elaris'&&key===SOLARIS_BOSS_ROOM);
- const count=safe?0:isBossRoom?1:(typeof areaPatrolCount==='function'?areaPatrolCount(key):2),list=[];
+ // Round 162: Solaris rooms carry one fewer regular patrol than the shared
+ // distance formula gives (boss rooms keep their boss).
+ const basePatrols=typeof areaPatrolCount==='function'?areaPatrolCount(key):2;
+ const count=safe?0:isBossRoom?1:activeRegion==='elaris'?Math.max(0,basePatrols-1):basePatrols,list=[];
  // Every room has 4 fixed static building blocks at its corners (see
  // solids() in neon-city.js), leaving only a narrow cross-shaped walkable
  // area — which sharply limits how far spawn "home" sectors can actually
