@@ -3364,3 +3364,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   lock; hovering a socket names it (`gauntletHTML` in `assets/pickups.js`).
 - The screen's drop-rate note now reads the real elite odds (6.4%) instead of a fixed "8%".
 - `tests/poi-art.test.cjs` checks the five sockets, a slotted crystal and the locks.
+
+## Round 148: the Aetherlink interface on the new gauntlet screen
+
+- New owner gauntlet painting (`assets/items/aetherlink-gauntlet.webp`, from the clean
+  "blankaetherlink" version, magenta keyed out) replaces Round 147's.
+- The real Aetherlink socket panels are drawn on its screen (`GAUNTLET_SCREEN` in
+  `assets/pickups.js`): five sockets side by side, each with its crystal, name, effect and
+  crystal picker, or its unlock level. Text is sized to the gauntlet (container units) and
+  checked to fit at desktop and tablet widths.
+- On narrow screens each socket shows just its number and crystal; tapping a socket opens the
+  crystal picker. Names and effects are still listed in the collection below.
+- `tests/poi-art.test.cjs` checks the screen position and that the panels move onto it.

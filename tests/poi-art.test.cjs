@@ -7,9 +7,9 @@ for(const n of ['nexus','terminal','sealed','cache','shrine','merchant','campfir
 assert(/elaris-chest\.webp/.test(fs.readFileSync(path.join(__dirname,'../assets/pickups.js'),'utf8')),'Elaris map chests use their own sprite');
 assert(/\.poi-node\.poi-art\.poi-merchant\{width:72px/.test(fs.readFileSync(path.join(__dirname,'../assets/pickups.js'),'utf8')),'the merchant is drawn larger');
 console.log('PASS: points of interest use painted sprites (Nexus Waypoint, Data Terminal, Sealed and Supply Caches, Aether Shrine).');
-// Round 147: the Aetherlink screen draws the gauntlet with crystals in their sockets.
-const g=run(`(()=>{newGame();state.playerLevel=30;const a=rollUpgradeCrystal('assault',.1);state.device.crystals.push(a);state.device.slots=[a.uid,null,null,null,null];return gauntletHTML()})()`);
+// Round 148: the Aetherlink interface is drawn on the gauntlet's screen.
 assert(fs.existsSync(path.join(__dirname,'../assets/items/aetherlink-gauntlet.webp')),'gauntlet image');
-assert.equal((g.match(/g-socket/g)||[]).length,5,'five sockets');assert(/g-socket filled/.test(g)&&/crystal-art/.test(g),'a slotted crystal sits in its socket');
-assert((g.match(/g-socket locked/g)||[]).length===5-run('deviceSlots()'),'locked sockets are marked');
-console.log('PASS: the Aetherlink gauntlet shows its five sockets with slotted crystals.');
+{ const js=fs.readFileSync(path.join(__dirname,'../assets/pickups.js'),'utf8');
+  assert(/g\.querySelector\('\.g-screen'\)\.append\(grid\)/.test(js),'the socket panels move onto the gauntlet screen');
+  assert(/GAUNTLET_SCREEN = \{ left: 29\.28/.test(js),'screen position matches the painting'); }
+console.log('PASS: the Aetherlink interface sits on the gauntlet screen.');

@@ -220,30 +220,33 @@ const poiRewardStyles = document.createElement('style');
 poiRewardStyles.textContent = '#poiRewards{flex-wrap:wrap;justify-content:center;align-items:flex-start}';
 document.head.append(poiRewardStyles);
 
-// Round 147: the Aetherlink screen shows the gauntlet itself, with each slotted crystal drawn in
-// its socket (empty sockets stay open, locked ones are dimmed with a lock).
-const GAUNTLET_SOCKETS = [[31.1, 16.7], [40.0, 25.4], [49.4, 35.8], [57.9, 45.8], [66.0, 55.3]]; // % of the image
-function gauntletHTML() {
-  const open = typeof deviceSlots === 'function' ? deviceSlots() : 0;
-  return '<div class="gauntlet" role="img" aria-label="Aetherlink Gauntlet, ' + open + ' of 5 sockets unlocked"><img src="assets/items/aetherlink-gauntlet.webp" alt="">'
-    + GAUNTLET_SOCKETS.map(([x, y], i) => {
-      const c = state.device.crystals.find(k => k.uid === state.device.slots[i]), locked = i >= open;
-      const title = locked ? 'Socket ' + (i + 1) + ': unlocks at level ' + AETHERLINK_SOCKET_LEVELS[i] : c ? 'Socket ' + (i + 1) + ': ' + crystalLabel(c) : 'Socket ' + (i + 1) + ': empty';
-      return '<span class="g-socket' + (locked ? ' locked' : c ? ' filled rarity-' + crystalRarity(c) : '') + '" style="left:' + x + '%;top:' + y + '%" title="' + title + '">' + (c && !locked ? crystalArt(c) : locked ? '🔒' : '') + '</span>';
-    }).join('') + '</div>';
-}
+// Round 147/148: the Aetherlink screen is drawn inside the gauntlet. Round 148 uses the owner's
+// new gauntlet painting (its painted placeholder screen blanked) and moves the real socket
+// panels onto its screen. On narrow screens each socket is tapped to choose its crystal.
+const GAUNTLET_SCREEN = { left: 29.28, top: 21.37, width: 43.69, height: 50.0 }; // % of the image
 if (typeof showDevice === 'function') {
   const showDeviceBeforeGauntlet = showDevice;
   showDevice = function () {
     showDeviceBeforeGauntlet.apply(this, arguments);
     const grid = document.querySelector && document.querySelector('#menuModal .crystal-sockets');
-    if (grid && grid.insertAdjacentHTML) grid.insertAdjacentHTML('beforebegin', gauntletHTML());
+    if (!grid || !grid.before || !document.createElement) return;
+    const g = document.createElement('div'); g.className = 'gauntlet';
+    g.innerHTML = '<img src="assets/items/aetherlink-gauntlet.webp" alt="Aetherlink Gauntlet"><div class="g-screen" style="left:' + GAUNTLET_SCREEN.left + '%;top:' + GAUNTLET_SCREEN.top + '%;width:' + GAUNTLET_SCREEN.width + '%;height:' + GAUNTLET_SCREEN.height + '%"></div>';
+    grid.before(g); g.querySelector('.g-screen').append(grid);
+    grid.querySelectorAll('.crystal-socket h3').forEach((h, i) => { h.dataset.n = String(i + 1); });
   };
 }
 const gauntletStyles = document.createElement('style');
-gauntletStyles.textContent = '.gauntlet{position:relative;width:min(340px,80vw);margin:4px auto 14px}.gauntlet img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 14px #000a)}'
-  + '.g-socket{position:absolute;width:7.4%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;font-size:11px;pointer-events:auto}'
-  + '.g-socket.locked{background:#0b1016cc;box-shadow:inset 0 0 0 2px #0008}.g-socket.filled{box-shadow:0 0 10px 2px var(--rarity,#59cbb2)}'
-  + '.g-socket .crystal-art{width:120%!important;height:120%!important;margin:0!important;filter:drop-shadow(0 0 4px var(--rarity,#59cbb2))}'
-  + '.g-socket.rarity-uncommon{--rarity:#59cbb2}.g-socket.rarity-rare{--rarity:#5aa8ff}.g-socket.rarity-epic{--rarity:#c77dff}';
+gauntletStyles.textContent = '.gauntlet{position:relative;width:100%;max-width:1000px;margin:6px auto 14px;container-type:inline-size}.gauntlet>img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 16px #000a)}'
+  + '.g-screen{position:absolute;padding:1.3cqw 1.1cqw;box-sizing:border-box}'
+  + '.g-screen .crystal-sockets{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:.7cqw!important;height:100%}'
+  + '.g-screen .crystal-socket{position:relative;margin:0;padding:.5cqw .4cqw!important;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3cqw;background:#0f1a26cc!important;border:1px solid #3d6b7f!important;border-radius:.6cqw;box-shadow:inset 0 0 1.4cqw #38d6ff22;overflow:hidden;text-align:center}'
+  + '.g-screen .crystal-socket h3{margin:0;font-size:1.15cqw;line-height:1.1;color:#ffe9a8;white-space:nowrap}'
+  + '.g-screen .crystal-socket .crystal-art{width:3cqw!important;height:3cqw!important;margin:.2cqw auto!important}'
+  + '.g-screen .crystal-socket .empty-crystal{font-size:1.9cqw;line-height:1;color:#7fb6c8;margin:.4cqw 0}'
+  + '.g-screen .crystal-socket b,.g-screen .crystal-socket p{margin:0;font-size:.85cqw;line-height:1.15;max-width:100%;overflow-wrap:anywhere}.g-screen .crystal-socket label{font-size:0!important}'
+  + '.g-screen .crystal-socket label{font-size:1cqw;display:flex!important;flex-direction:column;gap:0!important;width:100%}'
+  + '.g-screen .crystal-socket select{font-size:.85cqw;padding:0 .2cqw;height:2.1cqw;min-height:0!important;width:100%;max-width:100%;margin-top:.2cqw;line-height:1}'
+  // Narrow: the dropdown covers its whole socket invisibly, so a tap opens the crystal picker.
+  + '@container (max-width:700px){.g-screen .crystal-socket p,.g-screen .crystal-socket b,.g-screen .crystal-socket label>:not(select){display:none}.g-screen .crystal-socket label{font-size:0}.g-screen .crystal-socket select{position:absolute;inset:0;opacity:0;width:100%;height:100%!important}.g-screen .crystal-socket h3{font-size:0}.g-screen .crystal-socket h3::first-letter{font-size:0}.g-screen .crystal-socket h3::after{content:attr(data-n);font-size:3.2cqw}.g-screen .crystal-socket .crystal-art{width:6.5cqw!important;height:6.5cqw!important}.g-screen .crystal-socket .empty-crystal{font-size:4cqw}}';
 document.head.append(gauntletStyles);
