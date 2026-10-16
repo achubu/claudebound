@@ -156,6 +156,15 @@ function addSideCard(id) {
   if (state.side.deck.length < sideDeckMax() && sideCopies(id) < SIDE_COPIES) state.side.deck.push(card.uid);
   return card;
 }
+// Round 159: destroying a side card (a spare copy first) gives 5 Shards.
+const SIDE_DESTROY_SHARDS = 5;
+function destroySideCard(uid) {
+  ensureSide(); const card = state.side.pool.find(c => c.uid === uid); if (!card) return false;
+  state.side.pool = state.side.pool.filter(c => c.uid !== uid); state.side.deck = state.side.deck.filter(u => u !== uid);
+  state.shards = (state.shards || 0) + SIDE_DESTROY_SHARDS; save();
+  toast(SIDE_CARDS[card.id].name + ' destroyed: +' + SIDE_DESTROY_SHARDS + ' Shards (' + state.shards + ' total).');
+  return true;
+}
 function toggleSideCard(uid) {
   const card = state.side.pool.find(c => c.uid === uid); if (!card) return;
   if (state.side.deck.includes(uid)) state.side.deck = state.side.deck.filter(u => u !== uid);
@@ -523,12 +532,23 @@ showDeck = function () {
   panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + sideDeckMax() + '</b><p class="muted">Room for ' + sideDeckMax() + ' of ' + SIDE_DECK_MAX + ' cards. ' + (sideDeckMax() < SIDE_DECK_MAX ? 'Next slot: beat ' + SIDE_GROWTH_BOSSES.filter(id => !state.bosses.includes(id)).map(id => enemies[id] ? enemies[id].name : id)[0] + '. ' : 'Fully expanded. ') + '</p><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
   host.append(panel);
   const list = $('sidePoolCards');
-  [...state.side.pool].sort((a, c) => SIDE_CARDS[a.id].tier - SIDE_CARDS[c.id].tier || a.id.localeCompare(c.id)).forEach(card => {
-    const wrap = sideCardElement(card, () => {}), inDeck = state.side.deck.includes(card.uid);
-    wrap.firstChild.classList.toggle('active', inDeck);
-    const btn = document.createElement('button'); btn.textContent = inDeck ? '− Remove from side deck' : '+ Add to side deck';
-    btn.onclick = () => { toggleSideCard(card.uid); showDeck(); };
-    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(btn); wrap.append(actions); list.append(wrap);
+  // Round 159: copies of the same side card stack into one tile with a ×N count, like the main
+  // deck; each stack can add or remove a copy, and a spare copy can be destroyed for Shards.
+  const groups = {};
+  for (const card of state.side.pool) (groups[card.id] = groups[card.id] || []).push(card);
+  Object.keys(groups).sort((a, c) => SIDE_CARDS[a].tier - SIDE_CARDS[c].tier || a.localeCompare(c)).forEach(id => {
+    const cards = groups[id], inDeck = cards.filter(c => state.side.deck.includes(c.uid)), out = cards.filter(c => !state.side.deck.includes(c.uid)), n = cards.length;
+    const wrap = sideCardElement(cards[0], () => {});
+    wrap.firstChild.classList.toggle('active', inDeck.length > 0);
+    if (n > 1) { const badge = document.createElement('span'); badge.className = 'stack-count-badge'; badge.textContent = '×' + n; badge.title = n + ' copies · ' + inDeck.length + ' in your side deck'; wrap.append(badge); }
+    const info = document.createElement('p'); info.className = 'stack-info'; info.textContent = n > 1 ? inDeck.length + ' of ' + n + ' copies in side deck' : (inDeck.length ? 'In your side deck' : 'Not in your side deck'); wrap.append(info);
+    const add = document.createElement('button'); add.textContent = n > 1 ? '+ Add a copy to side deck' : '+ Add to side deck'; add.disabled = !out.length;
+    add.onclick = () => { if (out.length) { toggleSideCard(out[0].uid); showDeck(); } };
+    const rem = document.createElement('button'); rem.textContent = n > 1 ? '− Remove a copy' : '− Remove from side deck'; rem.disabled = !inDeck.length;
+    rem.onclick = () => { if (inDeck.length) { toggleSideCard(inDeck[inDeck.length - 1].uid); showDeck(); } };
+    const destroy = document.createElement('button'); destroy.className = 'danger'; destroy.textContent = (n > 1 ? 'Destroy a copy' : 'Destroy card') + ' · +◇ ' + SIDE_DESTROY_SHARDS;
+    destroy.onclick = () => { if (destroySideCard((out[0] || inDeck[inDeck.length - 1]).uid)) showDeck(); };
+    const actions = document.createElement('div'); actions.className = 'actions'; actions.append(add, rem, destroy); wrap.append(actions); list.append(wrap);
   });
 };
 

@@ -154,3 +154,10 @@ console.log('PASS: pitching, Aether, side-deck draws, all 11 enemy afflictions, 
 { const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/aether-deck.js'), 'utf8');
   require('node:assert')(/row\.prepend\(col\)/.test(src) && !/row\.append\(col\)/.test(src), 'side deck column is on the left of the hand');
   console.log('PASS: the side deck column sits on the left of the hand.'); }
+// Round 159: duplicate side cards stack, and a spare copy can be destroyed for 5 Shards.
+{ const { run: r3 } = require('./expansion.test.cjs'), assert = require('node:assert');
+  const o = JSON.parse(r3(`(()=>{newGame();ensureSide();ensureExplore();const a=addSideCard('aegis'),b=addSideCard('aegis');state.shards=0;const n0=state.side.pool.length;const ok=destroySideCard(b.uid);return JSON.stringify({ok,removed:n0-state.side.pool.length,shards:state.shards,stillThere:state.side.pool.some(c=>c.uid===a.uid),gone:!state.side.deck.includes(b.uid)})})()`));
+  assert.deepEqual(o, { ok: true, removed: 1, shards: 5, stillThere: true, gone: true }, 'destroying a side card copy gives 5 Shards');
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/aether-deck.js'), 'utf8');
+  assert(/badge\.className = 'stack-count-badge'; badge\.textContent = '×' \+ n/.test(src), 'side card copies stack with a count');
+  console.log('PASS: duplicate side cards stack with a count; destroying a copy gives 5 Shards.'); }

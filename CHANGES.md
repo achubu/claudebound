@@ -3473,3 +3473,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   of your max HP. They stay worth more than a supply cache because of that risk.
 - `CACHE_SHARDS` / `SEALED_SHARDS` in `assets/exploration.js`; `tests/exploration.test.cjs`
   checks both.
+
+## Round 159: side deck cards stack; destroy a copy for 5 Shards
+
+- In the Deck Workshop's side deck panel, copies of the same side card now stack into one tile
+  with a ×N count and an "x of N copies in side deck" line, like the main deck. Each stack has
+  "+ Add a copy", "− Remove a copy" and "Destroy a copy · +◇ 5".
+- Destroying a side card removes a spare copy first (one not in the side deck) and gives
+  ◇ 5 Shards (`destroySideCard`, `SIDE_DESTROY_SHARDS` in `assets/aether-deck.js`).
+- `tests/aether-deck.test.cjs` checks the stacking and the Shards.
