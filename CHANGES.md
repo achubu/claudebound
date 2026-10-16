@@ -3354,3 +3354,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   before), supply and sealed caches, events, campfire rests and shrines. The merchant keeps
   its own screens.
 - New `tests/poi-rewards.test.cjs`.
+
+## Round 147: Aetherlink gauntlet art
+
+- The owner's gauntlet painting (magenta keyed out, the purple glow kept as a soft halo) is in
+  `assets/items/aetherlink-gauntlet.webp` and shown at the top of the Aetherlink screen.
+- Its five painted sockets show the game state: each slotted crystal is drawn in its socket
+  with a rarity glow, open sockets stay empty, and sockets not yet unlocked are dimmed with a
+  lock; hovering a socket names it (`gauntletHTML` in `assets/pickups.js`).
+- The screen's drop-rate note now reads the real elite odds (6.4%) instead of a fixed "8%".
+- `tests/poi-art.test.cjs` checks the five sockets, a slotted crystal and the locks.

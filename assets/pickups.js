@@ -219,3 +219,31 @@ if (typeof finishPOI === 'function') {
 const poiRewardStyles = document.createElement('style');
 poiRewardStyles.textContent = '#poiRewards{flex-wrap:wrap;justify-content:center;align-items:flex-start}';
 document.head.append(poiRewardStyles);
+
+// Round 147: the Aetherlink screen shows the gauntlet itself, with each slotted crystal drawn in
+// its socket (empty sockets stay open, locked ones are dimmed with a lock).
+const GAUNTLET_SOCKETS = [[31.1, 16.7], [40.0, 25.4], [49.4, 35.8], [57.9, 45.8], [66.0, 55.3]]; // % of the image
+function gauntletHTML() {
+  const open = typeof deviceSlots === 'function' ? deviceSlots() : 0;
+  return '<div class="gauntlet" role="img" aria-label="Aetherlink Gauntlet, ' + open + ' of 5 sockets unlocked"><img src="assets/items/aetherlink-gauntlet.webp" alt="">'
+    + GAUNTLET_SOCKETS.map(([x, y], i) => {
+      const c = state.device.crystals.find(k => k.uid === state.device.slots[i]), locked = i >= open;
+      const title = locked ? 'Socket ' + (i + 1) + ': unlocks at level ' + AETHERLINK_SOCKET_LEVELS[i] : c ? 'Socket ' + (i + 1) + ': ' + crystalLabel(c) : 'Socket ' + (i + 1) + ': empty';
+      return '<span class="g-socket' + (locked ? ' locked' : c ? ' filled rarity-' + crystalRarity(c) : '') + '" style="left:' + x + '%;top:' + y + '%" title="' + title + '">' + (c && !locked ? crystalArt(c) : locked ? '🔒' : '') + '</span>';
+    }).join('') + '</div>';
+}
+if (typeof showDevice === 'function') {
+  const showDeviceBeforeGauntlet = showDevice;
+  showDevice = function () {
+    showDeviceBeforeGauntlet.apply(this, arguments);
+    const grid = document.querySelector && document.querySelector('#menuModal .crystal-sockets');
+    if (grid && grid.insertAdjacentHTML) grid.insertAdjacentHTML('beforebegin', gauntletHTML());
+  };
+}
+const gauntletStyles = document.createElement('style');
+gauntletStyles.textContent = '.gauntlet{position:relative;width:min(340px,80vw);margin:4px auto 14px}.gauntlet img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 14px #000a)}'
+  + '.g-socket{position:absolute;width:7.4%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;font-size:11px;pointer-events:auto}'
+  + '.g-socket.locked{background:#0b1016cc;box-shadow:inset 0 0 0 2px #0008}.g-socket.filled{box-shadow:0 0 10px 2px var(--rarity,#59cbb2)}'
+  + '.g-socket .crystal-art{width:120%!important;height:120%!important;margin:0!important;filter:drop-shadow(0 0 4px var(--rarity,#59cbb2))}'
+  + '.g-socket.rarity-uncommon{--rarity:#59cbb2}.g-socket.rarity-rare{--rarity:#5aa8ff}.g-socket.rarity-epic{--rarity:#c77dff}';
+document.head.append(gauntletStyles);
