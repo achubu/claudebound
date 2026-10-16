@@ -8,17 +8,15 @@
 // Null Anchor prevents it.
 //
 // Art: assets/monsters/elaris/sun-revenant.png holds 4 poses (stand, club swing, stand, recoil).
-// It stands and sways while idle, swings when it attacks and recoils when you hit it.
-// When sun-revenant-walk.png (a 4-frame walk loop) is present, patrols walk with it on the map.
+// In battle it stands and sways, swings when it attacks and recoils when you hit it. On the map
+// patrols walk with the 4-frame loop in sun-revenant-walk.png.
 // =====================================================================
 const SUN_REVENANT = { name: 'Sunwrapped Revenant', icon: '☥', hp: 50, attack: 9, element: 'earth', sheet: 'sun-revenant', cycle: '1.6s', poses: true };
 ELARIS_WILDLIFE.sunRevenant = SUN_REVENANT;
 enemies.sunRevenant = SUN_REVENANT;
 ENEMY_AFFLICTIONS.sunRevenant = ['entomb'];
 AFFLICTIONS.entomb = { name: 'Entomb', icon: '☥', type: 'hex', desc: () => 'Entomb: the strongest card in your next hand is wrapped in linen and cannot be played that turn.', answer: ['purify', 'anchor'] };
-const SUN_REVENANT_WALK = 'assets/monsters/elaris/sun-revenant-walk.png';
-let sunRevenantWalk = false;
-if (typeof Image === 'function') { try { const probe = new Image(); probe.onload = () => { sunRevenantWalk = true; }; probe.src = SUN_REVENANT_WALK; } catch (e) { /* no images (tests) */ } }
+const SUN_REVENANT_WALK = 'assets/monsters/elaris/sun-revenant-walk.png', sunRevenantWalk = true;
 
 function entombTarget(b) {
   const cards = b.hand.filter(c => !isJunk(c));

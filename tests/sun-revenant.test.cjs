@@ -13,7 +13,8 @@ const r = JSON.parse(run(`(()=>{const o={};newGame();state.region='elaris';confi
  applyHex(b,'entomb');endTurn();o.clearedNextTurn=state.battle!==b||b.entombed!==big.uid||!b.hand.includes(big);
  o.desc=afflictionText('entomb');
  return JSON.stringify(o)})()`));
-assert(r.art.includes('pose-sprite') && r.art.includes('sun-revenant'), 'pose sprite art');
+assert(r.art.includes('pose-sprite') && r.art.includes('has-walk') && r.art.includes('sun-revenant'), 'pose sprite art with the walk loop');
+assert(require('fs').existsSync(require('path').join(__dirname, '../assets/monsters/elaris/sun-revenant-walk.png')), 'walk sheet ships');
 assert.deepStrictEqual(r.aff, ['entomb']);
 assert(r.spawns, 'the Revenant patrols Solaris');
 assert.strictEqual(r.id, 'sunRevenant'); assert.strictEqual(r.element, 'earth');

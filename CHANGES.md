@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 170: the Revenant walks
+
+- The owner's 4-frame walk loop for the Sunwrapped Revenant (contact, passing, contact, passing) is
+  keyed off magenta into `assets/monsters/elaris/sun-revenant-walk.png`. Each frame is anchored on
+  its legs and set on a shared foot line. Map patrols loop it every 1.1s and flip it when they turn.
+  Battle keeps the pose sheet: stand and sway, club swing and recoil.
+- The walk sheet ships with the game, so it is wired in directly instead of being probed at load.
+- The keyer now also removes magenta specks of 4 pixels or more trapped inside the figure.
+
 ## Round 169: the Sunwrapped Revenant, a tech mummy for Solaris
 
 - New Solaris patrol enemy, the **Sunwrapped Revenant** ☥: 50 HP, 9 attack, earth (its charged
