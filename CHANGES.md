@@ -3435,3 +3435,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   The merchant still sells card upgrades too.
 - New `tests/cardsmith.test.cjs`. CLAUDE.md now lists `solaris` and `cardsmith` in the script
   order and notes that `elaris` is shown as Solaris.
+
+## Round 154: Solaris sprites for the merchant, Cardsmith, Sun Dials and chests
+
+- Four owner sprites (magenta keyed out by flood fill from the edges, plus enclosed pockets of
+  the background colour, e.g. under the awnings) in `assets/items/poi/`: `sol-merchant`,
+  `sol-cardsmith`, `sol-sundial`, `sol-chest`.
+- In Solaris they replace the merchant, the ⚒ Cardsmith badge, the ☀ Sun Dial badge and the
+  forest chest on the map (end of `assets/cardsmith.js`). Other worlds keep their own art.
+- `tests/cardsmith.test.cjs` checks the files and that they are used in Solaris only.

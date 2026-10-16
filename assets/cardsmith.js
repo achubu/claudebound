@@ -66,3 +66,14 @@ checkWorldInteractions = function () {
 const cardsmithStyles = document.createElement('style');
 cardsmithStyles.textContent = '.poi-node.poi-cardsmith{width:30px!important;height:30px!important;border-color:#ffb35a!important;box-shadow:0 0 10px #ffb35acc!important;background:radial-gradient(circle,#4a2c14ee,#1c120bee)!important}.poi-node.poi-cardsmith .poi-glyph{font-size:17px}';
 document.head.append(cardsmithStyles);
+
+// Round 154: Solaris sprites for its merchant, Cardsmith, Sun Dial lore points and map chests.
+const SOLARIS_POI_ART = { merchant: 'sol-merchant', cardsmith: 'sol-cardsmith', lore: 'sol-sundial' };
+if (typeof poiArt === 'function') {
+  const poiArtBeforeSolaris = poiArt;
+  poiArt = function (p) { return (activeRegion === 'elaris' && p && SOLARIS_POI_ART[p.type]) || poiArtBeforeSolaris(p); };
+}
+const solarisSpriteStyles = document.createElement('style');
+solarisSpriteStyles.textContent = '.poi-node.poi-art.poi-cardsmith{width:56px!important;height:56px!important;border:0!important;box-shadow:none!important;background:var(--poi-art) no-repeat center bottom/contain!important;filter:drop-shadow(0 0 6px #ffb35acc) drop-shadow(0 0 2px #000)}.poi-node.poi-art.poi-cardsmith::after{top:58px!important}'
+  + '#world[data-environment="solaris"] .map-chest.elaris-chest{background-image:url(assets/items/poi/sol-chest.webp)!important}';
+document.head.append(solarisSpriteStyles);
