@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 165: fewer upside-down Solaris rooms
+
+- `tools/build_solaris.py` now flips a tile top to bottom only when no unflipped or mirrored
+  option fits the room, since that flip turns painted buildings upside down. That takes the
+  T-junction (`t-right-a`) and straight tiles off the flipped list. The corners, the
+  `t-bottom` T-junctions, the north dead end and the observatory still need the flip until
+  upright paintings arrive; prompts for those went to the owner.
+
 ## Round 164: Solaris landmark rooms and the colonnade straight
 
 - Six of the owner's landmark paintings are now one-off rooms (`assets/environment/solaris/src/landmarks/`):

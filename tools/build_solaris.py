@@ -176,7 +176,10 @@ def main():
         cx, cy = map(int, key.split(','))
         near = {plan[k][0] for k in (f'{cx-1},{cy}', f'{cx},{cy-1}') if k in plan}
         h = int(hashlib.md5(key.encode()).hexdigest(), 16)
-        fresh = [o for o in opts if o[0] not in near] or opts
+        # Round 165: a top-to-bottom flip turns buildings upside down, so use one only when no
+        # unflipped or mirrored option fits the room.
+        upright = [o for o in opts if not o[1][1]] or opts
+        fresh = [o for o in upright if o[0] not in near] or upright
         plan[key] = fresh[h % len(fresh)]
     # World walk mask, same format as Neon's (8px cells over 7200x3000).
     W, H = 900, 375; bits = np.zeros((H, W), bool)
