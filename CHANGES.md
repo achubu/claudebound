@@ -3458,3 +3458,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   start room: Neon Square (city), Brass Yards (Solaris), Glasswind Reach (Vespera), Hourglass
   Hall (Chronospire), about halfway in. Its spot keeps clear of the waypoint and the room's
   patrols. `tests/cardsmith.test.cjs` checks the room and the clearance.
+
+## Round 157: lore points hold 15 Shards
+
+- Each lore point (Data Terminal in Neon Aftermath, Sun Dial in Solaris, Storm Glyph in
+  Vespera, and Chronospire's) now gives ◇ 15 Shards when read, up from 2 (`LORE_SHARDS` in
+  `assets/exploration.js`). Reading all five in a world still adds ◇ 15 and a side card.
+- `tests/exploration.test.cjs` checks the new total.

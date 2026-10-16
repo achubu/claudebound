@@ -226,7 +226,7 @@ function openPOI(p) {
   if (p.type === 'lore') {
     const d2 = poiDisplay(p);
     return poiMenu(d2.icon + ' ' + d2.name, '<blockquote class="lore">' + LORE[activeRegion][p.loreIndex] + '</blockquote><p class="muted">' + (state.poi.lore.filter(id => id.startsWith(activeRegion + ':')).length + 1) + ' of ' + LORE_PER_WORLD + ' in this world. Reading all five reveals a reward.</p>',
-      [{ id: 'poiRead', label: 'Take it in · +2 Shards', primary: true, onclick: () => readLore(p) }]);
+      [{ id: 'poiRead', label: 'Take it in · +' + LORE_SHARDS + ' Shards', primary: true, onclick: () => readLore(p) }]);
   }
   if (p.type === 'cache') {
     const rand = seeded(hashSeed(p.id + state.seed + 'cache')), shards = 3 + Math.floor(rand() * 4), potion = rand() < .25;
@@ -239,10 +239,12 @@ function openPOI(p) {
   }
 }
 function trainCard(c) { const o = owned(c.uid) || c; for (let k = 0; k < 15; k++) recordCardUse(o); }
+// Round 157: each lore point (Data Terminal, Sun Dial, Storm Glyph...) holds 15 Shards (was 2).
+const LORE_SHARDS = 15;
 function readLore(p) {
-  state.shards += 2; state.poi.lore.push(p.id);
+  state.shards += LORE_SHARDS; state.poi.lore.push(p.id);
   const read = state.poi.lore.filter(id => id.startsWith(activeRegion + ':')).length;
-  let msg = 'Lore recorded: +2 Shards.';
+  let msg = 'Lore recorded: +' + LORE_SHARDS + ' Shards.';
   if (read >= LORE_PER_WORLD && !state.poi.loreRewards.includes(activeRegion)) {
     state.poi.loreRewards.push(activeRegion); state.shards += 15;
     const pool = typeof sidePoolFor === 'function' ? sidePoolFor().filter(id => id !== 'stasis') : [];
