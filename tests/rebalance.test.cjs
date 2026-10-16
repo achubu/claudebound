@@ -217,7 +217,8 @@ function avgElarisHpAt(dist,samples){
 // old x+y shortcut), so distance 4 is barely past the start, nowhere near
 // "far." Distance 19 itself is bloomTyrant's room exclusively (no non-
 // boss spawn there), so 18 is the farthest sampleable distance.
-const nearAvg=avgElarisHpAt(1,50),farAvg=avgElarisHpAt(18,50);
+// Round 149: Solaris (54 rooms) has max distance 13, the Solar Crown alone; 12 is the farthest with regular patrols.
+const nearAvg=avgElarisHpAt(1,50),farAvg=avgElarisHpAt(12,50);
 assert(farAvg>nearAvg*1.2,'Elaris enemies near the region edge/boss should average meaningfully tougher than near the entry portal (near avg='+nearAvg.toFixed(1)+', far avg='+farAvg.toFixed(1)+')');
 
 // --- Heavy-hit multiplier scales with distance from the city's start room ---
@@ -407,7 +408,8 @@ configureRegion('elaris');
 const elarisChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
 assert.equal(elarisChests.length,2,'Elaris has exactly 2 hidden chests, both in mini-boss branches');
 assert(elarisChests.every(c=>c.reward==='potion'),'both Elaris chests grant a potion');
-const elarisSpineRooms=['0,0','1,0','2,0','2,1','1,1','1,2','2,2','3,2'];
+// Round 149: the Solaris spine is the shortest route from Dawnfire Gate to the Solar Crown.
+const elarisSpineRooms=(()=>{const prev={'0,0':null},q=['0,0'];while(q.length){const k=q.shift();for(const raw of Object.values(rooms[k].exits)){const t=typeof raw==='string'?raw:raw.to;if(!(t in prev)){prev[t]=k;q.push(t)}}}const out=[];for(let k=prev[SOLARIS_BOSS_ROOM];k;k=prev[k])out.push(k);return out})();
 assert(elarisSpineRooms.every(k=>!chestFor(k)),'no chest sits on the mandatory Elaris spine');
 
 // --- Round 31: a crystal chest now requires defeating the room's boss
@@ -524,10 +526,10 @@ assert(enemies.galeSovereign&&enemies.galeSovereign.boss&&enemies.galeSovereign.
 assert.equal(enemies.tidewardenElaris.sheet,'drowned-heron','Tidebound Warden reuses the existing Drowned Heron sprite sheet rather than needing new art');
 assert.equal(enemies.galeSovereign.sheet,'storm-moth','Gale Sovereign reuses the existing Storm Moth sprite sheet');
 newGame();configureRegion('elaris');
-const twSpawn=roomSpawns('0,2').find(s=>s.boss),gsSpawn=roomSpawns('10,6').find(s=>s.boss);
+const twSpawn=roomSpawns('5,2').find(s=>s.boss),gsSpawn=roomSpawns('8,0').find(s=>s.boss);
 assert(twSpawn&&twSpawn.type==='tidewardenElaris'&&twSpawn.element==='water','Tidebound Warden spawns correctly at its designated room with its element intact');
 assert(gsSpawn&&gsSpawn.type==='galeSovereign'&&gsSpawn.element==='air','Gale Sovereign spawns correctly at its designated room');
-state.room='0,2';startBattle(twSpawn.uid);
+state.room='5,2';startBattle(twSpawn.uid);
 const twElementalTurn=[1,2,3,4,5,6].map(t=>enemyPlan(state.battle,t)).find(p=>p.kind==='elemental');
 assert(twElementalTurn,'Tidebound Warden\\'s own pattern includes a signature elemental strike somewhere in its cycle, not a plain wildlife attack');
 const elarisMaterialsPre=materials();
@@ -560,9 +562,9 @@ run(`
 // full map screen.
 newGame();configureRegion('city');
 const w=126,h=82;
-configureRegion('elaris'); // Round 91: the city has no joined districts any more
-const singleBox=roomFootprint('0,0',w,h,9); // Elaris start: unjoined single room
-const joined4Box=roomFootprint('5,4',w,h,9); // Emerald Expanse: real 4-cell joined area
+configureRegion('vespera'); // Round 91: the city has no joined districts; Round 149: nor does Solaris
+const singleBox=roomFootprint(Object.keys(rooms).find(k=>joinedArea(k).cells.length===1),w,h,9); // a plain Vespera room
+const joined4Box=roomFootprint('8,3',w,h,9); // the Foundry: real 4-cell joined area
 assert(joined4Box.width>singleBox.width*1.5,'a real 4-cell joined area is meaningfully wider than a single room ('+joined4Box.width.toFixed(1)+' vs '+singleBox.width.toFixed(1)+')');
 assert(joined4Box.height>singleBox.height*1.5,'a real 4-cell joined area is meaningfully taller than a single room');
 
@@ -720,8 +722,8 @@ assert(canvasHtml.includes('map-stub'),'a room with an exit into unvisited terri
 // meaningfully bigger than a single room) even as a plain rectangle — the
 // "based on room size" sizing logic was explicitly kept, only the organic
 // shape/rotation was reverted.
-configureRegion('elaris'); // Round 91: the city has no joined districts
-const singleFp=mapAreaFootprint('0,0',0,10,0,9),joinedFp=mapAreaFootprint('5,4',0,10,0,9);
+configureRegion('vespera'); // Round 91/149: the city and Solaris have no joined districts
+const singleFp=mapAreaFootprint(Object.keys(rooms).find(k=>joinedArea(k).cells.length===1),0,11,0,9),joinedFp=mapAreaFootprint('8,3',0,11,0,9);
 assert(joinedFp.width>singleFp.width*1.3,'a real joined area still renders a meaningfully wider rectangle than a single room');
 
 // --- The exact same room footprint is stable across repeated calls (not

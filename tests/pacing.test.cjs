@@ -35,8 +35,8 @@ nexusTravel('city', '4,5'); assert.equal(state.room, '0,5', 'cannot teleport to 
 state.room = '4,5'; renderWorld(); assert(nexusList().some(n => n.id === 'city:4,5'), 'arriving discovers the mid-world waypoint');
 nexusTravel('city', '0,5'); assert.equal(state.room, '0,5'); nexusTravel('city', '4,5'); assert.equal(state.room, '4,5', 'teleport both ways');
 showMap(); assert(document.querySelectorAll('.nexus-go').length >= 0);
-state.poi.nexus.push('elaris:7,6'); nexusTravel('elaris', '7,6'); assert.equal(activeRegion, 'elaris'); assert.equal(state.room, '7,6'); assert(state.visited.includes('7,6'), 'teleport into another world');
-nexusTravel('city', '0,5'); assert.equal(activeRegion, 'city'); assert.equal(state.room, '0,5'); assert(state.regionVisits.elaris.includes('7,6'), 'that world remembers where you have been');
+state.poi.nexus.push('elaris:4,2'); nexusTravel('elaris', '4,2'); assert.equal(activeRegion, 'elaris'); assert.equal(state.room, '4,2'); assert(state.visited.includes('4,2'), 'teleport into another world');
+nexusTravel('city', '0,5'); assert.equal(activeRegion, 'city'); assert.equal(state.room, '0,5'); assert(state.regionVisits.elaris.includes('4,2'), 'that world remembers where you have been');
 for (const [r, nx] of Object.entries(NEXUS_POINTS)) { configureRegion(r); assert(rooms[nx.start] && rooms[nx.mid], r + ' waypoint rooms exist'); assert(!roomSpawns(nx.mid).some(s => s.boss), 'never in a boss room'); }
 configureRegion('city');
 // Older saves: an attuned waystone becomes both of that world's waypoints.

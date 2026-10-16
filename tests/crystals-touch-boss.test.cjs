@@ -19,16 +19,16 @@ b.hand=[b.hand.find(c=>c.uid===counterUid)];b.energy=3;playCard(0);const beforeC
 const beforeStrike=state.hp,enemyBefore=b.enemy.hp;endTurn();assert.equal(state.hp,beforeStrike);assert.equal(b.enemy.hp,enemyBefore-6);assert(!b.playerBurn,'counter blocks status');
 b.turn=3;b.enemy.element='water';b.disrupted=true;b.block=0;b.enemy.hp=300;b.playerPoison=0;const hpBeforeShock=state.hp,shockDamage=Math.ceil(enemyPlan().damage/2);endTurn();assert.equal(state.hp,hpBeforeShock-shockDamage);assert(!b.disrupted);
 // Boss unlock and reward happen once, then both regions round-trip through the portal.
-state.battle=null;state.room='10,9';assert.equal(portalTarget(),null);const boss=roomSpawns('10,9').find(s=>s.boss);assert.equal(boss.type,'bloomTyrant');startBattle(boss.uid);winBattle();
+state.battle=null;state.room=SOLARIS_BOSS_ROOM;assert.equal(portalTarget(),null);const boss=roomSpawns(SOLARIS_BOSS_ROOM).find(s=>s.boss);assert.equal(boss.type,'bloomTyrant');startBattle(boss.uid);winBattle();
 assert(state.bosses.includes('bloomTyrant'));assert.equal(state.pool.filter(c=>c.id==='stormglass').length,1);assert(state.pool.find(c=>c.id==='stormglass').soulbound);
 finishBattle();assert.equal(portalTarget().region,'vespera');travelPortal();assert.equal(state.region,'vespera');assert.equal(Object.keys(rooms).length,42,'Vespera matches the city at 42 rooms');assert.equal(joinedArea().cells.length,4);
-save();state=null;assert(load());assert.equal(state.region,'vespera');validateImport(JSON.parse(JSON.stringify(state)));travelPortal();assert.equal(state.region,'elaris');assert.equal(state.room,'10,9');
+save();state=null;assert(load());assert.equal(state.region,'vespera');validateImport(JSON.parse(JSON.stringify(state)));travelPortal();assert.equal(state.region,'elaris');assert.equal(state.room,SOLARIS_BOSS_ROOM);
 // Touch route crosses joined room seams using normal collision and movement.
-state.room='1,0';state.pos={x:760,y:190};state.battle=null;keys={};assert(setTouchDestination({x:860,y:190})); // on the Sunpetal path (organic since Round 90)
+state.room='1,0';state.pos={x:740,y:230};state.battle=null;keys={};assert(setTouchDestination({x:860,y:230})); // on the Solaris street (Round 149)
 for(let i=0;i<200&&touchRoute;i++)move(.033);
-assert.equal(state.room,'2,0');assert(Math.abs(state.pos.x-50)<=14); // finer touch grid on organic paths (Round 92)assert(!touchRoute);
-state.room='5,4';state.pos={x:670,y:440};assert(setTouchDestination({x:670,y:560}));for(let i=0;i<250&&touchRoute;i++)move(.033);assert.equal(state.room,'5,5');assert(!touchRoute);
-assert(setTouchDestination({x:670,y:620}));keys={ArrowLeft:true};move(.033);assert.equal(touchRoute,null);keys={};
+assert.equal(state.room,'2,0');assert(state.pos.x<120,'arrives at the west edge of the next room'); // finer touch grid on painted pathsassert(!touchRoute);
+state.room='5,4';state.pos={x:400,y:440};assert(setTouchDestination({x:400,y:560}));for(let i=0;i<250&&touchRoute;i++)move(.033);assert.equal(state.room,'5,5');assert(!touchRoute);
+assert(setTouchDestination({x:400,y:150}));keys={ArrowLeft:true};move(.033);assert.equal(touchRoute,null);keys={};
 console.log('PASS: bounded crystal rarities, counter reservation/timing/status prevention, Lightning disruption, boss unlock, third-region saves, touch seams and manual override.');
 }
 `);
