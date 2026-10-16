@@ -9,7 +9,7 @@ function makeContext(){
  run(fs.readFileSync('assets/cards.js','utf8'));
  for(const m of fs.readFileSync('index.html','utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
  run(fs.readFileSync('assets/elaris-wildlife.js','utf8'));
- run(fs.readFileSync('assets/expansion.js','utf8'));
+ run(fs.readFileSync('assets/solaris-data.js','utf8'));run(fs.readFileSync('assets/expansion.js','utf8'));
  run(fs.readFileSync('assets/encounter-depth.js','utf8'));
  return {context,run};
 }

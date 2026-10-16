@@ -63,7 +63,7 @@ function addDiagonalShortcuts() {
   const joinedFn = globalThis.joinedArea;
   const joined = { has: k => typeof joinedFn === 'function' && joinedFn(k).cells.length > 1 };
   const linked = (a, b) => !!rooms[a] && Object.values(rooms[a].exits).some(e => e === b); // plain (unlocked) exits only
-  const boss = k => { const r = rooms[k]; return (r.enemy && enemies[r.enemy[0]] && enemies[r.enemy[0]].boss) || (activeRegion === 'elaris' && k === '10,9'); };
+  const boss = k => { const r = rooms[k]; return (r.enemy && enemies[r.enemy[0]] && enemies[r.enemy[0]].boss) || (activeRegion === 'elaris' && k === SOLARIS_BOSS_ROOM); };
   let added = 0;
   for (const [k, r] of Object.entries(rooms)) {
     const [x, y] = k.split(',').map(Number);

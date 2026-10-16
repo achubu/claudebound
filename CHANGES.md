@@ -3376,3 +3376,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - On narrow screens each socket shows just its number and crystal; tapping a socket opens the
   crystal picker. Names and effects are still listed in the collection below.
 - `tests/poi-art.test.cjs` checks the screen position and that the panels move onto it.
+
+## Round 149: world 2 becomes Solaris (work in progress)
+
+- World 2 (region id still `elaris`, so saves carry over; the name "Elaris" is kept for a
+  later world) is now **Solaris**, a sun-scorched desert city on a 9×6, 54-room grid: Neon
+  Aftermath's layout mirrored top-to-bottom, start at 0,0 (Dawnfire Gate), mini-bosses at 5,2
+  (Temple of the Noon Bell) and 8,0 (Mirror Fortress), the Bloom Tyrant at 8,5 (The Solar
+  Crown). Levels 10-17 by distance from the start, 18 for the boss room.
+- Rooms are painted from a small kit of flippable tiles: `tools/build_solaris.py` picks a tile
+  and a flip for every room (neighbours get different variants), traces the streets once per
+  tile and writes the world walk mask, plan and layout to `assets/solaris-data.js`.
+  `assets/solaris.js` draws the flipped tile and plugs the mask into the painted-world engine
+  (loose crossings, stylized map).
+- Owner tiles so far (`assets/environment/solaris/src/`): corner-a, corner-b, t-bottom-a,
+  t-bottom-b, t-right-a. Placeholders cut from them stand in for the crossroads, straight
+  road and both dead ends until those are painted.
+- Old saves standing in an Elaris room resume at Dawnfire Gate. Visible "Elaris" text now
+  says "Solaris".

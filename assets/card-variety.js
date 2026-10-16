@@ -207,7 +207,7 @@ function offerArrivalCard() {
   const pool = [...ELARIS_ARRIVAL_POOL], offers = [];
   while (offers.length < 3) offers.push(make(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]));
   keys = {};
-  openMenu('<div class="eyebrow">ELARIS ATTUNEMENT</div><h2>Choose an Elaris card</h2><p>The wilds answer your arrival. Take one card attuned to this world — it joins your active deck if there is room.</p><div class="cards" id="arrivalCards"></div>');
+  openMenu('<div class="eyebrow">SOLARIS ATTUNEMENT</div><h2>Choose an Solaris card</h2><p>The wilds answer your arrival. Take one card attuned to this world — it joins your active deck if there is room.</p><div class="cards" id="arrivalCards"></div>');
   const host = $('arrivalCards');
   if (host && host.append) offers.forEach(c => host.append(cardElement(c, () => { state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(c.id) < maxCopies()) state.deck.push(c.uid); save(); toast(stat(c).name + ' joins your collection.'); closeMenu(); })));
   return offers;

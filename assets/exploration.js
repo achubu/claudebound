@@ -11,7 +11,7 @@
 // =====================================================================
 const POI_SHARE = 0.36, LORE_PER_WORLD = 5;
 const POI_SPOTS = [[400, 130], [400, 385], [330, 180], [470, 320], [330, 320], [470, 180], [205, 140], [600, 360], [205, 360], [600, 140], [400, 250]];
-const LORE_NAMES = { city: ['⌨', 'Data Terminal'], elaris: ['◈', 'Whispering Stone'], vespera: ['ϟ', 'Storm Glyph'] };
+const LORE_NAMES = { city: ['⌨', 'Data Terminal'], elaris: ['☀', 'Sun Dial'], vespera: ['ϟ', 'Storm Glyph'] };
 const POI_INFO = {
   shrine: { icon: '⛩', name: 'Aether Shrine' },
   campfire: { icon: '🔥', name: 'Campfire' },
@@ -28,7 +28,7 @@ const LORE = {
     'LOG 05 — The portal beneath the Warden\'s throne hums at the frequency of growing things. Something green is waiting on the other side.'
   ],
   elaris: [
-    'The stone is warm. Words rise in your mind: "Before the Tyrant bloomed, Elaris sang in four voices: flame, tide, root and wind."',
+    'The stone is warm. Words rise in your mind: "Before the Tyrant bloomed, Solaris sang in four voices: flame, tide, root and wind."',
     '"The Tidebound Warden was a guardian once. It guards the river still, but it no longer remembers from what."',
     '"Burn and rot are siblings here. What fire leaves, the poison finishes. Do not fight them both at once."',
     '"The Gale Sovereign crowned itself on the highest branch and called the storm its court."',
@@ -388,13 +388,13 @@ document.head.append(exploreStyles);
 // =====================================================================
 const QUIET_ROOMS = {
   city: ['1,6', '3,8', '7,9'], // Round 91: Fountain Row, Koi Garden, South Lot
-  elaris: ['2,2', '5,6', '10,7'],
+  elaris: ['2,1', '6,3', '3,5'], // Round 149: Solaris rooms
   vespera: ['2,4', '6,4', '10,5']
 };
 // Round 73: Nexus Waypoints at the start and middle of every world (see below).
 const NEXUS_POINTS = {
   city: { start: '0,5', mid: '4,5' }, // Round 91: Neon Square
-  elaris: { start: '0,0', mid: '7,6' },
+  elaris: { start: '0,0', mid: '4,2' },
   vespera: { start: '0,0', mid: '8,2' }
 };
 const pct = f => Math.max(1, Math.ceil(state.maxHp * f));
@@ -512,11 +512,11 @@ function nexusList() {
   }
   return out;
 }
-const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera' };
+const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Solaris', vespera: 'Vespera' };
 function nexusRoomName(region, key) {
   if (region === activeRegion) return rooms[key] ? rooms[key].name : key;
   const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : null;
-  return (src && src[key] && src[key].name) || ({ elaris: { '0,0': 'Dawnroot Landing', '7,6': 'Mistbound Thicket' } }[region] || {})[key] || key;
+  return (src && src[key] && src[key].name) || ({ elaris: { '0,0': SOLARIS_LAYOUT['0,0'].name, '4,2': SOLARIS_LAYOUT['4,2'].name } }[region] || {})[key] || key;
 }
 function discoverNexus() {
   if (!state) return false; ensureExplore();
