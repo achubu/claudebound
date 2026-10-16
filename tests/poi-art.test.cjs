@@ -19,3 +19,8 @@ console.log('PASS: the Aetherlink interface sits on the gauntlet screen.');
   assert(/t\.region === 'city'/.test(js)&&/solaris-portal\.webp/.test(js),'the Solaris portal home uses its own art');
   assert(/\.portal-art\{width:48px!important;height:72px!important;animation:portalPulse/.test(js),'portals are half size and pulse');
   console.log('PASS: Solaris sun-gate portal; portals half size with a pulsing glow.'); }
+// Round 155: the Neon Aftermath portal into Solaris shows the desert city inside a steel-and-neon gate.
+{ const js=fs.readFileSync(path.join(__dirname,'../assets/solaris.js'),'utf8');
+  assert(fs.existsSync(path.join(__dirname,'../assets/environment/city-solaris-portal.webp')),'city-side portal art');
+  assert(/activeRegion === 'city' && t\.region === 'elaris'/.test(js)&&/city-solaris-portal\.webp/.test(js),'the city portal into Solaris uses it');
+  console.log('PASS: the city portal into Solaris shows the desert city.'); }

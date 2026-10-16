@@ -3444,3 +3444,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - In Solaris they replace the merchant, the ⚒ Cardsmith badge, the ☀ Sun Dial badge and the
   forest chest on the map (end of `assets/cardsmith.js`). Other worlds keep their own art.
 - `tests/cardsmith.test.cjs` checks the files and that they are used in Solaris only.
+
+## Round 155: city portal into Solaris
+
+- New owner painting `assets/environment/city-solaris-portal.webp`: a steel-and-neon gate with
+  the sunlit desert city inside. It replaces the old forest portal for the Neon Aftermath
+  portal into Solaris (Warden's Crown), half size with the cyan pulsing glow
+  (`assets/solaris.js`). `tests/poi-art.test.cjs` checks it.

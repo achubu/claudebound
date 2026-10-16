@@ -80,14 +80,17 @@ document.head.append(solarisStyles);
 const renderWorldBeforeSolarisPortal = renderWorld;
 renderWorld = function () {
   renderWorldBeforeSolarisPortal.apply(this, arguments);
-  if (activeRegion !== 'elaris' || !document.querySelector || typeof portalTarget !== 'function') return;
-  const t = portalTarget(), art = t && t.region === 'city' && document.querySelector('#world .portal-art');
-  if (art) { art.src = 'assets/environment/solaris-portal.webp'; art.classList.add('solaris-portal'); }
+  if (!document.querySelector || typeof portalTarget !== 'function') return;
+  const t = portalTarget(), art = t && document.querySelector('#world .portal-art'); if (!art) return;
+  if (activeRegion === 'elaris' && t.region === 'city') { art.src = 'assets/environment/solaris-portal.webp'; art.classList.add('solaris-portal'); }
+  // Round 155: on the Neon Aftermath side, a steel-and-neon gate shows the desert city inside.
+  if (activeRegion === 'city' && t.region === 'elaris') { art.src = 'assets/environment/city-solaris-portal.webp'; art.classList.add('solaris-portal', 'city-solaris-portal'); }
 };
 const solarisPortalStyles = document.createElement('style');
 // Round 151: every portal is drawn at half its old size and pulses with a glow.
 solarisPortalStyles.textContent = '.portal-art{width:48px!important;height:72px!important;animation:portalPulse 2.4s ease-in-out infinite!important}'
   + '.portal-art.solaris-portal{width:59px!important;height:79px!important;image-rendering:auto;animation-name:solarPortalPulse!important}'
+  + '.portal-art.city-solaris-portal{animation-name:portalPulse!important}'
   + '@keyframes portalPulse{0%,100%{filter:drop-shadow(0 0 4px #42bdd8) drop-shadow(0 0 10px #42bdd866)}50%{filter:drop-shadow(0 0 8px #86fff0) drop-shadow(0 0 20px #86fff0aa)}}'
   + '@keyframes solarPortalPulse{0%,100%{filter:drop-shadow(0 0 4px #ffcf6a) drop-shadow(0 0 10px #5fe9ff66)}50%{filter:drop-shadow(0 0 8px #ffe39a) drop-shadow(0 0 20px #5fe9ffaa)}}'
   + '@media(prefers-reduced-motion:reduce){.portal-art{animation:none!important;filter:drop-shadow(0 0 6px #86fff0)}}';
