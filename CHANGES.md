@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 167: last Solaris stand-in replaced
+
+- The owner's `sol-dead-top` (road from the top into a turnaround circle) is the dead end for the
+  4 rooms that only open north (2,2 3,2 8,2 6,5), unflipped. New shape `dead-top` in
+  `tools/build_solaris.py`, with a hand-drawn walk area. Its sand alley below the circle stops short
+  of the bottom edge, since no room connects there.
+- Solaris now has no stand-in tiles (`SOLARIS_PLACEHOLDERS` is empty). Still to come: the start
+  camp and the upright corner, T-junction and observatory paintings.
+
 ## Round 166: Solaris crossroads and west dead end
 
 - The owner's `sol-cross-a` (sun-dial roundabout) and `sol-cross-b` (mirror towers) replace the

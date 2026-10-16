@@ -16,7 +16,7 @@ from scipy import ndimage as nd
 SRC = 'assets/environment/solaris/src'
 OUT = 'assets/environment/solaris'
 # Tile name prefix -> the exits of the tile as painted.
-SHAPES = {'corner': 'ne', 't-bottom': 'esw', 't-right': 'nes', 'cross': 'nesw', 'dead-bottom': 's', 'dead-right': 'e', 'dead-left': 'w', 'straight': 'ns'}
+SHAPES = {'corner': 'ne', 't-bottom': 'esw', 't-right': 'nes', 'cross': 'nesw', 'dead-bottom': 's', 'dead-right': 'e', 'dead-left': 'w', 'dead-top': 'n', 'straight': 'ns'}
 FLIP_EXITS = {(0, 0): {}, (1, 0): {'e': 'w', 'w': 'e'}, (0, 1): {'n': 's', 's': 'n'}, (1, 1): {'e': 'w', 'w': 'e', 'n': 's', 's': 'n'}}
 ROAD = np.array([247, 227, 175])
 
@@ -37,7 +37,7 @@ def placeholders(tiles):
     if has('t-right') and not has('straight'):
         a = np.asarray(first('t-right')).copy(); W = a.shape[1]; w = W // 2
         a[:, W - w:] = a[:, :w][:, ::-1]; out['straight-ph'] = Image.fromarray(a)
-    if has('t-bottom') and not has('dead-bottom'):
+    if has('t-bottom') and not has('dead-bottom') and not has('dead-top'):
         st = np.asarray(out.get('straight-ph') or first('straight')); top = np.asarray(first('t-bottom').resize((st.shape[1], st.shape[0])))
         a = st.copy(); cut = int(st.shape[0] * .44); a[:cut] = top[:cut]; out['dead-bottom-ph'] = Image.fromarray(a)
     if has('t-right') and has('t-bottom') and not has('dead-right') and not has('dead-left'):
@@ -67,6 +67,9 @@ MANUAL = {
         (0, 208, 210, 268), (580, 90, 656, 260), (120, 72, 200, 208)]},
     'sol-relic-boots': {'shapes': [
         (376, 0, 432, 276), (376, 216, 800, 276), (168, 240, 560, 320), (168, 320, 236, 470), (460, 112, 680, 216)]},
+    'dead-top': {'shapes': [  # road from the top into a turnaround circle; the sand alley below
+        (376, 0, 436, 262), ('ellipse', (354, 248, 474, 368)), (282, 262, 356, 350),  # stops short
+        (330, 360, 452, 440), (436, 212, 560, 300)]},                                   # of the edge
     'straight-a': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
     'straight-b': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
 }

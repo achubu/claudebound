@@ -23,7 +23,7 @@ assert.deepStrictEqual(bad, [], 'every exit has a door on the walk mask');
 console.log('solaris-landmarks ok');
 // Round 166: the crossroads and the west dead end are painted, so only the north dead end is a stand-in.
 const placeholders = JSON.parse(src.match(/SOLARIS_PLACEHOLDERS = (\[.*?\]);/)[1]);
-assert.deepStrictEqual(placeholders, ['dead-bottom-ph']);
+assert.deepStrictEqual(placeholders, [], 'Round 167: no stand-ins left');
 for (const [key, [tile]] of Object.entries(plan)) if (['nesw', 'w'].includes(Object.keys(layout[key].exits).sort().join('').replace('ensw', 'nesw')))
   assert(!tile.endsWith('-ph'), key + ' uses a real painting');
 console.log('solaris-landmarks round 166 ok');
