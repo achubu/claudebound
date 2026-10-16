@@ -93,6 +93,7 @@ assert.equal(forceRoll(.22).lootType,'potion','exactly 22% rolls over into potio
 assert.equal(forceRoll(.7499).lootType,'potion','just under 75% is still potion');
 assert.equal(forceRoll(.75).lootType,'choice','exactly 75% rolls over into a card choice (25% of chests, Round 140)');
 assert.equal(ELITE_CARD_ODDS,.7,'elites leave a card choice 70% of the time');
+assert.equal(ELITE_AETHERLINK_ODDS,.064,'elites drop an Aetherlink crystal 6.4% of the time (Round 145, was 8%)');
 forceRoll(0);assert(state.pool.some(c=>['phoenix','oath','verdict'].includes(c.id)),'Soulbound jackpot actually grants a Soulbound card');
 const materialsBefore=materials();forceRoll(.015);assert.equal(materials(),materialsBefore+1,'the Upgrade Crystal outcome actually increments the persistent materials() count');
 assert(typeof forceRoll(.15).thief==='string'&&forceRoll(.15).thief.length,'an empty chest names the animal that looted it');

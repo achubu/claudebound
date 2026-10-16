@@ -3338,3 +3338,9 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   many you already own). Picking one pays and adds it; still one per merchant visit.
 - `buySideCard` / `openSidePicker` in `assets/exploration.js`; `tests/exploration.test.cjs`
   covers the price, the free picker, getting the chosen card and the once-per-visit limit.
+
+## Round 145: Aetherlink crystals 20% rarer
+
+- Elites now drop an Aetherlink crystal 6.4% of the time (was 8%), as `ELITE_AETHERLINK_ODDS`
+  in `assets/expansion.js`. Type (Capacity / Assault / Aegis) and rarity odds (80 / 17 / 3%)
+  are unchanged. `tests/rebalance.test.cjs` checks the value.

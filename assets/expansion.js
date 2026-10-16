@@ -505,6 +505,8 @@ endTurn=function(){const b=state.battle;if(!b||b.phase!=='fight')return;const do
 // Round 140: Upgrade Crystal 1% (was 4%), card choice 25% (was 28%); potions take the rest.
 const LOOT_CHEST_ODDS={soulbound:.01,crystal:.02,empty:.22,potion:.75};
 const ELITE_CARD_ODDS=.7;
+// Round 145: elites drop an Aetherlink crystal 6.4% of the time (was 8%, cut by 20%).
+const ELITE_AETHERLINK_ODDS=.064;
 const LOOT_THIEVES=['a scavenging fox','a wiry alley cat','a startled crow','a masked raccoon','a quick sewer rat','a one-eared stray dog'];
 function rollLootChest(){const r=Math.random();return r<LOOT_CHEST_ODDS.soulbound?'soulbound':r<LOOT_CHEST_ODDS.crystal?'crystal':r<LOOT_CHEST_ODDS.empty?'empty':r<LOOT_CHEST_ODDS.potion?'potion':'card'}
 // Round 70: less XP for enemies below your level, so you don't outgrow a
@@ -542,7 +544,7 @@ if(b.id==='stormTyrant')b.special.push('The Tempest Colossus falls and Vespera\'
 // so this is genuinely the only source of it for this kill — exactly one,
 // never two.
 if(isMiniBoss){setMaterials(materials()+1);b.special.push('Mini-boss defeated: guaranteed Upgrade Crystal! ('+materials()+' total)')}
-if(b.enemy.elite&&Math.random()<.08){const type=Object.keys(CRYSTALS)[Math.floor(Math.random()*3)],crystal=rollUpgradeCrystal(type);state.device.crystals.push(crystal);b.crystalDrop=crystal.uid;b.special.push(crystalLabel(crystal)+' crystal found! Slot it into the Aetherlink.')}b.levels=levels;b.logs.push(b.lootType==='soulbound'?'Loot chest: Soulbound card!':b.lootType==='potion'?'Loot chest: small healing potion.':b.lootType==='crystal'?'Loot chest: an Upgrade Crystal! ('+materials()+' total)':b.lootType==='empty'?'Loot chest: empty — '+b.thief+' bolted off with everything inside.':'Loot chest: one random card added to your collection.')};
+if(b.enemy.elite&&Math.random()<ELITE_AETHERLINK_ODDS){const type=Object.keys(CRYSTALS)[Math.floor(Math.random()*3)],crystal=rollUpgradeCrystal(type);state.device.crystals.push(crystal);b.crystalDrop=crystal.uid;b.special.push(crystalLabel(crystal)+' crystal found! Slot it into the Aetherlink.')}b.levels=levels;b.logs.push(b.lootType==='soulbound'?'Loot chest: Soulbound card!':b.lootType==='potion'?'Loot chest: small healing potion.':b.lootType==='crystal'?'Loot chest: an Upgrade Crystal! ('+materials()+' total)':b.lootType==='empty'?'Loot chest: empty — '+b.thief+' bolted off with everything inside.':'Loot chest: one random card added to your collection.')};
 const baseLoseBattle=loseBattle;
 loseBattle=function(){const b=state.battle;baseLoseBattle();state.hp=state.maxHp;state.room=activeRegion!=='city'?'0,0':'0,5';state.pos={x:400,y:300};b.lastRegion=activeRegion;if(!active().length&&state.pool.length)state.deck=[state.pool[0].uid];b.defeatSummary={hp:state.hp,maxHp:state.maxHp,location:room()?.name||'safe zone',deckCount:state.deck.length}};
 const baseRenderBattle=renderBattle;
