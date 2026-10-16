@@ -15,6 +15,6 @@ const before=state.hp,raw=enemyPlan().damage;endTurn();
 assert.equal(before-state.hp,Math.max(0,raw-scaledRank('plating')),'Armor still applies after a mid-battle reload');
 renderBattle();assert(document.getElementById('battleModal').innerHTML.includes(scaledRank('plating')+' Armor'),'combat displays player Armor');
 state.battle=null;showCharacter();assert(document.getElementById('menuModal').innerHTML.includes('Armor '+scaledRank('plating')));
-assert(TALENT_BRANCHES.resolve.nodes.find(n=>n.id==='plating').desc.includes('+1 Armor per rank'));
+assert(TALENT_BRANCHES.resolve.nodes.find(n=>n.id==='plating').desc.includes('+1 / +2 / +4 / +6 / +8 Armor'));
 console.log('PASS: Reactive Plating provides persistent Armor, stacks with Block, survives reload, and displays correctly.');
 }`);

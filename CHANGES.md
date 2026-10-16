@@ -3482,3 +3482,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Destroying a side card removes a spare copy first (one not in the side deck) and gives
   ◇ 5 Shards (`destroySideCard`, `SIDE_DESTROY_SHARDS` in `assets/aether-deck.js`).
 - `tests/aether-deck.test.cjs` checks the stacking and the Shards.
+
+## Round 160: boosted talents climb in steps
+
+- The ×1.4 multiplier on talents is gone (`talentScale()` is now 1). Boosted talents use fixed
+  steps instead: ranks 1-5 count as 1, 2, 4, 6, 8 (`TALENT_STEPS` in `index.html`).
+  - Bulwark Doctrine: +1 / +2 / +4 Block on Defense cards.
+  - Retaliation Coil: 1 / 2 / 4 damage back.
+  - Counter Weave: +2 / +4 / +8 counter damage. Reflux: 2 / 4 / 8 HP.
+  - Siphon Edge: 1 / 2 HP.
+  - Reactive Plating: +1 / +2 / +4 / +6 / +8 Armor.
+  - Deep Interference: Weaken 3 + 3 per step (6 / 9 / 15 / 21 / 27); base Weaken is 3 again.
+- Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
+  talent-matrix, card-variety, plating-armor.

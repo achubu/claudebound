@@ -34,7 +34,7 @@ assert(checkWorldCompletion(), 'reward granted at 100%'); assert.equal(state.sha
 newGame(); configureRegion('city'); assert(worldCompletion() < 100); assert(!checkWorldCompletion());
 // Talent scaling (Round 126: a fixed ×1.4 in every world, no longer per world).
 newGame(); state.talents = { plating: 5, jammer: 2, weakenCore: 1, leech: 2 };
-for (const r of ['city', 'elaris', 'vespera']) { configureRegion(r); assert.equal(talentScale(), 1.4); assert.equal(scaledRank('plating'), 7); assert.equal(scaledRank('leech'), 3); assert.equal(weakenAmount(), 13); }
+for (const r of ['city', 'elaris', 'vespera']) { configureRegion(r); assert.equal(scaledRank('plating'), 8, 'Round 160: rank 5 counts as 8'); assert.equal(scaledRank('leech'), 2); assert.equal(weakenAmount(), 9); }
 configureRegion('city');
 console.log('PASS: elite card choices and 6 Shards, 3 city quiet rooms and all 4 city events, all 4 bounties (pay and miss), 100% exploration reward, world-scaled talents.');
 }`);
