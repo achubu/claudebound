@@ -3495,3 +3495,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   - Deep Interference: Weaken 3 + 3 per step (6 / 9 / 15 / 21 / 27); base Weaken is 3 again.
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
+
+## Round 161: armed counters are shown like Frozen
+
+- When a Prismatic Counter is armed, the enemy's status strip shows "⛨ Next fire strike
+  countered" (with the element it answers; hover for the effect), the same way Frozen shows
+  (`assets/battle-hud.js`). The enemy-move bubble for that charged strike reads "countered · no
+  damage" instead of its damage (`assets/aether-deck.js`).

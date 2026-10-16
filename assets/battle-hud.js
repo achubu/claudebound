@@ -64,6 +64,8 @@ renderBattle = function () {
     b.enemyDebuff && ['▼', 'Weakened −' + b.enemyDebuff, 'Its next attack deals ' + b.enemyDebuff + ' less damage.'],
     b.bind && ['🌿', 'Rootbind −' + b.bind, 'Its next attack deals ' + b.bind + ' less damage.'],
     b.freeze > 0 && ['❄', 'Frozen · ' + t(b.freeze), 'Skips its next ' + (b.freeze === 1 ? 'action' : b.freeze + ' actions') + '.'],
+    // Round 161: an armed counter shows on the enemy, the same way Frozen does.
+    b.counter && ((el) => ['⛨', 'Next ' + el + ' strike countered', 'Prismatic Counter is armed: its next charged ' + el + ' strike deals no damage, and it takes 6.'])(Object.keys(COUNTERS).find(e => COUNTERS[e] === b.counter) || 'elemental'),
     b.silenceTurn === b.turn && ['🔇', 'Silenced', 'Its next action is cancelled.']
   ].filter(Boolean);
   const strip = (side, list, dot) => {

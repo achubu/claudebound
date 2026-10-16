@@ -77,3 +77,7 @@ console.log('PASS: all 15 new cards with exact numbers, world reward pools, choo
    return JSON.stringify([t(6,5,31),t(100,5,31),t(100,40,10),t(11,5,30,2),t(100,5,30,2),t(20,0,30,2,10),t(100,0,30,2,10)])})()`));
   require('node:assert').deepEqual(out,[[0,0],[74,0],[100,30],[0,0],[81,0],[8,0],[88,0]],'Block, Frail and Barrier all come off the full hit, so killing blows land');
   console.log('PASS: enemy Block is subtracted from the full hit, so killing blows through Block land.'); }
+// Round 161: an armed counter is shown on the enemy and on the strike it will cancel.
+{ const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/battle-hud.js'), 'utf8'), ad = require('node:fs').readFileSync(require('node:path').join(__dirname, '../assets/aether-deck.js'), 'utf8');
+  require('node:assert')(/'Next ' \+ el \+ ' strike countered'/.test(src) && /countered · no damage/.test(ad), 'armed counters are shown like Frozen');
+  console.log('PASS: an armed counter is shown on the enemy and its countered strike.'); }

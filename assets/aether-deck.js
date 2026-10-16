@@ -447,8 +447,9 @@ function afflictionLine(plan, label) {
   return '<p class="affliction ' + a.type + '">' + a.icon + ' ' + body + ' <span class="answer">Answer: ' + answerNames(plan.rider) + '.</span></p>';
 }
 function intentBubble(plan, cls, label, frozen) {
-  const dmg = frozen ? 'frozen · skips its action' : plan.kind === 'silenced' ? 'silenced · no action' : plan.veiled ? 'negated by Phase Veil' : plan.damage > 0 ? (plan.hits > 1 ? plan.hits + ' × ' + plan.damage + ' damage' : plan.damage + ' damage') : 'no attack';
-  return '<div class="intent-bubble ' + cls + '"><span class="when">' + label + '</span><b class="what">' + plan.name + '</b><span class="dmg">' + dmg + (plan.kind === 'elemental' && !frozen ? ' · <em>counter window</em>' : '') + '</span>'
+  const bt = state && state.battle, countered = !frozen && plan.kind === 'elemental' && bt && bt.counter && COUNTERS[plan.element] === bt.counter; // Round 161
+  const dmg = frozen ? 'frozen · skips its action' : countered ? 'countered · no damage' : plan.kind === 'silenced' ? 'silenced · no action' : plan.veiled ? 'negated by Phase Veil' : plan.damage > 0 ? (plan.hits > 1 ? plan.hits + ' × ' + plan.damage + ' damage' : plan.damage + ' damage') : 'no attack';
+  return '<div class="intent-bubble ' + cls + '"><span class="when">' + label + '</span><b class="what">' + plan.name + '</b><span class="dmg">' + dmg + (plan.kind === 'elemental' && !frozen && !countered ? ' · <em>counter window</em>' : '') + '</span>'
     + afflictionLine(plan, '')
     + (plan.mirrored ? '<p class="affliction anchored">◐ Mirror Sigil: you take half, the enemy takes ' + plan.mirrored + '.</p>' : '') + '</div>';
 }
