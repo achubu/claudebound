@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 163: deck size grows with each world conquered
+
+- Max deck size no longer gets a flat +4 outside Neon Aftermath. Instead it grows by +1, for
+  good, each time you beat a world boss that opens the next world: the Thorn Warden (Solaris),
+  the Bloom Tyrant (Vespera) and the Storm Tyrant (Chronospire). With no talents or devices that
+  is 6 in the city, then 7, 8 and 9 (`worldDeckBonus` in `index.html`).
+- A save whose deck is now over the limit is trimmed to fit when it loads (`fitDeckToLimit`); the
+  extra cards stay in the collection. Without this the deck-limit check would block every fight.
+- Talents: removed the unused `talentScale()` and the "boosted" wording around the stepped values.
+  Talents give the same fixed amounts in every world (Plating 1/2/4/6/8 and so on, as in the
+  talent descriptions).
+- New `tests/world-deck.test.cjs`; `expansion` and `chronospire` tests updated.
+
 ## Round 162: fewer patrols in Solaris
 
 - Solaris rooms with two or more regular patrols now spawn one fewer than the shared distance

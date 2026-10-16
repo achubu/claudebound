@@ -20,7 +20,7 @@ assert.equal(roomSpawns('0,0').length, 0, 'the gate is safe');
 assert.equal(roomSpawns('8,7')[0].type, 'chronarch'); assert.equal(roomSpawns('0,3')[0].type, 'clockwarden'); assert.equal(roomSpawns('6,6')[0].type, 'paradoxTwin');
 for (const k of keys) for (const s of roomSpawns(k)) assert(enemies[s.type], 'spawn type exists: ' + s.type);
 const lv = keys.filter(k => rooms[k].level).map(k => rooms[k].level); assert.equal(Math.min(...lv), 28); assert.equal(Math.max(...lv), 36);
-assert.equal(regionIndex(), 3); assert.equal(talentScale(), 1, 'Round 160: no world or flat multiplier on talents');
+assert.equal(regionIndex(), 3); assert.equal(typeof talentScale, 'undefined', 'Round 163: no talent multiplier at all');
 for (const key of QUIET_ROOMS.chronospire) { assert.equal(roomSpawns(key).length, 0); assert.equal(poiAt(key).type, 'event'); }
 assert.equal(poiAt('5,3').type, 'nexus'); assert(merchantRoom());
 const st = enemyStats('chronoMauler', { region: 'chronospire', level: 35 }), vs = enemyStats('vespMauler', { region: 'vespera', level: 26 }); assert(st.hp > vs.hp && st.attack >= vs.attack, 'Chronospire hits harder than Vespera');
