@@ -70,3 +70,10 @@ assert.equal(balanceFor('normalHp', 'city'), .95); assert.equal(balanceFor('norm
 Math.random = realRandom;
 console.log('PASS: all 15 new cards with exact numbers, world reward pools, choose-1-of-3 card rewards (and leaving them), and city regular health.');
 }`);
+// Round 150: enemy Block comes off the whole hit, even on a killing blow.
+{ const {run:r2}=require('./expansion.test.cjs');
+  const out=JSON.parse(r2(`(()=>{newGame();state.room='3,6';state.cooldowns={};startBattle(roomSpawns(state.room)[0].uid);const b=state.battle;
+   const t=(hp,guard,blk,frail=0,bar=0)=>{b.enemy.hp=hp;b.enemy.guard=guard;b.block=blk;b.frail=frail;b.enemy.barrier=bar;b.phase='fight';b.hand=[make('bulwarkBash')];b.energy=3;b.enemy.armor=0;playCard(0);return [b.enemy.hp,b.enemy.guard]};
+   return JSON.stringify([t(6,5,31),t(100,5,31),t(100,40,10),t(11,5,30,2),t(100,5,30,2),t(20,0,30,2,10),t(100,0,30,2,10)])})()`));
+  require('node:assert').deepEqual(out,[[0,0],[74,0],[100,30],[0,0],[81,0],[8,0],[88,0]],'Block, Frail and Barrier all come off the full hit, so killing blows land');
+  console.log('PASS: enemy Block is subtracted from the full hit, so killing blows through Block land.'); }

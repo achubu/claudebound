@@ -3394,3 +3394,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   road and both dead ends until those are painted.
 - Old saves standing in an Elaris room resume at Dawnfire Gate. Visible "Elaris" text now
   says "Solaris".
+
+## Round 150: killing blows through enemy Block, Frail and Barrier land
+
+- Bug (owner report): "Bulwark Bash · 31 damage − 5 block = 1 dealt" and "30 damage − 5 block
+  = 6 dealt · Frail: −2". When a hit took the enemy to 0 HP, enemy Block, Frail and Barrier
+  were subtracted from the HP the enemy had left instead of from the whole hit, so a hit
+  that should have killed left the enemy alive with a few HP.
+- The base card effect now records the full hit (`b._hitTotal`); the Block wrapper
+  (`encounter-depth.js`) and the Frail/Barrier wrapper (`aether-deck.js`) work from the full
+  hit on a killing blow and set the enemy's HP once at the end. Hits that don't kill are
+  unchanged.
+- `tests/card-variety.test.cjs` covers kills and non-kills with Block, Frail and Barrier.

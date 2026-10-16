@@ -300,10 +300,15 @@ function sideEffect(b, id) {
 const cardEffectBeforeAether = cardEffect;
 cardEffect = function (c, empowered, doubleAttack) {
   const b = state.battle, before = b.enemy.hp;
+  b._hitNet = 0;
   cardEffectBeforeAether(c, empowered, doubleAttack);
-  let dealt = before - b.enemy.hp; if (dealt <= 0) return;
-  if (b.frail > 0) { const cut = Math.round(dealt * .25); if (cut) { b.enemy.hp += cut; dealt -= cut; b.logs.push('Frail: −' + cut + ' damage.'); } }
-  if (b.enemy.barrier > 0 && dealt > 0 && !stat(c).pierceBarrier) { const soak = Math.min(b.enemy.barrier, dealt); b.enemy.hp += soak; b.enemy.barrier -= soak; b.logs.push('Barrier absorbs ' + soak + (b.enemy.barrier ? ' (' + b.enemy.barrier + ' left).' : ' and breaks.')); }
+  // Round 150: on a killing blow, cut from the whole hit, not from the HP that was left.
+  const lost = before - b.enemy.hp;
+  let dealt = b.enemy.hp === 0 ? Math.max(lost, b._hitNet || 0) : lost; if (dealt <= 0) return;
+  const start = dealt;
+  if (b.frail > 0) { const cut = Math.round(dealt * .25); if (cut) { dealt -= cut; b.logs.push('Frail: −' + cut + ' damage.'); } }
+  if (b.enemy.barrier > 0 && dealt > 0 && !stat(c).pierceBarrier) { const soak = Math.min(b.enemy.barrier, dealt); dealt -= soak; b.enemy.barrier -= soak; b.logs.push('Barrier absorbs ' + soak + (b.enemy.barrier ? ' (' + b.enemy.barrier + ' left).' : ' and breaks.')); }
+  if (dealt !== start) b.enemy.hp = Math.max(0, before - dealt);
 };
 const playCardBeforeAether = playCard;
 playCard = function (i) {

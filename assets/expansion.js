@@ -455,6 +455,7 @@ function cardEffect(c,empowered,doubleAttack){
  if(damage&&tm)damage=tm.finalDamage(damage,b);
  const armor=Math.max(0,(b.enemy.armor||0)-(tm?tm.armorIgnore(b):0)),preArmor=damage,armorBlocked=(damage&&armor&&!d.pierce)?Math.min(damage,armor):0;
  if(armorBlocked)damage=Math.max(0,damage-armor);
+ b._hitTotal=(b._hitTotal||0)+damage; // Round 150: full hit before HP runs out, so enemy Block is taken off the real hit
  b.enemy.hp=Math.max(0,b.enemy.hp-damage);
  if(d.block)b.block+=d.block+deviceBonus('aegis')+boost+(tm?tm.blockBonus(c,d,b):0);
  if(d.heal)state.hp=Math.min(state.maxHp,state.hp+d.heal+boost);

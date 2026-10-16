@@ -75,10 +75,14 @@ cardEffect=function(c,empowered,doubleAttack){
  const b=state.battle,d=stat(c),before=b.enemy.hp;
  // Adaptive counter follows the telegraphed element, including the boss's shifts.
  if(enemies[b.id]&&enemies[b.id].shift)b.enemy.element=enemyPlan(b).element;
+ b._hitTotal=0;
  depthCardEffect(c,empowered,doubleAttack);
- const dealt=before-b.enemy.hp,absorbed=Math.min(b.enemy.guard||0,dealt);
+ // Round 150: when a hit takes the enemy to 0 HP, its Block is subtracted from the whole hit,
+ // not from the HP that happened to be left (a 31 hit on 6 HP behind 5 Block used to leave 1 HP).
+ const lost=before-b.enemy.hp,dealt=b.enemy.hp===0?Math.max(lost,b._hitTotal||0):lost,absorbed=Math.min(b.enemy.guard||0,dealt);
+ b._hitNet=dealt-absorbed; // full net hit, for Frail and Barrier (aether-deck.js)
  if(absorbed){
-  b.enemy.hp+=absorbed;b.enemy.guard-=absorbed;
+  b.enemy.guard-=absorbed;b.enemy.hp=Math.max(0,before-(dealt-absorbed));
   const net=dealt-absorbed,last=b.logs[b.logs.length-1];
   if(last!==undefined)b.logs[b.logs.length-1]=last+' − '+absorbed+' block = '+net+' dealt';
   else b.logs.push('Enemy Block absorbs '+absorbed+' damage.');
