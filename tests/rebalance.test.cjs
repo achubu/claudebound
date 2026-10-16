@@ -399,10 +399,10 @@ assert(cityChests.every(c=>c.reward==='crystal'),'both city chests grant an Upgr
 // against a hardcoded room list — a chest room is only genuinely optional
 // if it's a mini-boss's own room (a dead-end you choose to detour into),
 // not the start or any room on the main through-corridor.
-assert(chestFor('5,7')&&chestFor('5,7').reward==='crystal','the Lunar Enforcer\\'s room is a crystal chest');
+assert(!chestFor('5,7')&&chestFor('3,7')&&chestFor('3,7').reward==='crystal','Round 168: the Moon Temple keeps only its relic; its crystal chest is in Pagoda Court, a dead end nearby');
 assert(chestFor('8,9')&&chestFor('8,9').reward==='crystal','the Crown Sentinel\\'s room is a crystal chest');
 const cityChestKeys=Object.keys(rooms).filter(k=>chestFor(k));
-assert(cityChestKeys.every(k=>rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss),'every city chest sits specifically in a boss room (a real optional detour), not a through-route room');
+assert(cityChestKeys.every(k=>(rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss)||Object.keys(rooms[k].exits).length===1),'every city chest sits in a boss room or a dead end (a real optional detour), not a through-route room');
 assert(!chestFor('0,5'),'no chest sits in the start room');
 configureRegion('elaris');
 const elarisChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
@@ -415,22 +415,22 @@ assert(elarisSpineRooms.every(k=>!chestFor(k)),'no chest sits on the mandatory E
 // --- Round 31: a crystal chest now requires defeating the room's boss
 // first -- walking up to it before the fight is won no longer collects
 // it. Walking to it afterward grants a crystal, not a potion.
-configureRegion('city');state.room='5,7';state.chests=[];state.bosses=state.bosses.filter(id=>id!=='moonKnight');
+configureRegion('city');state.room='8,9';state.chests=[];state.bosses=state.bosses.filter(id=>id!=='crownSentinel');
 const materialsBeforeFight=materials();
-{const c=chestFor('5,7');state.pos={x:c.x,y:c.y};} // the chest stands on the street (Round 91)
+{const c=chestFor('8,9');state.pos={x:c.x,y:c.y};} // the chest stands on the street (Round 91)
 checkWorldInteractions();
 assert.equal(materials(),materialsBeforeFight,'the chest does NOT open while the room\\'s boss is still alive');
-assert(!state.chests.includes('city:5,7'),'an uncollected, boss-guarded chest is not marked collected just by walking near it');
+assert(!state.chests.includes('city:8,9'),'an uncollected, boss-guarded chest is not marked collected just by walking near it');
 defs.__finisher=defs.__finisher||{name:'Finisher',cost:1,kind:'Attack',icon:'X',tiers:[{damage:99},{damage:99},{damage:99},{damage:99}]};
-const bossSpawn=roomSpawns('5,7').find(s=>s.boss);startBattle(bossSpawn.uid);
+const bossSpawn=roomSpawns('8,9').find(s=>s.boss);startBattle(bossSpawn.uid);
 state.battle.enemy.hp=1;state.battle.hand=[make('__finisher')];state.battle.energy=3;playCard(0);
-assert(state.bosses.includes('moonKnight'),'the boss is now defeated');
+assert(state.bosses.includes('crownSentinel'),'the boss is now defeated');
 finishBattle();state.battle=null; // checkWorldInteractions() bails immediately while a battle (even the reward screen) is active
 const materialsBeforeWalk=materials(),potionsBeforeWalk=state.potions;
 checkWorldInteractions();
-assert.equal(materials(),materialsBeforeWalk+1,'walking to the Lunar Enforcer\\'s room chest now grants an Upgrade Crystal, boss defeated');
+assert.equal(materials(),materialsBeforeWalk+1,'walking to the Crown Sentinel\\'s room chest now grants an Upgrade Crystal, boss defeated');
 assert.equal(state.potions,potionsBeforeWalk,'it does NOT also grant a potion');
-assert(state.chests.includes('city:5,7'),'the chest is marked collected so it cannot be farmed repeatedly');
+assert(state.chests.includes('city:8,9'),'the chest is marked collected so it cannot be farmed repeatedly');
 
 console.log('PASS: both regions\\' chests are scarce (2 each), live exclusively in mini-boss branch rooms, never sit on the mandatory spine, a crystal chest is locked until that room\\'s boss is actually defeated, and once unlocked grants a crystal (not a potion) when collected.');
 `);
@@ -629,7 +629,7 @@ run(`
 // --- Hidden chests sit off the main N-S and E-W travel lines, not on top
 // of them, and are universally walkable in both regions.
 newGame();configureRegion('city');
-const cityChest=chestFor('5,7');
+const cityChest=chestFor('3,7');
 assert.notEqual(cityChest.x,400,'chest x is off the main north-south thoroughfare');
 let allWalkable=true;
 for(const key of Object.keys(rooms)){if(organicDef(key)){if(!organicGrid(key).length)allWalkable=false;continue}if(usesDiagMask(key)||CROSSROAD_ARTS[joinedArea(key).art]){if(![[330,180],[470,180],[300,245],[500,245],[400,150]].some(([x,y])=>walkable(key,x,y,8)))allWalkable=false;continue}if(!walkable(key,cityChest.x,cityChest.y,28))allWalkable=false} // Round 79: painted roundabout rooms relocate the chest to open pavement

@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 168: one thing per room
+
+- No room holds two things any more. Waypoints, the Cardsmith, the merchant, points of
+  interest (lore, shrines, campfires, caches, sealed vaults, events), relics and hidden chests
+  each get their own room.
+- **The Cardsmith** used to stand beside the middle Nexus Waypoint. It now has its own room about
+  halfway into each world, not in or next to the waypoint's room (`cardsmithRoom` in
+  `assets/cardsmith.js`). Points of interest and the merchant skip that room.
+
+  | World | Cardsmith room |
+  |---|---|
+  | Neon Aftermath | 2,7 Carousel Green |
+  | Solaris | 0,4 Ember Terrace |
+  | Vespera | 6,5 Ion Marsh Shoals |
+  | Chronospire | 6,2 Hourglass Walk |
+
+- **Neon Aftermath's Moon Temple** held both the Ember Sigil and a crystal chest. The chest moved
+  to Pagoda Court (3,7), a dead end in the same district, so it is now an off-path find instead of
+  being locked behind the Lunar Enforcer.
+- Portals are exits, not items, so a start room's waypoint still sits beside the return portal.
+- New `tests/one-per-room.test.cjs` checks every world over 5 seeds and 4 merchant moves.
+  `cardsmith` and `rebalance` tests are updated; the boss-locked chest test now uses the Crown
+  Sentinel's Scrap Fortress.
+
 ## Round 167: last Solaris stand-in replaced
 
 - The owner's `sol-dead-top` (road from the top into a turnaround circle) is the dead end for the

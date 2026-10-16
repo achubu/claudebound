@@ -1,7 +1,7 @@
 'use strict';
 // =====================================================================
-// Round 153: the CARDSMITH. Every world has one; since Round 156 it stands in the
-// room of the world's middle Nexus Waypoint, about halfway in. The cardsmith sells:
+// Round 153: the CARDSMITH. Every world has one, about halfway in, in a room of its own
+// (Round 168; Rounds 156-167 put it in the middle Nexus Waypoint's room). The cardsmith sells:
 //   - card upgrades for Impermanent cards (◇ 36 / 60 / 90, the merchant's prices)
 //   - making an Impermanent card Soulbound (◇ 500, keeps its level and mastery)
 // =====================================================================
@@ -22,11 +22,24 @@ function cardsmithSpot(key) {
   }
   return cardsmithCache[ck] = { x: 560, y: 300 };
 }
+// Round 168: one thing per room. The cardsmith keeps its own room, about halfway into the world
+// but not in or beside the waypoint's room. No point of interest, merchant, relic or chest shares it.
+const poiEligibleBeforeCardsmith = poiEligible;
+const cardsmithRoomCache = {};
+function cardsmithRoom() {
+  if (activeRegion in cardsmithRoomCache) return cardsmithRoomCache[activeRegion];
+  const nx = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS[activeRegion] ? NEXUS_POINTS[activeRegion].mid : null;
+  const nearNexus = k => k === nx || (nx && rooms[nx] && Object.values(rooms[nx].exits).some(v => (typeof v === 'string' ? v : v.to) === k));
+  const frac = k => typeof regionDistanceFrac === 'function' ? regionDistanceFrac(k) : .5;
+  const keys = Object.keys(rooms).filter(k => poiEligibleBeforeCardsmith(k) && !nearNexus(k)).sort((a, b) => Math.abs(frac(a) - .5) - Math.abs(frac(b) - .5) || (a < b ? -1 : 1));
+  return cardsmithRoomCache[activeRegion] = keys[0] || nx || Object.keys(rooms).find(isStartRoom);
+}
+poiEligible = function (key) { return poiEligibleBeforeCardsmith(key) && key !== cardsmithRoom(); };
 function cardsmithFor(region = activeRegion) {
-  const start = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS[region] ? NEXUS_POINTS[region].mid : Object.keys(rooms).find(isStartRoom);
-  if (!start || !rooms[start]) return null;
-  const s = cardsmithSpot(start);
-  return { key: start, x: s.x, y: s.y, type: 'cardsmith', id: region + ':cardsmith' };
+  const key = cardsmithRoom();
+  if (!key || !rooms[key]) return null;
+  const s = cardsmithSpot(key);
+  return { key, x: s.x, y: s.y, type: 'cardsmith', id: region + ':cardsmith' };
 }
 function soulbindTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound)); }
 function openCardsmith() {
