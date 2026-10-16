@@ -175,3 +175,47 @@ renderWorld = function () {
 const elarisChestStyles = document.createElement('style');
 elarisChestStyles.textContent = '.map-chest.elaris-chest{background-image:url(assets/items/poi/elaris-chest.webp)!important;width:30px!important;height:30px!important}';
 document.head.append(elarisChestStyles);
+
+// Round 146: when a point of interest gives you something (a Data Terminal's Shards and its
+// side card, a cache, a sealed cache, an event, a campfire rest), a window shows what you got,
+// with pictures, instead of only a passing message.
+let poiRewardSnap = null;
+function poiSnapshot() {
+  return { shards: state.shards || 0, potions: state.potions || 0, hp: state.hp, blessing: state.blessing || null,
+    side: new Set(((state.side && state.side.pool) || []).map(c => c.uid)), pool: new Set(state.pool.map(c => c.uid)) };
+}
+if (typeof openPOI === 'function') {
+  const openPOIBeforeRewards = openPOI;
+  openPOI = function (p) { if (p && p.type !== 'merchant') poiRewardSnap = { p, snap: poiSnapshot() }; return openPOIBeforeRewards.apply(this, arguments); };
+}
+function poiRewardHTML(before) {
+  const tiles = [], dShards = (state.shards || 0) - before.shards, dPot = (state.potions || 0) - before.potions, dHp = state.hp - before.hp;
+  if (dShards > 0) tiles.push(lootTileHTML('shards', '+' + dShards + (dShards === 1 ? ' Shard' : ' Shards'), state.shards + ' total'));
+  if (dPot > 0) tiles.push(lootTileHTML('potion', dPot > 1 ? dPot + ' Healing Potions' : 'Healing Potion', 'You have ' + state.potions));
+  if (dHp > 0) tiles.push(lootTileHTML('heal', '+' + dHp + ' HP', state.hp + '/' + state.maxHp));
+  if (state.blessing && state.blessing !== before.blessing && typeof BLESSINGS !== 'undefined' && BLESSINGS[state.blessing]) tiles.push(lootTileHTML('bounty', BLESSINGS[state.blessing].name, 'Blessing for your next fight'));
+  const side = ((state.side && state.side.pool) || []).filter(c => !before.side.has(c.uid)), cards = state.pool.filter(c => !before.pool.has(c.uid));
+  return { tiles, side, cards, any: tiles.length || side.length || cards.length };
+}
+if (typeof finishPOI === 'function') {
+  const finishPOIBeforeRewards = finishPOI;
+  finishPOI = function (p, msg) {
+    const rec = poiRewardSnap && poiRewardSnap.p && p && poiRewardSnap.p.id === p.id ? poiRewardSnap : null; poiRewardSnap = null;
+    if (!rec || !document.createElement) return finishPOIBeforeRewards.apply(this, arguments);
+    const got = poiRewardHTML(rec.snap);
+    if (!got.any) return finishPOIBeforeRewards.apply(this, arguments);
+    finishPOIBeforeRewards.call(this, p, null);
+    const d = typeof poiDisplay === 'function' ? poiDisplay(p) : { icon: '', name: 'Found' };
+    openMenu('<div class="eyebrow">ACQUIRED</div><h2>' + d.icon + ' ' + d.name + '</h2>' + (msg ? '<p>' + msg + '</p>' : '') + '<div id="poiRewards" class="cards"></div><p><button id="poiRewardOk" class="primary">Continue</button></p>');
+    const host = $('poiRewards');
+    if (host && host.append) {
+      for (const c of got.side) if (typeof sideCardElement === 'function') host.append(sideCardElement(c, () => {}, true));
+      for (const c of got.cards) host.append(cardElement(c, () => {}, true));
+      if (got.tiles.length && host.insertAdjacentHTML) host.insertAdjacentHTML('beforeend', '<div class="loot-tiles">' + got.tiles.join('') + '</div>');
+    }
+    const ok = $('poiRewardOk'); if (ok) ok.onclick = closeMenu;
+  };
+}
+const poiRewardStyles = document.createElement('style');
+poiRewardStyles.textContent = '#poiRewards{flex-wrap:wrap;justify-content:center;align-items:flex-start}';
+document.head.append(poiRewardStyles);

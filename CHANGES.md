@@ -3344,3 +3344,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Elites now drop an Aetherlink crystal 6.4% of the time (was 8%), as `ELITE_AETHERLINK_ODDS`
   in `assets/expansion.js`. Type (Capacity / Assault / Aegis) and rarity odds (80 / 17 / 3%)
   are unchanged. `tests/rebalance.test.cjs` checks the value.
+
+## Round 146: points of interest show what you got
+
+- Using a point of interest that gives you something now opens an "Acquired" window with
+  pictures instead of only a passing message: side cards and cards as cards, plus Shards,
+  potion, healing and blessing tiles (end of `assets/pickups.js`). Covers the Data Terminal
+  (its +2 Shards, and on the fifth terminal the +15 Shards and side card that weren't shown
+  before), supply and sealed caches, events, campfire rests and shrines. The merchant keeps
+  its own screens.
+- New `tests/poi-rewards.test.cjs`.
