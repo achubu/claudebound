@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 180: 46 refreshed paintings from achubu/Cardbound
+
+- Pulled the card art we were missing from `achubu/Cardbound` (its 2026-10-17 art refresh).
+  No other files in its `assets/` were new to us, and its card definitions match ours.
+  - **36 card paintings** (512 × 512 WebP). Complete four-stage sets for Rootbind, Static,
+    Storm Battery, Tempest Surge, Tidecall and Verdant Pact; the missing stages for Static
+    Shield (1), Thornlash (3) and Wildfire (0, 2, 3); and base paintings for Arc Bulwark,
+    Lunar Edict, Mirrorguard, Phantom Resonance, Prism Lance, Sovereign Gale and Tidebound.
+    Stages not painted yet reuse the nearest painted stage, as before.
+  - **All 10 side-deck cards:** `sideArtPath()` (`aether-deck.js`) now points at `.webp`.
+- `refreshedCardArt` (`cards.js`) lists 63 painted stages across 21 cards; 13 cards have all
+  four stages.
+- The 52 replaced card PNGs and 10 side-card PNGs moved to `unused assets/assets/cards/`,
+  under their old paths.
+- `assets/cards/art-refresh.md` and `tools/art-refresh/prompts.json` were synced from
+  Cardbound. Still to come there: levels 1-3 for the seven single-stage cards, and the
+  Chronospire set.
+- Cache tags bumped to `?v=round180` in `index.html` and `compendium.html`.
+- `card-art` checks every painting is wired in and every side card uses its painting.
+
 ## Round 179: Vespera and Chronospire are tile worlds too
 
 - Owner request: every world is built like Solaris. Vespera and Chronospire are rebuilt from
