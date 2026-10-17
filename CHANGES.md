@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 173: saves in every Chronospire room load
+
+- **Bug:** a save made in 6 of Chronospire's 34 rooms would not load: `9,4`, `9,5`, `9,6`,
+  `6,6` (Paradox Twin), `8,6` and `8,7` (the Chronarch). `validateImport` checked
+  Chronospire rooms against Solaris's room list, so those rooms failed with "Invalid room"
+  and "Continue" reported no save.
+- **Fix:** new `regionRoomKeys(region)` in `expansion.js` returns each world's own room list.
+  The worlds planned next will extend it.
+- New `tests/region-rooms-load.test.cjs` validates a save in every room of every world.
+
 ## Round 172: Solaris enemies fit the desert city
 
 - Owner request: rename and rework the Solaris enemies to fit a sun-scorched brass desert
