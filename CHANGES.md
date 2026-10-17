@@ -3496,6 +3496,70 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 176: gear, two pieces per world that open its boss room
+
+- Owner request: each world has only two items, and both are needed to unlock its boss room.
+  Each item is worn and gives a small boost (Armor, attack, health, armor piercing,
+  elemental attack, one free cleanse). Items get placeholder graphics and a separate
+  **Gear** screen like the Aetherlink.
+- **The rule, in every world:** each mini-boss guards one gear piece in its room. You can
+  take it once the mini-boss is beaten. Every door into the final boss room is sealed
+  (`requires: 'gate:<world>'`) until you hold both pieces, or once that boss is already
+  beaten, so old saves aren't locked out.
+- **The 12 pieces** (`GEAR` in the new `assets/gear.js`), across 5 slots:
+
+  | World | First mini-boss | Second mini-boss |
+  |---|---|---|
+  | Neon Aftermath | Ember Gloves (gloves): +1 attack | Briarstep Boots (boots): +1 Armor |
+  | Solaris | Sunwoven Shirt (shirt): +5 max HP | Scarab Belt (belt): Pierce 1 |
+  | Sky Isles | Galeweave Pants (pants): +1 elemental | Cloudstep Boots (boots): 1 free cleanse |
+  | Elaris | Thornhide Gloves (gloves): +2 attack | Mossweave Pants (pants): +2 Armor |
+  | Vespera | Stormglass Belt (belt): Pierce 2 | Tempest Gloves (gloves): +2 elemental |
+  | Chronospire | Timeworn Shirt (shirt): +12 max HP | Hourglass Belt (belt): 1 free cleanse |
+
+  - Attack and elemental add to card damage, through the talent damage hook.
+  - Pierce ignores enemy Armor.
+  - Armor stacks with Reactive Plating.
+  - A free cleanse is a **✚ Gear cleanse** button in battle: one Purifying Light per fight.
+- **Gear screen:** a new **Gear** button sits beside Aetherlink. It shows five slots (boots,
+  shirt, pants, belt, gloves), each with a picker, plus the whole collection: undiscovered
+  pieces say which world guards them. A piece goes on when you pick it up if its slot is
+  empty. Gear can't be changed mid-fight.
+- **Art:** new `tools/paint_gear_icons.py` paints a placeholder icon per piece in its world's
+  colours (`assets/items/gear/<id>.png`). On the map a piece shows its icon. Owner art with
+  the same file names replaces them.
+- **Neon Aftermath:**
+  - The relic gates are gone. Only the Warden's Crown is sealed.
+  - The Ember Sigil is now the Ember Gloves, still in the Moon Temple.
+  - The Briarstep Boots moved to the Crown Sentinel's Scrap Fortress.
+  - The Moon Lens is retired.
+  - The hidden Upgrade Crystal (owner request) is now a crystal chest at 4,4, the dead end in
+    the middle of the north edge. A save that already took it finds that chest open.
+  - Gear ids stay in `state.relics`, so old saves keep the Ember Sigil and the Boots as their
+    gear.
+- **Chests moved out of the mini-boss rooms** to nearby rooms, under their old ids, so opened
+  chests stay opened:
+
+  | World | Moves |
+  |---|---|
+  | Neon Aftermath | 8,9 → 5,4 |
+  | Solaris | 5,2 → 3,2, 8,0 → 8,2 |
+  | Vespera | 1,5 → 2,5, 11,2 → 10,2 |
+  | Chronospire | 0,3 → 1,3, 6,6 → 6,5 |
+  | Sky Isles | 5,3 and 0,3 |
+  | Elaris | 5,2 and 0,2 |
+
+- The objective names the missing pieces and their guardians until both are found.
+- **Fixes:**
+  - The exploration map's completion counted every relic you carried from other worlds,
+    and could go past 100%. It now counts only this world's.
+  - The Safe tag on the map uses each world's real start room.
+- **Tests:**
+  - New `tests/gear.test.cjs`.
+  - `relic-quest` now plays the gear chain in all six worlds.
+  - Updated: `neon-world`, `room-art`, `rebalance`, `expansion`, `chronospire` (doors into the
+    boss room are `{to, requires}` objects) and `solaris-roster`.
+
 ## Round 175: the Sky Isles and Elaris join the journey (worlds 3 and 4)
 
 - **Six worlds**, in travel order: Neon Aftermath, Solaris, **Sky Isles** (`sky`), **Elaris**

@@ -15,7 +15,8 @@ function setup(hand, opts = {}) {
 newGame(); configureRegion('chronospire'); state.region = 'chronospire'; state.room = '0,0'; state.visited = ['0,0'];
 const keys = Object.keys(rooms); assert.equal(keys.length, 34, '34 rooms');
 const d = regionRoomDistances('chronospire'); assert(keys.every(k => d[k] != null), 'every room is reachable from the gate');
-for (const k of keys) for (const [dir, to] of Object.entries(rooms[k].exits)) assert(rooms[to] && Object.values(rooms[to].exits).includes(k), k + ' ' + dir + ' exit is two-way');
+const exitTo = e => typeof e === 'string' ? e : e.to; // Round 176: doors into the boss room are { to, requires }
+for (const k of keys) for (const [dir, raw] of Object.entries(rooms[k].exits)) { const to = exitTo(raw); assert(rooms[to] && Object.values(rooms[to].exits).map(exitTo).includes(k), k + ' ' + dir + ' exit is two-way'); }
 assert.equal(roomSpawns('0,0').length, 0, 'the gate is safe');
 assert.equal(roomSpawns('8,7')[0].type, 'chronarch'); assert.equal(roomSpawns('0,3')[0].type, 'clockwarden'); assert.equal(roomSpawns('6,6')[0].type, 'paradoxTwin');
 for (const k of keys) for (const s of roomSpawns(k)) assert(enemies[s.type], 'spawn type exists: ' + s.type);

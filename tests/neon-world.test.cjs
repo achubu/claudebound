@@ -14,15 +14,15 @@ for(const k of allKeys)for(const [d,raw] of Object.entries(rooms[k].exits)){
  const back=Object.entries(rooms[to].exits).find(([,r])=>(typeof r==='string'?r:r.to)===k);assert(back,'two-way link '+k+'>'+to);
  const land=neonLandingFrom(k,to,neonMirror(d,{x:door.edge.x,y:door.edge.y-22}),d);assert(land&&walkable(to,land.x,land.y),'continuous street '+k+' '+d);
 }
-// Progression: with no relics, the Citadel and the Junkyard are sealed; collecting them opens everything.
+// Round 176: only the Warden's Crown is sealed. The Lunar Enforcer guards the Ember Gloves and the
+// Crown Sentinel the Briarstep Boots; holding both opens the boss doors.
 const reach=held=>{const seen=new Set(['0,5']),q=['0,5'];while(q.length){const k=q.shift();for(const raw of Object.values(rooms[k].exits)){const to=typeof raw==='string'?raw:raw.to;if(typeof raw==='object'&&raw.requires&&!held.includes(raw.requires))continue;if(!seen.has(to)){seen.add(to);q.push(to)}}}return seen};
-const r0=reach([]);assert(!r0.has('8,4')&&!r0.has('8,9'),'both far districts start sealed');
-for(const [relic,k] of [['boots','0,9'],['ember','5,7'],['lens','5,4']])assert.equal(rooms[k].relic[0],relic);
-assert(r0.has('0,9')&&r0.has('5,7')&&r0.has('5,4'),'Briarstep Boots, the Ember Sigil and the Moon Lens are reachable without other relics');
-// Round 98: the hidden Upgrade Crystal sits mid-map near the Citadel gate (Broadcast Row), not beside the start.
-assert.deepEqual(Object.keys(rooms).filter(k=>rooms[k].relic&&rooms[k].relic[0]==='material'),['5,6'],'one hidden Upgrade Crystal, on Broadcast Row');assert(r0.has('5,6'),'reachable without any relic');
-assert(reach(['ember']).has('8,4'),'the Ember Sigil opens the Crystal Citadel');assert(!reach(['ember']).has('8,9'),'but not the Junkyard');
-assert(reach(['boots']).has('8,9'),'Briarstep Boots open the Junkyard');assert.equal(reach(['ember','boots','lens']).size,54,'everything is reachable with all three');
+const r0=reach([]);assert(!r0.has('8,4'),"the Warden's Crown starts sealed");assert.equal(r0.size,53,'every other room is open from the start');
+for(const [relic,k] of [['ember','5,7'],['boots','8,9']])assert.equal(rooms[k].relic[0],relic);
+assert(!Object.values(rooms).some(r=>r.relic&&r.relic[0]==='lens'),'the Moon Lens is retired');
+// Round 176: the hidden Upgrade Crystal is a crystal chest at 4,4, the dead end in the middle of the north edge.
+assert(!Object.values(rooms).some(r=>r.relic&&r.relic[0]==='material'),'no crystal relic any more');assert(chestFor('4,4')&&chestFor('4,4').reward==='crystal'&&r0.has('4,4'),'the crystal chest at 4,4 is reachable from the start');
+assert(reach(['gate:city']).has('8,4'),"both gear pieces open the Warden's Crown");assert.equal(reach(['gate:city']).size,54);
 // Bosses and patrols stand on the streets; relics and chests just beside them (Round 93).
 assert.equal(rooms['8,4'].enemy[0],'thornWarden');assert.equal(rooms['8,9'].enemy[0],'crownSentinel');assert.equal(rooms['5,7'].enemy[0],'moonKnight');
 for(const k of allKeys){
@@ -34,8 +34,8 @@ for(const k of allKeys){
 state.room='0,5';const door=organicDoor('0,5','e');state.pos={x:786,y:door.edge.y-22};keys={ArrowRight:true};move(.05);keys={};
 assert.equal(state.room,'1,5','walked east into Floodgate Plaza');assert(state.pos.x<60&&Math.abs(state.pos.y-(door.edge.y-22))<=90,'arrived at the matching spot');
 // Gates hold until the relic is found.
-state.room='5,5';state.relics=[];const g=organicDoor('5,5','e');state.pos={x:786,y:g.edge.y-22};keys={ArrowRight:true};move(.05);keys={};assert.equal(state.room,'5,5','the Citadel gate is sealed');
-state.relics=['ember'];state.pos={x:786,y:g.edge.y-22};keys={ArrowRight:true};move(.05);keys={};assert.equal(state.room,'6,5','the Ember Sigil opens it');
+state.room='7,4';state.relics=[];const g=organicDoor('7,4','e');state.pos={x:786,y:g.edge.y-22};keys={ArrowRight:true};move(.05);keys={};assert.equal(state.room,'7,4',"the Warden's Crown door is sealed");
+state.relics=['ember','boots'];state.pos={x:786,y:g.edge.y-22};keys={ArrowRight:true};move(.05);keys={};assert.equal(state.room,'8,4','both city gear pieces open it');
 // The Thorn Warden's arena holds the portal to Elaris.
 state.room='8,4';state.bosses.push('thornWarden');assert.equal(portalTarget().region,'elaris');
 // Round 92: everything you can interact with is on a patch of street you can reach, and every such patch shows its exits.

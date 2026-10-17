@@ -20,7 +20,7 @@ assert.deepStrictEqual(r.shift, ['fire', 'earth'], 'the Pharaoh shifts between s
 assert(r.aff.includes('entomb'), 'the Pharaoh entombs like its Revenants');
 assert.strictEqual(r.bossId, 'bloomTyrant'); assert(r.entombs, 'Entomb works in the Pharaoh fight');
 assert(r.bossArt.includes('aria-label="The Sun Pharaoh"') && r.foxArt.includes('aria-label="Solar Scarab"'));
-assert(/Sun Pharaoh/.test(r.objective));
+assert(/Sun Pharaoh|Cistern Warden/.test(r.objective), 'the objective names the new enemies (Round 176: their gear first)');
 // Other worlds borrow art-only keys, so Solaris art can change without touching them.
 for (const a of r.borrowers) assert(!['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth', 'bloomTyrant'].includes(a), 'borrows a Solaris id: ' + a);
 assert(r.vespFox.includes('cinder-fox.png') && r.chronoHound.includes('cinder-fox.png'), 'Vespera and Chronospire keep the fox sheet');

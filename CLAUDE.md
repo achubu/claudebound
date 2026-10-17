@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 175) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 176) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -18,7 +18,7 @@ change set.
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
-    `sky-data`, `wilds-data`, `tile-worlds`, `pickups`, `cardsmith`. (`solaris-data.js` loads just before `expansion.js`.)
+    `sky-data`, `wilds-data`, `tile-worlds`, `pickups`, `cardsmith`, `gear`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`.
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.
   Prefer `function` declarations for new globals that other files test with
@@ -58,6 +58,8 @@ change set.
   - Doors sit where paths meet room edges.
   - Pockets are tracked; reachability is checked.
   - `organicItemSpot()` places items beside the paths.
+- **Gear** (Round 176, `assets/gear.js`): two pieces per world, one in each mini-boss room;
+  both open the final boss room (`requires: 'gate:<world>'`). Worn in 5 slots via the Gear screen.
 - **Interactables** (chests, relics, POIs, merchant, Nexus Waypoints) sit just
   off the walkable path, 12–28px from reachable street. Enemies and bosses
   stand on paths.

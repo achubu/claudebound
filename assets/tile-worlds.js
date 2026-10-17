@@ -87,12 +87,13 @@ const TILE_WORLD_ROLES = {
   sky: { boss: 'zenithRoc', mini1: 'stormbellWarden', mini2: 'featherMatriarch' },
   wilds: { boss: 'elarisTyrant', mini1: 'tideboundWarden', mini2: 'galeSovereignElaris' }
 };
+const TILE_WORLD_CHESTS = { sky: { '5,3': 'crystal', '0,3': 'crystal' }, wilds: { '5,2': 'crystal', '0,2': 'crystal' } };
 const TILE_WORLD_ZONES = { sky: SKY_ZONE_ENEMY, wilds: WILDS_ZONE_ENEMY };
 for (const id of TILE_WORLD_IDS) {
   const d = TILE_WORLD_DATA[id], stops = tileWorldStops(id);
   TILE_REGIONS[id] = {
     rooms: tileWorldRooms(id, TILE_WORLD_ROLES[id]), start: d.roles.start, stops,
-    chests: { [d.roles.mini1]: 'crystal', [d.roles.mini2]: 'crystal' },
+    chests: TILE_WORLD_CHESTS[id], // beside the mini-boss rooms, which hold gear (Round 176)
     tierTypes: key => { const z = rooms[key] && rooms[key].zone; return [TILE_WORLD_ZONES[id][(z || 1) - 1]]; }
   };
   WORLD_BOSS_ROOMS[id] = [d.roles.boss, TILE_WORLD_ROLES[id].boss];

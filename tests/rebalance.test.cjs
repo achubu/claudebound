@@ -392,7 +392,7 @@ run(`
 // at all). Scarcer too: city went 6->2, Elaris 3->2.
 newGame();configureRegion('city');
 const cityChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
-assert.equal(cityChests.length,2,'city has exactly 2 hidden chests, both in mini-boss branches');
+assert.equal(cityChests.length,3,'city has 3 hidden chests: two moved from mini-boss rooms and the hidden crystal (Round 176)');
 assert(cityChests.every(c=>c.reward==='crystal'),'both city chests grant an Upgrade Crystal');
 // Round 29: the user's hand-designed maze has real loops, not a single
 // spine, so "off the path" is checked structurally here instead of
@@ -400,7 +400,7 @@ assert(cityChests.every(c=>c.reward==='crystal'),'both city chests grant an Upgr
 // if it's a mini-boss's own room (a dead-end you choose to detour into),
 // not the start or any room on the main through-corridor.
 assert(!chestFor('5,7')&&chestFor('3,7')&&chestFor('3,7').reward==='crystal','Round 168: the Moon Temple keeps only its relic; its crystal chest is in Pagoda Court, a dead end nearby');
-assert(chestFor('8,9')&&chestFor('8,9').reward==='crystal','the Crown Sentinel\\'s room is a crystal chest');
+assert(!chestFor('8,9')&&rooms['8,9'].relic[0]==='boots'&&chestFor('5,4')&&chestFor('5,4').reward==='crystal'&&chestFor('5,4').id==='city:8,9','Round 176: the Crown Sentinel\\'s room holds the Briarstep Boots; its crystal chest moved to the Billboard Steps (a dead end) under its old id');
 const cityChestKeys=Object.keys(rooms).filter(k=>chestFor(k));
 assert(cityChestKeys.every(k=>(rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemies[rooms[k].enemy[0]].boss)||Object.keys(rooms[k].exits).length===1),'every city chest sits in a boss room or a dead end (a real optional detour), not a through-route room');
 assert(!chestFor('0,5'),'no chest sits in the start room');
@@ -412,25 +412,16 @@ assert(elarisChests.every(c=>c.reward==='potion'),'both Elaris chests grant a po
 const elarisSpineRooms=(()=>{const prev={'0,0':null},q=['0,0'];while(q.length){const k=q.shift();for(const raw of Object.values(rooms[k].exits)){const t=typeof raw==='string'?raw:raw.to;if(!(t in prev)){prev[t]=k;q.push(t)}}}const out=[];for(let k=prev[SOLARIS_BOSS_ROOM];k;k=prev[k])out.push(k);return out})();
 assert(elarisSpineRooms.every(k=>!chestFor(k)),'no chest sits on the mandatory Elaris spine');
 
-// --- Round 31: a crystal chest now requires defeating the room's boss
-// first -- walking up to it before the fight is won no longer collects
-// it. Walking to it afterward grants a crystal, not a potion.
-configureRegion('city');state.room='8,9';state.chests=[];state.bosses=state.bosses.filter(id=>id!=='crownSentinel');
-const materialsBeforeFight=materials();
-{const c=chestFor('8,9');state.pos={x:c.x,y:c.y};} // the chest stands on the street (Round 91)
-checkWorldInteractions();
-assert.equal(materials(),materialsBeforeFight,'the chest does NOT open while the room\\'s boss is still alive');
-assert(!state.chests.includes('city:8,9'),'an uncollected, boss-guarded chest is not marked collected just by walking near it');
-defs.__finisher=defs.__finisher||{name:'Finisher',cost:1,kind:'Attack',icon:'X',tiers:[{damage:99},{damage:99},{damage:99},{damage:99}]};
-const bossSpawn=roomSpawns('8,9').find(s=>s.boss);startBattle(bossSpawn.uid);
-state.battle.enemy.hp=1;state.battle.hand=[make('__finisher')];state.battle.energy=3;playCard(0);
-assert(state.bosses.includes('crownSentinel'),'the boss is now defeated');
-finishBattle();state.battle=null; // checkWorldInteractions() bails immediately while a battle (even the reward screen) is active
+// --- Round 31 / Round 176: chests no longer share a room with a boss (the mini-boss rooms hold
+// gear, which tests/relic-quest.test.cjs checks is locked until the fight is won). The Crown
+// Sentinel's old crystal chest, now on the Billboard Steps, still grants exactly one crystal.
+configureRegion('city');state.room='5,4';state.chests=[];
 const materialsBeforeWalk=materials(),potionsBeforeWalk=state.potions;
+{const c=chestFor('5,4');state.pos={x:c.x,y:c.y};}
 checkWorldInteractions();
-assert.equal(materials(),materialsBeforeWalk+1,'walking to the Crown Sentinel\\'s room chest now grants an Upgrade Crystal, boss defeated');
+assert.equal(materials(),materialsBeforeWalk+1,'the moved chest grants an Upgrade Crystal');
 assert.equal(state.potions,potionsBeforeWalk,'it does NOT also grant a potion');
-assert(state.chests.includes('city:8,9'),'the chest is marked collected so it cannot be farmed repeatedly');
+assert(state.chests.includes('city:8,9'),'the chest is marked collected under its old id so it cannot be farmed repeatedly');
 
 console.log('PASS: both regions\\' chests are scarce (2 each), live exclusively in mini-boss branch rooms, never sit on the mandatory spine, a crystal chest is locked until that room\\'s boss is actually defeated, and once unlocked grants a crystal (not a potion) when collected.');
 `);
@@ -595,8 +586,10 @@ assert(bossKey&&roomTag(bossKey)===null,'an unexplored boss room is not tagged o
 // mini-boss branch rooms (Round 26), where roomTag()'s Boss check takes
 // precedence over Relic regardless of collection state, so a boss room
 // with an uncollected relic still correctly shows "Boss", not "Relic".
+// Round 176: gear sits with a mini-boss, and boss rooms always read Boss.
 const relicKey=Object.keys(rooms).find(k=>rooms[k].relic&&rooms[k].relic[0]==='boots');
-state.visited.push(relicKey);assert(relicKey&&roomTag(relicKey).label==='Relic','a room with an uncollected relic (and no boss) is tagged Relic');
+state.visited.push(relicKey);assert(relicKey&&roomTag(relicKey).label==='Boss','the gear room shows Boss while its mini-boss stands');
+
 state.relics=['boots'];
 assert.notEqual(roomTag(relicKey)&&roomTag(relicKey).label,'Relic','once the relic is collected it is no longer tagged as an available Relic');
 
