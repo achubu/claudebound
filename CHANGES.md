@@ -3496,6 +3496,33 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 174: tile kits for worlds 3 and 4 (Sky Isles and Elaris)
+
+- Owner plan: six worlds in order: Neon Aftermath, Solaris, a new sky world, Elaris (the
+  forest, with the old forest creatures), then Vespera and Chronospire. Elaris and every later
+  world are built like Solaris, from road-shaped tiles flipped to fit each room.
+- New `tools/build_tile_world.py sky|wilds`: Solaris's builder generalised. It reuses the
+  tracer and flips from `tools/build_solaris.py`, so Solaris's output does not change. Each
+  world turns Neon Aftermath's 54-room layout a different way, so the three tile worlds have
+  different maps:
+
+  | World | Region id | Map | Start | Mini-bosses | Final boss | Levels |
+  |---|---|---|---|---|---|---|
+  | Solaris | `elaris` | flipped top-to-bottom | 0,0 | 5,2 / 8,0 | 8,5 | 10-18 |
+  | Sky Isles | `sky` | flipped left-to-right | 8,1 | 3,3 / 0,5 | 0,0 | 19-27 |
+  | Elaris | `wilds` | turned half way round | 8,4 | 3,2 / 0,0 | 0,5 | 28-36 |
+
+  The region id `elaris` stays with Solaris so saves carry over; the forest world is `wilds`.
+  The builder writes `assets/<world>-data.js` (`TILE_WORLD_DATA.<world>`: walk mask, tile plan,
+  rooms, the start/boss/mini-boss rooms and the placeholder list) and the room tiles as `.webp`.
+- New `tools/paint_placeholder_tiles.py sky|wilds` paints a stand-in for each of the 7 road
+  shapes the layout needs (cross, corner, t-bottom, t-right, straight, dead-bottom,
+  dead-right): marble walkways on grassy islands over clouds for the sky, and dirt trails
+  under tree canopy for Elaris. It also writes each tile's exact walk area to
+  `src/masks/<name>.png`, so the stand-ins need no colour tracing. Owner paintings
+  (e.g. `src/cross-a.jpg`) replace them; delete the `-ph` tile then.
+- The new data is not loaded by the game yet (next round).
+
 ## Round 173: saves in every Chronospire room load
 
 - **Bug:** a save made in 6 of Chronospire's 34 rooms would not load: `9,4`, `9,5`, `9,6`,
