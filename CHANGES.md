@@ -3496,6 +3496,46 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 182: the Difficulty lab, and a difficulty report for every enemy
+
+- Owner request: test the whole game and break down the difficulty of every enemy, each
+  fought at the player's own level, with all the items available by then, and with the talent
+  trees used up to that level. Owner request: run it from the compendium whenever wanted.
+- **Compendium → Difficulty lab** (new section and nav link):
+  - Pick a world or all worlds, and how many fights per build and style. Press **Run**.
+  - It plays real battles in the compendium's hidden game frame and fills a table: each
+    enemy's HP and attack at that level, typical win rate, best and worst build, average
+    turns, HP left when won, gear worn, and a verdict against the targets.
+  - **Copy results** gives tab-separated rows for a spreadsheet.
+  - All six worlds at 6 fights take about 100 s.
+  - While it runs, saving, drawing and storage writes in the frame are switched off, and
+    every `aethercede-` key is restored afterwards. A journey in another tab is never
+    touched; a planted save stayed byte-identical in the browser check.
+- **Shared code:**
+  - `assets/sim/bot.js`: the sim's bot, moved out of `tests/talent-sim.cjs`.
+  - `assets/sim/lab.js`: the 16 builds, decks, earlier bosses and side cards, moved out of
+    `tests/balance-sim.cjs`. It also holds `simEncounters()` (every encounter, with the gear
+    available by then) and `simEncounterRun()` (all builds and styles, one step at a time).
+  - The balance sim reads its settings from `lab.js`, and gives identical results (Lunar
+    Enforcer check before and after).
+  - The game itself does not load these files.
+  - `tests/talent-sim.cjs` also loads `gear.js`. Gear does nothing unless a piece is owned.
+- **New `tests/difficulty-report.cjs [fights] [world]`:** the same lab from the command line.
+- **The report:** `DIFFICULTY-REPORT.md` lists all 83 encounters, 15,936 battles at 6 fights
+  per build and style. 17 are off target:
+  - **Neon Aftermath's mini-bosses are swapped in difficulty.** The Lunar Enforcer (Lv 5)
+    wins 8% (too hard) and the Crown Sentinel (Lv 7) 100% (too easy). This was already so
+    before this session (8223aab, Round 170) and does not depend on gear (98% without it).
+  - **With gear worn, every mini-boss and final boss from Solaris on reads too easy:**
+    - Mini-bosses: 52-92%.
+    - Final bosses: the Sun Pharaoh 51%, Zenith Roc 59%, Bloom Tyrant 58%, Tempest Colossus
+      49%, Chronarch 60%.
+    - These were tuned in Rounds 177 and 181 without gear (about 42% and 29%), so the gear
+      boosts roughly double the boss win rates.
+    - Regular fights are all on target.
+- New `tests/difficulty-lab.test.cjs`: every world's encounters and their gear, and one
+  encounter run end to end.
+
 ## Round 181: mini-boss balance after the Vespera and Chronospire rebuild
 
 - On the new maps the Arc Sentinel and the Clockwarden stand 2 levels higher than before
