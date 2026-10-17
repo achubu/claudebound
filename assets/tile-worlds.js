@@ -49,18 +49,17 @@ Object.assign(BOSS_PATTERNS, {
   zenithRoc: ['guard', 'charge', 'elemental', 'heavy', 'attack', 'charge', 'elemental'],
   tideboundWarden: BOSS_PATTERNS.tidewardenElaris, galeSovereignElaris: BOSS_PATTERNS.galeSovereign, elarisTyrant: BOSS_PATTERNS.bloomTyrant
 });
-// Starting tuning: the Sky Isles take Vespera's old place in the curve and Elaris takes
-// Chronospire's (tests/balance-sim.cjs re-checks them).
+// Round 177: tuned with tests/balance-sim.cjs (regular fights ~75% wins, mini-bosses ~42%, final bosses ~29%).
 Object.assign(BALANCE.perEnemy, {
-  stormbellWarden: { hp: .72 }, featherMatriarch: { hp: .82 }, zenithRoc: { hp: .55 },
-  tideboundWarden: { hp: 1.05 }, galeSovereignElaris: { hp: .95 }, elarisTyrant: { hp: .72 }, elarisHeron: { hp: .9 }
+  stormbellWarden: { hp: .65 }, featherMatriarch: { hp: .78 }, zenithRoc: { hp: .42 },
+  tideboundWarden: { hp: .91 }, galeSovereignElaris: { hp: .65 }, elarisTyrant: { hp: .58 }, elarisHeron: { hp: .9 }
 });
 const SKY_ZONE_ENEMY = ['skyDrake', 'skyDrake', 'skyWisp', 'skyWisp', 'skyHarpy', 'skyHarpy', 'skyRam', 'skyRam'];
 const WILDS_ZONE_ENEMY = ['elarisFox', 'elarisFox', 'elarisAntler', 'elarisAntler', 'elarisHeron', 'elarisHeron', 'elarisMoth', 'elarisMoth'];
 WORLD_BOSSES.push('zenithRoc', 'elarisTyrant');
 
 // --- Balance: each new world sits where the old worlds 3 and 4 were ---
-for (const [table, sky, wilds] of [['hpPerLevel', .05, .05], ['attackPerLevel', .25, .25], ['regionHp', 2.35, 3.3], ['regionAttack', 16, 25],
+for (const [table, sky, wilds] of [['hpPerLevel', .05, .05], ['attackPerLevel', .25, .25], ['regionHp', 2.2, 2.22], ['regionAttack', 16, 25],
   ['difficulty', 1, 1], ['regionLevelBase', 19, 28], ['eliteHp', 1.25, 1.25], ['normalHp', 1.1, 1.1]]) Object.assign(BALANCE[table], { sky, wilds });
 
 // --- Rooms ------------------------------------------------------------

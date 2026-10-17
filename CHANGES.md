@@ -3496,6 +3496,27 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 177: balance for worlds 3 to 6
+
+- Tuned with `tests/balance-sim.cjs` (16 talent builds × 2 play styles, fair-fight levels).
+  Targets: regular fights about 75% wins on average, mini-bosses about 42%, final bosses
+  about 29%. Each world's health multiplier was bisected first, then each boss's own
+  health.
+
+  | World | `regionHp` | Mini-bosses (hp) | Final boss (hp) | Sim result: regular / minis / boss |
+  |---|---|---|---|---|
+  | Sky Isles | 2.35 → **2.2** | Stormbell Warden .65, Featherfall Matriarch .78 | Zenith Roc .42 | 58-91% / 42%, 41% / 31% |
+  | Elaris | 3.3 → **2.22** | Tidebound Warden .91, Gale Sovereign .65 | Bloom Tyrant .58 | 50-92% / 42%, 48% / 28% |
+  | Vespera | 2.35 → **3.02** | Arc Sentinel .69, Resonant Phantom .99 | Tempest Colossus .45 | 45-92% / 42%, 43% / 30% |
+  | Chronospire | 3.3 → **3.36** | Clockwarden .82, Paradox Twin .93 | Chronarch .47 | 41-100% / 40%, 42% / 31% |
+
+- Why it moved:
+  - At their new levels (+18), Vespera and Chronospire had become too easy: the player has
+    18 more levels of talents by then.
+  - Elaris on Chronospire's old values was too hard, because Chronospire's numbers assumed
+    Suspend cards.
+- The sim does not wear gear yet, so real fights are a little easier than these numbers.
+
 ## Round 176: gear, two pieces per world that open its boss room
 
 - Owner request: each world has only two items, and both are needed to unlock its boss room.

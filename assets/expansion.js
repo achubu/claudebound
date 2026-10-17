@@ -16,7 +16,8 @@ const BALANCE={
  hpPerLevel:{city:.04,elaris:.06,vespera:.05,chronospire:.05},
  attackPerLevel:{city:.4,elaris:1.1,vespera:.25,chronospire:.25},
  // Extra per-world strength on top of level (Round 38: about 5-10 points harder).
- regionHp:{city:1.08,elaris:1.8,vespera:2.35,chronospire:3.3},
+ // Round 177: Vespera and Chronospire re-tuned as worlds 5 and 6 (tests/balance-sim.cjs).
+ regionHp:{city:1.08,elaris:1.8,vespera:3.02,chronospire:3.36},
  regionAttack:{city:0,elaris:5,vespera:16,chronospire:25},
  // Round 139: overall difficulty per world, on top of everything else (health and attack).
  difficulty:{city:1.1,elaris:1,vespera:1,chronospire:1},
@@ -47,7 +48,7 @@ const BALANCE={
  perEnemy:{
   moonKnight:{hp:0.73},crownSentinel:{hp:0.72},thornWarden:{hp:0.95},
   tidewardenElaris:{hp:1.4},galeSovereign:{hp:0.82},bloomTyrant:{hp:0.77},
-  arcSentinel:{hp:0.72},resonantPhantom:{hp:0.82},stormTyrant:{hp:0.46},
+  arcSentinel:{hp:0.69},resonantPhantom:{hp:0.99},stormTyrant:{hp:0.45},
   // Round 51: the Drowned Heron (water, Siphon) was the worst early Elaris fight.
   drownedHeron:{hp:0.85},stormMoth:{hp:0.9}
  }

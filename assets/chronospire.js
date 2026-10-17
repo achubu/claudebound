@@ -27,7 +27,7 @@ const CHRONO_ENEMIES = {
   chronarch:    { name: 'The Chronarch', icon: '⌛', hp: 160, attack: 12, armor: 3, boss: true, element: 'water', shift: ['water', 'fire'], shiftEvery: 4, art: 'forestTyrant', tint: CHRONO_TINT }
 };
 Object.assign(enemies, CHRONO_ENEMIES);
-Object.assign(BALANCE.perEnemy, { clockwarden: { hp: .95 }, paradoxTwin: { hp: 1.05 }, chronarch: { hp: .72 } });
+Object.assign(BALANCE.perEnemy, { clockwarden: { hp: .82 }, paradoxTwin: { hp: .93 }, chronarch: { hp: .47 } }); // Round 177: tuned as world 6
 const CHRONO_ZONE_ENEMY = ['chronoHound', 'chronoMoth', 'chronoSentry', 'chronoWraith', 'chronoHeron', 'chronoStag', 'chronoWisp', 'chronoMauler'];
 function chronoTierTypes(key) { const z = rooms[key] && rooms[key].zone; return [CHRONO_ZONE_ENEMY[(z || 1) - 1]]; }
 
