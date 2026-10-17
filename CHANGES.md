@@ -3496,6 +3496,51 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 184: playtest fixes for pathing and things beside the path
+
+- Owner request: playtest for bad pathing, poor placement of interactable items, and bugs.
+- **New `tests/playtest-walk.cjs`** (Playwright, run on demand):
+  - In every world it walks the hero with the game's own tap-to-move routes
+    (`setTouchDestination` + `move()`) through every door, from every spot where the hero
+    actually arrives.
+  - From each arrival it tap-routes to every item in the room, and checks placement:
+    overlaps, patrols, the portal, and the HUD panel or minimap on a 1280×800 screen.
+  - It opens every menu in every world.
+  - Each run covers 6 × 54 rooms, about 820 arrivals, 2,321 door crossings and about 390 item
+    routes.
+- **Found and fixed:**
+  - **Walking past something stopped a tap route.** A point of interest, the merchant, a
+    Nexus Waypoint or the Cardsmith opens when you come within 40px. Items stand 12-28px off
+    the path, so any tap route along that path opened them and cancelled the route; you had to
+    close the menu and tap again. On a phone this hit about 70 crossings per world.
+    - Now a tap route only opens what was tapped: `touchPassingBy()` and `touchTapped()` in
+      `touch-controls.js`, checked in `exploration.js` and `cardsmith.js`.
+    - Walking with the keys still opens what you walk into.
+  - **Used points of interest popped up every time** you walked past ("You have already used
+    this."). They now show a short note instead; tap one to look again.
+  - **Items under the HUD or the minimap:**
+    - Seen in Neon Aftermath: the start Nexus at 658,383, and lore and campfires at 102-179,
+      117-120.
+    - Seen in Solaris: a cache at 140,166.
+    - Fix: new `screenCovered(x, y)` in `organic-paths.js` (top-left 225×180, bottom-right
+      from 650,350). `organicItemSpot()` avoids those areas when a room has another spot, and
+      Neon Aftermath's painted spots skip them.
+    - In a Neon Aftermath room whose only painted spots are covered, the point of interest goes
+      to another room. The Nexus keeps its place if there is no other spot.
+  - **Two Neon Aftermath chests had a patrol standing on them:** Billboard Steps 5,4 (18px)
+    and Pagoda Court 3,7 (16px), so reaching them started a fight. A painted chest spot is now
+    used only when no patrol stands within 70px; otherwise the chest keeps the patrol-clear spot
+    beside the street.
+- **After the fixes, three runs with different seeds:** every room in every world was visited,
+  every door crossed, every item reached, with no walk-past popups, no placement problems, no
+  page errors and no menu errors.
+- **Not covered by the walk:** patrols move and collide only in the animation loop, which the
+  walker doesn't run, so walking into patrols isn't exercised. Combat is covered by the other
+  suites and the Difficulty lab.
+- New `tests/walk-past.test.cjs`: tap routes, used points of interest, and HUD, minimap and
+  patrol clearance over three seeds in all six worlds.
+- Cache tags bumped to `?v=round184`.
+
 ## Round 183: every boss re-tuned with gear worn
 
 - The Round 182 report showed that, with gear worn, every mini-boss and final boss from

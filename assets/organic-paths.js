@@ -295,6 +295,9 @@ function organicSpot(key, x, y, avoid = [], gap = 0) {
 // there). Spots keep clear of exit doors and of anything in `avoid`.
 const ITEM_OFF = { min: 12, max: 28, ideal: 20 };
 const organicItemCache = {};
+// Round 184: on a 1280x800 screen the HUD panel covers the top-left of the room and the minimap
+// the bottom-right, so item spots there are avoided when the room has another one.
+function screenCovered(x, y) { return (x < 225 && y < 180) || (x > 650 && y > 350); }
 function organicItemSpot(key, x, y, avoid = [], gap = 0) {
   const o = organicDef(key); if (!o) return null;
   const ck = activeRegion + ':' + key + ':' + o.def.src + ':' + Math.round(x) + ',' + Math.round(y) + ':' + gap + ':' + avoid.map(a => Math.round(a.x) + ',' + Math.round(a.y)).join(';');
@@ -314,7 +317,7 @@ function organicItemSpot(key, x, y, avoid = [], gap = 0) {
     if (!near || near.d < ITEM_OFF.min || near.d > ITEM_OFF.max || !ok.has(near.g)) continue;
     if (doors.some(d => Math.hypot(d.x - px, d.y - py) < 90)) continue;
     if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
-    const s = Math.hypot(px - x, py - y) + 6 * Math.abs(near.d - ITEM_OFF.ideal);
+    const s = Math.hypot(px - x, py - y) + 6 * Math.abs(near.d - ITEM_OFF.ideal) + (screenCovered(px, py) ? 400 : 0);
     if (s < bs) { bs = s; best = { x: px, y: py }; }
   }
   return organicItemCache[ck] = best;

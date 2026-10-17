@@ -40,11 +40,16 @@ function findTouchPath(area,start,target){
  if(previous[end]===-2){end=-1;let bd=90*90;for(const i of queue){const q=point(i),d=(q.x-target.x)**2+(q.y-target.y)**2;if(d<bd){bd=d;end=i}}if(end<0)return null}
  const result=[];for(let at=end;at!==-1;at=previous[at])result.push(point(at));return result.reverse();
 }
+// Round 184: on a tap route only what was tapped opens. touchPassingBy(p): following a route to
+// somewhere else; touchTapped(p): the last tap in this room was on (or right next to) p.
+let lastTouchTap=null;
+function touchPassingBy(p){const r=touchRoute;if(!r||!r.target||!state)return false;const o=cellOffset(state.room,joinedArea());return Math.hypot(r.target.x-o.x-p.x,r.target.y-o.y-p.y)>50}
+function touchTapped(p){return !!(lastTouchTap&&state&&lastTouchTap.room===state.room&&Math.hypot(lastTouchTap.x-p.x,lastTouchTap.y-p.y)<=50)}
 function setTouchDestination(target,exit=null){
  if(!state||state.battle||!$('menuOverlay').classList.contains('hidden')||!$('startOverlay').classList.contains('hidden'))return false;
  const area=joinedArea(),points=findTouchPath(area,touchWorldPoint(),target);
  if(!points){cancelTouchRoute();toast('Tap an open path nearby.');return false}
- touchRoute={points,area:activeRegion+':'+area.cells.join('|'),exit,target:points.at(-1)};drawMoveMarker();return true;
+ touchRoute={points,area:activeRegion+':'+area.cells.join('|'),exit,target:points.at(-1)};{const o=cellOffset(state.room,area);lastTouchTap={room:state.room,x:target.x-o.x,y:target.y-o.y}}drawMoveMarker();return true;
 }
 function drawMoveMarker(){
  if(!touchRoute)return;let marker=document.querySelector('.move-marker');

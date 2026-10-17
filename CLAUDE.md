@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 183) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 184) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -64,8 +64,9 @@ change set.
 - **Gear** (Round 176, `assets/gear.js`): two pieces per world, one in each mini-boss room;
   both open the final boss room (`requires: 'gate:<world>'`). Worn in 5 slots via the Gear screen.
 - **Interactables** (chests, relics, POIs, merchant, Nexus Waypoints) sit just
-  off the walkable path, 12–28px from reachable street. Enemies and bosses
-  stand on paths.
+  off the walkable path, 12–28px from reachable street, clear of the HUD/minimap corners
+  (`screenCovered`) and of patrols. Enemies and bosses stand on paths. On a tap route only
+  the tapped item opens (Round 184).
 - **Card art** comes from `cardArtPath()` in `assets/cards.js`. The refreshed
   WebP illustrations are listed in `refreshedCardArt`. Status and pending
   prompts: `assets/cards/art-refresh.md` and `tools/art-refresh/`. When art
@@ -102,7 +103,7 @@ change set.
   - `exploration`
   - `rebalance`
 - Browser check: serve with `python3 -m http.server 8123` and drive it with
-  Playwright.
+  Playwright. `node tests/playtest-walk.cjs [world]` walks every door and item with tap routes.
 - Difficulty: compendium → Difficulty lab, or `node tests/difficulty-report.cjs [fights] [world]`
   (shared code in `assets/sim/`). Tune bosses with the lab (it wears gear); `tests/balance-sim.cjs`
   plays without gear.

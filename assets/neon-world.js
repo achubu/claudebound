@@ -269,7 +269,10 @@ function neonNook(key, kind, ok = () => true) {
 const chestForBeforeNook = chestFor;
 chestFor = function (key) {
   const c = chestForBeforeNook(key); if (!c || !neonNooks(key)) return c;
-  const n = neonNook(key, 'chest'); return n ? { ...c, x: n.x, y: n.y } : c;
+  // Round 184: a painted spot with a patrol standing on it would start a fight instead; keep the
+  // patrol-clear spot found beside the street then.
+  const n = neonNook(key, 'chest'), spawns = typeof state !== 'undefined' && state && state.seed != null ? roomSpawns(key) : [];
+  return n && spawns.every(s => Math.hypot(s.x - n.x, s.y - n.y) > 70) ? { ...c, x: n.x, y: n.y } : c;
 };
 if (typeof poiSpot === 'function') {
   const poiSpotBeforeNeonWorld = poiSpot;
@@ -279,7 +282,9 @@ if (typeof poiSpot === 'function') {
       if (ck in itemSpotCache) return itemSpotCache[ck];
       // A Nexus Waypoint always takes its spot (it isn't a fight); others keep clear of patrols.
       const spawns = roomSpawns(key), nexus = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS[activeRegion] && NEXUS_POINTS[activeRegion].mid === key;
-      const n = neonNook(key, 'poi', p => spawns.every(q => Math.hypot(q.x - p.x, q.y - p.y) > 150)) || (nexus ? neonNook(key, 'poi') : null);
+      const clear = p => spawns.every(q => Math.hypot(q.x - p.x, q.y - p.y) > 150);
+      // Round 184: a point of interest whose only spots are under the HUD or the minimap goes to another room.
+      const n = neonNook(key, 'poi', p => clear(p) && !screenCovered(p.x, p.y)) || (nexus ? neonNook(key, 'poi', p => !screenCovered(p.x, p.y)) || neonNook(key, 'poi') : null);
       return itemSpotCache[ck] = n ? [n.x, n.y] : null;
     }
     if (!rooms[key] || !organicDef(key)) return poiSpotBeforeNeonWorld(key);
@@ -298,7 +303,7 @@ if (typeof poiAt === 'function') {
     const p = poiAtBeforeNeonWorld(key);
     // The start room's waypoint has a fixed spot; move it beside the street too.
     if (p && p.type === 'nexus' && rooms[key] && organicDef(key)) {
-      const q = neonNook(key, 'poi') || organicItemSpot(key, p.x, p.y); if (q) return { ...p, x: q.x, y: q.y };
+      const q = neonNook(key, 'poi', n => !screenCovered(n.x, n.y)) || neonNook(key, 'poi') || organicItemSpot(key, p.x, p.y); if (q) return { ...p, x: q.x, y: q.y };
     }
     return p;
   };

@@ -260,7 +260,7 @@
          read from the running game (see loadGameData below), because
          expansion.js / encounter-depth.js depend on the game's own globals
          and crashed here, silently dropping 10 of the 23 cards. -->
-    <script src="assets/cards.js?v=round183" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/cards.js?v=round184" onerror="console.warn('assets/cards.js not found')"></script>
 </head>
 <body>
 
@@ -341,7 +341,7 @@
             // Top-level const/let in the game (WORLD_ORDER, enemies, ...) are not window properties.
             const g = (win, name) => { try { return win.eval(name); } catch (e) { return undefined; } };
             function loadScript(win, src) {
-                return new Promise((ok, fail) => { const el = win.document.createElement('script'); el.src = src + '?v=round183'; el.onload = ok; el.onerror = () => fail(Error('could not load ' + src)); win.document.head.append(el); });
+                return new Promise((ok, fail) => { const el = win.document.createElement('script'); el.src = src + '?v=round184'; el.onload = ok; el.onerror = () => fail(Error('could not load ' + src)); win.document.head.append(el); });
             }
             async function ready() {
                 const win = frameWin(); if (!win || !g(win, 'WORLD_ORDER')) return null;
@@ -427,7 +427,7 @@
             return new Promise(resolve => {
                 const frame = document.createElement('iframe');
                 window.gameFrame = frame; // Round 182: the Difficulty lab runs its battles in this frame
-                frame.src = 'index.html?v=round183';
+                frame.src = 'index.html?v=round184';
                 frame.setAttribute('aria-hidden', 'true');
                 frame.tabIndex = -1;
                 frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';

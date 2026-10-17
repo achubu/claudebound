@@ -197,7 +197,12 @@ checkWorldInteractions = function () {
   const near = here.find(p => Math.hypot(state.pos.x - p.x, state.pos.y - p.y) < 40);
   if (!near) { poiArmed = null; return; }
   if (poiArmed === near.id) return; // already opened; step away to re-open
+  // Round 184: walking past on a tap route to somewhere else doesn't stop you here.
+  if (typeof touchPassingBy === 'function' && touchPassingBy(near)) return;
   poiArmed = near.id;
+  // Something already used doesn't pop up again when you walk by; tap it to look again.
+  const tapped = typeof touchTapped === 'function' && touchTapped(near);
+  if (near.type !== 'merchant' && near.type !== 'nexus' && poiUsed(near) && !tapped) { const d = poiDisplay(near); toast(d.icon + ' ' + d.name + ': already used. Tap it to look again.'); return; }
   openPOI(near);
 };
 function poiMenu(title, body, buttons) {
