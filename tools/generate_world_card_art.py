@@ -14,6 +14,7 @@ DESERT = ((40, 22, 8), (110, 66, 24))
 SKY = ((40, 90, 150), (150, 200, 240))
 FOREST = ((10, 30, 14), (34, 80, 40))
 STORM = ((14, 14, 40), (44, 40, 96))
+BRASS = ((36, 22, 10), (92, 62, 28))
 CARDS = {
     # id: (background top, bottom, emblem main, emblem light, accent, motif)
     'sunflare':        (*DESERT, (255, 170, 40), (255, 240, 160), (255, 90, 40), 'sun'),
@@ -37,6 +38,8 @@ CARDS = {
     'noonPeal':        (*DESERT, (240, 190, 90), (255, 245, 200), (255, 255, 255), 'bell'),
     'stormbellToll':   (*SKY, (200, 210, 255), (255, 255, 255), (255, 240, 120), 'bell'),
     'featherfallGrace': (*SKY, (255, 235, 200), (255, 255, 255), (150, 210, 255), 'feather'),
+    'gearwardBulwark': (*BRASS, (210, 160, 80), (255, 235, 180), (120, 80, 30), 'gear'),
+    'paradoxEdge':     (*BRASS, (230, 190, 110), (255, 245, 210), (130, 220, 255), 'hourglass'),
 }
 MOTIF = {k: v[5] for k, v in CARDS.items()}
 
@@ -89,6 +92,14 @@ def emblem(d, card, main, light, accent):
     elif m == 'crystal':
         d.polygon([(cx, cy - 40), (cx + 20, cy - 8), (cx + 8, cy + 36), (cx - 8, cy + 36), (cx - 20, cy - 8)], fill=main, outline=light)
         d.polygon([(cx, cy - 40), (cx + 20, cy - 8), (cx, cy)], fill=light); d.line([cx, cy, cx, cy + 36], fill=accent, width=2)
+    elif m == 'gear':
+        for k in range(10):
+            a = k * math.pi / 5; d.rectangle([cx + 30 * math.cos(a) - 7, cy + 30 * math.sin(a) - 7, cx + 30 * math.cos(a) + 7, cy + 30 * math.sin(a) + 7], fill=main)
+        d.ellipse([cx - 30, cy - 30, cx + 30, cy + 30], fill=main, outline=light, width=2); d.ellipse([cx - 11, cy - 11, cx + 11, cy + 11], fill=accent)
+    elif m == 'hourglass':
+        d.rectangle([cx - 26, cy - 38, cx + 26, cy - 32], fill=light); d.rectangle([cx - 26, cy + 32, cx + 26, cy + 38], fill=light)
+        d.polygon([(cx - 20, cy - 32), (cx + 20, cy - 32), (cx + 3, cy), (cx + 20, cy + 32), (cx - 20, cy + 32), (cx - 3, cy)], fill=main, outline=light)
+        d.polygon([(cx - 12, cy + 30), (cx + 12, cy + 30), (cx, cy + 14)], fill=accent); d.line([cx, cy, cx, cy + 14], fill=accent, width=2)
     elif m == 'bell':
         d.polygon([(cx - 8, cy - 34), (cx + 8, cy - 34), (cx + 26, cy + 18), (cx - 26, cy + 18)], fill=main, outline=light)
         d.rectangle([cx - 30, cy + 16, cx + 30, cy + 22], fill=light); d.ellipse([cx - 6, cy + 22, cx + 6, cy + 34], fill=accent)

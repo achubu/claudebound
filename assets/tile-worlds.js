@@ -10,6 +10,11 @@
 // =====================================================================
 const TILE_WORLD_IDS = ['sky', 'wilds'];
 WORLD_ORDER.splice(WORLD_ORDER.indexOf('vespera'), 0, ...TILE_WORLD_IDS);
+// Round 179: Vespera and Chronospire are rebuilt from tiles too (assets/vespera-data.js,
+// assets/chronospire-data.js): Vespera on Neon Aftermath's layout as it is, Chronospire on it
+// turned on its side (a tall 6x9 spire). Their rosters, levels and gear stay.
+const REBUILT_WORLD_IDS = ['vespera', 'chronospire'];
+const ALL_TILE_WORLD_IDS = [...TILE_WORLD_IDS, ...REBUILT_WORLD_IDS];
 Object.assign(WORLD_NAMES, { sky: 'Sky Isles', wilds: 'Elaris' });
 
 // --- Enemies ----------------------------------------------------------
@@ -84,15 +89,33 @@ function tileWorldStops(id) {
 }
 const TILE_WORLD_ROLES = {
   sky: { boss: 'zenithRoc', mini1: 'stormbellWarden', mini2: 'featherMatriarch' },
-  wilds: { boss: 'elarisTyrant', mini1: 'tideboundWarden', mini2: 'galeSovereignElaris' }
+  wilds: { boss: 'elarisTyrant', mini1: 'tideboundWarden', mini2: 'galeSovereignElaris' },
+  vespera: { boss: 'stormTyrant', mini1: 'arcSentinel', mini2: 'resonantPhantom' },
+  chronospire: { boss: 'chronarch', mini1: 'clockwarden', mini2: 'paradoxTwin' }
 };
+// A crystal chest in the dead end nearest each mini-boss room (those rooms hold gear).
+function tileWorldChests(id, stops) {
+  const d = TILE_WORLD_DATA[id], taken = new Set([...Object.values(d.roles), stops.mid, ...stops.quiet]), out = {};
+  for (const mini of [d.roles.mini1, d.roles.mini2]) {
+    const dist = { [mini]: 0 }, q = [mini];
+    while (q.length) { const k = q.shift(); for (const t of Object.values(d.layout[k].exits)) if (!(t in dist)) { dist[t] = dist[k] + 1; q.push(t); } }
+    const pick = Object.keys(d.layout).filter(k => !taken.has(k) && Object.keys(d.layout[k].exits).length === 1).sort((a, b) => dist[a] - dist[b] || (a < b ? -1 : 1))[0];
+    if (pick) { out[pick] = 'crystal'; taken.add(pick); }
+  }
+  return out;
+}
 const TILE_WORLD_CHESTS = { sky: { '5,3': 'crystal', '0,3': 'crystal' }, wilds: { '5,2': 'crystal', '0,2': 'crystal' } };
-const TILE_WORLD_ZONES = { sky: SKY_ZONE_ENEMY, wilds: WILDS_ZONE_ENEMY };
-for (const id of TILE_WORLD_IDS) {
+const TILE_WORLD_ZONES = { sky: SKY_ZONE_ENEMY, wilds: WILDS_ZONE_ENEMY, vespera: VESPERA_ZONE_ENEMY, chronospire: CHRONO_ZONE_ENEMY };
+// The old Vespera and Chronospire rooms are swapped for the tile-built ones in place, so every
+// lookup of VESPERA_ROOM_DATA / CHRONO_ROOM_DATA sees the new map.
+const REBUILT_ROOM_DATA = { vespera: VESPERA_ROOM_DATA, chronospire: CHRONO_ROOM_DATA };
+for (const id of ALL_TILE_WORLD_IDS) {
   const d = TILE_WORLD_DATA[id], stops = tileWorldStops(id);
+  let built = tileWorldRooms(id, TILE_WORLD_ROLES[id]);
+  if (REBUILT_ROOM_DATA[id]) { const target = REBUILT_ROOM_DATA[id]; for (const k of Object.keys(target)) delete target[k]; Object.assign(target, built); built = target; }
   TILE_REGIONS[id] = {
-    rooms: tileWorldRooms(id, TILE_WORLD_ROLES[id]), start: d.roles.start, stops,
-    chests: TILE_WORLD_CHESTS[id], // beside the mini-boss rooms, which hold gear (Round 176)
+    rooms: built, start: d.roles.start, stops,
+    chests: TILE_WORLD_CHESTS[id] || tileWorldChests(id, stops), // beside the mini-boss rooms, which hold gear (Round 176)
     tierTypes: key => { const z = rooms[key] && rooms[key].zone; return [TILE_WORLD_ZONES[id][(z || 1) - 1]]; }
   };
   WORLD_BOSS_ROOMS[id] = [d.roles.boss, TILE_WORLD_ROLES[id].boss];
@@ -115,7 +138,7 @@ function tileWorldWalk(id, wx, wy) {
   return mx >= 0 && my >= 0 && mx < w.maskW && my < w.maskH && bits[my * w.maskW + mx] === 1;
 }
 // The map engine is absent in the balance sims (tests/talent-sim.cjs), so these hooks are guarded.
-if (typeof ORGANIC_AREAS !== 'undefined') for (const id of TILE_WORLD_IDS) ORGANIC_AREAS['world:' + id] = {
+if (typeof ORGANIC_AREAS !== 'undefined') for (const id of ALL_TILE_WORLD_IDS) ORGANIC_AREAS['world:' + id] = {
   src: id + '-world', world: true,
   at(o, ax, ay) { if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return tileWorldWalk(id, o.area.left * 800 + ax, o.area.top * 500 + ay); },
 };
@@ -125,7 +148,16 @@ if (typeof neonWorldWalk === 'function') {
   const neonLooseBeforeTiles = neonLoose;
   neonLoose = function (from, to) { const d = TILE_REGIONS[activeRegion] && TILE_WORLD_DATA[activeRegion]; return d ? !!(d.plan[from] || d.plan[to]) : neonLooseBeforeTiles(from, to); };
 }
-for (const id of TILE_WORLD_IDS) { if (typeof JOINED_AREAS !== 'undefined') JOINED_AREAS[id] = []; }
+for (const id of ALL_TILE_WORLD_IDS) { if (typeof JOINED_AREAS !== 'undefined') JOINED_AREAS[id] = []; }
+// Vespera's old joined districts and painted blocks belong to the retired map.
+VESPERA_ROOM_KEYS.splice(0, VESPERA_ROOM_KEYS.length, ...Object.keys(VESPERA_ROOM_DATA));
+if (typeof ORGANIC_AREAS !== 'undefined') for (const k of Object.keys(ORGANIC_AREAS)) if (/^(vespera|chronospire):/.test(k)) delete ORGANIC_AREAS[k];
+for (const id of REBUILT_WORLD_IDS) {
+  if (typeof DIAG_ART !== 'undefined') delete DIAG_ART[id];
+  if (typeof DIAG_MASK_SRC !== 'undefined') delete DIAG_MASK_SRC[id];
+  if (typeof CITY_BLOCK_ARTS !== 'undefined') delete CITY_BLOCK_ARTS[id];
+}
+if (typeof regionDistanceCache !== 'undefined') for (const id of REBUILT_WORLD_IDS) delete regionDistanceCache[id];
 
 const tileWorldImages = {};
 function paintTileWorld(canvas, id, key) {
@@ -159,7 +191,7 @@ NeonCity.render = function (container, key) {
   return out;
 };
 const tileWorldStyles = document.createElement('style');
-tileWorldStyles.textContent = '#world[data-environment="sky"]{background:#9fd2f2}#world[data-environment="sky"] .city-landmark{color:#fff;text-shadow:0 1px 3px #1d4f80}'
+tileWorldStyles.textContent = '#world[data-environment="vespera"]{background:#1a2550}#world[data-environment="chronospire"]{background:#3a2814}#world[data-environment="sky"]{background:#9fd2f2}#world[data-environment="sky"] .city-landmark{color:#fff;text-shadow:0 1px 3px #1d4f80}'
   + '#world[data-environment="wilds"]{background:#2f5a34}#world[data-environment="wilds"] .city-landmark{color:#eaffd8;text-shadow:0 1px 3px #0d2a12}';
 document.head.append(tileWorldStyles);
 
@@ -205,3 +237,29 @@ objective = function () {
   if (activeRegion === 'wilds') return state.bosses.includes('elarisTyrant') ? 'The portal to Vespera is open in Elderbloom Sanctuary.' : 'Defeat the Bloom Tyrant in Elderbloom Sanctuary. Reserve your counter for charged strikes.';
   return objectiveBeforeTileWorlds();
 };
+
+// --- Saves from before Round 179: Vespera and Chronospire have new maps ---
+// Exploration there restarts at the world's start (like Solaris in Round 149); character,
+// deck, gear and boss kills stay. A game in progress is always on the new maps, so every
+// save carries the mark (Round 171 lesson).
+const TILE_WORLDS_VERSION = 179;
+function migrateRebuiltWorlds(s) {
+  if (!s || s.tileWorlds >= TILE_WORLDS_VERSION) return s;
+  for (const id of REBUILT_WORLD_IDS) {
+    const start = TILE_REGIONS[id].start, mine = k => typeof k === 'string' && k.startsWith(id + ':');
+    if (s.regionVisits && Array.isArray(s.regionVisits[id])) s.regionVisits[id] = [start];
+    if (s.region === id) { s.room = start; s.pos = { x: 400, y: 300 }; s.visited = [start]; if (s.regionVisits) s.regionVisits[id] = s.visited; s.battle = null; }
+    if (s.cooldowns) for (const k of Object.keys(s.cooldowns)) if (mine(k)) delete s.cooldowns[k];
+    if (Array.isArray(s.chests)) s.chests = s.chests.filter(c => !mine(c));
+    if (s.poi && Array.isArray(s.poi.nexus)) s.poi.nexus = s.poi.nexus.filter(n => !mine(n) || n === nexusId(id, start));
+    if (s.poi && Array.isArray(s.poi.used)) s.poi.used = s.poi.used.filter(u => !mine(u));
+  }
+  s.tileWorlds = TILE_WORLDS_VERSION;
+  return s;
+}
+const restoreGameBeforeTiles = restoreGame;
+restoreGame = function (s) { return restoreGameBeforeTiles(migrateRebuiltWorlds(s)); };
+const validateImportBeforeTiles = validateImport;
+validateImport = function (s) { return validateImportBeforeTiles(migrateRebuiltWorlds(s)); };
+const saveBeforeTiles = save;
+save = function () { if (state) state.tileWorlds = TILE_WORLDS_VERSION; return saveBeforeTiles.apply(this, arguments); };

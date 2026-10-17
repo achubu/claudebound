@@ -12,23 +12,25 @@ function setup(hand, opts = {}) {
   return b;
 }
 // --- The world ---
-newGame(); configureRegion('chronospire'); state.region = 'chronospire'; state.room = '0,0'; state.visited = ['0,0'];
-const keys = Object.keys(rooms); assert.equal(keys.length, 34, '34 rooms');
+// Round 179: Chronospire is a tile world, Neon Aftermath's layout turned on its side (6 wide, 9 tall).
+const CR = TILE_WORLD_DATA.chronospire.roles, GATE = CR.start;
+newGame(); configureRegion('chronospire'); state.region = 'chronospire'; state.room = GATE; state.visited = [GATE];
+const keys = Object.keys(rooms); assert.equal(keys.length, 54, '54 rooms');
 const d = regionRoomDistances('chronospire'); assert(keys.every(k => d[k] != null), 'every room is reachable from the gate');
 const exitTo = e => typeof e === 'string' ? e : e.to; // Round 176: doors into the boss room are { to, requires }
 for (const k of keys) for (const [dir, raw] of Object.entries(rooms[k].exits)) { const to = exitTo(raw); assert(rooms[to] && Object.values(rooms[to].exits).map(exitTo).includes(k), k + ' ' + dir + ' exit is two-way'); }
-assert.equal(roomSpawns('0,0').length, 0, 'the gate is safe');
-assert.equal(roomSpawns('8,7')[0].type, 'chronarch'); assert.equal(roomSpawns('0,3')[0].type, 'clockwarden'); assert.equal(roomSpawns('6,6')[0].type, 'paradoxTwin');
+assert.equal(roomSpawns(GATE).length, 0, 'the gate is safe');
+assert.equal(roomSpawns(CR.boss)[0].type, 'chronarch'); assert.equal(roomSpawns(CR.mini1)[0].type, 'clockwarden'); assert.equal(roomSpawns(CR.mini2)[0].type, 'paradoxTwin');
 for (const k of keys) for (const s of roomSpawns(k)) assert(enemies[s.type], 'spawn type exists: ' + s.type);
 const lv = keys.filter(k => rooms[k].level).map(k => rooms[k].level); assert.equal(Math.min(...lv), 46); assert.equal(Math.max(...lv), 54); // Round 175: world 6
-assert.equal(regionIndex(), 5); // Round 175: sixth world assert.equal(typeof talentScale, 'undefined', 'Round 163: no talent multiplier at all');
+assert.equal(regionIndex(), 5); /* Round 175: sixth world */ assert.equal(typeof talentScale, 'undefined', 'Round 163: no talent multiplier at all');
 for (const key of QUIET_ROOMS.chronospire) { assert.equal(roomSpawns(key).length, 0); assert.equal(poiAt(key).type, 'event'); }
-assert.equal(poiAt('5,3').type, 'nexus'); assert(merchantRoom());
-const st = enemyStats('chronoMauler', { region: 'chronospire', level: 35 }), vs = enemyStats('vespMauler', { region: 'vespera', level: 26 }); assert(st.hp > vs.hp && st.attack >= vs.attack, 'Chronospire hits harder than Vespera');
+assert.equal(poiAt(NEXUS_POINTS.chronospire.mid).type, 'nexus'); assert(merchantRoom());
+const st = enemyStats('chronoMauler', { region: 'chronospire', level: 35 }), vs = enemyStats('vespMauler', { region: 'vespera', level: 26 }); /* same levels as before Round 175, to compare the worlds */ assert(st.hp > vs.hp && st.attack >= vs.attack, 'Chronospire hits harder than Vespera');
 for (const id of EVENT_POOLS.chronospire) for (let i = 0; i < 2; i++) { newGame(); state.pool.push(make('cleave', 0, false)); state.deck.push(state.pool.at(-1).uid); state.hp = 20; const c = EVENTS[id].choices()[i]; assert(!c.disabled, id); assert(c.run().length > 3); }
 // --- Portal: after the Tempest Colossus ---
-newGame(); state.bosses.push('stormTyrant'); state.region = 'vespera'; configureRegion('vespera'); state.room = '6,7'; state.visited = ['6,7'];
-assert.equal(portalTarget().region, 'chronospire'); travelPortal(); assert.equal(activeRegion, 'chronospire'); assert.equal(state.room, '0,0');
+newGame(); state.bosses.push('stormTyrant'); state.region = 'vespera'; configureRegion('vespera'); state.room = WORLD_BOSS_ROOMS.vespera[0]; state.visited = [state.room];
+assert.equal(portalTarget().region, 'chronospire'); travelPortal(); assert.equal(activeRegion, 'chronospire'); assert.equal(state.room, GATE);
 assert(state.chronoGift && state.pool.some(c => c.id === 'temporalBarrage') && state.pool.some(c => c.id === 'chronoSpike'), 'arrival grants two Suspend cards');
 assert.equal(portalTarget().region, 'vespera', 'and the rift leads back');
 configureRegion('city');
@@ -56,5 +58,5 @@ b = setup(['chronoSpike']); e = b.enemy.hp; playCard(0); assert.equal(e - b.enem
 // Winning while a card is suspended is fine; the guide shows once.
 newGame(); assert(!state.tips || !state.tips.suspend);
 Math.random = realRandom;
-console.log('PASS: Chronospire (34 two-way rooms, levels 46-54, bosses, quiet rooms, events, nexus, portal + arrival gift) and Suspend (free set-aside, countdown, charged auto-play, Accelerate, Rewind, limit of 3).');
+console.log('PASS: Chronospire (54 two-way tile rooms in a 6x9 spire, levels 46-54, bosses, quiet rooms, events, nexus, portal + arrival gift) and Suspend (free set-aside, countdown, charged auto-play, Accelerate, Rewind, limit of 3).');
 }`);

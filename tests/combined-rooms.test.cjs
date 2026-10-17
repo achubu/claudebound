@@ -35,8 +35,8 @@ for(const region of ['city','elaris']){
 }
 // Round 91: Neon Aftermath has no joined districts any more; its continuous
 // edges and relic gates are covered by neon-world.test. The camera clamp is
-// still checked on a 2x2 district (Elaris's Emerald Expanse).
-configureRegion('vespera');
-const area=joinedArea(Object.keys(rooms).find(k=>joinedArea(k).cells.length===4));assert.equal(cameraPosition(area,{x:800,y:500}).x,400);assert.equal(cameraPosition(area,{x:800,y:500}).y,250);assert.equal(cameraPosition(area,{x:1600,y:1000}).x,800);assert.equal(cameraPosition(area,{x:1600,y:1000}).y,500);
+// checked on a 2x2 footprint.
+// Round 179: no joined districts remain in any world, so the clamp is checked on a 2x2 footprint directly.
+const area={width:1600,height:1000};assert.equal(cameraPosition(area,{x:800,y:500}).x,400);assert.equal(cameraPosition(area,{x:800,y:500}).y,250);assert.equal(cameraPosition(area,{x:1600,y:1000}).x,800);assert.equal(cameraPosition(area,{x:1600,y:1000}).y,500);
 console.log('PASS: joined footprints, all internal routes, patrol density, bidirectional movement, continuous coordinates, cooldowns, gates and camera clamps.');
 `);

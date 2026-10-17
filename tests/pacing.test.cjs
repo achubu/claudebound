@@ -40,7 +40,7 @@ nexusTravel('city', '0,5'); assert.equal(activeRegion, 'city'); assert.equal(sta
 for (const [r, nx] of Object.entries(NEXUS_POINTS)) { configureRegion(r); assert(rooms[nx.start] && rooms[nx.mid], r + ' waypoint rooms exist'); assert(!roomSpawns(nx.mid).some(s => s.boss), 'never in a boss room'); }
 configureRegion('city');
 // Older saves: an attuned waystone becomes both of that world's waypoints.
-newGame(); state.poi.waystones = ['vespera']; migrateWaystones(); assert(state.poi.nexus.includes('vespera:0,0') && state.poi.nexus.includes('vespera:8,2'));
-state.battle = { phase: 'fight' }; const r0 = state.room; nexusTravel('vespera', '0,0'); assert.equal(state.room, r0, 'no teleporting mid-fight'); state.battle = null;
+newGame(); state.poi.waystones = ['vespera']; migrateWaystones(); assert(state.poi.nexus.includes(nexusId('vespera', NEXUS_POINTS.vespera.start)) && state.poi.nexus.includes(nexusId('vespera', NEXUS_POINTS.vespera.mid))); // Round 179: Vespera's new map
+state.battle = { phase: 'fight' }; const r0 = state.room; nexusTravel('vespera', NEXUS_POINTS.vespera.start); assert.equal(state.room, r0, 'no teleporting mid-fight'); state.battle = null;
 console.log('PASS: XP by level gap, quiet rooms with 3 events per world (all 8 events, both choices), Nexus Waypoints (discovery, map teleport, cross-world, save migration).');
 }`);

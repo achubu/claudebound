@@ -3496,6 +3496,48 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 179: Vespera and Chronospire are tile worlds too
+
+- Owner request: every world is built like Solaris. Vespera and Chronospire are rebuilt from
+  road tiles with `tools/build_tile_world.py vespera|chronospire`:
+  - **Vespera** uses Neon Aftermath's layout as it is: start 0,1, mini-bosses 5,3 and 8,5,
+    the Tempest Colossus at 8,0.
+  - **Chronospire** uses it turned on its side, a tall 6×9 spire: start 1,0, mini-bosses 3,5
+    and 5,8, the Chronarch at 0,8.
+  - Each has 54 rooms. Rosters, levels (37-45 and 46-54) and gear stay the same.
+  - The builder now handles turned layouts, grids of any size, and a new `straight-h`
+    (east-west) tile shape.
+- **Placeholder tiles:** `tools/paint_placeholder_tiles.py` paints both new styles:
+  - Vespera: wet flagstone causeways over dark storm shallows with glowing crystals and rain.
+  - Chronospire: brass floor plates through clockwork gears.
+  - Each world's own rain and clockwork overlays still play over them.
+- **Rooms swapped in place:** `tile-worlds.js` replaces the room tables (`VESPERA_ROOM_DATA`,
+  `CHRONO_ROOM_DATA`) in place. Quiet rooms, Nexus Waypoints, boss rooms and chests come from
+  the new maps; each chest is in the dead end nearest a mini-boss room.
+- **Old saves:** a save on the old Vespera or Chronospire map resumes at the new start; level,
+  deck, gear and boss kills stay. That world's waypoints, chests, cooldowns and used points of
+  interest are forgotten. The migration runs once, and every save carries the mark
+  (`tileWorlds: 179`).
+- **Retired:** Vespera's three joined districts (Stormglass Reach, Prism Bazaar, Stormforge
+  Foundry) were the last joined districts in the game. Their paintings, along with old Elaris's
+  emerald and sunpetal, moved to `unused assets/assets/environment/areas/`.
+- **Chronospire's mini-bosses get their own cards:**
+  - The Clockwarden drops **Gearward Bulwark** (15 Block, draw 1).
+  - The Paradox Twin drops **Paradox Edge** (16 Pierce damage, draw 1).
+  - Every mini-boss in the game now has a unique card.
+- **Tests:**
+  - `tile-worlds` covers all four tile worlds, the full portal chain and the 6×9 spire.
+  - New `rebuilt-worlds-migrate`.
+  - `organic-paths` now checks every tile world's doors, arrivals and patrols on the engine.
+  - Updated for the new maps: `chronospire`, `crystals-touch-boss`, `pacing`, `rebalance`,
+    `area-art` and `combined-rooms`.
+  - Fix: a Round 175 edit had put a `//` comment in the middle of a line in the `chronospire`
+    test, which disabled its "no talent multiplier" check. It runs again.
+- **Balance check** on the new maps (sim, 8 fights): Vespera's regular fights are 32-96%, the
+  Resonant Phantom 43% and the Tempest Colossus 30%. Chronospire's Paradox Twin is 44% and the
+  Chronarch 31%. The Arc Sentinel (53%) and the Clockwarden (55%) now sit 2 levels higher and
+  read slightly easy, so their adjustment follows in the next round.
+
 ## Round 178: every world drops its own cards
 
 - Owner request: each world has its own set of unique card drops. Chest and elite card

@@ -17,7 +17,10 @@ from PIL import Image
 from scipy import ndimage as nd
 
 sys.path.insert(0, os.path.dirname(__file__))
-from build_solaris import SHAPES, FLIP_EXITS, load, trace, manual_mask  # noqa: E402
+from build_solaris import SHAPES as SOLARIS_SHAPES, FLIP_EXITS, load, trace, manual_mask  # noqa: E402
+
+# Round 179: a turned layout (Chronospire) needs a straight east-west road too.
+SHAPES = {**SOLARIS_SHAPES, 'straight-h': 'ew'}
 
 WORLDS = {
     'sky': {
@@ -36,6 +39,24 @@ WORLDS = {
               'Meadow', 'Copse', 'Bend', 'Wood', 'Crossing', 'Knoll', 'Run', 'Ring'],
         'special': {'start': 'Elaris Gateway', 'boss': 'Elderbloom Sanctuary', 'mini1': 'Drowned Weir', 'mini2': 'Stormwing Canopy'},
     },
+    # Round 179: Vespera and Chronospire are rebuilt the same way. Vespera keeps Neon
+    # Aftermath's layout as it is; Chronospire turns it on its side into a tall 6x9 spire.
+    'vespera': {
+        'name': 'Vespera', 'key': lambda cx, cy: (cx, cy - 4), 'levels': (37, 45), 'road': None,
+        'a': ['Stormglass', 'Ion', 'Tempest', 'Rimeglass', 'Squall', 'Prism', 'Brine', 'Thunder', 'Static', 'Gale',
+              'Arc', 'Shatter', 'Cobalt', 'Riptide', 'Lightning', 'Mist', 'Surge', 'Crystal'],
+        'b': ['Shoals', 'Reach', 'Causeway', 'Strand', 'Cove', 'Spit', 'Marsh', 'Point', 'Bluffs', 'Pier',
+              'Hollow', 'Flats', 'Breakwater', 'Inlet', 'Ridge', 'Landing', 'Sound', 'Shelf'],
+        'special': {'start': 'Glasswind Reach', 'boss': 'Eye of the Tempest', 'mini1': 'Arc Bastion', 'mini2': 'Resonant Grotto'},
+    },
+    'chronospire': {
+        'name': 'Chronospire', 'key': lambda cx, cy: (cy - 4, cx), 'levels': (46, 54), 'road': None,
+        'a': ['Brass', 'Hourglass', 'Pendulum', 'Gear', 'Cog', 'Tick', 'Escapement', 'Sundial', 'Clockwork', 'Mainspring',
+              'Chime', 'Copper', 'Second', 'Minute', 'Ratchet', 'Balance', 'Bronze', 'Orrery'],
+        'b': ['Stair', 'Gallery', 'Landing', 'Walk', 'Hall', 'Works', 'Loft', 'Bridge', 'Vault', 'Ring',
+              'Shaft', 'Spiral', 'Arcade', 'Court', 'Lift', 'Ledge', 'Chamber', 'Steps'],
+        'special': {'start': 'Chronospire Gate', 'boss': 'The Last Second', 'mini1': 'Clockwarden\'s Loft', 'mini2': 'Paradox Stair'},
+    },
 }
 # Neon Aftermath rooms whose roles carry over: start, final boss and the two mini-boss rooms.
 CITY_ROLES = {'0,5': 'start', '8,4': 'boss', '5,7': 'mini1', '8,9': 'mini2'}
@@ -46,10 +67,14 @@ def layout(cfg, seed):
     city = {m.group(1): json.loads(m.group(2)) for m in re.finditer(r'^ "(\d+,\d+)":(\{.*\}),?$', s, re.M)}
     def key_of(k):
         x, y = cfg['key'](*map(int, k.split(','))); return f'{x},{y}'
-    # Turning the map swaps compass directions the same way.
-    probe = [cfg['key'](0, 4), cfg['key'](1, 4), cfg['key'](0, 5)]
-    fx, fy = probe[1][0] < probe[0][0], probe[2][1] < probe[0][1]
-    turn = {**({'e': 'w', 'w': 'e'} if fx else {}), **({'n': 's', 's': 'n'} if fy else {})}
+    # Turning the map turns compass directions the same way: see where a step east or south lands.
+    o, ex_, sy_ = cfg['key'](1, 5), cfg['key'](2, 5), cfg['key'](1, 6)
+    def dir_of(a, b):
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        return 'e' if dx > 0 else 'w' if dx < 0 else 's' if dy > 0 else 'n'
+    east, south = dir_of(o, ex_), dir_of(o, sy_)
+    opp = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
+    turn = {'e': east, 'w': opp[east], 's': south, 'n': opp[south]}
     rooms, used, roles = {}, set(), {}
     for k, r in city.items():
         key = key_of(k)
@@ -104,7 +129,8 @@ def main(world):
         upright = [o for o in opts if not o[1][1]] or opts
         fresh = [o for o in upright if o[0] not in near] or upright
         plan[key] = fresh[h % len(fresh)]
-    W, H = 900, 375; bits = np.zeros((H, W), bool)
+    cols = 1 + max(r['world'][0] for r in rooms.values()); rows = 1 + max(r['world'][1] for r in rooms.values())
+    W, H = cols * 100, -(-rows * 500 // 8); bits = np.zeros((H, W), bool)
     for key, (n, (fx, fy)) in plan.items():
         m = masks[n]
         if fx: m = m[:, ::-1]

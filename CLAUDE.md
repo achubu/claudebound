@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 178) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 179) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -18,7 +18,7 @@ change set.
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
-    `sky-data`, `wilds-data`, `tile-worlds`, `world-cards`, `pickups`, `cardsmith`, `gear`. (`solaris-data.js` loads just before `expansion.js`.)
+    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `pickups`, `cardsmith`, `gear`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`.
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.
   Prefer `function` declarations for new globals that other files test with
@@ -31,7 +31,9 @@ change set.
     like Solaris by `tools/build_tile_world.py` into `assets/<id>-data.js`, and run by
     `assets/tile-worlds.js`. Stand-in tiles come from `tools/paint_placeholder_tiles.py`.
     Every new world is built this way.
-  - `vespera` (levels 37-45) and `chronospire` (46-54).
+  - `vespera` (levels 37-45) and `chronospire` (46-54) were rebuilt the same way in
+    Round 179 (Chronospire is the layout turned on its side: 6 wide, 9 tall).
+    `tile-worlds.js` swaps their room tables in place.
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.
@@ -53,8 +55,9 @@ change set.
     `tools/build_world_rooms.py`, then the step that writes the rooms literal
     and mask into `index.html` and `neon-world.js`. Paths are widened with
     `tools/widen_paths.py`.
-- **Organic districts** (Elaris/Vespera) use traced masks in
-  `assets/organic-areas.js` with the engine in `assets/organic-paths.js`:
+- **Organic engine** (`assets/organic-paths.js`): painted and tile worlds walk on traced
+  masks through it (`ORGANIC_AREAS['world:<id>']`). The old joined districts in
+  `assets/organic-areas.js` are no longer used by any world (Round 179):
   - Doors sit where paths meet room edges.
   - Pockets are tracked; reachability is checked.
   - `organicItemSpot()` places items beside the paths.

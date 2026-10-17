@@ -1,6 +1,7 @@
 # Round 174: placeholder room tiles for the tile-built worlds that have no owner paintings yet.
 #   python3 tools/paint_placeholder_tiles.py sky      # world 3, the sky islands
 #   python3 tools/paint_placeholder_tiles.py wilds    # world 4, Elaris (the forest)
+#   python3 tools/paint_placeholder_tiles.py vespera|chronospire   # worlds 5 and 6 (Round 179)
 # Paints one 1600x1000 tile per road shape into assets/environment/<world>/src/ (named
 # <shape>-ph so they read as stand-ins), and writes each tile's exact walk area to
 # src/masks/<name>.png, so tools/build_tile_world.py needs no colour tracing for them.
@@ -144,12 +145,63 @@ def paint_wilds(exits, rng):
     return img
 
 
-PAINTERS = {'sky': paint_sky, 'wilds': paint_wilds}
+def paint_vespera(exits, rng):
+    """Vespera: wet flagstone causeways over dark storm shallows, with glowing crystals."""
+    n1, n2 = noise(rng, 40, 14), noise(rng, 6, 2)
+    img = np.zeros((H, W, 3)) + np.array([22, 30, 62], float)
+    img = blend(img, (34, 52, 96), (n1 - .45) * 3)
+    img = blend(img, (60, 90, 150), (n2 > .66) * .35)  # ripples
+    road = big(road_mask(exits))
+    shore = grow(road, 40 * S); img = blend(img, (46, 50, 72), soft(shore, 4))
+    img = blend(img, (58, 64, 92), soft(shore, 4) * (n2 > .5) * .5)
+    rd = np.asarray(grow(road, 8 * S)) > 0; sh = np.asarray(shore) > 0
+    for _ in range(70):  # crystal clusters on the shore
+        x, yy = int(rng.random() * W), int(rng.random() * H)
+        if sh[yy, x] and not rd[yy, x]:
+            m = Image.new('L', (W, H), 0); d = ImageDraw.Draw(m); h = int(34 + rng.random() * 40)
+            d.polygon([(x, yy - h), (x + 14, yy), (x, yy + 10), (x - 14, yy)], fill=255)
+            g = Image.new('L', (W, H), 0); g.paste(m.filter(ImageFilter.GaussianBlur(10)))
+            img = blend(img, (120, 160, 255), soft(g, 1) * .6); img = blend(img, (190, 210, 255), soft(m, 1))
+    path = soft(road, 1.5); img = blend(img, (92, 98, 126), path)
+    seam = np.zeros((H, W), bool); seam[:, ::56] = True; seam[::40, :] = True
+    img = blend(img, (64, 70, 96), path * seam * .8)
+    img = blend(img, (150, 170, 220), path * (n2 > .7) * .35)  # wet sheen
+    rain = np.zeros((H, W)); ys, xs = (rng.random(900) * H).astype(int), (rng.random(900) * W).astype(int)
+    for x, yy in zip(xs, ys): rain[yy:yy + 14, x] = 1
+    return blend(img, (200, 220, 255), rain * .25)
+
+
+def paint_chronospire(exits, rng):
+    """Chronospire: brass floor plates through clockwork, with gears and hourglass sand."""
+    n1, n2 = noise(rng, 30, 10), noise(rng, 6, 2)
+    img = np.zeros((H, W, 3)) + np.array([52, 36, 22], float)
+    img = blend(img, (74, 52, 30), (n1 - .45) * 3)
+    road = big(road_mask(exits)); rd = np.asarray(grow(road, 14 * S)) > 0
+    for _ in range(18):  # gears in the floor
+        x, yy, r = int(rng.random() * W), int(rng.random() * H), int(30 + rng.random() * 50)
+        if rd[min(H - 1, yy), min(W - 1, x)]: continue
+        m = Image.new('L', (W, H), 0); d = ImageDraw.Draw(m)
+        for k in range(12):
+            a = k * np.pi / 6; d.rectangle((x + np.cos(a) * r - 8, yy + np.sin(a) * r - 8, x + np.cos(a) * r + 8, yy + np.sin(a) * r + 8), fill=255)
+        d.ellipse((x - r, yy - r, x + r, yy + r), fill=255); d.ellipse((x - r * .45, yy - r * .45, x + r * .45, yy + r * .45), fill=0)
+        img = blend(img, (150, 108, 52), soft(m, 1) * .9); img = blend(img, (98, 70, 34), soft(m, 1) * (n2 > .55) * .5)
+    rim = soft(grow(road, 6 * S), 2); img = blend(img, (40, 26, 14), rim)
+    path = soft(road, 1.5); img = blend(img, (196, 156, 88), path)
+    seam = np.zeros((H, W), bool); seam[:, ::64] = True; seam[::64, :] = True
+    img = blend(img, (130, 96, 50), path * seam * .8)
+    rivets = np.zeros((H, W), bool); rivets[8::64, 8::64] = True; rivets = nd.binary_dilation(rivets, iterations=3)
+    img = blend(img, (240, 210, 140), path * rivets)
+    return blend(img, (230, 200, 130), path * (n2 > .72) * .25)
+
+
+PAINTERS = {'sky': paint_sky, 'wilds': paint_wilds, 'vespera': paint_vespera, 'chronospire': paint_chronospire}
+# Round 179: Chronospire's map is turned on its side, so it needs an east-west straight too.
+EXTRA_SHAPES = {'chronospire': {'straight-h': 'ew'}}
 
 
 def main(world):
     out = f'assets/environment/{world}/src'; os.makedirs(out + '/masks', exist_ok=True)
-    for i, (shape, exits) in enumerate(SHAPES.items()):
+    for i, (shape, exits) in enumerate({**SHAPES, **EXTRA_SHAPES.get(world, {})}.items()):
         rng = np.random.default_rng(1000 + i * 17 + len(world))
         img = PAINTERS[world](exits, rng)
         name = shape + '-ph'
@@ -159,5 +211,5 @@ def main(world):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2 or sys.argv[1] not in PAINTERS: raise SystemExit('usage: paint_placeholder_tiles.py sky|wilds')
+    if len(sys.argv) != 2 or sys.argv[1] not in PAINTERS: raise SystemExit('usage: paint_placeholder_tiles.py ' + '|'.join(PAINTERS))
     main(sys.argv[1])

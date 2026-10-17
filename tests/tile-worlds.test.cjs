@@ -4,7 +4,7 @@ const assert = require('assert');
 const fs = require('fs'), path = require('path');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(()=>{newGame();const o={order:WORLD_ORDER.slice(),worlds:{}};
- for(const id of ['sky','wilds']){state.region=id;configureRegion(id);const w={rooms:Object.keys(rooms).length,errors:[],bosses:[],offPath:[],tiles:[],levels:[]};
+ for(const id of ['sky','wilds','vespera','chronospire']){state.region=id;configureRegion(id);const w={rooms:Object.keys(rooms).length,errors:[],bosses:[],offPath:[],tiles:[],levels:[]};
   for(const k of Object.keys(rooms)){let list=[];try{list=roomSpawns(k)}catch(e){w.errors.push(k+' '+e.message)}
    for(const s of list){if(s.boss)w.bosses.push(s.type);if(!NeonCity.blocked||NeonCity.blocked(k,s.x,s.y))w.offPath.push(k+' '+s.type)}
    w.tiles.push(TILE_WORLD_DATA[id].plan[k][0]);if(rooms[k].level)w.levels.push(rooms[k].level)}
@@ -13,9 +13,10 @@ const r = JSON.parse(run(`(()=>{newGame();const o={order:WORLD_ORDER.slice(),wor
   o.worlds[id]=w}
  const hop=[];const go=(region,room,boss)=>{state.region=region;configureRegion(region);state.room=room;if(boss)state.bosses.push(boss);const t=portalTarget();hop.push(region+'>'+(t?t.region:'none'))};
  go('elaris',SOLARIS_BOSS_ROOM,'bloomTyrant');go('sky',WORLD_BOSS_ROOMS.sky[0],'zenithRoc');go('wilds',WORLD_BOSS_ROOMS.wilds[0],'elarisTyrant');
- go('sky',TILE_REGIONS.sky.start);go('wilds',TILE_REGIONS.wilds.start);go('vespera','0,0');o.hops=hop;
+ go('sky',TILE_REGIONS.sky.start);go('wilds',TILE_REGIONS.wilds.start);go('vespera',TILE_REGIONS.vespera.start);go('vespera',WORLD_BOSS_ROOMS.vespera[0],'stormTyrant');go('chronospire',TILE_REGIONS.chronospire.start);o.hops=hop;
  o.names=[enemies.zenithRoc.name,enemies.elarisTyrant.name,enemies.elarisFox.name];o.art=monsterArt('elarisFox');o.skyArt=monsterArt('skyDrake');
  state.region='wilds';configureRegion('wilds');o.objective=objective();
+ state.region='chronospire';configureRegion('chronospire');o.spire=[1+Math.max(...Object.values(rooms).map(x=>x.world[0])),1+Math.max(...Object.values(rooms).map(x=>x.world[1]))];
  return JSON.stringify(o)})()`));
 assert.deepStrictEqual(r.order, ['city', 'elaris', 'sky', 'wilds', 'vespera', 'chronospire']);
 for (const [id, w] of Object.entries(r.worlds)) {
@@ -30,9 +31,13 @@ for (const [id, w] of Object.entries(r.worlds)) {
 }
 assert.deepStrictEqual([Math.min(...r.worlds.sky.levels), Math.max(...r.worlds.sky.levels)], [19, 27]);
 assert.deepStrictEqual([Math.min(...r.worlds.wilds.levels), Math.max(...r.worlds.wilds.levels)], [28, 36]);
-assert.deepStrictEqual(r.hops, ['elaris>sky', 'sky>wilds', 'wilds>vespera', 'sky>elaris', 'wilds>sky', 'vespera>wilds'], 'portal chain');
+assert.deepStrictEqual(r.hops, ['elaris>sky', 'sky>wilds', 'wilds>vespera', 'sky>elaris', 'wilds>sky', 'vespera>wilds', 'vespera>chronospire', 'chronospire>vespera'], 'portal chain');
+// Round 179: Vespera and Chronospire are tile-built too; Chronospire is a tall 6x9 spire.
+assert.deepStrictEqual([Math.min(...r.worlds.vespera.levels), Math.max(...r.worlds.vespera.levels)], [37, 45]);
+assert.deepStrictEqual([Math.min(...r.worlds.chronospire.levels), Math.max(...r.worlds.chronospire.levels)], [46, 54]);
+assert.deepStrictEqual(r.spire, [6, 9], 'Chronospire is 6 rooms wide and 9 tall');
 assert.deepStrictEqual(r.names, ['The Zenith Roc', 'The Bloom Tyrant', 'Cinder Fox']);
 assert(r.art.includes('cinder-fox.png') && !r.art.includes('filter:hue'), 'Elaris shows the forest sprites untinted');
 assert(r.skyArt.includes('hue-rotate(165deg)'), 'sky enemies are tinted');
 assert(/portal to Vespera/.test(r.objective), 'after the Bloom Tyrant, Elaris points to Vespera');
-console.log('PASS: Sky Isles and Elaris are 54-room tile worlds between Solaris and Vespera, with their own rosters and portals.');
+console.log('PASS: Sky Isles, Elaris, Vespera and Chronospire are 54-room tile worlds with their own rosters, levels and portals.');

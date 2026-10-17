@@ -22,7 +22,7 @@ run(fs.readFileSync(path.join(root,'assets/cards.js'),'utf8'));
 for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
 run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
 run(fs.readFileSync(path.join(root,'assets/solaris-data.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));
-for(const f of ['encounter-depth','talent-matrix','aether-deck','card-variety','battle-hud','sun-revenant','combined-rooms','diagonals','city-paintings','organic-paths','organic-areas','exploration','neon-world','solaris','chronospire','sky-data','wilds-data','tile-worlds','world-cards','pickups','cardsmith','gear'])load('assets/'+f+'.js');
+for(const f of ['encounter-depth','talent-matrix','aether-deck','card-variety','battle-hud','sun-revenant','combined-rooms','diagonals','city-paintings','organic-paths','organic-areas','exploration','neon-world','solaris','chronospire','sky-data','wilds-data','vespera-data','chronospire-data','tile-worlds','world-cards','pickups','cardsmith','gear'])load('assets/'+f+'.js');
 if(process.env.HARNESS_ONLY){module.exports={context,run};return}
 run(`
 newGame();

@@ -553,11 +553,8 @@ run(`
 // full map screen.
 newGame();configureRegion('city');
 const w=126,h=82;
-configureRegion('vespera'); // Round 91: the city has no joined districts; Round 149: nor does Solaris
-const singleBox=roomFootprint(Object.keys(rooms).find(k=>joinedArea(k).cells.length===1),w,h,9); // a plain Vespera room
-const joined4Box=roomFootprint('8,3',w,h,9); // the Foundry: real 4-cell joined area
-assert(joined4Box.width>singleBox.width*1.5,'a real 4-cell joined area is meaningfully wider than a single room ('+joined4Box.width.toFixed(1)+' vs '+singleBox.width.toFixed(1)+')');
-assert(joined4Box.height>singleBox.height*1.5,'a real 4-cell joined area is meaningfully taller than a single room');
+// Round 179: no world has joined districts any more (Vespera's left with its tile rebuild), so the
+// joined-vs-single footprint comparison has nothing left to measure.
 
 // --- Single unjoined rooms still get some deterministic size variation
 // (not all identical), and it's stable across repeated calls (same key ->
@@ -715,9 +712,7 @@ assert(canvasHtml.includes('map-stub'),'a room with an exit into unvisited terri
 // meaningfully bigger than a single room) even as a plain rectangle — the
 // "based on room size" sizing logic was explicitly kept, only the organic
 // shape/rotation was reverted.
-configureRegion('vespera'); // Round 91/149: the city and Solaris have no joined districts
-const singleFp=mapAreaFootprint(Object.keys(rooms).find(k=>joinedArea(k).cells.length===1),0,11,0,9),joinedFp=mapAreaFootprint('8,3',0,11,0,9);
-assert(joinedFp.width>singleFp.width*1.3,'a real joined area still renders a meaningfully wider rectangle than a single room');
+// Round 179: no joined districts remain to compare against single rooms.
 
 // --- The exact same room footprint is stable across repeated calls (not
 // randomly reshuffled every time the map is opened)

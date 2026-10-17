@@ -32,10 +32,14 @@ addCard('cisternAegis', 'Cistern Aegis', 1, 'Unique Defense', '⛲', { block: 9,
 addCard('noonPeal', 'Noon Peal', 1, 'Unique Attack', '🔔', { damage: 7, shock: true, element: 'air' });
 addCard('stormbellToll', 'Stormbell Toll', 2, 'Unique Attack', 'ϟ', { damage: 12, draw: 1, element: 'lightning' });
 addCard('featherfallGrace', 'Featherfall Grace', 2, 'Unique Defense', '🪶', { block: 12, heal: 4, element: 'air' });
+// Round 179: Chronospire's mini-bosses get their own cards too.
+addCard('gearwardBulwark', 'Gearward Bulwark', 2, 'Unique Defense', '⚙', { block: 15, draw: 1 });
+addCard('paradoxEdge', 'Paradox Edge', 2, 'Unique Attack', '⌛', { damage: 16, draw: 1, pierce: true });
 Object.assign(MINI_BOSS_CARDS, {
   tidewardenElaris: 'cisternAegis', galeSovereign: 'noonPeal',
   tideboundWarden: 'tidebound', galeSovereignElaris: 'sovereignGale',
-  stormbellWarden: 'stormbellToll', featherMatriarch: 'featherfallGrace'
+  stormbellWarden: 'stormbellToll', featherMatriarch: 'featherfallGrace',
+  clockwarden: 'gearwardBulwark', paradoxTwin: 'paradoxEdge'
 });
 
 // --- One pool per world, no card in two pools ---
