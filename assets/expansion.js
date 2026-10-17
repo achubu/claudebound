@@ -48,7 +48,7 @@ const BALANCE={
  perEnemy:{
   moonKnight:{hp:0.73},crownSentinel:{hp:0.72},thornWarden:{hp:0.95},
   tidewardenElaris:{hp:1.4},galeSovereign:{hp:0.82},bloomTyrant:{hp:0.77},
-  arcSentinel:{hp:0.69},resonantPhantom:{hp:0.99},stormTyrant:{hp:0.45},
+  arcSentinel:{hp:0.72},resonantPhantom:{hp:0.99},stormTyrant:{hp:0.45},
   // Round 51: the Drowned Heron (water, Siphon) was the worst early Elaris fight.
   drownedHeron:{hp:0.85},stormMoth:{hp:0.9}
  }

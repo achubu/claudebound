@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 181: mini-boss balance after the Vespera and Chronospire rebuild
+
+- On the new maps the Arc Sentinel and the Clockwarden stand 2 levels higher than before
+  (41 and 50). In the fair-level sim that made them slightly easy (53% and 55% wins; target
+  34-50%). Chronospire's level 53 regular fights (the Thunder Mauler's zone) read slightly
+  hard at 24%.
+- Measured with `tests/balance-sim.cjs` (12 fights per build and style):
+
+  | Enemy | Health | Wins |
+  |---|---|---|
+  | Arc Sentinel | .69 / .74 / .79 | 53% / 37% / 32% |
+  | Clockwarden | .82 / .88 / .94 | 55% / 34% / 30% |
+  | Thunder Mauler | .88 | level 53 regular fights 38% |
+
+- Set to **Arc Sentinel .72** and **Clockwarden .85**, between the measured points (about
+  42% expected), and **Thunder Mauler .88**.
+
 ## Round 180: 46 refreshed paintings from achubu/Cardbound
 
 - Pulled the card art we were missing from `achubu/Cardbound` (its 2026-10-17 art refresh).
