@@ -3496,6 +3496,47 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 185: a card mechanic for every world
+
+Every world now has its own card mechanic, like Chronospire's ⏳ Suspend (new
+`assets/world-mechanics.js`, loaded after `world-cards.js`):
+
+| World | Mechanic | How it works | Cards | Works against it |
+|---|---|---|---|---|
+| Neon Aftermath | ⌁ Hack | Hack cards add Glitch to the enemy. At 5 it crashes and skips its next action; each crash patches it (+2 to the next limit). | Packet Sniff, Logic Bomb, Ghost Protocol, Zero Day | 🛡 Firewall (Crown Observer, Crown Sentinel): wipes Glitch, +1 to the limit |
+| Solaris | ☀ Heat | Heat cards build Heat (max 6, lasts between turns). Your next attack sears for 2 per Heat (Noon Blaze: 3) and spends it. | Sunstoke, Scorching Sands, Heatwave, Noon Blaze | 🥵 Sunstroke (Solar Scarab, Noon Toller): lose your Heat and 1 HP for each; with none, lose 2-4 HP |
+| Sky Isles | 🪶 Tailwind | Every card played adds 1 Tailwind this turn. Tailwind cards get a bonus per card already played (up to 4). | Gust Chain, Slipstream, Wind Wall, Skydive | 🌬 Headwind (Cloud Wisp, Featherfall Matriarch): your first 2 cards next turn add none |
+| Elaris | 🌱 Growth | Growth cards grow each time you play them in a fight (up to 4 times). | Sapling Strike, Barkskin, Bloom Mend, Ancient Oak | 🍂 Blight (Storm Moth, Gale Sovereign): your most-grown card withers; with none, lose HP |
+| Vespera | ⚡ Stormcharge | Stored charge (max 20, lasts between turns) strikes back, ignoring Armor, when an enemy attack lands. Lightning Rod lets it out now. | Static Coil, Capacitor Spark, Thunderhead, Lightning Rod | ⏚ Dampen (Arc Wisp, Resonant Phantom): half the charge drains; with none, −1 Aether |
+| Chronospire | ⏳ Suspend | unchanged (`assets/chronospire.js`) | | ⟲ Rewind |
+
+- The 4 cards of each mechanic join that world's reward pool (`VARIETY_POOLS`, `NEW_CARD_WORLD`).
+- Arriving in a world through its portal gives two of them and opens a "New mechanic" screen with
+  a 3-step guide (`mechanicGift`). In Neon Aftermath, Packet Sniff and Ghost Protocol come with
+  your first win. A save that loads inside a world it has not had the gift for gets it then. The
+  cards go into the deck only when it has room; otherwise they wait in the collection.
+- In battle, a tray above the hand shows the mechanic's count (Glitch, Heat, Tailwind, Growth,
+  Stormcharge) with a "How it works" guide that opens by itself the first time you hold one of its
+  cards. The cards carry a badge (Growth cards show how much they have grown). Tailwind and Growth
+  change the numbers on the card face live.
+- Rules text explains each keyword. Compendium → Mechanics has an entry for each.
+- Placeholder art for the 20 cards (`tools/generate_world_card_art.py`; it now writes only
+  missing files, because painting is not deterministic; `--force` repaints all of them).
+
+Balance (Difficulty lab, gear worn):
+- The lab's decks get the two arrival cards at the end, as the game does (they join only if the
+  deck has room). Putting them first pushed Rootbind and Riposte out of the 7-card Solaris deck and
+  dropped the Cistern Warden from 44% to 0%.
+- The mechanic afflictions replaced one rider on five mini-bosses, and three of them got easier.
+  Re-tuned health: Crown Sentinel ×1.29 → ×1.45 (53% → 43%), Resonant Phantom ×1.25 → ×1.7
+  (60% → about 41%), Noon Toller ×1.22 → ×1.35 (53% → 44%). The Featherfall Matriarch and the
+  Gale Sovereign stayed on target. Every other fight in all six worlds stayed on target too.
+- The Node sim (`tests/talent-sim.cjs`) now loads `sun-revenant.js`. Without it the Sun Pharaoh's
+  Entomb was undefined and the Node report stopped at that fight. The browser lab already loaded it.
+
+Tests: new `tests/world-mechanics.test.cjs`. `expansion` (the first-win gift is marked taken
+before the reward-choice check) and `card-variety` (52 world reward cards) updated.
+
 ## Round 184: playtest fixes for pathing and things beside the path
 
 - Owner request: playtest for bad pathing, poor placement of interactable items, and bugs.

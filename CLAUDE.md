@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 184) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 185) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -18,7 +18,7 @@ change set.
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
-    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `pickups`, `cardsmith`, `gear`. (`solaris-data.js` loads just before `expansion.js`.)
+    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `pickups`, `cardsmith`, `gear`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`.
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.
   Prefer `function` declarations for new globals that other files test with
@@ -67,6 +67,10 @@ change set.
   off the walkable path, 12–28px from reachable street, clear of the HUD/minimap corners
   (`screenCovered`) and of patrols. Enemies and bosses stand on paths. On a tap route only
   the tapped item opens (Round 184).
+- **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
+  Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.
+  Each has 4 cards in its world's pool, an arrival gift of 2 (city: first win), a battle tray with a guide,
+  and an affliction that works against it.
 - **Card art** comes from `cardArtPath()` in `assets/cards.js`. The refreshed
   WebP illustrations are listed in `refreshedCardArt`. Status and pending
   prompts: `assets/cards/art-refresh.md` and `tools/art-refresh/`. When art

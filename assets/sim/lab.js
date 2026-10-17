@@ -33,7 +33,13 @@ let SIM_BUILDS = {
 const simCardLevelFor = L => Math.min(3, Math.floor((L - 1) / 6));
 // Round 49: decks include the new cards a player would pick from card rewards
 // (basic = the pre-Round-49 decks, for comparison).
+// Round 185: the two mechanic cards a player gets on arriving in a world (Neon Aftermath: after
+// the first win) join the deck only when it has room, as in the game, so they go last.
 function simDeckFor(region, L, basic = false) {
+  const base = simBaseDeck(region, L, basic), m = !basic && typeof WORLD_MECHANICS === 'object' && WORLD_MECHANICS[region];
+  return m && !(region === 'city' && L <= 1) ? [...base, ...m.gift] : base;
+}
+function simBaseDeck(region, L, basic) {
   if (region === 'city') return L <= 3 ? ['strike', 'strike', 'guard', 'guard', 'focus', 'mend'] : basic ? ['strike', 'cleave', 'riposte', 'bastion', 'shatter', 'mend', 'cleave', 'bastion', 'riposte', 'shatter'] : ['strike', 'cleave', 'bastion', 'breachSpike', 'shatter', 'staticShield', 'riposte', 'mend', 'bulwarkBash', 'arcJab'];
   if (basic || region === 'elaris') return basic ? ['cleave', 'counter', 'bastion', 'cinder', 'venom', 'riposte', 'shatter', 'cleave', 'bastion', 'counter', 'mend', 'strike'] : ['cleave', 'counter', 'bastion', 'cinder', 'thornlash', 'rootbind', 'riposte', 'wildfire', 'shatter', 'bastion', 'mend', 'tidecall'];
   if (region === 'chronospire') return ['temporalBarrage', 'chronoSpike', 'delayedBulwark', 'counter', 'bastion', 'chainLightning', 'prismLance', 'mirrorguard', 'clockworkVolley', 'rewindMend', 'cleave', 'accelerate'];

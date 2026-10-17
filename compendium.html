@@ -260,7 +260,7 @@
          read from the running game (see loadGameData below), because
          expansion.js / encounter-depth.js depend on the game's own globals
          and crashed here, silently dropping 10 of the 23 cards. -->
-    <script src="assets/cards.js?v=round184" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/cards.js?v=round185" onerror="console.warn('assets/cards.js not found')"></script>
 </head>
 <body>
 
@@ -341,7 +341,7 @@
             // Top-level const/let in the game (WORLD_ORDER, enemies, ...) are not window properties.
             const g = (win, name) => { try { return win.eval(name); } catch (e) { return undefined; } };
             function loadScript(win, src) {
-                return new Promise((ok, fail) => { const el = win.document.createElement('script'); el.src = src + '?v=round184'; el.onload = ok; el.onerror = () => fail(Error('could not load ' + src)); win.document.head.append(el); });
+                return new Promise((ok, fail) => { const el = win.document.createElement('script'); el.src = src + '?v=round185'; el.onload = ok; el.onerror = () => fail(Error('could not load ' + src)); win.document.head.append(el); });
             }
             async function ready() {
                 const win = frameWin(); if (!win || !g(win, 'WORLD_ORDER')) return null;
@@ -427,7 +427,7 @@
             return new Promise(resolve => {
                 const frame = document.createElement('iframe');
                 window.gameFrame = frame; // Round 182: the Difficulty lab runs its battles in this frame
-                frame.src = 'index.html?v=round184';
+                frame.src = 'index.html?v=round185';
                 frame.setAttribute('aria-hidden', 'true');
                 frame.tabIndex = -1;
                 frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';
@@ -685,6 +685,11 @@
                 ['Points of interest', 'About a third of ordinary rooms hold one: Aether Shrines (choose a blessing for your next fight), Campfires (rest, or train a card +15 mastery uses), Supply Caches (Shards), Sealed Caches (risk HP for more Shards) and five lore finds per world (read all five for 15 Shards and a side card).'],
                 ['Shards & the merchant', 'Enemies drop Shards: 1-2 from regulars, 3 from elites, 6 from mini-bosses, 10 from final bosses. The Wandering Merchant (one in every world, shown on the map) sells for Shards: a side card, healing potions (◇ 4, never sell out), unlimited card upgrades for Impermanent cards (◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3), plus an upgraded card, card bundle or blessing. It never sells Soulbound cards or Upgrade Crystals, and moves to a new room whenever you enter a world or fall in battle.'],
                 ['Card rewards', 'A loot chest that holds a card offers three from the current world\'s pool. Take one, or leave them all.'],
+                ['⌁ Hack (Neon Aftermath)', 'Hack cards add Glitch to the enemy. At 5 Glitch it crashes and skips its next action; each crash patches it, so the next one needs 2 more. You get Packet Sniff and Ghost Protocol with your first win. 🛡 Firewall (Crown Observer, Crown Sentinel) wipes the Glitch and patches the enemy.'],
+                ['☀ Heat (Solaris)', 'Heat cards build Heat, up to 6, and it lasts between turns. Your next attack sears for 2 extra damage per Heat (Noon Blaze: 3) and uses it all up. You get Sunstoke and Scorching Sands on arrival. 🥵 Sunstoke (Solar Scarab, the Noon Toller) burns your Heat off and costs 1 HP for each.'],
+                ['🪶 Tailwind (Sky Isles)', 'Every card you play adds 1 Tailwind until the end of the turn. Tailwind cards get a bonus for each card you already played this turn, up to 4. You get Gust Chain and Slipstream on arrival. 🌬 Headwind (Cloud Wisp, the Featherfall Matriarch): your first 2 cards next turn add nothing.'],
+                ['🌱 Growth (Elaris)', 'Growth cards get stronger each time you play them in a fight, up to 4 times. You get Sapling Strike and Barkskin on arrival. 🍂 Blight (Storm Moth, the Gale Sovereign) withers your most-grown card back to its start.'],
+                ['⚡ Stormcharge (Vespera)', 'Stormcharge cards store charge, up to 20, and it lasts between turns. When an enemy attack lands on you (even into Block), all of it strikes back as damage that ignores Armor. Lightning Rod lets it out on your own turn. You get Static Coil and Capacitor Spark on arrival. ⏚ Dampen (Arc Wisp, the Resonant Phantom) drains half of it.'],
                 ['⏳ Suspend (Chronospire)', 'Cards marked ⏳ Suspend N have a second button: <b>⏳ Suspend · free</b>. Press it and the card leaves your hand for 0 energy and waits in the ⏳ Suspended tray with a countdown of N. Each time you end your turn the countdown drops by 1; at 0 the card plays itself at the start of your turn, for free, with its charged bonus (e.g. Temporal Barrage: 14 + 8 = 22 damage). Up to 3 at once. ⟲ Rewind (an enemy affliction) adds 1 to every countdown; ⏩ Accelerate takes 1 off.'],
                 ['Bounties', 'Every fight comes with one optional bounty: Swift (win within 4 turns, 5 for elites, 7 for bosses), Untouched (lose no HP), Self-reliant (play no side card) or Overkill (deal 15+ damage with one card). Completing it pays +3 Shards (elites +5, bosses +8).'],
                 ['Elites', 'Elites always leave a card choice (unless the chest rolls something rarer) and drop 6 Shards.'],

@@ -46,10 +46,10 @@ const BALANCE={
  // decks that include the new reward cards. "Typical" is the average over 16
  // builds covering every talent path.
  perEnemy:{
-  // Round 183: re-tuned with gear worn (assets/sim/lab.js); Neon Aftermath's three bosses at about 40% (owner request).
-  moonKnight:{hp:0.55},crownSentinel:{hp:1.29},thornWarden:{hp:0.75},
-  tidewardenElaris:{hp:2.4,attack:7},galeSovereign:{hp:1.22},bloomTyrant:{hp:0.96},
-  arcSentinel:{hp:0.9},resonantPhantom:{hp:1.25},stormTyrant:{hp:0.63},
+  // Round 183: re-tuned with gear worn (assets/sim/lab.js); Neon Aftermath's three bosses at about 40% (owner request). Round 185: Crown Sentinel, Noon Toller and Resonant Phantom re-tuned for their mechanic afflictions.
+  moonKnight:{hp:0.55},crownSentinel:{hp:1.45},thornWarden:{hp:0.75},
+  tidewardenElaris:{hp:2.4,attack:7},galeSovereign:{hp:1.35},bloomTyrant:{hp:0.96},
+  arcSentinel:{hp:0.9},resonantPhantom:{hp:1.7},stormTyrant:{hp:0.63},
   // Round 51: the Drowned Heron (water, Siphon) was the worst early Elaris fight.
   drownedHeron:{hp:0.85},stormMoth:{hp:0.9}
  }

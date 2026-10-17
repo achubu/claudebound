@@ -98,7 +98,7 @@ b = setup('drownedHeron', [], { turn: 2, enemy: { element: 'water', hp: 200 } })
 assert.equal(enemyPlanBeforeAether(b, 4).kind, 'guard'); assert.equal(riderAt(b, 5), 'siphon', 'Siphon carries from the guard turn onto the next attack');
 b.turn = 5; const sip = enemyPlan(b).damage; e = b.enemy.hp; hp = state.hp; endTurn(); assert.equal(hp - state.hp, sip, 'the siphoning strike lands in full'); assert.equal(b.enemy.hp - e, sip, 'Siphon heals the enemy by the damage dealt');
 // Barrage: three hits, Block and Armor on each.
-b = setup('cinderFox', [], { turn: 5, enemy: { element: 'fire' } }); const per = enemyPlan(b).damage; assert.equal(enemyPlan(b).hits, 3);
+b = setup('elarisFox', [], { turn: 5, enemy: { element: 'fire' } }); const per = enemyPlan(b).damage; assert.equal(enemyPlan(b).hits, 3);
 assert.equal(per, Math.max(1, Math.round(enemyPlanBeforeAether(b, 5).damage * .45)));
 state.talents = { plating: 1 }; b.block = 5; hp = state.hp; endTurn();
 const net = per - 1; let blk = 5, taken = 0; for (let k = 0; k < 3; k++) { const s = Math.min(blk, net); blk -= s; taken += net - s; }
