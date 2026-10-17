@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 182) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 183) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -104,7 +104,8 @@ change set.
 - Browser check: serve with `python3 -m http.server 8123` and drive it with
   Playwright.
 - Difficulty: compendium → Difficulty lab, or `node tests/difficulty-report.cjs [fights] [world]`
-  (shared code in `assets/sim/`). Balance tuning: `tests/balance-sim.cjs`.
+  (shared code in `assets/sim/`). Tune bosses with the lab (it wears gear); `tests/balance-sim.cjs`
+  plays without gear.
 
 ## Working conventions
 

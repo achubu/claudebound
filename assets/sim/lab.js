@@ -5,6 +5,8 @@
 // growing with player level, and the bosses, side cards and gear a player has by then).
 // Not loaded by the game itself.
 const SIM_TARGET = { zone: [30, 100], mini: [34, 50], boss: [22, 36] }; // Round 44: afflictions + side deck
+// Round 183: Neon Aftermath's final boss aims at about 40% like its mini-bosses (owner request).
+const SIM_TARGET_BY_WORLD = { city: { boss: [34, 50] } };
 // 16 builds: the 4 original archetypes plus 4 per tree covering every Round 40 talent path.
 // Each ends with a spill list so no point is wasted.
 const SIM_SPILL = [['plating', 5], ['jammer', 5], ['amplifier', 5], ['vitality', 5], ['edge', 5], ['quickdraw', 2], ['capacitor', 1], ['overcharge', 1], ['recovery', 3], ['deckMatrix', 4]];
@@ -97,7 +99,7 @@ function simEncounterRun(region, enc, M, opts = {}) {
       return next < combos.length;
     },
     result() {
-      const e = enemies[enc.type], s = enemyStats(enc.type, { region, level: enc.level, boss: enc.kind !== 'zone' }), typical = Math.round(acc.sum / acc.n), [lo, hi] = SIM_TARGET[enc.kind];
+      const e = enemies[enc.type], s = enemyStats(enc.type, { region, level: enc.level, boss: enc.kind !== 'zone' }), typical = Math.round(acc.sum / acc.n), [lo, hi] = (SIM_TARGET_BY_WORLD[region] || {})[enc.kind] || SIM_TARGET[enc.kind];
       return { key: enc.key, kind: enc.kind, type: enc.type, name: e.name, level: enc.level, hp: s.hp, attack: s.attack, armor: e.armor || 0, element: e.element || null,
         afflictions: (ENEMY_AFFLICTIONS[enc.type] || []).map(a => AFFLICTIONS[a] ? AFFLICTIONS[a].name : a), gear: (enc.gear || []).length,
         typical, best: acc.best, worst: acc.worst, avgTurns: +(acc.turns / acc.fights).toFixed(1), hpLeftWhenWon: acc.won ? Math.round(acc.hpLeft / acc.won * 100) : null,

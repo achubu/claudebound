@@ -3496,6 +3496,48 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 183: every boss re-tuned with gear worn
+
+- The Round 182 report showed that, with gear worn, every mini-boss and final boss from
+  Solaris on was too easy. It also showed Neon Aftermath's two mini-bosses the wrong way
+  round: the Lunar Enforcer won 8%, the Crown Sentinel 100%.
+- Owner request: Neon Aftermath's three bosses at about **40%**. Everything else keeps the
+  usual targets: mini-bosses about 42%, final bosses about 29%.
+- **How:** each boss's health (`BALANCE.perEnemy`) was bisected in the Difficulty lab: real
+  battles in the browser, gear worn, 16 builds × 2 styles × 6 fights.
+- **Cistern Warden:** its win rate barely moved with health (still 51% at 4.5×), because its
+  base attack (11) is the weakest of any boss at its level. It gets **health 2.4× and +7
+  attack** (538 HP, 37 attack), which wins 44%.
+
+  | Boss | Health | Wins with gear |
+  |---|---|---|
+  | Lunar Enforcer | .73 → .55 | 8% → 40% |
+  | Crown Sentinel | .72 → 1.29 | 100% → 40% |
+  | Thorn Warden | .95 → .75 | 31% → 41% |
+  | Cistern Warden | 1.4 → 2.4, +7 attack | 92% → 44% |
+  | Noon Toller | .82 → 1.22 | 73% → 42% |
+  | Sun Pharaoh | .77 → .96 | 51% → 31% |
+  | Stormbell Warden | .65 → .76 | 52% → 42% |
+  | Featherfall Matriarch | .78 → .94 | 72% → 42% |
+  | Zenith Roc | .42 → .50 | 59% → 31% |
+  | Tidebound Warden | .91 → 1.15 | 87% → 41% |
+  | Gale Sovereign | .65 → .78 | 64% → 43% |
+  | Bloom Tyrant | .58 → .70 | 58% → 29% |
+  | Arc Sentinel | .72 → .90 | 66% → 42% |
+  | Resonant Phantom | .99 → 1.25 | 72% → 42% |
+  | Tempest Colossus | .45 → .63 | 49% → 28% |
+  | Clockwarden | .85 → 1.16 | 84% → 42% |
+  | Paradox Twin | .93 → 1.28 | 83% → 43% |
+  | Chronarch | .47 → .62 | 60% → 29% |
+
+- **Result:** a full lab run puts **all 80 encounters on target**. `DIFFICULTY-REPORT.md` is
+  regenerated from that run.
+- The lab judges the Thorn Warden against 34-50%, through the new `SIM_TARGET_BY_WORLD` in
+  `assets/sim/lab.js`.
+- `tests/balance-sim.cjs` still plays without gear, so it now reads these bosses as hard. Tune
+  bosses with the lab, which wears gear like a player does.
+- Cache tags bumped to `?v=round183`.
+
 ## Round 182: the Difficulty lab, and a difficulty report for every enemy
 
 - Owner request: test the whole game and break down the difficulty of every enemy, each
