@@ -686,5 +686,5 @@ const style=document.createElement('style');style.textContent='.device-core{font
 const navDevice=document.createElement('button');navDevice.textContent='Aetherlink';navDevice.onclick=showDevice;$('nav').append(navDevice);const navMenu=document.createElement('button');navMenu.textContent='Menu';navMenu.onclick=showMainMenu;$('nav').append(navMenu);
 const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='.json,application/json';fileInput.id='saveFile';fileInput.hidden=true;fileInput.onchange=()=>{importSave(fileInput.files[0]);fileInput.value=''};document.body.append(fileInput);
 const importButton=document.createElement('button');importButton.textContent='Import save file';importButton.onclick=()=>fileInput.click();$('startOverlay').querySelector('section').append(importButton);
-$('newBtn').onclick=newGame;$('resumeBtn').onclick=load;$('mapBtn').onclick=showMap;$('charBtn').onclick=showCharacter;
+$('newBtn').onclick=()=>newGame();$('resumeBtn').onclick=()=>load();$('mapBtn').onclick=showMap;$('charBtn').onclick=showCharacter;
 $('resumeBtn').classList.toggle('hidden',!localStorage.getItem('aethercede-expansion-v3'));

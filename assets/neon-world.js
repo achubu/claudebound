@@ -332,6 +332,11 @@ const newGameBeforeNeonWorld = newGame;
 newGame = function () { const out = newGameBeforeNeonWorld.apply(this, arguments); state.cityWorld = 1; return out; };
 const validateImportBeforeNeonWorld = validateImport;
 validateImport = function (s) { return validateImportBeforeNeonWorld(migrateNeonWorld(s)); };
+// Round 171: a game in progress is always on the current map (new games start
+// there and loads migrate), so every save carries the mark. Before this, the
+// start button skipped the newGame wrapper above and each resume reset the city.
+const saveBeforeNeonWorld = save;
+save = function () { if (state) state.cityWorld = 1; return saveBeforeNeonWorld.apply(this, arguments); };
 
 // Relics sit just off a reachable street too (Round 93), in every region with
 // painted/organic rooms. Room data is copied fresh on each configureRegion.

@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 171: resuming a journey keeps your place in Neon Aftermath
+
+- **Bug:** after a refresh, "Continue saved journey" put you back at the
+  Afterlight Refuge with the map wiped back to one room. Level, deck, relics
+  and boss kills stayed.
+- **Cause:** `expansion.js` bound the start button straight to its own
+  `newGame`, so the wrappers added later never ran from the button. One of
+  them, in `neon-world.js`, marks new games with `cityWorld: 1`. Without that
+  mark, every load ran the Round 91 old-city migration, which resets city
+  exploration. The aether-deck and exploration `newGame` wrappers were skipped
+  too; loads filled in what they set up.
+- **Fix:** the start and resume buttons now call the current `newGame` and
+  `load`. `neon-world.js` also adds the mark on every save, because a game in
+  progress is always on the current map. A save that was made without the
+  mark still resets one more time on its next load, then keeps its place.
+- New `tests/resume-progress.test.cjs`. Cache tags bumped to `?v=round171`.
+
 ## Round 170: the Revenant walks
 
 - The owner's 4-frame walk loop for the Sunwrapped Revenant (contact, passing, contact, passing) is
