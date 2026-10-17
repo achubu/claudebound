@@ -14,17 +14,17 @@ const CHRONO_ROOM_DATA = {"0,0":{"name":"Chronospire Gate","exits":{"e":"1,0","s
 const CHRONO_TINT = 'sepia(.75) saturate(1.8) hue-rotate(-12deg) brightness(1.06)';
 const CHRONO_GROUND_FILTER = 'sepia(.7) hue-rotate(-10deg) saturate(1.35) brightness(.74) contrast(1.1)';
 const CHRONO_ENEMIES = {
-  chronoHound:  { name: 'Gearhound', icon: '⚙', hp: 48, attack: 10, element: 'fire', art: 'cinderFox', tint: CHRONO_TINT },
-  chronoMoth:   { name: 'Tick Moth', icon: '≋', hp: 50, attack: 10, element: 'air', art: 'stormMoth', tint: CHRONO_TINT },
+  chronoHound:  { name: 'Gearhound', icon: '⚙', hp: 48, attack: 10, element: 'fire', art: 'forestFox', tint: CHRONO_TINT },
+  chronoMoth:   { name: 'Tick Moth', icon: '≋', hp: 50, attack: 10, element: 'air', art: 'forestMoth', tint: CHRONO_TINT },
   chronoSentry: { name: 'Brass Sentry', icon: '♜', hp: 54, attack: 10, armor: 2, element: 'earth', art: 'vineguard', tint: CHRONO_TINT },
   chronoWraith: { name: 'Lag Wraith', icon: '☾', hp: 54, attack: 11, armor: 1, element: 'air', art: 'shade', tint: CHRONO_TINT },
-  chronoHeron:  { name: 'Hourglass Heron', icon: '⏳', hp: 56, attack: 11, element: 'water', art: 'drownedHeron', tint: CHRONO_TINT },
-  chronoStag:   { name: 'Pendulum Stag', icon: '◆', hp: 58, attack: 11, armor: 2, element: 'earth', art: 'blightAntler', tint: CHRONO_TINT },
+  chronoHeron:  { name: 'Hourglass Heron', icon: '⏳', hp: 56, attack: 11, element: 'water', art: 'forestHeron', tint: CHRONO_TINT },
+  chronoStag:   { name: 'Pendulum Stag', icon: '◆', hp: 58, attack: 11, armor: 2, element: 'earth', art: 'forestStag', tint: CHRONO_TINT },
   chronoWisp:   { name: 'Rust Wisp', icon: '✧', hp: 60, attack: 11, armor: 2, element: 'water', art: 'cryptWisp', tint: CHRONO_TINT },
   chronoMauler: { name: 'Cog Mauler', icon: '♨', hp: 62, attack: 12, armor: 2, element: 'fire', art: 'forgeBeast', tint: CHRONO_TINT },
   clockwarden:  { name: 'The Clockwarden', icon: '🕰', hp: 90, attack: 12, armor: 4, boss: true, miniBoss: true, element: 'earth', art: 'crownEye', tint: CHRONO_TINT },
   paradoxTwin:  { name: 'The Paradox Twin', icon: '♊', hp: 86, attack: 13, armor: 3, boss: true, miniBoss: true, element: 'air', art: 'shade', tint: 'sepia(.6) saturate(2) hue-rotate(160deg) brightness(1.1)' },
-  chronarch:    { name: 'The Chronarch', icon: '⌛', hp: 160, attack: 12, armor: 3, boss: true, element: 'water', shift: ['water', 'fire'], shiftEvery: 4, art: 'bloomTyrant', tint: CHRONO_TINT }
+  chronarch:    { name: 'The Chronarch', icon: '⌛', hp: 160, attack: 12, armor: 3, boss: true, element: 'water', shift: ['water', 'fire'], shiftEvery: 4, art: 'forestTyrant', tint: CHRONO_TINT }
 };
 Object.assign(enemies, CHRONO_ENEMIES);
 Object.assign(BALANCE.perEnemy, { clockwarden: { hp: .95 }, paradoxTwin: { hp: 1.05 }, chronarch: { hp: .72 } });

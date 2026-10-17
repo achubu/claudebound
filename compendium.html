@@ -303,7 +303,7 @@
         // ---------------------------------------------------------------
         // Data source. The game's full card and enemy data only exists once
         // index.html has run all of its scripts (expansion cards, Elaris
-        // wildlife, the Bloom Tyrant, boss attack patterns), so the page is
+        // wildlife, the Sun Pharaoh, boss attack patterns), so the page is
         // loaded invisibly and its live values are read directly. It never
         // starts a journey, so it never writes a save.
         // ---------------------------------------------------------------
@@ -352,7 +352,7 @@
             { id: 'elaris', name: 'Solaris', blurb: 'A sun-scorched desert city reached through the boss portal.', levels: [10, 17], bossLevels: { tidewardenElaris: 10, galeSovereign: 16, bloomTyrant: 18 },
               regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth', 'sunRevenant'],
               miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
-            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 42 rooms, levels 19–27.', levels: [19, 26], bossLevels: { arcSentinel: 21, resonantPhantom: 25, stormTyrant: 27 },
+            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Sun Pharaoh: 42 rooms, levels 19–27.', levels: [19, 26], bossLevels: { arcSentinel: 21, resonantPhantom: 25, stormTyrant: 27 },
               regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' },
             { id: 'chronospire', name: 'Chronospire', blurb: 'A clockwork citadel where time is broken, through the rift in the Eye of the Tempest: 34 rooms, levels 28–36. Home of the ⏳ Suspend mechanic.', levels: [28, 35], bossLevels: { clockwarden: 30, paradoxTwin: 33, chronarch: 36 },
               regular: ['chronoHound', 'chronoMoth', 'chronoSentry', 'chronoWraith', 'chronoHeron', 'chronoStag', 'chronoWisp', 'chronoMauler'], miniBosses: ['clockwarden', 'paradoxTwin'], boss: 'chronarch' }
@@ -533,7 +533,7 @@
             const grid = document.getElementById('side-grid');
             if (!game || !game.sideCards) { grid.innerHTML = '<p class="dim">Side deck data loads from the game itself.</p>'; return; }
             const a = game.aether || { max: 8, draw: 4, hold: 2, deck: 6, copies: 2 };
-            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Your side deck starts with room for 2 cards and grows to ${a.deck} (+1 for beating the Crown Sentinel, the Gale Sovereign, the Bloom Tyrant and the Resonant Phantom). Build it (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
+            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Your side deck starts with room for 2 cards and grows to ${a.deck} (+1 for beating the Crown Sentinel, the Noon Toller, the Sun Pharaoh and the Resonant Phantom). Build it (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
             const where = ['Starter or any world', 'Solaris and Vespera', 'Vespera', 'Final bosses only'];
             grid.innerHTML = Object.entries(game.sideCards).map(([id, c]) => {
                 let text = ''; try { text = c.text(); } catch (e) {}
@@ -554,7 +554,7 @@
             const items = [
                 ['Strike', 'Deals the enemy\'s attack value.'],
                 ['Heavy attack', 'About 1.5× attack near a region\'s start, a little more at its far edge. Bosses\' heavy hits are capped lower so one hit never decides the fight.'],
-                ['Guard', 'Gives the enemy 5 Block (Bloom Tyrant: 8) starting next turn. Block soaks your damage first.'],
+                ['Guard', 'Gives the enemy 5 Block (Sun Pharaoh: 8) starting next turn. Block soaks your damage first.'],
                 ['Charge', 'No damage. It telegraphs a charged elemental strike on the following turn.'],
                 ['Charged strike', 'About 1.8× attack (1.5× for bosses) plus a status effect if any damage gets through. An armed Prismatic Counter cancels it and reflects 6 damage.'],
                 ...Object.entries(ELEMENT_EFFECT).map(([el, t]) => [`${ELEMENT_ICON[el]} ${cap(el)} strike`, t]),
@@ -573,7 +573,7 @@
                 ['Nexus Waypoints', 'Every world has a Nexus Waypoint at its start and another in its middle (Tunnelworks Corridor, Mistbound Thicket, Glasswind Reach). Walking into one discovers it. Then teleport to any discovered waypoint, in any world you have reached, from the map or by stepping on a waypoint.'],
                 ['Experience', 'Enemies at or above your level give full XP (25, elites 40, bosses 50). Each level you are above an enemy takes 20% off, down to 10% at five or more levels.'],
                 ['Unspent energy', 'Each point of energy left when you end your turn becomes 1 Aether.'],
-                ['Side deck', 'Room for 2 side cards at first, growing to 6 as you beat the Crown Sentinel, Gale Sovereign, Bloom Tyrant and Resonant Phantom. Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
+                ['Side deck', 'Room for 2 side cards at first, growing to 6 as you beat the Crown Sentinel, Noon Toller, Sun Pharaoh and Resonant Phantom. Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
                 ['Weaken', 'Talent ability, once per encounter: the enemy\'s next attack deals 3 less damage (+3 per Deep Interference rank), then it wears off.']
             ];
             document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');

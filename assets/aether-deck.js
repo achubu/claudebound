@@ -46,7 +46,7 @@ const ENEMY_AFFLICTIONS = {
   emberling: ['bleed'], thornling: ['frail'], vineguard: ['barrier'], burrower: ['rend'], shade: ['fog'], cryptWisp: ['static'], forgeBeast: ['crush'], crownEye: ['fog'],
   moonKnight: ['rend', 'shackle'], crownSentinel: ['static', 'empower'], thornWarden: ['barrier', 'bleed', 'crush'],
   cinderFox: ['barrage'], drownedHeron: ['siphon'], blightAntler: ['frail'], stormMoth: ['fog'],
-  tidewardenElaris: ['siphon', 'barrier'], galeSovereign: ['barrage', 'shackle'], bloomTyrant: ['bleed', 'empower', 'rend'],
+  tidewardenElaris: ['siphon', 'barrier'], galeSovereign: ['barrage', 'shackle'], bloomTyrant: ['entomb', 'empower', 'rend'],
   vespFox: ['crush'], vespThorn: ['static'], vespMoth: ['barrage'], vespHeron: ['siphon'], vespShade: ['shackle'], vespStag: ['barrier'], vespWisp: ['fog'], vespMauler: ['rend'],
   arcSentinel: ['barrier', 'shackle'], resonantPhantom: ['static', 'siphon'], stormTyrant: ['empower', 'barrage', 'frail']
 };

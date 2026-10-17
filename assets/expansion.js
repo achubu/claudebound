@@ -131,17 +131,17 @@ const VESPERA_ROOM_KEYS=Object.keys(VESPERA_ROOM_DATA);
 // Storm-touched creatures. Each borrows an existing sprite (art) and is
 // recolored with the Vespera tint so it reads as a distinct species.
 const VESPERA_ENEMIES={
- vespFox:{name:'Static Fox',icon:'ϟ',hp:44,attack:9,element:'fire',art:'cinderFox'},
+ vespFox:{name:'Static Fox',icon:'ϟ',hp:44,attack:9,element:'fire',art:'forestFox'},
  vespThorn:{name:'Prism Thornling',icon:'✦',hp:46,attack:9,armor:1,element:'earth',art:'thornling'},
- vespMoth:{name:'Tempest Moth',icon:'≋',hp:48,attack:9,element:'air',art:'stormMoth'},
- vespHeron:{name:'Brinewing Heron',icon:'≈',hp:50,attack:10,element:'water',art:'drownedHeron'},
+ vespMoth:{name:'Tempest Moth',icon:'≋',hp:48,attack:9,element:'air',art:'forestMoth'},
+ vespHeron:{name:'Brinewing Heron',icon:'≈',hp:50,attack:10,element:'water',art:'forestHeron'},
  vespShade:{name:'Ion Shade',icon:'☄',hp:52,attack:10,armor:2,element:'air',art:'shade'},
- vespStag:{name:'Rimeglass Stag',icon:'◆',hp:54,attack:10,armor:2,element:'earth',art:'blightAntler'},
+ vespStag:{name:'Rimeglass Stag',icon:'◆',hp:54,attack:10,armor:2,element:'earth',art:'forestStag'},
  vespWisp:{name:'Arc Wisp',icon:'✧',hp:56,attack:10,armor:2,element:'water',art:'cryptWisp'},
  vespMauler:{name:'Thunder Mauler',icon:'♨',hp:58,attack:11,armor:2,element:'fire',art:'forgeBeast'},
  arcSentinel:{name:'The Arc Sentinel',icon:'⚡',hp:84,attack:11,armor:4,boss:true,miniBoss:true,element:'water',art:'vineguard'},
  resonantPhantom:{name:'The Resonant Phantom',icon:'☄',hp:80,attack:12,armor:3,boss:true,miniBoss:true,element:'air',art:'shade'},
- stormTyrant:{name:'The Tempest Colossus',icon:'🌩',hp:150,attack:11,armor:2,boss:true,element:'water',shift:['water','air'],shiftEvery:4,art:'bloomTyrant'}
+ stormTyrant:{name:'The Tempest Colossus',icon:'🌩',hp:150,attack:11,armor:2,boss:true,element:'water',shift:['water','air'],shiftEvery:4,art:'forestTyrant'}
 };
 Object.assign(enemies,VESPERA_ENEMIES);
 const VESPERA_ZONE_ENEMY=['vespFox','vespThorn','vespMoth','vespHeron','vespShade','vespStag','vespWisp','vespMauler'];
@@ -257,7 +257,7 @@ function configureRegion(region){activeRegion=region;for(const key of Object.key
  // (roomSpawns' isBossRoom/regionBoss checks, portalTarget() both
  // directions) was updated alongside this room block.
  // Round 149: Solaris rooms (world 2). Mini-bosses guard the Scrapwall Stronghold (5,2) and
- // the Temple of the Noon Bell (8,0); the Bloom Tyrant holds the Solar Crown (8,5), the far corner.
+ // the Temple of the Noon Bell (8,0); the Sun Pharaoh holds the Solar Crown (8,5), the far corner.
  const SOLARIS_ENEMY={'5,2':'tidewardenElaris','8,0':'galeSovereign','8,5':'bloomTyrant'};
  const elarisRooms=Object.fromEntries(Object.entries(SOLARIS_LAYOUT).map(([k,r],i)=>[k,{name:r.name,exits:{...r.exits},district:0,landmark:'SOLARIS',cityIndex:i,world:[...r.world],...(r.zone?{zone:r.zone}:{}),...(r.level?{level:r.level}:{}),...(SOLARIS_ENEMY[k]?{enemy:[SOLARIS_ENEMY[k],400,250]}:{})}]));
  Object.assign(rooms,elarisRooms);
@@ -592,7 +592,7 @@ async function importSave(file){try{if(!file||file.size>2000000)throw Error('Cho
 function showMainMenu(){keys={};openMenu('<div class="eyebrow">AETHERCEDE</div><h2>Main menu</h2><p>Save transfer is available between encounters.</p><button id="exportSave">Export save file</button> <button id="importSave">Import save file</button><p><button id="backToGame">Return to game</button> <button id="restartJourney" class="danger">New journey</button></p>');$('exportSave').onclick=exportSave;$('importSave').onclick=()=>$('saveFile').click();$('backToGame').onclick=closeMenu;$('restartJourney').onclick=()=>{if(confirm('Start a new journey? Export your current save first if you want to keep it.'))newGame()}}
 const baseShowCharacter=showCharacter;
 showCharacter=function(){baseShowCharacter();const portrait=document.querySelector('.sheet-portrait');if(portrait){portrait.src='assets/characters/character-portal.webp';portrait.style.maxHeight='none';portrait.style.aspectRatio='16 / 9';portrait.style.objectFit='cover'}const info=document.createElement('p');info.className='notice';info.textContent='Aetherlink: '+deviceSlots()+' sockets · Critical strike '+talentRank('critical')*3+'% · Every level grants +1 max HP and heals 5 HP.';$('menuModal').append(info)};
-objective=function(){if(activeRegion==='chronospire')return state.bosses.includes('chronarch')?'All four worlds are conquered. Time flows again in Chronospire.':'Climb the Chronospire to The Last Second and defeat the Chronarch. Use ⏳ Suspend to set up free plays.';if(activeRegion==='vespera')return state.bosses.includes('stormTyrant')?'Vespera\'s storm has broken. A time rift hums in the Eye of the Tempest — step through to Chronospire.':'Cross the storm to the Eye of the Tempest and defeat the Tempest Colossus. Reserve Prismatic Counter for charged strikes.';if(activeRegion==='elaris')return state.bosses.includes('bloomTyrant')?'The Vespera portal is open in the Solar Crown.':'Defeat the Bloom Tyrant in the Solar Crown. Reserve your counter for charged strikes.';if(state.bosses.includes('thornWarden'))return 'The Warden portal is open. Return to the Warden\'s Crown in the Crystal Citadel to enter Solaris.';if(!hasRelic('ember'))return state.room==='0,5'?'Head east into the city. The Ember Sigil that opens the Crystal Citadel is in the Moon Temple (Lantern Quarter). Beat its guardian to claim it.':'Find the Moon Temple in the Lantern Quarter, beat its guardian and take the Ember Sigil.';if(!hasRelic('boots'))return 'The Briarstep Boots are in the Statue Garden, the south-west corner of the park. Clear its guards to claim them; they open the Junkyard Lots.';if(!hasRelic('lens'))return 'Climb the Billboard Steps above the Holo Stage and clear its guards for the Moon Lens; it opens the park\'s Lake Bridge.';return 'Defeat the Thorn Warden at the Warden\'s Crown, high in the Crystal Citadel, to unlock Ice and Solaris.'};
+objective=function(){if(activeRegion==='chronospire')return state.bosses.includes('chronarch')?'All four worlds are conquered. Time flows again in Chronospire.':'Climb the Chronospire to The Last Second and defeat the Chronarch. Use ⏳ Suspend to set up free plays.';if(activeRegion==='vespera')return state.bosses.includes('stormTyrant')?'Vespera\'s storm has broken. A time rift hums in the Eye of the Tempest — step through to Chronospire.':'Cross the storm to the Eye of the Tempest and defeat the Tempest Colossus. Reserve Prismatic Counter for charged strikes.';if(activeRegion==='elaris')return state.bosses.includes('bloomTyrant')?'The Vespera portal is open in the Solar Crown.':'Defeat the Sun Pharaoh in the Solar Crown. Reserve your counter for charged strikes.';if(state.bosses.includes('thornWarden'))return 'The Warden portal is open. Return to the Warden\'s Crown in the Crystal Citadel to enter Solaris.';if(!hasRelic('ember'))return state.room==='0,5'?'Head east into the city. The Ember Sigil that opens the Crystal Citadel is in the Moon Temple (Lantern Quarter). Beat its guardian to claim it.':'Find the Moon Temple in the Lantern Quarter, beat its guardian and take the Ember Sigil.';if(!hasRelic('boots'))return 'The Briarstep Boots are in the Statue Garden, the south-west corner of the park. Clear its guards to claim them; they open the Junkyard Lots.';if(!hasRelic('lens'))return 'Climb the Billboard Steps above the Holo Stage and clear its guards for the Moon Lens; it opens the park\'s Lake Bridge.';return 'Defeat the Thorn Warden at the Warden\'s Crown, high in the Crystal Citadel, to unlock Ice and Solaris.'};
 function relicName(id){for(const r of Object.values(rooms))if(r.relic&&r.relic[0]===id)return r.relic[2]+' '+r.relic[1];return id}
 // The map now reads as an actually-drawn map, not a data grid: only areas
 // you've genuinely visited render at all (a real fog of war — the OLD

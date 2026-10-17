@@ -28,11 +28,11 @@ const LORE = {
     'LOG 05 — The portal beneath the Warden\'s throne hums at the frequency of growing things. Something green is waiting on the other side.'
   ],
   elaris: [
-    'The stone is warm. Words rise in your mind: "Before the Tyrant bloomed, Solaris sang in four voices: flame, tide, root and wind."',
-    '"The Tidebound Warden was a guardian once. It guards the river still, but it no longer remembers from what."',
-    '"Burn and rot are siblings here. What fire leaves, the poison finishes. Do not fight them both at once."',
-    '"The Gale Sovereign crowned itself on the highest branch and called the storm its court."',
-    '"The Bloom Tyrant drinks the land\'s four voices. Silence it, and the stormglass road will open to the east."'
+    'The stone is warm. Words rise in your mind: "Before the Pharaoh took the Solar Crown, Solaris kept four fires: sun, well, sand and wind."',
+    '"The Cistern Warden was built to share the water. It guards the Scrapwall cistern still, but it no longer lets anyone drink."',
+    '"Scarab and scorpion hunt together here. What the sun-fire leaves, the venom finishes. Do not fight them both at once."',
+    '"At noon the great bell rings and the Toller walks. Those who hear it too closely forget how to move."',
+    '"The Sun Pharaoh wraps the city in light and linen. Unseat it, and the stormglass road will open to the east."'
   ],
   vespera: [
     'The glyph crackles: "Vespera was a city of glass that caught lightning and turned it into light."',

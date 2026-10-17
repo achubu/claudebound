@@ -1,5 +1,30 @@
 # Elaris wildlife and gateway
 
+## Solaris roster and planned art (Round 172)
+
+World 2 is Solaris, a sun-scorched brass desert city. Its enemies were renamed and reworked
+in Round 172. They still use the old forest sheets below until the new art arrives. Drop each
+new sheet into `assets/monsters/elaris/` under the planned name, in the same 4-frame format as
+the forest sheets: one row, four equal cells, transparent background, facing right. The ids
+stay the same, so saves carry over.
+
+| Id | New enemy | Element | What it is | Planned sheet |
+|---|---|---|---|---|
+| `cinderFox` | Solar Scarab | Fire | Brass beetle that rolls a ball of captured sunlight; Barrage | `solar-scarab.png` |
+| `drownedHeron` | Mirage Ibis | Water | Sacred ibis with a shimmering heat-haze body that drinks your strength; Siphon | `mirage-ibis.png` |
+| `blightAntler` | Dune Scorpion | Earth | Sand-armored scorpion with a copper stinger; Enfeeble | `dune-scorpion.png` |
+| `stormMoth` | Dust Devil | Air | Whirling sand spirit with glowing eyes; Mind Fog | `dust-devil.png` |
+| `sunRevenant` | Sunwrapped Revenant | Earth | Tech mummy (already has art); Entomb | `sun-revenant.png` |
+| `tidewardenElaris` | The Cistern Warden | Water | Brass golem guarding the Scrapwall cistern (mini-boss) | `cistern-warden.png` |
+| `galeSovereign` | The Noon Toller | Air | Bell-headed sentinel of the Temple of the Noon Bell (mini-boss) | `noon-toller.png` |
+| `bloomTyrant` | The Sun Pharaoh | Earth, shifts fire/earth | Crowned sun-king of the Solar Crown (final boss) | `sun-pharaoh.png` |
+
+Vespera and Chronospire recolor the forest sheets through art-only keys (`forestFox`,
+`forestHeron`, `forestStag`, `forestMoth`, `forestTyrant`), so changing a Solaris sheet does
+not change those worlds.
+
+## Forest wildlife (original Elaris art)
+
 Generated with the built-in image-generation tool. Transparent source PNGs are used directly; no artificial walking frames were made by moving a static sprite. Each animal has four distinct poses, shown with stepped CSS animation in exploration and battles. Reduced-motion settings use the first frame.
 
 | Species | Element | Sheet | Cycle |

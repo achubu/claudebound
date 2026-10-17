@@ -3496,6 +3496,35 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 172: Solaris enemies fit the desert city
+
+- Owner request: rename and rework the Solaris enemies to fit a sun-scorched brass desert
+  city. The owner will send new art later. Ids are unchanged, so saves, boss kills and
+  mid-fight saves carry over.
+
+  | Was | Now | Change |
+  |---|---|---|
+  | Cinder Fox | **Solar Scarab** ☼ | fire, Barrage |
+  | Drowned Heron | **Mirage Ibis** | water, Siphon |
+  | Blight Antler | **Dune Scorpion** | earth, Enfeeble |
+  | Storm Moth | **Dust Devil** | air, Mind Fog |
+  | The Tidebound Warden | **The Cistern Warden** | mini-boss, Scrapwall Stronghold |
+  | The Gale Sovereign | **The Noon Toller** 🔔 | mini-boss, Temple of the Noon Bell |
+  | The Bloom Tyrant | **The Sun Pharaoh** ☉ | final boss, Solar Crown |
+
+- **The Sun Pharaoh** shifts between sun and sand (fire/earth, was earth/air). It now uses
+  Entomb, the Revenant's linen wrap, in place of Lacerate (Entomb, Empower, Rend).
+- Solaris Sun Dial lore, the Solaris objective and the compendium texts use the new names.
+- **Art:** the new enemies still show the old forest sheets for now. `ELARIS-ART.md` lists
+  the planned file for each one (`solar-scarab.png`, `mirage-ibis.png`, `dune-scorpion.png`,
+  `dust-devil.png`, `cistern-warden.png`, `noon-toller.png`, `sun-pharaoh.png`). Vespera
+  and Chronospire used to borrow the Solaris ids for their recolored sprites. They now
+  borrow art-only keys (`forestFox`, `forestHeron`, `forestStag`, `forestMoth`,
+  `forestTyrant`), so new Solaris art won't change them.
+- Unchanged: the mini-boss card drops (Tidebound Aegis, Sovereign Gale) and the Stormglass
+  Covenant keep their names.
+- New `tests/solaris-roster.test.cjs`. Cache tags bumped to `?v=round172`.
+
 ## Round 171: resuming a journey keeps your place in Neon Aftermath
 
 - **Bug:** after a refresh, "Continue saved journey" put you back at the
