@@ -3496,6 +3496,57 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 178: every world drops its own cards
+
+- Owner request: each world has its own set of unique card drops. Chest and elite card
+  rewards (choose 1 of 3) come from `VARIETY_POOLS[world]`, and no card is now in two worlds'
+  pools. New `assets/world-cards.js` (after `tile-worlds.js`):
+
+  | World | Reward cards |
+  |---|---|
+  | Neon Aftermath | Cleave, Riposte, Bastion, Mend, Spark, Shatter, Arc Jab, Bulwark Bash, Overclock, Static Shield, Breach Spike |
+  | Solaris | Cinder Lance, Venom Bloom, Gale Cut, Prismatic Counter, **Sunflare**, **Sand Veil**, **Scarab Swarm**, **Oasis Draught**, **Solar Lance** |
+  | Sky Isles | Chain Lightning, Storm Battery, Tempest Surge, **Skyfall**, **Featherguard**, **Updraft**, **Thunderclap**, **Cloudburst** |
+  | Elaris | Thornlash, Wildfire, Rootbind, Tidecall, Verdant Pact (the forest cards, moved from Solaris), **Elder Root**, **Spore Cloud**, **Briar Wall** |
+  | Vespera | Mirrorguard, Prism Lance, **Crystal Shard**, **Crystal Ward**, **Riptide**, **Squall Step** |
+  | Chronospire | its seven Suspend cards |
+
+- The 17 new reward cards use existing effects only:
+  - Sunflare: fire, Burn.
+  - Sand Veil: Block + draw.
+  - Scarab Swarm: 3 hits + Poison.
+  - Oasis Draught: heal + Block.
+  - Solar Lance: fire, Pierce.
+  - Skyfall: air, draw.
+  - Featherguard: Block + a card next turn.
+  - Updraft: draw + Aether.
+  - Thunderclap: lightning, halves the next enemy attack.
+  - Cloudburst: water, 2 hits + heal.
+  - Elder Root: earth, Poison.
+  - Spore Cloud: Poison + draw.
+  - Briar Wall: Block + Bind.
+  - Crystal Shard: lightning, Pierce.
+  - Crystal Ward: Block + halves the next enemy attack.
+  - Riptide: water, draw.
+  - Squall Step: Block + Aether.
+- **Mini-boss cards:**
+  - Elaris's Tidebound Warden and Gale Sovereign drop Tidebound Aegis and Sovereign Gale again.
+  - Solaris's Cistern Warden drops **Cistern Aegis**.
+  - Solaris's Noon Toller drops **Noon Peal**.
+  - The Sky Isles' Stormbell Warden drops **Stormbell Toll**.
+  - The Featherfall Matriarch drops **Featherfall Grace**.
+  - A drop you already received stays received (`miniDrops` keeps the mini-boss ids).
+- **Art:** new `tools/generate_world_card_art.py` paints placeholders for all 21 new cards at
+  all 4 levels, with the existing card pipeline and a motif per card.
+- Compendium and `cards.js` cache tags bumped. `tests/balance-sim.cjs` still uses its Round 177
+  decks for the new worlds (the cards a player carries in), so its numbers are unchanged.
+- New `tests/world-cards.test.cjs` checks:
+  - No card is in two pools, and offers come only from the current world.
+  - Forest cards drop in Elaris, every new mini-boss has its own card, and new cards play as
+    written.
+  - Every new card has art at all four levels.
+- `card-variety` now counts 32 world reward cards.
+
 ## Round 177: balance for worlds 3 to 6
 
 - Tuned with `tests/balance-sim.cjs` (16 talent builds × 2 play styles, fair-fight levels).

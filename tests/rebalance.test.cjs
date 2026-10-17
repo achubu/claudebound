@@ -30,8 +30,8 @@ for(let i=0;i<8000;i++){
  winBattle();
  if(state.battle.reward)seen.add(state.battle.reward.id);if(state.battle.offers)state.battle.offers.forEach(c=>seen.add(c.id));
 }
-assert(seen.has('bastion'),'Elaris reward pool now offers Bastion (block)');
-assert(seen.has('mend'),'Elaris reward pool now offers Mend (healing)');
+assert(seen.has('sandVeil'),'Solaris rewards offer a Block card (Round 178: Sand Veil, its own)');
+assert(seen.has('oasisDraught'),'Solaris rewards offer a healing card (Round 178: Oasis Draught, its own)');
 assert(seen.has('cinder')||seen.has('venom')||seen.has('gale')||seen.has('counter'),'Elaris still offers elemental cards');
 activeRegion='city';
 
