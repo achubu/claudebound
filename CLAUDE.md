@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 174) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 175) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -17,18 +17,21 @@ change set.
   - Then `elaris-wildlife`, `expansion`, `encounter-depth`, `talent-matrix`,
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
-    `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`, `pickups`,
-    `cardsmith`. (`solaris-data.js` loads just before `expansion.js`.)
+    `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
+    `sky-data`, `wilds-data`, `tile-worlds`, `pickups`, `cardsmith`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`.
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.
   Prefer `function` declarations for new globals that other files test with
   `typeof`.
-- **Three worlds, swapped in by `configureRegion(region)`:**
+- **Six worlds, in `WORLD_ORDER` (Round 175), swapped in by `configureRegion(region)`:**
   - `city` is Neon Aftermath.
   - `elaris` is shown to players as **Solaris** (Round 149): 54 rooms built from
     flipped tiles by `tools/build_solaris.py` into `assets/solaris-data.js`.
-  - `vespera`.
-  - `chronospire` is a fourth area.
+  - `sky` is the **Sky Isles** and `wilds` is **Elaris** (the forest). Both are tile-built
+    like Solaris by `tools/build_tile_world.py` into `assets/<id>-data.js`, and run by
+    `assets/tile-worlds.js`. Stand-in tiles come from `tools/paint_placeholder_tiles.py`.
+    Every new world is built this way.
+  - `vespera` (levels 37-45) and `chronospire` (46-54).
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.

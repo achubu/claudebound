@@ -352,9 +352,13 @@
             { id: 'elaris', name: 'Solaris', blurb: 'A sun-scorched desert city reached through the boss portal.', levels: [10, 17], bossLevels: { tidewardenElaris: 10, galeSovereign: 16, bloomTyrant: 18 },
               regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth', 'sunRevenant'],
               miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
-            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Sun Pharaoh: 42 rooms, levels 19–27.', levels: [19, 26], bossLevels: { arcSentinel: 21, resonantPhantom: 25, stormTyrant: 27 },
+            { id: 'sky', name: 'Sky Isles', blurb: 'Floating islands above the clouds, through the portal in the Solar Crown: 54 rooms, levels 19–27.', levels: [19, 26], bossLevels: { stormbellWarden: 23, featherMatriarch: 25, zenithRoc: 27 },
+              regular: ['skyDrake', 'skyWisp', 'skyHarpy', 'skyRam'], miniBosses: ['stormbellWarden', 'featherMatriarch'], boss: 'zenithRoc' },
+            { id: 'wilds', name: 'Elaris', blurb: 'The old forest and its original creatures, below the Sky Isles: 54 rooms, levels 28–36.', levels: [28, 35], bossLevels: { tideboundWarden: 32, galeSovereignElaris: 34, elarisTyrant: 36 },
+              regular: ['elarisFox', 'elarisAntler', 'elarisHeron', 'elarisMoth'], miniBosses: ['tideboundWarden', 'galeSovereignElaris'], boss: 'elarisTyrant' },
+            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 42 rooms, levels 37–45.', levels: [37, 44], bossLevels: { arcSentinel: 39, resonantPhantom: 43, stormTyrant: 45 },
               regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' },
-            { id: 'chronospire', name: 'Chronospire', blurb: 'A clockwork citadel where time is broken, through the rift in the Eye of the Tempest: 34 rooms, levels 28–36. Home of the ⏳ Suspend mechanic.', levels: [28, 35], bossLevels: { clockwarden: 30, paradoxTwin: 33, chronarch: 36 },
+            { id: 'chronospire', name: 'Chronospire', blurb: 'A clockwork citadel where time is broken, through the rift in the Eye of the Tempest: 34 rooms, levels 46–54. Home of the ⏳ Suspend mechanic.', levels: [46, 53], bossLevels: { clockwarden: 48, paradoxTwin: 51, chronarch: 54 },
               regular: ['chronoHound', 'chronoMoth', 'chronoSentry', 'chronoWraith', 'chronoHeron', 'chronoStag', 'chronoWisp', 'chronoMauler'], miniBosses: ['clockwarden', 'paradoxTwin'], boss: 'chronarch' }
         ];
         const ELEMENT_EFFECT = {
@@ -485,7 +489,7 @@
             if (e.armor) notes.push(`<b>Armor ${e.armor}:</b> blocks ${e.armor} damage from every hit except Pierce cards.`);
             const affl = (game.enemyAfflictions && game.enemyAfflictions[id]) || [];
             if (affl.length && game.afflictions) {
-                const ri = { city: 0, elaris: 1, vespera: 2, chronospire: 3 }[region.id] || 0;
+                const ri = Math.max(0, REGIONS.findIndex(r => r.id === region.id)); // Round 175: same order as the game's WORLD_ORDER
                 const strikeOnly = affl.length === 1 && game.afflictions[affl[0]].type === 'strike';
                 const when = e.boss ? (e.miniBoss ? 'every 3rd turn (2, 5, 8…), alternating' : 'every 3rd turn in order, and <b>every 2nd turn once enraged</b>') : (strikeOnly ? 'on its plain attacks every 3rd turn (4, 7, 10…)' : 'every 3rd turn (2, 5, 8…)') + '; elites every 2nd turn';
                 notes.push(`<b>Afflictions</b> — ${when}:<br>` + affl.map(a => { const A = game.afflictions[a]; const answer = A.answer.map(x => x === 'cleanse' ? 'spending 2 Aether to cleanse it' : (game.sideCards && game.sideCards[x] ? game.sideCards[x].name : x)).join(', '); return `${A.icon} <b>${esc(A.name)}</b>: ${esc(game.afflictionText ? game.afflictionText(a, ri) : A.name)} <i>Answer: ${esc(answer)}.</i>`; }).join('<br>'));

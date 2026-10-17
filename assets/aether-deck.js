@@ -20,7 +20,8 @@
 // shown one turn ahead, so you can pitch now and answer it next turn.
 // =====================================================================
 const STATIC_CLEANSE_COST = 2, AETHER_START = 2, AETHER_MAX = 8, SIDE_DRAW_COST = 4, SIDE_HAND_MAX = 2, SIDE_DECK_MAX = 6, SIDE_COPIES = 2, MIN_CYCLE = 4;
-const regionIndex = () => ({ city: 0, elaris: 1, vespera: 2, chronospire: 3 })[typeof activeRegion === 'string' ? activeRegion : 'city'] || 0;
+// Round 175: the world's place in WORLD_ORDER (city 0, Solaris 1, Sky Isles 2, Elaris 3, Vespera 4, Chronospire 5).
+const regionIndex = () => Math.max(0, WORLD_ORDER.indexOf(typeof activeRegion === 'string' ? activeRegion : 'city'));
 
 // ---------------------------------------------------------------------
 // Enemy afflictions

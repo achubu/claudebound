@@ -19,8 +19,8 @@ for (const k of keys) for (const [dir, to] of Object.entries(rooms[k].exits)) as
 assert.equal(roomSpawns('0,0').length, 0, 'the gate is safe');
 assert.equal(roomSpawns('8,7')[0].type, 'chronarch'); assert.equal(roomSpawns('0,3')[0].type, 'clockwarden'); assert.equal(roomSpawns('6,6')[0].type, 'paradoxTwin');
 for (const k of keys) for (const s of roomSpawns(k)) assert(enemies[s.type], 'spawn type exists: ' + s.type);
-const lv = keys.filter(k => rooms[k].level).map(k => rooms[k].level); assert.equal(Math.min(...lv), 28); assert.equal(Math.max(...lv), 36);
-assert.equal(regionIndex(), 3); assert.equal(typeof talentScale, 'undefined', 'Round 163: no talent multiplier at all');
+const lv = keys.filter(k => rooms[k].level).map(k => rooms[k].level); assert.equal(Math.min(...lv), 46); assert.equal(Math.max(...lv), 54); // Round 175: world 6
+assert.equal(regionIndex(), 5); // Round 175: sixth world assert.equal(typeof talentScale, 'undefined', 'Round 163: no talent multiplier at all');
 for (const key of QUIET_ROOMS.chronospire) { assert.equal(roomSpawns(key).length, 0); assert.equal(poiAt(key).type, 'event'); }
 assert.equal(poiAt('5,3').type, 'nexus'); assert(merchantRoom());
 const st = enemyStats('chronoMauler', { region: 'chronospire', level: 35 }), vs = enemyStats('vespMauler', { region: 'vespera', level: 26 }); assert(st.hp > vs.hp && st.attack >= vs.attack, 'Chronospire hits harder than Vespera');
@@ -55,5 +55,5 @@ b = setup(['chronoSpike']); e = b.enemy.hp; playCard(0); assert.equal(e - b.enem
 // Winning while a card is suspended is fine; the guide shows once.
 newGame(); assert(!state.tips || !state.tips.suspend);
 Math.random = realRandom;
-console.log('PASS: Chronospire (34 two-way rooms, levels 28-36, bosses, quiet rooms, events, nexus, portal + arrival gift) and Suspend (free set-aside, countdown, charged auto-play, Accelerate, Rewind, limit of 3).');
+console.log('PASS: Chronospire (34 two-way rooms, levels 46-54, bosses, quiet rooms, events, nexus, portal + arrival gift) and Suspend (free set-aside, countdown, charged auto-play, Accelerate, Rewind, limit of 3).');
 }`);

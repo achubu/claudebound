@@ -74,7 +74,7 @@ function ensureExplore(s = state) {
 
 // --- Placement (deterministic per journey seed) ---
 const poiCache = {};
-function isStartRoom(key) { return activeRegion === 'city' ? key === '0,5' : key === '0,0'; }
+function isStartRoom(key) { return key === regionStartRoom(); }
 function poiEligible(key) {
   const r = rooms[key]; if (!r || isStartRoom(key) || r.relic || chestFor(key)) return false;
   return !roomSpawns(key).some(s => s.boss);
@@ -294,7 +294,7 @@ function openSidePicker(p) {
     const tag = document.createElement('div'); tag.className = 'actions'; tag.textContent = '◇ ' + MERCHANT_ITEMS.side.cost + (owned(id) ? ' · you own ' + owned(id) : ''); el.append(tag); host.append(el);
   });
 }
-function upgradedLevel() { return activeRegion === 'vespera' || activeRegion === 'chronospire' ? 2 : 1; }
+function upgradedLevel() { return WORLD_ORDER.indexOf(activeRegion) >= 2 ? 2 : 1; } // Round 175: from world 3 on
 function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound) && c.level < 3); }
 // Round 69: upgrades are unlimited and priced by the level they reach.
 // The playthrough averaged ~1.5 Shards per regular fight and 150-180 per
@@ -519,7 +519,7 @@ function nexusList() {
 const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Solaris', vespera: 'Vespera' };
 function nexusRoomName(region, key) {
   if (region === activeRegion) return rooms[key] ? rooms[key].name : key;
-  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : null;
+  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : TILE_REGIONS[region] ? TILE_REGIONS[region].rooms : null;
   return (src && src[key] && src[key].name) || ({ elaris: { '0,0': SOLARIS_LAYOUT['0,0'].name, '4,2': SOLARIS_LAYOUT['4,2'].name } }[region] || {})[key] || key;
 }
 function discoverNexus() {

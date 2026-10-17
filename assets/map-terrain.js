@@ -103,7 +103,7 @@ function mapSeam(key, dir) {
   return mapSeamCache[ck].map(c => ({ own: first ? c.a : c.b, meet: c.meet, width: c.width }));
 }
 function mapPathTile(key) {
-  const r = rooms[key]; if ((activeRegion !== 'city' && activeRegion !== 'elaris') || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
+  const r = rooms[key]; if ((activeRegion !== 'city' && activeRegion !== 'elaris' && !TILE_REGIONS[activeRegion]) || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
   const ck = 'paths:' + activeRegion + ':' + key; if (mapTileCache[ck]) return mapTileCache[ck];
   const W = 800, H = 500, C = 8, D = MAP_SEAM_DEPTH, [cx, cy] = r.world, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;

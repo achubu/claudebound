@@ -22,7 +22,7 @@ const BALANCE={
  difficulty:{city:1.1,elaris:1,vespera:1,chronospire:1},
  // Level of a region's start rooms when a room has no hand-set level.
  // Elaris rooms are hand-set to 10-18 and Vespera's to 19-27.
- regionLevelBase:{city:1,elaris:1,vespera:19,chronospire:28},
+ regionLevelBase:{city:1,elaris:1,vespera:37,chronospire:46},
  eliteHp:{city:1.15,elaris:1.25,vespera:1.25,chronospire:1.25},eliteAttack:2,
  bossHp:1,bossAttack:0,         // extra for region bosses only
  miniBossHp:1,miniBossAttack:0, // extra for mini-bosses only
@@ -85,47 +85,47 @@ const ELARIS_ROOMS=Object.fromEntries(Object.entries(SOLARIS_LAYOUT).map(([k,r])
 // ---------------------------------------------------------------------
 const VESPERA_ROOM_DATA={
  '0,0':{name:"Stormglass Landing",exits:{s:"0,1",e:"1,0"},district:2,landmark:"ZONE 1",cityIndex:0},
- '1,0':{name:"Prism Coast",exits:{s:"1,1",w:"0,0"},district:2,landmark:"ZONE 1",cityIndex:1,zone:1,level:19},
- '0,1':{name:"Thunderfen",exits:{n:"0,0",s:"0,2",e:"1,1"},district:2,landmark:"ZONE 1",cityIndex:2,zone:1,level:19},
- '1,1':{name:"Resonant Spires",exits:{n:"1,0",e:"2,1",w:"0,1"},district:2,landmark:"ZONE 1",cityIndex:3,zone:1,level:19},
- '0,2':{name:"Prism Shore Shoals",exits:{n:"0,1",s:"0,3"},district:2,landmark:"ZONE 1",cityIndex:4,zone:1,level:19},
- '2,1':{name:"Prism Shore Causeway",exits:{e:"3,1",w:"1,1"},district:2,landmark:"ZONE 1",cityIndex:5,zone:1,level:19},
- '0,3':{name:"Prism Shore Reach",exits:{n:"0,2",e:"1,3"},district:2,landmark:"ZONE 1",cityIndex:6,zone:1,level:19},
- '3,1':{name:"Brinelight Shoals",exits:{s:"3,2",e:"4,1",w:"2,1"},district:2,landmark:"ZONE 2",cityIndex:7,zone:2,level:20},
- '1,3':{name:"Brinelight Causeway",exits:{e:"2,3",w:"0,3"},district:2,landmark:"ZONE 2",cityIndex:8,zone:2,level:20},
- '4,1':{name:"Brinelight Reach",exits:{e:"5,1",w:"3,1"},district:2,landmark:"ZONE 2",cityIndex:9,zone:2,level:20},
- '3,2':{name:"Brinelight Hollow",exits:{n:"3,1",s:"3,3"},district:2,landmark:"ZONE 2",cityIndex:10,zone:2,level:20},
- '2,3':{name:"Brinelight Flats",exits:{s:"2,4",e:"3,3",w:"1,3"},district:2,landmark:"ZONE 2",cityIndex:11,zone:2,level:20},
- '5,1':{name:"Galefen Shoals",exits:{s:"5,2",e:"6,1",w:"4,1"},district:0,landmark:"ZONE 3",cityIndex:12,zone:3,level:21},
- '3,3':{name:"Galefen Causeway",exits:{n:"3,2",e:"4,3",w:"2,3"},district:0,landmark:"ZONE 3",cityIndex:13,zone:3,level:21},
- '2,4':{name:"Galefen Reach",exits:{n:"2,3",s:"2,5"},district:0,landmark:"ZONE 3",cityIndex:14,zone:3,level:21},
- '6,1':{name:"Galefen Hollow",exits:{e:"7,1",w:"5,1"},district:0,landmark:"ZONE 3",cityIndex:15,zone:3,level:21},
- '5,2':{name:"Galefen Flats",exits:{n:"5,1",s:"5,3"},district:0,landmark:"ZONE 3",cityIndex:16,zone:3,level:21},
- '4,3':{name:"Prism Bazaar West",exits:{e:"5,3",w:"3,3"},district:0,landmark:"ZONE 3",cityIndex:17,zone:3,level:21},
- '2,5':{name:"Galefen Ridge",exits:{n:"2,4",w:"1,5"},district:0,landmark:"ZONE 3",cityIndex:18,zone:3,level:21},
- '7,1':{name:"Galefen Steps",exits:{e:"8,1",w:"6,1"},district:0,landmark:"ZONE 3",cityIndex:19,zone:3,level:21},
- '5,3':{name:"Prism Bazaar East",exits:{n:"5,2",e:"6,3",w:"4,3"},district:0,landmark:"ZONE 3",cityIndex:20,zone:3,level:21},
- '1,5':{name:"Shattered Vault",exits:{e:"2,5"},district:0,landmark:"ZONE 3",cityIndex:21,zone:3,level:21,enemy:["arcSentinel",400,250]},
- '8,1':{name:"Glasswind Shoals",exits:{s:"8,2",w:"7,1"},district:0,landmark:"ZONE 4",cityIndex:22,zone:4,level:22},
- '6,3':{name:"Glasswind Causeway",exits:{s:"6,4",w:"5,3"},district:0,landmark:"ZONE 4",cityIndex:23,zone:4,level:22},
- '8,2':{name:"Glasswind Reach",exits:{n:"8,1",s:"8,3"},district:0,landmark:"ZONE 4",cityIndex:24,zone:4,level:22},
- '6,4':{name:"Glasswind Hollow",exits:{n:"6,3",s:"6,5"},district:0,landmark:"ZONE 4",cityIndex:25,zone:4,level:22},
- '8,3':{name:"Stormforge Gate",exits:{n:"8,2",s:"8,4",e:"9,3"},district:1,landmark:"ZONE 5",cityIndex:26,zone:5,level:23},
- '6,5':{name:"Ion Marsh Shoals",exits:{n:"6,4"},district:1,landmark:"ZONE 5",cityIndex:27,zone:5,level:23},
- '9,3':{name:"Stormforge Works",exits:{s:"9,4",w:"8,3"},district:1,landmark:"ZONE 5",cityIndex:28,zone:5,level:23},
- '8,4':{name:"Stormforge Yard",exits:{n:"8,3",e:"9,4"},district:1,landmark:"ZONE 5",cityIndex:29,zone:5,level:23},
- '9,4':{name:"Stormforge Crucible",exits:{n:"9,3",e:"10,4",w:"8,4"},district:1,landmark:"ZONE 5",cityIndex:30,zone:5,level:23},
- '10,4':{name:"Resonant Shoals",exits:{n:"10,3",s:"10,5",w:"9,4"},district:1,landmark:"ZONE 6",cityIndex:31,zone:6,level:24},
- '10,3':{name:"Resonant Causeway",exits:{n:"10,2",s:"10,4"},district:1,landmark:"ZONE 6",cityIndex:32,zone:6,level:24},
- '10,5':{name:"Resonant Reach",exits:{n:"10,4",s:"10,6"},district:1,landmark:"ZONE 6",cityIndex:33,zone:6,level:24},
- '10,2':{name:"Tempest Shoals",exits:{s:"10,3",e:"11,2"},district:3,landmark:"ZONE 7",cityIndex:34,zone:7,level:25},
- '10,6':{name:"Tempest Causeway",exits:{n:"10,5",w:"9,6"},district:3,landmark:"ZONE 7",cityIndex:35,zone:7,level:25},
- '11,2':{name:"Resonance Chamber",exits:{w:"10,2"},district:3,landmark:"ZONE 7",cityIndex:36,zone:7,level:25,enemy:["resonantPhantom",400,250]},
- '9,6':{name:"Tempest Reach",exits:{e:"10,6",w:"8,6"},district:3,landmark:"ZONE 7",cityIndex:37,zone:7,level:25},
- '8,6':{name:"Tempest Hollow",exits:{e:"9,6",w:"7,6"},district:3,landmark:"ZONE 7",cityIndex:38,zone:7,level:25},
- '7,6':{name:"Stormeye Shoals",exits:{e:"8,6",w:"6,6"},district:3,landmark:"ZONE 8",cityIndex:39,zone:8,level:26},
- '6,6':{name:"Stormeye Causeway",exits:{s:"6,7",e:"7,6"},district:3,landmark:"ZONE 8",cityIndex:40,zone:8,level:26},
- '6,7':{name:"Eye of the Tempest",exits:{n:"6,6"},district:3,landmark:"ZONE 8",cityIndex:41,level:27,enemy:["stormTyrant",400,250]}
+ '1,0':{name:"Prism Coast",exits:{s:"1,1",w:"0,0"},district:2,landmark:"ZONE 1",cityIndex:1,zone:1,level:37},
+ '0,1':{name:"Thunderfen",exits:{n:"0,0",s:"0,2",e:"1,1"},district:2,landmark:"ZONE 1",cityIndex:2,zone:1,level:37},
+ '1,1':{name:"Resonant Spires",exits:{n:"1,0",e:"2,1",w:"0,1"},district:2,landmark:"ZONE 1",cityIndex:3,zone:1,level:37},
+ '0,2':{name:"Prism Shore Shoals",exits:{n:"0,1",s:"0,3"},district:2,landmark:"ZONE 1",cityIndex:4,zone:1,level:37},
+ '2,1':{name:"Prism Shore Causeway",exits:{e:"3,1",w:"1,1"},district:2,landmark:"ZONE 1",cityIndex:5,zone:1,level:37},
+ '0,3':{name:"Prism Shore Reach",exits:{n:"0,2",e:"1,3"},district:2,landmark:"ZONE 1",cityIndex:6,zone:1,level:37},
+ '3,1':{name:"Brinelight Shoals",exits:{s:"3,2",e:"4,1",w:"2,1"},district:2,landmark:"ZONE 2",cityIndex:7,zone:2,level:38},
+ '1,3':{name:"Brinelight Causeway",exits:{e:"2,3",w:"0,3"},district:2,landmark:"ZONE 2",cityIndex:8,zone:2,level:38},
+ '4,1':{name:"Brinelight Reach",exits:{e:"5,1",w:"3,1"},district:2,landmark:"ZONE 2",cityIndex:9,zone:2,level:38},
+ '3,2':{name:"Brinelight Hollow",exits:{n:"3,1",s:"3,3"},district:2,landmark:"ZONE 2",cityIndex:10,zone:2,level:38},
+ '2,3':{name:"Brinelight Flats",exits:{s:"2,4",e:"3,3",w:"1,3"},district:2,landmark:"ZONE 2",cityIndex:11,zone:2,level:38},
+ '5,1':{name:"Galefen Shoals",exits:{s:"5,2",e:"6,1",w:"4,1"},district:0,landmark:"ZONE 3",cityIndex:12,zone:3,level:39},
+ '3,3':{name:"Galefen Causeway",exits:{n:"3,2",e:"4,3",w:"2,3"},district:0,landmark:"ZONE 3",cityIndex:13,zone:3,level:39},
+ '2,4':{name:"Galefen Reach",exits:{n:"2,3",s:"2,5"},district:0,landmark:"ZONE 3",cityIndex:14,zone:3,level:39},
+ '6,1':{name:"Galefen Hollow",exits:{e:"7,1",w:"5,1"},district:0,landmark:"ZONE 3",cityIndex:15,zone:3,level:39},
+ '5,2':{name:"Galefen Flats",exits:{n:"5,1",s:"5,3"},district:0,landmark:"ZONE 3",cityIndex:16,zone:3,level:39},
+ '4,3':{name:"Prism Bazaar West",exits:{e:"5,3",w:"3,3"},district:0,landmark:"ZONE 3",cityIndex:17,zone:3,level:39},
+ '2,5':{name:"Galefen Ridge",exits:{n:"2,4",w:"1,5"},district:0,landmark:"ZONE 3",cityIndex:18,zone:3,level:39},
+ '7,1':{name:"Galefen Steps",exits:{e:"8,1",w:"6,1"},district:0,landmark:"ZONE 3",cityIndex:19,zone:3,level:39},
+ '5,3':{name:"Prism Bazaar East",exits:{n:"5,2",e:"6,3",w:"4,3"},district:0,landmark:"ZONE 3",cityIndex:20,zone:3,level:39},
+ '1,5':{name:"Shattered Vault",exits:{e:"2,5"},district:0,landmark:"ZONE 3",cityIndex:21,zone:3,level:39,enemy:["arcSentinel",400,250]},
+ '8,1':{name:"Glasswind Shoals",exits:{s:"8,2",w:"7,1"},district:0,landmark:"ZONE 4",cityIndex:22,zone:4,level:40},
+ '6,3':{name:"Glasswind Causeway",exits:{s:"6,4",w:"5,3"},district:0,landmark:"ZONE 4",cityIndex:23,zone:4,level:40},
+ '8,2':{name:"Glasswind Reach",exits:{n:"8,1",s:"8,3"},district:0,landmark:"ZONE 4",cityIndex:24,zone:4,level:40},
+ '6,4':{name:"Glasswind Hollow",exits:{n:"6,3",s:"6,5"},district:0,landmark:"ZONE 4",cityIndex:25,zone:4,level:40},
+ '8,3':{name:"Stormforge Gate",exits:{n:"8,2",s:"8,4",e:"9,3"},district:1,landmark:"ZONE 5",cityIndex:26,zone:5,level:41},
+ '6,5':{name:"Ion Marsh Shoals",exits:{n:"6,4"},district:1,landmark:"ZONE 5",cityIndex:27,zone:5,level:41},
+ '9,3':{name:"Stormforge Works",exits:{s:"9,4",w:"8,3"},district:1,landmark:"ZONE 5",cityIndex:28,zone:5,level:41},
+ '8,4':{name:"Stormforge Yard",exits:{n:"8,3",e:"9,4"},district:1,landmark:"ZONE 5",cityIndex:29,zone:5,level:41},
+ '9,4':{name:"Stormforge Crucible",exits:{n:"9,3",e:"10,4",w:"8,4"},district:1,landmark:"ZONE 5",cityIndex:30,zone:5,level:41},
+ '10,4':{name:"Resonant Shoals",exits:{n:"10,3",s:"10,5",w:"9,4"},district:1,landmark:"ZONE 6",cityIndex:31,zone:6,level:42},
+ '10,3':{name:"Resonant Causeway",exits:{n:"10,2",s:"10,4"},district:1,landmark:"ZONE 6",cityIndex:32,zone:6,level:42},
+ '10,5':{name:"Resonant Reach",exits:{n:"10,4",s:"10,6"},district:1,landmark:"ZONE 6",cityIndex:33,zone:6,level:42},
+ '10,2':{name:"Tempest Shoals",exits:{s:"10,3",e:"11,2"},district:3,landmark:"ZONE 7",cityIndex:34,zone:7,level:43},
+ '10,6':{name:"Tempest Causeway",exits:{n:"10,5",w:"9,6"},district:3,landmark:"ZONE 7",cityIndex:35,zone:7,level:43},
+ '11,2':{name:"Resonance Chamber",exits:{w:"10,2"},district:3,landmark:"ZONE 7",cityIndex:36,zone:7,level:43,enemy:["resonantPhantom",400,250]},
+ '9,6':{name:"Tempest Reach",exits:{e:"10,6",w:"8,6"},district:3,landmark:"ZONE 7",cityIndex:37,zone:7,level:43},
+ '8,6':{name:"Tempest Hollow",exits:{e:"9,6",w:"7,6"},district:3,landmark:"ZONE 7",cityIndex:38,zone:7,level:43},
+ '7,6':{name:"Stormeye Shoals",exits:{e:"8,6",w:"6,6"},district:3,landmark:"ZONE 8",cityIndex:39,zone:8,level:44},
+ '6,6':{name:"Stormeye Causeway",exits:{s:"6,7",e:"7,6"},district:3,landmark:"ZONE 8",cityIndex:40,zone:8,level:44},
+ '6,7':{name:"Eye of the Tempest",exits:{n:"6,6"},district:3,landmark:"ZONE 8",cityIndex:41,level:45,enemy:["stormTyrant",400,250]}
 };
 const VESPERA_ROOM_KEYS=Object.keys(VESPERA_ROOM_DATA);
 // Storm-touched creatures. Each borrows an existing sprite (art) and is
@@ -175,6 +175,12 @@ const ELEMENT_ICONS={fire:'♨',water:'≈',earth:'◆',air:'≋',ice:'❄',pois
 const CRYSTAL_RARITIES={uncommon:{name:'Uncommon',chance:.80,shield:0},rare:{name:'Rare',chance:.17,shield:1},epic:{name:'Epic',chance:.03,shield:2}};
 const CRYSTALS={capacity:{name:'Capacity',text:'+1 deck size',icon:'▥'},assault:{name:'Assault',text:'+1 attack-card damage',icon:'⚔'},aegis:{name:'Aegis',text:'+1 defense-card Block',icon:'◇'}};
 let spawnCatalog={},patrolCatalog={},activeRegion='city';
+// Round 175: the worlds in travel order. Tile-built worlds (assets/tile-worlds.js) put their
+// rooms in TILE_REGIONS and insert themselves into WORLD_ORDER.
+const WORLD_ORDER=['city','elaris','vespera','chronospire'];
+const WORLD_NAMES={city:'Neon Aftermath',elaris:'Solaris',vespera:'Vespera',chronospire:'Chronospire'};
+const TILE_REGIONS={};
+function regionStartRoom(region=activeRegion){return region==='city'?'0,5':TILE_REGIONS[region]?TILE_REGIONS[region].start:'0,0'}
 const natureTexture=new Image();
 natureTexture.src='assets/environment/elaris-atlas.webp';
 const originalRoomRender=NeonCity.render;
@@ -246,7 +252,7 @@ rules=function(c){const d=stat(c);return originalRules(c)+(d.freeze?' Freeze: en
 syncTalentVitals=function(heal=false){const old=state.maxHp,next=30+state.playerLevel-1+talentRank('vitality')*2;state.maxHp=next;state.hp=Math.min(next,state.hp+(heal?Math.max(0,next-old):0))};
 gainXP=function(n){const gained=[];if(state.playerLevel>=MAX_PLAYER_LEVEL){state.xp=0;return gained}state.xp+=n;while(state.xp>=100&&state.playerLevel<MAX_PLAYER_LEVEL){state.xp-=100;state.playerLevel++;gained.push(state.playerLevel);syncTalentVitals(false);state.hp=Math.min(state.maxHp,state.hp+5)}if(state.playerLevel>=MAX_PLAYER_LEVEL)state.xp=0;return gained};
 
-function configureRegion(region){activeRegion=region;for(const key of Object.keys(rooms))delete rooms[key];if(region==='city'){Object.assign(rooms,JSON.parse(JSON.stringify(CITY_ROOMS)))}else if(region==='vespera'){Object.assign(rooms,JSON.parse(JSON.stringify(VESPERA_ROOM_DATA)))}else if(region==='chronospire'){Object.assign(rooms,JSON.parse(JSON.stringify(CHRONO_ROOM_DATA)))}else{
+function configureRegion(region){activeRegion=region;for(const key of Object.keys(rooms))delete rooms[key];if(region==='city'){Object.assign(rooms,JSON.parse(JSON.stringify(CITY_ROOMS)))}else if(region==='vespera'){Object.assign(rooms,JSON.parse(JSON.stringify(VESPERA_ROOM_DATA)))}else if(region==='chronospire'){Object.assign(rooms,JSON.parse(JSON.stringify(CHRONO_ROOM_DATA)))}else if(TILE_REGIONS[region]){Object.assign(rooms,JSON.parse(JSON.stringify(TILE_REGIONS[region].rooms)))}else{
  // Round 30: a fresh hand-designed maze (30 rooms), same concept as
  // City's Round 29 rebuild but a different shape (verified via BFS before
  // writing: 30 cells, 39 edges -- 10 more than a tree needs, confirming
@@ -277,7 +283,7 @@ NeonCity.render=function(world,key,r){
  if(natureTexture.complete&&natureTexture.naturalWidth){const v=r.district;ctx.drawImage(natureTexture,(v%2)*natureTexture.width/2,Math.floor(v/2)*natureTexture.height/2,natureTexture.width/2,natureTexture.height/2,0,0,800,500)}
  if(activeRegion==='vespera')canvas.style.filter=VESPERA_GROUND_FILTER;
  if(activeRegion==='chronospire')canvas.style.filter=CHRONO_GROUND_FILTER;
- const title=document.createElement('div');title.className='city-landmark';title.textContent=(activeRegion==='vespera'?'VESPERA · ':activeRegion==='chronospire'?'CHRONOSPIRE · ':'SOLARIS · ')+r.name;world.append(title);
+ const title=document.createElement('div');title.className='city-landmark';title.textContent=(WORLD_NAMES[activeRegion]||'Solaris').toUpperCase()+' · '+r.name;world.append(title);
  for(const [dir,raw]of Object.entries(r.exits)){const to=typeof raw==='string'?raw:raw.to,node=document.createElement('div');node.className='city-exit '+dir;node.textContent=rooms[to].name;world.append(node)}
  for(let i=0;i<4;i++){const wildlife=document.createElement('span');wildlife.className='wildlife';wildlife.textContent=activeRegion==='vespera'?(i%2?'ϟ':'✦'):activeRegion==='chronospire'?(i%2?'⏳':'⚙'):(i%2?'🦋':'✧');wildlife.style.left=(160+i*135)+'px';wildlife.style.top=(140+(i%2)*190)+'px';wildlife.style.animationDelay=(-i*2)+'s';world.append(wildlife)}
 };
@@ -301,9 +307,9 @@ natureTexture.onload=()=>{if(state&&activeRegion!=='city'&&!state.battle)renderW
 const regionDistanceCache={};
 function regionRoomDistances(region){
  if(regionDistanceCache[region])return regionDistanceCache[region];
- const source=region==='city'?CITY_ROOMS:region==='elaris'?ELARIS_ROOMS:region==='vespera'?VESPERA_ROOM_DATA:region==='chronospire'?CHRONO_ROOM_DATA:null;
+ const source=region==='city'?CITY_ROOMS:region==='elaris'?ELARIS_ROOMS:region==='vespera'?VESPERA_ROOM_DATA:region==='chronospire'?CHRONO_ROOM_DATA:TILE_REGIONS[region]?TILE_REGIONS[region].rooms:null;
  if(!source)return{};
- const startKey=region==='city'?'0,5':'0,0',dist={[startKey]:0},queue=[startKey];
+ const startKey=regionStartRoom(region),dist={[startKey]:0},queue=[startKey];
  while(queue.length){
   const cur=queue.shift(),r=source[cur];
   for(const raw of Object.values(r.exits)){
@@ -340,9 +346,10 @@ function enemyLevel(key){
 // first. This is the actual visual answer to "do I need to grind more
 // before this fight."
 function levelColor(enemyLv){const diff=enemyLv-state.playerLevel;return diff<=0?'#5ecb50':diff<=2?'#e0c34f':'#e0524f'}
+function regionTierTypes(key){return activeRegion==='city'?cityTierTypes(key):activeRegion==='vespera'?vesperaTierTypes(key):activeRegion==='chronospire'?chronoTierTypes(key):TILE_REGIONS[activeRegion]?TILE_REGIONS[activeRegion].tierTypes(key):Object.keys(ELARIS_WILDLIFE).filter(id=>!ELARIS_WILDLIFE[id].boss)}
 function roomSpawns(key){
  const cache=activeRegion+':'+key;if(spawnCatalog[cache])return spawnCatalog[cache];
- const rand=seeded(hashSeed(state.seed+cache+'enemies')),r=rooms[key],safe=activeRegion==='city'?key==='0,5':key==='0,0';
+ const rand=seeded(hashSeed(state.seed+cache+'enemies')),r=rooms[key],safe=key===regionStartRoom();
  // A mini-boss or main-boss room is exclusively theirs — no extra random
  // patrols sharing the space, regardless of what the distance-based
  // density formula would otherwise put there.
@@ -350,7 +357,7 @@ function roomSpawns(key){
  // Round 162: Solaris rooms with 2+ patrols carry one fewer than the shared
  // distance formula gives; single-patrol rooms keep theirs (boss rooms too).
  const basePatrols=typeof areaPatrolCount==='function'?areaPatrolCount(key):2;
- const count=safe?0:isBossRoom?1:activeRegion==='elaris'&&basePatrols>1?basePatrols-1:basePatrols,list=[];
+ const count=safe?0:isBossRoom?1:(activeRegion==='elaris'||TILE_REGIONS[activeRegion])&&basePatrols>1?basePatrols-1:basePatrols,list=[];
  // Every room has 4 fixed static building blocks at its corners (see
  // solids() in neon-city.js), leaving only a narrow cross-shaped walkable
  // area — which sharply limits how far spawn "home" sectors can actually
@@ -368,7 +375,7 @@ function roomSpawns(key){
   // Mini-bosses now live in ELARIS_WILDLIFE (so they can reuse a species'
   // sprite sheet), but must never be drawn as an ordinary random patrol —
   // only ever appear via their own designated room slot (r.enemy above).
-  const types=activeRegion==='city'?cityTierTypes(key):activeRegion==='vespera'?vesperaTierTypes(key):activeRegion==='chronospire'?chronoTierTypes(key):Object.keys(ELARIS_WILDLIFE).filter(id=>!ELARIS_WILDLIFE[id].boss);
+  const types=regionTierTypes(key);
   // The region's own main boss (currently only bloomTyrant at Elaris 3,2)
   // keeps its special story-tied slot. Room-designated bosses (r.enemy,
   // e.g. mini-bosses) used to only work in the city — generalized so any
@@ -411,7 +418,7 @@ function patrolFor(s){return patrolCatalog[s.uid]||(patrolCatalog[s.uid]={x:s.x,
 // regions lives specifically in a mini-boss branch room — optional,
 // found only by actually taking the detour, same reward logic as the
 // mini-boss itself rather than scattered along the route you can't avoid.
-function chestFor(key){const designated=activeRegion==='city'?{'3,7':'crystal','8,9':'crystal'}:activeRegion==='elaris'?{'5,2':'potion','8,0':'potion'}:activeRegion==='vespera'?{'1,5':'crystal','11,2':'crystal'}:activeRegion==='chronospire'?{'0,3':'crystal','6,6':'crystal'}:null;if(!designated||!designated[key])return null;return{id:activeRegion+':'+key,x:330,y:180,reward:designated[key]}}
+function chestFor(key){const designated=activeRegion==='city'?{'3,7':'crystal','8,9':'crystal'}:activeRegion==='elaris'?{'5,2':'potion','8,0':'potion'}:activeRegion==='vespera'?{'1,5':'crystal','11,2':'crystal'}:activeRegion==='chronospire'?{'0,3':'crystal','6,6':'crystal'}:TILE_REGIONS[activeRegion]?TILE_REGIONS[activeRegion].chests:null;if(!designated||!designated[key])return null;return{id:activeRegion+':'+key,x:330,y:180,reward:designated[key]}}
 renderWorld=function(){if(!state)return;const r=room(),world=$('world');if(collides(state.pos.x,state.pos.y))state.pos={x:400,y:280};NeonCity.render(world,state.room,r);for(const s of roomSpawns(state.room)){if(!spawnAvailable(s))continue;const p=patrolFor(s),node=document.createElement('div');node.className='enemy-node monster-'+s.type+(s.boss?' boss':'')+(s.elite?' elite':'');node.dataset.spawn=s.uid;node.dataset.name=(s.elite?'★ ELITE · ':'')+(s.element?ELEMENT_ICONS[s.element]+' ':'')+enemies[s.type].name+' · Lv.'+enemyLevel(state.room);node.innerHTML=monsterArt(s.type);node.style.left=p.x+'px';node.style.top=p.y+'px';world.append(node)}if(r.relic&&relicAvailable(r.relic[0])){const q=r.relic,node=document.createElement('div');node.className='relic';node.textContent=q[2];node.dataset.name=q[1];node.style.left=q[3]+'px';node.style.top=q[4]+'px';world.append(node)}const chest=chestFor(state.room);if(chest&&!state.chests.includes(chest.id)){const node=document.createElement('div');node.className='map-chest';node.title=chest.reward==='crystal'?'Hidden loot chest — Upgrade Crystal':'Hidden loot chest';node.style.left=chest.x+'px';node.style.top=chest.y+'px';world.append(node)}if(portalTarget()){const portal=document.createElement('button');portal.className='region-portal';portal.innerHTML='<img class="portal-art" src="assets/environment/elaris-portal.png" alt=""><small>'+portalTarget().label+'</small>';portal.onclick=travelPortal;world.append(portal)}const player=document.createElement('div');player.id='player';player.style.left=state.pos.x+'px';player.style.top=state.pos.y+'px';player.innerHTML='<span class="hero-sprite"></span>';world.append(player);animateHero(0,false);renderHUD()};
 animateEnemy=function(dt){if(!state||state.battle||!$('menuOverlay').classList.contains('hidden'))return;for(const s of roomSpawns(state.room)){if(!spawnAvailable(s))continue;const p=patrolFor(s),speed=s.boss?8:14;p.turn-=dt;if(p.turn<0){p.angle+=.8;p.turn=3}const nx=p.x+Math.cos(p.angle)*speed*dt,ny=p.y+Math.sin(p.angle)*speed*dt;if(walkable(state.room,nx,ny,26)&&Math.hypot(nx-s.x,ny-s.y)<75){p.x=nx;p.y=ny}else p.angle+=1.8;const node=document.querySelector('[data-spawn="'+s.uid+'"]');if(node){node.style.left=p.x+'px';node.style.top=p.y+'px';node.querySelector('.monster-sprite')?.style.setProperty('--enemy-facing',Math.cos(p.angle)<0?-1:1)}if(Math.hypot(state.pos.x-p.x,state.pos.y-p.y)<(s.boss?58:43)){startBattle(s.uid);if(state.battle)return}}};
 checkWorldInteractions=function(){if(state.battle)return;const q=room().relic;if(q&&relicAvailable(q[0])&&Math.hypot(state.pos.x-q[3],state.pos.y-q[4])<48)collectRelic(q);const chest=chestFor(state.room);if(chest&&!state.chests.includes(chest.id)&&Math.hypot(state.pos.x-chest.x,state.pos.y-chest.y)<38){
@@ -426,13 +433,13 @@ checkWorldInteractions=function(){if(state.battle)return;const q=room().relic;if
   return;
  }
  state.chests.push(chest.id);if(chest.reward==='crystal'){setMaterials(materials()+1);toast('Hidden loot chest: an Upgrade Crystal!')}else{state.potions+=1;toast('Hidden loot chest: a small healing potion!')}save();renderWorld()}};
+// Round 175: portals link each world's boss room to the next world's start, in WORLD_ORDER.
+const WORLD_BOSS_ROOMS={city:['8,4','thornWarden'],elaris:[SOLARIS_BOSS_ROOM,'bloomTyrant'],vespera:['6,7','stormTyrant'],chronospire:['8,7','chronarch']};
+const PORTAL_LABELS={elaris:'Enter Solaris',chronospire:'Step through the rift to Chronospire'};
 function portalTarget(){
- if(activeRegion==='city'&&state.room==='8,4'&&state.bosses.includes('thornWarden'))return{region:'elaris',room:'0,0',label:'Enter Solaris'};
- if(activeRegion==='elaris'&&state.room==='0,0')return{region:'city',room:'8,4',label:'Return to city'};
- if(activeRegion==='elaris'&&state.room===SOLARIS_BOSS_ROOM&&state.bosses.includes('bloomTyrant'))return{region:'vespera',room:'0,0',label:'Enter Vespera'};
- if(activeRegion==='vespera'&&state.room==='0,0')return{region:'elaris',room:SOLARIS_BOSS_ROOM,label:'Return to Solaris'};
- if(activeRegion==='vespera'&&state.room==='6,7'&&state.bosses.includes('stormTyrant'))return{region:'chronospire',room:'0,0',label:'Step through the rift to Chronospire'};
- if(activeRegion==='chronospire'&&state.room==='0,0')return{region:'vespera',room:'6,7',label:'Return to Vespera'};
+ const i=WORLD_ORDER.indexOf(activeRegion),here=WORLD_BOSS_ROOMS[activeRegion],next=WORLD_ORDER[i+1],prev=WORLD_ORDER[i-1];
+ if(here&&next&&state.room===here[0]&&state.bosses.includes(here[1]))return{region:next,room:regionStartRoom(next),label:PORTAL_LABELS[next]||'Enter '+WORLD_NAMES[next]};
+ if(prev&&state.room===regionStartRoom())return{region:prev,room:WORLD_BOSS_ROOMS[prev][0],label:prev==='city'?'Return to city':'Return to '+WORLD_NAMES[prev]};
  return null;
 }
 function travelPortal(){
@@ -440,6 +447,7 @@ function travelPortal(){
  state.region=target.region;configureRegion(target.region);state.room=target.room;state.pos={x:400,y:300};state.visited=state.regionVisits[target.region]||[target.room];state.regionVisits[target.region]=state.visited;
  if(target.region==='elaris'&&!state.elarisGift){state.elarisGift=true;state.pool.push(make('counter'));toast('Solaris attunement: +4 deck capacity and a Prismatic Counter. Open Deck to equip it.')}
  if(target.region==='vespera')toast('Vespera · Stormglass Reach. Your expanded deck capacity carries forward.');
+ if(TILE_REGIONS[target.region]&&TILE_REGIONS[target.region].arrive)TILE_REGIONS[target.region].arrive();
  if(target.region==='chronospire'&&typeof chronoArrival==='function')chronoArrival();
  save();renderWorld();
 }
@@ -511,9 +519,9 @@ else if(b.lootType==='potion'){state.potions++;b.potionDrop=true}
 else if(b.lootType==='crystal'){setMaterials(materials()+1)}
 else if(b.lootType==='soulbound'){b.reward=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(b.reward)}
 else{b.thief=LOOT_THIEVES[Math.floor(Math.random()*LOOT_THIEVES.length)]}
-b.special=[];if(b.id==='thornWarden'&&!state.iceGift){state.iceGift=true;const ice=make('glacial');state.pool.push(ice);b.special.push('Glacial Covenant: guaranteed Soulbound Ice card. The Solaris portal is now open!')}else if(b.id==='bloomTyrant'&&!state.stormGift){state.stormGift=true;state.pool.push(make('stormglass'));b.special.push('Stormglass Covenant: guaranteed Soulbound Lightning card. The Vespera portal is now open!')}else if(b.enemy.boss&&b.lootType!=='soulbound'&&Math.random()<.10){const soul=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(soul);b.special.push('Soulbound boss card: '+stat(soul).name)}
+b.special=[];if(b.id==='thornWarden'&&!state.iceGift){state.iceGift=true;const ice=make('glacial');state.pool.push(ice);b.special.push('Glacial Covenant: guaranteed Soulbound Ice card. The Solaris portal is now open!')}else if(b.id==='bloomTyrant'&&!state.stormGift){state.stormGift=true;state.pool.push(make('stormglass'));b.special.push('Stormglass Covenant: guaranteed Soulbound Lightning card. The portal to the Sky Isles is now open!')}else if(b.enemy.boss&&b.lootType!=='soulbound'&&Math.random()<.10){const soul=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(soul);b.special.push('Soulbound boss card: '+stat(soul).name)}
 if(isMiniBoss)dropMiniBossCard(b);
-if(b.id==='stormTyrant')b.special.push('The Tempest Colossus falls and Vespera\'s storm breaks. A rift to a fourth world, Chronospire, opens in the Eye of the Tempest.');
+if(b.id==='stormTyrant')b.special.push('The Tempest Colossus falls and Vespera\'s storm breaks. A rift to the last world, Chronospire, opens in the Eye of the Tempest.');
 // Mini-bosses always drop exactly one Upgrade Crystal on defeat — true
 // bosses can only ever be defeated once each (state.bosses), so this is a
 // reliable one-time reward per mini-boss, never a farmable loop. The loot-
@@ -523,7 +531,7 @@ if(b.id==='stormTyrant')b.special.push('The Tempest Colossus falls and Vespera\'
 if(isMiniBoss){setMaterials(materials()+1);b.special.push('Mini-boss defeated: guaranteed Upgrade Crystal! ('+materials()+' total)')}
 if(b.enemy.elite&&Math.random()<ELITE_AETHERLINK_ODDS){const type=Object.keys(CRYSTALS)[Math.floor(Math.random()*3)],crystal=rollUpgradeCrystal(type);state.device.crystals.push(crystal);b.crystalDrop=crystal.uid;b.special.push(crystalLabel(crystal)+' crystal found! Slot it into the Aetherlink.')}b.levels=levels;b.logs.push(b.lootType==='soulbound'?'Loot chest: Soulbound card!':b.lootType==='potion'?'Loot chest: small healing potion.':b.lootType==='crystal'?'Loot chest: an Upgrade Crystal! ('+materials()+' total)':b.lootType==='empty'?'Loot chest: empty — '+b.thief+' bolted off with everything inside.':'Loot chest: one random card added to your collection.')};
 const baseLoseBattle=loseBattle;
-loseBattle=function(){const b=state.battle;baseLoseBattle();state.hp=state.maxHp;state.room=activeRegion!=='city'?'0,0':'0,5';state.pos={x:400,y:300};b.lastRegion=activeRegion;if(!active().length&&state.pool.length)state.deck=[state.pool[0].uid];b.defeatSummary={hp:state.hp,maxHp:state.maxHp,location:room()?.name||'safe zone',deckCount:state.deck.length}};
+loseBattle=function(){const b=state.battle;baseLoseBattle();state.hp=state.maxHp;state.room=regionStartRoom();state.pos={x:400,y:300};b.lastRegion=activeRegion;if(!active().length&&state.pool.length)state.deck=[state.pool[0].uid];b.defeatSummary={hp:state.hp,maxHp:state.maxHp,location:room()?.name||'safe zone',deckCount:state.deck.length}};
 const baseRenderBattle=renderBattle;
 renderBattle=function(){const b=state.battle;if(!b)return;if(b.phase==='reward'){const m=$('battleModal');
 if(!b.chestOpened){
@@ -554,8 +562,8 @@ if(tools.innerHTML)$('battleModal').prepend(tools);if($('overdrive'))$('overdriv
 newGame=function(){uid=1;const starterSeen=new Set();const pool=['strike','strike','guard','guard','focus','mend'].map(id=>{const first=!starterSeen.has(id);starterSeen.add(id);return make(id,0,first)});state={version:EXPANSION_VERSION,name:'Adventurer',characterId:'protagonist',seed:Math.floor(Math.random()*4294967295),region:'city',regionVisits:{city:['0,5'],elaris:['0,0']},playerLevel:1,xp:0,hp:30,maxHp:30,gold:0,potions:0,pool,deck:pool.map(c=>c.uid),room:'0,5',pos:{x:400,y:300},visited:['0,5'],relics:[],cleared:[],bosses:[],cooldowns:{},fight:0,wins:0,talents:{},battle:null,chests:[],device:{crystals:[],slots:[null,null,null,null,null],next:1}};state.visited=state.regionVisits.city;configureRegion('city');$('startOverlay').classList.add('hidden');$('menuOverlay').classList.add('hidden');$('battleOverlay').classList.add('hidden');setMaterials(0);save();renderWorld()};
 save=function(){if(!state)return;state.regionVisits[state.region]=state.visited;localStorage.setItem('aethercede-expansion-v3',JSON.stringify(state))};
 load=function(){try{const parsed=JSON.parse(localStorage.getItem('aethercede-expansion-v3'));if(!parsed||parsed.version!==3)throw Error('No save');const battle=parsed.battle;parsed.battle=null;validateImport(parsed);parsed.battle=battle;restoreGame(parsed);if(battle){$('battleOverlay').classList.remove('hidden');renderBattle()}return true}catch(e){toast('No valid expansion save found. Begin a new journey.');return false}};
-/* Round 173: each region checks its own rooms (Chronospire used to be checked against Solaris's). Later worlds extend this. */function regionRoomKeys(region){return region==='city'?Object.keys(CITY_ROOMS):region==='vespera'?VESPERA_ROOM_KEYS:region==='chronospire'&&typeof CHRONO_ROOM_DATA!=='undefined'?Object.keys(CHRONO_ROOM_DATA):ELARIS_ROOM_KEYS}
-function validateImport(s){/* Round 149: world 2 became Solaris on a new grid; a save standing in an old Elaris room resumes at Dawnfire Gate. */if(s&&s.region==='elaris'&&typeof s.room==='string'&&!ELARIS_ROOM_KEYS.includes(s.room)){s.room='0,0';s.pos={x:400,y:250}}if(s&&s.miniDrops!==undefined&&(!Array.isArray(s.miniDrops)||s.miniDrops.some(id=>!Object.hasOwn(MINI_BOSS_CARDS,id))))throw Error('Invalid mini-boss drop record.');if(!s||s.version!==3||!['city','elaris','vespera','chronospire'].includes(s.region)||!Number.isInteger(s.seed)||s.seed<0||!Array.isArray(s.pool)||s.pool.length>10000||!Array.isArray(s.deck)||s.deck.length>30)throw Error('Unsupported or malformed save.');const ids=new Set();for(const c of s.pool){if(!c||!Object.hasOwn(defs,c.id)||!Number.isInteger(c.uid)||c.uid<1||ids.has(c.uid)||!Number.isInteger(c.level)||c.level<0||c.level>3||!Number.isInteger(c.uses)||c.uses<0||c.uses>((defs[c.id].soulbound||c.soulbound)?USES*2**Math.min(2,c.level):USES*2))throw Error('Invalid card data.');ids.add(c.uid);c.soulbound=defs[c.id].soulbound?true:!!c.soulbound}if(new Set(s.deck).size!==s.deck.length||s.deck.some(id=>!ids.has(id)))throw Error('Invalid deck.');if(!Number.isInteger(s.playerLevel)||s.playerLevel<1||s.playerLevel>MAX_PLAYER_LEVEL||!Number.isFinite(s.hp)||s.hp<0||s.hp>1000||!Number.isFinite(s.maxHp)||s.maxHp<1||s.maxHp>1000||!Number.isFinite(s.xp)||s.xp<0||s.xp>=100||!Number.isInteger(s.potions)||s.potions<0)throw Error('Invalid player stats.');const validRooms=regionRoomKeys(s.region);if(!validRooms.includes(s.room)||!s.pos||!Number.isFinite(s.pos.x)||!Number.isFinite(s.pos.y))throw Error('Invalid room.');for(const field of ['visited','relics','cleared','bosses','chests'])if(!Array.isArray(s[field])||s[field].some(x=>typeof x!=='string'||x.length>100||/[<>]/.test(x)))throw Error('Invalid world data.');if(!s.regionVisits||!Array.isArray(s.regionVisits.city)||!Array.isArray(s.regionVisits.elaris)||!s.cooldowns||!s.talents||!s.device||!Array.isArray(s.device.crystals)||s.device.crystals.length>1000||!Array.isArray(s.device.slots)||s.device.slots.length!==5)throw Error('Invalid progression data.');for(const [id,rank] of Object.entries(s.talents)){const node=Object.values(TALENT_BRANCHES).flatMap(b=>b.nodes).find(n=>n.id===id);if(!node||!Number.isInteger(rank)||rank<0||rank>node.max)throw Error('Invalid talent.')}const crystalIds=new Set();for(const c of s.device.crystals){if(!c||!Object.hasOwn(CRYSTALS,c.type)||typeof c.uid!=='string'||!/^crystal-\d+$/.test(c.uid)||crystalIds.has(c.uid))throw Error('Invalid crystal.');if(c.rarity!==undefined&&!Object.hasOwn(CRYSTAL_RARITIES,c.rarity))throw Error('Invalid crystal rarity.');crystalIds.add(c.uid)}if(s.device.slots.some(id=>id!==null&&!crystalIds.has(id))||new Set(s.device.slots.filter(Boolean)).size!==s.device.slots.filter(Boolean).length)throw Error('Invalid sockets.');if(s.battle)throw Error('Save transfer is available between encounters only.');s.name='Adventurer';return s}
+/* Round 173: each region checks its own rooms (Chronospire used to be checked against Solaris's). Later worlds extend this. */function regionRoomKeys(region){return region==='city'?Object.keys(CITY_ROOMS):region==='vespera'?VESPERA_ROOM_KEYS:region==='chronospire'&&typeof CHRONO_ROOM_DATA!=='undefined'?Object.keys(CHRONO_ROOM_DATA):TILE_REGIONS[region]?Object.keys(TILE_REGIONS[region].rooms):ELARIS_ROOM_KEYS}
+function validateImport(s){/* Round 149: world 2 became Solaris on a new grid; a save standing in an old Elaris room resumes at Dawnfire Gate. */if(s&&s.region==='elaris'&&typeof s.room==='string'&&!ELARIS_ROOM_KEYS.includes(s.room)){s.room='0,0';s.pos={x:400,y:250}}if(s&&s.miniDrops!==undefined&&(!Array.isArray(s.miniDrops)||s.miniDrops.some(id=>!Object.hasOwn(MINI_BOSS_CARDS,id))))throw Error('Invalid mini-boss drop record.');if(!s||s.version!==3||!WORLD_ORDER.includes(s.region)||!Number.isInteger(s.seed)||s.seed<0||!Array.isArray(s.pool)||s.pool.length>10000||!Array.isArray(s.deck)||s.deck.length>30)throw Error('Unsupported or malformed save.');const ids=new Set();for(const c of s.pool){if(!c||!Object.hasOwn(defs,c.id)||!Number.isInteger(c.uid)||c.uid<1||ids.has(c.uid)||!Number.isInteger(c.level)||c.level<0||c.level>3||!Number.isInteger(c.uses)||c.uses<0||c.uses>((defs[c.id].soulbound||c.soulbound)?USES*2**Math.min(2,c.level):USES*2))throw Error('Invalid card data.');ids.add(c.uid);c.soulbound=defs[c.id].soulbound?true:!!c.soulbound}if(new Set(s.deck).size!==s.deck.length||s.deck.some(id=>!ids.has(id)))throw Error('Invalid deck.');if(!Number.isInteger(s.playerLevel)||s.playerLevel<1||s.playerLevel>MAX_PLAYER_LEVEL||!Number.isFinite(s.hp)||s.hp<0||s.hp>1000||!Number.isFinite(s.maxHp)||s.maxHp<1||s.maxHp>1000||!Number.isFinite(s.xp)||s.xp<0||s.xp>=100||!Number.isInteger(s.potions)||s.potions<0)throw Error('Invalid player stats.');const validRooms=regionRoomKeys(s.region);if(!validRooms.includes(s.room)||!s.pos||!Number.isFinite(s.pos.x)||!Number.isFinite(s.pos.y))throw Error('Invalid room.');for(const field of ['visited','relics','cleared','bosses','chests'])if(!Array.isArray(s[field])||s[field].some(x=>typeof x!=='string'||x.length>100||/[<>]/.test(x)))throw Error('Invalid world data.');if(!s.regionVisits||!Array.isArray(s.regionVisits.city)||!Array.isArray(s.regionVisits.elaris)||!s.cooldowns||!s.talents||!s.device||!Array.isArray(s.device.crystals)||s.device.crystals.length>1000||!Array.isArray(s.device.slots)||s.device.slots.length!==5)throw Error('Invalid progression data.');for(const [id,rank] of Object.entries(s.talents)){const node=Object.values(TALENT_BRANCHES).flatMap(b=>b.nodes).find(n=>n.id===id);if(!node||!Number.isInteger(rank)||rank<0||rank>node.max)throw Error('Invalid talent.')}const crystalIds=new Set();for(const c of s.device.crystals){if(!c||!Object.hasOwn(CRYSTALS,c.type)||typeof c.uid!=='string'||!/^crystal-\d+$/.test(c.uid)||crystalIds.has(c.uid))throw Error('Invalid crystal.');if(c.rarity!==undefined&&!Object.hasOwn(CRYSTAL_RARITIES,c.rarity))throw Error('Invalid crystal rarity.');crystalIds.add(c.uid)}if(s.device.slots.some(id=>id!==null&&!crystalIds.has(id))||new Set(s.device.slots.filter(Boolean)).size!==s.device.slots.filter(Boolean).length)throw Error('Invalid sockets.');if(s.battle)throw Error('Save transfer is available between encounters only.');s.name='Adventurer';return s}
 function normalizeElementalCards(s){
  const legacy=s.pool.filter(c=>/^counter_(fire|water|earth|air)$/.test(c.id));
  if(!legacy.length)return false;
@@ -593,7 +601,7 @@ async function importSave(file){try{if(!file||file.size>2000000)throw Error('Cho
 function showMainMenu(){keys={};openMenu('<div class="eyebrow">AETHERCEDE</div><h2>Main menu</h2><p>Save transfer is available between encounters.</p><button id="exportSave">Export save file</button> <button id="importSave">Import save file</button><p><button id="backToGame">Return to game</button> <button id="restartJourney" class="danger">New journey</button></p>');$('exportSave').onclick=exportSave;$('importSave').onclick=()=>$('saveFile').click();$('backToGame').onclick=closeMenu;$('restartJourney').onclick=()=>{if(confirm('Start a new journey? Export your current save first if you want to keep it.'))newGame()}}
 const baseShowCharacter=showCharacter;
 showCharacter=function(){baseShowCharacter();const portrait=document.querySelector('.sheet-portrait');if(portrait){portrait.src='assets/characters/character-portal.webp';portrait.style.maxHeight='none';portrait.style.aspectRatio='16 / 9';portrait.style.objectFit='cover'}const info=document.createElement('p');info.className='notice';info.textContent='Aetherlink: '+deviceSlots()+' sockets · Critical strike '+talentRank('critical')*3+'% · Every level grants +1 max HP and heals 5 HP.';$('menuModal').append(info)};
-objective=function(){if(activeRegion==='chronospire')return state.bosses.includes('chronarch')?'All four worlds are conquered. Time flows again in Chronospire.':'Climb the Chronospire to The Last Second and defeat the Chronarch. Use ⏳ Suspend to set up free plays.';if(activeRegion==='vespera')return state.bosses.includes('stormTyrant')?'Vespera\'s storm has broken. A time rift hums in the Eye of the Tempest — step through to Chronospire.':'Cross the storm to the Eye of the Tempest and defeat the Tempest Colossus. Reserve Prismatic Counter for charged strikes.';if(activeRegion==='elaris')return state.bosses.includes('bloomTyrant')?'The Vespera portal is open in the Solar Crown.':'Defeat the Sun Pharaoh in the Solar Crown. Reserve your counter for charged strikes.';if(state.bosses.includes('thornWarden'))return 'The Warden portal is open. Return to the Warden\'s Crown in the Crystal Citadel to enter Solaris.';if(!hasRelic('ember'))return state.room==='0,5'?'Head east into the city. The Ember Sigil that opens the Crystal Citadel is in the Moon Temple (Lantern Quarter). Beat its guardian to claim it.':'Find the Moon Temple in the Lantern Quarter, beat its guardian and take the Ember Sigil.';if(!hasRelic('boots'))return 'The Briarstep Boots are in the Statue Garden, the south-west corner of the park. Clear its guards to claim them; they open the Junkyard Lots.';if(!hasRelic('lens'))return 'Climb the Billboard Steps above the Holo Stage and clear its guards for the Moon Lens; it opens the park\'s Lake Bridge.';return 'Defeat the Thorn Warden at the Warden\'s Crown, high in the Crystal Citadel, to unlock Ice and Solaris.'};
+objective=function(){if(activeRegion==='chronospire')return state.bosses.includes('chronarch')?'All four worlds are conquered. Time flows again in Chronospire.':'Climb the Chronospire to The Last Second and defeat the Chronarch. Use ⏳ Suspend to set up free plays.';if(activeRegion==='vespera')return state.bosses.includes('stormTyrant')?'Vespera\'s storm has broken. A time rift hums in the Eye of the Tempest — step through to Chronospire.':'Cross the storm to the Eye of the Tempest and defeat the Tempest Colossus. Reserve Prismatic Counter for charged strikes.';if(activeRegion==='elaris')return state.bosses.includes('bloomTyrant')?'The portal to the Sky Isles is open in the Solar Crown.':'Defeat the Sun Pharaoh in the Solar Crown. Reserve your counter for charged strikes.';if(state.bosses.includes('thornWarden'))return 'The Warden portal is open. Return to the Warden\'s Crown in the Crystal Citadel to enter Solaris.';if(!hasRelic('ember'))return state.room==='0,5'?'Head east into the city. The Ember Sigil that opens the Crystal Citadel is in the Moon Temple (Lantern Quarter). Beat its guardian to claim it.':'Find the Moon Temple in the Lantern Quarter, beat its guardian and take the Ember Sigil.';if(!hasRelic('boots'))return 'The Briarstep Boots are in the Statue Garden, the south-west corner of the park. Clear its guards to claim them; they open the Junkyard Lots.';if(!hasRelic('lens'))return 'Climb the Billboard Steps above the Holo Stage and clear its guards for the Moon Lens; it opens the park\'s Lake Bridge.';return 'Defeat the Thorn Warden at the Warden\'s Crown, high in the Crystal Citadel, to unlock Ice and Solaris.'};
 function relicName(id){for(const r of Object.values(rooms))if(r.relic&&r.relic[0]===id)return r.relic[2]+' '+r.relic[1];return id}
 // The map now reads as an actually-drawn map, not a data grid: only areas
 // you've genuinely visited render at all (a real fog of war — the OLD
@@ -679,7 +687,7 @@ showMap=function(){
  const allChests=keys.map(chestFor).filter(Boolean),chestsFound=allChests.filter(c=>state.chests.includes(c.id)).length;
  const allRelics=Object.values(rooms).filter(r=>r.relic&&r.relic[0]!=='material'),relicsFound=state.relics.length;
  const pct=(()=>{const parts=[discovered/keys.length];if(allChests.length)parts.push(chestsFound/allChests.length);if(allRelics.length)parts.push(relicsFound/allRelics.length);return Math.round(parts.reduce((x,y)=>x+y,0)/parts.length*100)})(); // Round 75: worlds without relics no longer start at 34%
- openMenu('<div class="eyebrow">'+(activeRegion==='city'?'NEON AFTERMATH':activeRegion==='vespera'?'VESPERA':activeRegion==='chronospire'?'CHRONOSPIRE':'SOLARIS')+' · '+pct+'% COMPLETE</div><h2>Exploration map</h2><div class="map-scroll"><div class="map-canvas" style="width:'+Math.round((maxX-minX+1.8)*MAP_CELL_W)+'px;height:'+Math.round((maxY-minY+1.8)*MAP_CELL_H)+'px"><svg class="map-links" viewBox="0 0 100 100" preserveAspectRatio="none">'+linksSVG.join('')+'</svg>'+cellsHTML.join('')+'</div></div><p>'+discovered+' areas explored · '+chestsFound+' hidden chest'+(chestsFound===1?'':'s')+' found · '+relicsFound+' relic'+(relicsFound===1?'':'s')+' claimed.</p><button id="mapReturn">Return</button>');
+ openMenu('<div class="eyebrow">'+(WORLD_NAMES[activeRegion]||'Solaris').toUpperCase()+' · '+pct+'% COMPLETE</div><h2>Exploration map</h2><div class="map-scroll"><div class="map-canvas" style="width:'+Math.round((maxX-minX+1.8)*MAP_CELL_W)+'px;height:'+Math.round((maxY-minY+1.8)*MAP_CELL_H)+'px"><svg class="map-links" viewBox="0 0 100 100" preserveAspectRatio="none">'+linksSVG.join('')+'</svg>'+cellsHTML.join('')+'</div></div><p>'+discovered+' areas explored · '+chestsFound+' hidden chest'+(chestsFound===1?'':'s')+' found · '+relicsFound+' relic'+(relicsFound===1?'':'s')+' claimed.</p><button id="mapReturn">Return</button>');
  $('mapReturn').onclick=closeMenu;
  const here=document.querySelector&&document.querySelector('.map-canvas .current-room');if(here&&here.scrollIntoView)here.scrollIntoView({block:'center',inline:'center'});
 };

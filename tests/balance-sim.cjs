@@ -54,11 +54,13 @@ function deckFor(region, L) {
 // Round 75: fights see the progress a player would have by then — bosses
 // already beaten (side deck capacity grows with them) and the side cards
 // that drop along the way. Earlier sims always used capacity 2 and the kit.
-const PRIOR_BOSSES = { city: [], elaris: ['moonKnight', 'crownSentinel', 'thornWarden'], vespera: ['moonKnight', 'crownSentinel', 'thornWarden', 'tidewardenElaris', 'galeSovereign', 'bloomTyrant'], chronospire: ['moonKnight', 'crownSentinel', 'thornWarden', 'tidewardenElaris', 'galeSovereign', 'bloomTyrant', 'arcSentinel', 'resonantPhantom', 'stormTyrant'] };
-const PRIOR_SIDE = { city: [], elaris: ['restore', 'anchor'], vespera: ['restore', 'anchor', 'ground', 'mirror'], chronospire: ['restore', 'anchor', 'ground', 'mirror', 'phase'] };
+// Round 175: six worlds. Each world's fights see every boss of the worlds before it.
+const WORLD_BOSS_SETS = { city: ['moonKnight', 'crownSentinel', 'thornWarden'], elaris: ['tidewardenElaris', 'galeSovereign', 'bloomTyrant'], sky: ['stormbellWarden', 'featherMatriarch', 'zenithRoc'], wilds: ['tideboundWarden', 'galeSovereignElaris', 'elarisTyrant'], vespera: ['arcSentinel', 'resonantPhantom', 'stormTyrant'], chronospire: [] };
+const PRIOR_BOSSES = {}; { let seen = []; for (const r of Object.keys(WORLD_BOSS_SETS)) { PRIOR_BOSSES[r] = [...seen]; seen = seen.concat(WORLD_BOSS_SETS[r]); } }
+const PRIOR_SIDE = { city: [], elaris: ['restore', 'anchor'], sky: ['restore', 'anchor', 'ground', 'mirror'], wilds: ['restore', 'anchor', 'ground', 'mirror', 'phase'], vespera: ['restore', 'anchor', 'ground', 'mirror', 'phase'], chronospire: ['restore', 'anchor', 'ground', 'mirror', 'phase'] };
 const { context, run } = makeContext();
 run(BOT);if(process.env.NO_SIDE)run('globalThis.NO_SIDE=1');if(process.env.NO_SUSPEND)run('globalThis.NO_SUSPEND=1');
-const REGIONS = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera', chronospire: 'Chronospire' };
+const REGIONS = { city: 'Neon Aftermath', elaris: 'Solaris', sky: 'Sky Isles', wilds: 'Elaris', vespera: 'Vespera', chronospire: 'Chronospire' };
 function evaluate(over, only = null, quiet = false) {
 const log = quiet ? () => {} : console.log;
 run(`Object.assign(BALANCE, JSON.parse(JSON.stringify(globalThis.__BASE_BALANCE ||= JSON.parse(JSON.stringify(BALANCE)))), ${JSON.stringify(over)})`);
@@ -109,6 +111,6 @@ return { report, failures };
 }
 module.exports = { evaluate, run, setM: n => { M = n } };
 if (require.main === module) {
-  const r = evaluate(overrides);
+  const r = evaluate(overrides, process.env.ONLY_REGIONS ? { regions: process.env.ONLY_REGIONS.split(',') } : null);
   require('node:fs').writeFileSync(require('node:path').join(__dirname, 'balance-sim-results.json'), JSON.stringify({ M, overrides, report: r.report }, null, 1));
 }

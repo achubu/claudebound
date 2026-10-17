@@ -3496,6 +3496,62 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 175: the Sky Isles and Elaris join the journey (worlds 3 and 4)
+
+- **Six worlds**, in travel order: Neon Aftermath, Solaris, **Sky Isles** (`sky`), **Elaris**
+  (`wilds`), Vespera, Chronospire. Each final boss room's portal leads to the next world's
+  start, and each start leads back. Solaris's Solar Crown now opens to the Sky Isles, and
+  Vespera's start returns to Elaris.
+- **Vespera and Chronospire move up two worlds:** their rooms are 18 levels higher (Vespera
+  37-45, Chronospire 46-54).
+- **New `assets/tile-worlds.js`** (after `chronospire.js`; data in `assets/sky-data.js` and
+  `assets/wilds-data.js` from Round 174) does the following:
+  - Runs Solaris's painted-world engine once per world: walk mask, loose crossings and the
+    flipped tile per room.
+  - Sets up both rosters, rooms, portals, quiet rooms, Nexus Waypoints, lore, events and the
+    objective.
+- **Sky Isles roster** (sprites borrowed and tinted sky-blue until art arrives):
+
+  | Enemy | Element | Affliction |
+  |---|---|---|
+  | Sunfeather Drake | fire | Crush |
+  | Cloud Wisp | water | Static |
+  | Gale Harpy | air | Barrage |
+  | Thunderhorn Ram | earth | Rend |
+  | The Stormbell Warden (mini-boss, Stormbell Tower) | air | Shackle + Static |
+  | The Featherfall Matriarch (mini-boss, Featherfall Roost) | water | Siphon + Fog |
+  | **The Zenith Roc** (final boss, The Eye of the Sky) | air/fire | Empower, Barrage, Enfeeble |
+
+  - Events: Updraft Well, Abandoned Aerie, Singing Chimes, Starwell.
+  - Lore: Wind Chimes.
+- **Elaris roster:** the forest creatures come home under their original names and sprites,
+  untinted:
+  - Cinder Fox, Blight Antler, Drowned Heron, Storm Moth.
+  - The Tidebound Warden (Drowned Weir) and The Gale Sovereign (Stormwing Canopy).
+  - **The Bloom Tyrant** (Elderbloom Sanctuary).
+  - They have their own ids (`elarisFox`, `tideboundWarden`, `elarisTyrant`, ...), so
+    Solaris's renamed desert roster keeps its ids.
+  - Events: the forest set (Moonlit Spring, Wounded Ranger, Glowing Seedpod, Vines).
+  - Lore: Elder Stones.
+- **World registry in `expansion.js`:** `WORLD_ORDER`, `WORLD_NAMES`, `TILE_REGIONS`,
+  `regionStartRoom()`, `regionTierTypes()` and `WORLD_BOSS_ROOMS`. Portals, start rooms,
+  spawns, chests, saves, distances, titles and the exploration map read these instead of
+  per-world `if` chains. `regionIndex()` (`aether-deck.js`) is the world's place in
+  `WORLD_ORDER`. Affliction strength and side-card tiers follow it, and Dispel damage grows
+  4 + 3 per world.
+- **Deck slots:** the Zenith Roc and the Bloom Tyrant each add a deck slot (`WORLD_BOSSES`).
+- **Balance:** this round ships starting values. The Sky Isles take Vespera's old
+  multipliers and Elaris takes Chronospire's. `tests/balance-sim.cjs` now covers all six
+  worlds (`ONLY_REGIONS=sky,wilds`), and the tuned values follow in the next round.
+- **Card rewards** in the new worlds borrow Vespera's and Solaris's pools until Round 177
+  gives every world its own.
+- **Compendium:** lists both new worlds and the new levels.
+- **Tests:**
+  - New `tests/tile-worlds.test.cjs`: world order, 54 rooms each, enemies on paths, bosses,
+    quiet rooms, the tiles ship, levels, the portal chain, rosters and art.
+  - `region-rooms-load` covers all six worlds.
+  - `chronospire` and `crystals-touch-boss` are updated for the new order.
+
 ## Round 174: tile kits for worlds 3 and 4 (Sky Isles and Elaris)
 
 - Owner plan: six worlds in order: Neon Aftermath, Solaris, a new sky world, Elaris (the

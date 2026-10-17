@@ -1,0 +1,207 @@
+'use strict';
+// =====================================================================
+// Round 175: worlds 3 and 4, built from room tiles like Solaris.
+//   sky   — the SKY ISLES: marble walkways on floating islands (levels 19-27)
+//   wilds — ELARIS: the old forest, home of its original creatures (levels 28-36)
+// Vespera and Chronospire follow them as worlds 5 and 6.
+// Room data, tile plans and walk masks come from tools/build_tile_world.py
+// (assets/sky-data.js, assets/wilds-data.js). Until the owner paints the tiles they are
+// stand-ins from tools/paint_placeholder_tiles.py, and enemies borrow existing sprites.
+// =====================================================================
+const TILE_WORLD_IDS = ['sky', 'wilds'];
+WORLD_ORDER.splice(WORLD_ORDER.indexOf('vespera'), 0, ...TILE_WORLD_IDS);
+Object.assign(WORLD_NAMES, { sky: 'Sky Isles', wilds: 'Elaris' });
+
+// --- Enemies ----------------------------------------------------------
+const SKY_TINT = 'hue-rotate(165deg) saturate(.85) brightness(1.18)';
+const SKY_ENEMIES = {
+  skyDrake:   { name: 'Sunfeather Drake', icon: '☀', hp: 44, attack: 9, element: 'fire', art: 'forestFox', tint: SKY_TINT },
+  skyWisp:    { name: 'Cloud Wisp', icon: '☁', hp: 48, attack: 9, armor: 1, element: 'water', art: 'cryptWisp', tint: SKY_TINT },
+  skyHarpy:   { name: 'Gale Harpy', icon: '≋', hp: 52, attack: 10, element: 'air', art: 'forestMoth', tint: SKY_TINT },
+  skyRam:     { name: 'Thunderhorn Ram', icon: '◆', hp: 56, attack: 10, armor: 2, element: 'earth', art: 'forestStag', tint: SKY_TINT },
+  stormbellWarden: { name: 'The Stormbell Warden', icon: '🔔', hp: 82, attack: 11, armor: 4, boss: true, miniBoss: true, element: 'air', art: 'vineguard', tint: SKY_TINT },
+  featherMatriarch: { name: 'The Featherfall Matriarch', icon: '🪶', hp: 78, attack: 12, armor: 3, boss: true, miniBoss: true, element: 'water', art: 'forestHeron', tint: SKY_TINT },
+  zenithRoc:  { name: 'The Zenith Roc', icon: '🦅', hp: 150, attack: 11, armor: 2, boss: true, element: 'air', shift: ['air', 'fire'], shiftEvery: 4, art: 'forestTyrant', tint: SKY_TINT }
+};
+// Elaris gets back the forest creatures Solaris used to borrow, under their own names.
+const WILDS_ENEMIES = {
+  elarisFox:    { name: 'Cinder Fox', icon: '♨', hp: 38, attack: 7, element: 'fire', art: 'forestFox', tint: 'none' },
+  elarisHeron:  { name: 'Drowned Heron', icon: '≈', hp: 55, attack: 9, element: 'water', art: 'forestHeron', tint: 'none' },
+  elarisAntler: { name: 'Blight Antler', icon: '◆', hp: 44, attack: 8, element: 'earth', art: 'forestStag', tint: 'none' },
+  elarisMoth:   { name: 'Storm Moth', icon: '≋', hp: 52, attack: 9, element: 'air', art: 'forestMoth', tint: 'none' },
+  tideboundWarden: { name: 'The Tidebound Warden', icon: '≈', hp: 70, attack: 11, armor: 3, boss: true, miniBoss: true, element: 'water', art: 'forestHeron', tint: 'none' },
+  galeSovereignElaris: { name: 'The Gale Sovereign', icon: '≋', hp: 66, attack: 11, armor: 3, boss: true, miniBoss: true, element: 'air', art: 'forestMoth', tint: 'none' },
+  elarisTyrant: { name: 'The Bloom Tyrant', icon: '❃', hp: 150, attack: 10, boss: true, element: 'earth', shift: ['earth', 'air'], shiftEvery: 3, art: 'forestTyrant', tint: 'none' }
+};
+Object.assign(enemies, SKY_ENEMIES, WILDS_ENEMIES);
+Object.assign(ENEMY_AFFLICTIONS, {
+  skyDrake: ['crush'], skyWisp: ['static'], skyHarpy: ['barrage'], skyRam: ['rend'],
+  stormbellWarden: ['shackle', 'static'], featherMatriarch: ['siphon', 'fog'], zenithRoc: ['empower', 'barrage', 'frail'],
+  elarisFox: ['barrage'], elarisHeron: ['siphon'], elarisAntler: ['frail'], elarisMoth: ['fog'],
+  tideboundWarden: ['siphon', 'barrier'], galeSovereignElaris: ['barrage', 'shackle'], elarisTyrant: ['bleed', 'empower', 'rend']
+});
+Object.assign(BOSS_PATTERNS, {
+  // The Stormbell Warden — tolls, then strikes twice while you are still ringing.
+  stormbellWarden: ['guard', 'charge', 'elemental', 'attack', 'attack', 'heavy'],
+  // The Featherfall Matriarch — keeps her distance and dives from above.
+  featherMatriarch: ['attack', 'guard', 'charge', 'elemental', 'charge', 'elemental'],
+  // The Zenith Roc — circles high (guard, charge) and stoops hard.
+  zenithRoc: ['guard', 'charge', 'elemental', 'heavy', 'attack', 'charge', 'elemental'],
+  tideboundWarden: BOSS_PATTERNS.tidewardenElaris, galeSovereignElaris: BOSS_PATTERNS.galeSovereign, elarisTyrant: BOSS_PATTERNS.bloomTyrant
+});
+// Starting tuning: the Sky Isles take Vespera's old place in the curve and Elaris takes
+// Chronospire's (tests/balance-sim.cjs re-checks them).
+Object.assign(BALANCE.perEnemy, {
+  stormbellWarden: { hp: .72 }, featherMatriarch: { hp: .82 }, zenithRoc: { hp: .55 },
+  tideboundWarden: { hp: 1.05 }, galeSovereignElaris: { hp: .95 }, elarisTyrant: { hp: .72 }, elarisHeron: { hp: .9 }
+});
+const SKY_ZONE_ENEMY = ['skyDrake', 'skyDrake', 'skyWisp', 'skyWisp', 'skyHarpy', 'skyHarpy', 'skyRam', 'skyRam'];
+const WILDS_ZONE_ENEMY = ['elarisFox', 'elarisFox', 'elarisAntler', 'elarisAntler', 'elarisHeron', 'elarisHeron', 'elarisMoth', 'elarisMoth'];
+WORLD_BOSSES.push('zenithRoc', 'elarisTyrant');
+
+// --- Balance: each new world sits where the old worlds 3 and 4 were ---
+for (const [table, sky, wilds] of [['hpPerLevel', .05, .05], ['attackPerLevel', .25, .25], ['regionHp', 2.35, 3.3], ['regionAttack', 16, 25],
+  ['difficulty', 1, 1], ['regionLevelBase', 19, 28], ['eliteHp', 1.25, 1.25], ['normalHp', 1.1, 1.1]]) Object.assign(BALANCE[table], { sky, wilds });
+
+// --- Rooms ------------------------------------------------------------
+function tileWorldRooms(id, roleEnemy) {
+  const d = TILE_WORLD_DATA[id], byRoom = {};
+  for (const [role, enemy] of Object.entries(roleEnemy)) byRoom[d.roles[role]] = enemy;
+  return Object.fromEntries(Object.entries(d.layout).map(([k, r], i) => [k, {
+    name: r.name, exits: { ...r.exits }, district: 0, landmark: WORLD_NAMES[id].toUpperCase(), cityIndex: i, world: [...r.world],
+    ...(r.zone ? { zone: r.zone } : {}), ...(r.level ? { level: r.level } : {}), ...(byRoom[k] ? { enemy: [byRoom[k], 400, 250] } : {})
+  }]));
+}
+// Quiet rooms (events, no enemies) and the mid Nexus: ordinary rooms spread along the walk.
+function tileWorldStops(id) {
+  const d = TILE_WORLD_DATA[id], roles = new Set(Object.values(d.roles)), start = d.roles.start, dist = { [start]: 0 }, q = [start];
+  while (q.length) { const k = q.shift(); for (const t of Object.values(d.layout[k].exits)) if (!(t in dist)) { dist[t] = dist[k] + 1; q.push(t); } }
+  const far = Math.max(...Object.values(dist));
+  const pick = (frac, taken) => Object.keys(d.layout).filter(k => !roles.has(k) && !taken.includes(k) && Object.keys(d.layout[k].exits).length > 1)
+    .sort((a, b) => Math.abs(dist[a] / far - frac) - Math.abs(dist[b] / far - frac) || (a < b ? -1 : 1))[0];
+  const out = [];
+  for (const f of [.5, .25, .62, .85]) out.push(pick(f, out));
+  return { mid: out[0], quiet: out.slice(1) };
+}
+const TILE_WORLD_ROLES = {
+  sky: { boss: 'zenithRoc', mini1: 'stormbellWarden', mini2: 'featherMatriarch' },
+  wilds: { boss: 'elarisTyrant', mini1: 'tideboundWarden', mini2: 'galeSovereignElaris' }
+};
+const TILE_WORLD_ZONES = { sky: SKY_ZONE_ENEMY, wilds: WILDS_ZONE_ENEMY };
+for (const id of TILE_WORLD_IDS) {
+  const d = TILE_WORLD_DATA[id], stops = tileWorldStops(id);
+  TILE_REGIONS[id] = {
+    rooms: tileWorldRooms(id, TILE_WORLD_ROLES[id]), start: d.roles.start, stops,
+    chests: { [d.roles.mini1]: 'crystal', [d.roles.mini2]: 'crystal' },
+    tierTypes: key => { const z = rooms[key] && rooms[key].zone; return [TILE_WORLD_ZONES[id][(z || 1) - 1]]; }
+  };
+  WORLD_BOSS_ROOMS[id] = [d.roles.boss, TILE_WORLD_ROLES[id].boss];
+  NEXUS_POINTS[id] = { start: d.roles.start, mid: stops.mid };
+  QUIET_ROOMS[id] = stops.quiet;
+}
+TILE_REGIONS.sky.arrive = () => toast('Sky Isles · Windgate Landing. The wind carries you between the islands.');
+TILE_REGIONS.wilds.arrive = () => toast('Elaris · the old forest. Its creatures remember the Bloom Tyrant.');
+
+// --- Walk masks and painted tiles (the Solaris engine, once per world) ---
+const tileWorldBits = {};
+function tileWorldWalk(id, wx, wy) {
+  const w = TILE_WORLD_DATA[id].world;
+  let bits = tileWorldBits[id];
+  if (!bits) {
+    const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', n = w.maskW * w.maskH; bits = tileWorldBits[id] = new Uint8Array(n);
+    for (let i = 0; i < n; i++) bits[i] = (abc.indexOf(w.mask[Math.floor(i / 6)]) >> (5 - i % 6)) & 1;
+  }
+  const mx = Math.floor(wx / w.cell), my = Math.floor(wy / w.cell);
+  return mx >= 0 && my >= 0 && mx < w.maskW && my < w.maskH && bits[my * w.maskW + mx] === 1;
+}
+// The map engine is absent in the balance sims (tests/talent-sim.cjs), so these hooks are guarded.
+if (typeof ORGANIC_AREAS !== 'undefined') for (const id of TILE_WORLD_IDS) ORGANIC_AREAS['world:' + id] = {
+  src: id + '-world', world: true,
+  at(o, ax, ay) { if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return tileWorldWalk(id, o.area.left * 800 + ax, o.area.top * 500 + ay); },
+};
+if (typeof neonWorldWalk === 'function') {
+  const neonWorldWalkBeforeTiles = neonWorldWalk;
+  neonWorldWalk = function (wx, wy) { return TILE_REGIONS[activeRegion] ? tileWorldWalk(activeRegion, wx, wy) : neonWorldWalkBeforeTiles(wx, wy); };
+  const neonLooseBeforeTiles = neonLoose;
+  neonLoose = function (from, to) { const d = TILE_REGIONS[activeRegion] && TILE_WORLD_DATA[activeRegion]; return d ? !!(d.plan[from] || d.plan[to]) : neonLooseBeforeTiles(from, to); };
+}
+for (const id of TILE_WORLD_IDS) { if (typeof JOINED_AREAS !== 'undefined') JOINED_AREAS[id] = []; }
+
+const tileWorldImages = {};
+function paintTileWorld(canvas, id, key) {
+  const plan = TILE_WORLD_DATA[id].plan[key]; if (!plan) return false;
+  const [name, fx, fy] = plan, src = 'assets/environment/' + id + '/' + name + '.webp';
+  let img = tileWorldImages[src];
+  if (!img) { img = new Image(); img.src = src; tileWorldImages[src] = img; }
+  if (!(img.complete && img.naturalWidth)) {
+    if (canvas.dataset) canvas.dataset.pending = '1'; canvas.pendingImage = img;
+    if (img.addEventListener) img.addEventListener('load', () => { if (canvas.isConnected) paintTileWorld(canvas, id, key); }, { once: true });
+    return false;
+  }
+  canvas.width = img.naturalWidth; canvas.height = Math.round(img.naturalWidth * 5 / 8);
+  if (canvas.style) { canvas.style.imageRendering = 'auto'; canvas.style.filter = 'none'; }
+  const ctx = canvas.getContext('2d'); if (!ctx) return false;
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.save(); ctx.translate(fx ? canvas.width : 0, fy ? canvas.height : 0); ctx.scale(fx ? -1 : 1, fy ? -1 : 1);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height); ctx.restore();
+  if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null;
+  return true;
+}
+const renderBeforeTileWorlds = NeonCity.render;
+NeonCity.render = function (container, key) {
+  const out = renderBeforeTileWorlds.apply(this, arguments);
+  const id = activeRegion, d = TILE_REGIONS[id] && TILE_WORLD_DATA[id];
+  if (!d || !d.plan[key] || !container || !container.querySelector) return out;
+  if (container.dataset) container.dataset.environment = id;
+  const ground = container.querySelector('canvas.city-ground');
+  if (ground) { if (ground.classList) ground.classList.add('neon-world', id + '-ground'); paintTileWorld(ground, id, key); }
+  if (container.querySelectorAll) for (const w of container.querySelectorAll('.wildlife')) w.remove();
+  return out;
+};
+const tileWorldStyles = document.createElement('style');
+tileWorldStyles.textContent = '#world[data-environment="sky"]{background:#9fd2f2}#world[data-environment="sky"] .city-landmark{color:#fff;text-shadow:0 1px 3px #1d4f80}'
+  + '#world[data-environment="wilds"]{background:#2f5a34}#world[data-environment="wilds"] .city-landmark{color:#eaffd8;text-shadow:0 1px 3px #0d2a12}';
+document.head.append(tileWorldStyles);
+
+// --- Exploration: lore, events, names and the objective ---
+Object.assign(NEXUS_WORLD_NAMES, { sky: 'Sky Isles', wilds: 'Elaris' });
+Object.assign(LORE_NAMES, { sky: ['☁', 'Wind Chime'], wilds: ['❦', 'Elder Stone'] });
+LORE.sky = [
+  'The chime sings when the wind passes: "The isles were lifted so the storms could not reach them. Now the storms live here too."',
+  '"The Stormbell Warden rings once for every traveller. Count the peals, and you will know how many never left."',
+  '"Drakes nest where the sun first touches the isles. Their feathers are warm long after they fall."',
+  '"The Featherfall Matriarch guards the last roost. Her chicks are clouds; do not step on them."',
+  '"The Zenith Roc circles the Eye of the Sky. Ground it, and the wind will carry you down to the old forest of Elaris."'
+];
+LORE.wilds = [
+  'The stone is warm. Words rise in your mind: "Before the Tyrant bloomed, Elaris sang in four voices: flame, tide, root and wind."',
+  '"The Tidebound Warden was a guardian once. It guards the river still, but it no longer remembers from what."',
+  '"Burn and rot are siblings here. What fire leaves, the poison finishes. Do not fight them both at once."',
+  '"The Gale Sovereign crowned itself on the highest branch and called the storm its court."',
+  '"The Bloom Tyrant drinks the land\'s four voices. Silence it, and the stormglass road will open to Vespera."'
+];
+const skyPct = f => Math.ceil(state.maxHp * f);
+Object.assign(EVENTS, {
+  updraft: { icon: '🌬', name: 'Updraft Well', text: () => 'Warm air rises from a hole in the island. Feathers spin in it.',
+    choices: () => [{ label: 'Ride the updraft · heal ' + skyPct(.5) + ' HP', run: () => { state.hp = Math.min(state.maxHp, state.hp + skyPct(.5)); return 'The warm wind lifts you: +' + skyPct(.5) + ' HP.'; } },
+                    { label: 'Catch the feathers · +8 Shards', run: () => { state.shards += 8; return 'Shard-tipped feathers: +8 Shards.'; } }] },
+  aerie: { icon: '🪺', name: 'Abandoned Aerie', text: () => 'A nest as wide as a cart, lined with lost travellers\' things.',
+    choices: () => [{ label: 'Search the nest · +2 potions', run: () => { state.potions += 2; return '+2 healing potions.'; } },
+                    { label: 'Take the bright feather · Surge Rite blessing', run: () => { state.blessing = 'surge'; return 'Surge Rite: next fight +1 energy and +1 card on turn 1.'; } }] },
+  chimes: { icon: '🎐', name: 'Singing Chimes', text: () => 'Hundreds of chimes hang from a dead tree, all ringing the same note.',
+    choices: () => [{ label: 'Listen · train your whole deck +10 uses', run: () => { active().forEach(c => { for (let k = 0; k < 10; k++) recordCardUse(owned(c.uid) || c); }); return 'Every card in your deck gains 10 mastery uses.'; } },
+                    { label: 'Cut one down · +8 Shards', run: () => { state.shards += 8; return 'The chime is silver: +8 Shards.'; } }] },
+  starwell: { icon: '✦', name: 'Starwell', text: () => 'A pool that reflects the stars even at noon.',
+    choices: () => [{ label: 'Drink · 60%: heal 40%, 40%: −10% HP', run: () => { if (Math.random() < .6) { const h = skyPct(.4); state.hp = Math.min(state.maxHp, state.hp + h); return 'Starlight: +' + h + ' HP.'; } const l = skyPct(.1); state.hp = Math.max(1, state.hp - l); return 'Cold as space: −' + l + ' HP.'; } },
+                    { label: 'Fill a flask · +1 potion', run: () => { state.potions += 1; return '+1 healing potion.'; } }] }
+});
+EVENT_POOLS.sky = ['updraft', 'aerie', 'chimes', 'starwell'];
+EVENT_POOLS.wilds = ['spring', 'ranger', 'seedpod', 'vines'];
+// Card rewards until the per-world pools land (Round 177).
+VARIETY_POOLS.sky = [...VARIETY_POOLS.vespera]; VARIETY_POOLS.wilds = [...VARIETY_POOLS.elaris];
+const objectiveBeforeTileWorlds = objective;
+objective = function () {
+  if (activeRegion === 'sky') return state.bosses.includes('zenithRoc') ? 'The portal to Elaris is open in The Eye of the Sky.' : 'Defeat the Zenith Roc in The Eye of the Sky. Its dives come after it circles: save your Block.';
+  if (activeRegion === 'wilds') return state.bosses.includes('elarisTyrant') ? 'The portal to Vespera is open in Elderbloom Sanctuary.' : 'Defeat the Bloom Tyrant in Elderbloom Sanctuary. Reserve your counter for charged strikes.';
+  return objectiveBeforeTileWorlds();
+};

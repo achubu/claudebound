@@ -273,7 +273,7 @@ function organicReachable(key) {
   if (isStartRoomKey(key)) { const st = organicPocketAt(key, { x: 400, y: 300 }); for (const p of pockets[st]) ok.add(p); }
   return organicReach[ck] = ok;
 }
-function isStartRoomKey(key) { return activeRegion === 'city' ? key === '0,5' : key === '0,0'; }
+function isStartRoomKey(key) { return key === regionStartRoom(); }
 function organicReachableAt(key, p) { const r = organicReachable(key); if (!r) return true; const i = organicPocketNear(key, p); return i >= 0 && r.has([...organicPockets(key)[i]][0]); }
 function organicSpot(key, x, y, avoid = [], gap = 0) {
   let best = null, bd = Infinity;
