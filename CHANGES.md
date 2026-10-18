@@ -3496,6 +3496,36 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 187: playtest fixes for phones, desktop and the Hack gift
+
+From a browser playtest at 1280x800, 390x844 and 360x640 (items 1-6 of the playtest report).
+
+- **The Hack gift (bug from Round 185).** The starting deck is full (6/6), so Packet Sniff and
+  Ghost Protocol go to the collection; the log used to say "now in your deck". The log and the
+  arrival screens now say where the cards went (`giftPlacement`). Neon Aftermath's gift also
+  marked the Hack guide as seen, so it never opened. Now the "New mechanic: Hack" screen opens
+  once you leave the reward screen (`state.pendingMechIntro`, shown by a `finishBattle` wrapper).
+  `mechanicGift` returns `{ placed }`, or false if the world's gift was already given.
+- **Mechanic guides on phones (bug from Round 185).** The "How it works" box now goes below the
+  hand instead of above it, so the cards stay on screen. Only one guide opens by itself at a time.
+  The trays are one compact row on phones.
+- **Phones, the map.** The room now fills the space between the HUD and the controls, at least
+  380 room pixels wide, instead of sitting in the top half with a 300px black band below it. The
+  HUD is shorter and no longer covers the room. On short phones the part of the room that does not
+  fit is clipped instead of drawing under the HUD. New `assets/layout-polish.js` replaces
+  `updateAreaCamera`; it measures the HUD and menu row and re-measures when they change size.
+- **Phones, battles.** The side deck folds into one row above the hand ("Show" / "Hide"). The
+  enemy-move boxes show one line of their affliction (tap a box for the rest). The "Your hand"
+  header is hidden and the card art is a little shorter. At 390x844 the hand now starts at y=400
+  (was 451, with the side column taking a third of the width) and whole cards fit above the
+  footer. The enemy portrait is larger.
+- **Desktop.** The room sits below the top menu row, so the menu no longer covers the north exit
+  label (Saltwind Docks in the start room). "Art credits" moved from the top row into the main menu.
+- **Desktop.** The on-screen arrow pad only shows in touch mode.
+- Styles: new `assets/layout-polish.css`, loaded last. Tap-to-move was re-checked at all three sizes.
+- Tests: new `tests/layout-polish.test.cjs`. Screen placement (guide below the hand, folding
+  side deck, no gap under the room) was checked with Playwright screenshots.
+
 ## Round 186: 23 more paintings from achubu/Cardbound
 
 - Checked `achubu/Cardbound` again (commit f3495b8, "Complete tracked card art upgrades").

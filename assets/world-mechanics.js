@@ -228,13 +228,20 @@ renderBattle = function () {
   state.tips ||= {}; b.mechHelp ||= {};
   for (const mech of Object.values(WORLD_MECHANICS)) {
     if (!mechanicActive(mech, b)) continue;
-    if (b.hand.some(c => mech.cards.includes(c.id)) && !state.tips[mech.key]) { state.tips[mech.key] = true; b.mechHelp[mech.key] = true; save(); }
+    // One guide opens by itself at a time (the first time you hold that mechanic's cards).
+    if (b.hand.some(c => mech.cards.includes(c.id)) && !state.tips[mech.key] && !Object.values(b.mechHelp).some(Boolean)) { state.tips[mech.key] = true; b.mechHelp[mech.key] = true; save(); }
     const [big, label, note] = mechanicReadout(mech, b), box = document.createElement('div');
     box.className = 'mech-tray'; box.style.setProperty('--mc', mech.color); box.dataset.mechanic = mech.key;
-    box.innerHTML = '<div class="mt-head"><span class="mt-count">' + big + '</span><div class="mt-text"><b>' + mech.icon + ' ' + mech.name + ' · ' + label + '</b><small>' + note + '</small></div><button class="ability small mt-help">How ' + mech.name + ' works</button></div>'
-      + (b.mechHelp[mech.key] ? mechanicGuideHTML(mech, 'mechClose-' + mech.key) : '');
+    box.innerHTML = '<div class="mt-head"><span class="mt-count">' + big + '</span><div class="mt-text"><b>' + mech.icon + ' ' + mech.name + ' · ' + label + '</b><small>' + note + '</small></div><button class="ability small mt-help">How ' + mech.name + ' works</button></div>';
     const anchor = m.querySelector('.hand-title'); if (anchor && anchor.before) anchor.before(box); else m.append(box);
-    const help = box.querySelector('.mt-help'); if (help) help.onclick = () => { b.mechHelp[mech.key] = !b.mechHelp[mech.key]; renderBattle(); };
+    // Round 187: the guide goes below the hand, so the cards stay on screen (phones especially).
+    if (b.mechHelp[mech.key]) {
+      const guide = document.createElement('div'); guide.className = 'mech-tray mech-guide-box'; guide.style.setProperty('--mc', mech.color); guide.dataset.mechanicGuide = mech.key;
+      guide.innerHTML = mechanicGuideHTML(mech, 'mechClose-' + mech.key);
+      const handArea = m.querySelector('.hand-row') || ($('hand') && $('hand').parentNode === m ? $('hand') : null);
+      if (handArea && handArea.after) handArea.after(guide); else m.append(guide);
+    }
+    const help = box.querySelector('.mt-help'); if (help) help.onclick = () => { const open = !b.mechHelp[mech.key]; for (const k in b.mechHelp) b.mechHelp[k] = false; b.mechHelp[mech.key] = open; renderBattle(); if (open) { const g = m.querySelector('[data-mechanic-guide="' + mech.key + '"]'); if (g && g.scrollIntoView) g.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } };
     const close = $('mechClose-' + mech.key); if (close) close.onclick = () => { b.mechHelp[mech.key] = false; renderBattle(); };
   }
   // Badge the mechanic cards in hand.
@@ -262,16 +269,32 @@ function mechanicGift(region, withMenu = true) {
   const m = WORLD_MECHANICS[region]; if (!m || !state) return false;
   state.mechGifts ||= {}; if (state.mechGifts[region]) return false;
   state.mechGifts[region] = true;
-  for (const id of m.gift) { const c = make(id); c.soulbound = false; state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(id) < maxCopies()) state.deck.push(c.uid); }
-  state.tips ||= {}; state.tips[m.key] = true;
+  let placed = 0;
+  for (const id of m.gift) { const c = make(id); c.soulbound = false; state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(id) < maxCopies()) { state.deck.push(c.uid); placed++; } }
   save();
-  const names = m.gift.map(id => '<b>' + defs[id].name + '</b>').join(' and ');
-  if (withMenu) {
-    openMenu('<div class="eyebrow">' + m.world.replace(/^the /, '').toUpperCase() + ' · ' + m.tagline + '</div><h2>' + m.icon + ' New mechanic: ' + m.name + '</h2><p>You found ' + names + '. They are in your deck now (or in your collection if the deck is full).</p><div class="menu-mech" style="--mc:' + m.color + '">' + mechanicGuideHTML(m) + '</div><p><button id="mechOk" class="primary">Got it</button></p>');
-    const ok = $('mechOk'); if (ok) ok.onclick = closeMenu;
-  }
-  return true;
+  if (withMenu) mechanicIntro(region, placed);
+  else { state.pendingMechIntro = { region, placed }; save(); } // Round 187: shown once the reward screen closes
+  return { placed };
 }
+// Where the gift went, in words (Round 187: a full deck keeps them in the collection).
+function giftPlacement(m, placed) {
+  const names = m.gift.map(id => '<b>' + defs[id].name + '</b>').join(' and ');
+  if (placed >= m.gift.length) return 'You found ' + names + '. They are in your deck now.';
+  if (placed > 0) return 'You found ' + names + '. Your deck had room for one; the other is in your collection. Open <b>Deck</b> to swap it in.';
+  return 'You found ' + names + '. Your deck is full, so they are in your collection. Open <b>Deck</b> to swap them in.';
+}
+function mechanicIntro(region, placed) {
+  const m = WORLD_MECHANICS[region]; if (!m) return;
+  state.tips ||= {}; state.tips[m.key] = true; save();
+  openMenu('<div class="eyebrow">' + m.world.replace(/^the /, '').toUpperCase() + ' · ' + m.tagline + '</div><h2>' + m.icon + ' New mechanic: ' + m.name + '</h2><p>' + giftPlacement(m, placed) + '</p><div class="menu-mech" style="--mc:' + m.color + '">' + mechanicGuideHTML(m) + '</div><p><button id="mechOk" class="primary">Got it</button></p>');
+  const ok = $('mechOk'); if (ok) ok.onclick = closeMenu;
+}
+const finishBattleBeforeMechanics = finishBattle;
+finishBattle = function () {
+  finishBattleBeforeMechanics.apply(this, arguments);
+  const p = state && !state.battle && state.pendingMechIntro;
+  if (p) { state.pendingMechIntro = null; mechanicIntro(p.region, p.placed); }
+};
 const travelPortalBeforeMechanics = travelPortal;
 travelPortal = function () {
   const from = state && state.region;
@@ -283,8 +306,10 @@ const winBattleBeforeMechanics = winBattle;
 winBattle = function () {
   const b = state.battle, fresh = b && b.phase === 'fight';
   winBattleBeforeMechanics();
-  if (fresh && activeRegion === 'city' && !(state.mechGifts || {}).city && state.battle === b && b.phase === 'reward' && mechanicGift('city', false))
-    b.logs.push('⌁ You found Packet Sniff and Ghost Protocol: Hack cards, now in your deck. Hold one in battle to see how Hack works.');
+  if (fresh && activeRegion === 'city' && !(state.mechGifts || {}).city && state.battle === b && b.phase === 'reward') {
+    const { placed } = mechanicGift('city', false);
+    b.logs.push('⌁ You found Packet Sniff and Ghost Protocol, two Hack cards: ' + (placed >= 2 ? 'now in your deck.' : placed ? 'one is in your deck, the other in your collection.' : 'your deck is full, so they are in your collection.'));
+  }
 };
 // Saves already past a world's entrance get its cards when they next load there.
 const restoreGameBeforeMechanics = restoreGame;

@@ -1,0 +1,14 @@
+{
+ "city": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 387,
+  "arrivals": 137,
+  "itemRoutes": 68,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "pageErrors": []
+}
