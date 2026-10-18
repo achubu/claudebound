@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 188: the unused Reversal cards are gone
+
+- The four single-element counters (Fire, Water, Earth and Air Reversal, `counter_<element>`) were
+  left over from before the Prismatic Counter. No drop, reward pool or starting deck used them, but
+  they still showed in the compendium's card gallery. They are removed from `defs`, and their art
+  moved to `unused assets/assets/cards/`. The compendium now lists 90 cards.
+- Old saves that still hold one still load. `validateImport` checks every card id, so it now runs
+  `normalizeElementalCards` first. That turns the Reversals into one Prismatic Counter (keeping the
+  copy in the deck), including cards inside a battle in progress. The "Elemental counters
+  combined" message still shows.
+- Tests: new `tests/retired-cards.test.cjs`. `expansion` and `combat-balance` now use the
+  Prismatic Counter, or a hand-made old card for the migration check.
+
 ## Round 187: playtest fixes for phones, desktop and the Hack gift
 
 From a browser playtest at 1280x800, 390x844 and 360x640 (items 1-6 of the playtest report).

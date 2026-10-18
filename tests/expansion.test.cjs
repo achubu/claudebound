@@ -36,7 +36,7 @@ state.device.slots=['crystal-1','crystal-2','crystal-3',null,null];
 assert.equal(maxDeckSize(),7);assert.equal(deviceBonus('assault'),1);assert.equal(deviceBonus('aegis'),1);
 state.room='3,6';const s=roomSpawns(state.room)[0];startBattle(s.uid);assert(state.battle);assert.equal(state.battle.spawnId,s.uid);
 state.battle.hand=[make('glacial')];state.battle.energy=3;playCard(0);const hp=state.hp;endTurn();assert.equal(state.hp,hp);assert.equal(state.battle.freeze,0);
-state.battle.turn=3;state.battle.enemy.element='fire';state.battle.hand=[make('counter_water')];state.battle.energy=3;playCard(0);const ehp=state.battle.enemy.hp;endTurn();assert.equal(state.hp,hp);assert.equal(state.battle.enemy.hp,ehp-6);assert.equal(state.battle.counter,null);
+state.battle.turn=3;state.battle.enemy.element='fire';state.battle.hand=[make('counter')];state.battle.energy=3;playCard(0);const ehp=state.battle.enemy.hp;endTurn();assert.equal(state.hp,hp);assert.equal(state.battle.enemy.hp,ehp-6);assert.equal(state.battle.counter,null);
 state.talents.echo=1;state.battle.echoArmed=true;state.battle.hand=[make('guard')];state.battle.energy=3;state.battle.block=0;playCard(0);assert.equal(state.battle.block,12);assert.equal(state.battle.energy,2);assert(state.battle.echoUsed);
 state.talents.doublePower=1;state.battle.doubleArmed=true;state.battle.enemy.hp=100;state.battle.enemy.armor=0;state.battle.hand=[make('strike')];state.battle.energy=3;playCard(0);assert.equal(state.battle.enemy.hp,86);assert(state.battle.doubleUsed);
 state.battle.hand=[make('venom')];state.battle.energy=3;playCard(0);assert.equal(state.battle.poison,2);
