@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 186: 23 more paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` again (commit f3495b8, "Complete tracked card art upgrades").
+  It added 23 card paintings; all are wired in (`refreshedCardArt` in `assets/cards.js`):
+  - Level 1, 2 and 3 paintings for seven cards that had only their level-0 painting: Arc
+    Bulwark, Lunar Edict, Mirrorguard, Phantom Resonance, Prism Lance, Sovereign Gale and
+    Tidebound. Their art now changes as they level up, like the other refreshed cards.
+  - Real art for two Chronospire Suspend cards, Temporal Barrage and Clockwork Volley. Cardbound
+    painted only level 0 and uses it at every level; so does this game. Their placeholder PNGs
+    moved to `unused assets/assets/cards/`.
+- There were no other new images (no new monsters, rooms, items or side cards).
+- The 20 world-mechanic cards from Round 185 have no Cardbound art yet and keep their placeholders.
+- `cards.js?v=` tag bumped to round186. `card-art` test updated (86 refreshed paintings; Temporal
+  Barrage is now its example of a card with one painting).
+- Fixed a flaky `crystals-touch-boss` test caused by Round 185. It fights a random Solaris enemy,
+  and when that was the Solar Scarab, the new Sunstroke affliction cost 2 HP on a charging turn
+  that the test expects to cost nothing. The test is about counters, so it now clears that
+  fight's afflictions.
+
 ## Round 185: a card mechanic for every world
 
 Every world now has its own card mechanic, like Chronospire's ⏳ Suspend (new

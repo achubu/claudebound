@@ -30,7 +30,7 @@ function rules(c){const d=stat(c),p=[];if(d.damage)p.push('Deal '+d.damage+' dam
 // Round 94: refreshed pixel-art illustrations (512x512 WebP, see
 // assets/cards/art-refresh.md). Stages not yet painted reuse the nearest lower
 // painted stage (or the first one); stats always follow the real level.
-const refreshedCardArt={arcBulwark:[0],arcJab:[0,1,2,3],breachSpike:[0,1,2,3],bulwarkBash:[0,1,2,3],chainLightning:[0,1,2,3],lunarEdict:[0],mirrorguard:[0],overclock:[0,1,2,3],phantomResonance:[0],prismLance:[0],rootbind:[0,1,2,3],sovereignGale:[0],static:[0,1,2,3],staticShield:[0,1,2,3],stormBattery:[0,1,2,3],tempestSurge:[0,1,2,3],thornlash:[0,1,2,3],tidebound:[0],tidecall:[0,1,2,3],verdantPact:[0,1,2,3],wildfire:[0,1,2,3]}; // Round 180: 36 more paintings from achubu/Cardbound
+const refreshedCardArt={clockworkVolley:[0],temporalBarrage:[0],arcBulwark:[0,1,2,3],arcJab:[0,1,2,3],breachSpike:[0,1,2,3],bulwarkBash:[0,1,2,3],chainLightning:[0,1,2,3],lunarEdict:[0,1,2,3],mirrorguard:[0,1,2,3],overclock:[0,1,2,3],phantomResonance:[0,1,2,3],prismLance:[0,1,2,3],rootbind:[0,1,2,3],sovereignGale:[0,1,2,3],static:[0,1,2,3],staticShield:[0,1,2,3],stormBattery:[0,1,2,3],tempestSurge:[0,1,2,3],thornlash:[0,1,2,3],tidebound:[0,1,2,3],tidecall:[0,1,2,3],verdantPact:[0,1,2,3],wildfire:[0,1,2,3]}; // Round 180: 36 more paintings from achubu/Cardbound
 function cardArtPath(id,level){
  const stages=refreshedCardArt[id];
  if(stages){const artLevel=stages.filter(n=>n<=level).at(-1)??stages[0];return 'assets/cards/level'+artLevel+'/'+id+'.webp'}

@@ -13,7 +13,7 @@ state.device.crystals[0].rarity='invalid';assert.throws(()=>validateImport(JSON.
 save();state=null;assert(load());assert.equal(crystalOpeningBlock(),2);
 // A reserved counter survives a quiet turn; normal attacks are not counter windows.
 configureRegion('elaris');state.region='elaris';state.room='1,0';state.hp=59;state.maxHp=59;startBattle(roomSpawns(state.room)[0].uid);
-let b=state.battle;b.enemy.hp=300;b.enemy.maxHp=300;b.enemy.element='fire';b.hand=[make('counter')];b.savedUid=b.hand[0].uid;const counterUid=b.savedUid;
+let b=state.battle;ENEMY_AFFLICTIONS[b.id]=[];b.enemy.hp=300;b.enemy.maxHp=300;b.enemy.element='fire';b.hand=[make('counter')];b.savedUid=b.hand[0].uid;const counterUid=b.savedUid;
 endTurn();assert(b.hand.some(c=>c.uid===counterUid));assert.equal(enemyPlan().kind,'charge');
 b.hand=[b.hand.find(c=>c.uid===counterUid)];b.energy=3;playCard(0);const beforeCharge=state.hp;endTurn();assert.equal(state.hp,beforeCharge);assert(b.counter,'counter stays armed through charging');
 const beforeStrike=state.hp,enemyBefore=b.enemy.hp;endTurn();assert.equal(state.hp,beforeStrike);assert.equal(b.enemy.hp,enemyBefore-6);assert(!b.playerBurn,'counter blocks status');
