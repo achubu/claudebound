@@ -3508,6 +3508,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   combined" message still shows.
 - Tests: new `tests/retired-cards.test.cjs`. `expansion` and `combat-balance` now use the
   Prismatic Counter, or a hand-made old card for the migration check.
+- On phones up to 480px wide, the Character screen's talent tree used to run about 76px past
+  the edge and needed a sideways swipe. Its nodes are now smaller, so a five-path branch fits
+  (`assets/layout-polish.css`).
+- Bug hunt, nothing else found:
+  - a random-play battle fuzzer: about 25,000 actions in short fights across all six worlds,
+    plus about 90,000 in long fights with a near-unkillable player;
+  - `tests/playtest-walk.cjs` for all six worlds: every room, about 2,300 crossings, every item
+    reachable, no page errors;
+  - a 390x844 sweep of every menu and battle screen in every world, looking for anything
+    wider than the screen.
 
 ## Round 187: playtest fixes for phones, desktop and the Hack gift
 

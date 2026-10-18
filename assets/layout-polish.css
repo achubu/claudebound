@@ -44,3 +44,10 @@ body:not(.touch-mode) #touch{display:none}
   #battleModal .mt-text small{display:none}
   #battleModal .mt-help{font-size:10px;padding:4px 7px;min-height:0}
 }
+/* Round 188: on narrow phones the talent tree fits the screen instead of scrolling sideways. */
+@media(max-width:480px){
+  .talent-layout{min-width:calc(var(--paths,3) * 61px);row-gap:28px;grid-auto-rows:98px}
+  .talent-node{width:58px;flex-basis:58px;height:98px;padding:3px}
+  .talent-node .talent-icon{height:48px}
+  .talent-node b,.talent-node .talent-name,.talent-node span:not(.talent-icon){font-size:9px;line-height:1.15}
+}
