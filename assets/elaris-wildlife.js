@@ -7,7 +7,7 @@ const ELARIS_WILDLIFE={
  cinderFox:{name:'Solar Scarab',icon:'☼',hp:38,attack:7,element:'fire',sheet:'solar-scarab',cycle:'.95s'},
  drownedHeron:{name:'Mirage Ibis',icon:'≈',hp:55,attack:9,element:'water',sheet:'drowned-heron',cycle:'1.4s'},
  blightAntler:{name:'Dune Scorpion',icon:'◆',hp:44,attack:8,element:'earth',sheet:'blight-antler',cycle:'1.2s'},
- stormMoth:{name:'Dust Devil',icon:'≋',hp:52,attack:9,element:'air',sheet:'storm-moth',cycle:'.7s'},
+ stormMoth:{name:'Dust Devil',icon:'≋',hp:52,attack:9,element:'air',sheet:'dust-devil',cycle:'.7s'},
  // Round 22 mini-bosses: reuse an existing species' sprite sheet under a
  // new id/name/boss-tier stat block — same "new identity, borrowed art"
  // pattern as the city's crownSentinel.

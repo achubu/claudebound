@@ -9,6 +9,9 @@ edge by about a pixel and saves a 256-colour PNG.
     python3 tools/cut_sprite_sheet.py in.webp assets/monsters/elaris/solar-scarab.png [saturation]
 
 Lower the saturation (default 28) for pale creatures whose body would otherwise be cut away.
+
+Sheets drawn on a flat magenta (#ff00ff) background are chroma-keyed instead, and each frame is
+padded to the game's 3:4 frame (bottom-aligned) when the sheet is shorter than that.
 """
 import sys
 import numpy as np
@@ -21,13 +24,46 @@ im = np.array(Image.open(src).convert('RGBA')).astype(float)
 a = im[..., 3:] / 255
 rgb = im[..., :3] * a + 255 * (1 - a)
 mn = rgb.min(2); sat = rgb.max(2) - mn
+
+
+def save(rgb, alpha):
+    rgb = np.where(alpha[..., None] > 0, rgb, 0)  # blank colour under transparent pixels, so the palette is spent on the creature
+    sheet = Image.fromarray(np.dstack([rgb, alpha * 255]).clip(0, 255).astype(np.uint8))
+    w, h = sheet.size
+    if h < round(w / 4 * 4 / 3) - 2:  # Round 193: pad short frames to 3:4, standing near the bottom
+        H = round(w / 4 * 4 / 3); rows = np.where((alpha > 0.1).sum(1) > 2)[0]
+        top = max(0, min(H - h, round(H * 0.9) - rows.max()))
+        tall = Image.new('RGBA', (w, H), (0, 0, 0, 0)); tall.paste(sheet, (0, top)); sheet = tall
+    sheet.quantize(256, method=Image.Quantize.FASTOCTREE, dither=Image.Dither.NONE).save(out, optimize=True)
+    w, h = sheet.size
+    print(f'{out}: {w}x{h}, frames {w // 4}x{h}, transparent {100 * (alpha == 0).mean():.1f}%')
+
+
+key = np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1]
+if np.median(key[:8]) > 200:  # flat magenta background
+    alpha = np.clip((190 - key) / 150, 0, 1)
+    alpha[alpha < 0.12] = 0
+    bgc = np.array([252, 0, 250.0])
+    col = (rgb - (1 - alpha[..., None]) * bgc) / np.maximum(alpha, 1e-3)[..., None]
+    col[..., 1] = np.maximum(col[..., 1], 0)
+    col = col.clip(0, 255)
+    # Despill: JPEG blur mixes magenta into edges and outlines, which shows as pink. Nothing in
+    # these sheets has red far above green or blue above green, so cap both.
+    col[..., 0] = np.minimum(col[..., 0], col[..., 1] * 1.3 + 12)
+    col[..., 2] = np.minimum(col[..., 2], col[..., 1] * 0.85 + 8)
+    # Soft pixels (thin dust rings, edges) take the colour of the nearest solid pixel, which
+    # removes the pink cast that unmixing leaves on them.
+    solid = alpha >= 0.95
+    _, (iy, ix) = nd.distance_transform_edt(~solid, return_indices=True)
+    soft = (alpha > 0) & ~solid
+    col[soft] = col[iy[soft], ix[soft]]
+    col[alpha == 0] = 0
+    save(col, alpha); sys.exit()
+
 core = nd.binary_opening((sat >= SAT) | (mn < 170), iterations=1)
 lab, n = nd.label(core); sizes = nd.sum(core, lab, range(1, n + 1))
 keep = np.isin(lab, [i + 1 for i, s in enumerate(sizes) if s >= 25])
 keep = nd.binary_fill_holes(nd.binary_closing(keep, iterations=2))
 soft = nd.gaussian_filter(keep.astype(float), 0.7)
 alpha = np.where(keep, 1.0, np.clip(soft * 1.6, 0, 1) * ((sat >= SAT * 0.6) | (mn < 200)))
-sheet = Image.fromarray(np.dstack([rgb, alpha * 255]).clip(0, 255).astype(np.uint8))
-sheet.quantize(256, method=Image.Quantize.FASTOCTREE, dither=Image.Dither.NONE).save(out, optimize=True)
-w, h = sheet.size
-print(f'{out}: {w}x{h}, frames {w // 4}x{h}, transparent {100 * (alpha == 0).mean():.1f}%')
+save(rgb, alpha)

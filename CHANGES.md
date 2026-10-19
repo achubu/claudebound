@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 194: the Dust Devil gets its own sprite sheet
+
+- **New art.** The owner's 4-frame Dust Devil sheet (a sand tornado with glowing eyes and
+  orbiting rocks) is now `assets/monsters/elaris/dust-devil.png`, used by `stormMoth` (Dust
+  Devil, Solaris). The Noon Toller and the other worlds keep the moth sheet for now.
+- **Magenta backgrounds.** This sheet was drawn on flat magenta, and saved as a JPEG.
+  `tools/cut_sprite_sheet.py` now chroma-keys magenta sheets. JPEG blur mixes magenta into
+  outlines and the thin dust rings, so red and blue are capped against green to take the pink
+  back out, and soft edge pixels take the colour of the nearest solid pixel.
+- **Frame shape.** The sheet was 2000x496 (square frames). The game draws sprites in 3:4 boxes,
+  so the tool pads short sheets to 3:4 with the creature standing near the bottom, as the other
+  sheets do.
+- Colour under fully transparent pixels is now blanked before the 256-colour palette is made,
+  so the palette goes to the creature. The scarab sheet was re-cut with the updated tool.
+- `tests/elaris-wildlife.test.cjs` checks the Dust Devil sheet, and that the moth sheet stays for
+  the other worlds. `elaris-wildlife.js` cache tag is now round194.
+
 ## Round 193: the Solar Scarab gets its own sprite sheet
 
 - **New art.** The owner's 4-frame Solar Scarab sheet (a brass beetle rolling a sun-ball) is now

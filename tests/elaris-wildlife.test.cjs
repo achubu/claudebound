@@ -9,11 +9,11 @@ for(const id of Object.keys(ELARIS_WILDLIFE)){assert(monsterArt(id).includes('wi
 configureRegion('city');assert(!monsterArt('shade').includes('wildlife-sprite'));
 console.log('PASS: all five Solaris species spawn, elements match, animated markup and city art preserved.');
 `);
-for(const name of ['cinder-fox','drowned-heron','blight-antler','storm-moth','sun-revenant','sun-revenant-walk','solar-scarab']){
+for(const name of ['cinder-fox','drowned-heron','blight-antler','storm-moth','sun-revenant','sun-revenant-walk','solar-scarab','dust-devil']){
  const png=fs.readFileSync(path.join(__dirname,'../assets/monsters/elaris/'+name+'.png'));
  const w=png.readUInt32BE(16),h=png.readUInt32BE(20);
  // One row of four equal, upright frames (Round 193: owner sheets are 2000x667, the forest ones 2172x724).
  if(w%4||Math.abs(w/4/h-0.75)>0.02)throw Error('Unexpected frame layout '+name+' '+w+'x'+h);
 }
-run(`assert(monsterArt('cinderFox').includes('solar-scarab.png'),'the Solar Scarab has its own sheet');assert(monsterArt('forestFox').includes('cinder-fox.png'),'the fox sheet stays for Vespera and Chronospire')`);
-console.log('PASS: all seven sprite sheets have four upright frames; the Solar Scarab uses its own sheet.');
+run(`assert(monsterArt('cinderFox').includes('solar-scarab.png'),'the Solar Scarab has its own sheet');assert(monsterArt('stormMoth').includes('dust-devil.png'),'the Dust Devil has its own sheet');assert(monsterArt('forestMoth').includes('storm-moth.png'),'the moth sheet stays for the other worlds');assert(monsterArt('forestFox').includes('cinder-fox.png'),'the fox sheet stays for Vespera and Chronospire')`);
+console.log('PASS: all eight sprite sheets have four upright frames; the Solar Scarab and Dust Devil use their own sheets.');

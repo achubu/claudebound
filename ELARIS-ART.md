@@ -15,7 +15,7 @@ the species' `sheet` in `assets/elaris-wildlife.js` at the new name.
 | `cinderFox` | Solar Scarab | Fire | Brass beetle that rolls a ball of captured sunlight; Barrage | `solar-scarab.png` (in, Round 193) |
 | `drownedHeron` | Mirage Ibis | Water | Sacred ibis with a shimmering heat-haze body that drinks your strength; Siphon | `mirage-ibis.png` |
 | `blightAntler` | Dune Scorpion | Earth | Sand-armored scorpion with a copper stinger; Enfeeble | `dune-scorpion.png` |
-| `stormMoth` | Dust Devil | Air | Whirling sand spirit with glowing eyes; Mind Fog | `dust-devil.png` |
+| `stormMoth` | Dust Devil | Air | Whirling sand spirit with glowing eyes; Mind Fog | `dust-devil.png` (in, Round 193) |
 | `sunRevenant` | Sunwrapped Revenant | Earth | Tech mummy (already has art); Entomb | `sun-revenant.png` |
 | `tidewardenElaris` | The Cistern Warden | Water | Brass golem guarding the Scrapwall cistern (mini-boss) | `cistern-warden.png` |
 | `galeSovereign` | The Noon Toller | Air | Bell-headed sentinel of the Temple of the Noon Bell (mini-boss) | `noon-toller.png` |
