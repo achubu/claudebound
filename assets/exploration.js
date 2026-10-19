@@ -511,10 +511,16 @@ openPOI = function (p) {
 // by stepping on a waypoint.
 // =====================================================================
 function nexusId(region, key) { return region + ':' + key; }
+// Round 203: worlds in the order you travel them (WORLD_ORDER), not the order they were added.
+function nexusRegions() {
+  const order = typeof WORLD_ORDER !== 'undefined' ? WORLD_ORDER : [];
+  return Object.keys(NEXUS_POINTS).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+}
 function nexusList() {
   ensureExplore();
   const out = [];
-  for (const [region, nx] of Object.entries(NEXUS_POINTS)) for (const which of ['start', 'mid']) {
+  for (const region of nexusRegions()) for (const which of ['start', 'mid']) {
+    const nx = NEXUS_POINTS[region];
     const key = nx[which], id = nexusId(region, key);
     if (state.poi.nexus.includes(id)) out.push({ region, key, which, id });
   }
@@ -556,7 +562,7 @@ function nexusTravel(region, key) {
 function nexusButtonsHTML() {
   const list = nexusList();
   if (!list.length) return '<p class="muted">No Nexus Waypoints discovered yet.</p>';
-  return Object.keys(NEXUS_POINTS).filter(r => list.some(n => n.region === r)).map(r => '<div class="nexus-world"><b>' + NEXUS_WORLD_NAMES[r] + '</b><div class="nexus-buttons">' +
+  return nexusRegions().filter(r => list.some(n => n.region === r)).map(r => '<div class="nexus-world"><b>' + NEXUS_WORLD_NAMES[r] + '</b><div class="nexus-buttons">' +
     list.filter(n => n.region === r).map(n => { const here = n.region === activeRegion && n.key === state.room; return '<button class="nexus-go' + (here ? ' here' : '') + '" data-region="' + n.region + '" data-key="' + n.key + '"' + (here ? ' disabled' : '') + '>⟟ ' + nexusRoomName(n.region, n.key) + ' <small>' + (n.which === 'start' ? 'start' : 'mid-world') + (here ? ' · you are here' : '') + '</small></button>'; }).join('') + '</div></div>').join('');
 }
 function wireNexusButtons(root) {

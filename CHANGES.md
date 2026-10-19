@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 203: Nexus Waypoints in world order
+
+- The waypoint list (Aetherlink and the map) showed worlds in the order they were added to the
+  code: Neon Aftermath, Solaris, Vespera, Chronospire, Sky Isles, Elaris. It now follows the
+  travel order (`WORLD_ORDER`), with each world's start waypoint before its mid-world one
+  (`nexusRegions()` in `assets/exploration.js`).
+- `tests/god-mode.test.cjs` (which unlocks every waypoint) checks the list and the buttons are
+  in world order.
+
 ## Round 202: far fewer side cards
 
 The owner found far too many side cards dropping. About 6–7 came per world, around 40 over a

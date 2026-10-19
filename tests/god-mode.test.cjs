@@ -20,6 +20,8 @@ const r = JSON.parse(run(`JSON.stringify((() => {
   out.nexusAll = Object.entries(NEXUS_POINTS).every(([r, nx]) => [nx.start, nx.mid].every(k => state.poi.nexus.includes(nexusId(r, k))));
   out.mapsAll = WORLD_ORDER.every(r => regionRoomKeys(r).every(k => state.regionVisits[r].includes(k)));
   out.visitedIsRegion = state.visited === state.regionVisits[state.region];
+  out.nexusOrder = [...new Set(nexusList().map(n => n.region))]; out.worldOrder = WORLD_ORDER.slice();
+  out.nexusHtmlOrder = [...nexusButtonsHTML().matchAll(/data-region="([a-z]+)"/g)].map(m => m[1]).filter((r, i, a) => a.indexOf(r) === i);
   out.godFlag = state.godMode;
   // Any card wins, even one you can't afford, and a boss counts as beaten.
   const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => !s.boss));
@@ -47,6 +49,8 @@ assert(r.off.visited <= 2 && r.off.nexus <= 1, 'without God Mode the map and way
 assert(r.nexusAll, 'every Nexus Waypoint is unlocked');
 assert(r.mapsAll, 'every room of every world is revealed');
 assert(r.visitedIsRegion && r.godFlag === true);
+assert.deepStrictEqual(r.nexusOrder, r.worldOrder, 'waypoints are listed in world order (Round 203)');
+assert.deepStrictEqual(r.nexusHtmlOrder, r.worldOrder, 'and shown in world order');
 assert.deepStrictEqual(r.win, { phase: 'reward', wins: 1, hp: 0 }, 'an unaffordable card still wins the fight');
 assert.equal(r.boss.phase, 'reward'); assert(r.boss.beaten, 'a boss beaten in God Mode counts');
 assert.equal(r.travel.region, 'chronospire'); assert(r.travel.mapsAll, 'the new world is revealed too');
