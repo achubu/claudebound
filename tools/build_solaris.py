@@ -70,6 +70,7 @@ MANUAL = {
     'dead-top': {'shapes': [  # road from the top into a turnaround circle; the sand alley below
         (376, 0, 436, 262), ('ellipse', (354, 248, 474, 368)), (282, 262, 356, 350),  # stops short
         (330, 360, 452, 440), (436, 212, 560, 300)]},                                   # of the edge
+    'corner-c': {'shapes': [(374, 0, 426, 268), (374, 226, 800, 268)]},  # Round 191: brick paving the tracer cannot read
     'straight-a': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
     'straight-b': {'shapes': [(366, 0, 434, 500), (82, 228, 712, 266)]},
 }
@@ -77,6 +78,8 @@ MANUAL = {
 EXTRA = {
     'cross-a': [('ellipse', (328, 176, 472, 320))],  # sun-dial roundabout at the crossing
     'dead-left': [('ellipse', (448, 168, 604, 312))],  # round plaza at the end of the road
+    'dead-top-b': [('ellipse', (362, 224, 438, 294))],  # Round 191: ring plaza at the end of the road
+    't-bottom-c': [('ellipse', (374, 220, 426, 274))],  # Round 191: ring at the junction
 }
 MANUAL['sol-miniboss'] = MANUAL['sol-boss']  # same stronghold yard, painted twice
 # room: (painting, exits as painted, flip x, flip y). Rooms are picked so most paintings need no

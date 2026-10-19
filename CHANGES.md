@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 191: four new Solaris road paintings
+
+- The owner painted four new Solaris road tiles. They are added to the kit in
+  `assets/environment/solaris/src/`, and `tools/build_solaris.py` now spreads 11 rooms over them:
+
+  | Tile | Shape (exits as painted) | Rooms |
+  |---|---|---|
+  | `t-right-b` | north, east, south: market quarter with striped awnings | 8,1 · 1,4 · 3,4 · 7,4 |
+  | `corner-c` | north, east: brick-paved road through walled courtyards | 2,0 · 6,0 · 3,3 · 6,3 |
+  | `t-bottom-c` | east, south, west, with a short stub north (the cliffs close the top) | 4,4 · 1,5 · 3,5 |
+  | `dead-top-b` | north, ending in a ring plaza | 3,2 |
+
+  Before this, one T-junction painting covered 10 rooms and the two corner paintings 8 each.
+- The images arrived 16:9 (2000x1116 and 2752x1536). Each is cropped to the kit's 16:10 around
+  its vertical road, so the roads still leave at the middle of each edge.
+- `corner-c` is laid in bricks with grout lines, which the colour tracer cannot read (it came out
+  patchy, and the two halves did not meet). Its walk area is drawn by hand in `MANUAL`. The
+  stone rings in the middle of `dead-top-b` and `t-bottom-c` are added to the traced roads in
+  `EXTRA`.
+- Checked:
+  - Solaris, organic-path, item-placement, relic, gear and exploration tests pass.
+  - `tests/playtest-walk.cjs elaris`: all 54 rooms, 386 crossings and 68 item routes, with no
+    problems and no page errors.
+  - Screenshots of the new rooms in the game.
+
 ## Round 190: Chronospire card paintings from achubu/Cardbound
 
 - Checked `achubu/Cardbound` again (commit eb48d8d, "Expand Chronospire card illustrations").
