@@ -44,7 +44,7 @@ const card = active()[0], u0 = card.uses || 0; trainCard(card); assert.equal(own
 // Lore: all five pay out once
 const sideBefore = state.side.pool.length, sh = state.shards;
 for (const lp of pois.filter(x => x.type === 'lore')) { openPOI(lp); click('poiRead'); }
-assert.equal(state.shards, sh + 5 * 15 + 15, 'lore: +15 each (Round 157), +15 for all five'); assert.equal(state.side.pool.length, sideBefore + 1, 'and a side card'); assert(state.poi.loreRewards.includes('city'));
+assert.equal(state.shards, sh + 5 * 15 + 25, 'lore: +15 each (Round 157), +25 for all five (Round 202)'); assert.equal(state.side.pool.length, sideBefore, 'no side card (Round 202)'); assert(state.poi.loreRewards.includes('city'));
 // Sealed cache: risk
 p = of('sealed') || { ...of('cache'), type: 'sealed', id: 'city:test-sealed' };
 Math.random = () => .1; let sh2 = state.shards; openPOI(p); click('poiPry'); assert.equal(state.shards, sh2 + 25, 'lucky: +25 Shards (Round 158)');

@@ -131,8 +131,9 @@ b = setup('thornling', []); b.energy = 0; give(b, 'anchor'); b.aether = 4; playS
 
 // ---------- Rewards, workshop rules, saves ----------
 newGame(); b = setup('thornling', []); b.phase = 'reward'; b.special = [];
-const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .05), null, 'regular: 5% chance'); assert(rollSideDrop(b, .04), 'regular drop under 5%'); b.enemy.elite = true; assert.equal(rollSideDrop(b, .05), null, 'elites: 5% too'); b.enemy.elite = false; assert.equal(state.side.pool.length, n0 + 1);
-b.enemy.boss = true; assert(rollSideDrop(b, .999), 'bosses always drop one');
+const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .02), null, 'regular: 2% chance (Round 202)'); assert(rollSideDrop(b, .019), 'regular drop under 2%'); b.enemy.elite = true; assert.equal(rollSideDrop(b, .02), null, 'elites: 2% too'); b.enemy.elite = false; assert.equal(state.side.pool.length, n0 + 1);
+b.enemy.boss = true; const id0 = b.id; b.id = 'bloomTyrant'; assert(rollSideDrop(b, .999), 'final bosses always drop one');
+b.id = 'galeSovereign'; assert.equal(rollSideDrop(b, .25), null, 'mini-bosses: 25% (Round 202)'); assert(rollSideDrop(b, .24), 'mini-boss drop under 25%'); b.id = id0;
 assert(sidePoolFor(0).every(id => SIDE_CARDS[id].tier === 0), 'city drops city-tier side cards'); assert(sidePoolFor(2).includes('phase'));
 newGame(); state.bosses.push('crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'); for (let k = 0; k < 6; k++) addSideCard('purify');
 assert(state.side.deck.length <= SIDE_DECK_MAX); assert.equal(sideCopies('purify'), SIDE_COPIES, 'at most 2 copies per side card');

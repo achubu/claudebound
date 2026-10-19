@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 202: far fewer side cards
+
+The owner found far too many side cards dropping. About 6–7 came per world, around 40 over a
+run: every boss and mini-boss, 5% of other fights, the lore and world-completion rewards, and a
+50% event. Now:
+
+- Final bosses still always drop one (the Sun Pharaoh's 30% Stasis chance is kept).
+- Mini-bosses: 25% (they already give gear). Regular and elite enemies: 2% (was 5%).
+  (`SIDE_DROP_MINI` and `SIDE_DROP_REGULAR` in `assets/aether-deck.js`.)
+- Reading all five lore finds: 25 Shards instead of 15 Shards and a side card.
+- Exploring a world fully: 35 Shards instead of 20 Shards and a side card.
+- The supply-cache event's side card: 25% (was 50%).
+- Unchanged: the merchant's side card (you choose and pay) and the ranger event (costs a potion).
+
+That's about 2 per world. The Deck Workshop note, the map's completion hint and the compendium
+now say so. Tests in `aether-deck` (rates for regulars, elites, mini-bosses and final bosses),
+`exploration` and `round76` were updated.
+
 ## Round 201: smooth edges on the creatures
 
 - The creature sprite sheets (Solaris, the Sky Isles, the forest animals and their recoloured
