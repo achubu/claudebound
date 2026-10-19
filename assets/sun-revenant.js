@@ -16,7 +16,7 @@ ELARIS_WILDLIFE.sunRevenant = SUN_REVENANT;
 enemies.sunRevenant = SUN_REVENANT;
 ENEMY_AFFLICTIONS.sunRevenant = ['entomb'];
 AFFLICTIONS.entomb = { name: 'Entomb', icon: '☥', type: 'hex', desc: () => 'Entomb: the strongest card in your next hand is wrapped in linen and cannot be played that turn.', answer: ['purify', 'anchor'] };
-const SUN_REVENANT_WALK = 'assets/monsters/elaris/sun-revenant-walk.png', sunRevenantWalk = true;
+const SUN_REVENANT_WALK = 'assets/monsters/elaris/sun-revenant-walk.png?v=' + SPRITE_VERSION, sunRevenantWalk = true;
 
 function entombTarget(b) {
   const cards = b.hand.filter(c => !isJunk(c));

@@ -390,9 +390,12 @@ startBattle = function (spawnId) {
 // ---------------------------------------------------------------------
 // Side card rewards
 // ---------------------------------------------------------------------
+const SIDE_DROP_MINI = .25, SIDE_DROP_REGULAR = .02;
 function rollSideDrop(b, roll = Math.random()) {
   const final = b.enemy.boss && !(enemies[b.id] || {}).miniBoss;
-  const chance = b.enemy.boss ? 1 : .05; // Round 53: 5% from regular and elite enemies; bosses always
+  // Round 202: far fewer side cards. Final bosses always drop one; mini-bosses (who already give
+  // gear) 25%; regular and elite enemies 2% (was every boss and 5%).
+  const chance = final ? 1 : b.enemy.boss ? SIDE_DROP_MINI : SIDE_DROP_REGULAR;
   if (roll >= chance) return null;
   ensureSide();
   const owned = id => state.side.pool.filter(c => c.id === id).length;
@@ -531,7 +534,7 @@ showDeck = function () {
   showDeckBeforeAether(); ensureSide();
   const host = document.querySelector('#menuModal .workshop'); if (!host) return;
   const panel = document.createElement('div'); panel.className = 'panel side-workshop';
-  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + sideDeckMax() + '</b><p class="muted">Room for ' + sideDeckMax() + ' of ' + SIDE_DECK_MAX + ' cards. ' + (sideDeckMax() < SIDE_DECK_MAX ? 'Next slot: beat ' + SIDE_GROWTH_BOSSES.filter(id => !state.bosses.includes(id)).map(id => enemies[id] ? enemies[id].name : id)[0] + '. ' : 'Fully expanded. ') + '</p><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards drop from 5% of regular and elite enemies and from every boss; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
+  panel.innerHTML = '<div class="eyebrow">SIDE DECK · AETHER</div><b>Side deck ' + state.side.deck.length + '/' + sideDeckMax() + '</b><p class="muted">Room for ' + sideDeckMax() + ' of ' + SIDE_DECK_MAX + ' cards. ' + (sideDeckMax() < SIDE_DECK_MAX ? 'Next slot: beat ' + SIDE_GROWTH_BOSSES.filter(id => !state.bosses.includes(id)).map(id => enemies[id] ? enemies[id].name : id)[0] + '. ' : 'Fully expanded. ') + '</p><p class="muted">In battle, pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1. Your whole side deck is open in every fight: play any side card once per encounter for Aether (4 minimum, shown on the card). Unspent energy turns into Aether 1 for 1. Up to ' + SIDE_COPIES + ' copies of each. Side cards are rare: every final boss drops one, mini-bosses sometimes do, other enemies seldom; the merchant always sells one.</p><div class="cards" id="sidePoolCards"></div>';
   host.append(panel);
   const list = $('sidePoolCards');
   // Round 159: copies of the same side card stack into one tile with a ×N count, like the main

@@ -247,16 +247,15 @@ function trainCard(c) { const o = owned(c.uid) || c; for (let k = 0; k < 15; k++
 // Round 157: each lore point (Data Terminal, Sun Dial, Storm Glyph...) holds 15 Shards (was 2).
 const LORE_SHARDS = 15;
 // Round 158: a supply cache holds 15 Shards (was 3-6); a sealed cache, which can shock you, 25 (was 9).
-const CACHE_SHARDS = 15, SEALED_SHARDS = 25;
+const CACHE_SHARDS = 15, SEALED_SHARDS = 25, LORE_SET_SHARDS = 25;
 function readLore(p) {
   state.shards += LORE_SHARDS; state.poi.lore.push(p.id);
   const read = state.poi.lore.filter(id => id.startsWith(activeRegion + ':')).length;
   let msg = 'Lore recorded: +' + LORE_SHARDS + ' Shards.';
   if (read >= LORE_PER_WORLD && !state.poi.loreRewards.includes(activeRegion)) {
-    state.poi.loreRewards.push(activeRegion); state.shards += 15;
-    const pool = typeof sidePoolFor === 'function' ? sidePoolFor().filter(id => id !== 'stasis') : [];
-    const card = pool.length && typeof addSideCard === 'function' ? addSideCard(pool[Math.floor(Math.random() * pool.length)]) : null;
-    msg = 'All five read! +15 Shards' + (card ? ' and the side card ' + SIDE_CARDS[card.id].name : '') + '.';
+    // Round 202: Shards only (side cards are rarer now).
+    state.poi.loreRewards.push(activeRegion); state.shards += LORE_SET_SHARDS;
+    msg = 'All five read! +' + LORE_SET_SHARDS + ' Shards.';
   }
   finishPOI(p, msg);
 }
@@ -421,7 +420,7 @@ const EVENTS = {
                     { label: 'Pay ◇ 3 · +1 potion', disabled: state.shards < 3, run: () => { state.shards -= 3; state.potions++; return '+1 healing potion.'; } }] },
   courier: { icon: '✉', name: 'Lost Courier', text: () => 'A sealed parcel lies next to a dropped delivery drone.',
     choices: () => [{ label: 'Return it · Ward of Glass blessing, +4 Shards', run: () => { state.blessing = 'ward'; state.shards += 4; return 'The drone chirps thanks: +4 Shards and Ward of Glass for your next fight.'; } },
-                    { label: 'Open it · 50%: a side card', run: () => { if (Math.random() < .5) { const pool = sidePoolFor().filter(x => x !== 'stasis'), c = addSideCard(pool[Math.floor(Math.random() * pool.length)]); return 'Inside: ' + SIDE_CARDS[c.id].name + ' (side deck).'; } return 'Empty packing foam. Someone got here first.'; } }] },
+                    { label: 'Open it · 25%: a side card', run: () => { if (Math.random() < .25) { const pool = sidePoolFor().filter(x => x !== 'stasis'), c = addSideCard(pool[Math.floor(Math.random() * pool.length)]); return 'Inside: ' + SIDE_CARDS[c.id].name + ' (side deck).'; } return 'Empty packing foam. Someone got here first.'; } }] },
   // Elaris
   spring: { icon: '❦', name: 'Moonlit Spring', text: () => 'Cold, clear water pools between the roots. Nothing here wants to fight you.',
     choices: () => [{ label: 'Rest and drink · heal ' + pct(.5) + ' HP', run: () => { state.hp = Math.min(state.maxHp, state.hp + pct(.5)); return 'You rest by the spring: +' + pct(.5) + ' HP.'; } },
@@ -512,10 +511,16 @@ openPOI = function (p) {
 // by stepping on a waypoint.
 // =====================================================================
 function nexusId(region, key) { return region + ':' + key; }
+// Round 203: worlds in the order you travel them (WORLD_ORDER), not the order they were added.
+function nexusRegions() {
+  const order = typeof WORLD_ORDER !== 'undefined' ? WORLD_ORDER : [];
+  return Object.keys(NEXUS_POINTS).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+}
 function nexusList() {
   ensureExplore();
   const out = [];
-  for (const [region, nx] of Object.entries(NEXUS_POINTS)) for (const which of ['start', 'mid']) {
+  for (const region of nexusRegions()) for (const which of ['start', 'mid']) {
+    const nx = NEXUS_POINTS[region];
     const key = nx[which], id = nexusId(region, key);
     if (state.poi.nexus.includes(id)) out.push({ region, key, which, id });
   }
@@ -557,7 +562,7 @@ function nexusTravel(region, key) {
 function nexusButtonsHTML() {
   const list = nexusList();
   if (!list.length) return '<p class="muted">No Nexus Waypoints discovered yet.</p>';
-  return Object.keys(NEXUS_POINTS).filter(r => list.some(n => n.region === r)).map(r => '<div class="nexus-world"><b>' + NEXUS_WORLD_NAMES[r] + '</b><div class="nexus-buttons">' +
+  return nexusRegions().filter(r => list.some(n => n.region === r)).map(r => '<div class="nexus-world"><b>' + NEXUS_WORLD_NAMES[r] + '</b><div class="nexus-buttons">' +
     list.filter(n => n.region === r).map(n => { const here = n.region === activeRegion && n.key === state.room; return '<button class="nexus-go' + (here ? ' here' : '') + '" data-region="' + n.region + '" data-key="' + n.key + '"' + (here ? ' disabled' : '') + '>⟟ ' + nexusRoomName(n.region, n.key) + ' <small>' + (n.which === 'start' ? 'start' : 'mid-world') + (here ? ' · you are here' : '') + '</small></button>'; }).join('') + '</div></div>').join('');
 }
 function wireNexusButtons(root) {
@@ -668,14 +673,13 @@ function worldCompletion() {
   const parts = [discovered / keys.length]; if (chests.length) parts.push(chestsFound / chests.length); if (relics.length) parts.push(relicsFound / relics.length);
   return Math.round(parts.reduce((x, y) => x + y, 0) / parts.length * 100);
 }
-const COMPLETION_SHARDS = 20;
+const COMPLETION_SHARDS = 35; // Round 202: Shards only, no side card
 function checkWorldCompletion() {
   if (!state || state.battle) return false; ensureExplore(); state.poi.completed ||= [];
   if (state.poi.completed.includes(activeRegion) || worldCompletion() < 100) return false;
   state.poi.completed.push(activeRegion); state.shards += COMPLETION_SHARDS;
-  const pool = sidePoolFor().filter(x => x !== 'stasis'), card = addSideCard(pool[Math.floor(Math.random() * pool.length)]);
   save();
-  poiMenu('🗺 World fully explored', '<p>You have explored every corner of <b>' + NEXUS_WORLD_NAMES[activeRegion] + '</b>.</p><p class="notice">Reward: <b>+' + COMPLETION_SHARDS + ' Shards</b> and the side card <b>' + SIDE_CARDS[card.id].name + '</b>' + (state.side.deck.includes(card.uid) ? ' (added to your side deck).' : ' (add it in the Deck Workshop).') + '</p>', [{ id: 'poiLeave', label: 'Continue', primary: true, onclick: closeMenu }]);
+  poiMenu('🗺 World fully explored', '<p>You have explored every corner of <b>' + NEXUS_WORLD_NAMES[activeRegion] + '</b>.</p><p class="notice">Reward: <b>+' + COMPLETION_SHARDS + ' Shards</b>.</p>', [{ id: 'poiLeave', label: 'Continue', primary: true, onclick: closeMenu }]);
   return true;
 }
 const renderWorldBeforeCompletion = renderWorld;
@@ -685,7 +689,7 @@ showMap = function () {
   showMapBeforeCompletion(); if (!state) return;
   const done = (state.poi.completed || []).includes(activeRegion), p = document.createElement('p'); p.className = 'map-completion-note';
   const goals = ['room'].concat(Object.keys(rooms).some(chestFor) ? ['hidden chest'] : [], Object.values(rooms).some(r => r.relic && r.relic[0] !== 'material') ? ['relic'] : []);
-  p.textContent = done ? '🗺 Fully explored — reward claimed.' : '🗺 Find every ' + (goals.length > 1 ? goals.slice(0, -1).join(', ') + ' and ' + goals.at(-1) : goals[0]) + ' in this world for +' + COMPLETION_SHARDS + ' Shards and a side card.';
+  p.textContent = done ? '🗺 Fully explored — reward claimed.' : '🗺 Find every ' + (goals.length > 1 ? goals.slice(0, -1).join(', ') + ' and ' + goals.at(-1) : goals[0]) + ' in this world for +' + COMPLETION_SHARDS + ' Shards.';
   const ret = $('mapReturn'); if (ret && ret.before) ret.before(p);
 };
 const bountyStyles = document.createElement('style');

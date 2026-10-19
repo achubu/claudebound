@@ -50,9 +50,13 @@ border = border[(np.minimum(border[:, 0], border[:, 2]) - border[:, 1]) > 60]  #
 bgc = np.median(border, 0) if len(border) else np.zeros(3); kb = bgc[[0, 2]].min() - bgc[1]
 if kb > 100:  # flat magenta (or purple-magenta) background, read from just inside the border
     # Some sheets have thin dark lines round and between the frames: paint them background.
+    # Round 200: a frame line is thin, so the background shows a few pixels to each side of it
+    # (a dark creature can fill a whole column too; that is not a line).
     dark = rgb.max(2) < 130
     for axis in (0, 1):
-        lines = np.where(dark.mean(axis) > 0.85)[0]
+        frac = dark.mean(axis); n = len(frac)
+        side = lambda j: frac[j] if 0 <= j < n else 0  # past the sheet's edge counts as background
+        lines = [i for i in np.where(frac > 0.85)[0] if max(side(i - 8), side(i + 8)) < 0.5]
         for i in lines:
             for j in range(i - 2, i + 3):
                 if 0 <= j < rgb.shape[1 - axis]:
