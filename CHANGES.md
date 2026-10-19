@@ -3521,7 +3521,7 @@ run: every boss and mini-boss, 5% of other fights, the lore and world-completion
 
 That's about 2 per world. The Deck Workshop note, the map's completion hint and the compendium
 now say so. Tests in `aether-deck` (rates for regulars, elites, mini-bosses and final bosses),
-`exploration` and `round76` were updated.
+`exploration`, `round76` and `poi-rewards` were updated.
 
 ## Round 201: smooth edges on the creatures
 
