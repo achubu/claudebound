@@ -45,9 +45,20 @@ def save(rgb, alpha):
 
 
 key = np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1]
-border = np.concatenate([rgb[:6].reshape(-1, 3), rgb[-6:].reshape(-1, 3), rgb[:, :6].reshape(-1, 3), rgb[:, -6:].reshape(-1, 3)])
-bgc = np.median(border, 0); kb = bgc[[0, 2]].min() - bgc[1]
-if kb > 100:  # flat magenta (or purple-magenta) background, read from the border
+border = np.concatenate([rgb[8:14].reshape(-1, 3), rgb[-14:-8].reshape(-1, 3), rgb[:, 8:14].reshape(-1, 3), rgb[:, -14:-8].reshape(-1, 3)])
+border = border[(np.minimum(border[:, 0], border[:, 2]) - border[:, 1]) > 60]  # skip frame lines
+bgc = np.median(border, 0) if len(border) else np.zeros(3); kb = bgc[[0, 2]].min() - bgc[1]
+if kb > 100:  # flat magenta (or purple-magenta) background, read from just inside the border
+    # Some sheets have thin dark lines round and between the frames: paint them background.
+    dark = rgb.max(2) < 130
+    for axis in (0, 1):
+        lines = np.where(dark.mean(axis) > 0.85)[0]
+        for i in lines:
+            for j in range(i - 2, i + 3):
+                if 0 <= j < rgb.shape[1 - axis]:
+                    if axis == 0: rgb[:, j] = bgc
+                    else: rgb[j, :] = bgc
+    key = np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1]
     alpha = np.clip((kb * 0.76 - key) / (kb * 0.6), 0, 1)
     alpha[alpha < 0.12] = 0
     col = (rgb - (1 - alpha[..., None]) * bgc) / np.maximum(alpha, 1e-3)[..., None]

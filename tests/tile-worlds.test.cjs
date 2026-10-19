@@ -14,7 +14,7 @@ const r = JSON.parse(run(`(()=>{newGame();const o={order:WORLD_ORDER.slice(),wor
  const hop=[];const go=(region,room,boss)=>{state.region=region;configureRegion(region);state.room=room;if(boss)state.bosses.push(boss);const t=portalTarget();hop.push(region+'>'+(t?t.region:'none'))};
  go('elaris',SOLARIS_BOSS_ROOM,'bloomTyrant');go('sky',WORLD_BOSS_ROOMS.sky[0],'zenithRoc');go('wilds',WORLD_BOSS_ROOMS.wilds[0],'elarisTyrant');
  go('sky',TILE_REGIONS.sky.start);go('wilds',TILE_REGIONS.wilds.start);go('vespera',TILE_REGIONS.vespera.start);go('vespera',WORLD_BOSS_ROOMS.vespera[0],'stormTyrant');go('chronospire',TILE_REGIONS.chronospire.start);o.hops=hop;
- o.names=[enemies.zenithRoc.name,enemies.elarisTyrant.name,enemies.elarisFox.name];o.art=monsterArt('elarisFox');o.skyArt=monsterArt('skyDrake');
+ o.names=[enemies.zenithRoc.name,enemies.elarisTyrant.name,enemies.elarisFox.name];o.art=monsterArt('elarisFox');o.skyArt=monsterArt('skyDrake');o.skyAll=['skyDrake','skyWisp','skyHarpy','skyRam','stormbellWarden','featherMatriarch','zenithRoc'].map(id=>monsterArt(id));
  state.region='wilds';configureRegion('wilds');o.objective=objective();
  state.region='chronospire';configureRegion('chronospire');o.spire=[1+Math.max(...Object.values(rooms).map(x=>x.world[0])),1+Math.max(...Object.values(rooms).map(x=>x.world[1]))];
  return JSON.stringify(o)})()`));
@@ -38,6 +38,9 @@ assert.deepStrictEqual([Math.min(...r.worlds.chronospire.levels), Math.max(...r.
 assert.deepStrictEqual(r.spire, [6, 9], 'Chronospire is 6 rooms wide and 9 tall');
 assert.deepStrictEqual(r.names, ['The Zenith Roc', 'The Bloom Tyrant', 'Cinder Fox']);
 assert(r.art.includes('cinder-fox.png') && !r.art.includes('filter:hue'), 'Elaris shows the forest sprites untinted');
-assert(r.skyArt.includes('hue-rotate(165deg)'), 'sky enemies are tinted');
+// Round 196: the Sky Isles creatures have their own untinted sheets in assets/monsters/sky/.
+assert(r.skyArt.includes('assets/monsters/sky/sunfeather-drake.png') && !r.skyArt.includes('hue-rotate'), 'sky enemies use their own art, untinted');
+for (const html of r.skyAll) { const m = html.match(/monsters\/(sky\/[a-z-]+)\.png/); assert(m, 'own sky sheet: ' + html.slice(0, 120)); const png = require('fs').readFileSync(require('path').join(__dirname, '../assets/' + 'monsters/' + m[1] + '.png')); const w = png.readUInt32BE(16), h = png.readUInt32BE(20); assert(w % 4 === 0 && Math.abs(w / 4 / h - .75) < .02, m[1] + ' has four 3:4 frames'); }
+assert(r.skyAll[6].includes('bloom-tyrant'), 'the Zenith Roc is drawn in the big boss box');
 assert(/portal to Vespera/.test(r.objective), 'after the Bloom Tyrant, Elaris points to Vespera');
 console.log('PASS: Sky Isles, Elaris, Vespera and Chronospire are 54-room tile worlds with their own rosters, levels and portals.');

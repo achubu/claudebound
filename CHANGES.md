@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 196: the Sky Isles creatures get their own art
+
+- **Seven new sheets** in `assets/monsters/sky/`, from the owner's prompts: the Sunfeather Drake,
+  Cloud Wisp, Gale Harpy and Thunderhorn Ram, the Stormbell Warden and Featherfall Matriarch
+  mini-bosses, and the Zenith Roc final boss. They replace the forest animals that the Sky
+  Isles drew with a blue hue shift (`SKY_TINT`, now gone).
+- **How they are wired:** `tile-worlds.js` adds art-only keys to `WILDLIFE_ART` (`skyDrakeArt`
+  and so on) with `tint: 'none'`. In `elaris-wildlife.js`, a sheet name with a folder
+  (`sky/zenith-roc`) is read from that folder under `assets/monsters/`. `big: true` draws the
+  Zenith Roc in the larger boss box that the Bloom Tyrant uses.
+- **Cutout tool:** some of these sheets had thin dark lines round and between the frames.
+  `tools/cut_sprite_sheet.py` paints any line that is dark along 85% of a row or column as
+  background, and reads the background colour a few pixels inside the edge. The Solaris magenta
+  sheets were re-cut with this version, so the tool still reproduces every file.
+- `tests/tile-worlds.test.cjs` now checks that all seven Sky Isles enemies use their own
+  untinted sheets of four 3:4 frames, and that the Roc gets the boss box. Cache tags for
+  `elaris-wildlife.js` and `tile-worlds.js` are now round196.
+
 ## Round 195: the rest of the Solaris roster gets its own art
 
 Every Solaris enemy now has the owner's own sheet; none borrow forest art any more.

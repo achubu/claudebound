@@ -22,7 +22,10 @@ const WILDLIFE_ART={
  forestMoth:{name:'Storm Moth',sheet:'storm-moth',cycle:'.7s'}
 };
 const cityMonsterArt=monsterArt;
-monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite" role="img" aria-label="'+animal.name+'" style="background-image:url(assets/monsters/elaris/'+animal.sheet+'.png);--wildlife-cycle:'+animal.cycle+'"></span>'};
+// Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
+// big:true draws it in the larger boss box.
+function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png'}
+monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 const wildlifeStyle=document.createElement('style');
 wildlifeStyle.textContent=`
 .enemy-node .wildlife-sprite,.battle-monster .wildlife-sprite{display:block;background-repeat:no-repeat;background-size:400% 100%;background-position:0 0;image-rendering:pixelated;animation:wildlifeFrames var(--wildlife-cycle,1s) steps(1,end) infinite;transform:scaleX(var(--enemy-facing,1));transform-origin:center;filter:drop-shadow(0 5px 3px #0009)}

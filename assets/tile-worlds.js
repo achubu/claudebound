@@ -18,15 +18,25 @@ const ALL_TILE_WORLD_IDS = [...TILE_WORLD_IDS, ...REBUILT_WORLD_IDS];
 Object.assign(WORLD_NAMES, { sky: 'Sky Isles', wilds: 'Elaris' });
 
 // --- Enemies ----------------------------------------------------------
-const SKY_TINT = 'hue-rotate(165deg) saturate(.85) brightness(1.18)';
+// Round 196: the Sky Isles creatures have the owner's own sheets (assets/monsters/sky/), drawn
+// untinted through art-only keys.
+Object.assign(WILDLIFE_ART, {
+  skyDrakeArt:  { name: 'Sunfeather Drake', sheet: 'sky/sunfeather-drake', cycle: '.8s' },
+  skyWispArt:   { name: 'Cloud Wisp', sheet: 'sky/cloud-wisp', cycle: '1.6s' },
+  skyHarpyArt:  { name: 'Gale Harpy', sheet: 'sky/gale-harpy', cycle: '.8s' },
+  skyRamArt:    { name: 'Thunderhorn Ram', sheet: 'sky/thunderhorn-ram', cycle: '1.1s' },
+  stormbellArt: { name: 'The Stormbell Warden', sheet: 'sky/stormbell-warden', cycle: '1.4s' },
+  matriarchArt: { name: 'The Featherfall Matriarch', sheet: 'sky/featherfall-matriarch', cycle: '1.4s' },
+  zenithRocArt: { name: 'The Zenith Roc', sheet: 'sky/zenith-roc', cycle: '1.2s', big: true }
+});
 const SKY_ENEMIES = {
-  skyDrake:   { name: 'Sunfeather Drake', icon: '☀', hp: 44, attack: 9, element: 'fire', art: 'forestFox', tint: SKY_TINT },
-  skyWisp:    { name: 'Cloud Wisp', icon: '☁', hp: 48, attack: 9, armor: 1, element: 'water', art: 'cryptWisp', tint: SKY_TINT },
-  skyHarpy:   { name: 'Gale Harpy', icon: '≋', hp: 52, attack: 10, element: 'air', art: 'forestMoth', tint: SKY_TINT },
-  skyRam:     { name: 'Thunderhorn Ram', icon: '◆', hp: 56, attack: 10, armor: 2, element: 'earth', art: 'forestStag', tint: SKY_TINT },
-  stormbellWarden: { name: 'The Stormbell Warden', icon: '🔔', hp: 82, attack: 11, armor: 4, boss: true, miniBoss: true, element: 'air', art: 'vineguard', tint: SKY_TINT },
-  featherMatriarch: { name: 'The Featherfall Matriarch', icon: '🪶', hp: 78, attack: 12, armor: 3, boss: true, miniBoss: true, element: 'water', art: 'forestHeron', tint: SKY_TINT },
-  zenithRoc:  { name: 'The Zenith Roc', icon: '🦅', hp: 150, attack: 11, armor: 2, boss: true, element: 'air', shift: ['air', 'fire'], shiftEvery: 4, art: 'forestTyrant', tint: SKY_TINT }
+  skyDrake:   { name: 'Sunfeather Drake', icon: '☀', hp: 44, attack: 9, element: 'fire', art: 'skyDrakeArt', tint: 'none' },
+  skyWisp:    { name: 'Cloud Wisp', icon: '☁', hp: 48, attack: 9, armor: 1, element: 'water', art: 'skyWispArt', tint: 'none' },
+  skyHarpy:   { name: 'Gale Harpy', icon: '≋', hp: 52, attack: 10, element: 'air', art: 'skyHarpyArt', tint: 'none' },
+  skyRam:     { name: 'Thunderhorn Ram', icon: '◆', hp: 56, attack: 10, armor: 2, element: 'earth', art: 'skyRamArt', tint: 'none' },
+  stormbellWarden: { name: 'The Stormbell Warden', icon: '🔔', hp: 82, attack: 11, armor: 4, boss: true, miniBoss: true, element: 'air', art: 'stormbellArt', tint: 'none' },
+  featherMatriarch: { name: 'The Featherfall Matriarch', icon: '🪶', hp: 78, attack: 12, armor: 3, boss: true, miniBoss: true, element: 'water', art: 'matriarchArt', tint: 'none' },
+  zenithRoc:  { name: 'The Zenith Roc', icon: '🦅', hp: 150, attack: 11, armor: 2, boss: true, element: 'air', shift: ['air', 'fire'], shiftEvery: 4, art: 'zenithRocArt', tint: 'none' }
 };
 // Elaris gets back the forest creatures Solaris used to borrow, under their own names.
 const WILDS_ENEMIES = {
