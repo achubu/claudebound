@@ -212,12 +212,13 @@ function showGear() {
       + '<label>Wear<select aria-label="Gear for ' + GEAR_SLOT_NAMES[slot] + '" data-gear-slot="' + slot + '"><option value="">Nothing</option>'
       + options.map(g => '<option value="' + g + '"' + (g === id ? ' selected' : '') + '>' + GEAR[g].name + '</option>').join('') + '</select></label></section>';
   }).join('');
-  const collection = Object.keys(GEAR).map(g => {
-    const own = ownsGear(g), worn = wornGear().includes(g);
-    return '<article class="gear-item' + (own ? '' : ' unknown') + '">' + (own ? '<img class="gear-art" src="' + gearArtPath(g) + '" alt="">' : '<div class="gear-empty">?</div>')
-      + '<div><b>' + (own ? GEAR[g].name : 'Undiscovered ' + GEAR_SLOT_NAMES[GEAR[g].slot].toLowerCase()) + '</b><p>' + (own ? gearText(g) : 'Guarded by a mini-boss in ' + WORLD_NAMES[GEAR[g].world] + '.') + '</p>'
-      + '<small>' + WORLD_NAMES[GEAR[g].world] + ' · ' + GEAR_SLOT_NAMES[GEAR[g].slot] + (own ? (worn ? ' · Worn' : ' · In your pack') : '') + '</small></div></article>';
-  }).join('');
+  // Round 199: only gear you have found is listed.
+  const collection = Object.keys(GEAR).filter(ownsGear).map(g => {
+    const worn = wornGear().includes(g);
+    return '<article class="gear-item"><img class="gear-art" src="' + gearArtPath(g) + '" alt="">'
+      + '<div><b>' + GEAR[g].name + '</b><p>' + gearText(g) + '</p>'
+      + '<small>' + WORLD_NAMES[GEAR[g].world] + ' · ' + GEAR_SLOT_NAMES[GEAR[g].slot] + (worn ? ' · Worn' : ' · In your pack') + '</small></div></article>';
+  }).join('') || '<p class="muted">No gear found yet. Each mini-boss guards a piece.</p>';
   const totals = Object.keys(GEAR_STATS).map(s => gearStat(s) ? GEAR_STATS[s](gearStat(s)) : '').filter(Boolean).join(' · ') || 'No boosts yet';
   openMenu('<div class="eyebrow">EQUIPMENT · GEAR</div><h1>Gear</h1><p>Each world has two gear pieces, one with each mini-boss. Holding both opens that world\'s final boss room. Wear one piece per slot.</p><p class="notice">Worn: ' + totals + '</p><div class="gear-slots">' + slots + '</div><h2>Gear collection</h2><div class="gear-collection">' + collection + '</div><p><button id="gearClose" class="primary">Close</button></p>');
   document.querySelectorAll('[data-gear-slot]').forEach(s => s.onchange = () => { equipGear(s.dataset.gearSlot, s.value); showGear(); });
@@ -230,7 +231,7 @@ if (typeof document !== 'undefined' && document.createElement) {
   const style = document.createElement('style');
   style.textContent = '.gear-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.gear-slot{text-align:center}.gear-slot select{width:100%;margin-top:4px}'
     + '.gear-art{width:72px;height:72px;object-fit:contain;display:block;margin:4px auto;image-rendering:auto}.gear-empty{width:72px;height:72px;margin:4px auto;display:grid;place-items:center;border:1px dashed #5b8fa0;border-radius:12px;font-size:28px;opacity:.6}'
-    + '.gear-collection{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}.gear-item{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #2e5566;border-radius:10px;background:#0b1a26}.gear-item .gear-art,.gear-item .gear-empty{width:48px;height:48px;margin:0;flex:0 0 auto}.gear-item p{margin:2px 0}.gear-item.unknown{opacity:.6}'
+    + '.gear-collection{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}.gear-item{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #2e5566;border-radius:10px;background:#0b1a26}.gear-item .gear-art,.gear-item .gear-empty{width:48px;height:48px;margin:0;flex:0 0 auto}.gear-item p{margin:2px 0}'
     + '#world .relic.gear-relic{width:36px!important;height:36px!important;padding:0;background:#0b1a26cc;display:grid;place-items:center}#world .relic.gear-relic img{width:30px;height:30px;object-fit:contain}'
     + '.gear-cleanse{margin:6px 0;border-color:#9fe0a0!important;color:#dcffcf!important}';
   document.head.append(style);

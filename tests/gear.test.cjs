@@ -29,6 +29,9 @@ const r = JSON.parse(run(`(()=>{const o={};newGame();
  state.bosses.push('bloomTyrant');o.bossOpens=hasRelic('gate:elaris');
  // Gear screen
  showGear();o.menu=document.getElementById('menuModal').innerHTML||'';
+ o.unowned=Object.keys(GEAR).filter(g=>!ownsGear(g)).map(g=>GEAR[g].name);
+ // Round 199: with nothing found, the collection says so instead of listing what's out there.
+ const kept=state.relics;state.relics=[];showGear();o.emptyMenu=document.getElementById('menuModal').innerHTML||'';state.relics=kept;
  return JSON.stringify(o)})()`));
 assert.strictEqual(r.ids.length, 12); assert.deepStrictEqual(r.perWorld, [2, 2, 2, 2, 2, 2], 'two pieces per world');
 assert.deepStrictEqual(r.slots, ['belt', 'boots', 'gloves', 'pants', 'shirt']);
@@ -49,4 +52,6 @@ assert(r.oldGate, 'an old save with the Ember Sigil and Briarstep Boots opens th
 assert(r.oldChest, 'the hidden crystal already taken leaves its new chest open');
 assert(r.bossOpens, 'a beaten world boss keeps its door open');
 assert(/Gear collection/.test(r.menu) && /Ember Gloves/.test(r.menu) && /data-gear-slot="boots"/.test(r.menu), 'the Gear screen lists slots and the collection');
+assert(r.unowned.length && r.unowned.every(n => !r.menu.includes(n)) && !/Undiscovered/.test(r.menu), 'gear not yet found is not listed');
+assert(/No gear found yet/.test(r.emptyMenu), 'an empty collection says so');
 console.log('PASS: 12 gear pieces (2 per world) in 5 slots: boosts, one free cleanse, equip rules, saves, old-save carry-over and the Gear screen.');

@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 199: the Gear screen lists only gear you have found
+
+- The Gear collection used to list all 12 pieces, with "Undiscovered …" placeholders for the
+  ones you didn't have. It now shows only the gear you own. With nothing found yet it says
+  "No gear found yet. Each mini-boss guards a piece." The HUD objective still names each world's
+  two pieces and who guards them (`assets/gear.js`).
+- `tests/gear.test.cjs` checks that unfound gear isn't listed and that an empty collection says
+  so. `gear.js` cache tag is now round199.
+
 ## Round 198: God Mode
 
 A main-menu option (also on the start screen) for trying the game out, from `assets/god-mode.js`
