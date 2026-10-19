@@ -3496,6 +3496,52 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 192: Solaris diagonals, no flash of old room art, glowing items
+
+- **Solaris corners cut, with diagonal roads.** The owner asked for a less rectangular map.
+  - Rooms 0,3 Copper Wells, 8,3 Radiant Crossing and 5,0 Halo Court are gone (Solaris now has
+    51 rooms). All three were corner rooms on the outer edge, with nothing in them.
+  - The two rooms beside each cut are joined by a diagonal road: 0,4 ↔ 1,3, 7,3 ↔ 8,4, and
+    4,0 ↔ 5,1.
+  - Those six rooms use the owner's new diagonal paintings in
+    `assets/environment/solaris/src/diagonal/`: `diag-corner-a`, `diag-t-a` (two versions)
+    and `diag-t-b` (two versions). Only side-to-side flips are used.
+  - Room 4,0 takes a mirrored `diag-t-a`, whose extra north road runs off the top of the map as a
+    painted dead end, so no `diag-corner-b` painting was needed.
+- **How the diagonal doors work.**
+  - `tools/build_solaris.py` cuts the rooms (`CUT`), links the neighbours, picks diagonal tiles
+    (`DSHAPES`), and writes each diagonal door, the spot where the painted road leaves the room,
+    to `SOLARIS_DIAG` in `assets/solaris-data.js`.
+  - In `assets/solaris.js`, walking into a diagonal door (within 36px) takes you to the partner
+    room. You arrive a short way along its diagonal road, clear of its door, so you never bounce
+    straight back. It reuses the corner-exit code from `assets/diagonals.js`.
+  - Diagonal exit labels (↗ ↖ ↘ ↙ plus the room name) sit at their doors; tapping one walks you
+    through.
+  - Where a diagonal leaves through the same edge as a straight exit (rooms 1,3 and 7,3), the
+    straight door ignores that stretch (`organicDoorExcluded`, a new hook in
+    `assets/organic-paths.js`).
+  - The map draws the diagonal links on its own.
+  - Enemy levels are re-spread by walking distance, and the Solar Crown stays at 18.
+  - Old saves standing in a removed room resume at Dawnfire Gate (the existing check on Solaris
+    room keys).
+- **No more flash of old art on entering a room** (new `assets/room-preload.js`). A room's ground
+  was first drawn with the old district or forest art, and its own painting replaced it once the
+  image loaded, so on a first visit the old art showed for a moment. Two fixes:
+  - While the painting loads, the room now shows its world's plain ground colour.
+  - The paintings of the rooms next to you start loading as soon as you arrive, so they are
+    usually ready before you walk in.
+  - This covers Solaris, the tile worlds and Neon Aftermath's repainted rooms.
+- **Items glow.** Points of interest (data terminals, shrines, caches and so on), map chests and
+  relic/gear markers now have a white rim and a slow pulsing glow: cyan in Neon Aftermath, warm
+  gold elsewhere. Point-of-interest art is drawn at 52px (was 44). Used ones are greyed at 80%
+  opacity (was 45%), so they stay readable. With reduced motion the glow is steady.
+  (`assets/layout-polish.css`.)
+- **No dotted footpaths.** The footpath lines from the street to each item in Neon Aftermath's
+  painted rooms (Round 101) are no longer drawn. The paths are still walkable in the mask.
+- Tests: new `tests/solaris-diagonals.test.cjs`. `expansion` updated for 51 Solaris rooms.
+  `tests/playtest-walk.cjs` now also walks diagonal doors; for Solaris: 51 rooms, 374
+  crossings, no problems, no page errors.
+
 ## Round 191: four new Solaris road paintings
 
 - The owner painted four new Solaris road tiles. They are added to the kit in

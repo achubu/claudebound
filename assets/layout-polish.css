@@ -51,3 +51,17 @@ body:not(.touch-mode) #touch{display:none}
   .talent-node .talent-icon{height:48px}
   .talent-node b,.talent-node .talent-name,.talent-node span:not(.talent-icon){font-size:9px;line-height:1.15}
 }
+/* Round 192: things you can open or pick up stand out from the painting: a white rim and a
+   slow pulsing glow (cyan in Neon Aftermath, warm gold in the other worlds). Used ones stay
+   readable: dimmed and greyed, not see-through. */
+#world{--item-glow:#ffe9a0}
+#world[data-environment="neon"]{--item-glow:#8ff7ff}
+.poi-node.poi-art{width:52px!important;height:52px!important}
+.poi-node.poi-art:not(.used):not(.poi-merchant),.map-chest,#world .relic{animation:itemGlow 2.4s ease-in-out infinite!important}
+.poi-node.used{opacity:.8!important}
+.poi-node.poi-art.used{filter:grayscale(.65) brightness(.85) drop-shadow(0 0 1.5px #000c)!important;animation:none!important}
+@keyframes itemGlow{
+  0%,100%{filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 5px var(--item-glow)) drop-shadow(0 0 1px #000)}
+  50%{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 12px var(--item-glow)) drop-shadow(0 0 22px var(--item-glow))}}
+@media(prefers-reduced-motion:reduce){
+  .poi-node.poi-art:not(.used):not(.poi-merchant),.map-chest,#world .relic{animation:none!important;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 9px var(--item-glow))!important}}

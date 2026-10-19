@@ -18,6 +18,13 @@ OUT = 'assets/environment/solaris'
 # Tile name prefix -> the exits of the tile as painted.
 SHAPES = {'corner': 'ne', 't-bottom': 'esw', 't-right': 'nes', 'cross': 'nesw', 'dead-bottom': 's', 'dead-right': 'e', 'dead-left': 'w', 'dead-top': 'n', 'straight': 'ns'}
 FLIP_EXITS = {(0, 0): {}, (1, 0): {'e': 'w', 'w': 'e'}, (0, 1): {'n': 's', 's': 'n'}, (1, 1): {'e': 'w', 'w': 'e', 'n': 's', 's': 'n'}}
+# Round 192: three corner rooms are cut so the map is less rectangular; the two rooms beside each
+# cut are joined by a diagonal road across the gap. Their paintings live in src/diagonal/, named by
+# shape: (straight exits as painted, diagonal as painted). Only side-to-side flips are used.
+CUT = ['0,3', '8,3', '5,0']
+DIAG_SRC = SRC + '/diagonal'
+DSHAPES = {'diag-corner': ('es', 'ne'), 'diag-t-a': ('nes', 'sw'), 'diag-t-b': ('esw', 'nw')}
+FLIP_DIAG = {(0, 0): {}, (1, 0): {'ne': 'nw', 'nw': 'ne', 'se': 'sw', 'sw': 'se'}}
 ROAD = np.array([247, 227, 175])
 
 
@@ -145,6 +152,13 @@ def neon_layout():
         used.add(name)
         x, y = map(int, key.split(','))
         rooms[key] = {'name': name, 'exits': ex, 'world': [x, y], **({'zone': r['zone']} if r.get('zone') else {}), **({'level': r['level'] + 9} if r.get('level') else {})}
+    for c in CUT:
+        a, b = rooms[c]['exits'].values()
+        for k in (a, b): rooms[k]['exits'] = {d: t for d, t in rooms[k]['exits'].items() if t != c}
+        (ax, ay), (bx, by) = map(int, a.split(',')), map(int, b.split(','))
+        rooms[a]['exits'][('n' if by < ay else 's') + ('e' if bx > ax else 'w')] = b
+        rooms[b]['exits'][('n' if ay < by else 's') + ('e' if ax > bx else 'w')] = a
+        del rooms[c]
     # Levels climb with walking distance from the start (10 near the gate, 17 at the far edge,
     # 18 for the Solar Crown), so world 2's difficulty curve keeps its shape on the new map.
     dist, q = {'0,0': 0}, ['0,0']
@@ -171,11 +185,31 @@ def main():
     for n, shapes in EXTRA.items():
         if n in masks: masks[n] = masks[n] | manual_mask({'shapes': shapes})
     masks.update({n: manual_mask(MANUAL[n]) for n in marks})
+    dtiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(DIAG_SRC + '/*.*'))}
+    dshape_of = {n: next(sh for sh in sorted(DSHAPES, key=len, reverse=True) if n.startswith(sh)) for n in dtiles}
+    for n, im in dtiles.items():
+        im.save(f'{OUT}/{n}.webp', quality=88, method=6)
+        masks[n] = trace(im, DSHAPES[dshape_of[n]][0])
     rooms = neon_layout()
     # Pick a tile and flip for every room; spread variants so neighbours differ.
     plan = {}
     for key in sorted(rooms, key=lambda k: (int(k.split(',')[1]), int(k.split(',')[0]))):
-        want = set(rooms[key]['exits'])
+        want = {d for d in rooms[key]['exits'] if len(d) == 1}
+        want_d = {d for d in rooms[key]['exits'] if len(d) == 2}
+        if want_d:
+            cx, cy = map(int, key.split(','))
+            step = {'n': (0, -1), 's': (0, 1), 'e': (1, 0), 'w': (-1, 0)}
+            off_map = lambda d: f'{cx + step[d][0]},{cy + step[d][1]}' not in rooms
+            opts = []
+            for n in sorted(dtiles):
+                base, bd = DSHAPES[dshape_of[n]]
+                for f in FLIP_DIAG:
+                    ex = {FLIP_EXITS[f].get(d, d) for d in base}
+                    # An extra painted road may only run off the map (a painted dead end).
+                    if {FLIP_DIAG[f].get(bd, bd)} == want_d and want <= ex and all(off_map(d) for d in ex - want): opts.append((n, f))
+            if not opts: raise SystemExit('no diagonal tile for ' + key + ' ' + ''.join(sorted(want)) + '+' + ','.join(want_d))
+            h = int(hashlib.md5(key.encode()).hexdigest(), 16)
+            plan[key] = opts[h % len(opts)]; continue
         if key in LANDMARKS:
             n, ex, fx, fy = LANDMARKS[key]
             if n not in marks: raise SystemExit('missing landmark painting ' + n)
@@ -211,6 +245,20 @@ def main():
                 for c in range(cx * 100, cx * 100 + 100):
                     x0 = (c - cx * 100) * 8
                     bits[r, c] = m[max(0, yc - 4):yc + 4, x0:x0 + 8].mean() >= .5
+    # Diagonal doors: where each diagonal road leaves its room (outside the straight exits' middles).
+    diag = {}
+    for key, (n, (fx, fy)) in plan.items():
+        want_d = [d for d in rooms[key]['exits'] if len(d) == 2]
+        if not want_d: continue
+        m = masks[n][:, ::-1] if fx else masks[n]
+        ys, xs = np.nonzero(m)
+        edge = (xs <= 3) | (xs >= 796) | (ys <= 3) | (ys >= 496)
+        mid = ((ys <= 3) | (ys >= 496)) & (abs(xs - 400) < 70) | ((xs <= 3) | (xs >= 796)) & (abs(ys - 250) < 60)
+        d = want_d[0]; corner = (800 if 'e' in d else 0, 0 if 'n' in d else 500)
+        pts = [(x, y) for x, y in zip(xs[edge & ~mid], ys[edge & ~mid]) if (x < 400) == (corner[0] == 0) and (y < 250) == (corner[1] == 0)]
+        if not pts: raise SystemExit('no diagonal road reaches the edge in ' + key)
+        x, y = np.mean(pts, axis=0)
+        diag[key] = {d: {'to': rooms[key]['exits'][d], 'x': int(round(x)), 'y': int(round(y))}}
     ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
     flat = np.concatenate([bits.ravel().astype(int), np.zeros((-bits.size) % 6, int)])
     enc = ''.join(ABC[int(''.join(map(str, flat[i:i + 6])), 2)] for i in range(0, len(flat), 6))
@@ -219,7 +267,10 @@ def main():
           'const SOLARIS_WORLD = ' + json.dumps({'maskW': W, 'maskH': H, 'cell': 8, 'mask': enc}) + ';\n'
           'const SOLARIS_PLAN = ' + json.dumps({k: [n, f[0], f[1]] for k, (n, f) in plan.items()}, separators=(',', ':')) + ';\n'
           'const SOLARIS_LAYOUT = ' + json.dumps(rooms, separators=(',', ':')) + ';\n'
-          'const SOLARIS_PLACEHOLDERS = ' + json.dumps(placeholder) + ';\n')
+          'const SOLARIS_PLACEHOLDERS = ' + json.dumps(placeholder) + ';\n'
+          '// Round 192: diagonal doors, {room: {dir: {to, x, y}}} in room pixels (foot point on the edge).\n'
+          'const SOLARIS_DIAG = ' + json.dumps(diag, separators=(',', ':')) + ';\n'
+          'const SOLARIS_CUT = ' + json.dumps(CUT) + ';\n')
     open('assets/solaris-data.js', 'w').write(js)
     used = {}
     for n, _ in plan.values(): used[n] = used.get(n, 0) + 1
