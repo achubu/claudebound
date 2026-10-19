@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 200: no more line through the Cistern Warden
+
+- **The line was a cutout mistake, not in the owner's art.** In Round 196, `tools/cut_sprite_sheet.py`
+  learnt to erase the thin dark lines some generated sheets draw round and between their frames
+  (any column dark in 85% of its height). The Cistern Warden's dark body made two columns look
+  like such a line, so they were erased right through him in his second frame. A frame line now
+  also needs background just beside it (8px each side, the sheet's edge counting as background).
+  Checked against every source sheet: only the warden's false line is dropped, and every real
+  frame line is still found. The warden was cut again from the owner's image.
+- **A clear gutter between frames.** The game scales sheets down. With smoothing, a pixel or two
+  of the next frame shows at a frame's side, so art touching a frame's edge flickered as a thin
+  line while creatures animated. Most sheets, including the old forest ones, had art within a
+  few pixels of an edge. The new `tools/pad_sprite_frames.py` shrinks each frame of a sheet by
+  the same amount (2–5%) about its bottom-centre, leaving at least 14px clear at the sides and
+  top. Sheet sizes are unchanged, and two sheets that already had room were left alone.
+
 ## Round 199: the Gear screen lists only gear you have found
 
 - The Gear collection used to list all 12 pieces, with "Undiscovered …" placeholders for the
