@@ -3496,6 +3496,49 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 197: the Sky Isles are painted, with diagonal walkways
+
+The Sky Isles now use the owner's top-down tiles instead of stand-ins, and three edge rooms are
+cut so the map is less rectangular (51 rooms, as in Solaris).
+
+- **The owner's tiles** (2624x1632, `assets/environment/sky/src/`): two crosses, the corner,
+  straight, T to the right and T downward, and four dead-ends to the right. They are strictly
+  top-down with every walkway leaving its edge at the exact middle, so they flip both ways.
+- **Made from them** by the new `tools/prepare_sky_tiles.py` (no dead-end-from-below or diagonal
+  tiles came back from the generator):
+  - `dead-bottom-a/b/c`: three of the dead-right paintings turned a quarter turn, cropped round
+    the lookout and scaled back up. Their sources are kept in `src/rotate/`.
+  - `src/diagonal/diag-se/nw/sw`: the corner tile with a third walkway from its bend to that
+    corner of the image. The walkway is a strip of the straight tile turned to point at the
+    corner, so its stones and rim match, and the cross tile's round plaza is laid over the joint.
+  - Walk masks for every tile, traced by colour: the marble and its rim are warm grey, clouds
+    white-blue and islands green. An opening drops island cliffs and props, padded so it does not
+    eat the room edges. Some walkways start at an island's edge rather than the image's (the left
+    arm of the T and cross tiles), so each exit also gets a walkway-wide strip across the grass to
+    its edge.
+- **Corner cuts and diagonals in tile worlds** (`tools/build_tile_world.py`):
+  - A world may list `cut` rooms. As in Solaris, the two rooms beside each cut are joined by a
+    diagonal exit, and each diagonal door (where the painted walkway leaves the room) goes into
+    the data's `diag` table.
+  - The Sky Isles cut 8,0 and 8,5 (two corners) and 2,5 (a notch in the bottom edge). Of all the
+    choices, these need the fewest diagonal paintings (three).
+  - `top_down` worlds may flip diagonal tiles both ways.
+- **Engine.** `assets/solaris.js`'s diagonal doors read the active world's table
+  (`worldDiagTable()`: `SOLARIS_DIAG` in Solaris, `TILE_WORLD_DATA[world].diag` in a tile world).
+  Entering, arriving clear of the door, the ↗ labels and tap routes all work as in Solaris.
+- **Saves.** A save standing in a cut room resumes at Windgate Landing, and cut rooms leave the
+  visited lists (`dropCutRooms` in `assets/tile-worlds.js`). Without this, such a save would have
+  failed to load ("Invalid room").
+- **Gear kept clear of its guard.** In a corner tile the only open ground near the requested spot
+  is beside the bend, where the mini-boss stands. When a relic lands within 60px of a patrol it
+  is placed again, at least 90px (else 70px) away (`assets/neon-world.js`). Relics elsewhere don't
+  move.
+- The corner painting is used in 18 rooms. A second version would cut down the repetition.
+- Tests: new `tests/sky-diagonals.test.cjs` (51 rooms, no stand-ins, three links both ways that
+  arrive on the walkway, the save migration, Solaris keeping its own doors). `tile-worlds` expects
+  51 Sky rooms. `node tests/playtest-walk.cjs sky`: 51 rooms, 375 crossings, no problems.
+  Cache tags for `solaris.js`, `sky-data.js`, `tile-worlds.js` and `neon-world.js` are now round197.
+
 ## Round 196: the Sky Isles creatures get their own art
 
 - **Seven new sheets** in `assets/monsters/sky/`, from the owner's prompts: the Sunfeather Drake,

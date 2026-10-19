@@ -10,6 +10,10 @@
 # 3. Each world uses Neon Aftermath's rooms turned a different way, so the three tile worlds
 #    don't share a map: Solaris is flipped top-to-bottom, the Sky Isles left-to-right, and
 #    Elaris is turned half way round.
+# 4. Round 197: a world may cut rooms ('cut'); the two rooms beside each cut are joined by a
+#    diagonal road, painted on tiles in src/diagonal/ named by DSHAPES (straight exits as painted,
+#    diagonal as painted). Top-down worlds ('top_down') may flip those both ways. The doors are
+#    written to the data's 'diag' table, read by assets/solaris.js like Solaris's.
 # Writes assets/environment/<world>/*.webp and assets/<world>-data.js.
 import glob, hashlib, json, os, re, sys
 import numpy as np
@@ -21,6 +25,9 @@ from build_solaris import SHAPES as SOLARIS_SHAPES, FLIP_EXITS, load, trace, man
 
 # Round 179: a turned layout (Chronospire) needs a straight east-west road too.
 SHAPES = {**SOLARIS_SHAPES, 'straight-h': 'ew'}
+DSHAPES = {'diag-se': ('ne', 'se'), 'diag-nw': ('ne', 'nw'), 'diag-sw': ('ne', 'sw')}
+FLIP_DIAG = {(0, 0): {}, (1, 0): {'e': 'w', 'w': 'e'}, (0, 1): {'n': 's', 's': 'n'}, (1, 1): {'e': 'w', 'w': 'e', 'n': 's', 's': 'n'}}
+def flip_diag(f, d): return ''.join(FLIP_DIAG[f].get(c, c) for c in d)
 
 WORLDS = {
     'sky': {
@@ -30,6 +37,9 @@ WORLDS = {
         'b': ['Bridge', 'Spire', 'Isle', 'Terrace', 'Landing', 'Steps', 'Garden', 'Walk', 'Arch', 'Court',
               'Perch', 'Causeway', 'Overlook', 'Ring', 'Crossing', 'Ledge', 'Gate', 'Dock'],
         'special': {'start': 'Windgate Landing', 'boss': 'The Eye of the Sky', 'mini1': 'Stormbell Tower', 'mini2': 'Featherfall Roost'},
+        # Round 197: the owner's paintings are strictly top-down. Two corners and a notch in the
+        # bottom edge are cut; these three need the fewest diagonal paintings (3).
+        'cut': ['8,0', '8,5', '2,5'], 'top_down': True,
     },
     'wilds': {
         'name': 'Elaris', 'key': lambda cx, cy: (8 - cx, 9 - cy), 'levels': (28, 36), 'road': None,
@@ -87,6 +97,13 @@ def layout(cfg, seed):
         used.add(name)
         x, y = map(int, key.split(','))
         rooms[key] = {'name': name, 'exits': ex, 'world': [x, y]}
+    for c in cfg.get('cut', []):
+        a, b = rooms[c]['exits'].values()
+        for k in (a, b): rooms[k]['exits'] = {d: t for d, t in rooms[k]['exits'].items() if t != c}
+        (ax, ay), (bx, by) = map(int, a.split(',')), map(int, b.split(','))
+        rooms[a]['exits'][('n' if by < ay else 's') + ('e' if bx > ax else 'w')] = b
+        rooms[b]['exits'][('n' if ay < by else 's') + ('e' if ax > bx else 'w')] = a
+        del rooms[c]
     # Levels climb with walking distance from the start; the final boss room is one higher.
     lo, top = cfg['levels']; start, boss = roles['start'], roles['boss']
     dist, q = {start: 0}, [start]
@@ -114,10 +131,22 @@ def main(world):
         if cfg['road'] is None: raise SystemExit(n + ' has no mask and ' + world + ' has no road colour to trace')
         return trace(im, SHAPES[shape_of[n]])
     masks = {n: mask_for(n) for n in tiles}
+    dtiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(src + '/diagonal/*.*'))}
+    dshape_of = {n: next(sh for sh in DSHAPES if n.startswith(sh)) for n in dtiles}
+    for n, im in dtiles.items(): im.save(f'{out}/{n}.webp', quality=86, method=6); masks[n] = mask_for(n)
+    dflips = list(FLIP_DIAG) if cfg.get('top_down') else [(0, 0), (1, 0)]
     rooms, roles = layout(cfg, world)
     plan = {}
     for key in sorted(rooms, key=lambda k: (int(k.split(',')[1]), int(k.split(',')[0]))):
-        want = set(rooms[key]['exits']); opts = []
+        want = {d for d in rooms[key]['exits'] if len(d) == 1}; opts = []
+        want_d = {d for d in rooms[key]['exits'] if len(d) == 2}
+        if want_d:
+            for n in sorted(dtiles):
+                base, bd = DSHAPES[dshape_of[n]]
+                for f in dflips:
+                    if {flip_diag(f, bd)} == want_d and {flip_diag(f, d) for d in base} == want: opts.append((n, f))
+            if not opts: raise SystemExit('no diagonal tile for ' + key + ' ' + ''.join(sorted(want)) + '+' + ','.join(want_d))
+            plan[key] = opts[int(hashlib.md5((world + key).encode()).hexdigest(), 16) % len(opts)]; continue
         for n in sorted(tiles):
             base = set(SHAPES[shape_of[n]])
             for f, m in FLIP_EXITS.items():
@@ -140,12 +169,29 @@ def main(world):
         for r in range(H):
             yc = r * 8 + 4 - cy * 500
             if 0 <= yc < 500: bits[r, cx * 100:cx * 100 + 100] = cells[max(0, yc - 4):yc + 4].mean(0) >= .5
+    # Diagonal doors: where each diagonal road leaves its room (outside the straight exits' middles).
+    diag = {}
+    for key, (n, (fx, fy)) in plan.items():
+        want_d = [d for d in rooms[key]['exits'] if len(d) == 2]
+        if not want_d: continue
+        m = masks[n]
+        if fx: m = m[:, ::-1]
+        if fy: m = m[::-1]
+        ys, xs = np.nonzero(m)
+        edge = (xs <= 3) | (xs >= 796) | (ys <= 3) | (ys >= 496)
+        mid = ((ys <= 3) | (ys >= 496)) & (abs(xs - 400) < 70) | ((xs <= 3) | (xs >= 796)) & (abs(ys - 250) < 60)
+        d = want_d[0]; corner = (800 if 'e' in d else 0, 0 if 'n' in d else 500)
+        pts = [(x, y) for x, y in zip(xs[edge & ~mid], ys[edge & ~mid]) if (x < 400) == (corner[0] == 0) and (y < 250) == (corner[1] == 0)]
+        if not pts: raise SystemExit('no diagonal road reaches the edge in ' + key)
+        x, y = np.mean(pts, axis=0)
+        diag[key] = {d: {'to': rooms[key]['exits'][d], 'x': int(round(x)), 'y': int(round(y))}}
     ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
     flat = np.concatenate([bits.ravel().astype(int), np.zeros((-bits.size) % 6, int)])
     enc = ''.join(ABC[int(''.join(map(str, flat[i:i + 6])), 2)] for i in range(0, len(flat), 6))
     data = {'name': cfg['name'], 'world': {'maskW': W, 'maskH': H, 'cell': 8, 'mask': enc},
             'plan': {k: [n, f[0], f[1]] for k, (n, f) in plan.items()}, 'layout': rooms, 'roles': roles,
-            'placeholders': sorted(n for n in tiles if n.endswith('-ph'))}
+            'placeholders': sorted(n for n in tiles if n.endswith('-ph')),
+            **({'diag': diag, 'cut': cfg['cut']} if cfg.get('cut') else {})}
     js = (f'// Built by tools/build_tile_world.py {world} (Round 174). Do not edit by hand.\n'
           "var TILE_WORLD_DATA = typeof TILE_WORLD_DATA !== 'undefined' ? TILE_WORLD_DATA : {};\n"
           f'TILE_WORLD_DATA.{world} = ' + json.dumps(data, separators=(',', ':')) + ';\n')

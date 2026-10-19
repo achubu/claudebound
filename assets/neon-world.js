@@ -338,7 +338,11 @@ function placeOrganicRelics() {
   for (const [k, r] of Object.entries(rooms)) {
     if (!r.relic || !organicDef(k)) continue;
     const nook = neonNook(k, 'relic'); if (nook) { r.relic[3] = nook.x; r.relic[4] = nook.y; continue; }
-    const p = organicItemSpot(k, r.relic[3], r.relic[4]) || (!organicReachableAt(k, { x: r.relic[3], y: r.relic[4] }) && organicSpot(k, r.relic[3], r.relic[4]));
+    let p = organicItemSpot(k, r.relic[3], r.relic[4]) || (!organicReachableAt(k, { x: r.relic[3], y: r.relic[4] }) && organicSpot(k, r.relic[3], r.relic[4]));
+    // Round 197: keep gear clear of the mini-boss guarding it (a corner tile's only open ground
+    // can be right beside the bend where the boss stands).
+    const spawns = p && state ? roomSpawns(k) : [];
+    if (p && spawns.some(e => Math.hypot(e.x - p.x, e.y - p.y) < 60)) p = organicItemSpot(k, r.relic[3], r.relic[4], spawns, 90) || organicItemSpot(k, r.relic[3], r.relic[4], spawns, 70) || p;
     if (p) { r.relic[3] = p.x; r.relic[4] = p.y; }
   }
 }

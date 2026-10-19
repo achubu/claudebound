@@ -20,7 +20,7 @@ const r = JSON.parse(run(`(()=>{newGame();const o={order:WORLD_ORDER.slice(),wor
  return JSON.stringify(o)})()`));
 assert.deepStrictEqual(r.order, ['city', 'elaris', 'sky', 'wilds', 'vespera', 'chronospire']);
 for (const [id, w] of Object.entries(r.worlds)) {
-  assert.strictEqual(w.rooms, 54, id + ' has 54 rooms');
+  assert.strictEqual(w.rooms, id === 'sky' ? 51 : 54, id + ' room count (Round 197: the Sky Isles cut three for diagonals)');
   assert.deepStrictEqual(w.errors, [], id + ' every room places its enemies');
   assert.deepStrictEqual(w.offPath, [], id + ' enemies stand on the path');
   assert.strictEqual(w.bosses.length, 3, id + ' has two mini-bosses and a final boss');
@@ -43,4 +43,4 @@ assert(r.skyArt.includes('assets/monsters/sky/sunfeather-drake.png') && !r.skyAr
 for (const html of r.skyAll) { const m = html.match(/monsters\/(sky\/[a-z-]+)\.png/); assert(m, 'own sky sheet: ' + html.slice(0, 120)); const png = require('fs').readFileSync(require('path').join(__dirname, '../assets/' + 'monsters/' + m[1] + '.png')); const w = png.readUInt32BE(16), h = png.readUInt32BE(20); assert(w % 4 === 0 && Math.abs(w / 4 / h - .75) < .02, m[1] + ' has four 3:4 frames'); }
 assert(r.skyAll[6].includes('bloom-tyrant'), 'the Zenith Roc is drawn in the big boss box');
 assert(/portal to Vespera/.test(r.objective), 'after the Bloom Tyrant, Elaris points to Vespera');
-console.log('PASS: Sky Isles, Elaris, Vespera and Chronospire are 54-room tile worlds with their own rosters, levels and portals.');
+console.log('PASS: Sky Isles, Elaris, Vespera and Chronospire are tile worlds (51 or 54 rooms) with their own rosters, levels and portals.');

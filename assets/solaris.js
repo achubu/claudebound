@@ -104,15 +104,22 @@ document.head.append(solarisPortalStyles);
 // through it and you arrive a short way along the partner room's diagonal road.
 // =====================================================================
 const SOLARIS_DOOR_RADIUS = 36;
+// Round 197: the tile-built worlds can have diagonal roads too (their data's 'diag' table, from
+// tools/build_tile_world.py), so these read the active world's table.
+function worldDiagTable() {
+  if (activeRegion === 'elaris') return typeof SOLARIS_DIAG === 'object' ? SOLARIS_DIAG : {};
+  const d = typeof TILE_WORLD_DATA === 'object' && TILE_WORLD_DATA[activeRegion];
+  return (d && d.diag) || {};
+}
 // The door as a player position (the foot point is 22px below it), kept inside the room.
 function solarisDiagDoor(key, dir) {
-  const d = activeRegion === 'elaris' && typeof SOLARIS_DIAG === 'object' && SOLARIS_DIAG[key] && SOLARIS_DIAG[key][dir];
+  const d = worldDiagTable()[key] && worldDiagTable()[key][dir];
   return d ? { x: Math.max(14, Math.min(786, d.x)), y: Math.max(14, Math.min(486, d.y - 22)) } : null;
 }
-function solarisDiagDirs(key) { return activeRegion === 'elaris' && typeof SOLARIS_DIAG === 'object' && SOLARIS_DIAG[key] ? Object.keys(SOLARIS_DIAG[key]) : []; }
+function solarisDiagDirs(key) { const t = worldDiagTable()[key]; return t ? Object.keys(t) : []; }
 const diagCornerAtBeforeSolaris = diagCornerAt;
 diagCornerAt = function (key, p) {
-  if (activeRegion !== 'elaris') return diagCornerAtBeforeSolaris(key, p);
+  if (!Object.keys(worldDiagTable()).length) return diagCornerAtBeforeSolaris(key, p);
   for (const dir of solarisDiagDirs(key)) {
     const d = solarisDiagDoor(key, dir);
     if (d && rooms[key] && rooms[key].exits[dir] && Math.hypot(p.x - d.x, p.y - d.y) < SOLARIS_DOOR_RADIUS) return dir;
@@ -137,8 +144,8 @@ diagArrival = function (key, corner) {
 };
 // Straight exits on the same edge ignore the stretch where the diagonal road leaves.
 function organicDoorExcluded(key, dir, x, y) {
-  if (activeRegion !== 'elaris' || typeof SOLARIS_DIAG !== 'object' || !SOLARIS_DIAG[key]) return false;
-  return Object.values(SOLARIS_DIAG[key]).some(d => Math.hypot(x - d.x, y - d.y) < 80);
+  const t = worldDiagTable()[key]; if (!t) return false;
+  return Object.values(t).some(d => Math.hypot(x - d.x, y - d.y) < 80);
 }
 // The diagonal exit's label sits at its door; tapping it walks you there and on through.
 const renderBeforeSolarisDiag = NeonCity.render;
@@ -146,7 +153,7 @@ NeonCity.render = function (container, key) {
   const out = renderBeforeSolarisDiag.apply(this, arguments);
   if (!container || !container.querySelectorAll) return out;
   for (const dir of solarisDiagDirs(key)) {
-    const d = solarisDiagDoor(key, dir), to = SOLARIS_DIAG[key][dir].to; if (!d || !rooms[to]) continue;
+    const d = solarisDiagDoor(key, dir), to = worldDiagTable()[key][dir].to; if (!d || !rooms[to]) continue;
     for (const old of container.querySelectorAll('.city-exit.' + dir)) old.remove();
     const node = document.createElement('div'), arrow = { ne: '↗', nw: '↖', se: '↘', sw: '↙' }[dir];
     node.className = 'city-exit solaris-diag ' + dir; node.dataset.dir = dir; node.textContent = arrow + ' ' + rooms[to].name;

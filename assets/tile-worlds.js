@@ -268,9 +268,24 @@ function migrateRebuiltWorlds(s) {
   s.tileWorlds = TILE_WORLDS_VERSION;
   return s;
 }
+// Round 197: rooms a world cut for its diagonals. A save standing in one resumes at the world's
+// start, and the cut rooms leave the visited lists.
+function dropCutRooms(s) {
+  if (!s) return s;
+  for (const id of ALL_TILE_WORLD_IDS) {
+    const cut = TILE_WORLD_DATA[id].cut; if (!cut || !cut.length) continue;
+    const gone = k => cut.includes(k), start = TILE_REGIONS[id].start;
+    if (s.regionVisits && Array.isArray(s.regionVisits[id])) s.regionVisits[id] = s.regionVisits[id].filter(k => !gone(k));
+    if (s.region === id) {
+      if (Array.isArray(s.visited)) s.visited = s.visited.filter(k => !gone(k));
+      if (gone(s.room)) { s.room = start; s.pos = { x: 400, y: 300 }; if (Array.isArray(s.visited) && !s.visited.includes(start)) s.visited.push(start); }
+    }
+  }
+  return s;
+}
 const restoreGameBeforeTiles = restoreGame;
-restoreGame = function (s) { return restoreGameBeforeTiles(migrateRebuiltWorlds(s)); };
+restoreGame = function (s) { return restoreGameBeforeTiles(dropCutRooms(migrateRebuiltWorlds(s))); };
 const validateImportBeforeTiles = validateImport;
-validateImport = function (s) { return validateImportBeforeTiles(migrateRebuiltWorlds(s)); };
+validateImport = function (s) { return validateImportBeforeTiles(dropCutRooms(migrateRebuiltWorlds(s))); };
 const saveBeforeTiles = save;
 save = function () { if (state) state.tileWorlds = TILE_WORLDS_VERSION; return saveBeforeTiles.apply(this, arguments); };
