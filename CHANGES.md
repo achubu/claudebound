@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 201: smooth edges on the creatures
+
+- The creature sprite sheets (Solaris, the Sky Isles, the forest animals and their recoloured
+  copies in Vespera and Chronospire) were drawn with `image-rendering: pixelated`. That suits
+  tiny pixel art drawn bigger, but these sheets are paintings about 2000px wide drawn at
+  90–150px. Nearest-pixel scaling then just drops pixels, which gave jagged outlines. They now
+  scale smoothly (`assets/elaris-wildlife.js` for rooms and battles, `assets/battle-hud.css` for
+  the battle portrait). City enemies already scaled smoothly.
+- Sprite sheet URLs carry `?v=SPRITE_VERSION` (now 200, in `elaris-wildlife.js`; also used by
+  `encounter-depth.js` and `sun-revenant.js`), so browsers fetch Round 200's re-cut sheets rather
+  than cached ones. Bump it when sheets change.
+
 ## Round 200: no more line through the Cistern Warden
 
 - **The line was a cutout mistake, not in the owner's art.** In Round 196, `tools/cut_sprite_sheet.py`
