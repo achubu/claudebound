@@ -3496,6 +3496,28 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 198: God Mode
+
+A main-menu option (also on the start screen) for trying the game out, from `assets/god-mode.js`
+(loaded last).
+
+- **Any card wins.** Playing any card, from the hand or the side deck, wins the fight at once,
+  bosses included, with the usual rewards. Cards you couldn't afford can be clicked too. The
+  card's own effect is skipped.
+- **Every Nexus Waypoint** in every world is unlocked, so you can travel anywhere straight away.
+- **Every map is revealed**: each world's rooms all count as visited.
+- **Nothing is saved.** On entering, the journey is saved where it stands. After that, writes to
+  the game's save and material keys are ignored, and export and import are off. Leaving God
+  Mode reloads the page, and reloading rolls back to that save. Started from the start screen,
+  God Mode plays a fresh journey that is never stored. A ⚡ GOD MODE badge shows while it is on.
+- Tests: new `tests/god-mode.test.cjs` (cards don't win without it; any card wins with it, a boss
+  counts; all waypoints and maps are open, including after a waypoint trip to another world;
+  nothing reaches the save; export is off; the save is the pre-God journey). In the browser:
+  storage is byte-for-byte unchanged through a God session, and leaving or reloading resumes
+  the journey from before.
+- Also fixed `tests/crystals-touch-boss.test.cjs`, which still expected 54 Sky Isles rooms
+  (51 since Round 197).
+
 ## Round 197: the Sky Isles are painted, with diagonal walkways
 
 The Sky Isles now use the owner's top-down tiles instead of stand-ins, and three edge rooms are
