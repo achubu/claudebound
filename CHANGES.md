@@ -3496,6 +3496,38 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 195: the rest of the Solaris roster gets its own art
+
+Every Solaris enemy now has the owner's own sheet; none borrow forest art any more.
+
+- **New sheets** in `assets/monsters/elaris/`, cut from the owner's magenta-background sheets
+  with `tools/cut_sprite_sheet.py`:
+  - `mirage-ibis.png`: the Mirage Ibis (`drownedHeron`), a Thoth-style ibis with an ankh staff
+    and a heat-haze shimmer.
+  - `dune-scorpion.png`: the Dune Scorpion (`blightAntler`), with a glowing copper stinger.
+  - `cistern-warden.png`: the Cistern Warden mini-boss (`tidewardenElaris`), a brass golem with
+    water sloshing in its tank.
+  - `noon-toller.png`: the Noon Toller mini-boss (`galeSovereign`), a bell-headed knight with a
+    hammer. Its cycle went from .7s (the moth's flutter) to 1.2s, to suit a heavy walk.
+  - `sun-pharaoh.png`: the Sun Pharaoh final boss (`bloomTyrant`), whose sun halo grows across
+    the frames. `encounter-depth.js` now gives it this sheet; `forestTyrant` keeps the old Bloom
+    Tyrant sheet for the Sky Isles, Elaris, Vespera and Chronospire bosses.
+  - `dust-devil.png` was re-cut from the owner's sharper copy of the same sheet.
+- **Tool changes:**
+  - The magenta key reads the background colour from the sheet's border, so purple-magenta
+    backgrounds (the ibis) work too.
+  - Despill only touches magenta-ish pixels (red and blue both above green). Gold, orange glows,
+    the Pharaoh's blue stripes and the golem's water keep their colour.
+  - `--no-floor` removes the painted stone floor tile the golem and the knight stood on: in the
+    bottom sixth of the sheet, cool and magenta pixels go, while brass, dust and sand stay.
+  - Specks under 12 pixels are dropped.
+  - All the magenta sheets were cut with the final version, so the tool reproduces every file.
+- The sheets are 2064x688 (four 516x688 frames) and 170 to 285 KB each.
+- Tests: `elaris-wildlife` checks all thirteen sheets and which species uses each (the forest
+  keys keep the old sheets); `solaris-roster` checks the Pharaoh's sheet; `rebalance` now expects
+  the mini-bosses' own sheets. `ELARIS-ART.md` marks every planned sheet as in. Cache tags for
+  `elaris-wildlife.js` and `encounter-depth.js` are now round195.
+
 ## Round 194: the Dust Devil gets its own sprite sheet
 
 - **New art.** The owner's 4-frame Dust Devil sheet (a sand tornado with glowing eyes and

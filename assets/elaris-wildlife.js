@@ -2,17 +2,15 @@
 // Four-frame generated wildlife sheets. Elements are part of each species' identity.
 const ELARIS_WILDLIFE={
  // Round 172: Solaris is a sun-scorched brass desert city, so its creatures were renamed and
- // reworked to match. Ids stay the same so saves carry over. Until the owner's Solaris art
- // lands they still use the old sheets; the planned files are listed in ELARIS-ART.md.
+ // reworked to match. Ids stay the same so saves carry over. Rounds 193-195 gave them the owner's
+ // own sheets (see ELARIS-ART.md).
  cinderFox:{name:'Solar Scarab',icon:'☼',hp:38,attack:7,element:'fire',sheet:'solar-scarab',cycle:'.95s'},
- drownedHeron:{name:'Mirage Ibis',icon:'≈',hp:55,attack:9,element:'water',sheet:'drowned-heron',cycle:'1.4s'},
- blightAntler:{name:'Dune Scorpion',icon:'◆',hp:44,attack:8,element:'earth',sheet:'blight-antler',cycle:'1.2s'},
+ drownedHeron:{name:'Mirage Ibis',icon:'≈',hp:55,attack:9,element:'water',sheet:'mirage-ibis',cycle:'1.4s'},
+ blightAntler:{name:'Dune Scorpion',icon:'◆',hp:44,attack:8,element:'earth',sheet:'dune-scorpion',cycle:'1.2s'},
  stormMoth:{name:'Dust Devil',icon:'≋',hp:52,attack:9,element:'air',sheet:'dust-devil',cycle:'.7s'},
- // Round 22 mini-bosses: reuse an existing species' sprite sheet under a
- // new id/name/boss-tier stat block — same "new identity, borrowed art"
- // pattern as the city's crownSentinel.
- tidewardenElaris:{name:'The Cistern Warden',icon:'≈',hp:70,attack:11,armor:3,element:'water',sheet:'drowned-heron',cycle:'1.4s',boss:true,miniBoss:true},
- galeSovereign:{name:'The Noon Toller',icon:'🔔',hp:66,attack:11,armor:3,element:'air',sheet:'storm-moth',cycle:'.7s',boss:true,miniBoss:true}
+ // Round 22 mini-bosses (own sheets since Round 195).
+ tidewardenElaris:{name:'The Cistern Warden',icon:'≈',hp:70,attack:11,armor:3,element:'water',sheet:'cistern-warden',cycle:'1.4s',boss:true,miniBoss:true},
+ galeSovereign:{name:'The Noon Toller',icon:'🔔',hp:66,attack:11,armor:3,element:'air',sheet:'noon-toller',cycle:'1.2s',boss:true,miniBoss:true}
 };
 Object.assign(enemies,ELARIS_WILDLIFE);
 // Round 172: art-only keys for the old forest sheets. Vespera and Chronospire recolor these,

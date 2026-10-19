@@ -19,6 +19,7 @@ assert.deepStrictEqual(r.names, {
 assert.deepStrictEqual(r.shift, ['fire', 'earth'], 'the Pharaoh shifts between sun and sand');
 assert(r.aff.includes('entomb'), 'the Pharaoh entombs like its Revenants');
 assert.strictEqual(r.bossId, 'bloomTyrant'); assert(r.entombs, 'Entomb works in the Pharaoh fight');
+assert(r.bossArt.includes('sun-pharaoh.png'), 'Round 195: the Sun Pharaoh has its own sheet');
 assert(r.bossArt.includes('aria-label="The Sun Pharaoh"') && r.foxArt.includes('aria-label="Solar Scarab"'));
 assert(/Sun Pharaoh|Cistern Warden/.test(r.objective), 'the objective names the new enemies (Round 176: their gear first)');
 // Other worlds borrow art-only keys, so Solaris art can change without touching them.
