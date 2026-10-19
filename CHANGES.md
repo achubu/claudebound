@@ -3496,6 +3496,42 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 190: Chronospire card paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` again (commit eb48d8d, "Expand Chronospire card illustrations").
+  It added 24 paintings for all seven Chronospire Suspend cards:
+  - Chrono Spike, Clockwork Volley, Delayed Bulwark, Future Sight, Rewind Mend and Temporal
+    Barrage now have paintings at all four levels.
+  - Accelerate has levels 0 and 1; level 1 is reused at levels 2 and 3, as in Cardbound.
+- `refreshedCardArt` now lists 110 paintings. The placeholder PNGs these replace moved to
+  `unused assets/assets/cards/`. `cards.js?v=` tag bumped to round190.
+- Cardbound's other new commit adds a "card concept lab" to its compendium. That is code, not
+  art, so it was not taken (this repo only takes images from Cardbound).
+- `card-art` test: Accelerate is now its example of a card with fewer paintings than levels.
+
+## Round 189: Cinder Lance chains into a daze
+
+- Cinder Lance (1 energy, Fire, drops in Solaris) was a weaker Sunflare. Now play two Cinder Lances
+  in the same turn and the enemy is dazed: its attack that turn deals 50% less damage. It works on
+  every enemy, bosses included, and an enemy can be dazed at most once every 3 turns. The intent
+  bubble shows the lower number. A "✸ Chain" tray in battle shows the count and the recovery
+  turns (new `assets/stagger.js`). The card is now 6/7/9/11 damage with Burn 2 (Burn 3 at level 3);
+  it was 5/7/9/11 with Burn 2.
+- Designs tried in the Difficulty lab first (sim only):
+  - Stun on any 3 attacks in a turn: Chronospire bosses went from 30-49% to 88-100%.
+  - Stun on every 3rd copy played in a fight: one copy was enough, because the same card counts
+    again each time it is reshuffled. It took the Featherfall Matriarch from 47% to 100%.
+  - The owner's version, two copies in one turn, needs more than one copy in hand at once.
+- The daze strength was swept with decks that carry three Cinder Lances. Boss win rates averaged
+  over Solaris to Chronospire: 0% (no daze) 19, 25% 25, 50% 32, 75% 35, against 37 for normal
+  decks. 50% makes the three-Lance build nearly as good as a normal deck. 75% makes the Zenith Roc,
+  the Featherfall Matriarch and the Tempest Colossus too easy with it (55-66%). In Solaris (7-card
+  decks) and Chronospire it stays weaker than a normal deck at any strength: the three slots cost
+  more than the daze gives.
+- Normal decks are unchanged (they hold at most one Cinder Lance, which never chains).
+- Tests: new `tests/stagger.test.cjs`. `talent-matrix` updated for Cinder Lance's new 6 base
+  damage. The compendium's mechanics list explains the chain.
+
 ## Round 188: the unused Reversal cards are gone
 
 - The four single-element counters (Fire, Water, Earth and Air Reversal, `counter_<element>`) were
