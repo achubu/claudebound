@@ -15,9 +15,9 @@ function setup(hand, opts = {}) {
 }
 const dealt = (b, i = 0) => { const e = b.enemy.hp; playCard(i); return e - b.enemy.hp; };
 const ids = Object.keys(NEW_CARD_WORLD);
-assert.equal(ids.length, 15, '15 new cards');
+assert.equal(ids.length, 52, '52 world reward cards beyond the basics (Round 178; Round 185 adds 20 mechanic cards)');
 for (const id of ids) for (let l = 0; l < 4; l++) { assert(defs[id].tiers[l], id + ' has 4 levels'); assert(rules({ id, level: l }).length > 8, id + ' has rules text'); }
-for (const w of ['city', 'elaris', 'vespera']) assert(ids.filter(id => NEW_CARD_WORLD[id] === w).every(id => VARIETY_POOLS[w].includes(id)), w + ' offers its five new cards');
+for (const w of ['city', 'elaris', 'sky', 'wilds', 'vespera']) assert(ids.filter(id => NEW_CARD_WORLD[id] === w).every(id => VARIETY_POOLS[w].includes(id)), w + ' offers its own new cards');
 
 // City
 let b = setup(['arcJab']); assert.equal(dealt(b), 3); assert.equal(b.aether, 1, 'Arc Jab: +1 Aether'); assert.equal(b.energy, 3, 'costs 0');

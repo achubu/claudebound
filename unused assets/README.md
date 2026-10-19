@@ -15,8 +15,12 @@ What's here (Round 96):
   refreshed `.webp` paintings (arcJab, breachSpike, bulwarkBash,
   chainLightning, overclock, staticShield, thornlash, wildfire), plus the
   500px `level2/stormglass.png` (the game uses the `.jpeg`).
+- `assets/cards/` (Round 180): the PNG emblems replaced by the refreshed paintings from
+  `achubu/Cardbound` (52 card stages across 13 cards, and all 10 side cards in `side/`).
 - `assets/environment/areas/`: `burnout`, `mainframe`, `mainframe-8way` and
-  `promenade-8way`. Neon Aftermath became one painted world map in Round 91,
+  `promenade-8way`. Round 179 added `emerald` and `sunpetal` (old Elaris, unused
+  since Solaris in Round 149) and `foundry`, `promenade` and `stormglass` (old
+  Vespera, retired when Vespera became a tile world). Neon Aftermath became one painted world map in Round 91,
   so the city-only district paintings are no longer drawn.
 - `assets/environment/diagonal/city/`: the per-corner Neon Aftermath diagonal
   variants. The city no longer has diagonal rooms. `ne-nw-se-sw.webp` stays in

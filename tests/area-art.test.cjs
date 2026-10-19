@@ -5,7 +5,7 @@ const {run}=require('./expansion.test.cjs');
 run(fs.readFileSync(path.join(__dirname,'../assets/combined-rooms.js'),'utf8'));
 // Every painting a joined district actually uses (burnout.webp and the old city-only mainframe.webp now sit in unused assets/).
 const areaArts=JSON.parse(run(`JSON.stringify([...new Set(Object.values(JOINED_AREAS).flat().map(g=>g.art))])`));
-assert.deepEqual([...areaArts].sort(),['foundry','promenade','stormglass']); // Round 149: Elaris's emerald and sunpetal districts left with world 2's Solaris rebuild
+assert.deepEqual([...areaArts].sort(),[]); // Round 149: Elaris's districts left with Solaris; Round 179: Vespera's left with its tile rebuild (paintings in unused assets/)
 for(const id of areaArts){
  const bytes=fs.readFileSync(path.join(__dirname,'../assets/environment/areas',id+'.webp'));
  if(bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WEBP')throw Error('Invalid WebP: '+id);

@@ -63,7 +63,7 @@ assert.equal(lootRoll(.75).lootType,'choice','60%+ (40% of chests) rolls a card 
 {const lr=lootRoll(.75);assert(lr.offers&&lr.offers.length===3,'a card roll offers three cards to choose from');}
 
 const legacy={pool:[],deck:[],battle:null};
-for(const element of ELEMENTS){const card=make('counter_'+element);legacy.pool.push(card);legacy.deck.push(card.uid)}
+for(const element of ELEMENTS){const card=make('counter');card.id='counter_'+element;legacy.pool.push(card);legacy.deck.push(card.uid)} // Round 188: the Reversal cards are gone; old saves can still hold them
 for(let i=0;i<4;i++){const card=make('strike');legacy.pool.push(card);if(i<2)legacy.deck.push(card.uid)}
 normalizeElementalCards(legacy);
 assert.equal(legacy.pool.filter(c=>c.id==='counter').length,1);

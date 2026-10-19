@@ -1,0 +1,69 @@
+{
+ "city": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 387,
+  "arrivals": 137,
+  "itemRoutes": 65,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "elaris": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 386,
+  "arrivals": 137,
+  "itemRoutes": 63,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "sky": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 387,
+  "arrivals": 137,
+  "itemRoutes": 68,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "wilds": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 387,
+  "arrivals": 137,
+  "itemRoutes": 63,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "vespera": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 387,
+  "arrivals": 137,
+  "itemRoutes": 61,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "chronospire": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 387,
+  "arrivals": 137,
+  "itemRoutes": 61,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "pageErrors": []
+}

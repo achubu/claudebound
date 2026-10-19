@@ -28,11 +28,11 @@ const LORE = {
     'LOG 05 — The portal beneath the Warden\'s throne hums at the frequency of growing things. Something green is waiting on the other side.'
   ],
   elaris: [
-    'The stone is warm. Words rise in your mind: "Before the Tyrant bloomed, Solaris sang in four voices: flame, tide, root and wind."',
-    '"The Tidebound Warden was a guardian once. It guards the river still, but it no longer remembers from what."',
-    '"Burn and rot are siblings here. What fire leaves, the poison finishes. Do not fight them both at once."',
-    '"The Gale Sovereign crowned itself on the highest branch and called the storm its court."',
-    '"The Bloom Tyrant drinks the land\'s four voices. Silence it, and the stormglass road will open to the east."'
+    'The stone is warm. Words rise in your mind: "Before the Pharaoh took the Solar Crown, Solaris kept four fires: sun, well, sand and wind."',
+    '"The Cistern Warden was built to share the water. It guards the Scrapwall cistern still, but it no longer lets anyone drink."',
+    '"Scarab and scorpion hunt together here. What the sun-fire leaves, the venom finishes. Do not fight them both at once."',
+    '"At noon the great bell rings and the Toller walks. Those who hear it too closely forget how to move."',
+    '"The Sun Pharaoh wraps the city in light and linen. Unseat it, and the stormglass road will open to the east."'
   ],
   vespera: [
     'The glyph crackles: "Vespera was a city of glass that caught lightning and turned it into light."',
@@ -74,7 +74,7 @@ function ensureExplore(s = state) {
 
 // --- Placement (deterministic per journey seed) ---
 const poiCache = {};
-function isStartRoom(key) { return activeRegion === 'city' ? key === '0,5' : key === '0,0'; }
+function isStartRoom(key) { return key === regionStartRoom(); }
 function poiEligible(key) {
   const r = rooms[key]; if (!r || isStartRoom(key) || r.relic || chestFor(key)) return false;
   return !roomSpawns(key).some(s => s.boss);
@@ -197,7 +197,12 @@ checkWorldInteractions = function () {
   const near = here.find(p => Math.hypot(state.pos.x - p.x, state.pos.y - p.y) < 40);
   if (!near) { poiArmed = null; return; }
   if (poiArmed === near.id) return; // already opened; step away to re-open
+  // Round 184: walking past on a tap route to somewhere else doesn't stop you here.
+  if (typeof touchPassingBy === 'function' && touchPassingBy(near)) return;
   poiArmed = near.id;
+  // Something already used doesn't pop up again when you walk by; tap it to look again.
+  const tapped = typeof touchTapped === 'function' && touchTapped(near);
+  if (near.type !== 'merchant' && near.type !== 'nexus' && poiUsed(near) && !tapped) { const d = poiDisplay(near); toast(d.icon + ' ' + d.name + ': already used. Tap it to look again.'); return; }
   openPOI(near);
 };
 function poiMenu(title, body, buttons) {
@@ -294,7 +299,7 @@ function openSidePicker(p) {
     const tag = document.createElement('div'); tag.className = 'actions'; tag.textContent = '◇ ' + MERCHANT_ITEMS.side.cost + (owned(id) ? ' · you own ' + owned(id) : ''); el.append(tag); host.append(el);
   });
 }
-function upgradedLevel() { return activeRegion === 'vespera' || activeRegion === 'chronospire' ? 2 : 1; }
+function upgradedLevel() { return WORLD_ORDER.indexOf(activeRegion) >= 2 ? 2 : 1; } // Round 175: from world 3 on
 function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound) && c.level < 3); }
 // Round 69: upgrades are unlimited and priced by the level they reach.
 // The playthrough averaged ~1.5 Shards per regular fight and 150-180 per
@@ -519,7 +524,7 @@ function nexusList() {
 const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Solaris', vespera: 'Vespera' };
 function nexusRoomName(region, key) {
   if (region === activeRegion) return rooms[key] ? rooms[key].name : key;
-  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : null;
+  const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : TILE_REGIONS[region] ? TILE_REGIONS[region].rooms : null;
   return (src && src[key] && src[key].name) || ({ elaris: { '0,0': SOLARIS_LAYOUT['0,0'].name, '4,2': SOLARIS_LAYOUT['4,2'].name } }[region] || {})[key] || key;
 }
 function discoverNexus() {

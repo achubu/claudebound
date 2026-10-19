@@ -75,7 +75,9 @@ checkWorldInteractions = function () {
   if (!state || state.battle || !$('menuOverlay').classList.contains('hidden')) return;
   const s = cardsmithFor(), near = s && s.key === state.room && Math.hypot(state.pos.x - s.x, state.pos.y - s.y) < 40;
   if (!near) { cardsmithArmed = false; return; }
-  if (cardsmithArmed) return; cardsmithArmed = true; openCardsmith();
+  if (cardsmithArmed) return;
+  if (typeof touchPassingBy === 'function' && touchPassingBy(s)) return; // Round 184: only a tap on the Cardsmith opens it
+  cardsmithArmed = true; openCardsmith();
 };
 const cardsmithStyles = document.createElement('style');
 cardsmithStyles.textContent = '.poi-node.poi-cardsmith{width:30px!important;height:30px!important;border-color:#ffb35a!important;box-shadow:0 0 10px #ffb35acc!important;background:radial-gradient(circle,#4a2c14ee,#1c120bee)!important}.poi-node.poi-cardsmith .poi-glyph{font-size:17px}';

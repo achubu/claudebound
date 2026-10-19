@@ -16,49 +16,17 @@ let M = Number(process.argv[2]) || 40;
 const overrides = require.main === module && process.argv[3] ? JSON.parse(process.argv[3]) : {};
 // Judged on the AVERAGE win rate across all 16 talent builds and both play
 // styles (a typical player), not the single best combination.
-const TARGET = { zone: [30, 100], mini: [34, 50], boss: [22, 36] }; // Round 44: afflictions + side deck
-
-const SPILL = [['plating', 5], ['jammer', 5], ['amplifier', 5], ['vitality', 5], ['edge', 5], ['quickdraw', 2], ['capacitor', 1], ['overcharge', 1], ['recovery', 3], ['deckMatrix', 4]];
-// 16 builds: the 4 original archetypes plus 4 per tree covering every
-// Round 40 talent path. Each ends with a spill list so no point is wasted.
-let BUILDS = {
-  'Old·Surge': [["powerCore",1],["amplifier",5],["edge",5],["overcharge",1],["weakenCore",1],["retainCore",1],["plating",5],["jammer",5],["vitality",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'Old·Disrupt': [["weakenCore",1],["jammer",5],["quickdraw",2],["capacitor",1],["retainCore",1],["powerCore",1],["plating",5],["amplifier",5],["vitality",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'Old·Resolve': [["retainCore",1],["plating",5],["vitality",5],["recovery",3],["weakenCore",1],["powerCore",1],["jammer",5],["amplifier",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'Old·Hybrid': [["weakenCore",1],["retainCore",1],["powerCore",1],["plating",2],["jammer",2],["amplifier",2],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'S·Crit': [["powerCore",1],["critical",5],["lethal",2],["amplifier",3],["adrenaline",1],["amplifier",5],["edge",5],["executioner",1],["retainCore",1],["plating",5],["vitality",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'S·Elemental': [["attunement",3],["kindle",2],["powerCore",1],["amplifier",3],["weakpoint",2],["sunder",2],["amplifier",5],["edge",5],["stormcaller",1],["retainCore",1],["plating",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'S·Momentum': [["powerCore",1],["amplifier",3],["edge",2],["momentum",2],["sunder",2],["amplifier",5],["edge",5],["flurry",1],["shatterpoint",1],["retainCore",1],["plating",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'S·Sunder': [["sunder",2],["powerCore",1],["amplifier",5],["edge",3],["shatterpoint",1],["momentum",2],["retainCore",1],["plating",5],["vitality",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'D·Silence': [["weakenCore",1],["jammer",3],["suppression",3],["jammer",5],["silence",1],["quickdraw",2],["deckMatrix",4],["dominion",1],["retainCore",1],["plating",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'D·Draw': [["weakenCore",1],["jammer",5],["quickdraw",2],["deckMatrix",2],["foresight",1],["cycle",3],["capacitor",1],["battery",1],["retainCore",1],["plating",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'D·Counter': [["counterWeave",3],["resonance",1],["weakenCore",1],["jammer",3],["reflux",3],["suppression",3],["jammer",5],["nullField",1],["retainCore",1],["plating",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'D·Energy': [["weakenCore",1],["jammer",5],["quickdraw",2],["deckMatrix",2],["capacitor",1],["overload",1],["battery",1],["deckMatrix",4],["retainCore",1],["plating",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'R·Thorns': [["bulwark",3],["retainCore",1],["thorns",3],["plating",5],["fortress",1],["vitality",5],["unbreakable",1],["weakenCore",1],["jammer",5],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'R·Leech': [["retainCore",1],["plating",3],["vitality",1],["leech",3],["secondWind",1],["vitality",5],["plating",5],["undying",1],["recovery",3],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'R·Retain': [["retainCore",1],["preparation",1],["recall",3],["plating",3],["steadyMind",1],["plating",5],["vitality",5],["bulwark",3],["leech",2],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]],
-  'R·Fortress': [["retainCore",1],["bulwark",3],["thorns",1],["plating",3],["fortress",1],["plating",5],["unbreakable",1],["vitality",5],["recovery",3],["plating",5],["jammer",5],["amplifier",5],["vitality",5],["edge",5],["quickdraw",2],["capacitor",1],["overcharge",1],["recovery",3],["deckMatrix",4],["weakenCore",1],["powerCore",1],["retainCore",1]]
-};
-if (process.env.BUILDS_JSON) BUILDS = JSON.parse(require('node:fs').readFileSync(process.env.BUILDS_JSON, 'utf8'));
-const cardLevelFor = L => Math.min(3, Math.floor((L - 1) / 6));
-// Round 49: decks include the new cards a player would pick from card rewards
-// (BASIC_DECKS=1 reproduces the pre-Round-49 decks for comparison).
-function deckFor(region, L) {
-  const basic = !!process.env.BASIC_DECKS;
-  if (region === 'city') return L <= 3 ? ['strike', 'strike', 'guard', 'guard', 'focus', 'mend'] : basic ? ['strike', 'cleave', 'riposte', 'bastion', 'shatter', 'mend', 'cleave', 'bastion', 'riposte', 'shatter'] : ['strike', 'cleave', 'bastion', 'breachSpike', 'shatter', 'staticShield', 'riposte', 'mend', 'bulwarkBash', 'arcJab'];
-  if (basic || region === 'elaris') return basic ? ['cleave', 'counter', 'bastion', 'cinder', 'venom', 'riposte', 'shatter', 'cleave', 'bastion', 'counter', 'mend', 'strike'] : ['cleave', 'counter', 'bastion', 'cinder', 'thornlash', 'rootbind', 'riposte', 'wildfire', 'shatter', 'bastion', 'mend', 'tidecall'];
-  if (region === 'chronospire') return ['temporalBarrage', 'chronoSpike', 'delayedBulwark', 'counter', 'bastion', 'chainLightning', 'prismLance', 'mirrorguard', 'clockworkVolley', 'rewindMend', 'cleave', 'accelerate'];
-  return ['cleave', 'counter', 'bastion', 'chainLightning', 'prismLance', 'cinder', 'mirrorguard', 'bastion', 'venom', 'counter', 'mend', 'stormBattery'];
-}
-
-// Round 75: fights see the progress a player would have by then — bosses
-// already beaten (side deck capacity grows with them) and the side cards
-// that drop along the way. Earlier sims always used capacity 2 and the kit.
-const PRIOR_BOSSES = { city: [], elaris: ['moonKnight', 'crownSentinel', 'thornWarden'], vespera: ['moonKnight', 'crownSentinel', 'thornWarden', 'tidewardenElaris', 'galeSovereign', 'bloomTyrant'], chronospire: ['moonKnight', 'crownSentinel', 'thornWarden', 'tidewardenElaris', 'galeSovereign', 'bloomTyrant', 'arcSentinel', 'resonantPhantom', 'stormTyrant'] };
-const PRIOR_SIDE = { city: [], elaris: ['restore', 'anchor'], vespera: ['restore', 'anchor', 'ground', 'mirror'], chronospire: ['restore', 'anchor', 'ground', 'mirror', 'phase'] };
+// Round 182: builds, decks and earlier progress live in assets/sim/lab.js (shared with the compendium).
 const { context, run } = makeContext();
 run(BOT);if(process.env.NO_SIDE)run('globalThis.NO_SIDE=1');if(process.env.NO_SUSPEND)run('globalThis.NO_SUSPEND=1');
-const REGIONS = { city: 'Neon Aftermath', elaris: 'Elaris', vespera: 'Vespera', chronospire: 'Chronospire' };
+run(fs.readFileSync(path.join(root, 'assets/sim/lab.js'), 'utf8'));
+const TARGET = JSON.parse(run('JSON.stringify(SIM_TARGET)'));
+let BUILDS = JSON.parse(run('JSON.stringify(SIM_BUILDS)'));
+if (process.env.BUILDS_JSON) { BUILDS = JSON.parse(require('node:fs').readFileSync(process.env.BUILDS_JSON, 'utf8')); run('SIM_BUILDS=' + JSON.stringify(BUILDS)); }
+const cardLevelFor = L => Math.min(3, Math.floor((L - 1) / 6));
+const deckFor = (region, L) => JSON.parse(run(`JSON.stringify(simDeckFor('${region}', ${L}, ${!!process.env.BASIC_DECKS}))`));
+const PRIOR_BOSSES = JSON.parse(run('JSON.stringify(SIM_PRIOR_BOSSES)')), PRIOR_SIDE = JSON.parse(run('JSON.stringify(SIM_PRIOR_SIDE)'));
+const REGIONS = JSON.parse(run('JSON.stringify(SIM_REGION_NAMES)'));
 function evaluate(over, only = null, quiet = false) {
 const log = quiet ? () => {} : console.log;
 run(`Object.assign(BALANCE, JSON.parse(JSON.stringify(globalThis.__BASE_BALANCE ||= JSON.parse(JSON.stringify(BALANCE)))), ${JSON.stringify(over)})`);
@@ -107,8 +75,8 @@ for (const [region, regionName] of Object.entries(REGIONS)) {
 log(`\n${failures} area(s) outside target. Overrides: ${JSON.stringify(over)}`);
 return { report, failures };
 }
-module.exports = { evaluate, run, setM: n => { M = n } };
+module.exports = { evaluate, run, setM: n => { M = n }, BUILDS, deckFor, cardLevelFor, PRIOR_BOSSES, PRIOR_SIDE, REGIONS, context };
 if (require.main === module) {
-  const r = evaluate(overrides);
+  const r = evaluate(overrides, process.env.ONLY_REGIONS ? { regions: process.env.ONLY_REGIONS.split(',') } : null);
   require('node:fs').writeFileSync(require('node:path').join(__dirname, 'balance-sim-results.json'), JSON.stringify({ M, overrides, report: r.report }, null, 1));
 }

@@ -20,7 +20,8 @@
 // shown one turn ahead, so you can pitch now and answer it next turn.
 // =====================================================================
 const STATIC_CLEANSE_COST = 2, AETHER_START = 2, AETHER_MAX = 8, SIDE_DRAW_COST = 4, SIDE_HAND_MAX = 2, SIDE_DECK_MAX = 6, SIDE_COPIES = 2, MIN_CYCLE = 4;
-const regionIndex = () => ({ city: 0, elaris: 1, vespera: 2, chronospire: 3 })[typeof activeRegion === 'string' ? activeRegion : 'city'] || 0;
+// Round 175: the world's place in WORLD_ORDER (city 0, Solaris 1, Sky Isles 2, Elaris 3, Vespera 4, Chronospire 5).
+const regionIndex = () => Math.max(0, WORLD_ORDER.indexOf(typeof activeRegion === 'string' ? activeRegion : 'city'));
 
 // ---------------------------------------------------------------------
 // Enemy afflictions
@@ -46,7 +47,7 @@ const ENEMY_AFFLICTIONS = {
   emberling: ['bleed'], thornling: ['frail'], vineguard: ['barrier'], burrower: ['rend'], shade: ['fog'], cryptWisp: ['static'], forgeBeast: ['crush'], crownEye: ['fog'],
   moonKnight: ['rend', 'shackle'], crownSentinel: ['static', 'empower'], thornWarden: ['barrier', 'bleed', 'crush'],
   cinderFox: ['barrage'], drownedHeron: ['siphon'], blightAntler: ['frail'], stormMoth: ['fog'],
-  tidewardenElaris: ['siphon', 'barrier'], galeSovereign: ['barrage', 'shackle'], bloomTyrant: ['bleed', 'empower', 'rend'],
+  tidewardenElaris: ['siphon', 'barrier'], galeSovereign: ['barrage', 'shackle'], bloomTyrant: ['entomb', 'empower', 'rend'],
   vespFox: ['crush'], vespThorn: ['static'], vespMoth: ['barrage'], vespHeron: ['siphon'], vespShade: ['shackle'], vespStag: ['barrier'], vespWisp: ['fog'], vespMauler: ['rend'],
   arcSentinel: ['barrier', 'shackle'], resonantPhantom: ['static', 'siphon'], stormTyrant: ['empower', 'barrage', 'frail']
 };
@@ -139,7 +140,7 @@ function fillSideDeck(s = state) { // equip unequipped side cards into newly ope
   for (const c of s.side.pool) { if (s.side.deck.length >= sideDeckMax(s)) break; if (!s.side.deck.includes(c.uid) && s.side.deck.map(u => s.side.pool.find(x => x.uid === u)).filter(x => x && x.id === c.id).length < SIDE_COPIES) s.side.deck.push(c.uid); }
 }
 function sidePoolFor(region = regionIndex()) { return Object.keys(SIDE_CARDS).filter(id => SIDE_CARDS[id].tier <= region); }
-function sideArtPath(id) { return 'assets/cards/side/' + id + '.png'; }
+function sideArtPath(id) { return 'assets/cards/side/' + id + '.webp'; } // Round 180: refreshed side-deck paintings
 
 function ensureSide(s = state) {
   if (!s) return;

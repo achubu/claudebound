@@ -1,0 +1,25 @@
+// Round 179: a save from the old Vespera / Chronospire maps loads at the world's start;
+// character, deck, gear and boss kills stay, and the migration runs only once.
+process.env.HARNESS_ONLY = '1';
+const assert = require('assert');
+const { run } = require('./expansion.test.cjs');
+const r = JSON.parse(run(`(()=>{const o={};newGame();state.playerLevel=40;state.bosses.push('thornWarden','bloomTyrant','zenithRoc','elarisTyrant','arcSentinel');state.relics.push('stormglassBelt');save();
+ o.fresh=JSON.parse(localStorage.getItem('aethercede-expansion-v3')).tileWorlds;
+ const old=JSON.parse(localStorage.getItem('aethercede-expansion-v3'));delete old.tileWorlds;old.region='vespera';old.room='4,2';old.pos={x:100,y:100};
+ old.visited=['0,0','1,0','4,2'];old.regionVisits.vespera=old.visited;old.regionVisits.chronospire=['0,0','3,4'];
+ old.cooldowns={'vespera:4,2:0':2,'city:1,5:0':1};old.chests=['vespera:2,5','city:3,7'];old.poi=old.poi||{};old.poi.nexus=['vespera:0,0','vespera:8,2','vespera:0,1','city:0,5'];old.poi.used=['vespera:3,1:shrine','city:2,6:cache'];
+ localStorage.setItem('aethercede-expansion-v3',JSON.stringify(old));state=null;o.loaded=load();
+ o.room=state.room;o.start=TILE_REGIONS.vespera.start;o.visited=[...state.visited];o.chrono=[...state.regionVisits.chronospire];o.cool=Object.keys(state.cooldowns);o.chests=state.chests;o.nexus=state.poi.nexus;o.used=state.poi.used;
+ o.level=state.playerLevel;o.bosses=state.bosses.includes('arcSentinel');o.gear=state.relics.includes('stormglassBelt');
+ state.room=Object.keys(rooms).find(k=>k!==o.start);state.visited.push(state.room);save();const again=state.room;state=null;load();o.kept=state.room===again;
+ return JSON.stringify(o)})()`));
+assert.strictEqual(r.fresh, 179, 'new saves carry the mark');
+assert(r.loaded, 'the old save loads');
+assert.strictEqual(r.room, r.start, 'it resumes at the new Vespera start'); assert.deepStrictEqual(r.visited, [r.start]);
+assert.deepStrictEqual(r.chrono, ['1,0'], 'Chronospire exploration restarts too');
+assert.deepStrictEqual(r.cool, ['city:1,5:0']); assert.deepStrictEqual(r.chests, ['city:3,7']);
+assert.deepStrictEqual(r.nexus, ['vespera:0,1', 'city:0,5'], 'old Vespera waypoints are forgotten (the new start\'s is kept), others kept');
+assert.deepStrictEqual(r.used, ['city:2,6:cache']);
+assert(r.level === 40 && r.bosses && r.gear, 'level, boss kills and gear stay');
+assert(r.kept, 'after that, a save keeps its place');
+console.log('PASS: saves from the old Vespera and Chronospire maps resume at the new starts, once, keeping progress.');

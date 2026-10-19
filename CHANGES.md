@@ -3496,6 +3496,636 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 190: Chronospire card paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` again (commit eb48d8d, "Expand Chronospire card illustrations").
+  It added 24 paintings for all seven Chronospire Suspend cards:
+  - Chrono Spike, Clockwork Volley, Delayed Bulwark, Future Sight, Rewind Mend and Temporal
+    Barrage now have paintings at all four levels.
+  - Accelerate has levels 0 and 1; level 1 is reused at levels 2 and 3, as in Cardbound.
+- `refreshedCardArt` now lists 110 paintings. The placeholder PNGs these replace moved to
+  `unused assets/assets/cards/`. `cards.js?v=` tag bumped to round190.
+- Cardbound's other new commit adds a "card concept lab" to its compendium. That is code, not
+  art, so it was not taken (this repo only takes images from Cardbound).
+- `card-art` test: Accelerate is now its example of a card with fewer paintings than levels.
+
+## Round 189: Cinder Lance chains into a daze
+
+- Cinder Lance (1 energy, Fire, drops in Solaris) was a weaker Sunflare. Now play two Cinder Lances
+  in the same turn and the enemy is dazed: its attack that turn deals 50% less damage. It works on
+  every enemy, bosses included, and an enemy can be dazed at most once every 3 turns. The intent
+  bubble shows the lower number. A "✸ Chain" tray in battle shows the count and the recovery
+  turns (new `assets/stagger.js`). The card is now 6/7/9/11 damage with Burn 2 (Burn 3 at level 3);
+  it was 5/7/9/11 with Burn 2.
+- Designs tried in the Difficulty lab first (sim only):
+  - Stun on any 3 attacks in a turn: Chronospire bosses went from 30-49% to 88-100%.
+  - Stun on every 3rd copy played in a fight: one copy was enough, because the same card counts
+    again each time it is reshuffled. It took the Featherfall Matriarch from 47% to 100%.
+  - The owner's version, two copies in one turn, needs more than one copy in hand at once.
+- The daze strength was swept with decks that carry three Cinder Lances. Boss win rates averaged
+  over Solaris to Chronospire: 0% (no daze) 19, 25% 25, 50% 32, 75% 35, against 37 for normal
+  decks. 50% makes the three-Lance build nearly as good as a normal deck. 75% makes the Zenith Roc,
+  the Featherfall Matriarch and the Tempest Colossus too easy with it (55-66%). In Solaris (7-card
+  decks) and Chronospire it stays weaker than a normal deck at any strength: the three slots cost
+  more than the daze gives.
+- Normal decks are unchanged (they hold at most one Cinder Lance, which never chains).
+- Tests: new `tests/stagger.test.cjs`. `talent-matrix` updated for Cinder Lance's new 6 base
+  damage. The compendium's mechanics list explains the chain.
+
+## Round 188: the unused Reversal cards are gone
+
+- The four single-element counters (Fire, Water, Earth and Air Reversal, `counter_<element>`) were
+  left over from before the Prismatic Counter. No drop, reward pool or starting deck used them, but
+  they still showed in the compendium's card gallery. They are removed from `defs`, and their art
+  moved to `unused assets/assets/cards/`. The compendium now lists 90 cards.
+- Old saves that still hold one still load. `validateImport` checks every card id, so it now runs
+  `normalizeElementalCards` first. That turns the Reversals into one Prismatic Counter (keeping the
+  copy in the deck), including cards inside a battle in progress. The "Elemental counters
+  combined" message still shows.
+- Tests: new `tests/retired-cards.test.cjs`. `expansion` and `combat-balance` now use the
+  Prismatic Counter, or a hand-made old card for the migration check.
+- On phones up to 480px wide, the Character screen's talent tree used to run about 76px past
+  the edge and needed a sideways swipe. Its nodes are now smaller, so a five-path branch fits
+  (`assets/layout-polish.css`).
+- Bug hunt, nothing else found:
+  - a random-play battle fuzzer: about 25,000 actions in short fights across all six worlds,
+    plus about 90,000 in long fights with a near-unkillable player;
+  - `tests/playtest-walk.cjs` for all six worlds: every room, about 2,300 crossings, every item
+    reachable, no page errors;
+  - a 390x844 sweep of every menu and battle screen in every world, looking for anything
+    wider than the screen.
+
+## Round 187: playtest fixes for phones, desktop and the Hack gift
+
+From a browser playtest at 1280x800, 390x844 and 360x640 (items 1-6 of the playtest report).
+
+- **The Hack gift (bug from Round 185).** The starting deck is full (6/6), so Packet Sniff and
+  Ghost Protocol go to the collection; the log used to say "now in your deck". The log and the
+  arrival screens now say where the cards went (`giftPlacement`). Neon Aftermath's gift also
+  marked the Hack guide as seen, so it never opened. Now the "New mechanic: Hack" screen opens
+  once you leave the reward screen (`state.pendingMechIntro`, shown by a `finishBattle` wrapper).
+  `mechanicGift` returns `{ placed }`, or false if the world's gift was already given.
+- **Mechanic guides on phones (bug from Round 185).** The "How it works" box now goes below the
+  hand instead of above it, so the cards stay on screen. Only one guide opens by itself at a time.
+  The trays are one compact row on phones.
+- **Phones, the map.** The room now fills the space between the HUD and the controls, at least
+  380 room pixels wide, instead of sitting in the top half with a 300px black band below it. The
+  HUD is shorter and no longer covers the room. On short phones the part of the room that does not
+  fit is clipped instead of drawing under the HUD. New `assets/layout-polish.js` replaces
+  `updateAreaCamera`; it measures the HUD and menu row and re-measures when they change size.
+- **Phones, battles.** The side deck folds into one row above the hand ("Show" / "Hide"). The
+  enemy-move boxes show one line of their affliction (tap a box for the rest). The "Your hand"
+  header is hidden and the card art is a little shorter. At 390x844 the hand now starts at y=400
+  (was 451, with the side column taking a third of the width) and whole cards fit above the
+  footer. The enemy portrait is larger.
+- **Desktop.** The room sits below the top menu row, so the menu no longer covers the north exit
+  label (Saltwind Docks in the start room). "Art credits" moved from the top row into the main menu.
+- **Desktop.** The on-screen arrow pad only shows in touch mode.
+- Styles: new `assets/layout-polish.css`, loaded last. Tap-to-move was re-checked at all three sizes.
+- Tests: new `tests/layout-polish.test.cjs`. Screen placement (guide below the hand, folding
+  side deck, no gap under the room) was checked with Playwright screenshots.
+
+## Round 186: 23 more paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` again (commit f3495b8, "Complete tracked card art upgrades").
+  It added 23 card paintings; all are wired in (`refreshedCardArt` in `assets/cards.js`):
+  - Level 1, 2 and 3 paintings for seven cards that had only their level-0 painting: Arc
+    Bulwark, Lunar Edict, Mirrorguard, Phantom Resonance, Prism Lance, Sovereign Gale and
+    Tidebound. Their art now changes as they level up, like the other refreshed cards.
+  - Real art for two Chronospire Suspend cards, Temporal Barrage and Clockwork Volley. Cardbound
+    painted only level 0 and uses it at every level; so does this game. Their placeholder PNGs
+    moved to `unused assets/assets/cards/`.
+- There were no other new images (no new monsters, rooms, items or side cards).
+- The 20 world-mechanic cards from Round 185 have no Cardbound art yet and keep their placeholders.
+- `cards.js?v=` tag bumped to round186. `card-art` test updated (86 refreshed paintings; Temporal
+  Barrage is now its example of a card with one painting).
+- Fixed a flaky `crystals-touch-boss` test caused by Round 185. It fights a random Solaris enemy,
+  and when that was the Solar Scarab, the new Sunstroke affliction cost 2 HP on a charging turn
+  that the test expects to cost nothing. The test is about counters, so it now clears that
+  fight's afflictions.
+
+## Round 185: a card mechanic for every world
+
+Every world now has its own card mechanic, like Chronospire's ⏳ Suspend (new
+`assets/world-mechanics.js`, loaded after `world-cards.js`):
+
+| World | Mechanic | How it works | Cards | Works against it |
+|---|---|---|---|---|
+| Neon Aftermath | ⌁ Hack | Hack cards add Glitch to the enemy. At 5 it crashes and skips its next action; each crash patches it (+2 to the next limit). | Packet Sniff, Logic Bomb, Ghost Protocol, Zero Day | 🛡 Firewall (Crown Observer, Crown Sentinel): wipes Glitch, +1 to the limit |
+| Solaris | ☀ Heat | Heat cards build Heat (max 6, lasts between turns). Your next attack sears for 2 per Heat (Noon Blaze: 3) and spends it. | Sunstoke, Scorching Sands, Heatwave, Noon Blaze | 🥵 Sunstroke (Solar Scarab, Noon Toller): lose your Heat and 1 HP for each; with none, lose 2-4 HP |
+| Sky Isles | 🪶 Tailwind | Every card played adds 1 Tailwind this turn. Tailwind cards get a bonus per card already played (up to 4). | Gust Chain, Slipstream, Wind Wall, Skydive | 🌬 Headwind (Cloud Wisp, Featherfall Matriarch): your first 2 cards next turn add none |
+| Elaris | 🌱 Growth | Growth cards grow each time you play them in a fight (up to 4 times). | Sapling Strike, Barkskin, Bloom Mend, Ancient Oak | 🍂 Blight (Storm Moth, Gale Sovereign): your most-grown card withers; with none, lose HP |
+| Vespera | ⚡ Stormcharge | Stored charge (max 20, lasts between turns) strikes back, ignoring Armor, when an enemy attack lands. Lightning Rod lets it out now. | Static Coil, Capacitor Spark, Thunderhead, Lightning Rod | ⏚ Dampen (Arc Wisp, Resonant Phantom): half the charge drains; with none, −1 Aether |
+| Chronospire | ⏳ Suspend | unchanged (`assets/chronospire.js`) | | ⟲ Rewind |
+
+- The 4 cards of each mechanic join that world's reward pool (`VARIETY_POOLS`, `NEW_CARD_WORLD`).
+- Arriving in a world through its portal gives two of them and opens a "New mechanic" screen with
+  a 3-step guide (`mechanicGift`). In Neon Aftermath, Packet Sniff and Ghost Protocol come with
+  your first win. A save that loads inside a world it has not had the gift for gets it then. The
+  cards go into the deck only when it has room; otherwise they wait in the collection.
+- In battle, a tray above the hand shows the mechanic's count (Glitch, Heat, Tailwind, Growth,
+  Stormcharge) with a "How it works" guide that opens by itself the first time you hold one of its
+  cards. The cards carry a badge (Growth cards show how much they have grown). Tailwind and Growth
+  change the numbers on the card face live.
+- Rules text explains each keyword. Compendium → Mechanics has an entry for each.
+- Placeholder art for the 20 cards (`tools/generate_world_card_art.py`; it now writes only
+  missing files, because painting is not deterministic; `--force` repaints all of them).
+
+Balance (Difficulty lab, gear worn):
+- The lab's decks get the two arrival cards at the end, as the game does (they join only if the
+  deck has room). Putting them first pushed Rootbind and Riposte out of the 7-card Solaris deck and
+  dropped the Cistern Warden from 44% to 0%.
+- The mechanic afflictions replaced one rider on five mini-bosses, and three of them got easier.
+  Re-tuned health: Crown Sentinel ×1.29 → ×1.45 (53% → 43%), Resonant Phantom ×1.25 → ×1.7
+  (60% → about 41%), Noon Toller ×1.22 → ×1.35 (53% → 44%). The Featherfall Matriarch and the
+  Gale Sovereign stayed on target. Every other fight in all six worlds stayed on target too.
+- The Node sim (`tests/talent-sim.cjs`) now loads `sun-revenant.js`. Without it the Sun Pharaoh's
+  Entomb was undefined and the Node report stopped at that fight. The browser lab already loaded it.
+
+Tests: new `tests/world-mechanics.test.cjs`. `expansion` (the first-win gift is marked taken
+before the reward-choice check) and `card-variety` (52 world reward cards) updated.
+
+## Round 184: playtest fixes for pathing and things beside the path
+
+- Owner request: playtest for bad pathing, poor placement of interactable items, and bugs.
+- **New `tests/playtest-walk.cjs`** (Playwright, run on demand):
+  - In every world it walks the hero with the game's own tap-to-move routes
+    (`setTouchDestination` + `move()`) through every door, from every spot where the hero
+    actually arrives.
+  - From each arrival it tap-routes to every item in the room, and checks placement:
+    overlaps, patrols, the portal, and the HUD panel or minimap on a 1280×800 screen.
+  - It opens every menu in every world.
+  - Each run covers 6 × 54 rooms, about 820 arrivals, 2,321 door crossings and about 390 item
+    routes.
+- **Found and fixed:**
+  - **Walking past something stopped a tap route.** A point of interest, the merchant, a
+    Nexus Waypoint or the Cardsmith opens when you come within 40px. Items stand 12-28px off
+    the path, so any tap route along that path opened them and cancelled the route; you had to
+    close the menu and tap again. On a phone this hit about 70 crossings per world.
+    - Now a tap route only opens what was tapped: `touchPassingBy()` and `touchTapped()` in
+      `touch-controls.js`, checked in `exploration.js` and `cardsmith.js`.
+    - Walking with the keys still opens what you walk into.
+  - **Used points of interest popped up every time** you walked past ("You have already used
+    this."). They now show a short note instead; tap one to look again.
+  - **Items under the HUD or the minimap:**
+    - Seen in Neon Aftermath: the start Nexus at 658,383, and lore and campfires at 102-179,
+      117-120.
+    - Seen in Solaris: a cache at 140,166.
+    - Fix: new `screenCovered(x, y)` in `organic-paths.js` (top-left 225×180, bottom-right
+      from 650,350). `organicItemSpot()` avoids those areas when a room has another spot, and
+      Neon Aftermath's painted spots skip them.
+    - In a Neon Aftermath room whose only painted spots are covered, the point of interest goes
+      to another room. The Nexus keeps its place if there is no other spot.
+  - **Two Neon Aftermath chests had a patrol standing on them:** Billboard Steps 5,4 (18px)
+    and Pagoda Court 3,7 (16px), so reaching them started a fight. A painted chest spot is now
+    used only when no patrol stands within 70px; otherwise the chest keeps the patrol-clear spot
+    beside the street.
+- **After the fixes, three runs with different seeds:** every room in every world was visited,
+  every door crossed, every item reached, with no walk-past popups, no placement problems, no
+  page errors and no menu errors.
+- **Not covered by the walk:** patrols move and collide only in the animation loop, which the
+  walker doesn't run, so walking into patrols isn't exercised. Combat is covered by the other
+  suites and the Difficulty lab.
+- New `tests/walk-past.test.cjs`: tap routes, used points of interest, and HUD, minimap and
+  patrol clearance over three seeds in all six worlds.
+- Cache tags bumped to `?v=round184`.
+
+## Round 183: every boss re-tuned with gear worn
+
+- The Round 182 report showed that, with gear worn, every mini-boss and final boss from
+  Solaris on was too easy. It also showed Neon Aftermath's two mini-bosses the wrong way
+  round: the Lunar Enforcer won 8%, the Crown Sentinel 100%.
+- Owner request: Neon Aftermath's three bosses at about **40%**. Everything else keeps the
+  usual targets: mini-bosses about 42%, final bosses about 29%.
+- **How:** each boss's health (`BALANCE.perEnemy`) was bisected in the Difficulty lab: real
+  battles in the browser, gear worn, 16 builds × 2 styles × 6 fights.
+- **Cistern Warden:** its win rate barely moved with health (still 51% at 4.5×), because its
+  base attack (11) is the weakest of any boss at its level. It gets **health 2.4× and +7
+  attack** (538 HP, 37 attack), which wins 44%.
+
+  | Boss | Health | Wins with gear |
+  |---|---|---|
+  | Lunar Enforcer | .73 → .55 | 8% → 40% |
+  | Crown Sentinel | .72 → 1.29 | 100% → 40% |
+  | Thorn Warden | .95 → .75 | 31% → 41% |
+  | Cistern Warden | 1.4 → 2.4, +7 attack | 92% → 44% |
+  | Noon Toller | .82 → 1.22 | 73% → 42% |
+  | Sun Pharaoh | .77 → .96 | 51% → 31% |
+  | Stormbell Warden | .65 → .76 | 52% → 42% |
+  | Featherfall Matriarch | .78 → .94 | 72% → 42% |
+  | Zenith Roc | .42 → .50 | 59% → 31% |
+  | Tidebound Warden | .91 → 1.15 | 87% → 41% |
+  | Gale Sovereign | .65 → .78 | 64% → 43% |
+  | Bloom Tyrant | .58 → .70 | 58% → 29% |
+  | Arc Sentinel | .72 → .90 | 66% → 42% |
+  | Resonant Phantom | .99 → 1.25 | 72% → 42% |
+  | Tempest Colossus | .45 → .63 | 49% → 28% |
+  | Clockwarden | .85 → 1.16 | 84% → 42% |
+  | Paradox Twin | .93 → 1.28 | 83% → 43% |
+  | Chronarch | .47 → .62 | 60% → 29% |
+
+- **Result:** a full lab run puts **all 80 encounters on target**. `DIFFICULTY-REPORT.md` is
+  regenerated from that run.
+- The lab judges the Thorn Warden against 34-50%, through the new `SIM_TARGET_BY_WORLD` in
+  `assets/sim/lab.js`.
+- `tests/balance-sim.cjs` still plays without gear, so it now reads these bosses as hard. Tune
+  bosses with the lab, which wears gear like a player does.
+- Cache tags bumped to `?v=round183`.
+
+## Round 182: the Difficulty lab, and a difficulty report for every enemy
+
+- Owner request: test the whole game and break down the difficulty of every enemy, each
+  fought at the player's own level, with all the items available by then, and with the talent
+  trees used up to that level. Owner request: run it from the compendium whenever wanted.
+- **Compendium → Difficulty lab** (new section and nav link):
+  - Pick a world or all worlds, and how many fights per build and style. Press **Run**.
+  - It plays real battles in the compendium's hidden game frame and fills a table: each
+    enemy's HP and attack at that level, typical win rate, best and worst build, average
+    turns, HP left when won, gear worn, and a verdict against the targets.
+  - **Copy results** gives tab-separated rows for a spreadsheet.
+  - All six worlds at 6 fights take about 100 s.
+  - While it runs, saving, drawing and storage writes in the frame are switched off, and
+    every `aethercede-` key is restored afterwards. A journey in another tab is never
+    touched; a planted save stayed byte-identical in the browser check.
+- **Shared code:**
+  - `assets/sim/bot.js`: the sim's bot, moved out of `tests/talent-sim.cjs`.
+  - `assets/sim/lab.js`: the 16 builds, decks, earlier bosses and side cards, moved out of
+    `tests/balance-sim.cjs`. It also holds `simEncounters()` (every encounter, with the gear
+    available by then) and `simEncounterRun()` (all builds and styles, one step at a time).
+  - The balance sim reads its settings from `lab.js`, and gives identical results (Lunar
+    Enforcer check before and after).
+  - The game itself does not load these files.
+  - `tests/talent-sim.cjs` also loads `gear.js`. Gear does nothing unless a piece is owned.
+- **New `tests/difficulty-report.cjs [fights] [world]`:** the same lab from the command line.
+- **The report:** `DIFFICULTY-REPORT.md` lists all 83 encounters, 15,936 battles at 6 fights
+  per build and style. 17 are off target:
+  - **Neon Aftermath's mini-bosses are swapped in difficulty.** The Lunar Enforcer (Lv 5)
+    wins 8% (too hard) and the Crown Sentinel (Lv 7) 100% (too easy). This was already so
+    before this session (8223aab, Round 170) and does not depend on gear (98% without it).
+  - **With gear worn, every mini-boss and final boss from Solaris on reads too easy:**
+    - Mini-bosses: 52-92%.
+    - Final bosses: the Sun Pharaoh 51%, Zenith Roc 59%, Bloom Tyrant 58%, Tempest Colossus
+      49%, Chronarch 60%.
+    - These were tuned in Rounds 177 and 181 without gear (about 42% and 29%), so the gear
+      boosts roughly double the boss win rates.
+    - Regular fights are all on target.
+- New `tests/difficulty-lab.test.cjs`: every world's encounters and their gear, and one
+  encounter run end to end.
+
+## Round 181: mini-boss balance after the Vespera and Chronospire rebuild
+
+- On the new maps the Arc Sentinel and the Clockwarden stand 2 levels higher than before
+  (41 and 50). In the fair-level sim that made them slightly easy (53% and 55% wins; target
+  34-50%). Chronospire's level 53 regular fights (the Thunder Mauler's zone) read slightly
+  hard at 24%.
+- Measured with `tests/balance-sim.cjs` (12 fights per build and style):
+
+  | Enemy | Health | Wins |
+  |---|---|---|
+  | Arc Sentinel | .69 / .74 / .79 | 53% / 37% / 32% |
+  | Clockwarden | .82 / .88 / .94 | 55% / 34% / 30% |
+  | Thunder Mauler | .88 | level 53 regular fights 38% |
+
+- Set to **Arc Sentinel .72** and **Clockwarden .85**, between the measured points (about
+  42% expected), and **Thunder Mauler .88**.
+
+## Round 180: 46 refreshed paintings from achubu/Cardbound
+
+- Pulled the card art we were missing from `achubu/Cardbound` (its 2026-10-17 art refresh).
+  No other files in its `assets/` were new to us, and its card definitions match ours.
+  - **36 card paintings** (512 × 512 WebP). Complete four-stage sets for Rootbind, Static,
+    Storm Battery, Tempest Surge, Tidecall and Verdant Pact; the missing stages for Static
+    Shield (1), Thornlash (3) and Wildfire (0, 2, 3); and base paintings for Arc Bulwark,
+    Lunar Edict, Mirrorguard, Phantom Resonance, Prism Lance, Sovereign Gale and Tidebound.
+    Stages not painted yet reuse the nearest painted stage, as before.
+  - **All 10 side-deck cards:** `sideArtPath()` (`aether-deck.js`) now points at `.webp`.
+- `refreshedCardArt` (`cards.js`) lists 63 painted stages across 21 cards; 13 cards have all
+  four stages.
+- The 52 replaced card PNGs and 10 side-card PNGs moved to `unused assets/assets/cards/`,
+  under their old paths.
+- `assets/cards/art-refresh.md` and `tools/art-refresh/prompts.json` were synced from
+  Cardbound. Still to come there: levels 1-3 for the seven single-stage cards, and the
+  Chronospire set.
+- Cache tags bumped to `?v=round180` in `index.html` and `compendium.html`.
+- `card-art` checks every painting is wired in and every side card uses its painting.
+
+## Round 179: Vespera and Chronospire are tile worlds too
+
+- Owner request: every world is built like Solaris. Vespera and Chronospire are rebuilt from
+  road tiles with `tools/build_tile_world.py vespera|chronospire`:
+  - **Vespera** uses Neon Aftermath's layout as it is: start 0,1, mini-bosses 5,3 and 8,5,
+    the Tempest Colossus at 8,0.
+  - **Chronospire** uses it turned on its side, a tall 6×9 spire: start 1,0, mini-bosses 3,5
+    and 5,8, the Chronarch at 0,8.
+  - Each has 54 rooms. Rosters, levels (37-45 and 46-54) and gear stay the same.
+  - The builder now handles turned layouts, grids of any size, and a new `straight-h`
+    (east-west) tile shape.
+- **Placeholder tiles:** `tools/paint_placeholder_tiles.py` paints both new styles:
+  - Vespera: wet flagstone causeways over dark storm shallows with glowing crystals and rain.
+  - Chronospire: brass floor plates through clockwork gears.
+  - Each world's own rain and clockwork overlays still play over them.
+- **Rooms swapped in place:** `tile-worlds.js` replaces the room tables (`VESPERA_ROOM_DATA`,
+  `CHRONO_ROOM_DATA`) in place. Quiet rooms, Nexus Waypoints, boss rooms and chests come from
+  the new maps; each chest is in the dead end nearest a mini-boss room.
+- **Old saves:** a save on the old Vespera or Chronospire map resumes at the new start; level,
+  deck, gear and boss kills stay. That world's waypoints, chests, cooldowns and used points of
+  interest are forgotten. The migration runs once, and every save carries the mark
+  (`tileWorlds: 179`).
+- **Retired:** Vespera's three joined districts (Stormglass Reach, Prism Bazaar, Stormforge
+  Foundry) were the last joined districts in the game. Their paintings, along with old Elaris's
+  emerald and sunpetal, moved to `unused assets/assets/environment/areas/`.
+- **Chronospire's mini-bosses get their own cards:**
+  - The Clockwarden drops **Gearward Bulwark** (15 Block, draw 1).
+  - The Paradox Twin drops **Paradox Edge** (16 Pierce damage, draw 1).
+  - Every mini-boss in the game now has a unique card.
+- **Tests:**
+  - `tile-worlds` covers all four tile worlds, the full portal chain and the 6×9 spire.
+  - New `rebuilt-worlds-migrate`.
+  - `organic-paths` now checks every tile world's doors, arrivals and patrols on the engine.
+  - Updated for the new maps: `chronospire`, `crystals-touch-boss`, `pacing`, `rebalance`,
+    `area-art` and `combined-rooms`.
+  - Fix: a Round 175 edit had put a `//` comment in the middle of a line in the `chronospire`
+    test, which disabled its "no talent multiplier" check. It runs again.
+- **Balance check** on the new maps (sim, 8 fights): Vespera's regular fights are 32-96%, the
+  Resonant Phantom 43% and the Tempest Colossus 30%. Chronospire's Paradox Twin is 44% and the
+  Chronarch 31%. The Arc Sentinel (53%) and the Clockwarden (55%) now sit 2 levels higher and
+  read slightly easy, so their adjustment follows in the next round.
+
+## Round 178: every world drops its own cards
+
+- Owner request: each world has its own set of unique card drops. Chest and elite card
+  rewards (choose 1 of 3) come from `VARIETY_POOLS[world]`, and no card is now in two worlds'
+  pools. New `assets/world-cards.js` (after `tile-worlds.js`):
+
+  | World | Reward cards |
+  |---|---|
+  | Neon Aftermath | Cleave, Riposte, Bastion, Mend, Spark, Shatter, Arc Jab, Bulwark Bash, Overclock, Static Shield, Breach Spike |
+  | Solaris | Cinder Lance, Venom Bloom, Gale Cut, Prismatic Counter, **Sunflare**, **Sand Veil**, **Scarab Swarm**, **Oasis Draught**, **Solar Lance** |
+  | Sky Isles | Chain Lightning, Storm Battery, Tempest Surge, **Skyfall**, **Featherguard**, **Updraft**, **Thunderclap**, **Cloudburst** |
+  | Elaris | Thornlash, Wildfire, Rootbind, Tidecall, Verdant Pact (the forest cards, moved from Solaris), **Elder Root**, **Spore Cloud**, **Briar Wall** |
+  | Vespera | Mirrorguard, Prism Lance, **Crystal Shard**, **Crystal Ward**, **Riptide**, **Squall Step** |
+  | Chronospire | its seven Suspend cards |
+
+- The 17 new reward cards use existing effects only:
+  - Sunflare: fire, Burn.
+  - Sand Veil: Block + draw.
+  - Scarab Swarm: 3 hits + Poison.
+  - Oasis Draught: heal + Block.
+  - Solar Lance: fire, Pierce.
+  - Skyfall: air, draw.
+  - Featherguard: Block + a card next turn.
+  - Updraft: draw + Aether.
+  - Thunderclap: lightning, halves the next enemy attack.
+  - Cloudburst: water, 2 hits + heal.
+  - Elder Root: earth, Poison.
+  - Spore Cloud: Poison + draw.
+  - Briar Wall: Block + Bind.
+  - Crystal Shard: lightning, Pierce.
+  - Crystal Ward: Block + halves the next enemy attack.
+  - Riptide: water, draw.
+  - Squall Step: Block + Aether.
+- **Mini-boss cards:**
+  - Elaris's Tidebound Warden and Gale Sovereign drop Tidebound Aegis and Sovereign Gale again.
+  - Solaris's Cistern Warden drops **Cistern Aegis**.
+  - Solaris's Noon Toller drops **Noon Peal**.
+  - The Sky Isles' Stormbell Warden drops **Stormbell Toll**.
+  - The Featherfall Matriarch drops **Featherfall Grace**.
+  - A drop you already received stays received (`miniDrops` keeps the mini-boss ids).
+- **Art:** new `tools/generate_world_card_art.py` paints placeholders for all 21 new cards at
+  all 4 levels, with the existing card pipeline and a motif per card.
+- Compendium and `cards.js` cache tags bumped. `tests/balance-sim.cjs` still uses its Round 177
+  decks for the new worlds (the cards a player carries in), so its numbers are unchanged.
+- New `tests/world-cards.test.cjs` checks:
+  - No card is in two pools, and offers come only from the current world.
+  - Forest cards drop in Elaris, every new mini-boss has its own card, and new cards play as
+    written.
+  - Every new card has art at all four levels.
+- `card-variety` now counts 32 world reward cards.
+
+## Round 177: balance for worlds 3 to 6
+
+- Tuned with `tests/balance-sim.cjs` (16 talent builds × 2 play styles, fair-fight levels).
+  Targets: regular fights about 75% wins on average, mini-bosses about 42%, final bosses
+  about 29%. Each world's health multiplier was bisected first, then each boss's own
+  health.
+
+  | World | `regionHp` | Mini-bosses (hp) | Final boss (hp) | Sim result: regular / minis / boss |
+  |---|---|---|---|---|
+  | Sky Isles | 2.35 → **2.2** | Stormbell Warden .65, Featherfall Matriarch .78 | Zenith Roc .42 | 58-91% / 42%, 41% / 31% |
+  | Elaris | 3.3 → **2.22** | Tidebound Warden .91, Gale Sovereign .65 | Bloom Tyrant .58 | 50-92% / 42%, 48% / 28% |
+  | Vespera | 2.35 → **3.02** | Arc Sentinel .69, Resonant Phantom .99 | Tempest Colossus .45 | 45-92% / 42%, 43% / 30% |
+  | Chronospire | 3.3 → **3.36** | Clockwarden .82, Paradox Twin .93 | Chronarch .47 | 41-100% / 40%, 42% / 31% |
+
+- Why it moved:
+  - At their new levels (+18), Vespera and Chronospire had become too easy: the player has
+    18 more levels of talents by then.
+  - Elaris on Chronospire's old values was too hard, because Chronospire's numbers assumed
+    Suspend cards.
+- The sim does not wear gear yet, so real fights are a little easier than these numbers.
+
+## Round 176: gear, two pieces per world that open its boss room
+
+- Owner request: each world has only two items, and both are needed to unlock its boss room.
+  Each item is worn and gives a small boost (Armor, attack, health, armor piercing,
+  elemental attack, one free cleanse). Items get placeholder graphics and a separate
+  **Gear** screen like the Aetherlink.
+- **The rule, in every world:** each mini-boss guards one gear piece in its room. You can
+  take it once the mini-boss is beaten. Every door into the final boss room is sealed
+  (`requires: 'gate:<world>'`) until you hold both pieces, or once that boss is already
+  beaten, so old saves aren't locked out.
+- **The 12 pieces** (`GEAR` in the new `assets/gear.js`), across 5 slots:
+
+  | World | First mini-boss | Second mini-boss |
+  |---|---|---|
+  | Neon Aftermath | Ember Gloves (gloves): +1 attack | Briarstep Boots (boots): +1 Armor |
+  | Solaris | Sunwoven Shirt (shirt): +5 max HP | Scarab Belt (belt): Pierce 1 |
+  | Sky Isles | Galeweave Pants (pants): +1 elemental | Cloudstep Boots (boots): 1 free cleanse |
+  | Elaris | Thornhide Gloves (gloves): +2 attack | Mossweave Pants (pants): +2 Armor |
+  | Vespera | Stormglass Belt (belt): Pierce 2 | Tempest Gloves (gloves): +2 elemental |
+  | Chronospire | Timeworn Shirt (shirt): +12 max HP | Hourglass Belt (belt): 1 free cleanse |
+
+  - Attack and elemental add to card damage, through the talent damage hook.
+  - Pierce ignores enemy Armor.
+  - Armor stacks with Reactive Plating.
+  - A free cleanse is a **✚ Gear cleanse** button in battle: one Purifying Light per fight.
+- **Gear screen:** a new **Gear** button sits beside Aetherlink. It shows five slots (boots,
+  shirt, pants, belt, gloves), each with a picker, plus the whole collection: undiscovered
+  pieces say which world guards them. A piece goes on when you pick it up if its slot is
+  empty. Gear can't be changed mid-fight.
+- **Art:** new `tools/paint_gear_icons.py` paints a placeholder icon per piece in its world's
+  colours (`assets/items/gear/<id>.png`). On the map a piece shows its icon. Owner art with
+  the same file names replaces them.
+- **Neon Aftermath:**
+  - The relic gates are gone. Only the Warden's Crown is sealed.
+  - The Ember Sigil is now the Ember Gloves, still in the Moon Temple.
+  - The Briarstep Boots moved to the Crown Sentinel's Scrap Fortress.
+  - The Moon Lens is retired.
+  - The hidden Upgrade Crystal (owner request) is now a crystal chest at 4,4, the dead end in
+    the middle of the north edge. A save that already took it finds that chest open.
+  - Gear ids stay in `state.relics`, so old saves keep the Ember Sigil and the Boots as their
+    gear.
+- **Chests moved out of the mini-boss rooms** to nearby rooms, under their old ids, so opened
+  chests stay opened:
+
+  | World | Moves |
+  |---|---|
+  | Neon Aftermath | 8,9 → 5,4 |
+  | Solaris | 5,2 → 3,2, 8,0 → 8,2 |
+  | Vespera | 1,5 → 2,5, 11,2 → 10,2 |
+  | Chronospire | 0,3 → 1,3, 6,6 → 6,5 |
+  | Sky Isles | 5,3 and 0,3 |
+  | Elaris | 5,2 and 0,2 |
+
+- The objective names the missing pieces and their guardians until both are found.
+- **Fixes:**
+  - The exploration map's completion counted every relic you carried from other worlds,
+    and could go past 100%. It now counts only this world's.
+  - The Safe tag on the map uses each world's real start room.
+- **Tests:**
+  - New `tests/gear.test.cjs`.
+  - `relic-quest` now plays the gear chain in all six worlds.
+  - Updated: `neon-world`, `room-art`, `rebalance`, `expansion`, `chronospire` (doors into the
+    boss room are `{to, requires}` objects) and `solaris-roster`.
+
+## Round 175: the Sky Isles and Elaris join the journey (worlds 3 and 4)
+
+- **Six worlds**, in travel order: Neon Aftermath, Solaris, **Sky Isles** (`sky`), **Elaris**
+  (`wilds`), Vespera, Chronospire. Each final boss room's portal leads to the next world's
+  start, and each start leads back. Solaris's Solar Crown now opens to the Sky Isles, and
+  Vespera's start returns to Elaris.
+- **Vespera and Chronospire move up two worlds:** their rooms are 18 levels higher (Vespera
+  37-45, Chronospire 46-54).
+- **New `assets/tile-worlds.js`** (after `chronospire.js`; data in `assets/sky-data.js` and
+  `assets/wilds-data.js` from Round 174) does the following:
+  - Runs Solaris's painted-world engine once per world: walk mask, loose crossings and the
+    flipped tile per room.
+  - Sets up both rosters, rooms, portals, quiet rooms, Nexus Waypoints, lore, events and the
+    objective.
+- **Sky Isles roster** (sprites borrowed and tinted sky-blue until art arrives):
+
+  | Enemy | Element | Affliction |
+  |---|---|---|
+  | Sunfeather Drake | fire | Crush |
+  | Cloud Wisp | water | Static |
+  | Gale Harpy | air | Barrage |
+  | Thunderhorn Ram | earth | Rend |
+  | The Stormbell Warden (mini-boss, Stormbell Tower) | air | Shackle + Static |
+  | The Featherfall Matriarch (mini-boss, Featherfall Roost) | water | Siphon + Fog |
+  | **The Zenith Roc** (final boss, The Eye of the Sky) | air/fire | Empower, Barrage, Enfeeble |
+
+  - Events: Updraft Well, Abandoned Aerie, Singing Chimes, Starwell.
+  - Lore: Wind Chimes.
+- **Elaris roster:** the forest creatures come home under their original names and sprites,
+  untinted:
+  - Cinder Fox, Blight Antler, Drowned Heron, Storm Moth.
+  - The Tidebound Warden (Drowned Weir) and The Gale Sovereign (Stormwing Canopy).
+  - **The Bloom Tyrant** (Elderbloom Sanctuary).
+  - They have their own ids (`elarisFox`, `tideboundWarden`, `elarisTyrant`, ...), so
+    Solaris's renamed desert roster keeps its ids.
+  - Events: the forest set (Moonlit Spring, Wounded Ranger, Glowing Seedpod, Vines).
+  - Lore: Elder Stones.
+- **World registry in `expansion.js`:** `WORLD_ORDER`, `WORLD_NAMES`, `TILE_REGIONS`,
+  `regionStartRoom()`, `regionTierTypes()` and `WORLD_BOSS_ROOMS`. Portals, start rooms,
+  spawns, chests, saves, distances, titles and the exploration map read these instead of
+  per-world `if` chains. `regionIndex()` (`aether-deck.js`) is the world's place in
+  `WORLD_ORDER`. Affliction strength and side-card tiers follow it, and Dispel damage grows
+  4 + 3 per world.
+- **Deck slots:** the Zenith Roc and the Bloom Tyrant each add a deck slot (`WORLD_BOSSES`).
+- **Balance:** this round ships starting values. The Sky Isles take Vespera's old
+  multipliers and Elaris takes Chronospire's. `tests/balance-sim.cjs` now covers all six
+  worlds (`ONLY_REGIONS=sky,wilds`), and the tuned values follow in the next round.
+- **Card rewards** in the new worlds borrow Vespera's and Solaris's pools until Round 177
+  gives every world its own.
+- **Compendium:** lists both new worlds and the new levels.
+- **Tests:**
+  - New `tests/tile-worlds.test.cjs`: world order, 54 rooms each, enemies on paths, bosses,
+    quiet rooms, the tiles ship, levels, the portal chain, rosters and art.
+  - `region-rooms-load` covers all six worlds.
+  - `chronospire` and `crystals-touch-boss` are updated for the new order.
+
+## Round 174: tile kits for worlds 3 and 4 (Sky Isles and Elaris)
+
+- Owner plan: six worlds in order: Neon Aftermath, Solaris, a new sky world, Elaris (the
+  forest, with the old forest creatures), then Vespera and Chronospire. Elaris and every later
+  world are built like Solaris, from road-shaped tiles flipped to fit each room.
+- New `tools/build_tile_world.py sky|wilds`: Solaris's builder generalised. It reuses the
+  tracer and flips from `tools/build_solaris.py`, so Solaris's output does not change. Each
+  world turns Neon Aftermath's 54-room layout a different way, so the three tile worlds have
+  different maps:
+
+  | World | Region id | Map | Start | Mini-bosses | Final boss | Levels |
+  |---|---|---|---|---|---|---|
+  | Solaris | `elaris` | flipped top-to-bottom | 0,0 | 5,2 / 8,0 | 8,5 | 10-18 |
+  | Sky Isles | `sky` | flipped left-to-right | 8,1 | 3,3 / 0,5 | 0,0 | 19-27 |
+  | Elaris | `wilds` | turned half way round | 8,4 | 3,2 / 0,0 | 0,5 | 28-36 |
+
+  The region id `elaris` stays with Solaris so saves carry over; the forest world is `wilds`.
+  The builder writes `assets/<world>-data.js` (`TILE_WORLD_DATA.<world>`: walk mask, tile plan,
+  rooms, the start/boss/mini-boss rooms and the placeholder list) and the room tiles as `.webp`.
+- New `tools/paint_placeholder_tiles.py sky|wilds` paints a stand-in for each of the 7 road
+  shapes the layout needs (cross, corner, t-bottom, t-right, straight, dead-bottom,
+  dead-right): marble walkways on grassy islands over clouds for the sky, and dirt trails
+  under tree canopy for Elaris. It also writes each tile's exact walk area to
+  `src/masks/<name>.png`, so the stand-ins need no colour tracing. Owner paintings
+  (e.g. `src/cross-a.jpg`) replace them; delete the `-ph` tile then.
+- The new data is not loaded by the game yet (next round).
+
+## Round 173: saves in every Chronospire room load
+
+- **Bug:** a save made in 6 of Chronospire's 34 rooms would not load: `9,4`, `9,5`, `9,6`,
+  `6,6` (Paradox Twin), `8,6` and `8,7` (the Chronarch). `validateImport` checked
+  Chronospire rooms against Solaris's room list, so those rooms failed with "Invalid room"
+  and "Continue" reported no save.
+- **Fix:** new `regionRoomKeys(region)` in `expansion.js` returns each world's own room list.
+  The worlds planned next will extend it.
+- New `tests/region-rooms-load.test.cjs` validates a save in every room of every world.
+
+## Round 172: Solaris enemies fit the desert city
+
+- Owner request: rename and rework the Solaris enemies to fit a sun-scorched brass desert
+  city. The owner will send new art later. Ids are unchanged, so saves, boss kills and
+  mid-fight saves carry over.
+
+  | Was | Now | Change |
+  |---|---|---|
+  | Cinder Fox | **Solar Scarab** ☼ | fire, Barrage |
+  | Drowned Heron | **Mirage Ibis** | water, Siphon |
+  | Blight Antler | **Dune Scorpion** | earth, Enfeeble |
+  | Storm Moth | **Dust Devil** | air, Mind Fog |
+  | The Tidebound Warden | **The Cistern Warden** | mini-boss, Scrapwall Stronghold |
+  | The Gale Sovereign | **The Noon Toller** 🔔 | mini-boss, Temple of the Noon Bell |
+  | The Bloom Tyrant | **The Sun Pharaoh** ☉ | final boss, Solar Crown |
+
+- **The Sun Pharaoh** shifts between sun and sand (fire/earth, was earth/air). It now uses
+  Entomb, the Revenant's linen wrap, in place of Lacerate (Entomb, Empower, Rend).
+- Solaris Sun Dial lore, the Solaris objective and the compendium texts use the new names.
+- **Art:** the new enemies still show the old forest sheets for now. `ELARIS-ART.md` lists
+  the planned file for each one (`solar-scarab.png`, `mirage-ibis.png`, `dune-scorpion.png`,
+  `dust-devil.png`, `cistern-warden.png`, `noon-toller.png`, `sun-pharaoh.png`). Vespera
+  and Chronospire used to borrow the Solaris ids for their recolored sprites. They now
+  borrow art-only keys (`forestFox`, `forestHeron`, `forestStag`, `forestMoth`,
+  `forestTyrant`), so new Solaris art won't change them.
+- Unchanged: the mini-boss card drops (Tidebound Aegis, Sovereign Gale) and the Stormglass
+  Covenant keep their names.
+- New `tests/solaris-roster.test.cjs`. Cache tags bumped to `?v=round172`.
+
+## Round 171: resuming a journey keeps your place in Neon Aftermath
+
+- **Bug:** after a refresh, "Continue saved journey" put you back at the
+  Afterlight Refuge with the map wiped back to one room. Level, deck, relics
+  and boss kills stayed.
+- **Cause:** `expansion.js` bound the start button straight to its own
+  `newGame`, so the wrappers added later never ran from the button. One of
+  them, in `neon-world.js`, marks new games with `cityWorld: 1`. Without that
+  mark, every load ran the Round 91 old-city migration, which resets city
+  exploration. The aether-deck and exploration `newGame` wrappers were skipped
+  too; loads filled in what they set up.
+- **Fix:** the start and resume buttons now call the current `newGame` and
+  `load`. `neon-world.js` also adds the mark on every save, because a game in
+  progress is always on the current map. A save that was made without the
+  mark still resets one more time on its next load, then keeps its place.
+- New `tests/resume-progress.test.cjs`. Cache tags bumped to `?v=round171`.
+
 ## Round 170: the Revenant walks
 
 - The owner's 4-frame walk loop for the Sunwrapped Revenant (contact, passing, contact, passing) is

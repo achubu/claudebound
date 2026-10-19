@@ -199,6 +199,20 @@
         }
 
         .lead, .dim { color: var(--text-dim); }
+        .lab-controls { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; align-items: end; margin-bottom: 0.75rem; }
+        .lab-controls label { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--text-dim); gap: 0.25rem; }
+        .lab-controls select, .lab-btn { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.45rem 0.8rem; font: inherit; }
+        .lab-btn { cursor: pointer; } .lab-btn:disabled { opacity: 0.5; cursor: default; } #lab-run:not(:disabled) { border-color: var(--accent-blue); }
+        .lab-progress { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--text-dim); }
+        .lab-bar { flex: 0 0 200px; height: 8px; background: var(--card-bg); border-radius: 4px; overflow: hidden; } .lab-bar span { display: block; height: 100%; width: 0; background: var(--accent-blue); transition: width .2s; }
+        .lab-table-wrap { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+        .lab-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
+        .lab-table th, .lab-table td { padding: 0.4rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .lab-table th { background: #141722; position: sticky; top: 0; } .lab-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        .lab-table tr.kind-mini td:nth-child(2) { color: var(--accent-purple); } .lab-table tr.kind-boss td:nth-child(2) { color: var(--accent-color); font-weight: 600; }
+        .lab-win { display: inline-flex; align-items: center; gap: 0.4rem; } .lab-win i { display: inline-block; width: 60px; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; } .lab-win i b { display: block; height: 100%; background: var(--accent-blue); }
+        .verdict-hard { color: var(--accent-color); } .verdict-easy { color: #ffa502; } .verdict-ok { color: var(--accent-blue); }
+        .lab-note { font-size: 0.85rem; margin-top: 0.5rem; }
         .lead { margin-top: -0.75rem; margin-bottom: 1.5rem; }
         .game-card.soul { border-color: #7d5aa8; }
         .soul-tag { color: var(--accent-purple); }
@@ -246,7 +260,7 @@
          read from the running game (see loadGameData below), because
          expansion.js / encounter-depth.js depend on the game's own globals
          and crashed here, silently dropping 10 of the 23 cards. -->
-    <script src="assets/cards.js?v=round170" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/cards.js?v=round190" onerror="console.warn('assets/cards.js not found')"></script>
 </head>
 <body>
 
@@ -261,6 +275,7 @@
         <a href="#bosses">Bosses</a>
         <a href="#monsters">Bestiary</a>
         <a href="#mechanics">Attack guide</a>
+        <a href="#lab">Difficulty lab</a>
     </nav>
 
     <div class="container">
@@ -293,7 +308,108 @@
             <div class="mech-grid" id="mechanics-list"></div>
         </section>
 
+        <section id="lab">
+            <h2>Difficulty lab</h2>
+            <p class="lead">Plays real battles against every enemy with the game's own engine, at the player's own level: 16 talent builds (points spent up to that level) &times; 2 play styles, the bosses, side cards and deck slots of earlier worlds, and every gear piece available by then worn. Regular enemies are listed per species and level. <b>Typical</b> is the average win rate over all builds and styles. Your saved journey is never touched.</p>
+            <div class="lab-controls">
+                <label>World <select id="lab-world"><option value="all">All worlds</option></select></label>
+                <label>Fights per build and style <select id="lab-fights"><option>1</option><option selected>2</option><option>4</option><option>6</option></select></label>
+                <button id="lab-run" class="lab-btn" disabled>Run</button>
+                <button id="lab-stop" class="lab-btn" disabled>Stop</button>
+                <button id="lab-copy" class="lab-btn" disabled>Copy results</button>
+            </div>
+            <div class="lab-progress" aria-live="polite"><div class="lab-bar"><span id="lab-bar"></span></div><span id="lab-status">Loading the game&hellip;</span></div>
+            <div class="lab-table-wrap"><table class="lab-table" id="lab-table">
+                <thead><tr><th>World</th><th>Enemy</th><th>Lv</th><th>HP / Atk</th><th>Typical win</th><th>Best build</th><th>Worst build</th><th>Turns</th><th>HP left</th><th>Gear</th><th>Verdict</th></tr></thead>
+                <tbody></tbody>
+            </table></div>
+            <p class="dim lab-note">Targets: regular fights 30&ndash;100%, mini-bosses 34&ndash;50%, final bosses 22&ndash;36% (Neon Aftermath's Thorn Warden 34&ndash;50%). More fights per build give steadier numbers but take longer (all six worlds at 6 fights take a few minutes). The same lab runs from the command line: <code>node tests/difficulty-report.cjs [fights] [world]</code>.</p>
+        </section>
+
     </div>
+
+    <script>
+        // Round 182: the Difficulty lab (assets/sim/lab.js and the bot in assets/sim/bot.js) runs
+        // inside the hidden game frame. While it runs, saving, drawing and storage writes in that
+        // frame are switched off and every save key is restored afterwards, so a journey in
+        // another tab is never touched.
+        (function () {
+            const $ = id => document.getElementById(id);
+            let rows = [], stopping = false, running = false;
+            const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+            function frameWin() { return window.gameFrame && window.gameFrame.contentWindow; }
+            // Top-level const/let in the game (WORLD_ORDER, enemies, ...) are not window properties.
+            const g = (win, name) => { try { return win.eval(name); } catch (e) { return undefined; } };
+            function loadScript(win, src) {
+                return new Promise((ok, fail) => { const el = win.document.createElement('script'); el.src = src + '?v=round185'; el.onload = ok; el.onerror = () => fail(Error('could not load ' + src)); win.document.head.append(el); });
+            }
+            async function ready() {
+                const win = frameWin(); if (!win || !g(win, 'WORLD_ORDER')) return null;
+                if (typeof win.simEncounters !== 'function') { await loadScript(win, 'assets/sim/bot.js'); await loadScript(win, 'assets/sim/lab.js'); }
+                return win;
+            }
+            function guard(win) {
+                const store = win.localStorage, saved = {};
+                for (let i = 0; i < store.length; i++) { const k = store.key(i); if (k && k.startsWith('aethercede-')) saved[k] = store.getItem(k); }
+                const proto = win.Storage.prototype, setItem = proto.setItem, removeItem = proto.removeItem, random = win.Math.random, swapped = {};
+                proto.setItem = function () {}; proto.removeItem = function () {};
+                for (const f of ['save', 'renderBattle', 'renderWorld', 'toast', 'openMenu', 'closeMenu']) { try { swapped[f] = win.eval(f); win.eval(f + ' = function () {}'); } catch (e) { /* not assignable here */ } }
+                return () => {
+                    for (const [f, v] of Object.entries(swapped)) { win.__labRestore = v; try { win.eval(f + ' = __labRestore'); } catch (e) { /* ignore */ } }
+                    proto.setItem = setItem; proto.removeItem = removeItem; win.Math.random = random;
+                    for (const k of Object.keys(saved)) setItem.call(store, k, saved[k]);
+                    for (let i = store.length - 1; i >= 0; i--) { const k = store.key(i); if (k && k.startsWith('aethercede-') && !(k in saved)) removeItem.call(store, k); }
+                };
+            }
+            function rowHTML(r, world) {
+                const v = r.verdict === 'too hard' ? 'verdict-hard' : r.verdict === 'too easy' ? 'verdict-easy' : 'verdict-ok';
+                return `<tr class="kind-${r.kind}"><td>${esc(world)}</td><td>${esc(r.name)}${r.kind === 'zone' ? '' : r.kind === 'mini' ? ' <small>(mini-boss)</small>' : ' <small>(BOSS)</small>'}</td><td class="num">${r.level}</td><td class="num">${r.hp} / ${r.attack}${r.armor ? ' · ' + r.armor + ' Armor' : ''}</td>`
+                    + `<td><span class="lab-win"><i><b style="width:${r.typical}%"></b></i>${r.typical}%</span></td><td>${r.best.win}% ${esc(r.best.build)}</td><td>${r.worst.win}% ${esc(r.worst.build)}</td>`
+                    + `<td class="num">${r.avgTurns}</td><td class="num">${r.hpLeftWhenWon == null ? '–' : r.hpLeftWhenWon + '%'}</td><td class="num">${r.gear}</td><td class="${v}">${r.verdict}</td></tr>`;
+            }
+            async function runLab() {
+                const win = await ready(); if (!win) { $('lab-status').textContent = 'The game did not load.'; return; }
+                const pick = $('lab-world').value, M = Number($('lab-fights').value), worlds = pick === 'all' ? [...g(win, 'WORLD_ORDER')] : [pick];
+                running = true; stopping = false; rows = []; $('lab-table').tBodies[0].innerHTML = '';
+                $('lab-run').disabled = true; $('lab-stop').disabled = false; $('lab-copy').disabled = true;
+                const restore = guard(win); let plan = [];
+                try {
+                    for (const w of worlds) plan.push(...win.simEncounters(w).map(enc => [w, enc]));
+                    const total = plan.length * 32; let done = 0;
+                    for (const [w, enc] of plan) {
+                        if (stopping) break;
+                        const run = win.simEncounterRun(w, enc, M, { withGear: true }), name = g(win, 'SIM_REGION_NAMES')[w] || w;
+                        let more = true;
+                        while (more && !stopping) {
+                            more = run.step(); done++;
+                            $('lab-bar').style.width = Math.round(done / total * 100) + '%';
+                            $('lab-status').textContent = `${name}: ${g(win, 'enemies')[enc.type].name} Lv ${enc.level} (${done} / ${total} build runs)`;
+                            await new Promise(r => setTimeout(r, 0));
+                        }
+                        if (!more) { const r = run.result(); r.world = name; rows.push(r); $('lab-table').tBodies[0].insertAdjacentHTML('beforeend', rowHTML(r, name)); }
+                    }
+                    const off = rows.filter(r => r.verdict !== 'on target').length;
+                    $('lab-status').textContent = (stopping ? 'Stopped. ' : 'Done. ') + rows.length + ' encounters, ' + off + ' outside their target.';
+                } catch (e) { $('lab-status').textContent = 'Error: ' + e.message; console.error(e); }
+                finally { restore(); running = false; $('lab-run').disabled = false; $('lab-stop').disabled = true; $('lab-copy').disabled = !rows.length; }
+            }
+            $('lab-run').onclick = runLab;
+            $('lab-stop').onclick = () => { stopping = true; };
+            $('lab-copy').onclick = () => {
+                const head = ['World', 'Enemy', 'Kind', 'Level', 'HP', 'Attack', 'Armor', 'Typical win %', 'Best', 'Worst', 'Avg turns', 'HP left when won %', 'Gear', 'Verdict'];
+                const text = [head.join('\t'), ...rows.map(r => [r.world, r.name, r.kind, r.level, r.hp, r.attack, r.armor, r.typical, r.best.win + '% ' + r.best.build, r.worst.win + '% ' + r.worst.build, r.avgTurns, r.hpLeftWhenWon ?? '', r.gear, r.verdict].join('\t'))].join('\n');
+                navigator.clipboard && navigator.clipboard.writeText(text).then(() => { $('lab-status').textContent = 'Copied ' + rows.length + ' rows (paste into a spreadsheet).'; });
+            };
+            // Enable once the game frame has loaded its data.
+            const wait = setInterval(() => {
+                const win = frameWin(); if (!win || !g(win, 'WORLD_ORDER') || !g(win, 'WORLD_NAMES')) return;
+                clearInterval(wait);
+                for (const w of g(win, 'WORLD_ORDER')) $('lab-world').insertAdjacentHTML('beforeend', `<option value="${w}">${esc(g(win, 'WORLD_NAMES')[w] || w)}</option>`);
+                $('lab-run').disabled = false; $('lab-status').textContent = 'Ready. Pick a world and press Run.';
+            }, 300);
+            window.addEventListener('beforeunload', e => { if (running) { e.preventDefault(); e.returnValue = ''; } });
+        })();
+    </script>
 
     <footer>
         <p>Aethercede Compendium &mdash; card and enemy data is read live from the game.</p>
@@ -303,14 +419,15 @@
         // ---------------------------------------------------------------
         // Data source. The game's full card and enemy data only exists once
         // index.html has run all of its scripts (expansion cards, Elaris
-        // wildlife, the Bloom Tyrant, boss attack patterns), so the page is
+        // wildlife, the Sun Pharaoh, boss attack patterns), so the page is
         // loaded invisibly and its live values are read directly. It never
         // starts a journey, so it never writes a save.
         // ---------------------------------------------------------------
         function loadGameData() {
             return new Promise(resolve => {
                 const frame = document.createElement('iframe');
-                frame.src = 'index.html?v=round170';
+                window.gameFrame = frame; // Round 182: the Difficulty lab runs its battles in this frame
+                frame.src = 'index.html?v=round185';
                 frame.setAttribute('aria-hidden', 'true');
                 frame.tabIndex = -1;
                 frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';
@@ -352,9 +469,13 @@
             { id: 'elaris', name: 'Solaris', blurb: 'A sun-scorched desert city reached through the boss portal.', levels: [10, 17], bossLevels: { tidewardenElaris: 10, galeSovereign: 16, bloomTyrant: 18 },
               regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth', 'sunRevenant'],
               miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
-            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 42 rooms, levels 19–27.', levels: [19, 26], bossLevels: { arcSentinel: 21, resonantPhantom: 25, stormTyrant: 27 },
+            { id: 'sky', name: 'Sky Isles', blurb: 'Floating islands above the clouds, through the portal in the Solar Crown: 54 rooms, levels 19–27.', levels: [19, 26], bossLevels: { stormbellWarden: 23, featherMatriarch: 25, zenithRoc: 27 },
+              regular: ['skyDrake', 'skyWisp', 'skyHarpy', 'skyRam'], miniBosses: ['stormbellWarden', 'featherMatriarch'], boss: 'zenithRoc' },
+            { id: 'wilds', name: 'Elaris', blurb: 'The old forest and its original creatures, below the Sky Isles: 54 rooms, levels 28–36.', levels: [28, 35], bossLevels: { tideboundWarden: 32, galeSovereignElaris: 34, elarisTyrant: 36 },
+              regular: ['elarisFox', 'elarisAntler', 'elarisHeron', 'elarisMoth'], miniBosses: ['tideboundWarden', 'galeSovereignElaris'], boss: 'elarisTyrant' },
+            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 54 rooms, levels 37–45.', levels: [37, 44], bossLevels: { arcSentinel: 41, resonantPhantom: 43, stormTyrant: 45 },
               regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' },
-            { id: 'chronospire', name: 'Chronospire', blurb: 'A clockwork citadel where time is broken, through the rift in the Eye of the Tempest: 34 rooms, levels 28–36. Home of the ⏳ Suspend mechanic.', levels: [28, 35], bossLevels: { clockwarden: 30, paradoxTwin: 33, chronarch: 36 },
+            { id: 'chronospire', name: 'Chronospire', blurb: 'A clockwork citadel where time is broken, through the rift in the Eye of the Tempest: a tall spire of 54 rooms, levels 46–54. Home of the ⏳ Suspend mechanic.', levels: [46, 53], bossLevels: { clockwarden: 50, paradoxTwin: 52, chronarch: 54 },
               regular: ['chronoHound', 'chronoMoth', 'chronoSentry', 'chronoWraith', 'chronoHeron', 'chronoStag', 'chronoWisp', 'chronoMauler'], miniBosses: ['clockwarden', 'paradoxTwin'], boss: 'chronarch' }
         ];
         const ELEMENT_EFFECT = {
@@ -485,7 +606,7 @@
             if (e.armor) notes.push(`<b>Armor ${e.armor}:</b> blocks ${e.armor} damage from every hit except Pierce cards.`);
             const affl = (game.enemyAfflictions && game.enemyAfflictions[id]) || [];
             if (affl.length && game.afflictions) {
-                const ri = { city: 0, elaris: 1, vespera: 2, chronospire: 3 }[region.id] || 0;
+                const ri = Math.max(0, REGIONS.findIndex(r => r.id === region.id)); // Round 175: same order as the game's WORLD_ORDER
                 const strikeOnly = affl.length === 1 && game.afflictions[affl[0]].type === 'strike';
                 const when = e.boss ? (e.miniBoss ? 'every 3rd turn (2, 5, 8…), alternating' : 'every 3rd turn in order, and <b>every 2nd turn once enraged</b>') : (strikeOnly ? 'on its plain attacks every 3rd turn (4, 7, 10…)' : 'every 3rd turn (2, 5, 8…)') + '; elites every 2nd turn';
                 notes.push(`<b>Afflictions</b> — ${when}:<br>` + affl.map(a => { const A = game.afflictions[a]; const answer = A.answer.map(x => x === 'cleanse' ? 'spending 2 Aether to cleanse it' : (game.sideCards && game.sideCards[x] ? game.sideCards[x].name : x)).join(', '); return `${A.icon} <b>${esc(A.name)}</b>: ${esc(game.afflictionText ? game.afflictionText(a, ri) : A.name)} <i>Answer: ${esc(answer)}.</i>`; }).join('<br>'));
@@ -533,7 +654,7 @@
             const grid = document.getElementById('side-grid');
             if (!game || !game.sideCards) { grid.innerHTML = '<p class="dim">Side deck data loads from the game itself.</p>'; return; }
             const a = game.aether || { max: 8, draw: 4, hold: 2, deck: 6, copies: 2 };
-            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Your side deck starts with room for 2 cards and grows to ${a.deck} (+1 for beating the Crown Sentinel, the Gale Sovereign, the Bloom Tyrant and the Resonant Phantom). Build it (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
+            document.getElementById('side-lead').innerHTML = `Pitch cards from your hand at the end of your turn: each burns away for that encounter and gives Aether equal to its cost + 1 (up to ${a.max} stored). Your whole side deck is open in every fight: each side card can be played once per encounter for Aether only — ${a.draw} plus its listed cost, never less than ${a.draw}. Unspent energy turns into Aether 1 for 1. Your side deck starts with room for 2 cards and grows to ${a.deck} (+1 for beating the Crown Sentinel, the Noon Toller, the Sun Pharaoh and the Resonant Phantom). Build it (${a.copies} copies each) in the Deck Workshop. Numbers that grow with your level are shown at level 1.`;
             const where = ['Starter or any world', 'Solaris and Vespera', 'Vespera', 'Final bosses only'];
             grid.innerHTML = Object.entries(game.sideCards).map(([id, c]) => {
                 let text = ''; try { text = c.text(); } catch (e) {}
@@ -554,7 +675,7 @@
             const items = [
                 ['Strike', 'Deals the enemy\'s attack value.'],
                 ['Heavy attack', 'About 1.5× attack near a region\'s start, a little more at its far edge. Bosses\' heavy hits are capped lower so one hit never decides the fight.'],
-                ['Guard', 'Gives the enemy 5 Block (Bloom Tyrant: 8) starting next turn. Block soaks your damage first.'],
+                ['Guard', 'Gives the enemy 5 Block (Sun Pharaoh: 8) starting next turn. Block soaks your damage first.'],
                 ['Charge', 'No damage. It telegraphs a charged elemental strike on the following turn.'],
                 ['Charged strike', 'About 1.8× attack (1.5× for bosses) plus a status effect if any damage gets through. An armed Prismatic Counter cancels it and reflects 6 damage.'],
                 ...Object.entries(ELEMENT_EFFECT).map(([el, t]) => [`${ELEMENT_ICON[el]} ${cap(el)} strike`, t]),
@@ -564,6 +685,12 @@
                 ['Points of interest', 'About a third of ordinary rooms hold one: Aether Shrines (choose a blessing for your next fight), Campfires (rest, or train a card +15 mastery uses), Supply Caches (Shards), Sealed Caches (risk HP for more Shards) and five lore finds per world (read all five for 15 Shards and a side card).'],
                 ['Shards & the merchant', 'Enemies drop Shards: 1-2 from regulars, 3 from elites, 6 from mini-bosses, 10 from final bosses. The Wandering Merchant (one in every world, shown on the map) sells for Shards: a side card, healing potions (◇ 4, never sell out), unlimited card upgrades for Impermanent cards (◇ 12 to level 1, ◇ 20 to level 2, ◇ 30 to level 3), plus an upgraded card, card bundle or blessing. It never sells Soulbound cards or Upgrade Crystals, and moves to a new room whenever you enter a world or fall in battle.'],
                 ['Card rewards', 'A loot chest that holds a card offers three from the current world\'s pool. Take one, or leave them all.'],
+                ['⌁ Hack (Neon Aftermath)', 'Hack cards add Glitch to the enemy. At 5 Glitch it crashes and skips its next action; each crash patches it, so the next one needs 2 more. You get Packet Sniff and Ghost Protocol with your first win. 🛡 Firewall (Crown Observer, Crown Sentinel) wipes the Glitch and patches the enemy.'],
+                ['☀ Heat (Solaris)', 'Heat cards build Heat, up to 6, and it lasts between turns. Your next attack sears for 2 extra damage per Heat (Noon Blaze: 3) and uses it all up. You get Sunstoke and Scorching Sands on arrival. 🥵 Sunstoke (Solar Scarab, the Noon Toller) burns your Heat off and costs 1 HP for each.'],
+                ['🪶 Tailwind (Sky Isles)', 'Every card you play adds 1 Tailwind until the end of the turn. Tailwind cards get a bonus for each card you already played this turn, up to 4. You get Gust Chain and Slipstream on arrival. 🌬 Headwind (Cloud Wisp, the Featherfall Matriarch): your first 2 cards next turn add nothing.'],
+                ['🌱 Growth (Elaris)', 'Growth cards get stronger each time you play them in a fight, up to 4 times. You get Sapling Strike and Barkskin on arrival. 🍂 Blight (Storm Moth, the Gale Sovereign) withers your most-grown card back to its start.'],
+                ['⚡ Stormcharge (Vespera)', 'Stormcharge cards store charge, up to 20, and it lasts between turns. When an enemy attack lands on you (even into Block), all of it strikes back as damage that ignores Armor. Lightning Rod lets it out on your own turn. You get Static Coil and Capacitor Spark on arrival. ⏚ Dampen (Arc Wisp, the Resonant Phantom) drains half of it.'],
+                ['✸ Chain (Cinder Lance)', 'Play two Cinder Lances in the same turn and the enemy is dazed: its attack that turn deals 50% less damage. This works on every enemy, bosses too. An enemy can be dazed at most once every 3 turns. You need at least two copies (three makes the chain come up more often). Cinder Lance drops in Solaris.'],
                 ['⏳ Suspend (Chronospire)', 'Cards marked ⏳ Suspend N have a second button: <b>⏳ Suspend · free</b>. Press it and the card leaves your hand for 0 energy and waits in the ⏳ Suspended tray with a countdown of N. Each time you end your turn the countdown drops by 1; at 0 the card plays itself at the start of your turn, for free, with its charged bonus (e.g. Temporal Barrage: 14 + 8 = 22 damage). Up to 3 at once. ⟲ Rewind (an enemy affliction) adds 1 to every countdown; ⏩ Accelerate takes 1 off.'],
                 ['Bounties', 'Every fight comes with one optional bounty: Swift (win within 4 turns, 5 for elites, 7 for bosses), Untouched (lose no HP), Self-reliant (play no side card) or Overkill (deal 15+ damage with one card). Completing it pays +3 Shards (elites +5, bosses +8).'],
                 ['Elites', 'Elites always leave a card choice (unless the chest rolls something rarer) and drop 6 Shards.'],
@@ -573,7 +700,7 @@
                 ['Nexus Waypoints', 'Every world has a Nexus Waypoint at its start and another in its middle (Tunnelworks Corridor, Mistbound Thicket, Glasswind Reach). Walking into one discovers it. Then teleport to any discovered waypoint, in any world you have reached, from the map or by stepping on a waypoint.'],
                 ['Experience', 'Enemies at or above your level give full XP (25, elites 40, bosses 50). Each level you are above an enemy takes 20% off, down to 10% at five or more levels.'],
                 ['Unspent energy', 'Each point of energy left when you end your turn becomes 1 Aether.'],
-                ['Side deck', 'Room for 2 side cards at first, growing to 6 as you beat the Crown Sentinel, Gale Sovereign, Bloom Tyrant and Resonant Phantom. Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
+                ['Side deck', 'Room for 2 side cards at first, growing to 6 as you beat the Crown Sentinel, Noon Toller, Sun Pharaoh and Resonant Phantom. Your whole side deck is always open in battle. Play any side card once per encounter, paid in Aether only: 4 minimum (Null Anchor, Mirror Sigil and Phase Veil 5, Stasis Field 6). No energy needed.'],
                 ['Weaken', 'Talent ability, once per encounter: the enemy\'s next attack deals 3 less damage (+3 per Deep Interference rank), then it wears off.']
             ];
             document.getElementById('mechanics-list').innerHTML = items.map(([t, d]) => `<div class="mech"><b>${t}</b><p>${d}</p></div>`).join('');

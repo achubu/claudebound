@@ -17,10 +17,10 @@ function setup(talents, hand, opts = {}) {
 const dealt = (b, i = 0) => { const before = b.enemy.hp; playCard(i); return before - b.enemy.hp; };
 
 // ---------------- SURGE ----------------
-let b = setup({ attunement: 3 }, ['cinder']); assert.equal(dealt(b), 5 + 9, 'Elemental Attunement +3 per rank on elemental cards');
+let b = setup({ attunement: 3 }, ['cinder']); assert.equal(dealt(b), 6 + 9, 'Elemental Attunement +3 per rank on elemental cards'); // Cinder Lance is 6 since Round 189
 b = setup({ attunement: 3 }, ['strike']); assert.equal(dealt(b), 6, 'Attunement does not touch non-elemental cards');
 b = setup({ attunement: 2, kindle: 2 }, ['cinder']); playCard(0); assert.equal(b.burn, 2 + 4, 'Kindling Matrix +2 Burn per rank');
-b = setup({ attunement: 2, kindle: 1, weakpoint: 2 }, ['cinder'], { enemy: { element: 'earth' } }); assert.equal(dealt(b), Math.round((5 + 6) * 2.1), 'Exploit Weakness: +50% weakness becomes +110% at rank 2');
+b = setup({ attunement: 2, kindle: 1, weakpoint: 2 }, ['cinder'], { enemy: { element: 'earth' } }); assert.equal(dealt(b), Math.round((6 + 6) * 2.1), 'Exploit Weakness: +50% weakness becomes +110% at rank 2');
 b = setup({ attunement: 2, kindle: 1, weakpoint: 2, stormcaller: 1 }, ['cinder', 'cinder']);
 assert.equal(stat(b.hand[0]).cost, 0, 'Stormcaller: first elemental card shows cost 0'); playCard(0); assert.equal(b.energy, 3, 'Stormcaller card was free');
 assert.equal(stat(b.hand[0]).cost, 1, 'Stormcaller only discounts the first elemental card each turn'); playCard(0); assert.equal(b.energy, 2);

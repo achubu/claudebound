@@ -1,11 +1,13 @@
 'use strict';
 // The region boss and new card are registered before a journey is restored.
-enemies.bloomTyrant={name:'The Bloom Tyrant',icon:'❃',hp:150,attack:10,boss:true,element:'earth',shift:['earth','air'],shiftEvery:3};
+// Round 172: the Solaris boss is the Sun Pharaoh, shifting between sun (fire) and sand (earth).
+enemies.bloomTyrant={name:'The Sun Pharaoh',icon:'☉',hp:150,attack:10,boss:true,element:'earth',shift:['fire','earth'],shiftEvery:3};
 addCard('stormglass','Stormglass Covenant',1,'Soulbound Lightning','ϟ',{damage:7,shock:true,element:'lightning',soulbound:true,exhaust:true});
 const depthRules=rules;
 rules=function(c){return depthRules(c)+(stat(c).shock?' Disrupt: halve the next enemy attack.':'')};
 const depthMonsterArt=monsterArt;
-monsterArt=function(id){return id==='bloomTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="The Bloom Tyrant" style="background-image:url(assets/monsters/elaris/bloom-tyrant.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
+// forestTyrant is the same sheet as an art-only key (Vespera and Chronospire bosses borrow it).
+monsterArt=function(id){return id==='bloomTyrant'||id==='forestTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="'+(id==='bloomTyrant'?enemies.bloomTyrant.name:'The Bloom Tyrant')+'" style="background-image:url(assets/monsters/elaris/bloom-tyrant.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
 // Round 22 gave every boss an element (for the telegraphed elemental
 // strike + status effect), but all 4 mini-bosses still shared the exact
 // same 4-turn attack/charge/elemental/guard template, differing only in
@@ -27,13 +29,13 @@ const BOSS_PATTERNS={
  // The Crown Sentinel — a patient marksman: charges early and often,
  // guards to reset rather than trading blows.
  crownSentinel:['charge','elemental','guard','attack','charge','elemental'],
- // The Tidebound Warden — a tank, not an ambusher like its fellow water
+ // The Cistern Warden — a tank, not an ambusher like its fellow water
  // boss: guards on both sides of its burst instead of attacking into it.
  tidewardenElaris:['guard','attack','charge','elemental','guard','attack'],
- // The Gale Sovereign — a storm, not a marksman like its fellow air boss:
+ // The Noon Toller — a storm, not a marksman like its fellow air boss:
  // back-to-back charges with a heavy hit wedged between them.
  galeSovereign:['attack','charge','elemental','heavy','charge','elemental'],
- // The Bloom Tyrant — Elaris's final boss (formerly special-cased inline).
+ // The Sun Pharaoh — Solaris's final boss (formerly special-cased inline).
  bloomTyrant:['guard','charge','elemental','attack','charge','elemental'],
  // Vespera (Round 38). The Arc Sentinel — an armored bulwark that guards
  // first, then follows its charged strike straight into a heavy blow.
