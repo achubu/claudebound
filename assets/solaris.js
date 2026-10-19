@@ -96,3 +96,82 @@ solarisPortalStyles.textContent = '.portal-art{width:48px!important;height:72px!
   + '@keyframes solarPortalPulse{0%,100%{filter:drop-shadow(0 0 4px #ffcf6a) drop-shadow(0 0 10px #5fe9ff66)}50%{filter:drop-shadow(0 0 8px #ffe39a) drop-shadow(0 0 20px #5fe9ffaa)}}'
   + '@media(prefers-reduced-motion:reduce){.portal-art{animation:none!important;filter:drop-shadow(0 0 6px #86fff0)}}';
 document.head.append(solarisPortalStyles);
+
+// =====================================================================
+// Round 192: diagonal roads. Three corner rooms were cut (SOLARIS_CUT) so the map is less
+// rectangular, and the two rooms beside each cut are joined by a diagonal road. Its door is
+// where the painted road leaves the room (SOLARIS_DIAG, from tools/build_solaris.py); walk out
+// through it and you arrive a short way along the partner room's diagonal road.
+// =====================================================================
+const SOLARIS_DOOR_RADIUS = 36;
+// Round 197: the tile-built worlds can have diagonal roads too (their data's 'diag' table, from
+// tools/build_tile_world.py), so these read the active world's table.
+function worldDiagTable() {
+  if (activeRegion === 'elaris') return typeof SOLARIS_DIAG === 'object' ? SOLARIS_DIAG : {};
+  const d = typeof TILE_WORLD_DATA === 'object' && TILE_WORLD_DATA[activeRegion];
+  return (d && d.diag) || {};
+}
+// The door as a player position (the foot point is 22px below it), kept inside the room.
+function solarisDiagDoor(key, dir) {
+  const d = worldDiagTable()[key] && worldDiagTable()[key][dir];
+  return d ? { x: Math.max(14, Math.min(786, d.x)), y: Math.max(14, Math.min(486, d.y - 22)) } : null;
+}
+function solarisDiagDirs(key) { const t = worldDiagTable()[key]; return t ? Object.keys(t) : []; }
+const diagCornerAtBeforeSolaris = diagCornerAt;
+diagCornerAt = function (key, p) {
+  if (!Object.keys(worldDiagTable()).length) return diagCornerAtBeforeSolaris(key, p);
+  for (const dir of solarisDiagDirs(key)) {
+    const d = solarisDiagDoor(key, dir);
+    if (d && rooms[key] && rooms[key].exits[dir] && Math.hypot(p.x - d.x, p.y - d.y) < SOLARIS_DOOR_RADIUS) return dir;
+  }
+  return null;
+};
+// Arrive on the partner's diagonal road, clear of its door, as far into the room as the road goes.
+const diagArrivalBeforeSolaris = diagArrival;
+diagArrival = function (key, corner) {
+  const d = solarisDiagDoor(key, corner); if (!d) return diagArrivalBeforeSolaris(key, corner);
+  for (let r = SOLARIS_DOOR_RADIUS + 14; r < 160; r += 6) {
+    let best = null;
+    for (let a = 0; a < 360; a += 8) {
+      const x = Math.round(d.x + r * Math.cos(a * Math.PI / 180)), y = Math.round(d.y + r * Math.sin(a * Math.PI / 180));
+      if (x < 24 || x > 776 || y < 24 || y > 476 || !walkable(key, x, y)) continue;
+      if (typeof organicReachableAt === 'function' && !organicReachableAt(key, { x, y })) continue;
+      const s = Math.hypot(x - 400, y - 250); if (!best || s < best.s) best = { x, y, s };
+    }
+    if (best) return { x: best.x, y: best.y };
+  }
+  return { x: 400, y: 260 };
+};
+// Straight exits on the same edge ignore the stretch where the diagonal road leaves.
+function organicDoorExcluded(key, dir, x, y) {
+  const t = worldDiagTable()[key]; if (!t) return false;
+  return Object.values(t).some(d => Math.hypot(x - d.x, y - d.y) < 80);
+}
+// The diagonal exit's label sits at its door; tapping it walks you there and on through.
+const renderBeforeSolarisDiag = NeonCity.render;
+NeonCity.render = function (container, key) {
+  const out = renderBeforeSolarisDiag.apply(this, arguments);
+  if (!container || !container.querySelectorAll) return out;
+  for (const dir of solarisDiagDirs(key)) {
+    const d = solarisDiagDoor(key, dir), to = worldDiagTable()[key][dir].to; if (!d || !rooms[to]) continue;
+    for (const old of container.querySelectorAll('.city-exit.' + dir)) old.remove();
+    const node = document.createElement('div'), arrow = { ne: '↗', nw: '↖', se: '↘', sw: '↙' }[dir];
+    node.className = 'city-exit solaris-diag ' + dir; node.dataset.dir = dir; node.textContent = arrow + ' ' + rooms[to].name;
+    const right = d.x > 400, bottom = d.y > 250;
+    Object.assign(node.style, { left: d.x + 'px', top: (bottom ? d.y + 16 : d.y) + 'px', right: 'auto', bottom: 'auto', transform: 'translate(' + (right ? '-100%' : '0') + ',' + (bottom ? '-100%' : '0') + ')' });
+    container.append(node);
+  }
+  return out;
+};
+if (typeof document !== 'undefined' && document.getElementById) {
+  const world = document.getElementById('world');
+  if (world && world.addEventListener) world.addEventListener('click', e => {
+    const label = e.target && e.target.closest && e.target.closest('.city-exit.solaris-diag'); if (!label || !state || state.battle) return;
+    const dir = label.dataset && label.dataset.dir, d = dir && solarisDiagDoor(state.room, dir); if (!d || typeof setTouchDestination !== 'function') return;
+    e.stopPropagation(); e.preventDefault();
+    const o = cellOffset(state.room, joinedArea()); setTouchDestination({ x: o.x + d.x, y: o.y + d.y }, { dir, key: state.room });
+  }, true);
+}
+const solarisDiagStyles = document.createElement('style');
+solarisDiagStyles.textContent = '.city-exit.solaris-diag{border-color:#ffd27a;color:#ffe7b0;box-shadow:0 0 12px #ffd27a55;cursor:pointer;white-space:nowrap}';
+document.head.append(solarisDiagStyles);

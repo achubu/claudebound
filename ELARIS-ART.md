@@ -3,21 +3,24 @@
 ## Solaris roster and planned art (Round 172)
 
 World 2 is Solaris, a sun-scorched brass desert city. Its enemies were renamed and reworked
-in Round 172. They still use the old forest sheets below until the new art arrives. Drop each
+in Round 172. Since Rounds 193-195 every one of them has the owner's own sheet. Drop each
 new sheet into `assets/monsters/elaris/` under the planned name, in the same 4-frame format as
 the forest sheets: one row, four equal cells, transparent background, facing right. The ids
-stay the same, so saves carry over.
+stay the same, so saves carry over. Generated sheets usually come on a fake checkerboard; cut them
+out with `python3 tools/cut_sprite_sheet.py <in> assets/monsters/elaris/<name>.png` (add
+`--no-floor` when the creature stands on a painted floor tile), then point
+the species' `sheet` in `assets/elaris-wildlife.js` at the new name.
 
-| Id | New enemy | Element | What it is | Planned sheet |
+| Id | New enemy | Element | What it is | Sheet |
 |---|---|---|---|---|
-| `cinderFox` | Solar Scarab | Fire | Brass beetle that rolls a ball of captured sunlight; Barrage | `solar-scarab.png` |
-| `drownedHeron` | Mirage Ibis | Water | Sacred ibis with a shimmering heat-haze body that drinks your strength; Siphon | `mirage-ibis.png` |
-| `blightAntler` | Dune Scorpion | Earth | Sand-armored scorpion with a copper stinger; Enfeeble | `dune-scorpion.png` |
-| `stormMoth` | Dust Devil | Air | Whirling sand spirit with glowing eyes; Mind Fog | `dust-devil.png` |
+| `cinderFox` | Solar Scarab | Fire | Brass beetle that rolls a ball of captured sunlight; Barrage | `solar-scarab.png` (in, Round 193) |
+| `drownedHeron` | Mirage Ibis | Water | Sacred ibis with a shimmering heat-haze body that drinks your strength; Siphon | `mirage-ibis.png` (in, Round 195) |
+| `blightAntler` | Dune Scorpion | Earth | Sand-armored scorpion with a copper stinger; Enfeeble | `dune-scorpion.png` (in, Round 195) |
+| `stormMoth` | Dust Devil | Air | Whirling sand spirit with glowing eyes; Mind Fog | `dust-devil.png` (in, Round 194) |
 | `sunRevenant` | Sunwrapped Revenant | Earth | Tech mummy (already has art); Entomb | `sun-revenant.png` |
-| `tidewardenElaris` | The Cistern Warden | Water | Brass golem guarding the Scrapwall cistern (mini-boss) | `cistern-warden.png` |
-| `galeSovereign` | The Noon Toller | Air | Bell-headed sentinel of the Temple of the Noon Bell (mini-boss) | `noon-toller.png` |
-| `bloomTyrant` | The Sun Pharaoh | Earth, shifts fire/earth | Crowned sun-king of the Solar Crown (final boss) | `sun-pharaoh.png` |
+| `tidewardenElaris` | The Cistern Warden | Water | Brass golem guarding the Scrapwall cistern (mini-boss) | `cistern-warden.png` (in, Round 195) |
+| `galeSovereign` | The Noon Toller | Air | Bell-headed sentinel of the Temple of the Noon Bell (mini-boss) | `noon-toller.png` (in, Round 195) |
+| `bloomTyrant` | The Sun Pharaoh | Earth, shifts fire/earth | Crowned sun-king of the Solar Crown (final boss) | `sun-pharaoh.png` (in, Round 195) |
 
 Vespera and Chronospire recolor the forest sheets through art-only keys (`forestFox`,
 `forestHeron`, `forestStag`, `forestMoth`, `forestTyrant`), so changing a Solaris sheet does

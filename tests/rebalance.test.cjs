@@ -514,8 +514,8 @@ run(`
 // not just copy-pasting the city approach.
 assert(enemies.tidewardenElaris&&enemies.tidewardenElaris.boss&&enemies.tidewardenElaris.miniBoss,'The Tidebound Warden is a real boss-tier mini-boss');
 assert(enemies.galeSovereign&&enemies.galeSovereign.boss&&enemies.galeSovereign.miniBoss,'The Gale Sovereign is a real boss-tier mini-boss');
-assert.equal(enemies.tidewardenElaris.sheet,'drowned-heron','Tidebound Warden reuses the existing Drowned Heron sprite sheet rather than needing new art');
-assert.equal(enemies.galeSovereign.sheet,'storm-moth','Gale Sovereign reuses the existing Storm Moth sprite sheet');
+assert.equal(enemies.tidewardenElaris.sheet,'cistern-warden','Round 195: the Cistern Warden has its own sheet');
+assert.equal(enemies.galeSovereign.sheet,'noon-toller','Round 195: the Noon Toller has its own sheet');
 newGame();configureRegion('elaris');
 const twSpawn=roomSpawns('5,2').find(s=>s.boss),gsSpawn=roomSpawns('8,0').find(s=>s.boss);
 assert(twSpawn&&twSpawn.type==='tidewardenElaris'&&twSpawn.element==='water','Tidebound Warden spawns correctly at its designated room with its element intact');

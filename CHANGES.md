@@ -3496,6 +3496,238 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 199: the Gear screen lists only gear you have found
+
+- The Gear collection used to list all 12 pieces, with "Undiscovered …" placeholders for the
+  ones you didn't have. It now shows only the gear you own. With nothing found yet it says
+  "No gear found yet. Each mini-boss guards a piece." The HUD objective still names each world's
+  two pieces and who guards them (`assets/gear.js`).
+- `tests/gear.test.cjs` checks that unfound gear isn't listed and that an empty collection says
+  so. `gear.js` cache tag is now round199.
+
+## Round 198: God Mode
+
+A main-menu option (also on the start screen) for trying the game out, from `assets/god-mode.js`
+(loaded last).
+
+- **Any card wins.** Playing any card, from the hand or the side deck, wins the fight at once,
+  bosses included, with the usual rewards. Cards you couldn't afford can be clicked too. The
+  card's own effect is skipped.
+- **Every Nexus Waypoint** in every world is unlocked, so you can travel anywhere straight away.
+- **Every map is revealed**: each world's rooms all count as visited.
+- **Nothing is saved.** On entering, the journey is saved where it stands. After that, writes to
+  the game's save and material keys are ignored, and export and import are off. Leaving God
+  Mode reloads the page, and reloading rolls back to that save. Started from the start screen,
+  God Mode plays a fresh journey that is never stored. A ⚡ GOD MODE badge shows while it is on.
+- Tests: new `tests/god-mode.test.cjs` (cards don't win without it; any card wins with it, a boss
+  counts; all waypoints and maps are open, including after a waypoint trip to another world;
+  nothing reaches the save; export is off; the save is the pre-God journey). In the browser:
+  storage is byte-for-byte unchanged through a God session, and leaving or reloading resumes
+  the journey from before.
+- Also fixed two tests after Round 197's new Sky Isles map:
+  - `tests/crystals-touch-boss.test.cjs` still expected 54 Sky Isles rooms (51 now).
+  - `tests/walk-past.test.cjs` picks the Sky Isles shrine room, then loops through every world. Its
+    closing redraw ran in Chronospire, where that room (7,1) doesn't exist. It now goes back to
+    the Sky Isles first.
+- All five other worlds' walks (`tests/playtest-walk.cjs`) are clean after Round 197's gear
+  placement change.
+
+## Round 197: the Sky Isles are painted, with diagonal walkways
+
+The Sky Isles now use the owner's top-down tiles instead of stand-ins, and three edge rooms are
+cut so the map is less rectangular (51 rooms, as in Solaris).
+
+- **The owner's tiles** (2624x1632, `assets/environment/sky/src/`): two crosses, the corner,
+  straight, T to the right and T downward, and four dead-ends to the right. They are strictly
+  top-down with every walkway leaving its edge at the exact middle, so they flip both ways.
+- **Made from them** by the new `tools/prepare_sky_tiles.py` (no dead-end-from-below or diagonal
+  tiles came back from the generator):
+  - `dead-bottom-a/b/c`: three of the dead-right paintings turned a quarter turn, cropped round
+    the lookout and scaled back up. Their sources are kept in `src/rotate/`.
+  - `src/diagonal/diag-se/nw/sw`: the corner tile with a third walkway from its bend to that
+    corner of the image. The walkway is a strip of the straight tile turned to point at the
+    corner, so its stones and rim match, and the cross tile's round plaza is laid over the joint.
+  - Walk masks for every tile, traced by colour: the marble and its rim are warm grey, clouds
+    white-blue and islands green. An opening drops island cliffs and props, padded so it does not
+    eat the room edges. Some walkways start at an island's edge rather than the image's (the left
+    arm of the T and cross tiles), so each exit also gets a walkway-wide strip across the grass to
+    its edge.
+- **Corner cuts and diagonals in tile worlds** (`tools/build_tile_world.py`):
+  - A world may list `cut` rooms. As in Solaris, the two rooms beside each cut are joined by a
+    diagonal exit, and each diagonal door (where the painted walkway leaves the room) goes into
+    the data's `diag` table.
+  - The Sky Isles cut 8,0 and 8,5 (two corners) and 2,5 (a notch in the bottom edge). Of all the
+    choices, these need the fewest diagonal paintings (three).
+  - `top_down` worlds may flip diagonal tiles both ways.
+- **Engine.** `assets/solaris.js`'s diagonal doors read the active world's table
+  (`worldDiagTable()`: `SOLARIS_DIAG` in Solaris, `TILE_WORLD_DATA[world].diag` in a tile world).
+  Entering, arriving clear of the door, the ↗ labels and tap routes all work as in Solaris.
+- **Saves.** A save standing in a cut room resumes at Windgate Landing, and cut rooms leave the
+  visited lists (`dropCutRooms` in `assets/tile-worlds.js`). Without this, such a save would have
+  failed to load ("Invalid room").
+- **Gear kept clear of its guard.** In a corner tile the only open ground near the requested spot
+  is beside the bend, where the mini-boss stands. When a relic lands within 60px of a patrol it
+  is placed again, at least 90px (else 70px) away (`assets/neon-world.js`). Relics elsewhere don't
+  move.
+- The corner painting is used in 18 rooms. A second version would cut down the repetition.
+- Tests: new `tests/sky-diagonals.test.cjs` (51 rooms, no stand-ins, three links both ways that
+  arrive on the walkway, the save migration, Solaris keeping its own doors). `tile-worlds` expects
+  51 Sky rooms. `node tests/playtest-walk.cjs sky`: 51 rooms, 375 crossings, no problems.
+  Cache tags for `solaris.js`, `sky-data.js`, `tile-worlds.js` and `neon-world.js` are now round197.
+
+## Round 196: the Sky Isles creatures get their own art
+
+- **Seven new sheets** in `assets/monsters/sky/`, from the owner's prompts: the Sunfeather Drake,
+  Cloud Wisp, Gale Harpy and Thunderhorn Ram, the Stormbell Warden and Featherfall Matriarch
+  mini-bosses, and the Zenith Roc final boss. They replace the forest animals that the Sky
+  Isles drew with a blue hue shift (`SKY_TINT`, now gone).
+- **How they are wired:** `tile-worlds.js` adds art-only keys to `WILDLIFE_ART` (`skyDrakeArt`
+  and so on) with `tint: 'none'`. In `elaris-wildlife.js`, a sheet name with a folder
+  (`sky/zenith-roc`) is read from that folder under `assets/monsters/`. `big: true` draws the
+  Zenith Roc in the larger boss box that the Bloom Tyrant uses.
+- **Cutout tool:** some of these sheets had thin dark lines round and between the frames.
+  `tools/cut_sprite_sheet.py` paints any line that is dark along 85% of a row or column as
+  background, and reads the background colour a few pixels inside the edge. The Solaris magenta
+  sheets were re-cut with this version, so the tool still reproduces every file.
+- `tests/tile-worlds.test.cjs` now checks that all seven Sky Isles enemies use their own
+  untinted sheets of four 3:4 frames, and that the Roc gets the boss box. Cache tags for
+  `elaris-wildlife.js` and `tile-worlds.js` are now round196.
+
+## Round 195: the rest of the Solaris roster gets its own art
+
+Every Solaris enemy now has the owner's own sheet; none borrow forest art any more.
+
+- **New sheets** in `assets/monsters/elaris/`, cut from the owner's magenta-background sheets
+  with `tools/cut_sprite_sheet.py`:
+  - `mirage-ibis.png`: the Mirage Ibis (`drownedHeron`), a Thoth-style ibis with an ankh staff
+    and a heat-haze shimmer.
+  - `dune-scorpion.png`: the Dune Scorpion (`blightAntler`), with a glowing copper stinger.
+  - `cistern-warden.png`: the Cistern Warden mini-boss (`tidewardenElaris`), a brass golem with
+    water sloshing in its tank.
+  - `noon-toller.png`: the Noon Toller mini-boss (`galeSovereign`), a bell-headed knight with a
+    hammer. Its cycle went from .7s (the moth's flutter) to 1.2s, to suit a heavy walk.
+  - `sun-pharaoh.png`: the Sun Pharaoh final boss (`bloomTyrant`), whose sun halo grows across
+    the frames. `encounter-depth.js` now gives it this sheet; `forestTyrant` keeps the old Bloom
+    Tyrant sheet for the Sky Isles, Elaris, Vespera and Chronospire bosses.
+  - `dust-devil.png` was re-cut from the owner's sharper copy of the same sheet.
+- **Tool changes:**
+  - The magenta key reads the background colour from the sheet's border, so purple-magenta
+    backgrounds (the ibis) work too.
+  - Despill only touches magenta-ish pixels (red and blue both above green). Gold, orange glows,
+    the Pharaoh's blue stripes and the golem's water keep their colour.
+  - `--no-floor` removes the painted stone floor tile the golem and the knight stood on: in the
+    bottom sixth of the sheet, cool and magenta pixels go, while brass, dust and sand stay.
+  - Specks under 12 pixels are dropped.
+  - All the magenta sheets were cut with the final version, so the tool reproduces every file.
+- The sheets are 2064x688 (four 516x688 frames) and 170 to 285 KB each.
+- Tests: `elaris-wildlife` checks all thirteen sheets and which species uses each (the forest
+  keys keep the old sheets); `solaris-roster` checks the Pharaoh's sheet; `rebalance` now expects
+  the mini-bosses' own sheets. `ELARIS-ART.md` marks every planned sheet as in. Cache tags for
+  `elaris-wildlife.js` and `encounter-depth.js` are now round195.
+
+## Round 194: the Dust Devil gets its own sprite sheet
+
+- **New art.** The owner's 4-frame Dust Devil sheet (a sand tornado with glowing eyes and
+  orbiting rocks) is now `assets/monsters/elaris/dust-devil.png`, used by `stormMoth` (Dust
+  Devil, Solaris). The Noon Toller and the other worlds keep the moth sheet for now.
+- **Magenta backgrounds.** This sheet was drawn on flat magenta, and saved as a JPEG.
+  `tools/cut_sprite_sheet.py` now chroma-keys magenta sheets. JPEG blur mixes magenta into
+  outlines and the thin dust rings, so red and blue are capped against green to take the pink
+  back out, and soft edge pixels take the colour of the nearest solid pixel.
+- **Frame shape.** The sheet was 2000x496 (square frames). The game draws sprites in 3:4 boxes,
+  so the tool pads short sheets to 3:4 with the creature standing near the bottom, as the other
+  sheets do.
+- Colour under fully transparent pixels is now blanked before the 256-colour palette is made,
+  so the palette goes to the creature. The scarab sheet was re-cut with the updated tool.
+- `tests/elaris-wildlife.test.cjs` checks the Dust Devil sheet, and that the moth sheet stays for
+  the other worlds. `elaris-wildlife.js` cache tag is now round194.
+
+## Round 193: the Solar Scarab gets its own sprite sheet
+
+- **New art.** The owner's 4-frame Solar Scarab sheet (a brass beetle rolling a sun-ball) is now
+  `assets/monsters/elaris/solar-scarab.png`, and `cinderFox` (Solar Scarab, Solaris) uses it in
+  rooms and battles. Vespera and Chronospire still use the fox sheet through `forestFox`.
+- **Cutting the background.** The sheet came on a fake checkerboard with a soft white glow
+  round the creature. Keying out the near-white background left a grey halo, and it punched
+  holes in the bright centre of the sun-ball. `tools/cut_sprite_sheet.py` instead keeps the
+  creature's coloured and dark pixels, fills holes (so the ball stays solid), feathers the edge
+  by about a pixel, and saves a 256-colour PNG (180 KB instead of 1 MB). Use it for the
+  next Solaris sheets.
+- `tests/elaris-wildlife.test.cjs` accepts any sheet of four equal upright frames (the owner's
+  sheets are 2000x667, the forest ones 2172x724), and checks that the scarab has its own sheet
+  and that the fox sheet stays for the other worlds. `elaris-wildlife.js` cache tag is now round193.
+
+## Round 192: Solaris diagonals, no flash of old room art, glowing items
+
+- **Solaris corners cut, with diagonal roads.** The owner asked for a less rectangular map.
+  - Rooms 0,3 Copper Wells, 8,3 Radiant Crossing and 5,0 Halo Court are gone (Solaris now has
+    51 rooms). All three were corner rooms on the outer edge, with nothing in them.
+  - The two rooms beside each cut are joined by a diagonal road: 0,4 ↔ 1,3, 7,3 ↔ 8,4, and
+    4,0 ↔ 5,1.
+  - Those six rooms use the owner's new diagonal paintings in
+    `assets/environment/solaris/src/diagonal/`: `diag-corner-a`, `diag-t-a` (two versions)
+    and `diag-t-b` (two versions). Only side-to-side flips are used.
+  - Room 4,0 takes a mirrored `diag-t-a`, whose extra north road runs off the top of the map as a
+    painted dead end, so no `diag-corner-b` painting was needed.
+- **How the diagonal doors work.**
+  - `tools/build_solaris.py` cuts the rooms (`CUT`), links the neighbours, picks diagonal tiles
+    (`DSHAPES`), and writes each diagonal door, the spot where the painted road leaves the room,
+    to `SOLARIS_DIAG` in `assets/solaris-data.js`.
+  - In `assets/solaris.js`, walking into a diagonal door (within 36px) takes you to the partner
+    room. You arrive a short way along its diagonal road, clear of its door, so you never bounce
+    straight back. It reuses the corner-exit code from `assets/diagonals.js`.
+  - Diagonal exit labels (↗ ↖ ↘ ↙ plus the room name) sit at their doors; tapping one walks you
+    through.
+  - Where a diagonal leaves through the same edge as a straight exit (rooms 1,3 and 7,3), the
+    straight door ignores that stretch (`organicDoorExcluded`, a new hook in
+    `assets/organic-paths.js`).
+  - The map draws the diagonal links on its own.
+  - Enemy levels are re-spread by walking distance, and the Solar Crown stays at 18.
+  - Old saves standing in a removed room resume at Dawnfire Gate (the existing check on Solaris
+    room keys).
+- **No more flash of old art on entering a room** (new `assets/room-preload.js`). A room's ground
+  was first drawn with the old district or forest art, and its own painting replaced it once the
+  image loaded, so on a first visit the old art showed for a moment. Two fixes:
+  - While the painting loads, the room now shows its world's plain ground colour.
+  - The paintings of the rooms next to you start loading as soon as you arrive, so they are
+    usually ready before you walk in.
+  - This covers Solaris, the tile worlds and Neon Aftermath's repainted rooms.
+- **Items glow.** Points of interest (data terminals, shrines, caches and so on), map chests and
+  relic/gear markers now have a white rim and a slow pulsing glow: cyan in Neon Aftermath, warm
+  gold elsewhere. Point-of-interest art is drawn at 52px (was 44). Used ones are greyed at 80%
+  opacity (was 45%), so they stay readable. With reduced motion the glow is steady.
+  (`assets/layout-polish.css`.)
+- **No dotted footpaths.** The footpath lines from the street to each item in Neon Aftermath's
+  painted rooms (Round 101) are no longer drawn. The paths are still walkable in the mask.
+- Tests: new `tests/solaris-diagonals.test.cjs`. `expansion` updated for 51 Solaris rooms.
+  `tests/playtest-walk.cjs` now also walks diagonal doors; for Solaris: 51 rooms, 374
+  crossings, no problems, no page errors.
+
+## Round 191: four new Solaris road paintings
+
+- The owner painted four new Solaris road tiles. They are added to the kit in
+  `assets/environment/solaris/src/`, and `tools/build_solaris.py` now spreads 11 rooms over them:
+
+  | Tile | Shape (exits as painted) | Rooms |
+  |---|---|---|
+  | `t-right-b` | north, east, south: market quarter with striped awnings | 8,1 · 1,4 · 3,4 · 7,4 |
+  | `corner-c` | north, east: brick-paved road through walled courtyards | 2,0 · 6,0 · 3,3 · 6,3 |
+  | `t-bottom-c` | east, south, west, with a short stub north (the cliffs close the top) | 4,4 · 1,5 · 3,5 |
+  | `dead-top-b` | north, ending in a ring plaza | 3,2 |
+
+  Before this, one T-junction painting covered 10 rooms and the two corner paintings 8 each.
+- The images arrived 16:9 (2000x1116 and 2752x1536). Each is cropped to the kit's 16:10 around
+  its vertical road, so the roads still leave at the middle of each edge.
+- `corner-c` is laid in bricks with grout lines, which the colour tracer cannot read (it came out
+  patchy, and the two halves did not meet). Its walk area is drawn by hand in `MANUAL`. The
+  stone rings in the middle of `dead-top-b` and `t-bottom-c` are added to the traced roads in
+  `EXTRA`.
+- Checked:
+  - Solaris, organic-path, item-placement, relic, gear and exploration tests pass.
+  - `tests/playtest-walk.cjs elaris`: all 54 rooms, 386 crossings and 68 item routes, with no
+    problems and no page errors.
+  - Screenshots of the new rooms in the game.
+
 ## Round 190: Chronospire card paintings from achubu/Cardbound
 
 - Checked `achubu/Cardbound` again (commit eb48d8d, "Expand Chronospire card illustrations").

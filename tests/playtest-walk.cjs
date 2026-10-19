@@ -100,10 +100,12 @@ const only = process.argv[2];
           if (inBox(covers.minimap, it, 10)) P('item under the minimap', key, kind + ' at ' + Math.round(it.x) + ',' + Math.round(it.y));
         }
         // Doors.
-        for (const d of dirs) {
+        // Round 192: diagonal doors too (Solaris), walked to where their road leaves the room.
+        const diagDirs = typeof solarisDiagDirs === 'function' ? solarisDiagDirs(key) : [];
+        for (const d of [...dirs, ...diagDirs]) {
           const raw = rooms[key].exits[d]; if (!raw) continue;
           state.room = key; state.pos = { ...pos };
-          const res = walkTo(door[d], { key, dir: d });
+          const res = walkTo(door[d] || solarisDiagDoor(key, d), { key, dir: d });
           if (!res.ok) { P('door unreachable', key, d + ' from ' + via + ': ' + res.why); continue; }
           if (!res.crossed) { P('route ends without crossing', key, d + ' from ' + via + ' (stopped at ' + Math.round(state.pos.x) + ',' + Math.round(state.pos.y) + ')'); continue; }
           out.crossings++;

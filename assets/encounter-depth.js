@@ -6,8 +6,9 @@ addCard('stormglass','Stormglass Covenant',1,'Soulbound Lightning','ϟ',{damage:
 const depthRules=rules;
 rules=function(c){return depthRules(c)+(stat(c).shock?' Disrupt: halve the next enemy attack.':'')};
 const depthMonsterArt=monsterArt;
-// forestTyrant is the same sheet as an art-only key (Vespera and Chronospire bosses borrow it).
-monsterArt=function(id){return id==='bloomTyrant'||id==='forestTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="'+(id==='bloomTyrant'?enemies.bloomTyrant.name:'The Bloom Tyrant')+'" style="background-image:url(assets/monsters/elaris/bloom-tyrant.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
+// forestTyrant is the old Bloom Tyrant sheet as an art-only key (Vespera and Chronospire bosses
+// borrow it); the Sun Pharaoh has its own sheet since Round 195.
+monsterArt=function(id){return id==='bloomTyrant'||id==='forestTyrant'?'<span class="monster-sprite wildlife-sprite bloom-tyrant" role="img" aria-label="'+(id==='bloomTyrant'?enemies.bloomTyrant.name:'The Bloom Tyrant')+'" style="background-image:url(assets/monsters/elaris/'+(id==='bloomTyrant'?'sun-pharaoh':'bloom-tyrant')+'.png);--wildlife-cycle:1.8s"></span>':depthMonsterArt(id)};
 // Round 22 gave every boss an element (for the telegraphed elemental
 // strike + status effect), but all 4 mini-bosses still shared the exact
 // same 4-turn attack/charge/elemental/guard template, differing only in

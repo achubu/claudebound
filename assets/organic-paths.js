@@ -72,7 +72,9 @@ function organicDoor(key, dir, pocket = 0, checkLanding = true) {
     const outside = dir === 'w' ? -14 : dir === 'e' ? area.width + 14 : dir === 'n' ? -1 : area.height + 36;
     // On a continuous world map a door must also be street on the far side of the edge.
     const open = t < hi && (horiz ? organicAreaWalk(o, edgeCoord, t) : organicAreaWalk(o, t, edgeCoord))
-      && (!o.def.world || loose || (horiz ? o.def.at(o, outside, t) : o.def.at(o, t, outside)));
+      && (!o.def.world || loose || (horiz ? o.def.at(o, outside, t) : o.def.at(o, t, outside)))
+      // Round 192: a diagonal road leaving through this edge is its own door, not this one.
+      && !(typeof organicDoorExcluded === 'function' && organicDoorExcluded(key, dir, horiz ? edgeCoord - off.x : t - off.x, horiz ? t - off.y : edgeCoord - off.y));
     if (open && start === null) start = t;
     if (!open && start !== null) { runs.push([start, t]); start = null; }
   }

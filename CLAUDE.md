@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 190) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 199) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -18,20 +18,25 @@ change set.
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
-    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `pickups`, `cardsmith`, `gear`. (`solaris-data.js` loads just before `expansion.js`.)
+    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `pickups`, `cardsmith`, `gear`, `room-preload`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
-    on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last).
+    on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), then
+    `god-mode` (Round 198: any card wins, all waypoints and maps open; while it is on, writes to the
+    save keys are ignored, so leaving rolls back).
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.
   Prefer `function` declarations for new globals that other files test with
   `typeof`.
 - **Six worlds, in `WORLD_ORDER` (Round 175), swapped in by `configureRegion(region)`:**
   - `city` is Neon Aftermath.
-  - `elaris` is shown to players as **Solaris** (Round 149): 54 rooms built from
-    flipped tiles by `tools/build_solaris.py` into `assets/solaris-data.js`.
+  - `elaris` is shown to players as **Solaris** (Round 149): 51 rooms built from
+    flipped tiles by `tools/build_solaris.py` into `assets/solaris-data.js`. Round 192 cut three
+    corner rooms and joined their neighbours with diagonal roads (`CUT`, `SOLARIS_DIAG`).
   - `sky` is the **Sky Isles** and `wilds` is **Elaris** (the forest). Both are tile-built
     like Solaris by `tools/build_tile_world.py` into `assets/<id>-data.js`, and run by
     `assets/tile-worlds.js`. Stand-in tiles come from `tools/paint_placeholder_tiles.py`.
-    Every new world is built this way.
+    Every new world is built this way. Round 197: the Sky Isles use the owner's top-down tiles
+    (51 rooms, three cut for diagonal walkways: `cut`/`diag` in the data). Run
+    `tools/prepare_sky_tiles.py` (derived tiles and walk masks) before building it.
   - `vespera` (levels 37-45) and `chronospire` (46-54) were rebuilt the same way in
     Round 179 (Chronospire is the layout turned on its side: 6 wide, 9 tall).
     `tile-worlds.js` swaps their room tables in place.

@@ -131,18 +131,7 @@ NeonCity.render = function (container, key) {
   if (!neonWorldCell(key) || !container || !container.querySelector) return out;
   const ground = container.querySelector('canvas.city-ground');
   if (ground) { if (ground.classList) ground.classList.add('neon-world'); paintNeonWorld(ground, key); }
-  const nooks = neonNooks(key);
-  if (nooks && ground && ground.after && document.createElementNS) {
-    // Faint footpaths from the street to each spot (Round 101).
-    const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('class', 'neon-trails'); svg.setAttribute('viewBox', '0 0 800 500'); svg.setAttribute('aria-hidden', 'true');
-    for (const [, , ax, ay, ex, ey] of nooks) for (const [cls, w] of [['trail-bed', 16], ['trail-dots', 4]]) {
-      const l = document.createElementNS(NS, 'line');
-      l.setAttribute('x1', ax); l.setAttribute('y1', ay); l.setAttribute('x2', ex); l.setAttribute('y2', ey);
-      l.setAttribute('class', cls); l.setAttribute('stroke-width', w); svg.append(l);
-    }
-    ground.after(svg);
-  }
+  // Round 192: the dotted footpaths to items are no longer drawn (they stay walkable in the mask).
   const status = container.querySelector('.city-status'); if (status) status.remove();
   return out;
 };
@@ -349,7 +338,11 @@ function placeOrganicRelics() {
   for (const [k, r] of Object.entries(rooms)) {
     if (!r.relic || !organicDef(k)) continue;
     const nook = neonNook(k, 'relic'); if (nook) { r.relic[3] = nook.x; r.relic[4] = nook.y; continue; }
-    const p = organicItemSpot(k, r.relic[3], r.relic[4]) || (!organicReachableAt(k, { x: r.relic[3], y: r.relic[4] }) && organicSpot(k, r.relic[3], r.relic[4]));
+    let p = organicItemSpot(k, r.relic[3], r.relic[4]) || (!organicReachableAt(k, { x: r.relic[3], y: r.relic[4] }) && organicSpot(k, r.relic[3], r.relic[4]));
+    // Round 197: keep gear clear of the mini-boss guarding it (a corner tile's only open ground
+    // can be right beside the bend where the boss stands).
+    const spawns = p && state ? roomSpawns(k) : [];
+    if (p && spawns.some(e => Math.hypot(e.x - p.x, e.y - p.y) < 60)) p = organicItemSpot(k, r.relic[3], r.relic[4], spawns, 90) || organicItemSpot(k, r.relic[3], r.relic[4], spawns, 70) || p;
     if (p) { r.relic[3] = p.x; r.relic[4] = p.y; }
   }
 }
@@ -357,14 +350,10 @@ const configureRegionBeforeItems = configureRegion;
 configureRegion = function (region) { const out = configureRegionBeforeItems.apply(this, arguments); placeOrganicRelics(); return out; };
 placeOrganicRelics();
 
-// Round 101: chests, relics and points of interest are small markers off the road; the
-// footpaths to them are drawn faintly over the painting.
+// Round 101: chests, relics and points of interest are small markers off the road (their
+// footpaths are walkable but no longer drawn, Round 192).
 const neonItemStyles = document.createElement('style');
 neonItemStyles.textContent = [
-  '.neon-trails{position:absolute;inset:0;width:800px;height:500px;pointer-events:none;z-index:1}',
-  '.neon-trails line{stroke-linecap:round}',
-  '.neon-trails .trail-bed{stroke:rgba(196,222,226,.22)}',
-  '.neon-trails .trail-dots{stroke:rgba(236,250,252,.55);stroke-dasharray:1 9}',
   '.map-chest{width:20px!important;height:20px!important;filter:drop-shadow(0 0 4px #7fd8ffaa)!important}',
   '.relic{width:24px!important;height:24px!important;font-size:12px!important;border-width:1px!important;box-shadow:0 0 8px #6ce2da99!important}',
   '.relic:after{top:26px!important;font-size:9px!important;padding:1px 4px!important}',
