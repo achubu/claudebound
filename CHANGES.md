@@ -3515,8 +3515,13 @@ A main-menu option (also on the start screen) for trying the game out, from `ass
   nothing reaches the save; export is off; the save is the pre-God journey). In the browser:
   storage is byte-for-byte unchanged through a God session, and leaving or reloading resumes
   the journey from before.
-- Also fixed `tests/crystals-touch-boss.test.cjs`, which still expected 54 Sky Isles rooms
-  (51 since Round 197).
+- Also fixed two tests after Round 197's new Sky Isles map:
+  - `tests/crystals-touch-boss.test.cjs` still expected 54 Sky Isles rooms (51 now).
+  - `tests/walk-past.test.cjs` picks the Sky Isles shrine room, then loops through every world. Its
+    closing redraw ran in Chronospire, where that room (7,1) doesn't exist. It now goes back to
+    the Sky Isles first.
+- All five other worlds' walks (`tests/playtest-walk.cjs`) are clean after Round 197's gear
+  placement change.
 
 ## Round 197: the Sky Isles are painted, with diagonal walkways
 

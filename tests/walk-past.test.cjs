@@ -27,6 +27,8 @@ for (const seed of [3, 77, 4041]) { state.seed = seed;
   for (const [k, q] of Object.entries(worldPOIs())) if (q.type !== 'nexus') assert(!screenCovered(q.x, q.y), w + ' ' + k + ' ' + q.type + ' is under the HUD or minimap');
   for (const k of Object.keys(rooms)) { const c = chestFor(k); if (!c) continue; for (const s of roomSpawns(k)) assert(Math.hypot(s.x - c.x, s.y - c.y) > 60, w + ' ' + k + ' chest beside a patrol'); }
  }}
+// Back to the Sky Isles before redrawing: the shrine's room need not exist in the last world.
+configureRegion('sky'); state.region = 'sky';
 toast = realToast; closeMenu();
 console.log('PASS: on a tap route only the tapped item opens, used items do not pop up when walked past, and items keep clear of the HUD, minimap and patrols.');
 }`);
