@@ -4,7 +4,7 @@ const ELARIS_WILDLIFE={
  // Round 172: Solaris is a sun-scorched brass desert city, so its creatures were renamed and
  // reworked to match. Ids stay the same so saves carry over. Until the owner's Solaris art
  // lands they still use the old sheets; the planned files are listed in ELARIS-ART.md.
- cinderFox:{name:'Solar Scarab',icon:'☼',hp:38,attack:7,element:'fire',sheet:'cinder-fox',cycle:'.95s'},
+ cinderFox:{name:'Solar Scarab',icon:'☼',hp:38,attack:7,element:'fire',sheet:'solar-scarab',cycle:'.95s'},
  drownedHeron:{name:'Mirage Ibis',icon:'≈',hp:55,attack:9,element:'water',sheet:'drowned-heron',cycle:'1.4s'},
  blightAntler:{name:'Dune Scorpion',icon:'◆',hp:44,attack:8,element:'earth',sheet:'blight-antler',cycle:'1.2s'},
  stormMoth:{name:'Dust Devil',icon:'≋',hp:52,attack:9,element:'air',sheet:'storm-moth',cycle:'.7s'},

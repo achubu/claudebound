@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 193: the Solar Scarab gets its own sprite sheet
+
+- **New art.** The owner's 4-frame Solar Scarab sheet (a brass beetle rolling a sun-ball) is now
+  `assets/monsters/elaris/solar-scarab.png`, and `cinderFox` (Solar Scarab, Solaris) uses it in
+  rooms and battles. Vespera and Chronospire still use the fox sheet through `forestFox`.
+- **Cutting the background.** The sheet came on a fake checkerboard with a soft white glow
+  round the creature. Keying out the near-white background left a grey halo, and it punched
+  holes in the bright centre of the sun-ball. `tools/cut_sprite_sheet.py` instead keeps the
+  creature's coloured and dark pixels, fills holes (so the ball stays solid), feathers the edge
+  by about a pixel, and saves a 256-colour PNG (180 KB instead of 1 MB). Use it for the
+  next Solaris sheets.
+- `tests/elaris-wildlife.test.cjs` accepts any sheet of four equal upright frames (the owner's
+  sheets are 2000x667, the forest ones 2172x724), and checks that the scarab has its own sheet
+  and that the fox sheet stays for the other worlds. `elaris-wildlife.js` cache tag is now round193.
+
 ## Round 192: Solaris diagonals, no flash of old room art, glowing items
 
 - **Solaris corners cut, with diagonal roads.** The owner asked for a less rectangular map.
