@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 208: no stale Sky Isles paintings from the browser cache
+
+- The owner saw the map "reverted to an older state". `main` had the Sky City art (checked), but
+  Round 204 repainted the Sky Isles under the same file names (`corner-a.webp` and so on). The
+  game loaded those without a version, so a browser could keep showing the old marble islands.
+- Tile-world paintings now load through `tileWorldArtSrc(id, name)` in `assets/tile-worlds.js`,
+  which adds `?v=TILE_ART_VERSION` (204). The room preloader uses the same URL, so it still
+  shares the painter's cached image. Bump `TILE_ART_VERSION` whenever tile art changes. Checked
+  in the browser: rooms request `sky/cross-a.webp?v=204`.
+
 ## Round 207: the concept-lab cards drop one world later
 
 - Neon Aftermath already had plenty of cards, so each pair from Round 206 moved up a world

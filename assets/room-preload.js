@@ -30,7 +30,7 @@ function roomPaintingImage(key) {
     if (activeRegion === 'elaris' && typeof SOLARIS_PLAN === 'object' && SOLARIS_PLAN[key]) return solarisTile(SOLARIS_PLAN[key][0]);
     const d = typeof TILE_WORLD_DATA === 'object' && TILE_REGIONS[activeRegion] && TILE_WORLD_DATA[activeRegion];
     if (d && d.plan[key]) {
-      const src = 'assets/environment/' + activeRegion + '/' + d.plan[key][0] + '.webp';
+      const src = tileWorldArtSrc(activeRegion, d.plan[key][0]);
       if (!tileWorldImages[src]) { const img = new Image(); img.src = src; tileWorldImages[src] = img; }
       return tileWorldImages[src];
     }
