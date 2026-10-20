@@ -13,11 +13,12 @@ function setup(hand) {
   b.energy = 3; b.block = 0; b.turn = 1; b.aether = 0; b.poison = 0; ENEMY_AFFLICTIONS.thornling = [];
   return b;
 }
-// Every world has a pool, and no card is in two of them.
+// Every world has a pool, and no card is in two of them (except the Prismatic Counter, Round 210).
 const seen = {};
 for (const w of WORLD_ORDER) {
   assert(Array.isArray(VARIETY_POOLS[w]) && VARIETY_POOLS[w].length >= 6, w + ' has its own reward pool');
-  for (const id of VARIETY_POOLS[w]) { assert(defs[id], id + ' exists'); assert(!seen[id], id + ' drops in both ' + seen[id] + ' and ' + w); seen[id] = w; }
+  for (const id of VARIETY_POOLS[w]) { assert(defs[id], id + ' exists'); if (id === 'counter') continue; assert(!seen[id], id + ' drops in both ' + seen[id] + ' and ' + w); seen[id] = w; }
+  assert(VARIETY_POOLS[w].includes('counter'), 'Round 210: the Prismatic Counter drops in ' + w);
 }
 // Offers come from the world you are in.
 for (const w of WORLD_ORDER) { state.region = w; configureRegion(w); for (let i = 0; i < 5; i++) for (const c of cardOffers()) assert(VARIETY_POOLS[w].includes(c.id), w + ' offers only its own cards'); }
@@ -41,4 +42,4 @@ const missing = [];
 for (const id of ['sunflare', 'sandVeil', 'scarabSwarm', 'oasisDraught', 'solarLance', 'skyfall', 'featherguard', 'updraft', 'thunderclap', 'cloudburst', 'elderRoot', 'sporeCloud', 'briarWall', 'crystalShard', 'crystalWard', 'riptide', 'squallStep', 'cisternAegis', 'noonPeal', 'stormbellToll', 'featherfallGrace'])
   for (let l = 0; l < 4; l++) if (!fs.existsSync(path.join(__dirname, '../assets/cards/level' + l, id + '.png'))) missing.push(id + ' ' + l);
 require('assert').deepStrictEqual(missing, [], 'new cards have art at every level');
-console.log('PASS: six reward pools with no card shared between worlds, forest cards in Elaris, unique mini-boss cards, and the new cards play as written.');
+console.log('PASS: six reward pools with no card shared between worlds (the Prismatic Counter drops in all of them), forest cards in Elaris, unique mini-boss cards, and the new cards play as written.');

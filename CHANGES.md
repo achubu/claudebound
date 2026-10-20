@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 210: the Prismatic Counter drops in every world
+
+- The owner asked for it everywhere. Since Round 178 it had been in Solaris's reward pool only.
+  (An older pool list also named Vespera and Chronospire, but `world-cards.js` replaced it.)
+  It is now in every world's pool, including Neon Aftermath, Sky Isles and Elaris. It is the
+  one card allowed in more than one pool (`assets/world-cards.js`).
+- No other change: it can still be lost in a defeat like any Impermanent card.
+- `tests/world-cards.test.cjs` lets the counter be shared and checks it is in every pool.
+  `world-cards.js` cache tag is now round210.
+
 ## Round 209: smaller enemies on the map
 
 - Asked to make all enemies 20% smaller: every enemy on the map is now drawn at 80% of its old

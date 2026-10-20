@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 209) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 210) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -134,6 +134,10 @@ change set.
   4. Add a CHANGES.md entry.
   5. Commit.
   6. Push the branch.
+  7. Open a pull request to `main` and merge it (squash). The owner asked for this every round:
+     merge without asking, unless there is a specific concern, such as failing tests, a risky or
+     unverified change, or something only the owner can decide. In that case say so and ask.
+     After a squash merge, restart the working branch from `main`.
 - Owner: Aleksey (GitHub `achubu`). Repos: `achubu/claudebound` is Claude's
   repo and the most up-to-date code; work and push here. `achubu/Cardbound`
   is worked on by ChatGPT; use it only as a source of up-to-date image assets
