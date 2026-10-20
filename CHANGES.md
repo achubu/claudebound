@@ -3496,6 +3496,28 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 224: cybernetic robot creatures for the Sky Isles
+
+- The owner's new sheets turn every Sky Isles creature into a cybernetic robot in the sky city's
+  white, chrome, cyan and gold: the Sunfeather Drake, Rain Drone, Gale Harpy, Thunderhorn Ram,
+  the Stormbell Warden and the Featherfall Matriarch (mini-bosses) and the Zenith Roc (boss).
+- Gemini drew 4 to 8 poses per image in two rows rather than four in one, so the new
+  `tools/compose_sprite_sheet.py` builds the sheet: key the image with `cut_sprite_sheet.py`, then
+  pick four poses by box. Each pose takes the pieces that lie mostly inside its box (a neighbour's
+  wing tip is left out). All four are drawn at one scale, standing on one baseline, over their feet,
+  in 3:4 frames. Only the single widest pose (spread wings) may shrink on its own, so wide
+  creatures aren't small in every frame. `--ground-line` clears the thin ground lines Gemini
+  painted under the Roc's and the Matriarch's feet. Poses used:
+  - Drake: wings up, wings low, fire breath, wings raised.
+  - Drone: hover, tilt, water jet, recoil in mist.
+  - Harpy: hover, wings wide, wind slash, hover.
+  - Ram: stand, rear, lightning charge, stamp.
+  - Warden: the top row (stand, hammer raised, strike with lightning, lower). Its bottom row ran
+    off the image.
+  - Matriarch and Roc: their four poses.
+- `SPRITE_VERSION` is now 224 (and `elaris-wildlife.js?v=round224`), so browsers fetch the new
+  sheets. New `tests/sky-sprites.test.cjs` checks each sheet is four 3:4 frames with clear sides.
+
 ## Round 223: the new Zenith Roc, and sprite padding drops stray wing tips
 
 - A Zenith Roc sheet had one frame's wing crossing into the next frame's cell, which leaves a

@@ -85,6 +85,8 @@ change set.
   ◇ Choose one, via a `stat` wrapper reading `b.chain`, `b.amplifyUid` and `b.modePick`.
 - **Creature sprite sheets** (4 frames, one row; magenta or, since Round 222, green background): cut generated art with `tools/cut_sprite_sheet.py`,
   then run `tools/pad_sprite_frames.py` on the result so no art touches a frame's edge (Round 200).
+  When an image has more poses than 4 (often two rows), key it, then pick four with
+  `tools/compose_sprite_sheet.py` (Round 224).
   Bump `SPRITE_VERSION` in `assets/elaris-wildlife.js` when sheets change.
 - **Card art** comes from `cardArtPath()` in `assets/cards.js`. The refreshed
   WebP illustrations are listed in `refreshedCardArt`. Status and pending
