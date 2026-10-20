@@ -72,3 +72,6 @@ body:not(.touch-mode) #touch{display:none}
 /* Round 211: no enemy picture on the battle page (its name, health and moves stay). */
 #battleModal .compact-monster,#battleModal .battle-monster{display:none!important}
 #battleModal #combatLog{margin:6px 0;padding:6px 10px;border:1px solid #2e5566;border-radius:8px;background:#0b1a26aa;font:12px/1.4 system-ui;color:#cfe6ef}
+/* Round 214: End turn at the right end of the Turn / energy bar. */
+#battleModal .compact-bar{display:flex;align-items:center;flex-wrap:wrap}
+#battleModal .compact-bar #endTurn.end-turn-inline{margin-left:auto}

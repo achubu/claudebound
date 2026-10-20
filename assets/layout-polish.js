@@ -80,13 +80,16 @@ renderBattle = function () {
     el.classList.toggle('expanded', !!(b.intentOpen && b.intentOpen[el.classList.contains('later') ? 'later' : 'now']));
     el.onclick = () => { if (!phoneLayout()) return; const k = el.classList.contains('later') ? 'later' : 'now'; b.intentOpen ||= {}; b.intentOpen[k] = !b.intentOpen[k]; el.classList.toggle('expanded', b.intentOpen[k]); };
   });
-  // Round 211: the last moves sit just above the Aether panel; the element line and the
-  // Turn / energy / level bar just under it.
+  // Round 211: the last moves sit just above the Aether panel and the Turn / energy / level bar
+  // just under it. Round 214: the element line moved to the very top.
   const aether = m.querySelector('.aether-panel');
   if (b.phase === 'fight' && aether && aether.after) {
     const tools = m.querySelector('.combat-tools'), bar = m.querySelector('.compact-bar');
     if (bar) aether.after(bar);
-    if (tools) aether.after(tools); // element line first, then the bar, as before
+    if (tools && m.prepend) m.prepend(tools); // Round 214: the element line tops the battle screen
+    // Round 214: End turn sits at the right end of the Turn / energy bar.
+    const end = m.querySelector('#endTurn');
+    if (bar && end && bar.append && end.parentNode !== bar) { end.classList.add('end-turn-inline'); bar.append(end); }
     const log = m.querySelector('#combatLog'); if (log && aether.before) aether.before(log); // the last moves, just above the Aether panel
   }
 };
