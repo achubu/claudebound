@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 223: sprite padding drops a neighbour's stray wing tip
+
+- A Zenith Roc sheet had one frame's wing crossing into the next frame's cell, which leaves a
+  sliver at that frame's edge while the creature animates. `tools/pad_sprite_frames.py` now clears
+  small pieces (under 4% of the frame's creature) that touch a frame's left or right edge
+  (`drop_strays`). Re-running it on every installed sheet changes none of them.
+- The owner is sending a new Roc; it will be installed with this.
+
 ## Round 222: the Rain Drone replaces the Cloud Wisp
 
 - The owner disliked the Cloud Wisp. Their new sheet, a white weather drone with a cyan lens,
