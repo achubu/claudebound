@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 219: a slimmer last-moves line and Aether panel
+
+- The owner asked for the "Encounter / last moves" line and the Aether panel to be smaller, with
+  smaller text. Both are now about 20px tall (from about 33px and 37px): 11px text, 2px padding,
+  and smaller Aether pips (`assets/layout-polish.css`). Checked in the browser.
+
 ## Round 218: diagonal crossings land beside the door; Edge Calibration +1 per rank
 
 - **Diagonal crossings landed at the wrong edge.** Taking Ember Crossing's diagonal road into
