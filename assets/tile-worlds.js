@@ -133,7 +133,7 @@ for (const id of ALL_TILE_WORLD_IDS) {
   NEXUS_POINTS[id] = { start: d.roles.start, mid: stops.mid };
   QUIET_ROOMS[id] = stops.quiet;
 }
-TILE_REGIONS.sky.arrive = () => toast('Sky Isles · Windgate Landing. The wind carries you between the islands.');
+TILE_REGIONS.sky.arrive = () => toast('Sky Isles · Windgate Landing. Glass decks drift between the towers of the floating city.');
 TILE_REGIONS.wilds.arrive = () => toast('Elaris · the old forest. Its creatures remember the Bloom Tyrant.');
 
 // --- Walk masks and painted tiles (the Solaris engine, once per world) ---
@@ -202,7 +202,7 @@ NeonCity.render = function (container, key) {
   return out;
 };
 const tileWorldStyles = document.createElement('style');
-tileWorldStyles.textContent = '#world[data-environment="vespera"]{background:#1a2550}#world[data-environment="chronospire"]{background:#3a2814}#world[data-environment="sky"]{background:#9fd2f2}#world[data-environment="sky"] .city-landmark{color:#fff;text-shadow:0 1px 3px #1d4f80}'
+tileWorldStyles.textContent = '#world[data-environment="vespera"]{background:#1a2550}#world[data-environment="chronospire"]{background:#3a2814}#world[data-environment="sky"]{background:#2a1f4a}#world[data-environment="sky"] .city-landmark{color:#fff;text-shadow:0 1px 3px #3a1050}'
   + '#world[data-environment="wilds"]{background:#2f5a34}#world[data-environment="wilds"] .city-landmark{color:#eaffd8;text-shadow:0 1px 3px #0d2a12}';
 document.head.append(tileWorldStyles);
 

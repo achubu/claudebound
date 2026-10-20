@@ -38,3 +38,6 @@ What's here (Round 96):
 - `old-copies/environment/areas/*.webp`: older versions of the district
   paintings that sat in a duplicate root `environment/` folder. The current
   versions live in `assets/environment/areas/`.
+- `assets/environment/sky/` (Round 204): the first Sky Isles set (marble walkways between
+  floating islands, Round 197), with its sources, derived tiles and walk masks. The Sky Isles
+  are now the owner's dense floating city.

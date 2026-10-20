@@ -3496,6 +3496,35 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 204: the Sky Isles become a floating city
+
+The owner didn't like the island look and asked for a dense, vibrant, futuristic sky city with
+very little empty sky, and seamless connections without clearly marked roads. New prompts asked
+for top-down tiles where you walk on one continuous pale glass deck that flows between packed
+neon buildings and meets each open edge around its middle.
+
+- **The owner's tiles** (2624x1632): corner, cross, straight, T to the right, T downward, and
+  dead-ends from below and to the right. Each shape's openings are consistent (top x 357–442,
+  bottom 324–448, sides y 207–291 on the 800x500 room), so neighbouring rooms line up.
+- **Diagonals.** The generator's one diagonal came out as a top exit plus a bridge to the
+  bottom-right corner, which fits no room. So `tools/prepare_sky_tiles.py` (rewritten for the
+  city) builds the three diagonal pieces. Each is the corner tile with that painted bridge laid
+  from its middle to the corner (a strip of the bridge turned to point at the corner, mirrored
+  past its clean stretch) and the cross tile's fountain plaza pasted over the joint. The source
+  is kept in `src/parts/bridge.jpg`.
+- **Walk masks** are traced from the deck's pale cyan (its grid lines a stronger cyan). On the
+  diagonal pieces the plaza and bridge are added as laid out, because the fountain's colours and
+  the rims would otherwise hole or split the traced deck.
+- **Lighter paintings.** The city art is dense, so the builder's new `max_width` (2000 for the
+  Sky Isles) keeps each painting about 500 KB instead of 800 KB. That's still 2.5× the 800px room.
+- The loading and backdrop colour is now the city's deep purple, and the arrival line mentions
+  glass decks between the towers.
+- The marble island set moved to `unused assets/assets/environment/sky/`.
+- Same map as Round 197: 51 rooms, the same three cut rooms and diagonal links.
+  `node tests/playtest-walk.cjs sky`: 51 rooms, 375 crossings, no problems. `sky-diagonals`,
+  `tile-worlds`, `item-placement`, `walk-past` and `crystals-touch-boss` pass.
+  Cache tags for `sky-data.js`, `tile-worlds.js` and `room-preload.js` are now round204.
+
 ## Round 203: Nexus Waypoints in world order
 
 - The waypoint list (Aetherlink and the map) showed worlds in the order they were added to the
