@@ -87,6 +87,9 @@ renderBattle = function () {
     const tools = m.querySelector('.combat-tools'), bar = m.querySelector('.compact-bar');
     if (bar) aether.after(bar);
     if (tools && m.prepend) m.prepend(tools); // Round 214: the element line tops the battle screen
+    // Round 214: End turn sits at the right end of the Turn / energy bar.
+    const end = m.querySelector('#endTurn');
+    if (bar && end && bar.append && end.parentNode !== bar) { end.classList.add('end-turn-inline'); bar.append(end); }
     const log = m.querySelector('#combatLog'); if (log && aether.before) aether.before(log); // the last moves, just above the Aether panel
   }
 };
