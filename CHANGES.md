@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 209: smaller enemies on the map
+
+- Asked to make all enemies 20% smaller: every enemy on the map is now drawn at 80% of its old
+  size. That covers Neon Aftermath's monsters, the creature sheets, mini-bosses and bosses. One
+  rule in `assets/layout-polish.css` scales the `.monster-sprite` inside each `.enemy-node`
+  around its feet, so enemies stand in the same spot and their labels stay under them. CSS
+  `scale` stacks with the sprite's left/right facing flip. Positions, collisions and fights are
+  unchanged, and so are battle portraits.
+- Checked in the browser: sprites measure 80% of before (131→105px, 168→134px, 104→83px), with
+  no page errors.
+
 ## Round 208: no stale Sky Isles paintings from the browser cache
 
 - The owner saw the map "reverted to an older state". `main` had the Sky City art (checked), but
