@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 213: the Cardsmith asks before it upgrades or binds
+
+- Clicking a card at the Cardsmith used to spend the Shards at once. Both actions now open a
+  confirmation first: the card, the question ("Upgrade Ember Blade to level 1 for ◇ 36?" or
+  "Make … Soulbound for ◇ 500? It will never be lost."), your Shards, and **Upgrade** /
+  **Make Soulbound** or **Cancel**. Cancel goes back to the Cardsmith with nothing changed
+  (`cardsmithConfirm`, `askUpgrade` and `askSoulbind` in `assets/cardsmith.js`).
+- The Cardsmith's upgrade note now says the card keeps its progress toward the next level (Round
+  212), instead of "Its mastery starts fresh".
+- `tests/cardsmith.test.cjs` checks that asking changes nothing, Cancel keeps the card as it was,
+  and Yes upgrades or binds. Checked in the browser too.
+
 ## Round 212: items stand on open ground, and paid upgrades keep progress
 
 - **Items no longer sit on buildings in Solaris and the Sky Isles.** Items (points of interest,
