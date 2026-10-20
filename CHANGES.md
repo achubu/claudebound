@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 216: half-height you / enemy boxes in battle
+
+- The owner asked for the two health boxes at half their size, with the bars along the bottom.
+  Each box is now two rows:
+  - Top row: the name, small Block / Armor badges (the shield and crystal shrink from about 34px
+    to about 20px), and the debuffs, right-aligned.
+  - Bottom row: a slim 16px health bar across the box.
+- Tighter padding and slightly smaller text throughout (`assets/layout-polish.css`).
+- Desktop: the boxes went from 157px to about 52px tall (the whole battle screen from 901px to
+  841px). Phones: from 143px to about 89px. Checked in the browser at both widths, with Block,
+  Armor and debuffs showing, and no page errors.
+
 ## Round 215: half-size items, and a tighter battle screen
 
 - **Items at half size.** Points of interest, chests, gear and the merchant (everything you can
