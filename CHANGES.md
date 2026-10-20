@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 221: two more painted Sky City diagonals
+
+- The owner painted two more diagonal pieces (in `src/diagonal-owner/`):
+  - `diag-nw.jpg`: deck from the top and right edges, plus a bridge to the top-left. It replaces
+    the built `diag-nw` in rooms 1,5, 7,5 and 7,0 (mirrored to fit; the Sky Isles flip both ways).
+  - `diag-sw-b.jpg`: deck from the top and left edges, plus a bridge to the bottom-right. That is
+    the `diag-sw` shape mirrored, so it is stored mirrored as a second `diag-sw` version, and the
+    builder chose it for Sunbeam Arch (2,4). Round 220's `diag-sw` painting fits the same room
+    and stays as the alternative.
+- Each bridge's glass outline is added by hand (`OWNER_BRIDGE`) and must reach the image edge,
+  or the builder finds no diagonal door.
+- Only `diag-se` is still built by the tool, in rooms 8,1 and 8,4.
+- `TILE_ART_VERSION` is now 221. `sky-diagonals`, `tile-worlds` and `item-placement` pass.
+  `playtest-walk sky`: 51 rooms, 375 crossings, no problems.
+
 ## Round 220: the owner's painted diagonal in the Sky Isles
 
 - The owner painted a Sky City diagonal piece: deck from the top and right edges, and a glass
