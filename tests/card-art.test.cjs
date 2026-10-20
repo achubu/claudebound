@@ -6,13 +6,13 @@ const list=JSON.parse(run(`JSON.stringify(Object.keys(defs).flatMap(id=>[0,1,2,3
 const missing=list.filter(([, , p])=>!fs.existsSync(path.join(__dirname,'..',p)));
 assert.deepEqual(missing,[],'card art files exist');
 // Round 180: 36 more paintings from achubu/Cardbound (13 cards now have all four stages).
-const refreshed={accelerate:[0,1],chronoSpike:[0,1,2,3],clockworkVolley:[0,1,2,3],delayedBulwark:[0,1,2,3],futureSight:[0,1,2,3],rewindMend:[0,1,2,3],temporalBarrage:[0,1,2,3],arcBulwark:[0,1,2,3],arcJab:[0,1,2,3],breachSpike:[0,1,2,3],bulwarkBash:[0,1,2,3],chainLightning:[0,1,2,3],lunarEdict:[0,1,2,3],mirrorguard:[0,1,2,3],overclock:[0,1,2,3],phantomResonance:[0,1,2,3],prismLance:[0,1,2,3],rootbind:[0,1,2,3],sovereignGale:[0,1,2,3],static:[0,1,2,3],staticShield:[0,1,2,3],stormBattery:[0,1,2,3],tempestSurge:[0,1,2,3],thornlash:[0,1,2,3],tidebound:[0,1,2,3],tidecall:[0,1,2,3],verdantPact:[0,1,2,3],wildfire:[0,1,2,3]};
+const refreshed={accelerate:[0,1,2,3],chronoSpike:[0,1,2,3],clockworkVolley:[0,1,2,3],delayedBulwark:[0,1,2,3],futureSight:[0,1,2,3],rewindMend:[0,1,2,3],temporalBarrage:[0,1,2,3],arcBulwark:[0,1,2,3],arcJab:[0,1,2,3],breachSpike:[0,1,2,3],bulwarkBash:[0,1,2,3],chainLightning:[0,1,2,3],lunarEdict:[0,1,2,3],mirrorguard:[0,1,2,3],overclock:[0,1,2,3],phantomResonance:[0,1,2,3],prismLance:[0,1,2,3],rootbind:[0,1,2,3],sovereignGale:[0,1,2,3],static:[0,1,2,3],staticShield:[0,1,2,3],stormBattery:[0,1,2,3],tempestSurge:[0,1,2,3],thornlash:[0,1,2,3],tidebound:[0,1,2,3],tidecall:[0,1,2,3],verdantPact:[0,1,2,3],wildfire:[0,1,2,3]};
 assert.deepEqual(JSON.parse(run(`JSON.stringify(refreshedCardArt)`)),refreshed,'every painting is wired in');
 for(const [id,stages] of Object.entries(refreshed)){
  for(const l of stages)assert.equal(run(`cardArtPath(${JSON.stringify(id)},${l})`),`assets/cards/level${l}/${id}.webp`,id+' level '+l+' uses its new painting');
  for(const l of [0,1,2,3])assert(/\.webp$/.test(run(`cardArtPath(${JSON.stringify(id)},${l})`)),id+' level '+l+' borrows a new painting');
 }
-assert.equal(run(`cardArtPath('accelerate',3)`),'assets/cards/level1/accelerate.webp','unpainted stage reuses the nearest lower stage');
+assert.equal(run(`cardArtPath('accelerate',3)`),'assets/cards/level3/accelerate.webp','Round 205: Accelerate has all four paintings');
 assert.equal(run(`cardArtPath('strike',2)`),'assets/cards/level2/strike.png','other cards keep their art');
 const sides=JSON.parse(run(`JSON.stringify(Object.keys(SIDE_CARDS).map(sideArtPath))`));assert(sides.every(p=>p.endsWith('.webp')&&fs.existsSync(path.join(__dirname,'..',p))),'all side cards use their refreshed paintings');
 console.log('PASS: '+list.length/4+' cards x 4 levels have art; '+Object.values(refreshed).flat().length+' refreshed card paintings and '+sides.length+' side-card paintings wired in.');

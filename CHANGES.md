@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 205: Accelerate's last two paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` (head defe3cb, 2026-10-20) for images we don't have. The only new
+  ones are Accelerate levels 2 and 3. Its other differing files are the creature sheets before
+  Round 200's padding, and old PNGs we already replaced or keep in `unused assets/`.
+- `assets/cards/level2/accelerate.webp` and `level3/accelerate.webp` are in, so Accelerate now
+  has all four stages (`refreshedCardArt`). Every refreshed card now has its full set. Cache tag
+  `cards.js?v=round205` in `index.html` and `compendium.html`. `tests/card-art.test.cjs` updated.
+
 ## Round 204: the Sky Isles become a floating city
 
 The owner didn't like the island look and asked for a dense, vibrant, futuristic sky city with
