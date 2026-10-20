@@ -7,7 +7,7 @@
 // ground colour, and the paintings of the rooms next to you are loaded ahead of time so
 // they are usually ready before you walk in.
 // =====================================================================
-const ROOM_LOADING_COLOR = { city: '#0b1422', elaris: '#e9b45a', sky: '#9fd2f2', wilds: '#2f5a34', vespera: '#1a2550', chronospire: '#3a2814' };
+const ROOM_LOADING_COLOR = { city: '#0b1422', elaris: '#e9b45a', sky: '#2a1f4a', wilds: '#2f5a34', vespera: '#1a2550', chronospire: '#3a2814' };
 function blankWhileLoading(canvas) {
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext('2d'); if (!ctx) return;

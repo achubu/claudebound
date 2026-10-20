@@ -260,7 +260,7 @@
          read from the running game (see loadGameData below), because
          expansion.js / encounter-depth.js depend on the game's own globals
          and crashed here, silently dropping 10 of the 23 cards. -->
-    <script src="assets/cards.js?v=round190" onerror="console.warn('assets/cards.js not found')"></script>
+    <script src="assets/cards.js?v=round205" onerror="console.warn('assets/cards.js not found')"></script>
 </head>
 <body>
 
@@ -427,7 +427,7 @@
             return new Promise(resolve => {
                 const frame = document.createElement('iframe');
                 window.gameFrame = frame; // Round 182: the Difficulty lab runs its battles in this frame
-                frame.src = 'index.html?v=round185';
+                frame.src = 'index.html?v=round206';
                 frame.setAttribute('aria-hidden', 'true');
                 frame.tabIndex = -1;
                 frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';

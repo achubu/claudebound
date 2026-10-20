@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 203) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 206) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -18,7 +18,7 @@ change set.
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
-    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `pickups`, `cardsmith`, `gear`, `room-preload`. (`solaris-data.js` loads just before `expansion.js`.)
+    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `pickups`, `cardsmith`, `gear`, `room-preload`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
     on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), then
     `god-mode` (Round 198: any card wins, all waypoints and maps open; while it is on, writes to the
@@ -35,8 +35,9 @@ change set.
     like Solaris by `tools/build_tile_world.py` into `assets/<id>-data.js`, and run by
     `assets/tile-worlds.js`. Stand-in tiles come from `tools/paint_placeholder_tiles.py`.
     Every new world is built this way. Round 197: the Sky Isles use the owner's top-down tiles
-    (51 rooms, three cut for diagonal walkways: `cut`/`diag` in the data). Run
-    `tools/prepare_sky_tiles.py` (derived tiles and walk masks) before building it.
+    (51 rooms, three cut for diagonal walkways: `cut`/`diag` in the data); since Round 204 they
+    are a dense floating city walked on a glass deck. Run `tools/prepare_sky_tiles.py`
+    (diagonal pieces and walk masks) before building it.
   - `vespera` (levels 37-45) and `chronospire` (46-54) were rebuilt the same way in
     Round 179 (Chronospire is the layout turned on its side: 6 wide, 9 tall).
     `tile-worlds.js` swaps their room tables in place.
@@ -77,6 +78,8 @@ change set.
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.
   Each has 4 cards in its world's pool, an arrival gift of 2 (city: first win), a battle tray with a guide,
   and an affliction that works against it.
+- **Concept-lab card mechanics** (Round 206, `assets/card-mechanics.js`): ⤳ Follow-through, ⚡ Amplify and
+  ◇ Choose one, via a `stat` wrapper reading `b.chain`, `b.amplifyUid` and `b.modePick`.
 - **Creature sprite sheets** (4 frames, one row): cut generated art with `tools/cut_sprite_sheet.py`,
   then run `tools/pad_sprite_frames.py` on the result so no art touches a frame's edge (Round 200).
   Bump `SPRITE_VERSION` in `assets/elaris-wildlife.js` when sheets change.

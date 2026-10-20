@@ -3496,6 +3496,81 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 206: six cards from the Cardbound concept lab
+
+`achubu/Cardbound` added a review-only "card concept lab" (`assets/concepts/cards.json`): 16
+text-only cards across 8 mechanics borrowed from Magic, Hearthstone and Flesh and Blood. I
+picked the three mechanics that fit this game without new screens and add a real decision:
+
+- **⤳ Follow-through** (Wardbreaker Step, Afterimage Ward; Vespera). A bonus if the card you
+  played just before this one, this turn, was a Defense (or an Attack). It makes the order you
+  play cards matter. Side cards, pitching and Suspend's automatic plays don't count. A card whose
+  bonus is ready glows gold in your hand.
+- **⚡ Amplify** (Cinder Capacitor, Neon Aftermath; Crystal Aegis, Elaris). A second button plays
+  the card for one more energy with a bonus. That competes with banking unspent energy as
+  Aether.
+- **◇ Choose one** (Dusk Protocol, Neon Aftermath; Tidal Decision, Elaris). One button per mode,
+  and only that mode resolves; clicking the card plays the first. Tidal Decision exhausts either
+  way.
+
+Not taken: Cycle, Foresee and Reprise (they need new screens for reordering or playing from the
+discard pile), Prepared (only works with the Retain talent), and Improvise (temporary generated
+cards; the concept notes flag its risks).
+
+- The numbers start from the concept lab's: each mode or base sits just under the dedicated card
+  of its role, and the bonus is what makes the card worth a slot. Each card drops in one world's
+  reward pool only.
+- How it works (`assets/card-mechanics.js`, loaded after `stagger.js`): a `stat` wrapper reads
+  the battle's `amplifyUid`, `modePick` and `chain` (the last card played by hand this turn), so
+  costs, damage and Block resolve through the usual card effects. `playCardWith(i, choice)`
+  plays with Amplify or a mode chosen.
+- Placeholder art for all four levels comes from `tools/generate_world_card_art.py`, until the
+  owner paints them. The compendium shows them (its frame's tag is now round206).
+- Found while testing: a new helper shared its name with `world-mechanics.js`'s `addBonus` and
+  replaced it, breaking Tailwind. It is now `mechAddBonus`, and I checked every new name for
+  clashes.
+- Tests: new `tests/card-mechanics.test.cjs` (pools, rules text, Follow-through after the right
+  and wrong kind, the turn reset, Suspend not counting, Amplify cost, damage and Block, and both
+  modes). `card-variety` counts 58 world cards. Checked in the browser too.
+
+## Round 205: Accelerate's last two paintings from achubu/Cardbound
+
+- Checked `achubu/Cardbound` (head defe3cb, 2026-10-20) for images we don't have. The only new
+  ones are Accelerate levels 2 and 3. Its other differing files are the creature sheets before
+  Round 200's padding, and old PNGs we already replaced or keep in `unused assets/`.
+- `assets/cards/level2/accelerate.webp` and `level3/accelerate.webp` are in, so Accelerate now
+  has all four stages (`refreshedCardArt`). Every refreshed card now has its full set. Cache tag
+  `cards.js?v=round205` in `index.html` and `compendium.html`. `tests/card-art.test.cjs` updated.
+
+## Round 204: the Sky Isles become a floating city
+
+The owner didn't like the island look and asked for a dense, vibrant, futuristic sky city with
+very little empty sky, and seamless connections without clearly marked roads. New prompts asked
+for top-down tiles where you walk on one continuous pale glass deck that flows between packed
+neon buildings and meets each open edge around its middle.
+
+- **The owner's tiles** (2624x1632): corner, cross, straight, T to the right, T downward, and
+  dead-ends from below and to the right. Each shape's openings are consistent (top x 357–442,
+  bottom 324–448, sides y 207–291 on the 800x500 room), so neighbouring rooms line up.
+- **Diagonals.** The generator's one diagonal came out as a top exit plus a bridge to the
+  bottom-right corner, which fits no room. So `tools/prepare_sky_tiles.py` (rewritten for the
+  city) builds the three diagonal pieces. Each is the corner tile with that painted bridge laid
+  from its middle to the corner (a strip of the bridge turned to point at the corner, mirrored
+  past its clean stretch) and the cross tile's fountain plaza pasted over the joint. The source
+  is kept in `src/parts/bridge.jpg`.
+- **Walk masks** are traced from the deck's pale cyan (its grid lines a stronger cyan). On the
+  diagonal pieces the plaza and bridge are added as laid out, because the fountain's colours and
+  the rims would otherwise hole or split the traced deck.
+- **Lighter paintings.** The city art is dense, so the builder's new `max_width` (2000 for the
+  Sky Isles) keeps each painting about 500 KB instead of 800 KB. That's still 2.5× the 800px room.
+- The loading and backdrop colour is now the city's deep purple, and the arrival line mentions
+  glass decks between the towers.
+- The marble island set moved to `unused assets/assets/environment/sky/`.
+- Same map as Round 197: 51 rooms, the same three cut rooms and diagonal links.
+  `node tests/playtest-walk.cjs sky`: 51 rooms, 375 crossings, no problems. `sky-diagonals`,
+  `tile-worlds`, `item-placement`, `walk-past` and `crystals-touch-boss` pass.
+  Cache tags for `sky-data.js`, `tile-worlds.js` and `room-preload.js` are now round204.
+
 ## Round 203: Nexus Waypoints in world order
 
 - The waypoint list (Aetherlink and the map) showed worlds in the order they were added to the

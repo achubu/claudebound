@@ -37,9 +37,11 @@ WORLDS = {
         'b': ['Bridge', 'Spire', 'Isle', 'Terrace', 'Landing', 'Steps', 'Garden', 'Walk', 'Arch', 'Court',
               'Perch', 'Causeway', 'Overlook', 'Ring', 'Crossing', 'Ledge', 'Gate', 'Dock'],
         'special': {'start': 'Windgate Landing', 'boss': 'The Eye of the Sky', 'mini1': 'Stormbell Tower', 'mini2': 'Featherfall Roost'},
-        # Round 197: the owner's paintings are strictly top-down. Two corners and a notch in the
+        # Round 197 (Round 204: the Sky City set): the owner's paintings are strictly top-down. Two corners and a notch in the
         # bottom edge are cut; these three need the fewest diagonal paintings (3).
         'cut': ['8,0', '8,5', '2,5'], 'top_down': True,
+        # Round 204: the Sky City paintings are dense; 2000px wide is still 2.5x the room.
+        'max_width': 2000,
     },
     'wilds': {
         'name': 'Elaris', 'key': lambda cx, cy: (8 - cx, 9 - cy), 'levels': (28, 36), 'road': None,
@@ -124,7 +126,11 @@ def main(world):
     tiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(src + '/*.*'))}
     if not tiles: raise SystemExit('no tiles in ' + src + ' (run tools/paint_placeholder_tiles.py ' + world + ')')
     shape_of = {n: next(s for s in sorted(SHAPES, key=len, reverse=True) if n.startswith(s)) for n in tiles}
-    for n, im in tiles.items(): im.save(f'{out}/{n}.webp', quality=86, method=6)
+    def save_webp(n, im):  # Round 204: 'max_width' keeps busy paintings light (the room is 800 wide)
+        mw = cfg.get('max_width')
+        if mw and im.width > mw: im = im.resize((mw, round(mw * 5 / 8)), Image.LANCZOS)
+        im.save(f'{out}/{n}.webp', quality=86 if not mw else 84, method=6)
+    for n, im in tiles.items(): save_webp(n, im)
     def mask_for(n):
         p = f'{src}/masks/{n}.png'
         if os.path.exists(p): return np.asarray(Image.open(p).convert('L').resize((800, 500), Image.NEAREST)) > 127
@@ -133,7 +139,7 @@ def main(world):
     masks = {n: mask_for(n) for n in tiles}
     dtiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(src + '/diagonal/*.*'))}
     dshape_of = {n: next(sh for sh in DSHAPES if n.startswith(sh)) for n in dtiles}
-    for n, im in dtiles.items(): im.save(f'{out}/{n}.webp', quality=86, method=6); masks[n] = mask_for(n)
+    for n, im in dtiles.items(): save_webp(n, im); masks[n] = mask_for(n)
     dflips = list(FLIP_DIAG) if cfg.get('top_down') else [(0, 0), (1, 0)]
     rooms, roles = layout(cfg, world)
     plan = {}
