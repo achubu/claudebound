@@ -17,7 +17,10 @@ for (const region of ['city','elaris','vespera']) {
   let bad=[];
   for (const [k,t,p,rad] of items) {
     const st=organicItemStand(k,p);
-    if (walkable(k,p.x,p.y)) bad.push(k+' '+t+' ON path');
+    // Round 212: in Solaris and the Sky Isles items stand on the walkable ground, near its edge
+    // (off it is buildings); elsewhere they stand just off the path.
+    if (itemsOnGround()) { if (!walkable(k,p.x,p.y)) bad.push(k+' '+t+' OFF the ground'); }
+    else if (walkable(k,p.x,p.y)) bad.push(k+' '+t+' ON path');
     else if (!st || st.d>rad-8) bad.push(k+' '+t+' far '+(st&&st.d.toFixed(1)));
     // touch: route from the room's main pocket to a tap on the item
     const area=joinedArea(k),o=cellOffset(k,area),s=organicItemStand(k,p),pk=organicPocketNear(k,s);if(!organicReachableAt(k,s))bad.push(k+' '+t+' stand unreachable');const s2=[...organicPockets(k)[pk]].map(g=>g.split(',').map(Number)).sort((a,b)=>Math.hypot(b[0]-p.x,b[1]-p.y)-Math.hypot(a[0]-p.x,a[1]-p.y))[0];
@@ -27,5 +30,5 @@ for (const region of ['city','elaris','vespera']) {
   }
   assert(items.length>=4,region+' has organic items');assert.deepEqual(bad,[],seed+' '+region+': '+bad.join(' | '));
 }}
-console.log('PASS: every chest, relic, point of interest, merchant and waypoint in organic rooms stands beside a reachable path, within reach and tap-routable.');
+console.log('PASS: every chest, relic, point of interest, merchant and waypoint in organic rooms stands beside a reachable path (on the ground near its edge in Solaris and the Sky Isles), within reach and tap-routable.');
 }`);

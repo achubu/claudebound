@@ -68,7 +68,7 @@ const offered = cardOffers().map(c => { c.soulbound = false; c.level = upgradedL
 // Upgrade pack: raises an Impermanent card, never a Soulbound one.
 const imp = make('cleave', 0, false), soul = make('strike', 0, true); state.pool.push(imp, soul);
 assert(upgradeTargets().includes(imp) && !upgradeTargets().includes(soul), 'only Impermanent cards can be upgraded by a pack');
-applyUpgradePack(imp); assert.equal(imp.level, 1); assert.equal(imp.uses, 0); applyUpgradePack(soul); assert.equal(soul.level, 0, 'Soulbound cards are refused');
+imp.uses = 37; applyUpgradePack(imp); assert.equal(imp.level, 1); assert.equal(imp.uses, 37, 'Round 212: progress toward the next level is kept'); applyUpgradePack(soul); assert.equal(soul.level, 0, 'Soulbound cards are refused');
 // Unlimited upgrades, priced by the level reached: 36 / 60 / 90 (Round 123: tripled).
 { const c2 = make('strike', 0, false); state.pool.push(c2); state.shards = 183; buyUpgrade(c2); assert.equal(c2.level, 1); assert.equal(state.shards, 147);
   buyUpgrade(c2); assert.equal(c2.level, 2); assert.equal(state.shards, 87); buyUpgrade(c2); assert.equal(c2.level, 2, 'level 3 costs 90'); state.shards = 90; buyUpgrade(c2); assert.equal(c2.level, 3); assert.equal(state.shards, 0);

@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 211) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 212) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -74,7 +74,8 @@ change set.
   both open the final boss room (`requires: 'gate:<world>'`). Worn in 5 slots via the Gear screen.
 - **Interactables** (chests, relics, POIs, merchant, Nexus Waypoints) sit just
   off the walkable path, 12–28px from reachable street, clear of the HUD/minimap corners
-  (`screenCovered`) and of patrols. Enemies and bosses stand on paths. On a tap route only
+  (`screenCovered`) and of patrols. In Solaris and the Sky Isles, where off the path is all buildings,
+  they stand on the walkable ground 22–40px inside its edge instead (Round 212, `itemsOnGround()`). Enemies and bosses stand on paths. On a tap route only
   the tapped item opens (Round 184).
 - **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.

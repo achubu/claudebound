@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 212: items stand on open ground, and paid upgrades keep progress
+
+- **Items no longer sit on buildings in Solaris and the Sky Isles.** Items (points of interest,
+  chests, gear, the merchant, waypoints, the Cardsmith) are placed just off the walkable path,
+  12–28px from it. In these two painted worlds everything off the road or deck is buildings, so
+  many landed on roofs and walls. There, `organicItemSpot` now picks walkable, reachable ground
+  22–40px inside its edge (`ITEM_IN`, `itemsOnGround()` in `assets/organic-paths.js`). The
+  pictures are about 50px wide, so they stay fully on the ground beside the lane, clear of doors
+  and patrols as before. Neon Aftermath keeps its hand-checked spots, and the other worlds keep
+  the off-path rule.
+  - Checked with close-up crops in both worlds. `playtest-walk` for both: every room, door and
+    item route works, and walking past triggers no pop-ups.
+  - `item-placement` and `playtest-walk` now expect on-ground items in these two worlds.
+- **Paid upgrades keep a card's progress.** Raising an Impermanent card a level at the Cardsmith,
+  or with the merchant's upgrade pack, used to reset its progress toward the next automatic
+  upgrade to 0. It is now kept. (It is always below the threshold, or the card would already
+  have levelled.) The Cardsmith's upgrade moved into `cardsmithUpgrade(c)`. Tests in `cardsmith`
+  and `exploration`.
+
 ## Round 211: battle page tidy-up and a final-turn recap on the victory screens
 
 Four requests from the owner:

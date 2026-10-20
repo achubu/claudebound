@@ -42,6 +42,14 @@ function cardsmithFor(region = activeRegion) {
   return { key, x: s.x, y: s.y, type: 'cardsmith', id: region + ':cardsmith' };
 }
 function soulbindTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound)); }
+// Pay Shards to raise an Impermanent card one level. Round 212: its progress toward the next
+// automatic upgrade is kept.
+function cardsmithUpgrade(c) {
+  const card = owned(c.uid) || c, price = upgradePrice(card);
+  if (state.shards < price || card.soulbound || card.level >= 3) return false;
+  state.shards -= price; card.level++; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.');
+  return true;
+}
 function openCardsmith() {
   const up = typeof upgradeTargets === 'function' ? upgradeTargets().sort((a, b) => upgradePrice(a) - upgradePrice(b)) : [], bind = soulbindTargets();
   poiMenu('⚒ Cardsmith', '<p>"Bring me a card and I\'ll make it stronger, or bind it to you for good."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>'
@@ -52,7 +60,7 @@ function openCardsmith() {
   const tag = (el, text) => { const t = document.createElement('div'); t.className = 'actions'; t.textContent = text; el.append(t); return el; };
   if (hu && hu.append) {
     if (!up.length) hu.insertAdjacentHTML && hu.insertAdjacentHTML('beforeend', '<p class="muted">No Impermanent card can be upgraded right now.</p>');
-    up.forEach(c => hu.append(tag(cardElement(c, () => { const card = owned(c.uid) || c, price = upgradePrice(card); if (state.shards < price || card.soulbound || card.level >= 3) return; state.shards -= price; card.level++; card.uses = 0; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.'); openCardsmith(); }, state.shards < upgradePrice(c)), '◇ ' + upgradePrice(c) + ' → level ' + (c.level + 1))));
+    up.forEach(c => hu.append(tag(cardElement(c, () => { if (cardsmithUpgrade(c)) openCardsmith(); }, state.shards < upgradePrice(c)), '◇ ' + upgradePrice(c) + ' → level ' + (c.level + 1))));
   }
   if (hb && hb.append) {
     if (!bind.length) hb.insertAdjacentHTML && hb.insertAdjacentHTML('beforeend', '<p class="muted">You have no Impermanent cards to bind.</p>');

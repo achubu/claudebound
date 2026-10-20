@@ -296,6 +296,11 @@ function organicSpot(key, x, y, avoid = [], gap = 0) {
 // nearest ground belongs to a reachable patch (so a tap on the item routes
 // there). Spots keep clear of exit doors and of anything in `avoid`.
 const ITEM_OFF = { min: 12, max: 28, ideal: 20 };
+// Round 212: in the painted tile worlds everything off the road or deck is buildings and props,
+// so items there stand ON the walkable ground instead, ITEM_IN px inside its edge: beside the
+// lane, never on a roof or wall.
+const ITEM_IN = { min: 22, max: 40, ideal: 28 }; // the pictures are ~50px wide, so this keeps them on the ground
+function itemsOnGround() { return activeRegion === 'elaris' || activeRegion === 'sky'; }
 const organicItemCache = {};
 // Round 184: on a 1280x800 screen the HUD panel covers the top-left of the room and the minimap
 // the bottom-right, so item spots there are avoided when the room has another one.
@@ -311,6 +316,23 @@ function organicItemSpot(key, x, y, avoid = [], gap = 0) {
   for (let dx = -32; dx <= 32; dx += 8) for (let dy = -32; dy <= 32; dy += 8) offs.push([dx, dy, Math.hypot(dx, dy)]);
   offs.sort((a, b) => a[2] - b[2]);
   let best = null, bs = Infinity;
+  if (itemsOnGround()) {
+    const ring = [];
+    for (let dx = -48; dx <= 48; dx += 8) for (let dy = -48; dy <= 48; dy += 8) ring.push([dx, dy, Math.hypot(dx, dy)]);
+    ring.sort((a, c) => a[2] - c[2]);
+    for (const g of ok) {
+      const [px, py] = g.split(',').map(Number); if (px < 28 || px > 772 || py < 38 || py > 462) continue;
+      // Distance to the edge of the walkable ground: the nearest cell that isn't walkable.
+      let edge = null;
+      for (const [dx, dy, d] of ring) if (!any.has((px + dx) + ',' + (py + dy)) && !walkable(key, px + dx, py + dy)) { edge = d; break; }
+      if (edge === null || edge < ITEM_IN.min || edge > ITEM_IN.max) continue;
+      if (doors.some(d => Math.hypot(d.x - px, d.y - py) < 90)) continue;
+      if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
+      const s = Math.hypot(px - x, py - y) + 6 * Math.abs(edge - ITEM_IN.ideal) + (screenCovered(px, py) ? 400 : 0);
+      if (s < bs) { bs = s; best = { x: px, y: py }; }
+    }
+    return organicItemCache[ck] = best;
+  }
   for (let py = 38; py <= 462; py += 8) for (let px = 28; px <= 772; px += 8) {
     if (any.has(px + ',' + py) || walkable(key, px, py)) continue;
     // Nearest walkable grid point: it must be reachable and inside the band.
@@ -327,7 +349,10 @@ function organicItemSpot(key, x, y, avoid = [], gap = 0) {
 // The walkable spot a player would stand on to use an item, and how far away it is.
 function organicItemStand(key, p) { const q = organicSpot(key, p.x, p.y); return q ? { ...q, d: Math.hypot(q.x - p.x, q.y - p.y) } : null; }
 // An item is "beside the street": not on walkable ground, but a reachable street is within reach.
-function organicBesideStreet(key, p, reach = 30) { const q = organicItemStand(key, p); return !walkable(key, p.x, p.y) && !!q && q.d <= reach; }
+function organicBesideStreet(key, p, reach = 30) {
+  if (itemsOnGround()) return walkable(key, p.x, p.y) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, p)); // Round 212: on the ground, beside the lane
+  const q = organicItemStand(key, p); return !walkable(key, p.x, p.y) && !!q && q.d <= reach;
+}
 let organicSpawnPass = false;
 const walkableForSpawns = walkable;
 const roomSpawnsBeforeOrganic = roomSpawns;
