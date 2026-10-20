@@ -173,7 +173,7 @@ if (typeof regionDistanceCache !== 'undefined') for (const id of REBUILT_WORLD_I
 const tileWorldImages = {};
 // Round 208: the paintings carry a version, so a world repainted under the same file names (the
 // Sky Isles in Round 204) isn't shown from the browser's cache. Bump it when tile art changes.
-const TILE_ART_VERSION = '204';
+const TILE_ART_VERSION = '219';
 function tileWorldArtSrc(id, name) { return 'assets/environment/' + id + '/' + name + '.webp?v=' + TILE_ART_VERSION; }
 function paintTileWorld(canvas, id, key) {
   const plan = TILE_WORLD_DATA[id].plan[key]; if (!plan) return false;
