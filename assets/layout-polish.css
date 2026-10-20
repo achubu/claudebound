@@ -65,3 +65,7 @@ body:not(.touch-mode) #touch{display:none}
   50%{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 12px var(--item-glow)) drop-shadow(0 0 22px var(--item-glow))}}
 @media(prefers-reduced-motion:reduce){
   .poi-node.poi-art:not(.used):not(.poi-merchant),.map-chest,#world .relic{animation:none!important;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 9px var(--item-glow))!important}}
+/* Round 209: enemies on the map are drawn at 80% of their old size, shrunk around their feet so
+   they keep standing in the same spot. (CSS `scale` stacks with the left/right facing flip.)
+   Battle portraits are unchanged. */
+#world .enemy-node > .monster-sprite{scale:.8;transform-origin:50% 100%}
