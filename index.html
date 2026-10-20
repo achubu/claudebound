@@ -186,7 +186,7 @@ const MAX_PLAYER_LEVEL=60,TALENT_BRANCHES={
  surge:{name:'SURGE',subtitle:'Amplify cards and burst turns',icon:'◆',nodes:[
   {id:'powerCore',name:'Power Core',icon:'✦',max:1,tier:0,desc:'Choose a card to boost every time you play it this encounter.'},
   {id:'amplifier',name:'Signal Amplifier',icon:'⌁',max:5,tier:1,req:['powerCore',1],desc:'+1 Boost power for every rank (up to +5).'},
-  {id:'edge',name:'Edge Calibration',icon:'⚔',max:5,tier:2,req:['amplifier',3],desc:'Attacks deal +1 / +1 / +2 / +2 / +3 damage (ranks 1-5).'},
+  {id:'edge',name:'Edge Calibration',icon:'⚔',max:5,tier:2,req:['amplifier',3],desc:'Attacks deal +1 damage per rank (+5 at rank 5).'},
   {id:'overcharge',name:'Twin Overcharge',icon:'⚡',max:1,tier:3,req:['edge',3],desc:'Boost a second card for the whole encounter.'}
  ]},
  disruption:{name:'DISRUPTION',subtitle:'Control enemy pressure and tempo',icon:'◉',nodes:[
@@ -223,7 +223,7 @@ const hasTalent=id=>talentRank(id)>0;
 const maxCopies=()=>3+talentRank('replication');
 const maxEnergy=()=>3+talentRank('capacitor');
 const openingHand=()=>4+talentRank('quickdraw');
-const attackBonus=()=>Math.ceil(talentRank('edge')/2);
+const attackBonus=()=>talentRank('edge'); /* Round 218: +1 damage per rank (was rank/2 rounded up) */
 const boostCharges=()=>1+talentRank('overcharge');
 const potionHeal=()=>5+talentRank('recovery');
 const copiesInDeck=id=>active().filter(c=>c.id===id).length;
@@ -558,7 +558,7 @@ requestAnimationFrame(loop);
 <script src="assets/combined-rooms.js?v=round185"></script>
 <script src="assets/diagonals.js?v=round185"></script>
 <script src="assets/city-paintings.js?v=round185"></script>
-<script src="assets/organic-paths.js?v=round212"></script>
+<script src="assets/organic-paths.js?v=round218"></script>
 <script src="assets/organic-areas.js?v=round185"></script>
 <script src="assets/exploration.js?v=round212"></script>
 <script src="assets/neon-world.js?v=round197"></script>

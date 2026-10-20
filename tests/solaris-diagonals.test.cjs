@@ -14,7 +14,7 @@ const r = JSON.parse(run(`JSON.stringify((() => {
     const doorWalkable = walkable(k, door.x, Math.max(door.y, 30));
     move(1 / 30);
     const arrived = state.room, pos = { ...state.pos };
-    out.trips.push({ from: k, dir, to: d.to, arrived, onRoad: walkable(arrived, pos.x, pos.y), clear: diagCornerAt(arrived, pos) === null, doorWalkable });
+    out.trips.push({ from: k, dir, to: d.to, arrived, onRoad: walkable(arrived, pos.x, pos.y), clear: diagCornerAt(arrived, pos) === null, nearDoor: (() => { const back = Object.keys((typeof SOLARIS_DIAG !== 'undefined' && activeRegion === 'elaris' ? SOLARIS_DIAG : TILE_WORLD_DATA[activeRegion].diag)[arrived] || {})[0], dd = back && solarisDiagDoor(arrived, back); return dd ? Math.round(Math.hypot(pos.x - dd.x, pos.y - dd.y)) : -1; })(), doorWalkable });
   }
   // Levels still climb from the start; the boss stays 18.
   out.levels = Object.fromEntries(['0,0', '8,5', '1,3', '5,1'].map(k => [k, rooms[k].level || null]));
@@ -30,6 +30,7 @@ for (const [k, dir, to, exit, back] of r.links) { assert(exit, k + ' ' + dir + '
 for (const t of r.trips) {
   assert.equal(t.arrived, t.to, t.from + ' ' + t.dir + ' leads to ' + t.to);
   assert(t.onRoad, 'arrive on the road in ' + t.to);
+  assert(t.nearDoor >= 0 && t.nearDoor < 160, 'Round 218: arrive on the diagonal road beside its door in ' + t.to + ' (' + t.nearDoor + 'px away)');
   assert(t.clear, 'arrive clear of the door in ' + t.to + ' (no bounce back)');
 }
 for (const [k, x] of r.southDoors) assert(x !== null && Math.abs(x - 400) < 80, k + ' south door stays on the south road (x ' + x + ')');
