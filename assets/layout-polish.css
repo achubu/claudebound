@@ -97,3 +97,31 @@ body:not(.touch-mode) #touch{display:none}
 #battleModal .hand-title{line-height:1.1}
 #battleModal .hand-title h2,#battleModal .hand-title h3{margin:0!important}
 #battleModal .hand-row,#battleModal .hand-row .cards{gap:8px!important}
+/* Round 216: you/enemy boxes at about half their height. Name, Block/Armor and debuffs share the
+   top row; a slimmer health bar runs along the bottom. */
+#battleModal .compact-side,#battleModal .compact-enemy-info{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px 8px!important}
+#battleModal .compact-side{padding:5px 8px!important}
+#battleModal .compact-side.enemy{display:block!important}
+#battleModal .compact-enemy-info{width:100%}
+#battleModal .compact-head{order:1;margin:0!important;line-height:1.1}
+#battleModal .compact-head b{font-size:14px!important}
+#battleModal .compact-tags{order:2;display:flex;gap:6px;min-height:0!important;margin:0!important}
+#battleModal .compact-tags:empty{display:none}
+#battleModal .debuff-strip{order:3;flex:1 1 auto;margin:0!important;padding:0!important;border:0!important;background:none!important;min-height:0!important;font-size:11px!important;justify-content:flex-end}
+#battleModal .debuff-strip .ds-cap{font-size:9px!important}
+#battleModal .hp-row{order:4;flex:1 0 100%;margin:0!important;gap:5px!important}
+#battleModal .hp-row .hp-icon,#battleModal .hp-row .hp-icon svg{width:16px!important;height:16px!important}
+#battleModal .hp-row .meter{height:16px!important;margin:0!important}
+#battleModal .hp-row .meter-label{font-size:11px!important;line-height:16px!important}
+#battleModal .hud-stat{gap:4px!important;padding:0!important}
+#battleModal .hud-crystal,#battleModal .hud-crystal .gem,#battleModal .hud-shield{width:20px!important;height:20px!important;min-width:0!important}
+#battleModal .hud-crystal b,#battleModal .hud-shield b,#battleModal .hud-crystal .gem b{font-size:11px!important;line-height:20px!important}
+#battleModal .hud-cap{font-size:10px!important}
+#battleModal .compact-side,#battleModal .compact-enemy-info{justify-content:flex-start!important;text-align:left!important}
+#battleModal .hp-row{display:flex!important;align-items:center;width:100%}
+#battleModal .hp-row .meter{flex:1 1 auto!important;width:auto!important;min-width:0}
+#battleModal .debuff-strip{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px!important;margin-left:auto!important}
+#battleModal .debuff-strip .ds-item,#battleModal .debuff-strip .dot-hud{font-size:10px!important;padding:1px 6px!important}
+#battleModal .compact-side,#battleModal .compact-enemy-info{flex-direction:row!important}
+#battleModal .compact-side.enemy{display:block!important}
+#battleModal .hud-shield{width:auto!important;height:auto!important;font-size:10px!important}
