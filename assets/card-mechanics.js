@@ -11,16 +11,17 @@
 //   plays the first). Only that mode resolves.
 // Numbers start from the concept lab's and sit just under the dedicated cards of each role.
 // =====================================================================
-// Neon Aftermath
+// Solaris (Round 207; was Neon Aftermath)
 tieredCard('cinderCapacitor', 'Cinder Capacitor', 1, 'Attack', '⚡', [{ damage: 5, amplify: { damage: 6 } }, { damage: 7, amplify: { damage: 7 } }, { damage: 9, amplify: { damage: 8 } }, { damage: 12, amplify: { damage: 10 } }]);
 tieredCard('duskProtocol', 'Dusk Protocol', 1, 'Skill', '◐', [{ modes: [{ damage: 5 }, { block: 4 }] }, { modes: [{ damage: 7 }, { block: 6 }] }, { modes: [{ damage: 9 }, { block: 8 }] }, { modes: [{ damage: 12 }, { block: 10 }] }]);
-// Elaris (the forest)
+// Vespera (Round 207; was Elaris)
 tieredCard('crystalAegis', 'Crystal Aegis', 1, 'Defense', '❖', [{ block: 4, amplify: { block: 5 } }, { block: 6, amplify: { block: 6 } }, { block: 8, amplify: { block: 7 } }, { block: 10, amplify: { block: 9 } }]);
 tieredCard('tidalDecision', 'Tidal Decision', 1, 'Skill', '≋', [{ modes: [{ block: 7 }, { draw: 1 }] }, { modes: [{ block: 9 }, { draw: 1 }] }, { modes: [{ block: 12 }, { draw: 1 }] }, { modes: [{ block: 15 }, { draw: 1 }] }], { exhaust: true });
-// Vespera
+// Chronospire (Round 207; was Vespera)
 tieredCard('wardbreakerStep', 'Wardbreaker Step', 1, 'Attack', '⤳', [{ damage: 4, follow: { after: 'Defense', damage: 4 } }, { damage: 6, follow: { after: 'Defense', damage: 5 } }, { damage: 8, follow: { after: 'Defense', damage: 6 } }, { damage: 10, follow: { after: 'Defense', damage: 8 } }]);
 tieredCard('afterimageWard', 'Afterimage Ward', 1, 'Defense', '⤳', [{ block: 3, follow: { after: 'Attack', block: 4 } }, { block: 5, follow: { after: 'Attack', block: 4 } }, { block: 6, follow: { after: 'Attack', block: 5 } }, { block: 8, follow: { after: 'Attack', block: 6 } }]);
-const MECH_CARDS = { city: ['cinderCapacitor', 'duskProtocol'], wilds: ['crystalAegis', 'tidalDecision'], vespera: ['wardbreakerStep', 'afterimageWard'] };
+// Round 207: each pair moved up a world (Neon Aftermath had enough cards).
+const MECH_CARDS = { elaris: ['cinderCapacitor', 'duskProtocol'], vespera: ['crystalAegis', 'tidalDecision'], chronospire: ['wardbreakerStep', 'afterimageWard'] };
 for (const [world, ids] of Object.entries(MECH_CARDS)) { VARIETY_POOLS[world].push(...ids); for (const id of ids) NEW_CARD_WORLD[id] = world; }
 
 // The kind a card counts as for Follow-through.
