@@ -51,5 +51,8 @@ Object.assign(VARIETY_POOLS, {
   vespera: ['mirrorguard', 'prismLance', 'crystalShard', 'crystalWard', 'riptide', 'squallStep'],
   chronospire: [...CHRONO_CARDS]
 });
+// Round 210: the Prismatic Counter, the answer to charged elemental strikes, drops in every world
+// (the one card allowed in more than one pool).
+for (const pool of Object.values(VARIETY_POOLS)) if (!pool.includes('counter')) pool.push('counter');
 // Where each reward card is first found (Chronospire's Suspend cards are listed in chronospire.js).
 for (const [world, ids] of Object.entries(VARIETY_POOLS)) if (world !== 'chronospire') for (const id of ids) if (!['cleave', 'riposte', 'bastion', 'mend', 'spark', 'shatter', 'cinder', 'venom', 'gale', 'counter'].includes(id)) NEW_CARD_WORLD[id] = world;
