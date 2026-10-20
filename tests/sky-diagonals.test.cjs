@@ -14,7 +14,7 @@ const r = JSON.parse(run(`JSON.stringify((() => {
     state.room = k; state.visited = [k]; const door = solarisDiagDoor(k, dir); state.pos = { ...door }; keys = {};
     move(1 / 30);
     const arrived = state.room, pos = { ...state.pos };
-    out.trips.push({ from: k, dir, to: door0.to, arrived, onRoad: walkable(arrived, pos.x, pos.y), clear: diagCornerAt(arrived, pos) === null });
+    out.trips.push({ from: k, dir, to: door0.to, arrived, onRoad: walkable(arrived, pos.x, pos.y), clear: diagCornerAt(arrived, pos) === null, nearDoor: (() => { const back = Object.keys((typeof SOLARIS_DIAG !== 'undefined' && activeRegion === 'elaris' ? SOLARIS_DIAG : TILE_WORLD_DATA[activeRegion].diag)[arrived] || {})[0], dd = back && solarisDiagDoor(arrived, back); return dd ? Math.round(Math.hypot(pos.x - dd.x, pos.y - dd.y)) : -1; })() });
   }
   out.roles = d.roles; out.bossLevel = rooms[d.roles.boss].level;
   // Solaris keeps its own diagonals while the Sky Isles are loaded and after.
@@ -37,6 +37,7 @@ for (const [k, dir, to, exit, back] of r.links) { assert(exit, k + ' ' + dir + '
 for (const t of r.trips) {
   assert.equal(t.arrived, t.to, t.from + ' ' + t.dir + ' leads to ' + t.to);
   assert(t.onRoad, 'arrive on the walkway in ' + t.to);
+  assert(t.nearDoor >= 0 && t.nearDoor < 160, 'Round 218: arrive on the diagonal road beside its door in ' + t.to + ' (' + t.nearDoor + 'px away)');
   assert(t.clear, 'arrive clear of the door in ' + t.to + ' (no bounce back)');
 }
 assert.equal(r.bossLevel, 27, 'the Eye of the Sky stays level 27');

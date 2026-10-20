@@ -158,7 +158,9 @@ move = function (dt) {
 const transitionBeforeOrganic = transition;
 transition = function (dir) {
   const from = state.room, ok = transitionBeforeOrganic(dir);
-  if (ok && state.room !== from && organicDef(state.room) && !(organicDef(from) && organicDef(from).area.cells.includes(state.room))) {
+  // Round 218: diagonal exits place you on the partner's diagonal road themselves (diagArrival);
+  // a straight door here would move you to the wrong edge.
+  if (ok && dir.length === 1 && state.room !== from && organicDef(state.room) && !(organicDef(from) && organicDef(from).area.cells.includes(state.room))) {
     const opp = { n: 's', s: 'n', e: 'w', w: 'e' }[dir], door = organicDoor(state.room, opp);
     if (door) {
       const n = organicNormalize(state.room, door.inward);

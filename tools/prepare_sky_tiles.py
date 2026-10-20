@@ -67,6 +67,20 @@ def diagonals():
         Image.fromarray(out.clip(0, 255).astype(np.uint8)).save(f'{SRC}/diagonal/diag-{name}.jpg', quality=92)
 
 
+# Round 219: the owner's own diagonal paintings (src/diagonal-owner/diag-<dir>.jpg) replace the
+# built ones; their walk masks are traced as painted.
+OWNER_DIAG = SRC + '/diagonal-owner'
+# The owner's bridge glass is a darker blue than the deck, so its outline is drawn by hand
+# (800x500, inside the rails).
+OWNER_BRIDGE = {'diag-sw': [(400, 195), (468, 258), (252, 500), (112, 500)]}
+
+
+def owner_diagonals():
+    import shutil
+    for p in sorted(glob.glob(OWNER_DIAG + '/diag-*.jpg')):
+        shutil.copyfile(p, SRC + '/diagonal/' + os.path.basename(p))
+
+
 def laid(name):
     # The plaza and bridge laid on a diagonal tile, as walkable ground at 800x500 (their rims
     # and the fountain's colours would otherwise split or hole the traced deck).
@@ -88,12 +102,16 @@ def trace(path):
     keep = [i + 1 for i, s in enumerate(sizes) if s >= .25 * max(sizes)]
     m = np.isin(lab, keep)
     name = os.path.splitext(os.path.basename(path))[0]
-    if name.startswith('diag-'): m |= laid(name[5:])
+    if name.startswith('diag-') and not os.path.exists(OWNER_DIAG + '/' + name + '.jpg'): m |= laid(name[5:])
+    if name in OWNER_BRIDGE and os.path.exists(OWNER_DIAG + '/' + name + '.jpg'):
+        from PIL import ImageDraw
+        poly = Image.new('L', (800, 500), 0); ImageDraw.Draw(poly).polygon(OWNER_BRIDGE[name], fill=255)
+        m |= np.asarray(poly) > 127
     return nd.binary_fill_holes(m)
 
 
 def main():
-    diagonals()
+    diagonals(); owner_diagonals()
     os.makedirs(SRC + '/masks', exist_ok=True)
     for old in glob.glob(SRC + '/masks/*.png'): os.remove(old)
     for p in sorted(glob.glob(SRC + '/*.jpg') + glob.glob(SRC + '/diagonal/*.jpg')):

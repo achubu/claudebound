@@ -80,3 +80,6 @@ assert.equal(stat(kept).cost, 1, 'Preparation no longer changes cost'); const id
 Math.random = realRandom;
 console.log('PASS: all 32 new talents verified (Surge 11, Disruption 11 incl. Jammer Reserve charges, Resolve 10) with exact numbers through the real engine.');
 }`);
+// Round 218: Edge Calibration adds +1 damage per rank.
+run(`{ newGame(); const got = [1, 2, 3, 4, 5].map(r => { state.talents.edge = r; return attackBonus(); }); assert.deepEqual(got, [1, 2, 3, 4, 5], 'Edge Calibration: +1 per rank');
+  const node = Object.values(TALENT_BRANCHES).flatMap(b => b.nodes).find(n => n.id === 'edge'); assert(node.desc.includes('+1 damage per rank')); console.log('PASS: Edge Calibration adds +1 damage per rank, as its description says.'); }`);

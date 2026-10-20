@@ -3496,6 +3496,41 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 220: the owner's painted diagonal in the Sky Isles
+
+- The owner painted a Sky City diagonal piece: deck from the top and right edges, and a glass
+  bridge to the bottom-left. It replaces the built `diag-sw` tile in Sunbeam Arch (2,4).
+  - Owner diagonals live in `src/diagonal-owner/` and override the built ones
+    (`owner_diagonals()` in `tools/prepare_sky_tiles.py`).
+  - The bridge glass is darker than the deck, so its outline is added by hand (`OWNER_BRIDGE`).
+- The other diagonal rooms need a bridge to a different corner, so they keep the built pieces.
+- `TILE_ART_VERSION` is now 219, so browsers fetch the new painting.
+- `sky-diagonals`, `tile-worlds` and `item-placement` pass. `playtest-walk sky`: 51 rooms, 375
+  crossings, no problems.
+
+## Round 219: a slimmer last-moves line and Aether panel
+
+- The owner asked for the "Encounter / last moves" line and the Aether panel to be smaller, with
+  smaller text. Both are now about 20px tall (from about 33px and 37px): 11px text, 2px padding,
+  and smaller Aether pips (`assets/layout-polish.css`). Checked in the browser.
+
+## Round 218: diagonal crossings land beside the door; Edge Calibration +1 per rank
+
+- **Diagonal crossings landed at the wrong edge.** Taking Ember Crossing's diagonal road into
+  Radiant Causeway (Solaris) put you at the bottom of the room instead of on its diagonal road at
+  the top-left. Every diagonal crossing, in Solaris and the Sky Isles, did the same.
+  - Cause: after any room change, the organic engine moved you to the door matching the opposite
+    straight edge. A diagonal direction has no straight opposite, so it fell back to a default
+    door and replaced the diagonal arrival.
+  - Fix: that step now only runs for straight exits (`assets/organic-paths.js`). Diagonals keep
+    their own arrival beside the partner's diagonal door.
+  - `solaris-diagonals` and `sky-diagonals` now also check that you arrive within 160px of the
+    partner's diagonal door. Before, they only checked that you landed on a road, which is how
+    this slipped through.
+- **Edge Calibration: +1 damage per rank** (+1 / +2 / +3 / +4 / +5), as the owner asked. It was
+  rank ÷ 2 rounded up (+1 / +1 / +2 / +2 / +3). `attackBonus()` in `index.html`. Its description
+  now reads "Attacks deal +1 damage per rank (+5 at rank 5)", and `talent-matrix` checks both.
+
 ## Round 217: Edge Calibration says what each rank gives
 
 - The owner flagged Edge Calibration's text. It read "+1 damage to every Attack at ranks 1, 3
