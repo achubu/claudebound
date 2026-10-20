@@ -37,7 +37,8 @@ change set.
     Every new world is built this way. Round 197: the Sky Isles use the owner's top-down tiles
     (51 rooms, three cut for diagonal walkways: `cut`/`diag` in the data); since Round 204 they
     are a dense floating city walked on a glass deck. Run `tools/prepare_sky_tiles.py`
-    (diagonal pieces and walk masks) before building it.
+    (diagonal pieces and walk masks) before building it. Bump `TILE_ART_VERSION` in
+    `assets/tile-worlds.js` when tile paintings change, so browsers fetch the new ones (Round 208).
   - `vespera` (levels 37-45) and `chronospire` (46-54) were rebuilt the same way in
     Round 179 (Chronospire is the layout turned on its side: 6 wide, 9 tall).
     `tile-worlds.js` swaps their room tables in place.
