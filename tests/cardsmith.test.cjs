@@ -17,3 +17,14 @@ console.log('PASS: a Cardsmith in every world sells card upgrades and Make Soulb
   const a=JSON.parse(run(`(()=>{const o={};configureRegion('elaris');o.sol=['merchant','cardsmith','lore'].map(t=>poiArt({type:t}));configureRegion('city');o.city=['merchant','cardsmith','lore'].map(t=>poiArt({type:t}));return JSON.stringify(o)})()`));
   assert.deepEqual(a,{sol:['sol-merchant','sol-cardsmith','sol-sundial'],city:['merchant',null,'terminal']},'Solaris sprites are used in Solaris only');
   console.log('PASS: Solaris merchant, Cardsmith, Sun Dial and chest sprites (Solaris only).'); }
+// Round 212: a Cardsmith upgrade keeps the card's progress toward its next level.
+{ const u = JSON.parse(run(`(()=>{newGame();const c=make('strike',0,false);state.pool.push(c);c.uses=42;state.shards=999;const ok=cardsmithUpgrade(c);return JSON.stringify({ok,level:c.level,uses:c.uses,soul:cardsmithUpgrade(make('strike',0,true))})})()`));
+  assert.deepEqual(u, { ok: true, level: 1, uses: 42, soul: false }, 'upgraded one level, progress kept, Soulbound refused'); }
+// Round 213: both Cardsmith actions ask first; Cancel changes nothing.
+{ const q = JSON.parse(run(`(()=>{newGame();const c=make('strike',0,false);state.pool.push(c);state.shards=999;
+  askUpgrade(c);const asked=c.level;document.getElementById('smithNo').onclick();const cancelled=c.level;
+  askUpgrade(c);document.getElementById('smithYes').onclick();const upgraded=c.level;
+  askSoulbind(c);const notYet=!!c.soulbound;document.getElementById('smithYes').onclick();
+  return JSON.stringify({asked,cancelled,upgraded,notYet,bound:!!c.soulbound})})()`));
+  assert.deepEqual(q, { asked: 0, cancelled: 0, upgraded: 1, notYet: false, bound: true }, 'asking changes nothing; Cancel keeps the card; Yes upgrades or binds'); }
+console.log('PASS: Cardsmith upgrades keep progress toward the next level, and both actions ask for confirmation first.');

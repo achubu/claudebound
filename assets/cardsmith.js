@@ -42,21 +42,44 @@ function cardsmithFor(region = activeRegion) {
   return { key, x: s.x, y: s.y, type: 'cardsmith', id: region + ':cardsmith' };
 }
 function soulbindTargets() { return state.pool.filter(c => !c.soulbound && !(defs[c.id] && defs[c.id].soulbound)); }
+// Pay Shards to raise an Impermanent card one level. Round 212: its progress toward the next
+// automatic upgrade is kept.
+function cardsmithUpgrade(c) {
+  const card = owned(c.uid) || c, price = upgradePrice(card);
+  if (state.shards < price || card.soulbound || card.level >= 3) return false;
+  state.shards -= price; card.level++; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.');
+  return true;
+}
+// Round 213: both paid actions ask first.
+function cardsmithConfirm(c, question, label, run) {
+  const card = owned(c.uid) || c;
+  poiMenu('⚒ Cardsmith', '<p>' + question + '</p><p class="muted">You have ◇ ' + state.shards + ' Shards.</p><div class="cards" id="smithConfirmCard"></div>',
+    [{ id: 'smithYes', label, primary: true, onclick: () => { run(card); openCardsmith(); } }, { id: 'smithNo', label: 'Cancel', onclick: openCardsmith }]);
+  const host = $('smithConfirmCard'); if (host && host.append) host.append(cardElement(card, () => {}, true));
+}
+function askUpgrade(c) {
+  const card = owned(c.uid) || c, price = upgradePrice(card);
+  cardsmithConfirm(card, 'Upgrade <b>' + stat(card).name + '</b> to level ' + (card.level + 1) + ' for <b>◇ ' + price + '</b>?', 'Upgrade · ◇ ' + price, cardsmithUpgrade);
+}
+function askSoulbind(c) {
+  const card = owned(c.uid) || c;
+  cardsmithConfirm(card, 'Make <b>' + stat(card).name + '</b> Soulbound for <b>◇ ' + SOULBIND_COST + '</b>? It will never be lost.', 'Make Soulbound · ◇ ' + SOULBIND_COST, x => { if (soulbindCard(x)) save(); });
+}
 function openCardsmith() {
   const up = typeof upgradeTargets === 'function' ? upgradeTargets().sort((a, b) => upgradePrice(a) - upgradePrice(b)) : [], bind = soulbindTargets();
   poiMenu('⚒ Cardsmith', '<p>"Bring me a card and I\'ll make it stronger, or bind it to you for good."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>'
-    + '<h3>Upgrade a card</h3><p class="muted">Raise one Impermanent card by a level: ◇ 36 to level 1, ◇ 60 to level 2, ◇ 90 to level 3. Its mastery starts fresh.</p><div class="cards" id="smithUpgrade"></div>'
+    + '<h3>Upgrade a card</h3><p class="muted">Raise one Impermanent card by a level: ◇ 36 to level 1, ◇ 60 to level 2, ◇ 90 to level 3. It keeps its progress toward the next level.</p><div class="cards" id="smithUpgrade"></div>'
     + '<h3>Make Soulbound · ◇ ' + SOULBIND_COST + '</h3><p class="muted">A Soulbound card is protected (never lost) and levels up with mastery and Upgrade Crystals. It keeps its level and mastery.</p><div class="cards" id="smithBind"></div>',
     [{ id: 'smithLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
   const hu = $('smithUpgrade'), hb = $('smithBind');
   const tag = (el, text) => { const t = document.createElement('div'); t.className = 'actions'; t.textContent = text; el.append(t); return el; };
   if (hu && hu.append) {
     if (!up.length) hu.insertAdjacentHTML && hu.insertAdjacentHTML('beforeend', '<p class="muted">No Impermanent card can be upgraded right now.</p>');
-    up.forEach(c => hu.append(tag(cardElement(c, () => { const card = owned(c.uid) || c, price = upgradePrice(card); if (state.shards < price || card.soulbound || card.level >= 3) return; state.shards -= price; card.level++; card.uses = 0; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.'); openCardsmith(); }, state.shards < upgradePrice(c)), '◇ ' + upgradePrice(c) + ' → level ' + (c.level + 1))));
+    up.forEach(c => hu.append(tag(cardElement(c, () => askUpgrade(c), state.shards < upgradePrice(c)), '◇ ' + upgradePrice(c) + ' → level ' + (c.level + 1))));
   }
   if (hb && hb.append) {
     if (!bind.length) hb.insertAdjacentHTML && hb.insertAdjacentHTML('beforeend', '<p class="muted">You have no Impermanent cards to bind.</p>');
-    bind.forEach(c => hb.append(tag(cardElement(c, () => { if (soulbindCard(owned(c.uid) || c)) { save(); openCardsmith(); } }, state.shards < SOULBIND_COST), '◇ ' + SOULBIND_COST + ' · make Soulbound')));
+    bind.forEach(c => hb.append(tag(cardElement(c, () => askSoulbind(c), state.shards < SOULBIND_COST), '◇ ' + SOULBIND_COST + ' · make Soulbound')));
   }
 }
 const openPOIBeforeCardsmith = openPOI;

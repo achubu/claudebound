@@ -3496,6 +3496,55 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 213: the Cardsmith asks before it upgrades or binds
+
+- Clicking a card at the Cardsmith used to spend the Shards at once. Both actions now open a
+  confirmation first: the card, the question ("Upgrade Ember Blade to level 1 for ◇ 36?" or
+  "Make … Soulbound for ◇ 500? It will never be lost."), your Shards, and **Upgrade** /
+  **Make Soulbound** or **Cancel**. Cancel goes back to the Cardsmith with nothing changed
+  (`cardsmithConfirm`, `askUpgrade` and `askSoulbind` in `assets/cardsmith.js`).
+- The Cardsmith's upgrade note now says the card keeps its progress toward the next level (Round
+  212), instead of "Its mastery starts fresh".
+- `tests/cardsmith.test.cjs` checks that asking changes nothing, Cancel keeps the card as it was,
+  and Yes upgrades or binds. Checked in the browser too.
+
+## Round 212: items stand on open ground, and paid upgrades keep progress
+
+- **Items no longer sit on buildings in Solaris and the Sky Isles.** Items (points of interest,
+  chests, gear, the merchant, waypoints, the Cardsmith) are placed just off the walkable path,
+  12–28px from it. In these two painted worlds everything off the road or deck is buildings, so
+  many landed on roofs and walls. There, `organicItemSpot` now picks walkable, reachable ground
+  22–40px inside its edge (`ITEM_IN`, `itemsOnGround()` in `assets/organic-paths.js`). The
+  pictures are about 50px wide, so they stay fully on the ground beside the lane, clear of doors
+  and patrols as before. Neon Aftermath keeps its hand-checked spots, and the other worlds keep
+  the off-path rule.
+  - Checked with close-up crops in both worlds. `playtest-walk` for both: every room, door and
+    item route works, and walking past triggers no pop-ups.
+  - `item-placement` and `playtest-walk` now expect on-ground items in these two worlds.
+- **Paid upgrades keep a card's progress.** Raising an Impermanent card a level at the Cardsmith,
+  or with the merchant's upgrade pack, used to reset its progress toward the next automatic
+  upgrade to 0. It is now kept. (It is always below the threshold, or the card would already
+  have levelled.) The Cardsmith's upgrade moved into `cardsmithUpgrade(c)`. Tests in `cardsmith`
+  and `exploration`.
+
+## Round 211: battle page tidy-up and a final-turn recap on the victory screens
+
+Four requests from the owner:
+
+- **Final turn on the victory screens** (new `assets/battle-recap.js`, loaded after
+  `layout-polish.js`). The fight ends as the last card lands, so the finishing move was never
+  seen. The victory screens (loot chest, card choice) now open with a "Final turn" box: each card
+  played on your last turn, what it did (damage dealt, Block gained) and which one finished the
+  enemy. A win by damage over time or a side card names that instead.
+- **The last moves above the Aether panel.** The battle log line (`#combatLog`, the "·"-joined
+  last moves) moved from the bottom of the page to just above the Aether panel, in a small box.
+- **The element line and the Turn / energy / level bar under the Aether panel**, in that order.
+- **No enemy picture on the battle page.** The enemy's name, health, debuffs and moves stay.
+- The moves are in `assets/layout-polish.js`'s battle wrapper, the styles in `layout-polish.css`.
+  Checked in the browser at desktop and phone widths, with no page errors.
+- Tests: new `tests/battle-recap.test.cjs` (cards and what each did, only the final turn, a
+  damage-over-time win, names escaped).
+
 ## Round 210: the Prismatic Counter drops in every world
 
 - The owner asked for it everywhere. Since Round 178 it had been in Solaris's reward pool only.

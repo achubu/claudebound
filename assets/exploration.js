@@ -323,7 +323,7 @@ function buyUpgrade(c, p) {
 }
 function applyUpgradePack(c) {
   const card = owned(c.uid) || c; if (card.soulbound || card.level >= 3) return;
-  card.level++; card.uses = 0; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.'); closeMenu();
+  card.level++; save(); toast(stat(card).name + ' upgraded to level ' + card.level + '.'); closeMenu(); // Round 212: progress toward the next level is kept
 }
 function openBundle(level = 0) {
   // Store cards are always Impermanent, never Soulbound.
