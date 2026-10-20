@@ -62,6 +62,13 @@ CARDS = {
     'capacitorSpark':  (*STORM, (255, 240, 120), (255, 255, 230), (190, 150, 255), 'bolt'),
     'thunderhead':     (*STORM, (120, 120, 200), (220, 220, 255), (255, 240, 120), 'cloud'),
     'lightningRod':    (*STORM, (200, 200, 220), (255, 255, 255), (255, 240, 120), 'lance'),
+    # Round 206: cards from the Cardbound concept lab (Amplify, Choose one, Follow-through).
+    'cinderCapacitor': (*NEON, (255, 150, 60), (255, 230, 170), (95, 242, 224), 'coil'),
+    'duskProtocol':    (*NEON, (170, 120, 255), (235, 220, 255), (255, 80, 200), 'circuit'),
+    'crystalAegis':    (*FOREST, (120, 230, 220), (230, 255, 250), (140, 220, 100), 'crystal'),
+    'tidalDecision':   (*FOREST, (80, 170, 230), (215, 245, 255), (140, 220, 100), 'wave'),
+    'wardbreakerStep': (*STORM, (255, 210, 110), (255, 250, 220), (130, 255, 240), 'lance'),
+    'afterimageWard':  (*STORM, (170, 160, 255), (240, 235, 255), (255, 210, 110), 'shield'),
 }
 MOTIF = {k: v[5] for k, v in CARDS.items()}
 

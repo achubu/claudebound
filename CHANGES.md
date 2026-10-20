@@ -3496,6 +3496,43 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 206: six cards from the Cardbound concept lab
+
+`achubu/Cardbound` added a review-only "card concept lab" (`assets/concepts/cards.json`): 16
+text-only cards across 8 mechanics borrowed from Magic, Hearthstone and Flesh and Blood. I
+picked the three mechanics that fit this game without new screens and add a real decision:
+
+- **⤳ Follow-through** (Wardbreaker Step, Afterimage Ward; Vespera). A bonus if the card you
+  played just before this one, this turn, was a Defense (or an Attack). It makes the order you
+  play cards matter. Side cards, pitching and Suspend's automatic plays don't count. A card whose
+  bonus is ready glows gold in your hand.
+- **⚡ Amplify** (Cinder Capacitor, Neon Aftermath; Crystal Aegis, Elaris). A second button plays
+  the card for one more energy with a bonus. That competes with banking unspent energy as
+  Aether.
+- **◇ Choose one** (Dusk Protocol, Neon Aftermath; Tidal Decision, Elaris). One button per mode,
+  and only that mode resolves; clicking the card plays the first. Tidal Decision exhausts either
+  way.
+
+Not taken: Cycle, Foresee and Reprise (they need new screens for reordering or playing from the
+discard pile), Prepared (only works with the Retain talent), and Improvise (temporary generated
+cards; the concept notes flag its risks).
+
+- The numbers start from the concept lab's: each mode or base sits just under the dedicated card
+  of its role, and the bonus is what makes the card worth a slot. Each card drops in one world's
+  reward pool only.
+- How it works (`assets/card-mechanics.js`, loaded after `stagger.js`): a `stat` wrapper reads
+  the battle's `amplifyUid`, `modePick` and `chain` (the last card played by hand this turn), so
+  costs, damage and Block resolve through the usual card effects. `playCardWith(i, choice)`
+  plays with Amplify or a mode chosen.
+- Placeholder art for all four levels comes from `tools/generate_world_card_art.py`, until the
+  owner paints them. The compendium shows them (its frame's tag is now round206).
+- Found while testing: a new helper shared its name with `world-mechanics.js`'s `addBonus` and
+  replaced it, breaking Tailwind. It is now `mechAddBonus`, and I checked every new name for
+  clashes.
+- Tests: new `tests/card-mechanics.test.cjs` (pools, rules text, Follow-through after the right
+  and wrong kind, the turn reset, Suspend not counting, Amplify cost, damage and Block, and both
+  modes). `card-variety` counts 58 world cards. Checked in the browser too.
+
 ## Round 205: Accelerate's last two paintings from achubu/Cardbound
 
 - Checked `achubu/Cardbound` (head defe3cb, 2026-10-20) for images we don't have. The only new
