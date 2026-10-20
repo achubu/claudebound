@@ -27,9 +27,26 @@ def margins(a, fw):
     return out
 
 
+def drop_strays(rgba, fw):
+    # Round 223: a neighbour's wing tip that crossed into this frame is a small piece touching the
+    # frame's left or right edge; clear it (the creature itself is the big piece).
+    from scipy import ndimage as nd
+    a = np.array(rgba)
+    for f in range(4):
+        cell = a[:, f * fw:(f + 1) * fw]; solid = cell[..., 3] > 8
+        lab, n = nd.label(solid); sizes = nd.sum(solid, lab, range(1, n + 1))
+        if not n: continue
+        big = sizes.max()
+        for i in range(1, n + 1):
+            touches = lab[:, :2].__eq__(i).any() or lab[:, -2:].__eq__(i).any()
+            if touches and sizes[i - 1] < 0.04 * big: cell[lab == i] = 0
+    return Image.fromarray(a)
+
+
 def pad(path):
     im = Image.open(path); mode = im.mode
     rgba = im.convert('RGBA'); W, H = rgba.size; fw = W // 4
+    rgba = drop_strays(rgba, fw)
     m = margins(np.asarray(rgba)[..., 3], fw)
     side = min(min(x[0], x[1]) for x in m); top = min(x[2] for x in m); bottom = min(x[3] for x in m)
     if side >= GUTTER and top >= GUTTER and bottom >= 0: return print('ok    ', path)

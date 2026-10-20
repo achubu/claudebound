@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 223: the new Zenith Roc, and sprite padding drops stray wing tips
+
+- A Zenith Roc sheet had one frame's wing crossing into the next frame's cell, which leaves a
+  sliver at that frame's edge while the creature animates. `tools/pad_sprite_frames.py` now clears
+  small pieces (under 4% of the frame's creature) that touch a frame's left or right edge
+  (`drop_strays`). Re-running it on every installed sheet changes none of them.
+- **The new Zenith Roc**: the owner's armoured silver eagle with an orbiting sun sphere that powers
+  up across the frames (a sun burst and a holographic ring under it in frame 3). Cut from its
+  green background and padded; frame 2's wing tip, which crossed into frame 3, is gone.
+  `SPRITE_VERSION` is now 223, so browsers fetch it. Checked in the Eye of the Sky.
+
 ## Round 222: the Rain Drone replaces the Cloud Wisp
 
 - The owner disliked the Cloud Wisp. Their new sheet, a white weather drone with a cyan lens,
