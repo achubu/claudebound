@@ -28,7 +28,7 @@ const r = JSON.parse(run(`JSON.stringify((() => {
   state.battle = null;
   return out;
 })())`));
-assert.deepStrictEqual(r.pools, { cinderCapacitor: ['city'], duskProtocol: ['city'], crystalAegis: ['wilds'], tidalDecision: ['wilds'], wardbreakerStep: ['vespera'], afterimageWard: ['vespera'] }, 'each new card drops in one world');
+assert.deepStrictEqual(r.pools, { cinderCapacitor: ['elaris'], duskProtocol: ['elaris'], crystalAegis: ['vespera'], tidalDecision: ['vespera'], wardbreakerStep: ['chronospire'], afterimageWard: ['chronospire'] }, 'each new card drops in one world (Round 207: one world later)');
 assert.match(r.rules.cinderCapacitor, /Deal 5 damage\..*Amplify \(\+1 energy\): \+6 damage/);
 assert.match(r.rules.duskProtocol, /^Choose one: deal 5 damage; or gain 4 Block\.$/);
 assert.match(r.rules.tidalDecision, /Choose one: gain 7 Block; or draw 1 card\. Exhaust\./);

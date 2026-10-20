@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 207: the concept-lab cards drop one world later
+
+- Neon Aftermath already had plenty of cards, so each pair from Round 206 moved up a world
+  (`MECH_CARDS` in `assets/card-mechanics.js`):
+  - Cinder Capacitor and Dusk Protocol: Neon Aftermath → Solaris.
+  - Crystal Aegis and Tidal Decision: Elaris → Vespera.
+  - Wardbreaker Step and Afterimage Ward: Vespera → Chronospire.
+- Each is still in exactly one world's reward pool (`tests/card-mechanics.test.cjs`). Copies
+  already found stay in your collection.
+- Asked to remove the blank-image Reversal cards: this game has none left. Round 188 removed the
+  four single-element Reversal cards (saves holding one load it as a Prismatic Counter), and a
+  browser pass over the compendium found no broken images and no "Reversal" text. They are
+  still in `achubu/Cardbound`'s copy of the game, which Claude doesn't change.
+
 ## Round 206: six cards from the Cardbound concept lab
 
 `achubu/Cardbound` added a review-only "card concept lab" (`assets/concepts/cards.json`): 16
