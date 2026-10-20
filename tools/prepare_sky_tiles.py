@@ -72,7 +72,9 @@ def diagonals():
 OWNER_DIAG = SRC + '/diagonal-owner'
 # The owner's bridge glass is a darker blue than the deck, so its outline is drawn by hand
 # (800x500, inside the rails).
-OWNER_BRIDGE = {'diag-sw': [(400, 195), (468, 258), (252, 500), (112, 500)]}
+OWNER_BRIDGE = {'diag-sw': [(400, 195), (468, 258), (252, 500), (112, 500)],  # each outline reaches the image edge
+                'diag-nw': [(0, 0), (96, 0), (345, 214), (304, 262), (0, 70)],
+                'diag-sw-b': [(300, 212), (352, 252), (156, 500), (14, 500)]}
 
 
 def owner_diagonals():
