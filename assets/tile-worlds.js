@@ -22,7 +22,7 @@ Object.assign(WORLD_NAMES, { sky: 'Sky Isles', wilds: 'Elaris' });
 // untinted through art-only keys.
 Object.assign(WILDLIFE_ART, {
   skyDrakeArt:  { name: 'Sunfeather Drake', sheet: 'sky/sunfeather-drake', cycle: '.8s' },
-  skyWispArt:   { name: 'Cloud Wisp', sheet: 'sky/cloud-wisp', cycle: '1.6s' },
+  skyWispArt:   { name: 'Rain Drone', sheet: 'sky/rain-drone', cycle: '1.2s' }, // Round 222: replaces the Cloud Wisp
   skyHarpyArt:  { name: 'Gale Harpy', sheet: 'sky/gale-harpy', cycle: '.8s' },
   skyRamArt:    { name: 'Thunderhorn Ram', sheet: 'sky/thunderhorn-ram', cycle: '1.1s' },
   stormbellArt: { name: 'The Stormbell Warden', sheet: 'sky/stormbell-warden', cycle: '1.4s' },
@@ -31,7 +31,7 @@ Object.assign(WILDLIFE_ART, {
 });
 const SKY_ENEMIES = {
   skyDrake:   { name: 'Sunfeather Drake', icon: '☀', hp: 44, attack: 9, element: 'fire', art: 'skyDrakeArt', tint: 'none' },
-  skyWisp:    { name: 'Cloud Wisp', icon: '☁', hp: 48, attack: 9, armor: 1, element: 'water', art: 'skyWispArt', tint: 'none' },
+  skyWisp:    { name: 'Rain Drone', icon: '☔', hp: 48, attack: 9, armor: 1, element: 'water', art: 'skyWispArt', tint: 'none' },
   skyHarpy:   { name: 'Gale Harpy', icon: '≋', hp: 52, attack: 10, element: 'air', art: 'skyHarpyArt', tint: 'none' },
   skyRam:     { name: 'Thunderhorn Ram', icon: '◆', hp: 56, attack: 10, armor: 2, element: 'earth', art: 'skyRamArt', tint: 'none' },
   stormbellWarden: { name: 'The Stormbell Warden', icon: '🔔', hp: 82, attack: 11, armor: 4, boss: true, miniBoss: true, element: 'air', art: 'stormbellArt', tint: 'none' },

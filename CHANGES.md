@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 222: the Rain Drone replaces the Cloud Wisp
+
+- The owner disliked the Cloud Wisp. Their new sheet, a white weather drone with a cyan lens,
+  four rotors and a water tank spraying rain, takes its place as the **Rain Drone** (same id
+  `skyWisp`, so saves carry over; water element, ☔). The sheet is `assets/monsters/sky/rain-drone.png`;
+  the old one moved to `unused assets/`.
+- **Green-background sheets.** The Sky City is full of magenta, so new sheets come on flat green.
+  `tools/cut_sprite_sheet.py` now keys green the same way it keys magenta, and pulls leftover
+  green out of the edges (cyan, white and gold keep their colour). The magenta sheets still come
+  out byte-for-byte the same. Then `pad_sprite_frames.py` leaves the usual gutter.
+- The compendium's Headwind note names the Rain Drone. `tile-worlds`, `elaris-wildlife` and
+  `sky-diagonals` pass, and the drone was checked in a Sky Isles room.
+
 ## Round 221: two more painted Sky City diagonals
 
 - The owner painted two more diagonal pieces (in `src/diagonal-owner/`):
