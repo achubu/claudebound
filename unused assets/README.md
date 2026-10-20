@@ -41,3 +41,4 @@ What's here (Round 96):
 - `assets/environment/sky/` (Round 204): the first Sky Isles set (marble walkways between
   floating islands, Round 197), with its sources, derived tiles and walk masks. The Sky Isles
   are now the owner's dense floating city.
+- `assets/monsters/sky/cloud-wisp.png` (Round 222): the Cloud Wisp sheet, replaced by the Rain Drone.

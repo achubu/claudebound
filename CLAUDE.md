@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 221) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 222) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -83,7 +83,7 @@ change set.
   and an affliction that works against it.
 - **Concept-lab card mechanics** (Round 206, `assets/card-mechanics.js`): ⤳ Follow-through, ⚡ Amplify and
   ◇ Choose one, via a `stat` wrapper reading `b.chain`, `b.amplifyUid` and `b.modePick`.
-- **Creature sprite sheets** (4 frames, one row): cut generated art with `tools/cut_sprite_sheet.py`,
+- **Creature sprite sheets** (4 frames, one row; magenta or, since Round 222, green background): cut generated art with `tools/cut_sprite_sheet.py`,
   then run `tools/pad_sprite_frames.py` on the result so no art touches a frame's edge (Round 200).
   Bump `SPRITE_VERSION` in `assets/elaris-wildlife.js` when sheets change.
 - **Card art** comes from `cardArtPath()` in `assets/cards.js`. The refreshed

@@ -10,8 +10,8 @@ edge by about a pixel and saves a 256-colour PNG.
 
 Lower the saturation (default 28) for pale creatures whose body would otherwise be cut away.
 
-Sheets drawn on a flat magenta background (any shade; the colour is read from the border) are
-chroma-keyed instead, and each frame is
+Sheets drawn on a flat magenta or green background (any shade; the colour is read from the border)
+are chroma-keyed instead, and each frame is
 padded to the game's 3:4 frame (bottom-aligned) when the sheet is shorter than that.
 --no-floor drops a painted stone floor under the creature's feet: in the bottom sixth of the
 sheet, cool (blue-grey) pixels go, warm ones (brass, sand, dust) stay.
@@ -48,6 +48,27 @@ key = np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1]
 border = np.concatenate([rgb[8:14].reshape(-1, 3), rgb[-14:-8].reshape(-1, 3), rgb[:, 8:14].reshape(-1, 3), rgb[:, -14:-8].reshape(-1, 3)])
 border = border[(np.minimum(border[:, 0], border[:, 2]) - border[:, 1]) > 60]  # skip frame lines
 bgc = np.median(border, 0) if len(border) else np.zeros(3); kb = bgc[[0, 2]].min() - bgc[1]
+# Round 222: flat green backgrounds (sheets whose creatures use magenta and pink), keyed the
+# same way: green far above both red and blue is background.
+gborder = np.concatenate([rgb[8:14].reshape(-1, 3), rgb[-14:-8].reshape(-1, 3), rgb[:, 8:14].reshape(-1, 3), rgb[:, -14:-8].reshape(-1, 3)])
+gborder = gborder[(gborder[:, 1] - gborder[:, [0, 2]].max(1)) > 60]
+gbg = np.median(gborder, 0) if len(gborder) else np.zeros(3); kg = gbg[1] - gbg[[0, 2]].max()
+if kg > 100:
+    gkey = rgb[..., 1] - rgb[..., [0, 2]].max(2)
+    alpha = np.clip((kg * 0.76 - gkey) / (kg * 0.6), 0, 1)
+    alpha[alpha < 0.12] = 0
+    col = ((rgb - (1 - alpha[..., None]) * gbg) / np.maximum(alpha, 1e-3)[..., None]).clip(0, 255)
+    # Despill: green left in edges and outlines comes back down to the brighter of red and blue
+    # (cyan, white and gold keep their colour).
+    col[..., 1] = np.minimum(col[..., 1], col[..., [0, 2]].max(2) + 6)
+    solid = alpha >= 0.95
+    _, (iy, ix) = nd.distance_transform_edt(~solid, return_indices=True)
+    soft = (alpha > 0) & ~solid
+    col[soft] = col[iy[soft], ix[soft]]
+    lab, n = nd.label(alpha > 0); sizes = nd.sum(alpha > 0, lab, range(1, n + 1))
+    alpha[np.isin(lab, [i + 1 for i, s in enumerate(sizes) if s < 12])] = 0
+    col[alpha == 0] = 0
+    save(col, alpha); sys.exit()
 if kb > 100:  # flat magenta (or purple-magenta) background, read from just inside the border
     # Some sheets have thin dark lines round and between the frames: paint them background.
     # Round 200: a frame line is thin, so the background shows a few pixels to each side of it
