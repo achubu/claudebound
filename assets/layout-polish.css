@@ -75,3 +75,25 @@ body:not(.touch-mode) #touch{display:none}
 /* Round 214: End turn at the right end of the Turn / energy bar. */
 #battleModal .compact-bar{display:flex;align-items:center;flex-wrap:wrap}
 #battleModal .compact-bar #endTurn.end-turn-inline{margin-left:auto}
+/* Round 215: things you can open or pick up are drawn at half their old size, around their centre
+   (they stay where they were placed). Their name labels stay full size, just under the picture. */
+#world .poi-node,#world .map-chest,#world .relic{scale:.5}
+#world .poi-node::after{scale:2;transform-origin:50% 0;top:calc(100% + 3px)!important}
+/* Round 215: a tighter battle screen: less padding and smaller gaps between every part. */
+#battleModal{padding:12px 14px!important}
+#battleModal>*{margin-top:0!important;margin-bottom:0!important}
+#battleModal>*+*{margin-top:6px!important}
+#battleModal .battle-compact{display:grid;gap:6px}
+#battleModal .compact-combatants{gap:6px!important}
+#battleModal .compact-side{padding:6px 10px!important}
+#battleModal .debuff-strip{margin-top:3px!important;padding:3px 7px!important;min-height:0!important}
+#battleModal .intent-bubbles{gap:6px!important}
+#battleModal .intent-bubble{padding:6px 10px!important}
+#battleModal .intent-bubble .affliction{margin-top:3px!important}
+#battleModal #combatLog{padding:4px 10px!important}
+#battleModal .aether-panel{padding:5px 10px!important}
+#battleModal .compact-bar{gap:6px!important}
+#battleModal .combat-tools{padding:4px 10px!important}
+#battleModal .hand-title{line-height:1.1}
+#battleModal .hand-title h2,#battleModal .hand-title h3{margin:0!important}
+#battleModal .hand-row,#battleModal .hand-row .cards{gap:8px!important}

@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 215: half-size items, and a tighter battle screen
+
+- **Items at half size.** Points of interest, chests, gear and the merchant (everything you can
+  open or pick up) are drawn at 50% of their old size, around the same centre. Their name
+  labels stay full size and sit just under the picture. Portals keep their size. One CSS rule in
+  `assets/layout-polish.css` (`scale:.5`, with the label scaled back up). Placement, reach and tap
+  routes are unchanged. Checked with close-ups in four worlds.
+- **Tighter battle screen.** Less padding and smaller gaps between every part: the panel's own
+  padding, your and the enemy's boxes, the debuff strips, the enemy-move boxes, the last moves,
+  the Aether panel, the Turn / energy bar, "Your hand" and the cards. On desktop the screen went
+  from 988px to 901px tall; phones tighten too. Checked in the browser at both widths.
+
 ## Round 214: the element line at the top of the battle screen, End turn beside the energy
 
 - The owner asked for "Element: earth · reserve Prismatic Counter" at the very top of the battle
