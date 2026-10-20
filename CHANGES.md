@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 211: battle page tidy-up and a final-turn recap on the victory screens
+
+Four requests from the owner:
+
+- **Final turn on the victory screens** (new `assets/battle-recap.js`, loaded after
+  `layout-polish.js`). The fight ends as the last card lands, so the finishing move was never
+  seen. The victory screens (loot chest, card choice) now open with a "Final turn" box: each card
+  played on your last turn, what it did (damage dealt, Block gained) and which one finished the
+  enemy. A win by damage over time or a side card names that instead.
+- **The last moves above the Aether panel.** The battle log line (`#combatLog`, the "·"-joined
+  last moves) moved from the bottom of the page to just above the Aether panel, in a small box.
+- **The element line and the Turn / energy / level bar under the Aether panel**, in that order.
+- **No enemy picture on the battle page.** The enemy's name, health, debuffs and moves stay.
+- The moves are in `assets/layout-polish.js`'s battle wrapper, the styles in `layout-polish.css`.
+  Checked in the browser at desktop and phone widths, with no page errors.
+- Tests: new `tests/battle-recap.test.cjs` (cards and what each did, only the final turn, a
+  damage-over-time win, names escaped).
+
 ## Round 210: the Prismatic Counter drops in every world
 
 - The owner asked for it everywhere. Since Round 178 it had been in Solaris's reward pool only.

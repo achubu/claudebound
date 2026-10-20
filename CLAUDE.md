@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 210) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 211) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -20,7 +20,8 @@ change set.
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
     `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `pickups`, `cardsmith`, `gear`, `room-preload`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
-    on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), then
+    on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), `battle-recap`
+    (Round 211: the final turn on the victory screens), then
     `god-mode` (Round 198: any card wins, all waypoints and maps open; while it is on, writes to the
     save keys are ignored, so leaving rolls back).
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.

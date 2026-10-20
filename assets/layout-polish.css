@@ -69,3 +69,6 @@ body:not(.touch-mode) #touch{display:none}
    they keep standing in the same spot. (CSS `scale` stacks with the left/right facing flip.)
    Battle portraits are unchanged. */
 #world .enemy-node > .monster-sprite{scale:.8;transform-origin:50% 100%}
+/* Round 211: no enemy picture on the battle page (its name, health and moves stay). */
+#battleModal .compact-monster,#battleModal .battle-monster{display:none!important}
+#battleModal #combatLog{margin:6px 0;padding:6px 10px;border:1px solid #2e5566;border-radius:8px;background:#0b1a26aa;font:12px/1.4 system-ui;color:#cfe6ef}
