@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 214: the element line at the top of the battle screen
+
+- The owner asked for "Element: earth · reserve Prismatic Counter" at the very top of the battle
+  screen. In Round 211 it had moved under the Aether panel; it now leads the battle screen
+  (`assets/layout-polish.js`). Everything else keeps the Round 211 order: you and the enemy, the
+  enemy's moves, the last moves, Aether, the Turn / energy / level bar, then your hand. Checked
+  in the browser.
+
 ## Round 213: the Cardsmith asks before it upgrades or binds
 
 - Clicking a card at the Cardsmith used to spend the Shards at once. Both actions now open a
