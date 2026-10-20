@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 217: Edge Calibration says what each rank gives
+
+- The owner flagged Edge Calibration's text. It read "+1 damage to every Attack at ranks 1, 3
+  and 5", which sounds like +1 at every rank (or a flat +1). In fact it adds rank ÷ 2 rounded up:
+  +1 / +1 / +2 / +2 / +3 damage at ranks 1–5 (`attackBonus()`). The description now says exactly
+  that, in the same style as the other talents: "Attacks deal +1 / +1 / +2 / +2 / +3 damage
+  (ranks 1-5)." No change to how it plays.
+
 ## Round 216: half-height you / enemy boxes in battle
 
 - The owner asked for the two health boxes at half their size, with the bars along the bottom.
