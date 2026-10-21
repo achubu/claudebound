@@ -66,9 +66,9 @@ Object.assign(BOSS_PATTERNS, {
 });
 // Round 177: tuned with tests/balance-sim.cjs (regular fights ~75% wins, mini-bosses ~42%, final bosses ~29%).
 Object.assign(BALANCE.perEnemy, {
-  // Round 183: re-tuned with gear worn (assets/sim/lab.js).
-  stormbellWarden: { hp: .76 }, featherMatriarch: { hp: .94 }, zenithRoc: { hp: .5 },
-  tideboundWarden: { hp: 1.15 }, galeSovereignElaris: { hp: .78 }, elarisTyrant: { hp: .7 }, elarisHeron: { hp: .9 }
+  // Round 183: re-tuned with gear worn (assets/sim/lab.js). Round 226: again after ⚔ Pressure.
+  stormbellWarden: { hp: .93 }, featherMatriarch: { hp: 1.15 }, zenithRoc: { hp: .79 },
+  tideboundWarden: { hp: 1.31 }, galeSovereignElaris: { hp: 1.01 }, elarisTyrant: { hp: .8 }, elarisHeron: { hp: .9 }
 });
 const SKY_ZONE_ENEMY = ['skyDrake', 'skyDrake', 'skyWisp', 'skyWisp', 'skyHarpy', 'skyHarpy', 'skyRam', 'skyRam'];
 const WILDS_ZONE_ENEMY = ['elarisFox', 'elarisFox', 'elarisAntler', 'elarisAntler', 'elarisHeron', 'elarisHeron', 'elarisMoth', 'elarisMoth'];
