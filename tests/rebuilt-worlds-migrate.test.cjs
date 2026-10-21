@@ -18,7 +18,7 @@ assert(r.loaded, 'the old save loads');
 assert.strictEqual(r.room, r.start, 'it resumes at the new Vespera start'); assert.deepStrictEqual(r.visited, [r.start]);
 assert.deepStrictEqual(r.chrono, ['1,0'], 'Chronospire exploration restarts too');
 assert.deepStrictEqual(r.cool, ['city:1,5:0']); assert.deepStrictEqual(r.chests, ['city:3,7']);
-assert.deepStrictEqual(r.nexus, ['vespera:0,1', 'city:0,5'], 'old Vespera waypoints are forgotten (the new start\'s is kept), others kept');
+assert.deepStrictEqual(r.nexus, ['vespera:1,3', 'city:1,7'], 'old Vespera waypoints are forgotten (the new start\'s is kept), others kept; Round 229: start-room waypoints move to their new rooms');
 assert.deepStrictEqual(r.used, ['city:2,6:cache']);
 assert(r.level === 40 && r.bosses && r.gear, 'level, boss kills and gear stay');
 assert(r.kept, 'after that, a save keeps its place');

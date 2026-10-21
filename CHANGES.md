@@ -3496,6 +3496,34 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 229: the first Nexus Waypoint is a few rooms in; mechanic badges above the cards; bigger enemies, smaller names
+
+- **First waypoint moved** (`assets/waypoints.js`). Each world's first Nexus Waypoint used to stand in
+  the room you arrive in. It is now three rooms in, in a room with nothing else in it: no point of
+  interest, merchant, Cardsmith, chest, relic, event or patrol. The rooms were picked with the
+  game's own checks, avoiding quiet rooms, bosses, the middle waypoint and dead ends:
+  - Neon Aftermath: Blossom Grove (1,7)
+  - Solaris: Sandglass Terrace (1,2)
+  - Sky Isles: Moonrise Court (5,0)
+  - Elaris: Emerald Thicket (6,4)
+  - Vespera: Mist Marsh (1,3)
+  - Chronospire: Chime Court (0,2)
+- `NEXUS_POINTS[world].start` now names that room, and `.arrival` names the arrival room, which has
+  no waypoint. Points of interest, the merchant and the Cardsmith skip the waypoint's room, and its
+  patrols are removed. Discovering it shows the same message as the middle waypoint.
+- A save that had discovered a world's old start-room waypoint keeps it, moved to the new room.
+- The waypoint list now names any Solaris room (it only knew the old two).
+- **Mechanic badges above the cards** (`assets/world-mechanics.js`). The 🪶 Tailwind badge (and
+  every world's mechanic badge) sat on the card, over its Level row. It now sits centred above the
+  card. In a hand with any badge, the other cards get an invisible spacer of the same height, so the
+  hand stays level.
+- **Enemies on the map are 10% larger** (their sprite scale .8 → .88, `layout-polish.css`), and **their
+  name labels are smaller** (55% of the original size, was 70%; `enemy-labels.js`).
+- New tests: `waypoints` (every world, three seeds: distance, an empty room, travel, old saves) and
+  `mech-badge` (Chromium, desktop and phone).
+- Updated tests for the new waypoint rooms: `pacing`, `rebuilt-worlds-migrate`, `room-art` (the city's
+  waypoint stands on one of Blossom Grove's hand-checked spots), `solaris-patrols` (the waypoint rooms have none).
+
 ## Round 228: Solaris gets a new look (the owner's top-down golden city)
 
 - **New tiles.** The owner's seven top-down paintings of a golden desert city (pale sandstone

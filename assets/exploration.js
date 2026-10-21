@@ -526,7 +526,7 @@ const NEXUS_WORLD_NAMES = { city: 'Neon Aftermath', elaris: 'Solaris', vespera: 
 function nexusRoomName(region, key) {
   if (region === activeRegion) return rooms[key] ? rooms[key].name : key;
   const src = region === 'city' ? (typeof CITY_ROOMS !== 'undefined' ? CITY_ROOMS : null) : region === 'vespera' ? (typeof VESPERA_ROOM_DATA !== 'undefined' ? VESPERA_ROOM_DATA : null) : region === 'chronospire' ? (typeof CHRONO_ROOM_DATA !== 'undefined' ? CHRONO_ROOM_DATA : null) : TILE_REGIONS[region] ? TILE_REGIONS[region].rooms : null;
-  return (src && src[key] && src[key].name) || ({ elaris: { '0,0': SOLARIS_LAYOUT['0,0'].name, '4,2': SOLARIS_LAYOUT['4,2'].name } }[region] || {})[key] || key;
+  return (src && src[key] && src[key].name) || (region === 'elaris' && typeof SOLARIS_LAYOUT === 'object' && SOLARIS_LAYOUT[key] ? SOLARIS_LAYOUT[key].name : null) || key; // Round 229: any Solaris room
 }
 function discoverNexus() {
   if (!state) return false; ensureExplore();

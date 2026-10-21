@@ -20,8 +20,8 @@ renderWorld = function () {
 const enemyLabelStyles = document.createElement('style');
 // `scale` composes with the nodes' existing translate(-50%,-50%) and walk
 // animations. The name bubble sits inside the node, so it already shrinks to
-// 80%; another .875 brings it to 70% of its old size.
+// 80%; another .69 brings it to 55% of its old size (Round 229; it was .875, 70%).
 enemyLabelStyles.textContent = '.enemy-node{scale:.8}'
-  + '.enemy-node:after{scale:.875;transform-origin:50% 0}'
+  + '.enemy-node:after{scale:.69;transform-origin:50% 0}' // Round 229: smaller names (55% of the original, was 70%)
   + '.enemy-node.enemy-overlevel:after{color:#ff5b5b!important;border-color:#ff5b5b!important;text-shadow:0 0 6px #ff1f1f66}';
 document.head.append(enemyLabelStyles);
