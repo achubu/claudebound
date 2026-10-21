@@ -5,8 +5,8 @@
 //   wilds — ELARIS: the old forest, home of its original creatures (levels 28-36)
 // Vespera and Chronospire follow them as worlds 5 and 6.
 // Room data, tile plans and walk masks come from tools/build_tile_world.py
-// (assets/sky-data.js, assets/wilds-data.js). Until the owner paints the tiles they are
-// stand-ins from tools/paint_placeholder_tiles.py, and enemies borrow existing sprites.
+// (assets/sky-data.js, assets/wilds-data.js). Both now use the owner's paintings: the Sky City
+// (Round 204) and the forest of Elaris with its three boardwalk lakes (Round 225).
 // =====================================================================
 const TILE_WORLD_IDS = ['sky', 'wilds'];
 WORLD_ORDER.splice(WORLD_ORDER.indexOf('vespera'), 0, ...TILE_WORLD_IDS);
@@ -134,7 +134,7 @@ for (const id of ALL_TILE_WORLD_IDS) {
   QUIET_ROOMS[id] = stops.quiet;
 }
 TILE_REGIONS.sky.arrive = () => toast('Sky Isles · Windgate Landing. Glass decks drift between the towers of the floating city.');
-TILE_REGIONS.wilds.arrive = () => toast('Elaris · the old forest. Its creatures remember the Bloom Tyrant.');
+TILE_REGIONS.wilds.arrive = () => toast('Elaris · the old forest. Paths wind between moss-grown ruins, and boardwalks cross its lakes.');
 
 // --- Walk masks and painted tiles (the Solaris engine, once per world) ---
 const tileWorldBits = {};
@@ -173,7 +173,7 @@ if (typeof regionDistanceCache !== 'undefined') for (const id of REBUILT_WORLD_I
 const tileWorldImages = {};
 // Round 208: the paintings carry a version, so a world repainted under the same file names (the
 // Sky Isles in Round 204) isn't shown from the browser's cache. Bump it when tile art changes.
-const TILE_ART_VERSION = '221';
+const TILE_ART_VERSION = '225';
 function tileWorldArtSrc(id, name) { return 'assets/environment/' + id + '/' + name + '.webp?v=' + TILE_ART_VERSION; }
 function paintTileWorld(canvas, id, key) {
   const plan = TILE_WORLD_DATA[id].plan[key]; if (!plan) return false;

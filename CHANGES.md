@@ -3496,6 +3496,42 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 225: Elaris gets the owner's forest, and one line tops the battle screen
+
+- **Elaris (world 4) is painted.** The owner's 11 top-down forest tiles replace the grey
+  stand-ins. All 11 share one base forest (the ruins and trees sit in the same places), so the new
+  `tools/prepare_wilds_tiles.py` lifts a path arm or a stretch of plain forest from one tile into
+  another with a soft seam, making the shapes that weren't painted:
+  - `t-bottom-a`: the cross with its north arm grown over.
+  - The boardwalk tiles: north and east paths (`diag-a`/`diag-b`, as painted); with a south arm
+    added (`diag-c`); with south instead of north (`diag-d`); and `diag-e` (the owner's diag-se:
+    a path north and a boardwalk to the bottom-right).
+  - The owner's "t-bottom" runs its side path on, under a tree, to the right edge, so it is a
+    second t-right (`t-right-b`).
+- **Three forest lakes.** Rooms 2,0, 2,3 and 6,3 are cut, and their neighbours are joined by
+  boardwalks across the water (`cut`, and the world's own `dshapes` in `build_tile_world.py`). A
+  lake blocks the side path on its own side, and these are the only cuts whose neighbours keep
+  clear of their lakes. 51 rooms.
+- **A path round the fountain.** The owner asked for one: the cross now has a ring of path painted
+  round its fountain, in the paths' own colour and grain, under the standing stones. The ring is
+  walkable; the fountain isn't.
+- **Walk masks** are traced by the path's golden tan. Arms that run on under a tree are bridged to
+  the edge and in to the room's middle (some junctions are painted as moss). The boardwalks are
+  outlined by hand (`BOARDWALK`), and only pieces joined to an exit are kept.
+  `node tests/playtest-walk.cjs wilds` reaches every door and item in all 51 rooms;
+  `PLAYTEST_DETAIL=1` now lists each problem it finds.
+- The two straight tiles are kept but unused: Elaris's only straight room sits beside a lake. The
+  one corner painting covers 18 rooms, so a second corner would add the most variety.
+- `TILE_ART_VERSION` is now 225. The owner's originals are in `assets/environment/wilds/src/owner/`.
+- **Battle screen:** the encounter ("Encounter: Storm Moth") moved from the log line into the top
+  line, beside the element: "Encounter: Storm Moth · Element: air · reserve Prismatic Counter". A
+  fight with no element still gets the top line. The log line above the Aether panel shows only
+  moves, and is hidden until the first one (`assets/layout-polish.js`).
+- A point of interest whose only spot 150px clear of patrols was under the HUD or minimap (Elaris's
+  north-and-west corner rooms) now stands up to 90px from a patrol instead (`assets/neon-world.js`).
+- New tests: `elaris-tiles` (lakes, boardwalk doors, one connected path per tile, the fountain
+  ring) and `battle-header` (Chromium, desktop and phone). `tile-worlds` expects 51 Elaris rooms.
+
 ## Round 224: cybernetic robot creatures for the Sky Isles
 
 - The owner's new sheets turn every Sky Isles creature into a cybernetic robot in the sky city's

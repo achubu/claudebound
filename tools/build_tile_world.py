@@ -50,6 +50,11 @@ WORLDS = {
         'b': ['Glade', 'Trail', 'Hollow', 'Grove', 'Thicket', 'Brook', 'Clearing', 'Path', 'Ford', 'Dell',
               'Meadow', 'Copse', 'Bend', 'Wood', 'Crossing', 'Knoll', 'Run', 'Ring'],
         'special': {'start': 'Elaris Gateway', 'boss': 'Elderbloom Sanctuary', 'mini1': 'Drowned Weir', 'mini2': 'Stormwing Canopy'},
+        # Round 225: the owner's forest (tools/prepare_wilds_tiles.py). Three rooms become forest lakes
+        # crossed by boardwalks; a lake blocks the side path on its own side, and these three are the
+        # cuts whose neighbours' paths keep clear of their lakes.
+        'cut': ['2,0', '2,3', '6,3'], 'top_down': True, 'max_width': 2000,
+        'dshapes': {'diag-a': ('ne', 'nw'), 'diag-b': ('ne', 'nw'), 'diag-c': ('nes', 'nw'), 'diag-d': ('es', 'nw'), 'diag-e': ('n', 'se')},
     },
     # Round 179: Vespera and Chronospire are rebuilt the same way. Vespera keeps Neon
     # Aftermath's layout as it is; Chronospire turns it on its side into a tall 6x9 spire.
@@ -138,7 +143,8 @@ def main(world):
         return trace(im, SHAPES[shape_of[n]])
     masks = {n: mask_for(n) for n in tiles}
     dtiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(src + '/diagonal/*.*'))}
-    dshape_of = {n: next(sh for sh in DSHAPES if n.startswith(sh)) for n in dtiles}
+    dshapes = cfg.get('dshapes', DSHAPES)  # Round 225: a world may name its own diagonal shapes
+    dshape_of = {n: next(sh for sh in dshapes if n.startswith(sh)) for n in dtiles}
     for n, im in dtiles.items(): save_webp(n, im); masks[n] = mask_for(n)
     dflips = list(FLIP_DIAG) if cfg.get('top_down') else [(0, 0), (1, 0)]
     rooms, roles = layout(cfg, world)
@@ -148,7 +154,7 @@ def main(world):
         want_d = {d for d in rooms[key]['exits'] if len(d) == 2}
         if want_d:
             for n in sorted(dtiles):
-                base, bd = DSHAPES[dshape_of[n]]
+                base, bd = dshapes[dshape_of[n]]
                 for f in dflips:
                     if {flip_diag(f, bd)} == want_d and {flip_diag(f, d) for d in base} == want: opts.append((n, f))
             if not opts: raise SystemExit('no diagonal tile for ' + key + ' ' + ''.join(sorted(want)) + '+' + ','.join(want_d))

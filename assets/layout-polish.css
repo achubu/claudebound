@@ -131,3 +131,5 @@ body:not(.touch-mode) #touch{display:none}
 #battleModal .aether-panel b,#battleModal .aether-panel strong,#battleModal .aether-panel .aether-count{font-size:12px!important}
 #battleModal .aether-panel small{font-size:10px!important}
 #battleModal .aether-panel .aether-pip,#battleModal .aether-panel i{width:9px!important;height:9px!important}
+/* Round 225: the encounter and the element share the top line */
+#battleModal .combat-tools.with-encounter{display:block}#battleModal .combat-tools .encounter-line + p{display:inline;margin:0!important}

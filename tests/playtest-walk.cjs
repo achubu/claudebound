@@ -129,6 +129,10 @@ const only = process.argv[2];
     report[world] = r;
     const byKind = {}; for (const p of r.problems) byKind[p.kind] = (byKind[p.kind] || 0) + 1;
     console.log(world, '| rooms', r.rooms, '| arrivals', r.arrivals, '| crossings', r.crossings, '| fights won', r.fights, '| item routes', r.itemRoutes, '| walk-past popups', Object.values(r.interruptions).reduce((a, b) => a + b, 0), '| unvisited', r.unvisited.length, '| problems', JSON.stringify(byKind), '| menu errors', menuErrors.length);
+    if (process.env.PLAYTEST_DETAIL) { // Round 225: PLAYTEST_DETAIL=1 lists each problem
+      for (const p of r.problems) console.log('  ', p.kind, p.room, p.what);
+      if (r.unvisited.length) console.log('   unvisited', r.unvisited.join(' '));
+    }
   }
   report.pageErrors = [...new Set(errors)];
   console.log('page errors:', report.pageErrors.length ? report.pageErrors.join(' | ') : 'none');
