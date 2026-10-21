@@ -23,13 +23,21 @@ FLIP_EXITS = {(0, 0): {}, (1, 0): {'e': 'w', 'w': 'e'}, (0, 1): {'n': 's', 's': 
 # shape: (straight exits as painted, diagonal as painted). Only side-to-side flips are used.
 CUT = ['0,3', '8,3', '5,0']
 DIAG_SRC = SRC + '/diagonal'
-DSHAPES = {'diag-corner': ('es', 'ne'), 'diag-t-a': ('nes', 'sw'), 'diag-t-b': ('esw', 'nw')}
+DSHAPES = {'diag-corner': ('es', 'ne'), 'diag-t-a': ('nes', 'sw'), 'diag-t-b': ('esw', 'nw'), 'diag-t-c': ('nes', 'nw')}
 FLIP_DIAG = {(0, 0): {}, (1, 0): {'ne': 'nw', 'nw': 'ne', 'se': 'sw', 'sw': 'se'}}
+# Round 228: the new look's tiles ('-s1', tools/prepare_solaris_tiles.py) are strictly top-down, so
+# their diagonals may flip top-to-bottom too. They bring their own walk masks (src/masks/).
+FLIP_DIAG_ALL = {**FLIP_DIAG, (0, 1): {'ne': 'se', 'se': 'ne', 'nw': 'sw', 'sw': 'nw'}, (1, 1): {'ne': 'sw', 'sw': 'ne', 'nw': 'se', 'se': 'nw'}}
+def top_down(n): return n.endswith('-s1')
+MASK_SRC = SRC + '/masks'
+# Round 228: the landmark rooms' paintings are in the old style; the new look uses its tiles there
+# (the paintings are kept in unused assets/environment/solaris/).
+USE_LANDMARKS = False
 ROAD = np.array([247, 227, 175])
 
 
 def load(path):
-    im = Image.open(path).convert('RGB'); w = im.width
+    im = Image.open(path).convert('RGB'); w = min(im.width, 2000)  # Round 228: the room is 800 wide; 2000 keeps detail without the weight
     return im.resize((w, round(w * 5 / 8)), Image.LANCZOS)
 
 
@@ -178,10 +186,13 @@ def neon_layout():
 def main():
     tiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(SRC + '/*.*'))}
     tiles.update(placeholders(tiles))
-    marks = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(SRC + '/landmarks/*.*'))}
+    marks = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(SRC + '/landmarks/*.*'))} if USE_LANDMARKS else {}
     shape_of = {n: next(s for s in sorted(SHAPES, key=len, reverse=True) if n.startswith(s)) for n in tiles}
     for n, im in {**tiles, **marks}.items(): im.save(f'{OUT}/{n}.webp', quality=88, method=6)
-    masks = {n: manual_mask(MANUAL[n]) if n in MANUAL else trace(im, SHAPES[shape_of[n]]) for n, im in tiles.items()}
+    def own_mask(n):
+        p = f'{MASK_SRC}/{n}.png'
+        return np.asarray(Image.open(p).convert('L').resize((800, 500), Image.NEAREST)) > 127 if os.path.exists(p) else None
+    masks = {n: own_mask(n) if own_mask(n) is not None else manual_mask(MANUAL[n]) if n in MANUAL else trace(im, SHAPES[shape_of[n]]) for n, im in tiles.items()}
     for n, shapes in EXTRA.items():
         if n in masks: masks[n] = masks[n] | manual_mask({'shapes': shapes})
     masks.update({n: manual_mask(MANUAL[n]) for n in marks})
@@ -189,7 +200,7 @@ def main():
     dshape_of = {n: next(sh for sh in sorted(DSHAPES, key=len, reverse=True) if n.startswith(sh)) for n in dtiles}
     for n, im in dtiles.items():
         im.save(f'{OUT}/{n}.webp', quality=88, method=6)
-        masks[n] = trace(im, DSHAPES[dshape_of[n]][0])
+        masks[n] = own_mask(n) if own_mask(n) is not None else trace(im, DSHAPES[dshape_of[n]][0])
     rooms = neon_layout()
     # Pick a tile and flip for every room; spread variants so neighbours differ.
     plan = {}
@@ -203,14 +214,15 @@ def main():
             opts = []
             for n in sorted(dtiles):
                 base, bd = DSHAPES[dshape_of[n]]
-                for f in FLIP_DIAG:
+                flips = FLIP_DIAG_ALL if top_down(n) else FLIP_DIAG
+                for f in flips:
                     ex = {FLIP_EXITS[f].get(d, d) for d in base}
                     # An extra painted road may only run off the map (a painted dead end).
-                    if {FLIP_DIAG[f].get(bd, bd)} == want_d and want <= ex and all(off_map(d) for d in ex - want): opts.append((n, f))
+                    if {flips[f].get(bd, bd)} == want_d and want <= ex and all(off_map(d) for d in ex - want): opts.append((n, f))
             if not opts: raise SystemExit('no diagonal tile for ' + key + ' ' + ''.join(sorted(want)) + '+' + ','.join(want_d))
             h = int(hashlib.md5(key.encode()).hexdigest(), 16)
             plan[key] = opts[h % len(opts)]; continue
-        if key in LANDMARKS:
+        if key in LANDMARKS and USE_LANDMARKS:
             n, ex, fx, fy = LANDMARKS[key]
             if n not in marks: raise SystemExit('missing landmark painting ' + n)
             if {FLIP_EXITS[(fx, fy)].get(d, d) for d in ex} != want: raise SystemExit('landmark ' + n + ' does not fit ' + key)
@@ -251,6 +263,7 @@ def main():
         want_d = [d for d in rooms[key]['exits'] if len(d) == 2]
         if not want_d: continue
         m = masks[n][:, ::-1] if fx else masks[n]
+        if fy: m = m[::-1]  # Round 228: top-down diagonals may be flipped top-to-bottom
         ys, xs = np.nonzero(m)
         edge = (xs <= 3) | (xs >= 796) | (ys <= 3) | (ys >= 496)
         mid = ((ys <= 3) | (ys >= 496)) & (abs(xs - 400) < 70) | ((xs <= 3) | (xs >= 796)) & (abs(ys - 250) < 60)

@@ -1,4 +1,4 @@
-// Round 164: Solaris landmark rooms use their own paintings, and every tile in the plan exists.
+// Round 164: Solaris landmark rooms used their own paintings (retired in Round 228); every tile in the plan exists.
 const assert = require('assert'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const src = fs.readFileSync(path.join(root, 'assets/solaris-data.js'), 'utf8');
@@ -6,11 +6,12 @@ const plan = JSON.parse(src.match(/SOLARIS_PLAN = (\{.*?\});/)[1]);
 const layout = JSON.parse(src.match(/SOLARIS_LAYOUT = (\{.*?\});\n/)[1]);
 for (const [key, [tile]] of Object.entries(plan))
   assert(fs.existsSync(path.join(root, 'assets/environment/solaris', tile + '.webp')), 'missing art for ' + key + ': ' + tile);
-const landmarks = { '8,5': 'sol-boss', '5,2': 'sol-miniboss', '8,0': 'sol-relic-ember', '0,2': 'sol-relic-boots', '6,2': 'sol-relic-crystal', '5,5': 'sol-relic-lens' };
-for (const [key, tile] of Object.entries(landmarks)) assert.strictEqual(plan[key][0], tile, key + ' uses ' + tile);
-const counts = {};
-for (const [tile] of Object.values(plan)) counts[tile] = (counts[tile] || 0) + 1;
-for (const tile of Object.values(landmarks)) assert.strictEqual(counts[tile], 1, tile + ' is used once');
+// Round 228: the new look. The landmark paintings (old style) are retired, and those rooms use the
+// owner's top-down tiles ('-s1') like the rest. Only the rooms whose shapes the new set doesn't have yet
+// keep an old painting: the west dead end (4,5) and two diagonal shapes (0,4 and 8,4; 5,1).
+const old = Object.entries(plan).filter(([, [tile]]) => !tile.endsWith('-s1')).map(([k]) => k).sort();
+assert.deepStrictEqual(old, ['0,4', '4,5', '5,1', '8,4'], 'only the rooms awaiting new paintings keep old ones');
+for (const key of ['8,5', '5,2', '8,0', '0,2', '6,2', '5,5']) assert(plan[key][0].endsWith('-s1'), key + ' (a landmark room) uses the new tiles');
 assert.strictEqual(layout['0,2'].name, 'Statue Garden');
 assert.strictEqual(layout['8,5'].name, 'The Solar Crown');
 // Every room's walk mask still reaches each of its exits (checked through the real scripts).

@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 227) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 228) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -32,7 +32,9 @@ change set.
   - `city` is Neon Aftermath.
   - `elaris` is shown to players as **Solaris** (Round 149): 51 rooms built from
     flipped tiles by `tools/build_solaris.py` into `assets/solaris-data.js`. Round 192 cut three
-    corner rooms and joined their neighbours with diagonal roads (`CUT`, `SOLARIS_DIAG`).
+    corner rooms and joined their neighbours with diagonal roads (`CUT`, `SOLARIS_DIAG`). Round 228: a new
+    top-down look (`tools/prepare_solaris_tiles.py` first; tiles named `-s1` bring their own masks); the old
+    landmark paintings are retired (`USE_LANDMARKS`).
   - `sky` is the **Sky Isles** and `wilds` is **Elaris** (the forest). Both are tile-built
     like Solaris by `tools/build_tile_world.py` into `assets/<id>-data.js`, and run by
     `assets/tile-worlds.js`. Stand-in tiles come from `tools/paint_placeholder_tiles.py`.

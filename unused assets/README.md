@@ -42,3 +42,6 @@ What's here (Round 96):
   floating islands, Round 197), with its sources, derived tiles and walk masks. The Sky Isles
   are now the owner's dense floating city.
 - `assets/monsters/sky/cloud-wisp.png` (Round 222): the Cloud Wisp sheet, replaced by the Rain Drone.
+- `assets/environment/solaris/src/` (Round 228): the first Solaris tile set and its six landmark
+  paintings (boss and mini-boss yards, relic rooms). Solaris now uses the owner's top-down golden city
+  (`tools/prepare_solaris_tiles.py`); its builder can bring the landmarks back with `USE_LANDMARKS`.

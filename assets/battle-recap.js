@@ -58,13 +58,12 @@ if (typeof document !== 'undefined' && document.createElement && document.head) 
     + '.battle-recap ul{margin:4px 0 0;padding-left:18px}.battle-recap span{color:#9fd3e6}.battle-recap .finisher{color:#ffe7a8}.battle-recap em{font-style:normal;color:#ffd36a;font-weight:700}';
   document.head.append(st);
 }
-// Round 227: Esc closes the victory screens. It opens the loot chest first if it is still shut, so
-// the loot is never lost, then continues back to the map.
+// Round 227: Esc closes the victory screens. It opens the loot chest first if it is still shut (so
+// potions and Shards are kept), skips a card choice as the Skip button does, then continues to the map.
 if (typeof addEventListener === 'function') addEventListener('keydown', e => {
   if (e.key !== 'Escape' || e.repeat) return;
   const b = state && state.battle, ov = typeof $ === 'function' && $('battleOverlay');
   if (!b || b.phase !== 'reward' || !ov || ov.classList.contains('hidden')) return;
   e.preventDefault(); e.stopImmediatePropagation();
-  const chest = $('openChest'); if (chest && !chest.disabled) chest.click();
-  const go = $('continueReward'); if (go && !go.disabled) go.click();
+  for (const id of ['openChest', 'skipCards', 'continueReward']) { const el = $(id); if (el && !el.disabled && state.battle) el.click(); }
 }, true);
