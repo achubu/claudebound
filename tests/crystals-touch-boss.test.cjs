@@ -24,7 +24,7 @@ assert(state.bosses.includes('bloomTyrant'));assert.equal(state.pool.filter(c=>c
 // Round 175: the Solar Crown's portal now leads to the Sky Isles (world 3).
 finishBattle();assert.equal(portalTarget().region,'sky');travelPortal();assert.equal(state.region,'sky');assert.equal(Object.keys(rooms).length,51,'the Sky Isles have 51 rooms (Round 197: three cut for diagonals)');assert.equal(state.room,TILE_REGIONS.sky.start);
 save();state=null;assert(load());assert.equal(state.region,'sky');validateImport(JSON.parse(JSON.stringify(state)));travelPortal();assert.equal(state.region,'elaris');assert.equal(state.room,SOLARIS_BOSS_ROOM);
-{const saved=state.room;state.region='vespera';configureRegion('vespera');state.room=TILE_REGIONS.vespera.start;assert.equal(Object.keys(rooms).length,54,'Vespera is a 54-room tile world (Round 179)');assert.equal(joinedArea().cells.length,1,'no joined districts');assert.equal(portalTarget().region,'wilds','Vespera returns to Elaris');state.region='elaris';configureRegion('elaris');state.room=saved;}
+{const saved=state.room;state.region='vespera';configureRegion('vespera');state.room=TILE_REGIONS.vespera.start;assert.equal(Object.keys(rooms).length,51,'Vespera is a 51-room tile world (Round 179; Round 227 cut three for its piers)');assert.equal(joinedArea().cells.length,1,'no joined districts');assert.equal(portalTarget().region,'wilds','Vespera returns to Elaris');state.region='elaris';configureRegion('elaris');state.room=saved;}
 // Touch route crosses joined room seams using normal collision and movement.
 closeMenu();state.room='1,0';state.pos={x:740,y:230};state.battle=null;keys={};assert(setTouchDestination({x:860,y:230})); // on the Solaris street (Round 149)
 for(let i=0;i<200&&touchRoute;i++)move(.033);

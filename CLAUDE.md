@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 226) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 227) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -42,7 +42,8 @@ change set.
     (diagonal pieces and walk masks) before building it. Round 225: Elaris uses the owner's
     forest (three lakes crossed by boardwalks); run `tools/prepare_wilds_tiles.py` before
     building it. It makes missing shapes by blending arms between tiles that share one base
-    painting. Bump `TILE_ART_VERSION` in
+    painting. Round 227: Vespera uses the owner's storm coast (three sea inlets crossed by piers);
+    run `tools/prepare_vespera_tiles.py` before building it. Bump `TILE_ART_VERSION` in
     `assets/tile-worlds.js` when tile paintings change, so browsers fetch the new ones (Round 208).
   - `vespera` (levels 37-45) and `chronospire` (46-54) were rebuilt the same way in
     Round 179 (Chronospire is the layout turned on its side: 6 wide, 9 tall).

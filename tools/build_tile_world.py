@@ -65,6 +65,10 @@ WORLDS = {
         'b': ['Shoals', 'Reach', 'Causeway', 'Strand', 'Cove', 'Spit', 'Marsh', 'Point', 'Bluffs', 'Pier',
               'Hollow', 'Flats', 'Breakwater', 'Inlet', 'Ridge', 'Landing', 'Sound', 'Shelf'],
         'special': {'start': 'Glasswind Reach', 'boss': 'Eye of the Tempest', 'mini1': 'Arc Bastion', 'mini2': 'Resonant Grotto'},
+        # Round 227: the owner's storm coast (tools/prepare_vespera_tiles.py). Three rooms become storm-sea
+        # inlets crossed by piers; these are the cuts whose neighbours the pier tiles fit.
+        'cut': ['2,2', '6,2', '6,3'], 'top_down': True, 'max_width': 2000,
+        'dshapes': {'diag-a': ('n', 'sw'), 'diag-b': ('n', 'se'), 'diag-c': ('nes', 'nw'), 'diag-d': ('es', 'nw'), 'diag-e': ('s', 'ne'), 'diag-f': ('s', 'ne')},
     },
     'chronospire': {
         'name': 'Chronospire', 'key': lambda cx, cy: (cy - 4, cx), 'levels': (46, 54), 'road': None,

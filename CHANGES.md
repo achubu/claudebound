@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 227: Vespera gets the owner's storm coast; Esc closes the victory screens; the merchant buys potions
+
+- **Vespera (world 5) is painted.** The owner's 15 top-down tiles of a storm-lashed glass coast (a
+  pale golden sand path over dark rock, violet crystals, glowing tide pools) replace the grey
+  stand-ins. The new `tools/prepare_vespera_tiles.py` traces the path by colour and bridges arms
+  the trace stops short of (stepping stones at the edges, a stream ford), reusing Elaris's
+  `arms()`. The piers are outlined by hand (`PIER`). Two tiles carry a pier that ends in the water
+  (`corner-b`, `t-right2`): it's decoration, and those are a second corner and a second t-right.
+- **Three storm-sea inlets.** Rooms 2,2, 6,2 and 6,3 are cut, and their neighbours are joined by
+  piers across the water. With the five pier tiles as painted only one room could be cut, so
+  `diag-c` (paths north, east and south with a pier to the top-left) is the owner's
+  top-left pier tile with `t-right`'s north arm laid over it. 51 rooms; `node
+  tests/playtest-walk.cjs vespera` reaches every door and item. `TILE_ART_VERSION` is 227.
+- The straight tile is unused: Vespera's only straight room sits beside an inlet.
+- **Esc closes the victory screens** (`assets/battle-recap.js`). It opens the loot chest first
+  if it's still shut, so the loot is kept, then continues to the map. It does nothing during a fight.
+- **Merchant** (`assets/exploration.js`): card upgrades are no longer sold here (they stay at
+  the Cardsmith, ◇ 36 / 60 / 90). Its stock is now a side card, potions and one other ware. It
+  also buys healing potions back for ◇ 10 each (`POTION_SELL_PRICE`). The merchant's potion price
+  rises from ◇ 4 to ◇ 15, so buying potions to sell back loses Shards.
+- Tests: new `reward-escape` (Chromium). `tile-worlds` and `crystals-touch-boss` expect 51 Vespera
+  rooms; `exploration` covers the new stock and potion sales.
+
 ## Round 226: ⚔ Pressure makes decks without Block viable; a new-journey tutorial; Nano Mend
 
 - **The problem, measured.** The owner felt Block was essential, and the Difficulty lab agreed. It
