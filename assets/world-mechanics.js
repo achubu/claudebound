@@ -244,14 +244,18 @@ renderBattle = function () {
     const help = box.querySelector('.mt-help'); if (help) help.onclick = () => { const open = !b.mechHelp[mech.key]; for (const k in b.mechHelp) b.mechHelp[k] = false; b.mechHelp[mech.key] = open; renderBattle(); if (open) { const g = m.querySelector('[data-mechanic-guide="' + mech.key + '"]'); if (g && g.scrollIntoView) g.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } };
     const close = $('mechClose-' + mech.key); if (close) close.onclick = () => { b.mechHelp[mech.key] = false; renderBattle(); };
   }
-  // Badge the mechanic cards in hand.
-  document.querySelectorAll('#hand .card-wrap').forEach((wrap, i) => {
+  // Badge the mechanic cards in hand. Round 229: the badge sits above the card, not on it; the other
+  // cards get an invisible spacer of the same height so the hand stays level.
+  const wraps = [...document.querySelectorAll('#hand .card-wrap')];
+  let badged = false;
+  wraps.forEach((wrap, i) => {
     const c = b.hand[i], mech = c && mechanicOfCard(c.id), card = wrap.querySelector('.card');
-    if (!mech || !card || card.querySelector('.mech-badge')) return;
+    if (!mech || !card || wrap.querySelector('.mech-badge')) return;
     const badge = document.createElement('span'); badge.className = 'mech-badge'; badge.style.setProperty('--mc', mech.color);
     const g = mech.key === 'growth' ? growthOf(b, c) : 0;
-    badge.textContent = mech.icon + ' ' + mech.name.toUpperCase() + (g ? ' +' + g : ''); card.append(badge);
+    badge.textContent = mech.icon + ' ' + mech.name.toUpperCase() + (g ? ' +' + g : ''); wrap.insertBefore(badge, card); badged = true;
   });
+  if (badged) wraps.forEach(wrap => { const card = wrap.querySelector('.card'); if (card && !wrap.querySelector('.mech-badge')) { const s = document.createElement('span'); s.className = 'mech-badge mech-badge-space'; s.textContent = '·'; s.setAttribute('aria-hidden', 'true'); wrap.insertBefore(s, card); } });
 };
 const mechStyles = document.createElement('style');
 mechStyles.textContent = '.mech-tray{margin:8px 0;padding:8px 10px;border:1px solid var(--mc);border-radius:12px;background:linear-gradient(135deg,#101a26,#0a1018);box-shadow:inset 0 0 0 1px #ffffff0d,0 0 14px color-mix(in srgb,var(--mc) 25%,transparent);color:#e6eef6}'
@@ -260,7 +264,7 @@ mechStyles.textContent = '.mech-tray{margin:8px 0;padding:8px 10px;border:1px so
   + '.mech-guide{margin-top:8px;padding:10px 12px;border-radius:10px;background:#070c12;border:1px dashed var(--mc)}.mg-head{display:flex;align-items:center;justify-content:space-between}.mg-head b{color:var(--mc);font:800 14px system-ui}'
   + '.mg-steps{list-style:none;margin:8px 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}.mg-steps li{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;background:#121c28;font:13px/1.35 system-ui;color:#e6eef6}'
   + '.mg-n{flex:0 0 auto;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--mc);color:#0a1018;font:900 13px system-ui}.mg-tip{margin:0;font:12px/1.35 system-ui;color:#b8c8d8}'
-  + '.mech-badge{position:absolute;left:6px;bottom:44px;z-index:3;padding:2px 7px;border-radius:999px;background:var(--mc);color:#0a1018;font:900 10px/1.3 system-ui;letter-spacing:.06em;box-shadow:0 0 8px color-mix(in srgb,var(--mc) 70%,transparent)}'
+  + '.mech-badge{display:block;width:max-content;margin:0 auto 4px;position:relative;z-index:3;padding:2px 7px;border-radius:999px;background:var(--mc);color:#0a1018;font:900 10px/1.3 system-ui;letter-spacing:.06em;box-shadow:0 0 8px color-mix(in srgb,var(--mc) 70%,transparent)}.mech-badge-space{visibility:hidden}'
   + '.menu-mech .mech-guide{--mc:inherit}';
 document.head.append(mechStyles);
 
