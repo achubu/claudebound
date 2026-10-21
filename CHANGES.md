@@ -3496,6 +3496,53 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 226: ⚔ Pressure makes decks without Block viable; a new-journey tutorial; Nano Mend
+
+- **The problem, measured.** The owner felt Block was essential, and the Difficulty lab agreed. It
+  compared each world's sim deck with the same deck with its Block and Counter cards swapped for
+  its own attacks (16 builds × 2 styles). The Block-free decks fell to 0–23% against mini-bosses
+  in Neon Aftermath, Solaris and Vespera (the standard decks won about 40%). One enemy hit takes
+  45–72% of your HP (up to 130% for a Solaris mini-boss), and even an all-attack hand needs 4–17
+  turns to kill, so a deck that doesn't block dies in about two hits.
+- **⚔ Pressure** (`assets/pressure.js`). On a turn where you gain no Block from a card, every few
+  damage you deal takes 1 off the enemy's attack that turn, up to half. The rate is per world,
+  because late decks deal far more damage per energy: 2 in Neon Aftermath and Solaris, 3 in the
+  Sky Isles, 4 in Elaris, 6 in Vespera and Chronospire (`PRESSURE_PER_BY_WORLD`, tuned with the
+  lab). It counts damage from hand and side cards. Gaining Block from any card, Counters
+  included, cancels it for that turn. The enemy's move shows the lower number as you play, with
+  a line saying what Pressure is doing or why it isn't ("⚔ No Pressure: you gained Block this turn").
+- **Re-tuned for it.** With Pressure, the standard decks won too often from the Sky Isles on, so
+  boss HP went up (`BALANCE.perEnemy`): Stormbell Warden .76→.93, Featherfall Matriarch .94→1.15,
+  Zenith Roc .5→.79, Tidebound Warden 1.15→1.31, Gale Sovereign (Elaris) .78→1.01, Bloom Tyrant
+  (Elaris) .7→.8, Arc Sentinel .9→1.03, Tempest Colossus .63→.77, Clockwarden 1.16→1.25, Paradox
+  Twin 1.28→1.46, Chronarch .62→.87. In the lab every mini-boss is now 39–49% (target 34–50%), every
+  final boss 25–32% (target 22–36%; Thorn Warden 46%, target 34–50%), and regular enemies 45%+.
+- **Where it lands** (typical win rate, standard deck / no Block or Counter cards):
+
+  | | Neon Aftermath | Solaris | Sky Isles | Elaris | Vespera | Chronospire |
+  |---|---|---|---|---|---|---|
+  | mini-bosses | 47–49 / 16–31 | 43–47 / 0 | 42–45 / 31–47 | 44–47 / 40–41 | 40–44 / 28–31 | 39–41 / 42–72 |
+  | final boss | 46 / 21 | 31 / 0 | 31 / 33 | 32 / 43 | 29 / 60 | 25 / 55 |
+
+  From the Sky Isles on, a deck without Block is as good as one with it, or better against the
+  last bosses. Neon Aftermath's mini-bosses and Solaris's still need Block: they hit for 65–130%
+  of your HP and have about 540 HP, and Solaris's Siphon heals them from every hit you take. Those
+  fights teach Block, as the starting deck and tutorial do.
+- **Nano Mend** (new, `assets/cards.js`): 1 energy, heal 7 (9 / 11 / 14 at higher levels), not
+  Exhaust, so unlike Bloom of Life it can be used every time you draw it. Its picture is a
+  recoloured stand-in of Bloom of Life's (`refreshedCardArt`) until the owner paints one.
+- **New-journey tutorial** (`assets/tutorial.js`). "Begin new journey" and the main menu's "New
+  journey" open six short pages on what Neon Aftermath teaches (exploring and the boss gate,
+  battles and intents, Block and Pressure, Aether and the side deck, ⌁ Hack, Soulbound and
+  Impermanent cards and talents). You then pick the 6 cards your journey starts with, from Ember
+  Blade ×3, Crystal Ward ×3, Silver Riposte, Starlit Focus, Bloom of Life and Nano Mend. The first
+  copy of each picked card is ◆ Soulbound, and the cards show it as you pick. Escape doesn't skip
+  the tutorial, and continuing a journey saved mid-tutorial reopens the pick. `newGame()` is
+  unchanged (tests and the lab still get the old starter deck).
+- Tests: new `pressure`, `tutorial` (Chromium, desktop and phone). `stagger` marks its turns as
+  guarded so it measures the daze alone; `card-art` lists Nano Mend. Pressure is in the harness
+  and sim script lists.
+
 ## Round 225: Elaris gets the owner's forest, and one line tops the battle screen
 
 - **Elaris (world 4) is painted.** The owner's 11 top-down forest tiles replace the grey

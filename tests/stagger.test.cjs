@@ -13,7 +13,8 @@ function setup(boss) {
   b.draw = Array.from({ length: 20 }, () => make('guard')); b.discard = []; b.exhaust = []; b.turn = 1; b.freeze = 0; b.block = 0;
   return b;
 }
-const lance = b => { b.hand.push(make('cinder')); b.energy = 9; playCard(b.hand.length - 1); };
+// Round 226: the Lances' own damage would also bring ⚔ Pressure; mark the turn as guarded so only the daze shows.
+const lance = b => { b.hand.push(make('cinder')); b.energy = 9; playCard(b.hand.length - 1); b.guardTurn = b.turn; };
 const nextAttackTurn = () => { const b = state.battle; while (!(enemyPlan(b).damage > 0)) { b.block = 999; endTurn(); } return state.battle; };
 assert(defs.cinder.stagger && rules(make('cinder')).includes('Chain'), 'Cinder Lance explains the chain');
 assert.equal(stat(make('cinder')).damage, 6); assert.equal(stat(make('cinder')).burn, 2);
