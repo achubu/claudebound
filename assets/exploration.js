@@ -51,10 +51,9 @@ const BLESSINGS = {
 };
 const MERCHANT_ITEMS = {
   side:    { name: 'Side deck card', cost: 100, text: 'Choose any side card from this world.' }, // Round 144: pick it yourself, 100 Shards
-  potion:  { name: 'Healing potion', cost: 4, repeatable: true, text: 'One small healing potion. Always in stock.' },
+  potion:  { name: 'Healing potion', cost: 15, repeatable: true, text: 'One small healing potion. Always in stock.' }, // Round 227: was 4; above the sell price
   pick:    { name: 'Card bundle', cost: 8, text: 'Choose one of three Impermanent cards from this world.' },
   upgraded:{ name: 'Upgraded card', cost: 12, text: 'Choose one of three Impermanent cards from this world, already upgraded.' },
-  upgradePack: { name: 'Card upgrade', cost: 36, repeatable: true, text: 'Raise one of your Impermanent cards by one level: ◇ 36 to level 1, ◇ 60 to level 2, ◇ 90 to level 3. Always available.' },
   bless:   { name: 'Bottled blessing', cost: 4, text: 'A random shrine blessing for your next fight.' }
 };
 
@@ -123,11 +122,11 @@ function findMerchantRoom() {
 }
 function merchantStock() {
   const rand = seeded(hashSeed(state.seed + activeRegion + 'stock' + state.poi.merchantMoves));
-  // Always a side card and a card upgrade (an upgraded card or an upgrade pack), plus one other ware.
-  // The merchant never sells Soulbound cards or Upgrade Crystals.
-  // Round 69: potions and card upgrades are always in stock and never sell out.
+  // Always a side card and potions (which never sell out), plus one other ware.
+  // The merchant never sells Soulbound cards or Upgrade Crystals. Round 227: card upgrades moved to
+  // the Cardsmith only.
   const others = ['upgraded', 'pick', 'bless'];
-  return ['side', 'potion', 'upgradePack', others[Math.floor(rand() * others.length)]];
+  return ['side', 'potion', others[Math.floor(rand() * others.length)]];
 }
 function poiDisplay(p) {
   if (p.type === 'lore') { const [icon, name] = LORE_NAMES[activeRegion] || LORE_NAMES.city; return { icon, name }; }
@@ -259,14 +258,22 @@ function readLore(p) {
   }
   finishPOI(p, msg);
 }
+// Round 227: the merchant buys healing potions back.
+const POTION_SELL_PRICE = 10;
+function sellPotion(p) {
+  if (!(state.potions > 0)) return;
+  state.potions--; state.shards += POTION_SELL_PRICE; save();
+  toast('Sold a healing potion for ◇ ' + POTION_SELL_PRICE + '.'); openMerchant(p);
+}
 function openMerchant(p) {
   const stock = merchantStock(), bought = id => !MERCHANT_ITEMS[id].repeatable && state.poi.bought.includes(p.id + ':' + id);
-  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + (id === 'upgradePack' ? '36–90' : MERCHANT_ITEMS[id].cost) + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join(''),
-    stock.map((id, i) => ({ id: 'buy' + i, label: (bought(id) ? 'Sold · ' : id === 'upgradePack' ? 'Choose a card to upgrade · ◇ ' + cheapestUpgrade() : 'Buy ') + (id === 'upgradePack' ? '' : MERCHANT_ITEMS[id].name + ' · ◇ ' + MERCHANT_ITEMS[id].cost), disabled: bought(id) || state.shards < (id === 'upgradePack' ? cheapestUpgrade() : MERCHANT_ITEMS[id].cost) || (id === 'upgradePack' && !upgradeTargets().length), onclick: () => buyItem(p, id) })).concat([{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]));
+  poiMenu('🛒 Wandering Merchant', '<p>"Shards for wares, traveller. I move on when you do."</p><p>You have <b>◇ ' + state.shards + ' Shards</b> and <b>⚗ ' + state.potions + ' potion' + (state.potions === 1 ? '' : 's') + '</b>.</p>' + stock.map(id => '<p class="poi-option"><b>' + MERCHANT_ITEMS[id].name + '</b> · ◇ ' + MERCHANT_ITEMS[id].cost + ' — ' + MERCHANT_ITEMS[id].text + (bought(id) ? ' <i>(sold)</i>' : '') + '</p>').join('')
+    + '<p class="poi-option"><b>Sell a healing potion</b> · +◇ ' + POTION_SELL_PRICE + ' — the merchant buys potions back.</p>',
+    stock.map((id, i) => ({ id: 'buy' + i, label: (bought(id) ? 'Sold · ' : 'Buy ') + MERCHANT_ITEMS[id].name + ' · ◇ ' + MERCHANT_ITEMS[id].cost, disabled: bought(id) || state.shards < MERCHANT_ITEMS[id].cost, onclick: () => buyItem(p, id) }))
+      .concat([{ id: 'sellPotion', label: 'Sell a potion · +◇ ' + POTION_SELL_PRICE, disabled: !(state.potions > 0), onclick: () => sellPotion(p) }, { id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]));
 }
 function buyItem(p, id) {
   const item = MERCHANT_ITEMS[id], tag = p.id + ':' + id;
-  if (id === 'upgradePack') { if (upgradeTargets().length && state.shards >= cheapestUpgrade()) openUpgradePack(p); return; } // paid per card
   if ((!item.repeatable && state.poi.bought.includes(tag)) || state.shards < item.cost) return;
   if (id === 'side') return openSidePicker(p); // Round 144: choose the card; paid when you pick
   state.shards -= item.cost; if (!item.repeatable) state.poi.bought.push(tag);
@@ -277,7 +284,6 @@ function buyItem(p, id) {
   save();
   if (id === 'pick') return openBundle(0);
   if (id === 'upgraded') return openBundle(upgradedLevel());
-  if (id === 'upgradePack') return openUpgradePack(p);
   toast(msg); openMerchant(p);
 }
 // Round 144: the merchant lets you pick which side card to buy.
@@ -306,20 +312,10 @@ function upgradeTargets() { return state.pool.filter(c => !c.soulbound && !(defs
 // (62 Shards) roughly a third of a world's income.
 const UPGRADE_PRICES = [36, 60, 90];
 function upgradePrice(c) { return UPGRADE_PRICES[Math.min(2, c.level || 0)]; }
-function cheapestUpgrade() { const t = upgradeTargets(); return t.length ? Math.min(...t.map(upgradePrice)) : UPGRADE_PRICES[0]; }
-function openUpgradePack(p) {
-  poiMenu('Card upgrade', '<p>Choose one Impermanent card to raise by one level. Its mastery progress starts fresh at the new level.</p><p>You have <b>◇ ' + state.shards + ' Shards</b>. Level 1 costs ◇ 36, level 2 ◇ 60, level 3 ◇ 90.</p><div class="cards" id="packCards"></div>', [{ id: 'packBack', label: 'Back to the merchant', primary: true, onclick: () => p ? openMerchant(p) : closeMenu() }]);
-  const host = $('packCards');
-  if (host && host.append) upgradeTargets().sort((a, b) => upgradePrice(a) - upgradePrice(b)).forEach(c => {
-    const el = cardElement(c, () => buyUpgrade(c, p), state.shards < upgradePrice(c));
-    const tag = document.createElement('div'); tag.className = 'actions'; tag.textContent = '◇ ' + upgradePrice(c) + ' → level ' + (c.level + 1); el.append(tag); host.append(el);
-  });
-}
 function buyUpgrade(c, p) {
   const card = owned(c.uid) || c, price = upgradePrice(card);
   if (card.soulbound || card.level >= 3 || state.shards < price) return;
   state.shards -= price; applyUpgradePack(card);
-  if (p && upgradeTargets().length && state.shards >= cheapestUpgrade()) openUpgradePack(p);
 }
 function applyUpgradePack(c) {
   const card = owned(c.uid) || c; if (card.soulbound || card.level >= 3) return;

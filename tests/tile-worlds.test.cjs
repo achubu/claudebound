@@ -20,7 +20,7 @@ const r = JSON.parse(run(`(()=>{newGame();const o={order:WORLD_ORDER.slice(),wor
  return JSON.stringify(o)})()`));
 assert.deepStrictEqual(r.order, ['city', 'elaris', 'sky', 'wilds', 'vespera', 'chronospire']);
 for (const [id, w] of Object.entries(r.worlds)) {
-  assert.strictEqual(w.rooms, id === 'sky' || id === 'wilds' ? 51 : 54, id + ' room count (the Sky Isles (Round 197) and Elaris (Round 225) cut three for diagonals)');
+  assert.strictEqual(w.rooms, id === 'chronospire' ? 54 : 51, id + ' room count (the Sky Isles (Round 197), Elaris (Round 225) and Vespera (Round 227) cut three for diagonals)');
   assert.deepStrictEqual(w.errors, [], id + ' every room places its enemies');
   assert.deepStrictEqual(w.offPath, [], id + ' enemies stand on the path');
   assert.strictEqual(w.bosses.length, 3, id + ' has two mini-bosses and a final boss');

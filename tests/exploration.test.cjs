@@ -50,7 +50,7 @@ p = of('sealed') || { ...of('cache'), type: 'sealed', id: 'city:test-sealed' };
 Math.random = () => .1; let sh2 = state.shards; openPOI(p); click('poiPry'); assert.equal(state.shards, sh2 + 25, 'lucky: +25 Shards (Round 158)');
 const p2 = { ...p, id: 'city:test-sealed-2' }; Math.random = () => .9; state.hp = 3; openPOI(p2); click('poiPry'); assert.equal(state.hp, 1, 'unlucky: lose HP, never below 1'); Math.random = realRandom;
 // Merchant
-const shop = merchantRoom(), stock = merchantStock(); assert.equal(stock.length, 4); assert(stock.includes('side') && stock.includes('potion') && stock.includes('upgradePack'), 'always stocks a side card, potions and card upgrades');
+const shop = merchantRoom(), stock = merchantStock(); assert.equal(stock.length, 3); assert(stock.includes('side') && stock.includes('potion') && !stock.includes('upgradePack'), 'always stocks a side card and potions; card upgrades are at the Cardsmith (Round 227)');
 state.shards = 0; openMerchant(shop); assert.equal($('buy0').disabled === undefined ? true : true, true);
 // Round 144: side cards cost 100 and you choose which one.
 assert.equal(MERCHANT_ITEMS.side.cost, 100);
@@ -58,9 +58,13 @@ state.shards = 150; const sideN = state.side.pool.length; buyItem(shop, 'side');
 const pickId = sidePoolFor().filter(x => x !== 'stasis')[0]; const bought1 = buySideCard(shop, pickId); assert(bought1 && bought1.id === pickId, 'you get the side card you chose'); assert.equal(state.shards, 50); assert.equal(state.side.pool.length, sideN + 1);
 state.shards = 200; assert.equal(buySideCard(shop, pickId), null, 'each item sells once'); assert.equal(state.side.pool.length, sideN + 1);
 { const shop2 = { ...shop, id: 'pricecheck' }; state.shards = 99; assert.equal(buySideCard(shop2, pickId), null, 'needs 100 Shards'); }
-const pots = state.potions, shp = state.shards; for (let k = 0; k < 5; k++) buyItem(shop, 'potion'); assert.equal(state.potions, pots + 5, 'potions never sell out'); assert.equal(state.shards, shp - 5 * MERCHANT_ITEMS.potion.cost); assert.equal(MERCHANT_ITEMS.potion.cost, 4);
+const pots = state.potions, shp = state.shards; for (let k = 0; k < 5; k++) buyItem(shop, 'potion'); assert.equal(state.potions, pots + 5, 'potions never sell out'); assert.equal(state.shards, shp - 5 * MERCHANT_ITEMS.potion.cost); assert.equal(MERCHANT_ITEMS.potion.cost, 15);
+// Round 227: the merchant buys potions back for 10 Shards (less than it sells them for).
+{ const p0 = state.potions, s0 = state.shards; sellPotion(shop); assert.equal(state.potions, p0 - 1); assert.equal(state.shards, s0 + 10); closeMenu();
+  state.potions = 0; const s1 = state.shards; sellPotion(shop); assert.equal(state.shards, s1, 'nothing to sell, nothing paid'); closeMenu(); state.potions = p0 - 1;
+  assert(POTION_SELL_PRICE < MERCHANT_ITEMS.potion.cost, 'buying to sell back loses Shards'); }
 const mats = materials();
-for (let m = 0; m < 40; m++) { state.poi.merchantMoves = m; const st = merchantStock(); assert(st.includes('side') && st.includes('potion') && st.includes('upgradePack'), 'always a side card, potions and card upgrades'); assert(!st.includes('crystal'), 'never Upgrade Crystals'); }
+for (let m = 0; m < 40; m++) { state.poi.merchantMoves = m; const st = merchantStock(); assert(st.includes('side') && st.includes('potion') && !st.includes('upgradePack'), 'always a side card and potions'); assert(!st.includes('crystal'), 'never Upgrade Crystals'); }
 state.poi.merchantMoves = 0; assert(!('crystal' in MERCHANT_ITEMS), 'no crystal ware exists');
 // Upgraded cards: three Impermanent cards at level 1 (city).
 state.shards = 50; buyItem(shop, 'upgraded'); const ups = [...document.querySelectorAll('#bundleCards .card')]; assert.equal(materials(), mats, 'no crystals sold');
@@ -71,10 +75,8 @@ assert(upgradeTargets().includes(imp) && !upgradeTargets().includes(soul), 'only
 imp.uses = 37; applyUpgradePack(imp); assert.equal(imp.level, 1); assert.equal(imp.uses, 37, 'Round 212: progress toward the next level is kept'); applyUpgradePack(soul); assert.equal(soul.level, 0, 'Soulbound cards are refused');
 // Unlimited upgrades, priced by the level reached: 36 / 60 / 90 (Round 123: tripled).
 { const c2 = make('strike', 0, false); state.pool.push(c2); state.shards = 183; buyUpgrade(c2); assert.equal(c2.level, 1); assert.equal(state.shards, 147);
-  buyUpgrade(c2); assert.equal(c2.level, 2); assert.equal(state.shards, 87); buyUpgrade(c2); assert.equal(c2.level, 2, 'level 3 costs 90'); state.shards = 90; buyUpgrade(c2); assert.equal(c2.level, 3); assert.equal(state.shards, 0);
-  state.shards = 100; const sh1 = state.shards; buyItem(shop, 'upgradePack'); assert.equal(state.shards, sh1, 'opening the upgrade menu costs nothing'); closeMenu(); }
-const keep = state.pool; state.pool = [soul]; const sh0 = state.shards; buyItem({ ...shop, id: 'nopack' }, 'upgradePack'); assert.equal(state.shards, sh0, 'no pack sale without an Impermanent card to upgrade'); state.pool = keep;
-assert.deepEqual([...UPGRADE_PRICES], [36, 60, 90], 'market card upgrades cost triple the old 12/20/30'); assert.equal(MERCHANT_ITEMS.upgradePack.cost, 36);
+  buyUpgrade(c2); assert.equal(c2.level, 2); assert.equal(state.shards, 87); buyUpgrade(c2); assert.equal(c2.level, 2, 'level 3 costs 90'); state.shards = 90; buyUpgrade(c2); assert.equal(c2.level, 3); assert.equal(state.shards, 0); }
+assert.deepEqual([...UPGRADE_PRICES], [36, 60, 90], 'card upgrades (at the Cardsmith) cost triple the old 12/20/30'); assert(!MERCHANT_ITEMS.upgradePack, 'the merchant no longer sells upgrades');
 state.shards = 1; buyItem({ ...shop, id: 'x' }, 'potion'); assert.equal(state.shards, 1, 'cannot buy without Shards');
 // Shards from fights
 state.room = '1,5'; state.cooldowns = {}; startBattle(roomSpawns('1,5').find(x => !x.boss).uid); state.battle.bounty = null; let before = state.shards; state.battle.enemy.hp = 0; winBattle(); assert([1, 2].includes(state.shards - before), 'regular: 1-2 Shards');
