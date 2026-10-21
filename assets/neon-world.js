@@ -282,7 +282,9 @@ if (typeof poiSpot === 'function') {
     const s = poiSpotBeforeNeonWorld(key), spawns = roomSpawns(key).map(q => ({ x: q.x, y: q.y }));
     const [tx, ty] = s || [400, 250];
     // Round 100: keep the base rule (150px clear of patrols); a room with no such spot gets no point of interest.
-    const p = organicItemSpot(key, tx, ty, spawns, 150);
+    let p = organicItemSpot(key, tx, ty, spawns, 150);
+    // Round 225: rather than under the HUD or minimap, stand a little closer to a patrol.
+    if (p && screenCovered(p.x, p.y)) for (const gap of [120, 90]) { const q = organicItemSpot(key, tx, ty, spawns, gap); if (q && !screenCovered(q.x, q.y)) { p = q; break; } }
     return itemSpotCache[ck] = p ? [p.x, p.y] : null;
   };
 }

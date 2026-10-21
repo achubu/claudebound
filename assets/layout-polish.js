@@ -91,5 +91,24 @@ renderBattle = function () {
     const end = m.querySelector('#endTurn');
     if (bar && end && bar.append && end.parentNode !== bar) { end.classList.add('end-turn-inline'); bar.append(end); }
     const log = m.querySelector('#combatLog'); if (log && aether.before) aether.before(log); // the last moves, just above the Aether panel
+    // Round 225: the encounter shares the top line with the element; the log line below keeps
+    // only the moves (and stays hidden until the first one).
+    const enc = (b.logs || []).find(l => /^Encounter: /.test(l));
+    if (enc && document.createElement) {
+      let top = tools;
+      if (!top) { top = document.createElement('div'); top.className = 'combat-tools'; }
+      if (!top.querySelector || !top.querySelector('.encounter-line')) {
+        const s = document.createElement('span'); s.className = 'encounter-line';
+        s.innerHTML = '<b>Encounter:</b> ' + enc.slice(11).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+        const more = (top.textContent || '').trim();
+        if (top.prepend) { top.prepend(s); if (more) s.after(' · '); }
+      }
+      if (top.classList) top.classList.add('with-encounter');
+      if (m.prepend) m.prepend(top);
+      if (log) {
+        const moves = b.logs.filter(l => !/^Encounter: /.test(l)).slice(-5);
+        log.innerHTML = moves.join(' · '); log.style.display = moves.length ? '' : 'none';
+      }
+    }
   }
 };
