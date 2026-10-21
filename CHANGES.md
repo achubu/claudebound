@@ -3496,6 +3496,35 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 228: Solaris gets a new look (the owner's top-down golden city)
+
+- **New tiles.** The owner's seven top-down paintings of a golden desert city (pale sandstone
+  streets between terracotta roofs, palms, turquoise canals, sun-mirrors) replace Solaris's
+  tiles in 47 of its 51 rooms: corner, cross (a sundial plaza), dead-top, straight (a canal
+  bridge), t-bottom and t-right, plus a diagonal causeway tile.
+- `tools/prepare_solaris_tiles.py` traces the streets by colour into walk masks
+  (`src/masks/`), bridges arms the trace stops short of, and fills only small gaps, so the
+  obelisk and fountains stay solid. The new tiles are named `-s1`, so they don't collide with
+  the old tiles' hand-drawn masks.
+- **Builder** (`tools/build_solaris.py`):
+  - Uses a tile's own mask when it has one.
+  - Lets the top-down `-s1` diagonals flip top-to-bottom too (`FLIP_DIAG_ALL`). The old ones
+    had perspective.
+  - Knows the new tile's shape, `diag-t-c` (streets north, east and south, causeway to the
+    top-left). That one tile now serves three of the six diagonal rooms (1,3, 7,3, and 4,0,
+    where its north street runs off the map).
+  - Limits saved tile images to 2000px wide.
+- **Landmarks retired.** The six landmark paintings (the Solar Crown and the Stronghold yards and
+  four relic rooms) were in the old style, so those rooms use the new tiles (`USE_LANDMARKS =
+  False`). Room names, bosses and relics are unchanged. The old tiles and landmarks move to
+  `unused assets/assets/environment/solaris/src/`, and their built images are removed.
+- **Still in the old style until painted:** the west dead end (4,5), the corner causeway with
+  streets east and south (0,4, and mirrored at 8,4), and the T causeway with streets east, south
+  and west (5,1). `tests/solaris-landmarks.test.cjs` lists exactly these four rooms.
+- `node tests/playtest-walk.cjs elaris` reaches every door and item in all 51 rooms.
+- Fix (Round 227's Esc): when the chest held a card choice, Esc left the screen open; it now skips the
+  choice as the Skip button does, then continues. `reward-escape` covers every kind of loot.
+
 ## Round 227: Vespera gets the owner's storm coast; Esc closes the victory screens; the merchant buys potions
 
 - **Vespera (world 5) is painted.** The owner's 15 top-down tiles of a storm-lashed glass coast (a
@@ -3510,8 +3539,9 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   top-left pier tile with `t-right`'s north arm laid over it. 51 rooms; `node
   tests/playtest-walk.cjs vespera` reaches every door and item. `TILE_ART_VERSION` is 227.
 - The straight tile is unused: Vespera's only straight room sits beside an inlet.
-- **Esc closes the victory screens** (`assets/battle-recap.js`). It opens the loot chest first
-  if it's still shut, so the loot is kept, then continues to the map. It does nothing during a fight.
+- **Esc closes the victory screens** (`assets/battle-recap.js`). It opens the loot chest first if
+  it's still shut, so potions and Shards are kept. If the chest holds a card choice, Esc skips it
+  as the Skip button does. Then it continues to the map. It does nothing during a fight.
 - **Merchant** (`assets/exploration.js`): card upgrades are no longer sold here (they stay at
   the Cardsmith, ◇ 36 / 60 / 90). Its stock is now a side card, potions and one other ware. It
   also buys healing potions back for ◇ 10 each (`POTION_SELL_PRICE`). The merchant's potion price
