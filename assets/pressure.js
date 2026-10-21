@@ -2,19 +2,22 @@
 // =====================================================================
 // Round 226: ⚔ Pressure. Block was essential: one enemy hit takes about half your HP or more,
 // so a deck that didn't block died in two hits long before it could win a race. Now attacking is
-// a defence too. On a turn where you gain no Block from a card, every PRESSURE_PER damage you
-// deal to the enemy takes 1 off its attack at the end of that turn, up to PRESSURE_CAP of it.
+// a defence too. On a turn where you gain no Block from a card, every few damage you deal to the
+// enemy (the world's rate, pressurePer()) takes 1 off its attack at the end of that turn, up to
+// PRESSURE_CAP of it.
 // Gaining Block from any card (Counters included) that turn means no Pressure: you either
 // defend or press. Tuned with the Difficulty lab (assets/sim/lab.js).
 // =====================================================================
-const PRESSURE_PER = 3, PRESSURE_CAP = 0.5;
+// Damage per point taken off, by world: late decks deal far more per energy, so pressing costs more there.
+const PRESSURE_PER_BY_WORLD = { city: 2, elaris: 2, sky: 3, wilds: 4, vespera: 6, chronospire: 6 }, PRESSURE_CAP = 0.5;
+function pressurePer() { return PRESSURE_PER_BY_WORLD[typeof activeRegion === 'string' ? activeRegion : 'city'] || 3; }
 
 function pressureDealt(b) { return b && b.pressureTurn === b.turn ? b.pressureDmg || 0 : 0; }
 function pressureGuarded(b) { return !!b && b.guardTurn === b.turn; }
 // How much comes off each hit of this turn's attack.
 function pressureOff(b, plan) {
   if (!b || pressureGuarded(b) || !(plan && plan.damage > 0)) return 0;
-  return Math.min(Math.floor(pressureDealt(b) / PRESSURE_PER / (plan.hits || 1)), Math.floor(plan.damage * PRESSURE_CAP));
+  return Math.min(Math.floor(pressureDealt(b) / pressurePer() / (plan.hits || 1)), Math.floor(plan.damage * PRESSURE_CAP));
 }
 
 // The enemy's attack this turn (the one it makes when you end your turn) is lowered; its intent
@@ -52,7 +55,7 @@ intentBubble = function (plan, cls, label, frozen) {
   if (cls !== 'now' || frozen || !b || !(plan.damage > 0)) return html;
   const line = plan.pressure ? '⚔ Pressure: −' + plan.pressure + (plan.hits > 1 ? ' per hit' : '') + ' (you dealt ' + pressureDealt(b) + ' this turn)'
     : pressureGuarded(b) ? '⚔ No Pressure: you gained Block this turn'
-    : '⚔ Pressure: every ' + PRESSURE_PER + ' damage you deal this turn takes 1 off, up to half (not if you gain Block)';
+    : '⚔ Pressure: every ' + pressurePer() + ' damage you deal this turn takes 1 off, up to half (not if you gain Block)';
   return html.replace(/<\/div>$/, '<p class="affliction pressure-line' + (plan.pressure ? ' on' : '') + '">' + line + '</p></div>');
 };
 if (typeof document !== 'undefined' && document.createElement && document.head) {
