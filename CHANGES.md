@@ -3496,6 +3496,69 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 248: a pair walks side by side, without overlapping
+
+- Owner request: a group's units should stand close together but never overlap.
+- The partner is drawn full size right beside the leader with a small gap (about 10px between the
+  sprites), on the side the leader walks away from.
+- The patrol loop turns only the leader's sprite (`--enemy-facing`); a small frame loop in
+  `enemy-pairs.js` copies that onto the pair, so the partner swaps sides when the patrol turns.
+- Checked in the browser: no overlap either way.
+
+## Round 247: more pairs, walking together
+
+- Owner request: pair the enemies so the two walk together in the room, and more pair patrols from
+  the Sky Isles on.
+- 70% of regular patrols from the Sky Isles on are now pairs (was half). On the map the partner
+  walks with its leader as one patrol, full size, instead of a small figure on its shoulder.
+- `enemy-pairs` test: it clears a Swipe's discard before switching target. With Round 246's offset
+  the partner can charge on turn 1, and its Swipe's discard rightly holds back a switch.
+
+## Round 246: a pair's charged strikes come on different turns
+
+- The owner found it too hard to counter two charged strikes at once. The second enemy of a pair now
+  runs its move pattern offset (`b.patternShift`, read by the base `enemyPlan` in
+  `encounter-depth.js`), chosen when the fight starts (`staggerShift` in `enemy-pairs.js`) as the
+  first offset with no shared charged-strike turn over the next dozen turns.
+- So one enemy charges while the other attacks or guards, and a single Prismatic Counter can answer
+  each charged strike in turn. In every pair fight in all four worlds no turn has both charged
+  strikes (checked in `tests/enemy-pairs.test.cjs`).
+
+## Round 244: enemy Armor grows with the worlds; the pair panel shows Armor
+
+- The owner noticed enemies hardly showed Armor any more. Only Neon Aftermath's species had real
+  Armor (Round 1, 0-6). Later worlds grew HP and attack instead, while cards grew to 8-16 damage, so
+  their 0-2 Armor barely mattered, and the battle screen hides it at 0.
+- `assets/enemy-armor.js`: every enemy after Neon Aftermath has at least its world's Armor.
+  - Regular enemies range from the low to the high end of the world's range, rising toward the far
+    side (`regionDistanceFrac`): Solaris 1-2, Sky Isles 2-3, Elaris 2-4, Vespera 3-5, Chronospire 4-6.
+  - Elites +1; mini-bosses the high end +2; final bosses +3.
+  - Solaris's bosses keep their own Armor: its cards are still small, and they were already hard.
+  - A species whose own Armor is higher keeps it. Both of a pair are armored.
+  - Pierce and Breach Spike now count for more.
+- **HP compensation:** enemies that gained Armor have less HP, per world (`ARMOR_HP_FACTOR`):
+  Solaris 95%, Sky Isles 88%, Elaris 75%, Vespera 80%, Chronospire 82%. Tuned in two Difficulty lab
+  passes (with pairs at 70%). Typical wins:
+  - Bosses: Zenith Roc 22%, Bloom Tyrant 38%, Tempest Colossus 19%, Chronarch 25% (target 22-36).
+    The Bloom Tyrant was 53% before.
+  - Regular enemies mostly 70-100%. A few late species are 33-56%: Storm Moth, Static Fox,
+    Pendulum Stag.
+  - Mini-bosses 47-81%, above target as after Round 240.
+  - Solaris's bosses were already under target before this round (Noon Toller 14%, Sun Pharaoh 9%);
+    left for the owner.
+- **Fix:** the second enemy's panel in a pair fight now shows its Armor (🛡 N).
+- New `tests/enemy-armor.test.cjs`.
+
+## Round 245: a pop-up when a Swipe makes you discard
+
+- The owner found it unclear when a Swipe happens. Now the turn after one opens with a pop-up:
+  "<enemy> swiped at you", how many HP it took (and how much was blocked), and your hand to pick
+  the card to discard.
+- Clicking a card discards it and closes the pop-up. Closing the pop-up without picking leaves the
+  choice on the battle screen as before. Pair partners' swipes open it too; the simulator's bot
+  skips it (`swipePopup` in `assets/charge-swipe.js`).
+- `charge-swipe` test checks the pop-up's text; checked in the browser on desktop and phone.
+
 ## Round 243: pairs of enemies from the Sky Isles on
 
 - The owner asked for regular enemies that are harder without being boring or too hard. Of the

@@ -1,7 +1,9 @@
 'use strict';
 // =====================================================================
 // Round 243 (owner request): PAIRS. From the Sky Isles on, some regular patrols are two enemies at
-// once (a nearby species joins them; the map shows ×2). Both act every turn; you choose which one your
+// once (a nearby species joins them; the map shows ×2). Round 247: 70% of regular patrols (was half),
+// and on the map the two walk together: the partner full size, trailing right behind the leader on
+// the side it walks away from, side by side with a small gap and never overlapping (Round 248). Both act every turn; you choose which one your
 // cards hit by clicking its panel (the target), and when one falls the other fights on alone. Each of
 // the two is weaker than a lone enemy (PAIR.hp, PAIR.attack), and the fight gives more XP.
 //
@@ -14,10 +16,10 @@
 // intent bubbles show each enemy's next move. The first pair fight opens a short guide.
 // =====================================================================
 const PAIR_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
-const PAIR = { chance: 0.5, hp: 0.72, attack: 0.8, xp: 1.5, world: { sky: [0.7, 0.78], wilds: [0.72, 0.8], vespera: [0.82, 0.87], chronospire: [0.72, 0.8] } }; // tuned with the Difficulty lab (CHANGES.md)
+const PAIR = { chance: 0.7, hp: 0.72, attack: 0.8, xp: 1.5, world: { sky: [0.7, 0.78], wilds: [0.72, 0.8], vespera: [0.82, 0.87], chronospire: [0.72, 0.8] } }; // tuned with the Difficulty lab (CHANGES.md)
 // Each world's pair strength (share of a lone enemy's HP and attack), as [hp, attack]; others use PAIR.hp/attack.
 function pairScale(region = activeRegion) { const w = PAIR.world[region]; return w ? { hp: w[0], attack: w[1] } : { hp: PAIR.hp, attack: PAIR.attack }; }
-const PAIR_FIELDS = ['enemy', 'id', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
+const PAIR_FIELDS = ['enemy', 'id', 'patternShift', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
 const PAIR_ZONES = () => ({ sky: typeof SKY_ZONE_ENEMY !== 'undefined' && SKY_ZONE_ENEMY, wilds: typeof WILDS_ZONE_ENEMY !== 'undefined' && WILDS_ZONE_ENEMY,
   vespera: typeof VESPERA_ZONE_ENEMY !== 'undefined' && VESPERA_ZONE_ENEMY, chronospire: typeof CHRONO_ZONE_ENEMY !== 'undefined' && CHRONO_ZONE_ENEMY });
 
@@ -30,6 +32,21 @@ function pairMateFor(key, s) {
   const z = (rooms[key] && rooms[key].zone) || 1;
   for (const d of [-1, 1, -2, 2, -3, 3, -4, 4]) { const t = list[z - 1 + d]; if (t && t !== s.type && enemies[t]) return t; }
   return list.find(t => t !== s.type && enemies[t]) || null;
+}
+// Round 246 (owner request): the two run their move patterns out of step, so their charged strikes
+// (and charges) never land on the same turn: the second enemy's pattern is offset by the first shift
+// that keeps them apart over the next dozen turns (fewest shared charge turns if none is clean).
+function staggerShift(b) {
+  const kinds = (shift, mate) => { const out = []; const run = () => { const keep = b.patternShift; b.patternShift = shift; try { for (let t = 1; t <= 12; t++) out.push(enemyPlan(b, t).kind); } finally { b.patternShift = keep; } };
+    if (mate) { swapPairFields(b); try { run(); } finally { swapPairFields(b); } } else run(); return out; };
+  const mine = kinds(0, false); let best = 0, bestScore = Infinity;
+  for (let s = 0; s < 6; s++) {
+    const theirs = kinds(s, true); let score = 0;
+    for (let t = 0; t < 12; t++) { if (mine[t] === 'elemental' && theirs[t] === 'elemental') score += 10; if (mine[t] === 'charge' && theirs[t] === 'charge') score += 3; }
+    if (score < bestScore) { bestScore = score; best = s; }
+    if (!score) break;
+  }
+  return best;
 }
 function pairOn(b = state && state.battle) { return !!(b && b.pair && b.pair.other && b.pair.other.enemy && b.pair.other.enemy.hp > 0); }
 function swapPairFields(b) { const o = b.pair.other; for (const k of PAIR_FIELDS) { const t = b[k]; b[k] = o[k]; o[k] = t; } }
@@ -46,6 +63,7 @@ startBattle = function (spawnId) {
   const other = { enemy: cut({ ...enemies[mate], boss: false, elite: false, element: enemies[mate].element || null, level, name: enemies[mate].name, hp: stats.hp, maxHp: stats.hp, attack: stats.attack }), id: mate,
     freeze: 0, enemyDebuff: 0, burn: 0, burnTurns: 0, poison: 0 };
   b.pair = { other, names: [b.enemy.name, other.enemy.name] };
+  b.patternShift = 0; other.patternShift = staggerShift(b);
   b.logs[0] = 'Encounter: ' + b.enemy.name + ' and ' + other.enemy.name;
   save(); renderBattle();
   if (!(state.tips || {}).pairs) pairGuide();
@@ -87,7 +105,7 @@ function pairMateActs(b) {
     if (plan.kind === 'silenced') b.logs.push(e.name + ' is silenced.');
     else if (plan.kind === 'charge') {
       b.logs.push(e.name + ': ' + plan.name + '. A charged strike is coming.');
-      if (plan.swipe) { const l = hit(plan.swipe); lost += l; swipe = true; b.logs.push('🗡 ' + e.name + ' swipes: ' + l + ' HP.'); }
+      if (plan.swipe) { const l = hit(plan.swipe); lost += l; swipe = true; b.swipeBy = { name: e.name, hurt: l }; b.logs.push('🗡 ' + e.name + ' swipes: ' + l + ' HP.'); }
     } else if (plan.kind === 'guard') { e.guard = 5; b.logs.push(e.name + ': Block 5 from next turn.'); }
     else if (plan.damage > 0) {
       if (plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter) { e.hp = Math.max(0, e.hp - 6); b.counter = null; b.logs.push('Prismatic Counter cancels ' + e.name + '\'s charged strike. 6 damage returned.'); }
@@ -119,7 +137,7 @@ endTurn = function () {
   if (!state.hp) { loseBattle(); save(); renderBattle(); return; }
   const r = endTurnBeforePairs.apply(this, arguments);
   if (swipe && state.battle === b && b.phase === 'fight' && b.turn > turn && b.hand.length) {
-    b.siftPick = (b.siftPick || 0) + 1; b.siftDrawn = []; b.siftReason = 'swipe'; save(); renderBattle();
+    b.siftPick = (b.siftPick || 0) + 1; b.siftDrawn = []; b.siftReason = 'swipe'; save(); renderBattle(); if (typeof swipePopup === 'function') swipePopup(b);
   }
   return r;
 };
@@ -146,7 +164,7 @@ renderBattle = function () {
   const o = b.pair.other.enemy, alive = o.hp > 0;
   const mate = document.createElement('button'); mate.type = 'button'; mate.className = 'pair-mate' + (alive ? '' : ' fallen');
   mate.innerHTML = '<span class="pm-info"><b>' + o.name + '</b><span class="meter enemy"><span style="width:' + (o.hp / o.maxHp * 100) + '%"></span><i class="meter-label">' + o.hp + '/' + o.maxHp + '</i></span>'
-    + '<small>' + (alive ? '<span class="pm-long">🎯 Click to target</span><span class="pm-short">🎯 Target</span>' + (o.guard ? ' · ◈ ' + o.guard : '') + (b.pair.other.poison ? ' · ☣ ' + b.pair.other.poison : '') + (b.pair.other.burnTurns > 0 ? ' · 🔥' : '') : 'Defeated') + '</small></span>';
+    + '<small>' + (alive ? '<span class="pm-long">🎯 Click to target</span><span class="pm-short">🎯 Target</span>' + (o.armor ? ' · 🛡 ' + o.armor : '') + (o.guard ? ' · ◈ ' + o.guard : '') + (b.pair.other.poison ? ' · ☣ ' + b.pair.other.poison : '') + (b.pair.other.burnTurns > 0 ? ' · 🔥' : '') : 'Defeated') + '</small></span>';
   mate.disabled = !alive; mate.onclick = () => pairSwitch();
   const wrap = document.createElement('div'); wrap.className = 'pair-row'; side.parentNode.insertBefore(wrap, side); wrap.append(side, mate);
   if (alive) {
@@ -173,6 +191,17 @@ renderWorld = function () {
   });
   return out;
 };
+// The patrol loop turns the leader's sprite (its --enemy-facing); the partner follows on the far side.
+if (typeof requestAnimationFrame === 'function' && typeof document !== 'undefined' && document.querySelectorAll) {
+  const followFacing = () => {
+    document.querySelectorAll('#world .enemy-node.pair-node').forEach(n => {
+      const lead = n.querySelector('.monster-sprite'), f = lead && lead.style.getPropertyValue('--enemy-facing');
+      if (f && n.dataset.facing !== f) { n.dataset.facing = f; n.style.setProperty('--enemy-facing', f); }
+    });
+    requestAnimationFrame(followFacing);
+  };
+  requestAnimationFrame(followFacing);
+}
 if (typeof document !== 'undefined' && document.createElement && document.head) {
   const st = document.createElement('style');
   st.textContent = '#battleModal .pair-row{display:flex;gap:6px;min-width:0}#battleModal .pair-row>.compact-side.enemy{flex:1 1 60%;min-width:0;outline:2px solid #f5c86a;outline-offset:-2px;border-radius:10px}'
@@ -181,6 +210,6 @@ if (typeof document !== 'undefined' && document.createElement && document.head) 
     + '#battleModal .pair-mate .pm-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}#battleModal .pair-mate b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#battleModal .pair-mate small{font-size:10px;color:#e8c9a0}'
     + '#battleModal .pair-mate .meter{height:12px}#battleModal .pair-mate .pm-short{display:none}'
     + '@media(max-width:560px){#battleModal .pair-row>.compact-side.enemy{flex-basis:55%}#battleModal .pair-mate{flex-basis:45%;padding:4px}#battleModal .pair-mate b{font-size:11px;white-space:normal;line-height:1.15}#battleModal .pair-mate .pm-long{display:none}#battleModal .pair-mate .pm-short{display:inline}}'
-    + '.enemy-node .pair-ghost{position:absolute;left:58%;top:22%;width:70%;height:70%;opacity:.95;pointer-events:none}.enemy-node .pair-ghost>*{width:100%;height:100%;display:block}';
+    + '.enemy-node .pair-ghost{position:absolute;left:0;top:6%;width:100%;height:100%;pointer-events:none;transform:translateX(calc(var(--enemy-facing,1) * (-100% - 4px)))}.enemy-node .pair-ghost>*{width:100%;height:100%;display:block}';
   document.head.append(st);
 }

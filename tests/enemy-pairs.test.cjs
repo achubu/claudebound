@@ -19,9 +19,10 @@ o.start = { encounter: b.logs[0], a: b.enemy.name, m: b.pair.other.enemy.name, h
 // Turn 1: both act.
 b.hand = []; b.block = 0; b.enemy.attack = 10; b.pair.other.enemy.attack = 7; const t = b.turn; let hp = state.hp;
 const p1 = enemyPlan(b), p2 = withPairMate(b, () => enemyPlan(b)); endTurn();
+b.siftPick = 0; // a Swipe's discard would hold back the switch below
 o.turn1 = { lost: hp - state.hp, p1: p1.damage, p2: p2.damage, k1: p1.kind, k2: p2.kind, advanced: b.turn === t + 1 };
 // Block protects from both, in order.
-b.turn = 1; b.block = 999; hp = state.hp; endTurn(); o.blocked = hp - state.hp;
+b.turn = 1; b.block = 999; hp = state.hp; endTurn(); o.blocked = hp - state.hp; b.siftPick = 0;
 // Target switching swaps who your cards hit.
 const first = b.enemy.name; pairSwitch(); o.switched = b.enemy.name !== first && b.pair.other.enemy.name === first;
 b.hand = [make('cleave')]; b.energy = 3; const ta = b.enemy.hp, oa = b.pair.other.enemy.hp; playCard(0); o.hitTarget = b.enemy.hp < ta && b.pair.other.enemy.hp === oa;
@@ -30,6 +31,11 @@ b.enemy.hp = 1; b.hand = [make('strike')]; b.energy = 3; playCard(0); o.oneDown 
 b.enemy.hp = 1; b.hand = [make('strike')]; b.energy = 3; playCard(0); o.win = { phase: b.phase };
 o.xp = (() => { const x = { enemy: { level: 5, boss: false, elite: false } }; const plain = xpReward(x); x.pair = {}; return [plain, xpReward(x)]; })();
 o.guide = pairGuideHTML();
+// Round 246: the two never land charged strikes on the same turn.
+let clash = 0; for (const w of ['sky', 'wilds', 'vespera', 'chronospire']) { newGame(); state.region = w; configureRegion(w); state.hp = state.maxHp = 999; state.tips = { pairs: true };
+  for (const kk of Object.keys(rooms)) for (const sp of roomSpawns(kk)) { if (!spawnAvailable(sp) || !pairMateFor(kk, sp)) continue; state.room = kk; startBattle(sp.uid); const bb = state.battle;
+    for (let t = 1; t <= 12; t++) if (enemyPlan(bb, t).kind === 'elemental' && withPairMate(bb, () => enemyPlan(bb, t).kind) === 'elemental') clash++; state.battle = null; } }
+o.clash = clash;
 return JSON.stringify(o); })()`));
 assert(!r.same, 'a partner is always another species');
 assert.strictEqual(r.city.pairs + r.elaris.pairs, 0, 'no pairs in Neon Aftermath or Solaris');
@@ -46,4 +52,5 @@ assert(r.oneDown.phase === 'fight' && r.oneDown.alive && !r.oneDown.pairOn, 'one
 assert.strictEqual(r.win.phase, 'reward', 'both down wins');
 assert(r.xp[1] > r.xp[0], 'a pair gives more XP');
 assert(/Both act every turn/.test(r.guide) && /switch target/.test(r.guide), 'the first pair fight explains it');
+assert.strictEqual(r.clash, 0, 'Round 246: the pair never lands two charged strikes on the same turn');
 console.log('enemy-pairs ok');
