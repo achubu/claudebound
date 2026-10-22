@@ -25,8 +25,13 @@ SRC = 'assets/environment/solaris/src'
 OWN = SRC + '/owner'
 # Built name: (owner painting, its exits as painted).
 TILES = {'corner-s1': ('corner', 'ne'), 'cross-s1': ('cross', 'nesw'), 'dead-top-s1': ('dead-top', 'n'),
-         'straight-s1': ('straight', 'ns'), 't-bottom-s1': ('t-bottom', 'esw'), 't-right-s1': ('t-right', 'nes')}
-DIAG = {'diag-t-c-s1': ('diag-top-left', 'nes')}  # streets north, east and south; causeway to the top-left
+         'straight-s1': ('straight', 'ns'), 't-bottom-s1': ('t-bottom', 'esw'), 't-right-s1': ('t-right', 'nes'),
+         # Round 230: painted with streets west and south; turned half way round it is a second corner.
+         'corner-s2': ('corner-b', 'ne')}
+TURN = {'corner-s2'}  # paintings turned 180 degrees (top-down, so nothing ends up upside down)
+DIAG = {'diag-t-c-s1': ('diag-top-left', 'nes'),  # streets north, east and south; causeway to the top-left
+        'diag-corner-s1': ('diag-top-right', 'es')}  # Round 230: streets east and south; causeway to the top-right
+CORNER = {'diag-t-c-s1': 'nw', 'diag-corner-s1': 'ne'}  # where each causeway leaves the image
 SMALL_GAP = 600  # holes in the traced paving smaller than this (in room pixels) are filled
 
 
@@ -39,9 +44,14 @@ def trace(im):
     return nd.binary_opening(m, structure=np.ones((3, 3)), iterations=3)[P:-P, P:-P]
 
 
-def mask(im, exits, diagonal):
+def mask(im, exits, corner=None):
     m, bands = arms(trace(im), exits)
-    if diagonal: bands[:20, :120] = True; bands[:120, :20] = True  # the causeway runs off the top-left corner
+    if corner:  # the causeway runs off this corner of the image
+        near_x = slice(None, 120) if corner[1] == 'w' else slice(-120, None)  # along the edges, near the corner
+        near_y = slice(None, 120) if corner[0] == 'n' else slice(-120, None)
+        edge_x = slice(None, 20) if corner[1] == 'w' else slice(-20, None)   # the side edge itself
+        edge_y = slice(None, 20) if corner[0] == 'n' else slice(-20, None)   # the top or bottom edge itself
+        bands[edge_y, near_x] = True; bands[near_y, edge_x] = True
     lab, _ = nd.label(m)
     m = np.isin(lab, np.unique(lab[bands & m])) & (lab > 0)
     holes, n = nd.label(nd.binary_fill_holes(m) & ~m)
@@ -53,9 +63,10 @@ def main():
     os.makedirs(SRC + '/diagonal', exist_ok=True); os.makedirs(SRC + '/masks', exist_ok=True)
     for name, (src, exits) in {**TILES, **DIAG}.items():
         rgb = Image.open(f'{OWN}/{src}.jpeg').convert('RGB')
+        if name in TURN: rgb = rgb.rotate(180)
         out = f'{SRC}/diagonal/{name}.jpg' if name in DIAG else f'{SRC}/{name}.jpg'
         rgb.save(out, quality=92)
-        m = mask(np.asarray(rgb).astype(int), exits, name in DIAG)
+        m = mask(np.asarray(rgb).astype(int), exits, CORNER.get(name))
         Image.fromarray((m * 255).astype(np.uint8)).save(f'{SRC}/masks/{name}.png')
         print('tile', name)
 

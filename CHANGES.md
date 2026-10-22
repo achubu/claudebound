@@ -3496,6 +3496,27 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 230: two more Solaris tiles; one room left in the old style
+
+- The owner sent four more Solaris paintings. Two fit:
+  - **top-right** (streets east and south, causeway to the top-right corner) is the corner
+    causeway, `diag-corner-s1`. It now serves rooms 0,4 and 8,4 (mirrored).
+  - **dead-left** has a street south as well as west, so it is a corner. Turned half way round it is
+    a second corner tile, `corner-s2`, for variety (corners fill 19 rooms). It also serves the
+    west dead end at 4,5, where its south street runs off the map's bottom edge.
+- **Builder** (`tools/build_solaris.py`):
+  - When no tile fits a room exactly, an extra painted street may run off the map, as diagonal
+    tiles already allowed.
+  - The new look's tiles (`-s1`, `-s2`) are chosen over old ones whenever both fit.
+  - No generated stand-ins once real paintings are in.
+  - `prepare_solaris_tiles.py` can turn a painting half way round (`TURN`) and outlines a
+    causeway to any corner (`CORNER`).
+- The other two (`diag1`: a west street with a boardwalk to the bottom-right corner; `top-left`:
+  streets east and south with a causeway to the top-left) fit no room. Not used.
+- **Still in the old style:** the T causeway room 5,1 (streets west, east and south, causeway to
+  the top-left). It is the only one; `solaris-landmarks` checks that.
+- The old dead-left and diag-corner paintings move to `unused assets/`.
+
 ## Round 229: the first Nexus Waypoint is a few rooms in; mechanic badges above the cards; bigger enemies, smaller names
 
 - **First waypoint moved** (`assets/waypoints.js`). Each world's first Nexus Waypoint used to stand in
