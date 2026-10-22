@@ -24,14 +24,33 @@ endTurn = function () {
     const net = Math.max(0, plan.swipe - scaledRank('plating')), soak = Math.min(b.block || 0, net), hurt = net - soak;
     b.block = (b.block || 0) - soak; state.hp = Math.max(0, state.hp - hurt);
     b.logs.push('🗡 Swipe: ' + hurt + ' HP damage' + (soak ? ' (' + soak + ' blocked)' : '') + '. Discard a card next turn.');
+    b.swipeBy = { name: b.enemy.name, hurt, blocked: soak };
   }
   const r = endTurnBeforeSwipe.apply(this, arguments);
   if (swipes && state.battle === b && b.phase === 'fight' && b.turn > turn && b.hand.length) {
     b.siftPick = (b.siftPick || 0) + 1; b.siftDrawn = []; b.siftReason = 'swipe';
-    b.logs.push('🗡 Swipe: choose a card to discard.'); save(); renderBattle();
+    b.logs.push('🗡 Swipe: choose a card to discard.'); save(); renderBattle(); swipePopup(b);
   }
   return r;
 };
+// Round 245 (owner request: it wasn't clear when a Swipe happens): the turn after a Swipe opens with a
+// pop-up that says who swiped and for how much, and shows your hand to pick the card to discard.
+// Closing it leaves the choice on the battle screen as before. The simulator's bot skips it.
+function swipePopupHTML(b) {
+  const w = b.swipeBy || { name: b.enemy.name, hurt: 0 };
+  return '<div class="eyebrow">🗡 SWIPE</div><h2>' + w.name + ' swiped at you</h2><p>While gathering energy it lashed out for <b>' + w.hurt + ' HP</b>'
+    + (w.blocked ? ' (' + w.blocked + ' blocked)' : '') + '. <b>Choose a card to discard.</b> Then play your turn as usual.</p><div class="cards swipe-pick" id="swipePick"></div>';
+}
+function swipePopup(b = state && state.battle) {
+  if (!b || globalThis.POLICY || typeof openMenu !== 'function' || typeof siftPending !== 'function' || !siftPending(b) || b.siftReason !== 'swipe') return false;
+  openMenu(swipePopupHTML(b));
+  const host = typeof $ === 'function' && $('swipePick'); if (!host || !host.append) return true;
+  for (const i of siftChoices(b)) {
+    const c = b.hand[i], uid = c.uid;
+    host.append(cardElement(c, () => { const at = b.hand.findIndex(x => x.uid === uid); if (at >= 0 && siftDiscard(at)) closeMenu(); }));
+  }
+  return true;
+}
 const intentBubbleBeforeSwipe = intentBubble;
 intentBubble = function (plan, cls, label, frozen) {
   const html = intentBubbleBeforeSwipe(plan, cls, label, frozen);

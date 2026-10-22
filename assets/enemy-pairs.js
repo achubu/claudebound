@@ -87,7 +87,7 @@ function pairMateActs(b) {
     if (plan.kind === 'silenced') b.logs.push(e.name + ' is silenced.');
     else if (plan.kind === 'charge') {
       b.logs.push(e.name + ': ' + plan.name + '. A charged strike is coming.');
-      if (plan.swipe) { const l = hit(plan.swipe); lost += l; swipe = true; b.logs.push('🗡 ' + e.name + ' swipes: ' + l + ' HP.'); }
+      if (plan.swipe) { const l = hit(plan.swipe); lost += l; swipe = true; b.swipeBy = { name: e.name, hurt: l }; b.logs.push('🗡 ' + e.name + ' swipes: ' + l + ' HP.'); }
     } else if (plan.kind === 'guard') { e.guard = 5; b.logs.push(e.name + ': Block 5 from next turn.'); }
     else if (plan.damage > 0) {
       if (plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter) { e.hp = Math.max(0, e.hp - 6); b.counter = null; b.logs.push('Prismatic Counter cancels ' + e.name + '\'s charged strike. 6 damage returned.'); }
@@ -119,7 +119,7 @@ endTurn = function () {
   if (!state.hp) { loseBattle(); save(); renderBattle(); return; }
   const r = endTurnBeforePairs.apply(this, arguments);
   if (swipe && state.battle === b && b.phase === 'fight' && b.turn > turn && b.hand.length) {
-    b.siftPick = (b.siftPick || 0) + 1; b.siftDrawn = []; b.siftReason = 'swipe'; save(); renderBattle();
+    b.siftPick = (b.siftPick || 0) + 1; b.siftDrawn = []; b.siftReason = 'swipe'; save(); renderBattle(); if (typeof swipePopup === 'function') swipePopup(b);
   }
   return r;
 };

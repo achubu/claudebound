@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 245: a pop-up when a Swipe makes you discard
+
+- The owner found it unclear when a Swipe happens. Now the turn after one opens with a pop-up:
+  "<enemy> swiped at you", how many HP it took (and how much was blocked), and your hand to pick
+  the card to discard.
+- Clicking a card discards it and closes the pop-up. Closing the pop-up without picking leaves the
+  choice on the battle screen as before. Pair partners' swipes open it too; the simulator's bot
+  skips it (`swipePopup` in `assets/charge-swipe.js`).
+- `charge-swipe` test checks the pop-up's text; checked in the browser on desktop and phone.
+
 ## Round 243: pairs of enemies from the Sky Isles on
 
 - The owner asked for regular enemies that are harder without being boring or too hard. Of the

@@ -13,7 +13,7 @@ const b=state.battle; b.enemy.hp=b.enemy.maxHp=999; b.enemy.attack=20;
 const t=[...Array(12).keys()].find(t=>t>0&&enemyPlan(b,t).kind==='charge'); b.turn=t; const plan=enemyPlan(b);
 const o={ name: plan.name, swipe: plan.swipe, bubble: intentBubble(plan,'now','x',false) };
 b.hand=[]; b.block=2; state.hp=state.maxHp; endTurn();
-o.lost=state.maxHp-state.hp; o.pending=siftPending(b); o.reason=b.siftReason; o.choices=siftChoices(b).length; o.hand=b.hand.length;
+o.lost=state.maxHp-state.hp; o.popup=swipePopupHTML(b); o.pending=siftPending(b); o.reason=b.siftReason; o.choices=siftChoices(b).length; o.hand=b.hand.length;
 const blocked=(playCard(0), b.hand.length); o.blocked=blocked===o.hand;
 const gone=b.hand[0].uid; siftDiscard(0); o.after={ pending: siftPending(b), discarded: b.discard.some(c=>c.uid===gone), reason: b.siftReason };
 // A frozen enemy doesn't swipe.
@@ -24,6 +24,7 @@ assert(r.bubble.includes('🗡 Swipe: 6 damage') && /discard 1 card/.test(r.bubb
 assert.strictEqual(r.lost, 4, 'the swipe is blocked as usual (6 - 2 Block)');
 assert(r.pending && r.reason === 'swipe' && r.choices === r.hand && r.hand > 0, 'next turn you choose a card to discard (any card)');
 assert(r.blocked, 'no card can be played before discarding');
+assert(/swiped at you/.test(r.popup) && /4 HP/.test(r.popup) && /Choose a card to discard/.test(r.popup), 'Round 245: a pop-up says who swiped, for how much, and asks for the discard');
 assert(!r.after.pending && r.after.discarded && !r.after.reason, 'the chosen card is discarded and play goes on');
 assert(r.frozen.lost === 0 && !r.frozen.pending, 'a frozen enemy does not swipe');
 console.log('charge-swipe ok');
