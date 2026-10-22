@@ -146,7 +146,7 @@ renderBattle = function () {
   const o = b.pair.other.enemy, alive = o.hp > 0;
   const mate = document.createElement('button'); mate.type = 'button'; mate.className = 'pair-mate' + (alive ? '' : ' fallen');
   mate.innerHTML = '<span class="pm-info"><b>' + o.name + '</b><span class="meter enemy"><span style="width:' + (o.hp / o.maxHp * 100) + '%"></span><i class="meter-label">' + o.hp + '/' + o.maxHp + '</i></span>'
-    + '<small>' + (alive ? '<span class="pm-long">🎯 Click to target</span><span class="pm-short">🎯 Target</span>' + (o.guard ? ' · ◈ ' + o.guard : '') + (b.pair.other.poison ? ' · ☣ ' + b.pair.other.poison : '') + (b.pair.other.burnTurns > 0 ? ' · 🔥' : '') : 'Defeated') + '</small></span>';
+    + '<small>' + (alive ? '<span class="pm-long">🎯 Click to target</span><span class="pm-short">🎯 Target</span>' + (o.armor ? ' · 🛡 ' + o.armor : '') + (o.guard ? ' · ◈ ' + o.guard : '') + (b.pair.other.poison ? ' · ☣ ' + b.pair.other.poison : '') + (b.pair.other.burnTurns > 0 ? ' · 🔥' : '') : 'Defeated') + '</small></span>';
   mate.disabled = !alive; mate.onclick = () => pairSwitch();
   const wrap = document.createElement('div'); wrap.className = 'pair-row'; side.parentNode.insertBefore(wrap, side); wrap.append(side, mate);
   if (alive) {
