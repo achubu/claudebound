@@ -2,7 +2,8 @@
 // =====================================================================
 // Round 243 (owner request): PAIRS. From the Sky Isles on, some regular patrols are two enemies at
 // once (a nearby species joins them; the map shows ×2). Round 247: 70% of regular patrols (was half),
-// and on the map the two walk together, the partner full size just behind and beside. Both act every turn; you choose which one your
+// and on the map the two walk together: the partner full size, trailing right behind the leader on
+// the side it walks away from, side by side with a small gap and never overlapping (Round 248). Both act every turn; you choose which one your
 // cards hit by clicking its panel (the target), and when one falls the other fights on alone. Each of
 // the two is weaker than a lone enemy (PAIR.hp, PAIR.attack), and the fight gives more XP.
 //
@@ -190,6 +191,17 @@ renderWorld = function () {
   });
   return out;
 };
+// The patrol loop turns the leader's sprite (its --enemy-facing); the partner follows on the far side.
+if (typeof requestAnimationFrame === 'function' && typeof document !== 'undefined' && document.querySelectorAll) {
+  const followFacing = () => {
+    document.querySelectorAll('#world .enemy-node.pair-node').forEach(n => {
+      const lead = n.querySelector('.monster-sprite'), f = lead && lead.style.getPropertyValue('--enemy-facing');
+      if (f && n.dataset.facing !== f) { n.dataset.facing = f; n.style.setProperty('--enemy-facing', f); }
+    });
+    requestAnimationFrame(followFacing);
+  };
+  requestAnimationFrame(followFacing);
+}
 if (typeof document !== 'undefined' && document.createElement && document.head) {
   const st = document.createElement('style');
   st.textContent = '#battleModal .pair-row{display:flex;gap:6px;min-width:0}#battleModal .pair-row>.compact-side.enemy{flex:1 1 60%;min-width:0;outline:2px solid #f5c86a;outline-offset:-2px;border-radius:10px}'
@@ -198,6 +210,6 @@ if (typeof document !== 'undefined' && document.createElement && document.head) 
     + '#battleModal .pair-mate .pm-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}#battleModal .pair-mate b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#battleModal .pair-mate small{font-size:10px;color:#e8c9a0}'
     + '#battleModal .pair-mate .meter{height:12px}#battleModal .pair-mate .pm-short{display:none}'
     + '@media(max-width:560px){#battleModal .pair-row>.compact-side.enemy{flex-basis:55%}#battleModal .pair-mate{flex-basis:45%;padding:4px}#battleModal .pair-mate b{font-size:11px;white-space:normal;line-height:1.15}#battleModal .pair-mate .pm-long{display:none}#battleModal .pair-mate .pm-short{display:inline}}'
-    + '.enemy-node .pair-ghost{position:absolute;left:-62%;top:14%;width:100%;height:100%;z-index:-1;pointer-events:none}.enemy-node.pair-node{margin-left:22px}.enemy-node .pair-ghost>*{width:100%;height:100%;display:block}';
+    + '.enemy-node .pair-ghost{position:absolute;left:0;top:6%;width:100%;height:100%;pointer-events:none;transform:translateX(calc(var(--enemy-facing,1) * (-100% - 4px)))}.enemy-node .pair-ghost>*{width:100%;height:100%;display:block}';
   document.head.append(st);
 }

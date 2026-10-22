@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 248: a pair walks side by side, without overlapping
+
+- Owner request: a group's units should stand close together but never overlap.
+- The partner is drawn full size right beside the leader with a small gap (about 10px between the
+  sprites), on the side the leader walks away from.
+- The patrol loop turns only the leader's sprite (`--enemy-facing`); a small frame loop in
+  `enemy-pairs.js` copies that onto the pair, so the partner swaps sides when the patrol turns.
+- Checked in the browser: no overlap either way.
+
+## Round 247: more pairs, walking together
+
+- Owner request: pair the enemies so the two walk together in the room, and more pair patrols from
+  the Sky Isles on.
+- 70% of regular patrols from the Sky Isles on are now pairs (was half). On the map the partner
+  walks with its leader as one patrol, full size, instead of a small figure on its shoulder.
+- `enemy-pairs` test: it clears a Swipe's discard before switching target. With Round 246's offset
+  the partner can charge on turn 1, and its Swipe's discard rightly holds back a switch.
+
 ## Round 246: a pair's charged strikes come on different turns
 
 - The owner found it too hard to counter two charged strikes at once. The second enemy of a pair now
