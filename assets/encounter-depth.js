@@ -121,7 +121,7 @@ endTurn=function(){
    if(plan.element==='air')b.exposed=2;
   }
  }
- const ailment=(b.playerBurn>0?2:0)+(b.playerPoison||0);if(ailment){state.hp=Math.max(0,state.hp-ailment);b.logs.push('Lingering corruption: '+ailment+' HP.')}if(b.playerBurn>0)b.playerBurn--;
+ const ailment=(b.playerBurn>0?(b.burnPower||2):0)+(b.playerPoison||0);/* Round 237: Scorch burns harder (burnPower) */if(ailment){state.hp=Math.max(0,state.hp-ailment);b.logs.push('Lingering corruption: '+ailment+' HP.')}if(b.playerBurn>0)b.playerBurn--;
  b.block=0;
  const keep=b.hand.filter(c=>c.uid===b.savedUid&&(hasTalent('retainCore')||stat(c).counter)).slice(0,1);
  b.discard.push(...b.hand.filter(c=>!keep.includes(c)));b.hand=keep;b.savedUid=null;
