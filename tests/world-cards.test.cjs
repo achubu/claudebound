@@ -16,8 +16,9 @@ function setup(hand) {
 // Every world has a pool, and no card is in two of them (except the Prismatic Counter, Round 210).
 const seen = {};
 for (const w of WORLD_ORDER) {
+// Round 236: Sift is in every world too, like the Prismatic Counter.
   assert(Array.isArray(VARIETY_POOLS[w]) && VARIETY_POOLS[w].length >= 6, w + ' has its own reward pool');
-  for (const id of VARIETY_POOLS[w]) { assert(defs[id], id + ' exists'); if (id === 'counter') continue; assert(!seen[id], id + ' drops in both ' + seen[id] + ' and ' + w); seen[id] = w; }
+  for (const id of VARIETY_POOLS[w]) { assert(defs[id], id + ' exists'); if (id === 'counter' || id === 'sift') continue; assert(!seen[id], id + ' drops in both ' + seen[id] + ' and ' + w); seen[id] = w; }
   assert(VARIETY_POOLS[w].includes('counter'), 'Round 210: the Prismatic Counter drops in ' + w);
 }
 // Offers come from the world you are in.

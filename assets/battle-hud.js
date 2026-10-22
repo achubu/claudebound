@@ -51,7 +51,7 @@ renderBattle = function () {
   const youDebuffs = [
     b.bleed && ['🩸', 'Bleed ' + b.bleed, 'Lose ' + b.bleed + ' HP at the end of your turn; falls by 1 each turn.'],
     b.playerPoison && ['☣', 'Poison ' + b.playerPoison, 'Lose ' + b.playerPoison + ' HP at the end of each turn.'],
-    b.playerBurn > 0 && ['🔥', 'Burn · ' + t(b.playerBurn), 'Lose 2 HP at the end of each turn for ' + t(b.playerBurn) + '.'],
+    b.playerBurn > 0 && ['🔥', 'Burn ' + (b.burnPower || 2) + ' · ' + t(b.playerBurn), 'Lose ' + (b.burnPower || 2) + ' HP at the end of each turn for ' + t(b.playerBurn) + '.'],
     b.frail && ['⤓', 'Frail ' + b.frail, 'Your cards deal 25% less damage.'],
     b.shackledNow && ['⛓', 'Shackled', '1 less energy this turn.'],
     b.drained && ['💧', 'Drained', '1 less energy next turn.'],
@@ -77,7 +77,7 @@ renderBattle = function () {
       + (total ? '<b class="dot-hud ' + side + '" title="' + dot.filter(p => p[1]).map(p => p[0] + ' ' + p[1]).join(' + ') + ' = ' + total + ' damage at the end of each turn"><span class="dot-drop">☠</span><span class="dot-num">−' + total + '</span><span class="dot-cap">HP / turn</span></b>' : '');
     host.after(el);
   };
-  strip('you', youDebuffs, [['Bleed', b.bleed || 0], ['Burn', b.playerBurn > 0 ? 2 : 0], ['Poison', b.playerPoison || 0]]);
+  strip('you', youDebuffs, [['Bleed', b.bleed || 0], ['Burn', b.playerBurn > 0 ? (b.burnPower || 2) : 0], ['Poison', b.playerPoison || 0]]);
   strip('enemy', foeDebuffs, [['Poison', b.poison || 0], ['Burn', b.burnTurns > 0 ? (b.burn || 0) : 0]]);
   // Armor: a steel shield; Block: a glowing crystal.
   m.querySelectorAll('.compact-tags .armor-tag').forEach(t => { const n = hudNumber(t); t.classList.add('hud-stat', 'armor'); t.innerHTML = hudShield(n, t.title || ''); });

@@ -63,6 +63,7 @@ function botTurn(){
  botSide();if(!state.battle||state.battle.phase!=='fight')return;
  let guard=0;
  while(guard++<20&&state.battle&&state.battle.phase==='fight'){
+  if(typeof siftPending==='function'&&siftPending(b)){siftDiscard(siftDefaultIndex(b));continue} // Round 236: Sift's discard
   const plan=botIntent();
   let affordable=b.hand.map((c,i)=>({c,i,d:stat(c)})).filter(x=>x.d.cost<=b.energy&&!x.d.unplayable&&!(x.d.xCost&&b.energy<1));
   if(affordable.some(x=>!x.d.xCost))affordable=affordable.filter(x=>!x.d.xCost); // X-cost cards spend the leftover energy last
@@ -72,7 +73,7 @@ function botTurn(){
   const lethal=affordable.find(x=>dmgOf(x)>0&&dmgOf(x)>=b.enemy.hp+(b.enemy.guard||0));
   if(lethal){playCard(lethal.i);continue}
   if((plan.kind==='charge'||plan.kind==='elemental')&&!b.counter){const cc=affordable.find(x=>x.d.counter);if(cc){playCard(cc.i);continue}}
-  const threat=(plan.kind==='elemental'&&b.counter)?0:Math.max(0,(plan.damage||0)-talentRank('plating'));
+  const threat=(plan.kind==='elemental'&&b.counter)?0:Math.max(0,(plan.damage||0)-(plan.shear?0:talentRank('plating'))); // Round 237: a Sky Isles Shear ignores Plating
   const mustBlock=globalThis.POLICY==='race'?(threat-b.block>=state.hp||threat>=state.maxHp*.4):threat-b.block>0;
   if(mustBlock&&threat-b.block>0){const bc=affordable.filter(x=>x.d.block>0).sort((a,c)=>c.d.block-a.d.block)[0];if(bc){playCard(bc.i);continue}}
   if(state.hp<state.maxHp*.5){const hc=affordable.find(x=>x.d.heal>0);if(hc){playCard(hc.i);continue}}

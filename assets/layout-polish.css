@@ -133,3 +133,5 @@ body:not(.touch-mode) #touch{display:none}
 #battleModal .aether-panel .aether-pip,#battleModal .aether-panel i{width:9px!important;height:9px!important}
 /* Round 225: the encounter and the element share the top line */
 #battleModal .combat-tools.with-encounter{display:block}#battleModal .combat-tools .encounter-line + p{display:inline;margin:0!important}
+/* Round 239: a gap before the talent buttons (Overdrive, Echo, Overload) on the encounter line */
+#battleModal .combat-tools > button.ability{margin-left:8px}

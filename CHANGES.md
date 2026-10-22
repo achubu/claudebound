@@ -3496,6 +3496,172 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 243: pairs of enemies from the Sky Isles on
+
+- The owner asked for regular enemies that are harder without being boring or too hard. Of the
+  options offered, they chose pairs of enemies, starting in the Sky Isles, with a new battle
+  tutorial and without making the battle screen taller.
+- `assets/enemy-pairs.js`:
+  - **Which patrols:** half of the regular patrols in the Sky Isles, Elaris, Vespera and
+    Chronospire are two enemies (`pairMateFor`; fixed per patrol and journey). The partner is a
+    species from a neighbouring zone. Bosses, mini-bosses and elites never pair.
+  - **On the map:** the partner stands beside the patrol, with "×2 · A + B" in its name.
+  - **In battle:**
+    - Both act every turn. Block and Armor protect you from both.
+    - Your cards and the effects on an enemy (Burn, Poison, Weaken, Freeze, Hack, the Prismatic
+      Counter) apply to your target, which you switch by clicking the other panel.
+    - When one falls the other fights on. Beating both wins, with 1.5× XP.
+  - **How it runs:** the target lives in the usual battle fields. The other enemy's fields wait in
+    `b.pair.other` and are swapped in (`withPairMate`) to read its intent or let it act
+    (`pairMateActs`: attacks, charged strikes, Block, afflictions, Swipe, Shear). It acts first at
+    the end of your turn, then the turn resolves as usual.
+  - **Screen:** the same height or less. The enemy panel splits in two side by side (the target
+    outlined in gold), and the two intent bubbles show each enemy's next move instead of one
+    enemy's next two.
+  - **Tutorial:** the first pair fight opens a short guide (`state.tips.pairs`).
+- **Strength:** each of the pair has part of a lone enemy's HP and attack:
+  - Sky Isles 70%/78%
+  - Elaris 72%/80%
+  - Vespera 82%/87%
+  - Chronospire 72%/80%
+
+  Tuned with the Difficulty lab on regular encounters with every patrol a pair. Typical pair-fight
+  win rates: Sky Isles 68%, Elaris 67%, Vespera 73%, Chronospire 73%, against 93-100% for single
+  enemies. With half the patrols paired, regular encounters come to roughly 80-85%.
+- **Known limit:** when your target dies at the end of a turn from Burn or Poison, the other enemy
+  can act twice that turn.
+- New `tests/enemy-pairs.test.cjs`.
+
+## Round 242: enemies swipe while they charge
+
+- The owner asked for something to happen during an enemy's charge-up turn, for example a swipe that
+  forces a discard.
+- 🗡 **Swipe** (`assets/charge-swipe.js`):
+  - On a charge turn ("Gathering … energy") the enemy now swipes for 30% of its attack, rounded up.
+    Block and Armor apply as usual.
+  - At the start of your next turn you discard 1 card of your choice. It uses Sift's discard screen
+    (any card in hand may go; nothing else can be played until you choose).
+  - The intent shows it a turn ahead. Frozen or silenced enemies don't swipe.
+  - Neon Aftermath's patrols have no element and never charge, so there it comes only from its
+    elemental bosses. From Solaris on, every charging creature swipes.
+- `cycle-card.js` labels the discard by its cause (`b.siftReason`: Sift or Swipe).
+- New `tests/charge-swipe.test.cjs`.
+
+## Round 241: Tailwind cards show their printed numbers outside the fight
+
+- The owner reported Tailwind cards showing wrong values on the reward page and elsewhere.
+- Cause: Tailwind, Growth and Discharge add their live bonus whenever a battle is loaded. The reward
+  screen opens while the finished battle is still loaded, so a Gust Chain on offer added last turn's
+  Tailwind to its damage.
+- Fix (`liveBattleCard` in `assets/world-mechanics.js`): the live bonus applies only during a fight
+  and only to that fight's own cards (hand, draw pile, discard, exhaust, or the card being played).
+  Everywhere else a card shows its printed numbers (after the Round 240 boost in later worlds).
+- New `tests/mech-live-values.test.cjs`.
+
+## Round 240: attack cards +25% after Neon Aftermath
+
+- Owner request: attack cards deal 25% more damage in every world after Neon Aftermath.
+- `assets/attack-boost.js` scales each attack card's printed damage numbers (rounded) when a later
+  world is configured, and puts them back in Neon Aftermath. So text, live bonuses and the damage
+  dealt agree:
+  - base damage;
+  - Tempest Surge's damage per energy;
+  - the damage in Tailwind, Follow-through, Amplify and Choose-one modes.
+
+  Strike 6 → 8, Cleave 13 → 16, Tempest Surge 7 → 9 per energy, Gust Chain's Tailwind +2 → +3.
+- Not scaled:
+  - **Bulwark Bash** (it hits with your Block): the owner counts it as a defensive card.
+  - **Defense cards and Skills:** Dusk Protocol's damage mode is unchanged.
+  - **Block on hybrid attacks:** Silver Riposte and Lunar Edict scale their damage only.
+  - **Talent, crystal and Boost bonuses:** added on top as before.
+- Difficulty lab, typical win rate over 16 builds × 2 styles, before Round 237 → with Rounds
+  237 and 240 (before Swipe, Round 242):
+  - Mini-bosses mostly rose above their 34-50% target: Stormbell Warden 48 → 88, Tidebound Warden
+    46 → 77, Gale Sovereign 40 → 59, Arc Sentinel 32 → 55, Resonant Phantom 47 → 66, Clockwarden
+    36 → 63. Featherfall Matriarch 44 → 36 and Paradox Twin 41 → 47 held.
+  - Final bosses: Zenith Roc 28 → 40, Bloom Tyrant 33 → 61, Tempest Colossus 41 → 30, Chronarch
+    29 → 33 (target 22-36).
+  - Regular enemies: 90-100% almost everywhere.
+
+  Boss HP was not retuned; that is left to the owner.
+- New `tests/attack-boost.test.cjs`.
+
+## Round 239: Overdrive's button
+
+- Owner request: the Overdrive button on the battle screen's encounter line is renamed
+  "Overdrive - Double Value" (it was "Overdrive ×2"). It no longer sits right against the " · "
+  before it: talent buttons on that line get an 8px gap (`layout-polish.css`). Echo and Overload
+  get the gap too.
+
+## Round 238: mechanic tags on the card, so the Deck screen shows them
+
+- The owner asked for the Tailwind tag right after the card's description, because the Deck screen
+  didn't show it. Round 229 drew it as a badge above the card, in battle only.
+- Every world-mechanic card now carries its tag (⌁ HACK, ☀ HEAT, 🪶 TAILWIND, 🌱 GROWTH,
+  ⚡ STORMCHARGE) as a small pill at the end of its rules text, wherever it is drawn: hand, Deck
+  screen, rewards, merchant. Chronospire's ⏳ Suspend cards keep their own markings.
+- It is added in a `cardHTML` wrapper in `assets/world-mechanics.js`. In battle a Growth card's
+  pill still shows how far it has grown. The badge above the card and its spacers are gone.
+- Tests: `mech-badge` checks the tag after the description in battle and in the Deck screen, on
+  desktop and phone.
+
+## Round 237: the Sky Isles push back on turtling: Shear and stronger damage over time
+
+- **Why:** the owner found the Sky Isles too easy with a defensive build (save file at player
+  level 25: Reactive Plating 5, which is 8 Armor, plus Block cards, gear and potions). The
+  simulator played that save through every Sky Isles fight:
+  - Regular enemies cost 0-2 HP, fights took 8-14 turns, and boss fights took 33 turns.
+  - Sky Isles hits are 9-12, so 8 Armor took most of every hit before Block.
+- **Options offered:** Shear, a rising storm, paying off defence, or an optional challenge. The
+  owner chose Shear plus stronger statuses instead of the storm.
+- 🌪 **Shear** (`assets/sky-storm.js`, Sky Isles only):
+  - Every 3rd turn's attack ignores your Armor (Reactive Plating). Block from cards still stops it,
+    and the intent says so.
+  - While the turn resolves, the outermost `endTurn` sets `b.shearing`, and `scaledRank('plating')`
+    reads 0.
+  - The sim bot plans its Block for it.
+- 🔥☣🩸 **Stronger damage over time, Sky Isles onward** (`assets/status-dots.js`). Armor and Block
+  can't stop any of it; cleansing (Purifying Light, Static Shield) or healing answers it.
+  - **Scorch** (new): Burn N for 3 turns, refreshing, not stacking (2, 2, 3, 4, 5, 6 by world).
+    It uses the existing Burn, which now has a strength (`b.burnPower`, shown in the battle tags).
+    A charged fire strike still burns for 2.
+  - **Venom** (new): Poison +N, stacking to 3×N, until cleansed (1, 1, 2, 2, 3, 3).
+  - **Bleed** now grows past Solaris: 2, 3, 4, 5, 6, 7.
+  - Sky Isles enemies trade Crush and Barrage (both blunted by Armor) for these: Sunfeather Drake
+    Scorch, Gale Harpy Bleed, Stormbell Warden Shackle + Scorch, Featherfall Matriarch Bleed +
+    Headwind, Zenith Roc Empower + Scorch + Bleed.
+  - Some enemies in Elaris, Vespera and Chronospire carry them too.
+- **Effect on the owner's save:**
+  - In a Sunfeather Drake fight, Scorch did 15 damage through Armor and Block, and Mend healed it
+    back.
+  - Gale Harpy and Thunderhorn Ram fights now cost about 13-22 HP of 59.
+- The rising storm (enemy hits growing late in a fight) was built and measured, then dropped. Every
+  setting killed the slow defensive deck in long boss fights.
+- `tests/sky-storm.test.cjs`.
+
+## Round 236: Sift, a deck-cycling card in every world
+
+- The owner asked for a card in every world that cycles the deck: 0 energy, draw 1, discard 1 of
+  your choice. While it was being built they added that the card just drawn is not a choice.
+- **Sift** (⇄, Skill, 0 energy):
+  - Draw 1 card, then discard 1 card you already held, your choice.
+  - Upgrades: +1 Aether at level 1, draw 2 at level 2, both at level 3.
+  - Like the Prismatic Counter, it is in every world's card rewards. New `assets/cycle-card.js`.
+- **The choice:**
+  - The hand waits: clicking a card you already held discards it, and the drawn card is dimmed
+    and labelled "JUST DRAWN".
+  - Nothing else can be played until you choose. Ending the turn ends the choice, since the hand
+    is discarded anyway.
+  - With nothing drawn, or only the drawn card in hand, there is no choice.
+  - Discarding is not playing: no recap line, no Follow-through, no Pressure.
+- It loads after `touch-controls` and `layout-polish`, so the choice owns the hand's taps in touch
+  mode too, and the touch "Play" button is hidden while choosing.
+- The sim bot discards the weakest card it may (`siftDefaultIndex`: junk first). The Difficulty
+  lab's decks don't include Sift, so its numbers are unchanged.
+- No painting yet: the card shows its ⇄ icon until art comes. The compendium's game frame is
+  bumped to `round236`.
+- Tests: new `tests/sift.test.cjs`; checked in the browser on desktop and phone.
+
 ## Round 235: new Sky Isles tiles with glass terraces
 
 - The owner painted six Sky Isles tiles from the Round 232 prompts. They are in the same city,

@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 235) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 243) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -20,7 +20,9 @@ change set.
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
     `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `pressure`, `pickups`, `cardsmith`, `gear`, `waypoints` (Round 229: each world's first Nexus Waypoint stands three rooms in, alone in its room), `deck-choice` (Round 233: new cards wait in the collection; +1 deck slot per boss), `room-preload`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
-    on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), `battle-recap`
+    on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), `cycle-card` (Round 236: Sift and
+    its discard choice), `sky-storm` and `status-dots` (Round 237), `attack-boost` (Round 240), `charge-swipe` (Round 242),
+    `enemy-pairs` (Round 243: two enemies at once from the Sky Isles on), `battle-recap`
     (Round 211: the final turn on the victory screens), `tutorial` (Round 226: a new journey's guide and
     starting-deck pick; it hangs off the New journey buttons, not `newGame()`), then
     `god-mode` (Round 198: any card wins, all waypoints and maps open; while it is on, writes to the
@@ -88,7 +90,8 @@ change set.
   the tapped item opens (Round 184).
 - **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.
-  Each has 4 cards in its world's pool, an arrival gift of 2 (city: first win), a battle tray with a guide,
+  Each has 4 cards in its world's pool, an arrival gift of 2 (city: first win), a battle tray with a guide, a tag after
+  each card's description (Round 238),
   and an affliction that works against it.
 - **⚔ Pressure** (Round 226, `assets/pressure.js`): on a turn where you gain no Block from a card, every
   `pressurePer()` damage you deal (2 in the first two worlds, rising to 6 late) takes 1 off the enemy's
