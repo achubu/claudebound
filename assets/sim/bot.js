@@ -63,6 +63,7 @@ function botTurn(){
  botSide();if(!state.battle||state.battle.phase!=='fight')return;
  let guard=0;
  while(guard++<20&&state.battle&&state.battle.phase==='fight'){
+  if(typeof siftPending==='function'&&siftPending(b)){siftDiscard(siftDefaultIndex(b));continue} // Round 236: Sift's discard
   const plan=botIntent();
   let affordable=b.hand.map((c,i)=>({c,i,d:stat(c)})).filter(x=>x.d.cost<=b.energy&&!x.d.unplayable&&!(x.d.xCost&&b.energy<1));
   if(affordable.some(x=>!x.d.xCost))affordable=affordable.filter(x=>!x.d.xCost); // X-cost cards spend the leftover energy last

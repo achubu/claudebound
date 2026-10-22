@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 236: Sift, a deck-cycling card in every world
+
+- The owner asked for a card in every world that cycles the deck: 0 energy, draw 1, discard 1 of
+  your choice. While it was being built they added that the card just drawn is not a choice.
+- **Sift** (⇄, Skill, 0 energy):
+  - Draw 1 card, then discard 1 card you already held, your choice.
+  - Upgrades: +1 Aether at level 1, draw 2 at level 2, both at level 3.
+  - Like the Prismatic Counter, it is in every world's card rewards. New `assets/cycle-card.js`.
+- **The choice:**
+  - The hand waits: clicking a card you already held discards it, and the drawn card is dimmed
+    and labelled "JUST DRAWN".
+  - Nothing else can be played until you choose. Ending the turn ends the choice, since the hand
+    is discarded anyway.
+  - With nothing drawn, or only the drawn card in hand, there is no choice.
+  - Discarding is not playing: no recap line, no Follow-through, no Pressure.
+- It loads after `touch-controls` and `layout-polish`, so the choice owns the hand's taps in touch
+  mode too, and the touch "Play" button is hidden while choosing.
+- The sim bot discards the weakest card it may (`siftDefaultIndex`: junk first). The Difficulty
+  lab's decks don't include Sift, so its numbers are unchanged.
+- No painting yet: the card shows its ⇄ icon until art comes. The compendium's game frame is
+  bumped to `round236`.
+- Tests: new `tests/sift.test.cjs`; checked in the browser on desktop and phone.
+
 ## Round 235: new Sky Isles tiles with glass terraces
 
 - The owner painted six Sky Isles tiles from the Round 232 prompts. They are in the same city,
