@@ -244,18 +244,19 @@ renderBattle = function () {
     const help = box.querySelector('.mt-help'); if (help) help.onclick = () => { const open = !b.mechHelp[mech.key]; for (const k in b.mechHelp) b.mechHelp[k] = false; b.mechHelp[mech.key] = open; renderBattle(); if (open) { const g = m.querySelector('[data-mechanic-guide="' + mech.key + '"]'); if (g && g.scrollIntoView) g.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } };
     const close = $('mechClose-' + mech.key); if (close) close.onclick = () => { b.mechHelp[mech.key] = false; renderBattle(); };
   }
-  // Badge the mechanic cards in hand. Round 229: the badge sits above the card, not on it; the other
-  // cards get an invisible spacer of the same height so the hand stays level.
-  const wraps = [...document.querySelectorAll('#hand .card-wrap')];
-  let badged = false;
-  wraps.forEach((wrap, i) => {
-    const c = b.hand[i], mech = c && mechanicOfCard(c.id), card = wrap.querySelector('.card');
-    if (!mech || !card || wrap.querySelector('.mech-badge')) return;
-    const badge = document.createElement('span'); badge.className = 'mech-badge'; badge.style.setProperty('--mc', mech.color);
-    const g = mech.key === 'growth' ? growthOf(b, c) : 0;
-    badge.textContent = mech.icon + ' ' + mech.name.toUpperCase() + (g ? ' +' + g : ''); wrap.insertBefore(badge, card); badged = true;
-  });
-  if (badged) wraps.forEach(wrap => { const card = wrap.querySelector('.card'); if (card && !wrap.querySelector('.mech-badge')) { const s = document.createElement('span'); s.className = 'mech-badge mech-badge-space'; s.textContent = '·'; s.setAttribute('aria-hidden', 'true'); wrap.insertBefore(s, card); } });
+  // Round 238: the mechanic tag now sits on the card itself, after its description (cardHTML below),
+  // so it shows in the deck viewer too; it replaces Round 229's badge above the card.
+};
+// Round 238 (owner request): every mechanic card names its mechanic right after its description, as a
+// small pill, wherever the card is drawn (hand, Deck screen, rewards). In battle a Growth card's pill
+// shows how much it has grown.
+const cardHTMLBeforeMechanics = cardHTML;
+cardHTML = function (c) {
+  const html = cardHTMLBeforeMechanics.apply(this, arguments), mech = c && mechanicOfCard(c.id);
+  if (!mech) return html;
+  const b = typeof state === 'object' && state && state.battle, g = b && mech.key === 'growth' && b.hand && b.hand.some(x => x.uid === c.uid) ? growthOf(b, c) : 0;
+  const tag = '<span class="mech-tag" style="--mc:' + mech.color + '">' + mech.icon + ' ' + mech.name.toUpperCase() + (g ? ' +' + g : '') + '</span>';
+  return html.replace('</span><span class="upgrade-row">', tag + '</span><span class="upgrade-row">');
 };
 const mechStyles = document.createElement('style');
 mechStyles.textContent = '.mech-tray{margin:8px 0;padding:8px 10px;border:1px solid var(--mc);border-radius:12px;background:linear-gradient(135deg,#101a26,#0a1018);box-shadow:inset 0 0 0 1px #ffffff0d,0 0 14px color-mix(in srgb,var(--mc) 25%,transparent);color:#e6eef6}'
@@ -264,7 +265,7 @@ mechStyles.textContent = '.mech-tray{margin:8px 0;padding:8px 10px;border:1px so
   + '.mech-guide{margin-top:8px;padding:10px 12px;border-radius:10px;background:#070c12;border:1px dashed var(--mc)}.mg-head{display:flex;align-items:center;justify-content:space-between}.mg-head b{color:var(--mc);font:800 14px system-ui}'
   + '.mg-steps{list-style:none;margin:8px 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}.mg-steps li{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;background:#121c28;font:13px/1.35 system-ui;color:#e6eef6}'
   + '.mg-n{flex:0 0 auto;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--mc);color:#0a1018;font:900 13px system-ui}.mg-tip{margin:0;font:12px/1.35 system-ui;color:#b8c8d8}'
-  + '.mech-badge{display:block;width:max-content;margin:0 auto 4px;position:relative;z-index:3;padding:2px 7px;border-radius:999px;background:var(--mc);color:#0a1018;font:900 10px/1.3 system-ui;letter-spacing:.06em;box-shadow:0 0 8px color-mix(in srgb,var(--mc) 70%,transparent)}.mech-badge-space{visibility:hidden}'
+  + '.mech-tag{display:inline-block;margin:2px 0 0 4px;padding:1px 6px;border-radius:999px;background:var(--mc);color:#0a1018;font:900 9px/1.4 system-ui;letter-spacing:.06em;vertical-align:middle;white-space:nowrap;box-shadow:0 0 6px color-mix(in srgb,var(--mc) 60%,transparent)}'
   + '.menu-mech .mech-guide{--mc:inherit}';
 document.head.append(mechStyles);
 

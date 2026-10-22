@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 238: mechanic tags on the card, so the Deck screen shows them
+
+- The owner asked for the Tailwind tag right after the card's description, because the Deck screen
+  didn't show it. Round 229 drew it as a badge above the card, in battle only.
+- Every world-mechanic card now carries its tag (⌁ HACK, ☀ HEAT, 🪶 TAILWIND, 🌱 GROWTH,
+  ⚡ STORMCHARGE, ⏳ SUSPEND) as a small pill at the end of its rules text, wherever it is drawn:
+  hand, Deck screen, rewards, merchant.
+- It is added in a `cardHTML` wrapper in `assets/world-mechanics.js`. In battle a Growth card's
+  pill still shows how far it has grown. The badge above the card and its spacers are gone.
+- Tests: `mech-badge` checks the tag after the description in battle and in the Deck screen, on
+  desktop and phone.
+
 ## Round 236: Sift, a deck-cycling card in every world
 
 - The owner asked for a card in every world that cycles the deck: 0 energy, draw 1, discard 1 of

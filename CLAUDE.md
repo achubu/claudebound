@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 236) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 238) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -89,7 +89,8 @@ change set.
   the tapped item opens (Round 184).
 - **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.
-  Each has 4 cards in its world's pool, an arrival gift of 2 (city: first win), a battle tray with a guide,
+  Each has 4 cards in its world's pool, an arrival gift of 2 (city: first win), a battle tray with a guide, a tag after
+  each card's description (Round 238),
   and an affliction that works against it.
 - **⚔ Pressure** (Round 226, `assets/pressure.js`): on a turn where you gain no Block from a card, every
   `pressurePer()` damage you deal (2 in the first two worlds, rising to 6 late) takes 1 off the enemy's
