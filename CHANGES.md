@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 239: Overdrive's button
+
+- Owner request: the Overdrive button on the battle screen's encounter line is renamed
+  "Overdrive - Double Value" (it was "Overdrive ×2"). It no longer sits right against the " · "
+  before it: talent buttons on that line get an 8px gap (`layout-polish.css`). Echo and Overload
+  get the gap too.
+
 ## Round 238: mechanic tags on the card, so the Deck screen shows them
 
 - The owner asked for the Tailwind tag right after the card's description, because the Deck screen
