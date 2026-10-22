@@ -19,9 +19,10 @@ o.start = { encounter: b.logs[0], a: b.enemy.name, m: b.pair.other.enemy.name, h
 // Turn 1: both act.
 b.hand = []; b.block = 0; b.enemy.attack = 10; b.pair.other.enemy.attack = 7; const t = b.turn; let hp = state.hp;
 const p1 = enemyPlan(b), p2 = withPairMate(b, () => enemyPlan(b)); endTurn();
+b.siftPick = 0; // a Swipe's discard would hold back the switch below
 o.turn1 = { lost: hp - state.hp, p1: p1.damage, p2: p2.damage, k1: p1.kind, k2: p2.kind, advanced: b.turn === t + 1 };
 // Block protects from both, in order.
-b.turn = 1; b.block = 999; hp = state.hp; endTurn(); o.blocked = hp - state.hp;
+b.turn = 1; b.block = 999; hp = state.hp; endTurn(); o.blocked = hp - state.hp; b.siftPick = 0;
 // Target switching swaps who your cards hit.
 const first = b.enemy.name; pairSwitch(); o.switched = b.enemy.name !== first && b.pair.other.enemy.name === first;
 b.hand = [make('cleave')]; b.energy = 3; const ta = b.enemy.hp, oa = b.pair.other.enemy.hp; playCard(0); o.hitTarget = b.enemy.hp < ta && b.pair.other.enemy.hp === oa;

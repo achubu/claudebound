@@ -1,7 +1,8 @@
 'use strict';
 // =====================================================================
 // Round 243 (owner request): PAIRS. From the Sky Isles on, some regular patrols are two enemies at
-// once (a nearby species joins them; the map shows ×2). Both act every turn; you choose which one your
+// once (a nearby species joins them; the map shows ×2). Round 247: 70% of regular patrols (was half),
+// and on the map the two walk together, the partner full size just behind and beside. Both act every turn; you choose which one your
 // cards hit by clicking its panel (the target), and when one falls the other fights on alone. Each of
 // the two is weaker than a lone enemy (PAIR.hp, PAIR.attack), and the fight gives more XP.
 //
@@ -14,7 +15,7 @@
 // intent bubbles show each enemy's next move. The first pair fight opens a short guide.
 // =====================================================================
 const PAIR_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
-const PAIR = { chance: 0.5, hp: 0.72, attack: 0.8, xp: 1.5, world: { sky: [0.7, 0.78], wilds: [0.72, 0.8], vespera: [0.82, 0.87], chronospire: [0.72, 0.8] } }; // tuned with the Difficulty lab (CHANGES.md)
+const PAIR = { chance: 0.7, hp: 0.72, attack: 0.8, xp: 1.5, world: { sky: [0.7, 0.78], wilds: [0.72, 0.8], vespera: [0.82, 0.87], chronospire: [0.72, 0.8] } }; // tuned with the Difficulty lab (CHANGES.md)
 // Each world's pair strength (share of a lone enemy's HP and attack), as [hp, attack]; others use PAIR.hp/attack.
 function pairScale(region = activeRegion) { const w = PAIR.world[region]; return w ? { hp: w[0], attack: w[1] } : { hp: PAIR.hp, attack: PAIR.attack }; }
 const PAIR_FIELDS = ['enemy', 'id', 'patternShift', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
@@ -197,6 +198,6 @@ if (typeof document !== 'undefined' && document.createElement && document.head) 
     + '#battleModal .pair-mate .pm-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}#battleModal .pair-mate b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#battleModal .pair-mate small{font-size:10px;color:#e8c9a0}'
     + '#battleModal .pair-mate .meter{height:12px}#battleModal .pair-mate .pm-short{display:none}'
     + '@media(max-width:560px){#battleModal .pair-row>.compact-side.enemy{flex-basis:55%}#battleModal .pair-mate{flex-basis:45%;padding:4px}#battleModal .pair-mate b{font-size:11px;white-space:normal;line-height:1.15}#battleModal .pair-mate .pm-long{display:none}#battleModal .pair-mate .pm-short{display:inline}}'
-    + '.enemy-node .pair-ghost{position:absolute;left:58%;top:22%;width:70%;height:70%;opacity:.95;pointer-events:none}.enemy-node .pair-ghost>*{width:100%;height:100%;display:block}';
+    + '.enemy-node .pair-ghost{position:absolute;left:-62%;top:14%;width:100%;height:100%;z-index:-1;pointer-events:none}.enemy-node.pair-node{margin-left:22px}.enemy-node .pair-ghost>*{width:100%;height:100%;display:block}';
   document.head.append(st);
 }
