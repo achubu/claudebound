@@ -3496,6 +3496,42 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 243: pairs of enemies from the Sky Isles on
+
+- The owner asked for regular enemies that are harder without being boring or too hard. Of the
+  options offered, they chose pairs of enemies, starting in the Sky Isles, with a new battle
+  tutorial and without making the battle screen taller.
+- `assets/enemy-pairs.js`:
+  - **Which patrols:** half of the regular patrols in the Sky Isles, Elaris, Vespera and
+    Chronospire are two enemies (`pairMateFor`; fixed per patrol and journey). The partner is a
+    species from a neighbouring zone. Bosses, mini-bosses and elites never pair.
+  - **On the map:** the partner stands beside the patrol, with "×2 · A + B" in its name.
+  - **In battle:**
+    - Both act every turn. Block and Armor protect you from both.
+    - Your cards and the effects on an enemy (Burn, Poison, Weaken, Freeze, Hack, the Prismatic
+      Counter) apply to your target, which you switch by clicking the other panel.
+    - When one falls the other fights on. Beating both wins, with 1.5× XP.
+  - **How it runs:** the target lives in the usual battle fields. The other enemy's fields wait in
+    `b.pair.other` and are swapped in (`withPairMate`) to read its intent or let it act
+    (`pairMateActs`: attacks, charged strikes, Block, afflictions, Swipe, Shear). It acts first at
+    the end of your turn, then the turn resolves as usual.
+  - **Screen:** the same height or less. The enemy panel splits in two side by side (the target
+    outlined in gold), and the two intent bubbles show each enemy's next move instead of one
+    enemy's next two.
+  - **Tutorial:** the first pair fight opens a short guide (`state.tips.pairs`).
+- **Strength:** each of the pair has part of a lone enemy's HP and attack:
+  - Sky Isles 70%/78%
+  - Elaris 72%/80%
+  - Vespera 82%/87%
+  - Chronospire 72%/80%
+
+  Tuned with the Difficulty lab on regular encounters with every patrol a pair. Typical pair-fight
+  win rates: Sky Isles 68%, Elaris 67%, Vespera 73%, Chronospire 73%, against 93-100% for single
+  enemies. With half the patrols paired, regular encounters come to roughly 80-85%.
+- **Known limit:** when your target dies at the end of a turn from Burn or Poison, the other enemy
+  can act twice that turn.
+- New `tests/enemy-pairs.test.cjs`.
+
 ## Round 242: enemies swipe while they charge
 
 - The owner asked for something to happen during an enemy's charge-up turn, for example a swipe that

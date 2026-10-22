@@ -14,7 +14,7 @@
 // intent bubbles show each enemy's next move. The first pair fight opens a short guide.
 // =====================================================================
 const PAIR_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
-const PAIR = { chance: 0.35, hp: 0.65, attack: 0.75, xp: 1.5, world: {} }; // tuned with the Difficulty lab (CHANGES.md)
+const PAIR = { chance: 0.5, hp: 0.72, attack: 0.8, xp: 1.5, world: { sky: [0.7, 0.78], wilds: [0.72, 0.8], vespera: [0.82, 0.87], chronospire: [0.72, 0.8] } }; // tuned with the Difficulty lab (CHANGES.md)
 // Each world's pair strength (share of a lone enemy's HP and attack), as [hp, attack]; others use PAIR.hp/attack.
 function pairScale(region = activeRegion) { const w = PAIR.world[region]; return w ? { hp: w[0], attack: w[1] } : { hp: PAIR.hp, attack: PAIR.attack }; }
 const PAIR_FIELDS = ['enemy', 'id', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
