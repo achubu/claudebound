@@ -7,7 +7,6 @@
 // TILE_WORLD_DATA[world].plazas). Neon Aftermath already does this with its hand-picked nooks.
 // A room whose painting has no such square keeps the old spot beside the road.
 // =====================================================================
-const PLAZA_GAP_MIN = 70; // how close a square may be to a patrol or another item before it is passed over
 function plazaSpots(key, region = activeRegion) {
   const t = region === 'elaris' ? (typeof SOLARIS_PLAZAS !== 'undefined' ? SOLARIS_PLAZAS : null)
     : typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA[region] ? TILE_WORLD_DATA[region].plazas : null;
@@ -29,7 +28,7 @@ function plazaFor(key, x, y, avoid = [], gap = 0) {
 const organicItemSpotBeforePlazas = organicItemSpot;
 organicItemSpot = function (key, x, y, avoid = [], gap = 0) {
   if (plazaSpots(key)) {
-    const p = plazaFor(key, x, y, avoid, gap) || (gap > PLAZA_GAP_MIN ? plazaFor(key, x, y, avoid, PLAZA_GAP_MIN) : null);
+    const p = plazaFor(key, x, y, avoid, gap); // each caller's own gap (points of interest keep 150px from patrols)
     if (p) return p;
   }
   return organicItemSpotBeforePlazas.apply(this, arguments);
@@ -40,17 +39,19 @@ organicBesideStreet = function (key, p) {
   if (isPlazaSpot(key, p)) return walkable(key, p.x, p.y) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, p));
   return organicBesideStreetBeforePlazas.apply(this, arguments);
 };
-// Patrols keep out of the squares, so what stands there is not right beside a fight.
-const PLAZA_PATROL_GAP = 90;
+// Patrols keep well clear of the squares (160px where the path allows, else 120 or 90), so what stands
+// there is not right beside a fight.
+const PLAZA_PATROL_GAPS = [160, 120, 90];
 const roomSpawnsBeforePlazas = roomSpawns;
 roomSpawns = function (key) {
   const list = roomSpawnsBeforePlazas.apply(this, arguments), spots = plazaSpots(key);
   if (!spots || !Array.isArray(list) || list.plazaPlaced) return list;
   const squares = spots.map(([x, y]) => ({ x, y })), placed = [];
   for (const s of list) {
-    if (squares.some(q => Math.hypot(q.x - s.x, q.y - s.y) < PLAZA_PATROL_GAP)) {
-      const p = organicSpot(key, s.x, s.y, squares.concat(placed), PLAZA_PATROL_GAP) || organicSpot(key, s.x, s.y, squares, PLAZA_PATROL_GAP);
-      if (p) { s.x = p.x; s.y = p.y; }
+    for (const gap of PLAZA_PATROL_GAPS) {
+      if (squares.every(q => Math.hypot(q.x - s.x, q.y - s.y) >= gap)) break;
+      const p = organicSpot(key, s.x, s.y, squares.concat(placed), gap) || organicSpot(key, s.x, s.y, squares, gap);
+      if (p) { s.x = p.x; s.y = p.y; break; }
     }
     placed.push({ x: s.x, y: s.y });
   }

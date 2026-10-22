@@ -19,7 +19,8 @@ for (const region of ['city','elaris','vespera']) {
     const st=organicItemStand(k,p);
     // Round 212: in Solaris and the Sky Isles items stand on the walkable ground, near its edge
     // (off it is buildings); elsewhere they stand just off the path.
-    if (itemsOnGround()) { if (!walkable(k,p.x,p.y)) bad.push(k+' '+t+' OFF the ground'); }
+    // Round 232: open squares beside the road are opened up to the walk mask.
+    if (itemsOnGround() || isPlazaSpot(k,p)) { if (!walkable(k,p.x,p.y)) bad.push(k+' '+t+' OFF the ground'); }
     else if (walkable(k,p.x,p.y)) bad.push(k+' '+t+' ON path');
     else if (!st || st.d>rad-8) bad.push(k+' '+t+' far '+(st&&st.d.toFixed(1)));
     // touch: route from the room's main pocket to a tap on the item
