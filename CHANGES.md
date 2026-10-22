@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 246: a pair's charged strikes come on different turns
+
+- The owner found it too hard to counter two charged strikes at once. The second enemy of a pair now
+  runs its move pattern offset (`b.patternShift`, read by the base `enemyPlan` in
+  `encounter-depth.js`), chosen when the fight starts (`staggerShift` in `enemy-pairs.js`) as the
+  first offset with no shared charged-strike turn over the next dozen turns.
+- So one enemy charges while the other attacks or guards, and a single Prismatic Counter can answer
+  each charged strike in turn. In every pair fight in all four worlds no turn has both charged
+  strikes (checked in `tests/enemy-pairs.test.cjs`).
+
 ## Round 245: a pop-up when a Swipe makes you discard
 
 - The owner found it unclear when a Swipe happens. Now the turn after one opens with a pop-up:

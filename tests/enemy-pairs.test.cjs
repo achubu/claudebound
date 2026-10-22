@@ -30,6 +30,11 @@ b.enemy.hp = 1; b.hand = [make('strike')]; b.energy = 3; playCard(0); o.oneDown 
 b.enemy.hp = 1; b.hand = [make('strike')]; b.energy = 3; playCard(0); o.win = { phase: b.phase };
 o.xp = (() => { const x = { enemy: { level: 5, boss: false, elite: false } }; const plain = xpReward(x); x.pair = {}; return [plain, xpReward(x)]; })();
 o.guide = pairGuideHTML();
+// Round 246: the two never land charged strikes on the same turn.
+let clash = 0; for (const w of ['sky', 'wilds', 'vespera', 'chronospire']) { newGame(); state.region = w; configureRegion(w); state.hp = state.maxHp = 999; state.tips = { pairs: true };
+  for (const kk of Object.keys(rooms)) for (const sp of roomSpawns(kk)) { if (!spawnAvailable(sp) || !pairMateFor(kk, sp)) continue; state.room = kk; startBattle(sp.uid); const bb = state.battle;
+    for (let t = 1; t <= 12; t++) if (enemyPlan(bb, t).kind === 'elemental' && withPairMate(bb, () => enemyPlan(bb, t).kind) === 'elemental') clash++; state.battle = null; } }
+o.clash = clash;
 return JSON.stringify(o); })()`));
 assert(!r.same, 'a partner is always another species');
 assert.strictEqual(r.city.pairs + r.elaris.pairs, 0, 'no pairs in Neon Aftermath or Solaris');
@@ -46,4 +51,5 @@ assert(r.oneDown.phase === 'fight' && r.oneDown.alive && !r.oneDown.pairOn, 'one
 assert.strictEqual(r.win.phase, 'reward', 'both down wins');
 assert(r.xp[1] > r.xp[0], 'a pair gives more XP');
 assert(/Both act every turn/.test(r.guide) && /switch target/.test(r.guide), 'the first pair fight explains it');
+assert.strictEqual(r.clash, 0, 'Round 246: the pair never lands two charged strikes on the same turn');
 console.log('enemy-pairs ok');

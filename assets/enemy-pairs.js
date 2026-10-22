@@ -17,7 +17,7 @@ const PAIR_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
 const PAIR = { chance: 0.5, hp: 0.72, attack: 0.8, xp: 1.5, world: { sky: [0.7, 0.78], wilds: [0.72, 0.8], vespera: [0.82, 0.87], chronospire: [0.72, 0.8] } }; // tuned with the Difficulty lab (CHANGES.md)
 // Each world's pair strength (share of a lone enemy's HP and attack), as [hp, attack]; others use PAIR.hp/attack.
 function pairScale(region = activeRegion) { const w = PAIR.world[region]; return w ? { hp: w[0], attack: w[1] } : { hp: PAIR.hp, attack: PAIR.attack }; }
-const PAIR_FIELDS = ['enemy', 'id', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
+const PAIR_FIELDS = ['enemy', 'id', 'patternShift', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
 const PAIR_ZONES = () => ({ sky: typeof SKY_ZONE_ENEMY !== 'undefined' && SKY_ZONE_ENEMY, wilds: typeof WILDS_ZONE_ENEMY !== 'undefined' && WILDS_ZONE_ENEMY,
   vespera: typeof VESPERA_ZONE_ENEMY !== 'undefined' && VESPERA_ZONE_ENEMY, chronospire: typeof CHRONO_ZONE_ENEMY !== 'undefined' && CHRONO_ZONE_ENEMY });
 
@@ -30,6 +30,21 @@ function pairMateFor(key, s) {
   const z = (rooms[key] && rooms[key].zone) || 1;
   for (const d of [-1, 1, -2, 2, -3, 3, -4, 4]) { const t = list[z - 1 + d]; if (t && t !== s.type && enemies[t]) return t; }
   return list.find(t => t !== s.type && enemies[t]) || null;
+}
+// Round 246 (owner request): the two run their move patterns out of step, so their charged strikes
+// (and charges) never land on the same turn: the second enemy's pattern is offset by the first shift
+// that keeps them apart over the next dozen turns (fewest shared charge turns if none is clean).
+function staggerShift(b) {
+  const kinds = (shift, mate) => { const out = []; const run = () => { const keep = b.patternShift; b.patternShift = shift; try { for (let t = 1; t <= 12; t++) out.push(enemyPlan(b, t).kind); } finally { b.patternShift = keep; } };
+    if (mate) { swapPairFields(b); try { run(); } finally { swapPairFields(b); } } else run(); return out; };
+  const mine = kinds(0, false); let best = 0, bestScore = Infinity;
+  for (let s = 0; s < 6; s++) {
+    const theirs = kinds(s, true); let score = 0;
+    for (let t = 0; t < 12; t++) { if (mine[t] === 'elemental' && theirs[t] === 'elemental') score += 10; if (mine[t] === 'charge' && theirs[t] === 'charge') score += 3; }
+    if (score < bestScore) { bestScore = score; best = s; }
+    if (!score) break;
+  }
+  return best;
 }
 function pairOn(b = state && state.battle) { return !!(b && b.pair && b.pair.other && b.pair.other.enemy && b.pair.other.enemy.hp > 0); }
 function swapPairFields(b) { const o = b.pair.other; for (const k of PAIR_FIELDS) { const t = b[k]; b[k] = o[k]; o[k] = t; } }
@@ -46,6 +61,7 @@ startBattle = function (spawnId) {
   const other = { enemy: cut({ ...enemies[mate], boss: false, elite: false, element: enemies[mate].element || null, level, name: enemies[mate].name, hp: stats.hp, maxHp: stats.hp, attack: stats.attack }), id: mate,
     freeze: 0, enemyDebuff: 0, burn: 0, burnTurns: 0, poison: 0 };
   b.pair = { other, names: [b.enemy.name, other.enemy.name] };
+  b.patternShift = 0; other.patternShift = staggerShift(b);
   b.logs[0] = 'Encounter: ' + b.enemy.name + ' and ' + other.enemy.name;
   save(); renderBattle();
   if (!(state.tips || {}).pairs) pairGuide();

@@ -61,7 +61,7 @@ function enemyPlan(b=state.battle,turn=b?.turn){
  // the Round 22 mini-bosses get a real signature move each.
  const shifted=shiftingElement(b.id,turn),isShifter=!!shifted,element=shifted||b.enemy.element;
  const pattern=BOSS_PATTERNS[b.id]||(element?['attack','charge','elemental','guard']:['attack','guard','heavy']);
- const kind=pattern[(turn-1)%pattern.length],enraged=b.enemy.boss&&b.enemy.hp<=b.enemy.maxHp/2;
+ const kind=pattern[(turn-1+(b.patternShift||0))%pattern.length],/* Round 246: a pair's second enemy runs its pattern offset (enemy-pairs.js) */enraged=b.enemy.boss&&b.enemy.hp<=b.enemy.maxHp/2;
  const base=Math.max(1,b.enemy.attack-(b.enemyDebuff||0))+(enraged?2:0);
  // Heavy hits scale from 1.5x near the region's start room up to 2.5x at its
  // farthest edge, so a fully-stacked Block turn that comfortably absorbs an
