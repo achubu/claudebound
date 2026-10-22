@@ -7,11 +7,15 @@ const layout = JSON.parse(src.match(/SOLARIS_LAYOUT = (\{.*?\});\n/)[1]);
 for (const [key, [tile]] of Object.entries(plan))
   assert(fs.existsSync(path.join(root, 'assets/environment/solaris', tile + '.webp')), 'missing art for ' + key + ': ' + tile);
 // Round 228: the new look. The landmark paintings (old style) are retired, and those rooms use the
-// owner's top-down tiles ('-s1') like the rest. Only the rooms whose shapes the new set doesn't have yet
-// keep an old painting: the west dead end (4,5) and two diagonal shapes (0,4 and 8,4; 5,1).
-const old = Object.entries(plan).filter(([, [tile]]) => !tile.endsWith('-s1')).map(([k]) => k).sort();
-assert.deepStrictEqual(old, ['0,4', '4,5', '5,1', '8,4'], 'only the rooms awaiting new paintings keep old ones');
-for (const key of ['8,5', '5,2', '8,0', '0,2', '6,2', '5,5']) assert(plan[key][0].endsWith('-s1'), key + ' (a landmark room) uses the new tiles');
+// owner's top-down tiles ('-s1', '-s2') like the rest. Only the rooms whose shapes the new set doesn't
+// have yet keep an old painting: since Round 230 that is the T causeway room (5,1) alone.
+const isNew = tile => /-s\d+$/.test(tile);
+const old = Object.entries(plan).filter(([, [tile]]) => !isNew(tile)).map(([k]) => k).sort();
+assert.deepStrictEqual(old, ['5,1'], 'only the room awaiting a new painting keeps an old one');
+for (const key of ['8,5', '5,2', '8,0', '0,2', '6,2', '5,5']) assert(isNew(plan[key][0]), key + ' (a landmark room) uses the new tiles');
+// Round 230: the west dead end (4,5) is the second corner, its south street running off the map's bottom edge.
+assert.deepStrictEqual(plan['4,5'].slice(0, 1), ['corner-s2'], '4,5 uses the corner whose extra street runs off the map');
+assert(!layout['4,6'], 'the corner\'s extra street at 4,5 leads off the map');
 assert.strictEqual(layout['0,2'].name, 'Statue Garden');
 assert.strictEqual(layout['8,5'].name, 'The Solar Crown');
 // Every room's walk mask still reaches each of its exits (checked through the real scripts).

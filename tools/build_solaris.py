@@ -28,7 +28,7 @@ FLIP_DIAG = {(0, 0): {}, (1, 0): {'ne': 'nw', 'nw': 'ne', 'se': 'sw', 'sw': 'se'
 # Round 228: the new look's tiles ('-s1', tools/prepare_solaris_tiles.py) are strictly top-down, so
 # their diagonals may flip top-to-bottom too. They bring their own walk masks (src/masks/).
 FLIP_DIAG_ALL = {**FLIP_DIAG, (0, 1): {'ne': 'se', 'se': 'ne', 'nw': 'sw', 'sw': 'nw'}, (1, 1): {'ne': 'sw', 'sw': 'ne', 'nw': 'se', 'se': 'nw'}}
-def top_down(n): return n.endswith('-s1')
+def top_down(n): return bool(re.search(r'-s\d+$', n))  # '-s1', '-s2'...
 MASK_SRC = SRC + '/masks'
 # Round 228: the landmark rooms' paintings are in the old style; the new look uses its tiles there
 # (the paintings are kept in unused assets/environment/solaris/).
@@ -185,7 +185,7 @@ def neon_layout():
 
 def main():
     tiles = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(SRC + '/*.*'))}
-    tiles.update(placeholders(tiles))
+    if not any(top_down(n) for n in tiles): tiles.update(placeholders(tiles))  # Round 230: the new look uses real paintings only
     marks = {os.path.splitext(os.path.basename(p))[0]: load(p) for p in sorted(glob.glob(SRC + '/landmarks/*.*'))} if USE_LANDMARKS else {}
     shape_of = {n: next(s for s in sorted(SHAPES, key=len, reverse=True) if n.startswith(s)) for n in tiles}
     for n, im in {**tiles, **marks}.items(): im.save(f'{OUT}/{n}.webp', quality=88, method=6)
@@ -220,6 +220,7 @@ def main():
                     # An extra painted road may only run off the map (a painted dead end).
                     if {flips[f].get(bd, bd)} == want_d and want <= ex and all(off_map(d) for d in ex - want): opts.append((n, f))
             if not opts: raise SystemExit('no diagonal tile for ' + key + ' ' + ''.join(sorted(want)) + '+' + ','.join(want_d))
+            opts = [o for o in opts if top_down(o[0])] or opts  # Round 230: the new look's tiles first
             h = int(hashlib.md5(key.encode()).hexdigest(), 16)
             plan[key] = opts[h % len(opts)]; continue
         if key in LANDMARKS and USE_LANDMARKS:
@@ -232,8 +233,17 @@ def main():
             base = set(SHAPES[shape_of[n]])
             for f, m in FLIP_EXITS.items():
                 if {m.get(d, d) for d in base} == want: opts.append((n, f))
-        if not opts: raise SystemExit('no tile for ' + key + ' ' + ''.join(sorted(want)))
         cx, cy = map(int, key.split(','))
+        if not opts:  # Round 230: as for diagonals, an extra painted street may run off the map (a painted dead end)
+            step = {'n': (0, -1), 's': (0, 1), 'e': (1, 0), 'w': (-1, 0)}
+            off_map = lambda d: f'{cx + step[d][0]},{cy + step[d][1]}' not in rooms
+            for n in sorted(tiles):
+                base = set(SHAPES[shape_of[n]])
+                for f, m in FLIP_EXITS.items():
+                    ex = {m.get(d, d) for d in base}
+                    if want <= ex and all(off_map(d) for d in ex - want): opts.append((n, f))
+        if not opts: raise SystemExit('no tile for ' + key + ' ' + ''.join(sorted(want)))
+        opts = [o for o in opts if top_down(o[0])] or opts  # Round 230: the new look's tiles first
         near = {plan[k][0] for k in (f'{cx-1},{cy}', f'{cx},{cy-1}') if k in plan}
         h = int(hashlib.md5(key.encode()).hexdigest(), 16)
         # Round 165: a top-to-bottom flip turns buildings upside down, so use one only when no
