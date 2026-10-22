@@ -27,12 +27,17 @@ PLAZAS = {
         't-bottom-s1': [(312, 162), (487, 162), (470, 322)],
         't-right-s1': [(322, 170), (478, 165), (320, 425), (205, 250)],
     },
-    'sky': {  # terraces and the round plaza; the plain lanes have none
-        'corner-a': [(372, 288)],
+    'sky': {  # Round 235: the grey glass terraces (prepare_sky_tiles.TERRACES); older tiles: terraces and the plaza
+        'corner-a': [(272, 247), (522, 338), (600, 338)],
+        'corner-b': [(272, 247), (522, 338), (600, 338)],
         'cross-a': [(300, 140), (500, 140), (300, 320), (500, 320)],
         'dead-bottom-a': [(290, 110), (510, 110), (285, 262), (515, 262)],
         'dead-right-a': [(300, 145), (345, 318), (165, 320)],
+        'diag-nw': [(272, 247)],
+        'diag-se': [(272, 247)],
+        'diag-sw-b': [(272, 247), (518, 250)],
         'straight-a': [(280, 70), (520, 70)],
+        't-bottom-a': [(522, 162), (600, 162), (400, 390)],
     },
     'wilds': {  # Elaris: the old ruins' flagstones and the clearings beside the trail
         'corner-a': [(590, 125), (585, 360), (475, 135)],
