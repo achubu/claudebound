@@ -3496,6 +3496,36 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 232: items stand in the open squares beside the road
+
+- The owner asked that interactable objects stand only in open areas off the road (like Solaris's
+  little paved yards), and for prompts where a painting has none.
+- `tools/plazas.py` lists hand-checked spots on every tile painting, picked by eye over a grid,
+  never on roofs, props, trees or water:
+  - Solaris: paved yards and sand squares.
+  - Elaris: the ruins' flagstones and clearings beside the trail.
+  - Vespera: flats of rock and sand and the old stone circle.
+  - Sky Isles: the terraces and the round plaza.
+- The builders open each spot up to the walk mask (a disc round it and a footpath to the nearest
+  road) and write each room's spots, flipped with the room, into the data (`SOLARIS_PLAZAS`,
+  `TILE_WORLD_DATA[w].plazas`).
+- `assets/plazas.js`:
+  - `organicItemSpot()` picks the nearest open square first, for chests, gear, points of interest,
+    the merchant, the Cardsmith and Nexus Waypoints. A square may be as close as 70px to a patrol
+    or another item before it is passed over.
+  - Patrols keep 90px out of the squares.
+  - A room whose painting has no square keeps the old spot beside the road.
+- Neon Aftermath already worked this way (hand-picked nooks, Round 101), so it is unchanged.
+- Squares per world:
+  - Solaris, Elaris and Vespera: every room has at least two.
+  - Sky Isles: 33 of 51 rooms. Its plain lanes (the T, the three diagonal walkways, and the corner,
+    which has only one small bay) have nothing but rooftops beside the deck.
+  - Chronospire: none; its tiles are still generated stand-ins.
+
+  Prompts for new paintings of those tiles were given to the owner.
+- Tests: new `tests/plazas.test.cjs`. Items in rooms with a square stand in one, and each can be
+  walked up to.
+
 ## Round 231: the last Solaris room in the new look
 
 - The owner painted the tile asked for in Round 230: streets west, east and south with a stone

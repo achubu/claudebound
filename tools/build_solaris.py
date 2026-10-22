@@ -12,6 +12,9 @@ import glob, json, os, re, hashlib
 import numpy as np
 from PIL import Image
 from scipy import ndimage as nd
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from plazas import carve, room_spots  # noqa: E402
 
 SRC = 'assets/environment/solaris/src'
 OUT = 'assets/environment/solaris'
@@ -201,6 +204,7 @@ def main():
     for n, im in dtiles.items():
         im.save(f'{OUT}/{n}.webp', quality=88, method=6)
         masks[n] = own_mask(n) if own_mask(n) is not None else trace(im, DSHAPES[dshape_of[n]][0])
+    masks = {n: carve('elaris', n, m) for n, m in masks.items()}  # Round 232: open squares beside the road
     rooms = neon_layout()
     # Pick a tile and flip for every room; spread variants so neighbours differ.
     plan = {}
@@ -293,7 +297,9 @@ def main():
           'const SOLARIS_PLACEHOLDERS = ' + json.dumps(placeholder) + ';\n'
           '// Round 192: diagonal doors, {room: {dir: {to, x, y}}} in room pixels (foot point on the edge).\n'
           'const SOLARIS_DIAG = ' + json.dumps(diag, separators=(',', ':')) + ';\n'
-          'const SOLARIS_CUT = ' + json.dumps(CUT) + ';\n')
+          'const SOLARIS_CUT = ' + json.dumps(CUT) + ';\n'
+          '// Round 232: open squares beside the road where items stand (tools/plazas.py), per room.\n'
+          'const SOLARIS_PLAZAS = ' + json.dumps({k: room_spots('elaris', n, *f) for k, (n, f) in plan.items() if room_spots('elaris', n, *f)}, separators=(',', ':')) + ';\n')
     open('assets/solaris-data.js', 'w').write(js)
     used = {}
     for n, _ in plan.values(): used[n] = used.get(n, 0) + 1

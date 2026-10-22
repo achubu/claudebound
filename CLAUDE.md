@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 231) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 232) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -16,7 +16,7 @@ change set.
     the `rooms` literal for Neon Aftermath.
   - Then `elaris-wildlife`, `expansion`, `encounter-depth`, `talent-matrix`,
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
-  - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`,
+  - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`, `plazas` (Round 232),
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
     `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `pressure`, `pickups`, `cardsmith`, `gear`, `waypoints` (Round 229: each world's first Nexus Waypoint stands three rooms in, alone in its room), `room-preload`. (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
@@ -82,7 +82,9 @@ change set.
 - **Interactables** (chests, relics, POIs, merchant, Nexus Waypoints) sit just
   off the walkable path, 12–28px from reachable street, clear of the HUD/minimap corners
   (`screenCovered`) and of patrols. In Solaris and the Sky Isles, where off the path is all buildings,
-  they stand on the walkable ground 22–40px inside its edge instead (Round 212, `itemsOnGround()`). Enemies and bosses stand on paths. On a tap route only
+  they stand on the walkable ground 22–40px inside its edge instead (Round 212, `itemsOnGround()`). Round 232: in the tile worlds
+  they stand in hand-picked open squares beside the road first (`tools/plazas.py`, opened up to the walk mask by the builders;
+  `assets/plazas.js`). When adding tile paintings, pick 2-3 such spots for each in `PLAZAS` and rebuild. Enemies and bosses stand on paths. On a tap route only
   the tapped item opens (Round 184).
 - **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.
