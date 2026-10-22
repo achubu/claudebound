@@ -3522,6 +3522,34 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   Everywhere else a card shows its printed numbers (after the Round 240 boost in later worlds).
 - New `tests/mech-live-values.test.cjs`.
 
+## Round 240: attack cards +25% after Neon Aftermath
+
+- Owner request: attack cards deal 25% more damage in every world after Neon Aftermath.
+- `assets/attack-boost.js` scales each attack card's printed damage numbers (rounded) when a later
+  world is configured, and puts them back in Neon Aftermath. So text, live bonuses and the damage
+  dealt agree:
+  - base damage;
+  - Tempest Surge's damage per energy;
+  - the damage in Tailwind, Follow-through, Amplify and Choose-one modes.
+
+  Strike 6 → 8, Cleave 13 → 16, Tempest Surge 7 → 9 per energy, Gust Chain's Tailwind +2 → +3.
+- Not scaled:
+  - **Bulwark Bash** (it hits with your Block): the owner counts it as a defensive card.
+  - **Defense cards and Skills:** Dusk Protocol's damage mode is unchanged.
+  - **Block on hybrid attacks:** Silver Riposte and Lunar Edict scale their damage only.
+  - **Talent, crystal and Boost bonuses:** added on top as before.
+- Difficulty lab, typical win rate over 16 builds × 2 styles, before Round 237 → with Rounds
+  237 and 240 (before Swipe, Round 242):
+  - Mini-bosses mostly rose above their 34-50% target: Stormbell Warden 48 → 88, Tidebound Warden
+    46 → 77, Gale Sovereign 40 → 59, Arc Sentinel 32 → 55, Resonant Phantom 47 → 66, Clockwarden
+    36 → 63. Featherfall Matriarch 44 → 36 and Paradox Twin 41 → 47 held.
+  - Final bosses: Zenith Roc 28 → 40, Bloom Tyrant 33 → 61, Tempest Colossus 41 → 30, Chronarch
+    29 → 33 (target 22-36).
+  - Regular enemies: 90-100% almost everywhere.
+
+  Boss HP was not retuned; that is left to the owner.
+- New `tests/attack-boost.test.cjs`.
+
 ## Round 239: Overdrive's button
 
 - Owner request: the Overdrive button on the battle screen's encounter line is renamed
@@ -3540,6 +3568,40 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   pill still shows how far it has grown. The badge above the card and its spacers are gone.
 - Tests: `mech-badge` checks the tag after the description in battle and in the Deck screen, on
   desktop and phone.
+
+## Round 237: the Sky Isles push back on turtling: Shear and stronger damage over time
+
+- **Why:** the owner found the Sky Isles too easy with a defensive build (save file at player
+  level 25: Reactive Plating 5, which is 8 Armor, plus Block cards, gear and potions). The
+  simulator played that save through every Sky Isles fight:
+  - Regular enemies cost 0-2 HP, fights took 8-14 turns, and boss fights took 33 turns.
+  - Sky Isles hits are 9-12, so 8 Armor took most of every hit before Block.
+- **Options offered:** Shear, a rising storm, paying off defence, or an optional challenge. The
+  owner chose Shear plus stronger statuses instead of the storm.
+- 🌪 **Shear** (`assets/sky-storm.js`, Sky Isles only):
+  - Every 3rd turn's attack ignores your Armor (Reactive Plating). Block from cards still stops it,
+    and the intent says so.
+  - While the turn resolves, the outermost `endTurn` sets `b.shearing`, and `scaledRank('plating')`
+    reads 0.
+  - The sim bot plans its Block for it.
+- 🔥☣🩸 **Stronger damage over time, Sky Isles onward** (`assets/status-dots.js`). Armor and Block
+  can't stop any of it; cleansing (Purifying Light, Static Shield) or healing answers it.
+  - **Scorch** (new): Burn N for 3 turns, refreshing, not stacking (2, 2, 3, 4, 5, 6 by world).
+    It uses the existing Burn, which now has a strength (`b.burnPower`, shown in the battle tags).
+    A charged fire strike still burns for 2.
+  - **Venom** (new): Poison +N, stacking to 3×N, until cleansed (1, 1, 2, 2, 3, 3).
+  - **Bleed** now grows past Solaris: 2, 3, 4, 5, 6, 7.
+  - Sky Isles enemies trade Crush and Barrage (both blunted by Armor) for these: Sunfeather Drake
+    Scorch, Gale Harpy Bleed, Stormbell Warden Shackle + Scorch, Featherfall Matriarch Bleed +
+    Headwind, Zenith Roc Empower + Scorch + Bleed.
+  - Some enemies in Elaris, Vespera and Chronospire carry them too.
+- **Effect on the owner's save:**
+  - In a Sunfeather Drake fight, Scorch did 15 damage through Armor and Block, and Mend healed it
+    back.
+  - Gale Harpy and Thunderhorn Ram fights now cost about 13-22 HP of 59.
+- The rising storm (enemy hits growing late in a fight) was built and measured, then dropped. Every
+  setting killed the slow defensive deck in long boss fights.
+- `tests/sky-storm.test.cjs`.
 
 ## Round 236: Sift, a deck-cycling card in every world
 
