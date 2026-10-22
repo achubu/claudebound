@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 234: the Briar Sentinel is animated
+
+- The owner sent two sheets for Neon Aftermath's Briar Sentinel (`vineguard`): four battle poses
+  (stand, shield up, slash with a pink trail, stand) and a six-frame walk, on black.
+- Keyed off the black with a filled silhouette, so the dark armour joints stay. Small enclosed
+  gaps are filled; large ones stay see-through.
+  - Composed with `tools/compose_sprite_sheet.py` into `assets/monsters/city/briar-sentinel.png`.
+  - The walk uses frames 2-5 (shield forward), in `briar-sentinel-walk.png`.
+  - Both padded with `pad_sprite_frames.py`.
+- It is a `WILDLIFE_ART` entry with `poses: { attack: 2, hurt: 1, walk }`. The Arc Sentinel and
+  the Brass Sentry, which borrow its art, animate too (recoloured as before).
+- The Sunwrapped Revenant's pose code (`assets/sun-revenant.js`) now serves any creature that
+  lists `poses` (`posesOf()`, CSS variables for the frames and the walk sheet).
+- Fixed: a `#battleModal .compact-monster` rule pinned every sprite to frame 0, so the
+  attack and hurt poses never showed, not even the Revenant's.
+- `SPRITE_VERSION` 234. New `tests/briar-sentinel.test.cjs`.
+
 ## Round 233: a deck slot for every boss; new cards wait for the player
 
 - The owner asked for +1 max deck size for every boss defeated, and that newly acquired cards not

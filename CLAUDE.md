@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 233) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 234) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -99,7 +99,8 @@ change set.
   then run `tools/pad_sprite_frames.py` on the result so no art touches a frame's edge (Round 200).
   When an image has more poses than 4 (often two rows), key it, then pick four with
   `tools/compose_sprite_sheet.py` (Round 224).
-  Bump `SPRITE_VERSION` in `assets/elaris-wildlife.js` when sheets change.
+  Bump `SPRITE_VERSION` in `assets/elaris-wildlife.js` when sheets change. Sheets drawn on black: key with a
+  filled silhouette (Round 234). A creature with battle poses and a walk lists `poses: { attack, hurt, walk }` (`sun-revenant.js`).
 - **Card art** comes from `cardArtPath()` in `assets/cards.js`. The refreshed
   WebP illustrations are listed in `refreshedCardArt`. Status and pending
   prompts: `assets/cards/art-refresh.md` and `tools/art-refresh/`. When art
