@@ -11,10 +11,13 @@
 // Applied when a fight starts, after enemy-pairs.js, so both of a pair get it.
 // =====================================================================
 const ARMOR_BY_WORLD = { elaris: [1, 2], sky: [2, 3], wilds: [2, 4], vespera: [3, 5], chronospire: [4, 6] };
-const ARMOR_HP_FACTOR = { elaris: 1, sky: 1, wilds: 1, vespera: 1, chronospire: 1 }; // tuned with the Difficulty lab (CHANGES.md)
+const ARMOR_HP_FACTOR = { elaris: 0.95, sky: 0.88, wilds: 0.75, vespera: 0.8, chronospire: 0.82 }; // tuned with the Difficulty lab (CHANGES.md)
+// Solaris's bosses keep their own Armor: cards are still small there and they were already hard.
+const ARMOR_BOSS_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
 function worldArmor(e, region = activeRegion, frac = 0) {
   const range = ARMOR_BY_WORLD[region]; if (!range || !e || globalThis.NO_WORLD_ARMOR) return e ? e.armor || 0 : 0;
   const [lo, hi] = range;
+  if (e.boss && !ARMOR_BOSS_WORLDS.includes(region)) return e.armor || 0;
   const base = e.boss ? hi + (e.miniBoss ? 2 : 3) : lo + Math.round(Math.max(0, Math.min(1, frac)) * (hi - lo)) + (e.elite ? 1 : 0);
   return Math.max(e.armor || 0, base);
 }

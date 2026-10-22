@@ -21,7 +21,7 @@ assert(r.cityMatches, 'Neon Aftermath keeps its own Armor');
 for (const w of ['elaris', 'sky', 'wilds', 'vespera', 'chronospire']) {
   const [lo, hi] = r.ranges[w], x = r[w];
   assert(x.zone[0] >= lo && x.zone[1] <= Math.max(hi, x.zone[1]) && x.zone[1] >= hi - 1, w + ': regular enemies ' + x.zone.join('-') + ' (world ' + lo + '-' + hi + ')');
-  assert(x.mini[0] >= hi + 2 && x.boss[0] >= hi + 3, w + ': mini-bosses and the boss have more');
+  if (w !== 'elaris') assert(x.mini[0] >= hi + 2 && x.boss[0] >= hi + 3, w + ': mini-bosses and the boss have more');
   if (x.pair) assert(x.pair[0] >= lo, w + ': both of a pair are armored');
   assert(x.keepsOwn, w + ': no species loses Armor it had');
 }
