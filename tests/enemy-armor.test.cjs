@@ -6,7 +6,7 @@ const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(()=>{
 const o = {};
-const fights = w => { newGame(); state.region = w; configureRegion(w); state.hp = state.maxHp = 999; state.tips = { pairs: true }; const got = { zone: [], elite: [], mini: [], boss: [], pair: [], keepsOwn: true };
+const fights = w => { newGame(); state.seed = 4242; state.region = w; configureRegion(w); state.hp = state.maxHp = 999; state.tips = { pairs: true }; const got = { zone: [], elite: [], mini: [], boss: [], pair: [], keepsOwn: true };
   for (const k of Object.keys(rooms)) for (const s of roomSpawns(k)) { if (!spawnAvailable(s)) continue; state.room = k; startBattle(s.uid); const b = state.battle; if (!b) continue;
     const tag = s.boss ? (enemies[s.type].miniBoss ? 'mini' : 'boss') : s.elite ? 'elite' : 'zone'; got[tag].push(b.enemy.armor);
     if (b.enemy.armor < (enemies[s.type].armor || 0)) got.keepsOwn = false;
