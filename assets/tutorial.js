@@ -33,7 +33,7 @@ function tutorialPages() {
       + '<p class="muted">Every world has its own mechanic like this, with a short guide in battle.</p>' },
     { title: 'Your cards', body: '<ul><li><b>◆ Soulbound</b> cards are yours for good: they are never lost and level up with Card Mastery.</li>'
       + '<li><b>◇ Impermanent</b> cards level up as you use them, but <b>losing a fight</b> destroys one Impermanent card in your deck at random.</li>'
-      + '<li>After each win you choose a new card. Build your deck from your collection in the <b>Deck</b> screen; it holds ' + TUTORIAL_PICK + ' cards to start, and more as you conquer worlds and learn talents.</li>'
+      + '<li>After each win you choose a new card. Build your deck from your collection in the <b>Deck</b> screen; it holds ' + TUTORIAL_PICK + ' cards to start, one more for every boss you beat, and more from talents. New cards wait in your collection until you put them in.</li>'
       + '<li>Levelling up gives <b>talent points</b> (Surge, Disruption, Resolve).</li></ul>' }
   ];
 }

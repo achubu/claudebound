@@ -3496,6 +3496,33 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 233: a deck slot for every boss; new cards wait for the player
+
+- The owner asked for +1 max deck size for every boss defeated, and that newly acquired cards not
+  go into the deck automatically: the player chooses.
+- **Deck size:** `worldDeckBonus()` now counts every boss beaten, mini-bosses included (three per
+  world, eighteen in all), not only the five bosses that open the next world.
+  - With no talents or devices that is 6 at the start and 24 with every boss down.
+  - The victory screen shows a "Deck slot" tile when a slot opens.
+  - The old `WORLD_BOSSES` list is gone.
+- **New cards wait in the collection.** None of these put cards in the deck any more:
+  - battle rewards (`chooseReward`, `chooseCardReward`, the random card loot);
+  - card bundles;
+  - Solaris's attunement pick;
+  - the worlds' arrival gifts (`mechanicGift`, Chronospire's Suspend cards);
+  - new side cards (`addSideCard`).
+
+  New deck and side-deck slots are left empty (the side deck's `fillSideDeck` is gone). The texts
+  now say the cards are in the collection, to add from Deck.
+- The Deck button counts the cards gained since the Deck screen was last opened
+  ("Deck · 3 new", gold outline). New `assets/deck-choice.js`; it also rebinds the Deck button
+  to the whole `showDeck` chain.
+- The tutorial's deck line says one slot more for every boss beaten.
+- The balance sim and the Difficulty lab equip the sim player's side cards themselves. Their
+  numbers are unchanged: their decks are built before the beaten bosses are set.
+- Tests: `world-deck` (18 bosses, +1 each, counted once; reward, gift and side card stay out of
+  the deck; the badge) and `aether-deck` updated.
+
 ## Round 232: items stand in the open squares beside the road
 
 - The owner asked that interactable objects stand only in open areas off the road (like Solaris's

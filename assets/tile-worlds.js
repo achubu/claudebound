@@ -72,7 +72,6 @@ Object.assign(BALANCE.perEnemy, {
 });
 const SKY_ZONE_ENEMY = ['skyDrake', 'skyDrake', 'skyWisp', 'skyWisp', 'skyHarpy', 'skyHarpy', 'skyRam', 'skyRam'];
 const WILDS_ZONE_ENEMY = ['elarisFox', 'elarisFox', 'elarisAntler', 'elarisAntler', 'elarisHeron', 'elarisHeron', 'elarisMoth', 'elarisMoth'];
-WORLD_BOSSES.push('zenithRoc', 'elarisTyrant');
 
 // --- Balance: each new world sits where the old worlds 3 and 4 were ---
 for (const [table, sky, wilds] of [['hpPerLevel', .05, .05], ['attackPerLevel', .25, .25], ['regionHp', 2.2, 2.22], ['regionAttack', 16, 25],

@@ -233,9 +233,9 @@ document.head.append(suspendStyles);
 // --- Arrival: two Suspend cards and the guide ---
 function chronoArrival() {
   if (state.chronoGift) return; state.chronoGift = true;
-  for (const id of ['temporalBarrage', 'chronoSpike']) { const c = make(id); c.soulbound = false; state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(id) < maxCopies()) state.deck.push(c.uid); }
+  for (const id of ['temporalBarrage', 'chronoSpike']) { const c = make(id); c.soulbound = false; state.pool.push(c); } // Round 233: into the collection; the player decides
   save();
-  openMenu('<div class="eyebrow">CHRONOSPIRE · A WORLD WHERE TIME IS BROKEN</div><h2>⏳ New mechanic: Suspend</h2><p>You found <b>Temporal Barrage</b> and <b>Chrono Spike</b>. They are now in your deck. Cards marked ⏳ can be <b>suspended</b>:</p>' + suspendGuideHTML().replace('<button id="suspendGuideClose" class="ability small">Got it</button>', '') + '<p><button id="chronoOk" class="primary">Got it</button></p>');
+  openMenu('<div class="eyebrow">CHRONOSPIRE · A WORLD WHERE TIME IS BROKEN</div><h2>⏳ New mechanic: Suspend</h2><p>You found <b>Temporal Barrage</b> and <b>Chrono Spike</b>. They are in your collection: open <b>Deck</b> to add them. Cards marked ⏳ can be <b>suspended</b>:</p>' + suspendGuideHTML().replace('<button id="suspendGuideClose" class="ability small">Got it</button>', '') + '<p><button id="chronoOk" class="primary">Got it</button></p>');
   const ok = $('chronoOk'); if (ok) ok.onclick = closeMenu;
   state.tips ||= {}; state.tips.suspend = true;
 }

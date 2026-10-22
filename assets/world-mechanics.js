@@ -273,24 +273,22 @@ function mechanicGift(region, withMenu = true) {
   const m = WORLD_MECHANICS[region]; if (!m || !state) return false;
   state.mechGifts ||= {}; if (state.mechGifts[region]) return false;
   state.mechGifts[region] = true;
-  let placed = 0;
-  for (const id of m.gift) { const c = make(id); c.soulbound = false; state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(id) < maxCopies()) { state.deck.push(c.uid); placed++; } }
+  const placed = 0; // Round 233: gifts go to the collection; the player chooses what goes in the deck
+  for (const id of m.gift) { const c = make(id); c.soulbound = false; state.pool.push(c); }
   save();
   if (withMenu) mechanicIntro(region, placed);
   else { state.pendingMechIntro = { region, placed }; save(); } // Round 187: shown once the reward screen closes
   return { placed };
 }
-// Where the gift went, in words (Round 187: a full deck keeps them in the collection).
-function giftPlacement(m, placed) {
+// Where the gift went, in words (Round 233: always the collection; the player adds them from Deck).
+function giftPlacement(m) {
   const names = m.gift.map(id => '<b>' + defs[id].name + '</b>').join(' and ');
-  if (placed >= m.gift.length) return 'You found ' + names + '. They are in your deck now.';
-  if (placed > 0) return 'You found ' + names + '. Your deck had room for one; the other is in your collection. Open <b>Deck</b> to swap it in.';
-  return 'You found ' + names + '. Your deck is full, so they are in your collection. Open <b>Deck</b> to swap them in.';
+  return 'You found ' + names + '. They are in your collection: open <b>Deck</b> to add them.';
 }
 function mechanicIntro(region, placed) {
   const m = WORLD_MECHANICS[region]; if (!m) return;
   state.tips ||= {}; state.tips[m.key] = true; save();
-  openMenu('<div class="eyebrow">' + m.world.replace(/^the /, '').toUpperCase() + ' · ' + m.tagline + '</div><h2>' + m.icon + ' New mechanic: ' + m.name + '</h2><p>' + giftPlacement(m, placed) + '</p><div class="menu-mech" style="--mc:' + m.color + '">' + mechanicGuideHTML(m) + '</div><p><button id="mechOk" class="primary">Got it</button></p>');
+  openMenu('<div class="eyebrow">' + m.world.replace(/^the /, '').toUpperCase() + ' · ' + m.tagline + '</div><h2>' + m.icon + ' New mechanic: ' + m.name + '</h2><p>' + giftPlacement(m) + '</p><div class="menu-mech" style="--mc:' + m.color + '">' + mechanicGuideHTML(m) + '</div><p><button id="mechOk" class="primary">Got it</button></p>');
   const ok = $('mechOk'); if (ok) ok.onclick = closeMenu;
 }
 const finishBattleBeforeMechanics = finishBattle;
@@ -311,8 +309,8 @@ winBattle = function () {
   const b = state.battle, fresh = b && b.phase === 'fight';
   winBattleBeforeMechanics();
   if (fresh && activeRegion === 'city' && !(state.mechGifts || {}).city && state.battle === b && b.phase === 'reward') {
-    const { placed } = mechanicGift('city', false);
-    b.logs.push('⌁ You found Packet Sniff and Ghost Protocol, two Hack cards: ' + (placed >= 2 ? 'now in your deck.' : placed ? 'one is in your deck, the other in your collection.' : 'your deck is full, so they are in your collection.'));
+    mechanicGift('city', false);
+    b.logs.push('⌁ You found Packet Sniff and Ghost Protocol, two Hack cards. They are in your collection: open Deck to add them.');
   }
 };
 // Saves already past a world's entrance get its cards when they next load there.

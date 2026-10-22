@@ -219,7 +219,7 @@ const talentSpent=()=>Object.values(state.talents||{}).reduce((n,v)=>n+(Number(v
 const talentPoints=()=>Math.max(0,Math.min(MAX_PLAYER_LEVEL-1,state.playerLevel-1)-talentSpent());
 const branchSpent=key=>TALENT_BRANCHES[key].nodes.reduce((n,node)=>n+talentRank(node.id),0);
 const hasTalent=id=>talentRank(id)>0;
-/* Round 163: +1 deck slot for each world boss beaten (the one that opens the next world), instead of a flat +4 outside the city. */const WORLD_BOSSES=['thornWarden','bloomTyrant','stormTyrant'],worldDeckBonus=()=>WORLD_BOSSES.filter(id=>state?.bosses?.includes(id)).length;function fitDeckToLimit(){if(state&&state.deck.length>maxDeckSize())state.deck=state.deck.slice(0,maxDeckSize())}const maxDeckSize=()=>BASE_MAX_DECK+talentRank('deckMatrix')+worldDeckBonus()+(typeof deviceBonus==='function'?deviceBonus('capacity'):0);
+/* Round 163: deck slots for bosses beaten. Round 233: +1 for every boss, mini-bosses included (three per world). */const worldDeckBonus=()=>new Set((state?.bosses||[]).filter(id=>enemies[id]?.boss)).size;function fitDeckToLimit(){if(state&&state.deck.length>maxDeckSize())state.deck=state.deck.slice(0,maxDeckSize())}const maxDeckSize=()=>BASE_MAX_DECK+talentRank('deckMatrix')+worldDeckBonus()+(typeof deviceBonus==='function'?deviceBonus('capacity'):0);
 const maxCopies=()=>3+talentRank('replication');
 const maxEnergy=()=>3+talentRank('capacitor');
 const openingHand=()=>4+talentRank('quickdraw');
@@ -384,7 +384,7 @@ function playCard(i){const b=state.battle,c=b.hand[i],d=stat(c);if(!c||d.cost>b.
 function endTurn(){const b=state.battle,hit=intent(),damage=Math.max(0,hit-scaledRank('plating')-b.block);state.hp=Math.max(0,state.hp-damage);b.logs.push(b.enemy.name+' attacks for '+hit+'. Lose '+damage+' HP.');b.block=0;const keep=hasTalent('retainCore')&&b.savedUid?b.hand.filter(c=>c.uid===b.savedUid).slice(0,1):[];b.discard.push(...b.hand.filter(c=>!keep.some(k=>k.uid===c.uid)));b.hand=keep;b.savedUid=null;if(!state.hp)loseBattle();else{b.turn++;b.energy=maxEnergy();drawCards(4)}save();renderBattle()}
 function winBattle(){const b=state.battle,isBoss=!!b.enemy.boss,earned=isBoss?50:25,levels=gainXP(earned);state.wins++;if(isBoss)state.bosses.push(b.id);else state.cooldowns[b.id]=3;b.potionDrop=Math.random()<.30;if(b.potionDrop)state.potions++;b.phase='reward';b.offers=shuffle(['cleave','riposte','bastion','mend','spark','shatter']).slice(0,3).map(id=>make(id));b.soulDrop=isBoss&&Math.random()<.10;b.soulOffer=b.soulDrop?make(shuffle(['phoenix','oath','verdict']).pop()):null;b.logs.push('Victory! +'+earned+' XP.'+(b.potionDrop?' Small healing potion found.':'')+(levels.length?' Level '+state.playerLevel+' reached · +'+levels.length+' talent point!':''))}
 function loseBattle(){const candidates=active().filter(c=>!c.soulbound);let lost=null;gainXP(10);if(candidates.length){const c=candidates[Math.floor(Math.random()*candidates.length)];lost=stat(c).name;state.battle.lostCard={id:c.id,name:lost,level:c.level,uses:c.uses};state.pool=state.pool.filter(x=>x.uid!==c.uid);state.deck=state.deck.filter(x=>x!==c.uid)}state.hp=state.maxHp;state.room='0,5';state.pos={x:400,y:300};state.battle.phase='lost';state.battle.lost=lost}
-function chooseReward(c){if(c){state.pool.push(c);if(state.deck.length<maxDeckSize()&&copiesInDeck(c.id)<maxCopies())state.deck.push(c.uid)}finishBattle()}
+function chooseReward(c){if(c)state.pool.push(c);finishBattle()}
 function finishBattle(){state.battle=null;$('battleOverlay').classList.add('hidden');save();renderWorld()}
 function renderDefeat(b,m){
  const lost=b.lostCard,summary=b.defeatSummary||{hp:state.hp,maxHp:state.maxHp,location:room()?.name||'safe zone',deckCount:state.deck.length};
@@ -548,11 +548,11 @@ requestAnimationFrame(loop);
 </script>
 <script src="assets/elaris-wildlife.js?v=round224"></script>
 <script src="assets/solaris-data.js?v=round232"></script>
-<script src="assets/expansion.js?v=round185"></script>
+<script src="assets/expansion.js?v=round233"></script>
 <script src="assets/encounter-depth.js?v=round200"></script>
 <script src="assets/talent-matrix.js?v=round185"></script>
-<script src="assets/aether-deck.js?v=round202"></script>
-<script src="assets/card-variety.js?v=round185"></script>
+<script src="assets/aether-deck.js?v=round233"></script>
+<script src="assets/card-variety.js?v=round233"></script>
 <script src="assets/battle-hud.js?v=round185"></script>
 <script src="assets/sun-revenant.js?v=round200"></script>
 <script src="assets/combined-rooms.js?v=round185"></script>
@@ -561,17 +561,17 @@ requestAnimationFrame(loop);
 <script src="assets/organic-paths.js?v=round218"></script>
 <script src="assets/plazas.js?v=round232"></script>
 <script src="assets/organic-areas.js?v=round185"></script>
-<script src="assets/exploration.js?v=round229"></script>
+<script src="assets/exploration.js?v=round233"></script>
 <script src="assets/neon-world.js?v=round225"></script>
 <script src="assets/solaris.js?v=round197"></script>
-<script src="assets/chronospire.js?v=round185"></script>
+<script src="assets/chronospire.js?v=round233"></script>
 <script src="assets/sky-data.js?v=round232"></script>
 <script src="assets/wilds-data.js?v=round232"></script>
 <script src="assets/vespera-data.js?v=round232"></script>
 <script src="assets/chronospire-data.js?v=round232"></script>
-<script src="assets/tile-worlds.js?v=round227"></script>
+<script src="assets/tile-worlds.js?v=round233"></script>
 <script src="assets/world-cards.js?v=round210"></script>
-<script src="assets/world-mechanics.js?v=round229"></script>
+<script src="assets/world-mechanics.js?v=round233"></script>
 <script src="assets/stagger.js?v=round189"></script>
 <script src="assets/card-mechanics.js?v=round207"></script>
 <script src="assets/pressure.js?v=round226"></script>
@@ -579,12 +579,13 @@ requestAnimationFrame(loop);
 <script src="assets/cardsmith.js?v=round213"></script>
 <script src="assets/gear.js?v=round199"></script>
 <script src="assets/waypoints.js?v=round229"></script>
+<script src="assets/deck-choice.js?v=round233"></script>
 <script src="assets/room-preload.js?v=round208"></script>
 <script src="assets/touch-controls.js?v=round185"></script>
 <script src="assets/map-terrain.js?v=round185"></script>
 <script src="assets/enemy-labels.js?v=round229"></script>
 <script src="assets/layout-polish.js?v=round225"></script>
 <script src="assets/battle-recap.js?v=round228"></script>
-<script src="assets/tutorial.js?v=round226"></script>
+<script src="assets/tutorial.js?v=round233"></script>
 <script src="assets/god-mode.js?v=round198"></script>
 </body></html>

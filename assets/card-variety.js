@@ -168,7 +168,7 @@ winBattle = function () {
 function chooseCardReward(i) {
   const b = state.battle; if (!b || b.lootType !== 'choice') return;
   const card = i == null ? null : b.offers[i];
-  if (card) { state.pool.push(card); if (state.deck.length < maxDeckSize() && copiesInDeck(card.id) < maxCopies()) state.deck.push(card.uid); b.reward = card; b.lootType = 'card'; }
+  if (card) { state.pool.push(card); b.reward = card; b.lootType = 'card'; }
   else b.lootType = 'skipped';
   b.offers = null; save(); renderBattle();
 }
@@ -207,9 +207,9 @@ function offerArrivalCard() {
   const pool = [...ELARIS_ARRIVAL_POOL], offers = [];
   while (offers.length < 3) offers.push(make(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]));
   keys = {};
-  openMenu('<div class="eyebrow">SOLARIS ATTUNEMENT</div><h2>Choose an Solaris card</h2><p>The wilds answer your arrival. Take one card attuned to this world — it joins your active deck if there is room.</p><div class="cards" id="arrivalCards"></div>');
+  openMenu('<div class="eyebrow">SOLARIS ATTUNEMENT</div><h2>Choose an Solaris card</h2><p>The wilds answer your arrival. Take one card attuned to this world — it joins your collection; open <b>Deck</b> to add it.</p><div class="cards" id="arrivalCards"></div>');
   const host = $('arrivalCards');
-  if (host && host.append) offers.forEach(c => host.append(cardElement(c, () => { state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(c.id) < maxCopies()) state.deck.push(c.uid); save(); toast(stat(c).name + ' joins your collection.'); closeMenu(); })));
+  if (host && host.append) offers.forEach(c => host.append(cardElement(c, () => { state.pool.push(c); save(); toast(stat(c).name + ' joins your collection. Open Deck to add it.'); closeMenu(); })));
   return offers;
 }
 const travelPortalBeforeVariety = travelPortal;

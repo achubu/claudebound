@@ -516,7 +516,7 @@ if(b.enemy.elite&&!b.enemy.boss&&(b.lootType==='empty'||b.lootType==='potion')&&
 // coincidence to a card instead, rather than letting it silently stack.
 if(isMiniBoss&&b.lootType==='crystal')b.lootType='card';
 b.reward=null;b.potionDrop=false;b.chestOpened=false;
-if(b.lootType==='card'){const rewardIds=activeRegion!=='city'?['cinder','venom','gale','counter','bastion','mend']:['cleave','riposte','bastion','mend','spark','shatter'];b.reward=make(rewardIds[Math.floor(Math.random()*rewardIds.length)]);state.pool.push(b.reward);if(state.deck.length<maxDeckSize()&&copiesInDeck(b.reward.id)<maxCopies())state.deck.push(b.reward.uid)}
+if(b.lootType==='card'){const rewardIds=activeRegion!=='city'?['cinder','venom','gale','counter','bastion','mend']:['cleave','riposte','bastion','mend','spark','shatter'];b.reward=make(rewardIds[Math.floor(Math.random()*rewardIds.length)]);state.pool.push(b.reward)}
 else if(b.lootType==='potion'){state.potions++;b.potionDrop=true}
 else if(b.lootType==='crystal'){setMaterials(materials()+1)}
 else if(b.lootType==='soulbound'){b.reward=make(['phoenix','oath','verdict'][Math.floor(Math.random()*3)]);state.pool.push(b.reward)}
