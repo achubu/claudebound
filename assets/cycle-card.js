@@ -26,11 +26,11 @@ function siftPending(b = state && state.battle) { return !!(b && b.phase === 'fi
 const playCardBeforeSift = playCard;
 playCard = function (i) {
   const b = state && state.battle, c = b && b.hand[i];
-  if (siftPending(b)) { toast('Sift: choose a card to discard first.'); return; }
+  if (siftPending(b)) { toast((b.siftReason === 'swipe' ? 'Swipe' : 'Sift') + ': choose a card to discard first.'); return; }
   const held = b ? b.hand.map(x => x.uid) : [];
   const r = playCardBeforeSift.apply(this, arguments);
   if (b && c && c.id === 'sift' && !b.hand.includes(c) && b.phase === 'fight') {
-    b.siftPick = stat(c).siftDiscard || 1; b.siftDrawn = b.hand.filter(x => !held.includes(x.uid)).map(x => x.uid);
+    b.siftPick = stat(c).siftDiscard || 1; b.siftReason = 'sift'; b.siftDrawn = b.hand.filter(x => !held.includes(x.uid)).map(x => x.uid);
     if (siftPending(b)) { b.logs.push('⇄ Sift: choose a card to discard.'); save(); renderBattle(); } else { b.siftPick = 0; b.siftDrawn = []; }
   }
   return r;
@@ -41,8 +41,9 @@ function siftDiscard(i) {
   b.hand.splice(i, 1); b.discard.push(c);
   if (Array.isArray(b.pitch)) b.pitch = b.pitch.filter(u => u !== c.uid);
   if (b.savedUid === c.uid) b.savedUid = null;
-  b.siftPick--; if (!b.siftPick) b.siftDrawn = [];
-  b.logs.push('⇄ Sift: discarded ' + stat(c).name + '.');
+  const why = b.siftReason === 'swipe' ? '🗡 Swipe' : '⇄ Sift';
+  b.siftPick--; if (!b.siftPick) { b.siftDrawn = []; b.siftReason = null; }
+  b.logs.push(why + ': discarded ' + stat(c).name + '.');
   save(); renderBattle(); return true;
 }
 // The card the simulator (and nobody's hand) would miss least: a junk card, else the weakest.
@@ -53,7 +54,7 @@ function siftDefaultIndex(b = state.battle) {
   return choices.reduce((best, i) => worth(b.hand[i]) < worth(b.hand[best]) ? i : best, choices[0]);
 }
 const endTurnBeforeSift = endTurn;
-endTurn = function () { const b = state && state.battle; if (b) { b.siftPick = 0; b.siftDrawn = []; } return endTurnBeforeSift.apply(this, arguments); };
+endTurn = function () { const b = state && state.battle; if (b) { b.siftPick = 0; b.siftDrawn = []; b.siftReason = null; } return endTurnBeforeSift.apply(this, arguments); };
 
 const renderBattleBeforeSift = renderBattle;
 renderBattle = function () {
@@ -63,7 +64,7 @@ renderBattle = function () {
   if (!siftPending(b) || !document.querySelectorAll) return;
   const title = modal.querySelector('.hand-title .muted') || modal.querySelector('.hand-title');
   const note = document.createElement('div'); note.className = 'sift-note';
-  note.textContent = '⇄ Sift: choose a card you already held to discard' + (b.siftPick > 1 ? ' (' + b.siftPick + ' left)' : '') + '.';
+  note.textContent = (b.siftReason === 'swipe' ? '🗡 Swipe: choose a card to discard' : '⇄ Sift: choose a card you already held to discard') + (b.siftPick > 1 ? ' (' + b.siftPick + ' left)' : '') + '.'; // Round 242: an enemy's Swipe uses this screen too
   if (title && title.after) title.after(note); else if (title && title.append) title.append(note);
   const choices = siftChoices(b);
   document.querySelectorAll('#hand .card-wrap').forEach((wrap, i) => {

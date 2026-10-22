@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 242: enemies swipe while they charge
+
+- The owner asked for something to happen during an enemy's charge-up turn, for example a swipe that
+  forces a discard.
+- 🗡 **Swipe** (`assets/charge-swipe.js`):
+  - On a charge turn ("Gathering … energy") the enemy now swipes for 30% of its attack, rounded up.
+    Block and Armor apply as usual.
+  - At the start of your next turn you discard 1 card of your choice. It uses Sift's discard screen
+    (any card in hand may go; nothing else can be played until you choose).
+  - The intent shows it a turn ahead. Frozen or silenced enemies don't swipe.
+  - Neon Aftermath's patrols have no element and never charge, so there it comes only from its
+    elemental bosses. From Solaris on, every charging creature swipes.
+- `cycle-card.js` labels the discard by its cause (`b.siftReason`: Sift or Swipe).
+- New `tests/charge-swipe.test.cjs`.
+
 ## Round 241: Tailwind cards show their printed numbers outside the fight
 
 - The owner reported Tailwind cards showing wrong values on the reward page and elsewhere.
