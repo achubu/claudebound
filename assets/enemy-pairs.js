@@ -14,7 +14,9 @@
 // intent bubbles show each enemy's next move. The first pair fight opens a short guide.
 // =====================================================================
 const PAIR_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
-const PAIR = { chance: 0.35, hp: 0.65, attack: 0.75, xp: 1.5 }; // tuned with the Difficulty lab (CHANGES.md)
+const PAIR = { chance: 0.35, hp: 0.65, attack: 0.75, xp: 1.5, world: {} }; // tuned with the Difficulty lab (CHANGES.md)
+// Each world's pair strength (share of a lone enemy's HP and attack), as [hp, attack]; others use PAIR.hp/attack.
+function pairScale(region = activeRegion) { const w = PAIR.world[region]; return w ? { hp: w[0], attack: w[1] } : { hp: PAIR.hp, attack: PAIR.attack }; }
 const PAIR_FIELDS = ['enemy', 'id', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
 const PAIR_ZONES = () => ({ sky: typeof SKY_ZONE_ENEMY !== 'undefined' && SKY_ZONE_ENEMY, wilds: typeof WILDS_ZONE_ENEMY !== 'undefined' && WILDS_ZONE_ENEMY,
   vespera: typeof VESPERA_ZONE_ENEMY !== 'undefined' && VESPERA_ZONE_ENEMY, chronospire: typeof CHRONO_ZONE_ENEMY !== 'undefined' && CHRONO_ZONE_ENEMY });
@@ -39,7 +41,7 @@ startBattle = function (spawnId) {
   const spawn = state && rooms[state.room] ? roomSpawns(state.room).find(s => s.uid === spawnId) : null, mate = spawn && pairMateFor(state.room, spawn);
   const r = startBattleBeforePairs.apply(this, arguments), b = state && state.battle;
   if (!mate || !b || b.spawnId !== spawnId || b.pair) return r;
-  const level = b.enemy.level, stats = enemyStats(mate, { level }), cut = e => { e.maxHp = e.hp = Math.max(1, Math.round(e.hp * PAIR.hp)); e.attack = Math.max(1, Math.round(e.attack * PAIR.attack)); return e; };
+  const level = b.enemy.level, stats = enemyStats(mate, { level }), cut = e => { const k = pairScale(); e.maxHp = e.hp = Math.max(1, Math.round(e.hp * k.hp)); e.attack = Math.max(1, Math.round(e.attack * k.attack)); return e; };
   cut(b.enemy);
   const other = { enemy: cut({ ...enemies[mate], boss: false, elite: false, element: enemies[mate].element || null, level, name: enemies[mate].name, hp: stats.hp, maxHp: stats.hp, attack: stats.attack }), id: mate,
     freeze: 0, enemyDebuff: 0, burn: 0, burnTurns: 0, poison: 0 };
