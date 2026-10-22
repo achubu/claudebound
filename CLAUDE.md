@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 234) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 235) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -41,7 +41,7 @@ change set.
     Every new world is built this way. Round 197: the Sky Isles use the owner's top-down tiles
     (51 rooms, three cut for diagonal walkways: `cut`/`diag` in the data); since Round 204 they
     are a dense floating city walked on a glass deck. Run `tools/prepare_sky_tiles.py`
-    (diagonal pieces and walk masks) before building it. Round 225: Elaris uses the owner's
+    (walk masks; Round 235: the owner's tiles in `src/owner/`, glass terraces) before building it. Round 225: Elaris uses the owner's
     forest (three lakes crossed by boardwalks); run `tools/prepare_wilds_tiles.py` before
     building it. It makes missing shapes by blending arms between tiles that share one base
     painting. Round 227: Vespera uses the owner's storm coast (three sea inlets crossed by piers);

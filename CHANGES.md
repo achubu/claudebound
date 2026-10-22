@@ -3496,6 +3496,32 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 235: new Sky Isles tiles with glass terraces
+
+- The owner painted six Sky Isles tiles from the Round 232 prompts. They are in the same city,
+  with grey glass terraces beside the deck where items stand. They are kept in
+  `src/owner/` under readable names:
+  - two corners (`corner-a`, and `corner-b` as a second variant);
+  - a T painted with its branch up. Turned top to bottom it is `t-bottom-a` (the paintings are
+    strictly top-down).
+  - the three bridge tiles: `diag-sw-b`, `diag-se` and `diag-nw`.
+- `diag-se` and `diag-nw` were painted with the deck from the top only, which is what the prompt
+  asked for. The rooms beside the cut corners also need it from the right, so `corner-a`'s east arm
+  is laid in with a soft edge, clear of the bridge (the paintings share one base city).
+- `tools/prepare_sky_tiles.py`:
+  - The old built bridges and `parts/bridge.jpg` are gone. All three bridge tiles are the owner's,
+    with hand-drawn bridge outlines.
+  - The trace takes the new set's near-white deck highlights.
+  - Terraces (`TERRACES`) are walkable ground, joined to the deck by a short path when apart from
+    it. A terrace across a deck arm (the corner's top, the T's bottom) runs to the edge, so the
+    doorway stays open.
+- Item squares (`tools/plazas.py`) sit on the terraces. 44 of 51 Sky Isles rooms now have one, up
+  from 33. Only `t-right-a` (7 rooms; no new painting was sent for it) has none.
+- The replaced paintings moved to `unused assets/assets/environment/sky/src/round204/`.
+  `TILE_ART_VERSION` is 235.
+- Tests: plazas, sky-diagonals, tile-worlds, item-placement, walk-past and waypoints pass. The Sky
+  Isles playtest walk is clean.
+
 ## Round 234: the Briar Sentinel is animated
 
 - The owner sent two sheets for Neon Aftermath's Briar Sentinel (`vineguard`): four battle poses

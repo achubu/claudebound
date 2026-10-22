@@ -25,12 +25,6 @@ from PIL import Image
 from scipy import ndimage as nd
 
 SRC = 'assets/environment/sky/src'
-DIAGS = {'se': (1, 1), 'nw': (0, 0), 'sw': (0, 1)}  # corner of the image each diagonal runs to
-# The painted bridge in parts/bridge.jpg: a point on its centre line, its direction, and the
-# half-width to copy (glass ~130px plus its rim).
-BRIDGE_AT, BRIDGE_DIR, BRIDGE_HALF = (2144.2, 1220.2), (0.7528, 0.6583), 146
-BRIDGE_FROM, BRIDGE_TO = -520, 560  # the clean stretch along the centre line, either side of BRIDGE_AT
-PLAZA_R = 268  # the cross tile's fountain plaza
 
 
 def rgb(path):
@@ -41,30 +35,8 @@ def deck(im):
     R, G, B = im[..., 0], im[..., 1], im[..., 2]
     pale = (R >= 170) & (G >= 225) & (B >= 225) & (G >= R + 8) & (B >= R + 8) & (B - R <= 75)
     grid = (G >= R + 45) & (B >= R + 60) & (G >= 170) & (B >= 200)
-    return pale | grid
-
-
-def diagonals():
-    corner, bridge, cross = rgb(SRC + '/corner-a.jpg'), rgb(SRC + '/parts/bridge.jpg'), rgb(SRC + '/cross-a.jpg')
-    H, W = corner.shape[:2]; cx, cy = W / 2, H / 2
-    yy, xx = np.mgrid[0:H, 0:W].astype(float)
-    (bx, by), (dx, dy) = BRIDGE_AT, BRIDGE_DIR; nx_, ny_ = -dy, dx
-    span = BRIDGE_TO - BRIDGE_FROM
-    os.makedirs(SRC + '/diagonal', exist_ok=True)
-    for name, (ex, ey) in DIAGS.items():
-        tx, ty = ex * W - cx, ey * H - cy; L = np.hypot(tx, ty); tx, ty = tx / L, ty / L
-        u = (xx - cx) * tx + (yy - cy) * ty; v = (xx - cx) * -ty + (yy - cy) * tx
-        a = np.clip(BRIDGE_HALF + .5 - np.abs(v), 0, 1) * (u > 0)
-        # Walk the painted bridge from its far (corner) end back, mirrored past its clean stretch,
-        # so the end of the new bridge at the image corner matches the painted one's.
-        t = BRIDGE_TO - (L - u)
-        t = BRIDGE_FROM + np.abs(((t - BRIDGE_FROM) + span) % (2 * span) - span)
-        sx, sy = bx + t * dx + v * nx_, by + t * dy + v * ny_
-        band = np.dstack([nd.map_coordinates(bridge[..., c], [sy, sx], order=1, mode='nearest') for c in range(3)])
-        out = corner * (1 - a[..., None]) + band * a[..., None]
-        d = np.hypot(xx - cx, yy - cy); pa = np.clip(PLAZA_R + .5 - d, 0, 1)[..., None]
-        out = out * (1 - pa) + cross * pa
-        Image.fromarray(out.clip(0, 255).astype(np.uint8)).save(f'{SRC}/diagonal/diag-{name}.jpg', quality=92)
+    glare = (R >= 215) & (G >= 232) & (B >= 232)  # Round 235: the third set's deck has near-white highlights
+    return pale | grid | glare
 
 
 # Round 219: the owner's own diagonal paintings (src/diagonal-owner/diag-<dir>.jpg) replace the
@@ -72,25 +44,58 @@ def diagonals():
 OWNER_DIAG = SRC + '/diagonal-owner'
 # The owner's bridge glass is a darker blue than the deck, so its outline is drawn by hand
 # (800x500, inside the rails).
-OWNER_BRIDGE = {'diag-sw': [(400, 195), (468, 258), (252, 500), (112, 500)],  # each outline reaches the image edge
-                'diag-nw': [(0, 0), (96, 0), (345, 214), (304, 262), (0, 70)],
-                'diag-sw-b': [(300, 212), (352, 252), (156, 500), (14, 500)]}
+OWNER_BRIDGE = {'diag-sw-b': [(395, 190), (470, 245), (250, 500), (105, 500)],  # Round 235 set
+                'diag-se': [(352, 245), (392, 207), (712, 500), (612, 500)],
+                'diag-nw': [(110, 0), (195, 0), (448, 240), (410, 285)]}
 
 
 def owner_diagonals():
     import shutil
+    os.makedirs(SRC + '/diagonal', exist_ok=True)
     for p in sorted(glob.glob(OWNER_DIAG + '/diag-*.jpg')):
         shutil.copyfile(p, SRC + '/diagonal/' + os.path.basename(p))
 
 
-def laid(name):
-    # The plaza and bridge laid on a diagonal tile, as walkable ground at 800x500 (their rims
-    # and the fountain's colours would otherwise split or hole the traced deck).
-    ex, ey = DIAGS[name]; k = 800 / 2624
-    yy, xx = np.mgrid[0:500, 0:800].astype(float)
-    tx, ty = ex * 800 - 400, ey * 500 - 250; L = np.hypot(tx, ty); tx, ty = tx / L, ty / L
-    u = (xx - 400) * tx + (yy - 250) * ty; v = (xx - 400) * -ty + (yy - 250) * tx
-    return (np.hypot(xx - 400, yy - 250) <= (PLAZA_R - 24) * k) | ((u > 0) & (np.abs(v) <= (BRIDGE_HALF - 22) * k))
+# Round 235: the owner's third set (src/owner/*.jpeg) adds grey glass terraces beside the deck, where
+# items stand (tools/plazas.py). Two corners, a T (painted with its branch up, so turned top to
+# bottom: the paintings are strictly top-down) and three bridge tiles. Two of the bridge tiles were
+# painted with the deck from the top only; the rooms beside the cut corners need it from the right
+# too, so corner-a's east arm is laid in (the paintings share one base city), clear of the bridge.
+OWN = SRC + '/owner'
+EAST_ARM = (470, 185, 300, 18)
+# The grey glass terraces beside (and in places across) the deck are walkable ground: items stand
+# there (tools/plazas.py). x0, y0, x1, y1 at 800x500, in the tile as saved (t-bottom-a turned). A terrace
+# across a deck arm runs to the image edge, so the glass beyond it stays joined to the deck.
+TERRACES = {'corner-a': [(362, 0, 437, 130), (228, 210, 315, 285), (485, 292, 560, 385), (562, 292, 640, 385)],
+            'corner-b': [(228, 210, 315, 285), (485, 292, 560, 385), (562, 292, 640, 385)],
+            't-bottom-a': [(365, 350, 435, 500), (485, 115, 560, 208), (562, 115, 640, 208)],
+            'diag-sw-b': [(228, 210, 315, 285), (480, 215, 555, 285)],
+            'diag-se': [(228, 210, 315, 285)],
+            'diag-nw': [(228, 210, 315, 285), (300, 195, 475, 300)]}  # its junction lies under the bridge's glare  # from x, between y0 and y1 (800x500), soft edge
+
+
+def poly_mask(pts, shape):
+    from PIL import ImageDraw
+    H, W = shape; k = W / 800
+    im = Image.new('L', (W, H), 0); ImageDraw.Draw(im).polygon([(x * k, y * k) for x, y in pts], fill=255)
+    return np.asarray(im) > 127
+
+
+def owner_tiles():
+    os.makedirs(OWNER_DIAG, exist_ok=True)
+    save = lambda im, path: Image.fromarray(im.clip(0, 255).astype(np.uint8)).save(path, quality=92)
+    save(rgb(OWN + '/corner-a.jpeg'), SRC + '/corner-a.jpg')
+    save(rgb(OWN + '/corner-b.jpeg'), SRC + '/corner-b.jpg')
+    save(rgb(OWN + '/t-top.jpeg')[::-1], SRC + '/t-bottom-a.jpg')
+    save(rgb(OWN + '/diag-sw-b.jpeg'), OWNER_DIAG + '/diag-sw-b.jpg')
+    arm = rgb(OWN + '/corner-a.jpeg')
+    for name in ('diag-se', 'diag-nw'):
+        im = rgb(OWN + '/' + name + '-n.jpeg'); H, W = im.shape[:2]; k = W / 800
+        x0, y0, y1, f = (v * k for v in EAST_ARM)
+        yy, xx = np.mgrid[0:H, 0:W].astype(float)
+        a = np.clip((xx - x0) / f, 0, 1) * np.clip(np.minimum(yy - y0, y1 - yy) / f, 0, 1)
+        a *= ~nd.binary_dilation(poly_mask(OWNER_BRIDGE[name], (H, W)), iterations=int(10 * k))
+        save(im * (1 - a[..., None]) + arm * a[..., None], OWNER_DIAG + '/' + name + '.jpg')
 
 
 def trace(path):
@@ -104,7 +109,14 @@ def trace(path):
     keep = [i + 1 for i, s in enumerate(sizes) if s >= .25 * max(sizes)]
     m = np.isin(lab, keep)
     name = os.path.splitext(os.path.basename(path))[0]
-    if name.startswith('diag-') and not os.path.exists(OWNER_DIAG + '/' + name + '.jpg'): m |= laid(name[5:])
+    for x0, y0, x1, y1 in TERRACES.get(name, []):  # walkable, and joined to the deck by a short path if apart from it
+        if not m[y0:y1, x0:x1].any():
+            _, (iy, ix) = nd.distance_transform_edt(~m, return_indices=True)
+            cx, cy = (x0 + x1) // 2, (y0 + y1) // 2; tx, ty = ix[cy, cx], iy[cy, cx]
+            yy, xx = np.mgrid[0:500, 0:800]; d = np.array([tx - cx, ty - cy], float); L = max(np.hypot(*d), 1); d /= L
+            t = np.clip((xx - cx) * d[0] + (yy - cy) * d[1], 0, L + 4)
+            m |= (xx - cx - t * d[0]) ** 2 + (yy - cy - t * d[1]) ** 2 <= 14 ** 2
+        m[y0:y1, x0:x1] = True
     if name in OWNER_BRIDGE and os.path.exists(OWNER_DIAG + '/' + name + '.jpg'):
         from PIL import ImageDraw
         poly = Image.new('L', (800, 500), 0); ImageDraw.Draw(poly).polygon(OWNER_BRIDGE[name], fill=255)
@@ -113,7 +125,7 @@ def trace(path):
 
 
 def main():
-    diagonals(); owner_diagonals()
+    owner_tiles(); owner_diagonals()
     os.makedirs(SRC + '/masks', exist_ok=True)
     for old in glob.glob(SRC + '/masks/*.png'): os.remove(old)
     for p in sorted(glob.glob(SRC + '/*.jpg') + glob.glob(SRC + '/diagonal/*.jpg')):
