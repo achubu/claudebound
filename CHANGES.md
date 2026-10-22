@@ -3496,6 +3496,80 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 234: the Briar Sentinel is animated
+
+- The owner sent two sheets for Neon Aftermath's Briar Sentinel (`vineguard`): four battle poses
+  (stand, shield up, slash with a pink trail, stand) and a six-frame walk, on black.
+- Keyed off the black with a filled silhouette, so the dark armour joints stay. Small enclosed
+  gaps are filled; large ones stay see-through.
+  - Composed with `tools/compose_sprite_sheet.py` into `assets/monsters/city/briar-sentinel.png`.
+  - The walk uses frames 2-5 (shield forward), in `briar-sentinel-walk.png`.
+  - Both padded with `pad_sprite_frames.py`.
+- It is a `WILDLIFE_ART` entry with `poses: { attack: 2, hurt: 1, walk }`. The Arc Sentinel and
+  the Brass Sentry, which borrow its art, animate too (recoloured as before).
+- The Sunwrapped Revenant's pose code (`assets/sun-revenant.js`) now serves any creature that
+  lists `poses` (`posesOf()`, CSS variables for the frames and the walk sheet).
+- Fixed: a `#battleModal .compact-monster` rule pinned every sprite to frame 0, so the
+  attack and hurt poses never showed, not even the Revenant's.
+- `SPRITE_VERSION` 234. New `tests/briar-sentinel.test.cjs`.
+
+## Round 233: a deck slot for every boss; new cards wait for the player
+
+- The owner asked for +1 max deck size for every boss defeated, and that newly acquired cards not
+  go into the deck automatically: the player chooses.
+- **Deck size:** `worldDeckBonus()` now counts every boss beaten, mini-bosses included (three per
+  world, eighteen in all), not only the five bosses that open the next world.
+  - With no talents or devices that is 6 at the start and 24 with every boss down.
+  - The victory screen shows a "Deck slot" tile when a slot opens.
+  - The old `WORLD_BOSSES` list is gone.
+- **New cards wait in the collection.** None of these put cards in the deck any more:
+  - battle rewards (`chooseReward`, `chooseCardReward`, the random card loot);
+  - card bundles;
+  - Solaris's attunement pick;
+  - the worlds' arrival gifts (`mechanicGift`, Chronospire's Suspend cards);
+  - new side cards (`addSideCard`).
+
+  New deck and side-deck slots are left empty (the side deck's `fillSideDeck` is gone). The texts
+  now say the cards are in the collection, to add from Deck.
+- The Deck button counts the cards gained since the Deck screen was last opened
+  ("Deck · 3 new", gold outline). New `assets/deck-choice.js`; it also rebinds the Deck button
+  to the whole `showDeck` chain.
+- The tutorial's deck line says one slot more for every boss beaten.
+- The balance sim and the Difficulty lab equip the sim player's side cards themselves. Their
+  numbers are unchanged: their decks are built before the beaten bosses are set.
+- Tests: `world-deck` (18 bosses, +1 each, counted once; reward, gift and side card stay out of
+  the deck; the badge) and `aether-deck` updated.
+
+## Round 232: items stand in the open squares beside the road
+
+- The owner asked that interactable objects stand only in open areas off the road (like Solaris's
+  little paved yards), and for prompts where a painting has none.
+- `tools/plazas.py` lists hand-checked spots on every tile painting, picked by eye over a grid,
+  never on roofs, props, trees or water:
+  - Solaris: paved yards and sand squares.
+  - Elaris: the ruins' flagstones and clearings beside the trail.
+  - Vespera: flats of rock and sand and the old stone circle.
+  - Sky Isles: the terraces and the round plaza.
+- The builders open each spot up to the walk mask (a disc round it and a footpath to the nearest
+  road) and write each room's spots, flipped with the room, into the data (`SOLARIS_PLAZAS`,
+  `TILE_WORLD_DATA[w].plazas`).
+- `assets/plazas.js`:
+  - `organicItemSpot()` picks the nearest open square first, for chests, gear, points of interest,
+    the merchant, the Cardsmith and Nexus Waypoints. A square may be as close as 70px to a patrol
+    or another item before it is passed over.
+  - Patrols keep 90px out of the squares.
+  - A room whose painting has no square keeps the old spot beside the road.
+- Neon Aftermath already worked this way (hand-picked nooks, Round 101), so it is unchanged.
+- Squares per world:
+  - Solaris, Elaris and Vespera: every room has at least two.
+  - Sky Isles: 33 of 51 rooms. Its plain lanes (the T, the three diagonal walkways, and the corner,
+    which has only one small bay) have nothing but rooftops beside the deck.
+  - Chronospire: none; its tiles are still generated stand-ins.
+
+  Prompts for new paintings of those tiles were given to the owner.
+- Tests: new `tests/plazas.test.cjs`. Items in rooms with a square stand in one, and each can be
+  walked up to.
+
 ## Round 231: the last Solaris room in the new look
 
 - The owner painted the tile asked for in Round 230: streets west, east and south with a stone

@@ -92,7 +92,7 @@ const only = process.argv[2];
           const d = Math.hypot(state.pos.x - it.x, state.pos.y - it.y);
           if (!res.ok || (!res.opened && d > reach)) P('item out of reach', key, kind + ' from ' + via + ': ' + (res.ok ? 'ends ' + Math.round(d) + 'px away' : res.why));
           if (testedItems.has(key + kind)) continue; testedItems.add(key + kind);
-          if (walkable(key, it.x, it.y) && !(typeof itemsOnGround === 'function' && itemsOnGround())) P('item on the path', key, kind); // Round 212: Solaris and the Sky Isles put items on the ground
+          if (walkable(key, it.x, it.y) && !(typeof itemsOnGround === 'function' && itemsOnGround()) && !(typeof isPlazaSpot === 'function' && isPlazaSpot(key, it))) P('item on the path', key, kind); // Round 212: Solaris and the Sky Isles put items on the ground; Round 232: open squares are walkable
           for (const [k2, it2] of items(key)) if (k2 !== kind && Math.hypot(it.x - it2.x, it.y - it2.y) < 34) P('items overlap', key, kind + ' + ' + k2);
           for (const s of roomSpawns(key)) if (Math.hypot(it.x - s.x, it.y - s.y) < 60) P('item next to a patrol', key, kind + ' and ' + s.type + ' ' + Math.round(Math.hypot(it.x - s.x, it.y - s.y)) + 'px');
           if (portalTarget && (() => { const old = state.room; state.room = key; const t = portalTarget(); state.room = old; return t; })() && it.x > 330 && it.x < 470 && it.y > 300 && it.y < 480) P('portal covers item', key, kind);

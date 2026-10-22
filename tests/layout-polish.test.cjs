@@ -7,25 +7,24 @@ const { run } = require('./expansion.test.cjs');
 run(fs.readFileSync(path.join(__dirname, '../assets/layout-polish.js'), 'utf8'));
 run(`{
 const realRandom = Math.random; Math.random = () => 0.99;
-// 1. First win in Neon Aftermath: a full starting deck keeps the Hack cards in the collection, and says so.
+// 1. First win in Neon Aftermath: the Hack cards go to the collection (Round 233: always), and it says so.
 newGame(); state.room = Object.keys(rooms).find(k => roomSpawns(k).some(s => !s.boss && !s.elite)); state.cooldowns = {};
 startBattle(roomSpawns(state.room).find(s => !s.boss && !s.elite).uid);
 let b = state.battle; assert.equal(state.deck.length, maxDeckSize(), 'the starting deck is full');
 b.enemy.hp = 0; winBattle();
 assert.equal(b.phase, 'reward');
-assert(b.logs.some(l => l.includes('your deck is full, so they are in your collection')), 'the log says where the Hack cards went');
+assert(b.logs.some(l => l.includes('They are in your collection: open Deck to add them')), 'the log says where the Hack cards went');
 assert(!state.deck.some(u => ['packetSniff', 'ghostProtocol'].includes(state.pool.find(c => c.uid === u).id)), 'not in the deck');
 assert(!(state.tips || {}).hack, 'the Hack guide is not marked as seen yet');
 assert(state.pendingMechIntro && state.pendingMechIntro.region === 'city');
 finishBattle();
 assert(!$('menuOverlay').classList.contains('hidden'), 'closing the rewards opens the Hack intro');
-assert($('menuModal').innerHTML.includes('New mechanic: Hack') && $('menuModal').innerHTML.includes('Your deck is full'), 'and it explains where the cards are');
+assert($('menuModal').innerHTML.includes('New mechanic: Hack') && $('menuModal').innerHTML.includes('They are in your collection'), 'and it explains where the cards are');
 assert(state.tips.hack && !state.pendingMechIntro, 'shown once');
 closeMenu();
-// With room in the deck the gift goes into it.
+// Round 233: even with room in the deck the gift waits in the collection; the player adds it.
 newGame(); state.deck = state.deck.slice(0, 4); const g = mechanicGift('elaris', false);
-assert.equal(g.placed, 2); assert(giftPlacement(WORLD_MECHANICS.elaris, 2).includes('in your deck now'));
-assert(giftPlacement(WORLD_MECHANICS.elaris, 1).includes('room for one'));
+assert.equal(g.placed, 0); assert.equal(state.deck.length, 4); assert(giftPlacement(WORLD_MECHANICS.elaris).includes('in your collection'));
 // 2. A mechanic guide goes below the hand, not above it; only one opens by itself at a time.
 newGame(); state.room = Object.keys(rooms).find(k => roomSpawns(k).some(s => !s.boss)); state.tips = {};
 startBattle(roomSpawns(state.room).find(s => !s.boss).uid); b = state.battle;

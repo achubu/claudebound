@@ -39,4 +39,4 @@ for (const s of sheets) {
   assert(filled > 0.05 * w * h, s + ' has a creature in it');
 }
 const tw = fs.readFileSync(path.join(__dirname, '../assets/elaris-wildlife.js'), 'utf8');
-assert(/SPRITE_VERSION='224'/.test(tw), 'SPRITE_VERSION is bumped so browsers fetch the new sheets');
+assert(+(/SPRITE_VERSION='(\d+)'/.exec(tw) || [0, 0])[1] >= 224, 'SPRITE_VERSION is bumped so browsers fetch the new sheets');

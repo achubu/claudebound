@@ -22,6 +22,7 @@ from scipy import ndimage as nd
 
 sys.path.insert(0, os.path.dirname(__file__))
 from build_solaris import SHAPES as SOLARIS_SHAPES, FLIP_EXITS, load, trace, manual_mask  # noqa: E402
+from plazas import carve, room_spots  # noqa: E402
 
 # Round 179: a turned layout (Chronospire) needs a straight east-west road too.
 SHAPES = {**SOLARIS_SHAPES, 'straight-h': 'ew'}
@@ -151,6 +152,7 @@ def main(world):
     dshape_of = {n: next(sh for sh in dshapes if n.startswith(sh)) for n in dtiles}
     for n, im in dtiles.items(): save_webp(n, im); masks[n] = mask_for(n)
     dflips = list(FLIP_DIAG) if cfg.get('top_down') else [(0, 0), (1, 0)]
+    masks = {n: carve(world, n, m) for n, m in masks.items()}  # Round 232: open squares beside the road
     rooms, roles = layout(cfg, world)
     plan = {}
     for key in sorted(rooms, key=lambda k: (int(k.split(',')[1]), int(k.split(',')[0]))):
@@ -207,6 +209,7 @@ def main(world):
     data = {'name': cfg['name'], 'world': {'maskW': W, 'maskH': H, 'cell': 8, 'mask': enc},
             'plan': {k: [n, f[0], f[1]] for k, (n, f) in plan.items()}, 'layout': rooms, 'roles': roles,
             'placeholders': sorted(n for n in tiles if n.endswith('-ph')),
+            'plazas': {k: room_spots(world, n, *f) for k, (n, f) in plan.items() if room_spots(world, n, *f)},
             **({'diag': diag, 'cut': cfg['cut']} if cfg.get('cut') else {})}
     js = (f'// Built by tools/build_tile_world.py {world} (Round 174). Do not edit by hand.\n'
           "var TILE_WORLD_DATA = typeof TILE_WORLD_DATA !== 'undefined' ? TILE_WORLD_DATA : {};\n"

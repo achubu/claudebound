@@ -135,7 +135,8 @@ const n0 = state.side.pool.length; assert.equal(rollSideDrop(b, .02), null, 'reg
 b.enemy.boss = true; const id0 = b.id; b.id = 'bloomTyrant'; assert(rollSideDrop(b, .999), 'final bosses always drop one');
 b.id = 'galeSovereign'; assert.equal(rollSideDrop(b, .25), null, 'mini-bosses: 25% (Round 202)'); assert(rollSideDrop(b, .24), 'mini-boss drop under 25%'); b.id = id0;
 assert(sidePoolFor(0).every(id => SIDE_CARDS[id].tier === 0), 'city drops city-tier side cards'); assert(sidePoolFor(2).includes('phase'));
-newGame(); state.bosses.push('crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'); for (let k = 0; k < 6; k++) addSideCard('purify');
+newGame(); state.bosses.push('crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'); const sideBefore = state.side.deck.length; const purifies = []; for (let k = 0; k < 6; k++) purifies.push(addSideCard('purify'));
+assert.equal(state.side.deck.length, sideBefore, 'Round 233: a new side card waits in the collection'); for (const c of purifies) toggleSideCard(c.uid);
 assert(state.side.deck.length <= SIDE_DECK_MAX); assert.equal(sideCopies('purify'), SIDE_COPIES, 'at most 2 copies per side card');
 const saved = JSON.parse(JSON.stringify(state)); validateImport(saved);
 const bad = JSON.parse(JSON.stringify(state)); bad.side.pool.push({ uid: 'x9', id: 'purify' }); assert.throws(() => validateImport(bad), /side/);
@@ -147,7 +148,7 @@ newGame(); assert.equal(sideDeckMax(), 2); state.side.pool.push({ uid: 's90', id
 toggleSideCard('s90'); assert.equal(state.side.deck.length, 2, 'cannot exceed the current capacity');
 const grow = ['crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'];
 grow.forEach((id, i) => { state.bosses.push(id); assert.equal(sideDeckMax(), 3 + i); }); state.bosses.push('stormTyrant'); assert.equal(sideDeckMax(), 6, 'never above 6');
-state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '8,9'; const sp = roomSpawns(state.room).find(s => s.type === 'crownSentinel'); if (sp) { state.side.deck = state.side.deck.slice(0, 5); startBattle(sp.uid); state.battle.enemy.hp = 0; winBattle(); assert.equal(sideDeckMax(), 6); assert.equal(state.side.deck.length, 6, 'a new slot is filled automatically'); assert(state.battle.special.some(t => /Side deck expanded/.test(t))); }
+state.bosses = state.bosses.filter(id => id !== 'crownSentinel'); state.room = '8,9'; const sp = roomSpawns(state.room).find(s => s.type === 'crownSentinel'); if (sp) { state.side.deck = state.side.deck.slice(0, 5); const sideLen = state.side.deck.length; startBattle(sp.uid); state.battle.enemy.hp = 0; winBattle(); assert.equal(sideDeckMax(), 6); assert.equal(state.side.deck.length, sideLen, 'Round 233: a new slot is left for the player to fill'); assert(state.battle.special.some(t => /Side deck expanded/.test(t))); }
 newGame(); state.side.deck = state.side.pool.map(c => c.uid); ensureSide(); assert.equal(state.side.deck.length, 2, 'over-capacity side decks are trimmed');
 console.log('PASS: pitching, Aether, side-deck draws, all 11 enemy afflictions, schedules, all 10 side cards, drops, deck rules and save migration.');
 }`);

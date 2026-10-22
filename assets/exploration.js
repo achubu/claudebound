@@ -325,7 +325,7 @@ function openBundle(level = 0) {
   // Store cards are always Impermanent, never Soulbound.
   const offers = cardOffers().map(c => { c.soulbound = false; c.level = level; return c; });
   poiMenu(level ? 'Upgraded cards' : 'Card bundle', '<p>Choose one card.</p><div class="cards" id="bundleCards"></div>', [{ id: 'poiLeave', label: 'Leave them', onclick: closeMenu }]);
-  offers.forEach(c => $('bundleCards').append(cardElement(c, () => { state.pool.push(c); if (state.deck.length < maxDeckSize() && copiesInDeck(c.id) < maxCopies()) state.deck.push(c.uid); save(); toast(stat(c).name + ' added to your collection.'); closeMenu(); })));
+  offers.forEach(c => $('bundleCards').append(cardElement(c, () => { state.pool.push(c); save(); toast(stat(c).name + ' added to your collection. Open Deck to add it.'); closeMenu(); })));
 }
 
 // --- Shards from fights, blessings in fights, merchant moving on ---

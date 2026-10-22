@@ -55,7 +55,7 @@ for (const [region, regionName] of Object.entries(REGIONS)) {
         run(`Math.random=(()=>{let s=${(i + 1 + Number(process.env.SEED || 0) * 1000) * 48271 + lv};return()=>{s=(s*16807)%2147483647;return (s-1)/2147483646}})();
           newGame();configureRegion('${region}');state.region='${region}';state.playerLevel=${Math.max(1, lv + Number(process.env.LEVEL_DELTA || 0))};allocate(${JSON.stringify(plan)});syncTalentVitals(false);state.hp=state.maxHp;
           state.pool=${JSON.stringify(deckFor(region, L))}.slice(0,maxDeckSize()).map(id=>{const c=make(id);c.level=${cardLevelFor(Math.max(1, lv + Number(process.env.LEVEL_DELTA || 0)))};return c});
-          state.deck=state.pool.map(c=>c.uid);state.cooldowns={};state.bosses=${JSON.stringify(PRIOR_BOSSES[region]||[])};ensureSide();for(const id of ${JSON.stringify(PRIOR_SIDE[region]||[])})state.side.pool.push({uid:'s'+(state.side.next++),id});if(typeof fillSideDeck==='function')fillSideDeck();state.cleared=[];state.room='${room}';state.pos={x:400,y:300};startBattle('${uid}');
+          state.deck=state.pool.map(c=>c.uid);state.cooldowns={};state.bosses=${JSON.stringify(PRIOR_BOSSES[region]||[])};ensureSide();for(const id of ${JSON.stringify(PRIOR_SIDE[region]||[])})state.side.pool.push({uid:'s'+(state.side.next++),id});for(const c of state.side.pool){if(state.side.deck.length>=sideDeckMax())break;if(!state.side.deck.includes(c.uid))state.side.deck.push(c.uid)}state.cleared=[];state.room='${room}';state.pos={x:400,y:300};startBattle('${uid}');
           globalThis.__r=state.battle?playOutBattle():{won:false,aborted:true};`);
         if (context.__r.aborted) throw new Error('fight did not start: ' + region + ' ' + room);
         if (context.__r.won) wins++;

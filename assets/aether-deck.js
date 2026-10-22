@@ -136,9 +136,6 @@ const SIDE_STARTER = ['purify', 'aegis', 'dispel'];
 // (SIDE_DECK_MAX) over the game: +1 for each of these bosses.
 const SIDE_START_SLOTS = 2, SIDE_GROWTH_BOSSES = ['crownSentinel', 'galeSovereign', 'bloomTyrant', 'resonantPhantom'];
 function sideDeckMax(s = state) { const beaten = (s && Array.isArray(s.bosses)) ? s.bosses : []; return Math.min(SIDE_DECK_MAX, SIDE_START_SLOTS + SIDE_GROWTH_BOSSES.filter(id => beaten.includes(id)).length); }
-function fillSideDeck(s = state) { // equip unequipped side cards into newly opened slots
-  for (const c of s.side.pool) { if (s.side.deck.length >= sideDeckMax(s)) break; if (!s.side.deck.includes(c.uid) && s.side.deck.map(u => s.side.pool.find(x => x.uid === u)).filter(x => x && x.id === c.id).length < SIDE_COPIES) s.side.deck.push(c.uid); }
-}
 function sidePoolFor(region = regionIndex()) { return Object.keys(SIDE_CARDS).filter(id => SIDE_CARDS[id].tier <= region); }
 function sideArtPath(id) { return 'assets/cards/side/' + id + '.webp'; } // Round 180: refreshed side-deck paintings
 
@@ -153,8 +150,7 @@ function ensureSide(s = state) {
 }
 const sideCopies = id => state.side.deck.map(u => state.side.pool.find(c => c.uid === u)).filter(c => c && c.id === id).length;
 function addSideCard(id) {
-  ensureSide(); const card = { uid: 's' + state.side.next++, id }; state.side.pool.push(card);
-  if (state.side.deck.length < sideDeckMax() && sideCopies(id) < SIDE_COPIES) state.side.deck.push(card.uid);
+  ensureSide(); const card = { uid: 's' + state.side.next++, id }; state.side.pool.push(card); // Round 233: the player equips it from Deck
   return card;
 }
 // Round 159: destroying a side card (a spare copy first) gives 5 Shards.
@@ -557,11 +553,11 @@ showDeck = function () {
   });
 };
 
-// Round 71: beating a growth boss opens a side deck slot (and fills it).
+// Round 71: beating a growth boss opens a side deck slot (Round 233: left for the player to fill).
 const winBattleBeforeSideGrowth = winBattle;
 winBattle = function () {
   const b = state.battle, before = sideDeckMax();
   winBattleBeforeSideGrowth();
   const after = sideDeckMax();
-  if (after > before && state.side) { fillSideDeck(); if (b && Array.isArray(b.special)) b.special.push('✦ Side deck expanded: room for ' + after + ' of ' + SIDE_DECK_MAX + ' side cards.'); save(); }
+  if (after > before && state.side) { if (b && Array.isArray(b.special)) b.special.push('✦ Side deck expanded: room for ' + after + ' of ' + SIDE_DECK_MAX + ' side cards.'); save(); }
 };
