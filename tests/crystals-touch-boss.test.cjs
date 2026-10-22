@@ -15,7 +15,7 @@ save();state=null;assert(load());assert.equal(crystalOpeningBlock(),2);
 configureRegion('elaris');state.region='elaris';state.room='1,0';state.hp=59;state.maxHp=59;startBattle(roomSpawns(state.room)[0].uid);
 let b=state.battle;ENEMY_AFFLICTIONS[b.id]=[];b.enemy.hp=300;b.enemy.maxHp=300;b.enemy.element='fire';b.hand=[make('counter')];b.savedUid=b.hand[0].uid;const counterUid=b.savedUid;
 endTurn();assert(b.hand.some(c=>c.uid===counterUid));assert.equal(enemyPlan().kind,'charge');
-b.hand=[b.hand.find(c=>c.uid===counterUid)];b.energy=3;playCard(0);const beforeCharge=state.hp;endTurn();assert.equal(state.hp,beforeCharge);assert(b.counter,'counter stays armed through charging');
+b.hand=[b.hand.find(c=>c.uid===counterUid)];b.energy=3;playCard(0);const beforeCharge=state.hp,swipe=Math.max(0,(enemyPlan().swipe||0)-scaledRank('plating')-b.block);endTurn();assert.equal(state.hp,beforeCharge-swipe,'Round 242: a charge turn only swipes');b.siftPick=0;assert(b.counter,'counter stays armed through charging');
 const beforeStrike=state.hp,enemyBefore=b.enemy.hp;endTurn();assert.equal(state.hp,beforeStrike);assert.equal(b.enemy.hp,enemyBefore-6);assert(!b.playerBurn,'counter blocks status');
 b.turn=3;b.enemy.element='water';b.disrupted=true;b.block=0;b.enemy.hp=300;b.playerPoison=0;const hpBeforeShock=state.hp,shockDamage=Math.ceil(enemyPlan().damage/2);endTurn();assert.equal(state.hp,hpBeforeShock-shockDamage);assert(!b.disrupted);
 // Boss unlock and reward happen once, then both regions round-trip through the portal.
