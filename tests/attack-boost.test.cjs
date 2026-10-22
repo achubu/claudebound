@@ -19,7 +19,7 @@ assert.strictEqual(r.sky.text, 'Spend all your energy: deal 9 damage per energy.
 assert.deepStrictEqual(r.chrono, r.sky, 'the same in every later world (not compounded)');
 assert.strictEqual(r.sky.guard, r.city.guard, 'defense cards unchanged');
 assert.strictEqual(r.sky.dusk, r.city.dusk, 'skills unchanged');
-assert.strictEqual(r.sky.bash3, 8, "Bulwark Bash's bonus over your Block scales");
+assert.strictEqual(r.sky.bash3, r.city.bash3, 'Bulwark Bash is a defensive card and keeps its values (owner)');
 assert.deepStrictEqual(r.back, r.city, 'back in Neon Aftermath the numbers return');
 assert.strictEqual(r.dealt, 16, 'the damage dealt follows (16 for Cleave)');
 console.log('attack-boost ok');
