@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 231: the last Solaris room in the new look
+
+- The owner painted the tile asked for in Round 230: streets west, east and south with a stone
+  causeway to the top-left. It is `diag-t-b-s1` and serves 5,1 (Mirage Bazaar), the far end of the
+  causeway from 4,0. All 51 Solaris rooms now use the new top-down look.
+- The causeway is grey stone, which the colour trace doesn't pick up, so `prepare_solaris_tiles.py`
+  can outline one by hand (`CAUSEWAY`, at 800x500). Walking up from 4,0 again arrives on it.
+- The old diag-t-b paintings moved to `unused assets/`.
+- Tests: `solaris-landmarks` expects no old-style rooms. The Solaris playtest walk is clean.
+
 ## Round 230: two more Solaris tiles; one room left in the old style
 
 - The owner sent four more Solaris paintings. Two fit:

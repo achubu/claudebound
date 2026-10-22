@@ -11,7 +11,7 @@ for (const [key, [tile]] of Object.entries(plan))
 // have yet keep an old painting: since Round 230 that is the T causeway room (5,1) alone.
 const isNew = tile => /-s\d+$/.test(tile);
 const old = Object.entries(plan).filter(([, [tile]]) => !isNew(tile)).map(([k]) => k).sort();
-assert.deepStrictEqual(old, ['5,1'], 'only the room awaiting a new painting keeps an old one');
+assert.deepStrictEqual(old, [], 'every room uses the new look (Round 231)');
 for (const key of ['8,5', '5,2', '8,0', '0,2', '6,2', '5,5']) assert(isNew(plan[key][0]), key + ' (a landmark room) uses the new tiles');
 // Round 230: the west dead end (4,5) is the second corner, its south street running off the map's bottom edge.
 assert.deepStrictEqual(plan['4,5'].slice(0, 1), ['corner-s2'], '4,5 uses the corner whose extra street runs off the map');
