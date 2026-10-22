@@ -3501,8 +3501,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - The owner asked for the Tailwind tag right after the card's description, because the Deck screen
   didn't show it. Round 229 drew it as a badge above the card, in battle only.
 - Every world-mechanic card now carries its tag (⌁ HACK, ☀ HEAT, 🪶 TAILWIND, 🌱 GROWTH,
-  ⚡ STORMCHARGE, ⏳ SUSPEND) as a small pill at the end of its rules text, wherever it is drawn:
-  hand, Deck screen, rewards, merchant.
+  ⚡ STORMCHARGE) as a small pill at the end of its rules text, wherever it is drawn: hand, Deck
+  screen, rewards, merchant. Chronospire's ⏳ Suspend cards keep their own markings.
 - It is added in a `cardHTML` wrapper in `assets/world-mechanics.js`. In battle a Growth card's
   pill still shows how far it has grown. The badge above the card and its spacers are gone.
 - Tests: `mech-badge` checks the tag after the description in battle and in the Deck screen, on
