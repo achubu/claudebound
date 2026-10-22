@@ -15,7 +15,7 @@ builder may flip them both ways (they are strictly top-down).
 """
 import os, sys
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 from scipy import ndimage as nd
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -30,8 +30,11 @@ TILES = {'corner-s1': ('corner', 'ne'), 'cross-s1': ('cross', 'nesw'), 'dead-top
          'corner-s2': ('corner-b', 'ne')}
 TURN = {'corner-s2'}  # paintings turned 180 degrees (top-down, so nothing ends up upside down)
 DIAG = {'diag-t-c-s1': ('diag-top-left', 'nes'),  # streets north, east and south; causeway to the top-left
-        'diag-corner-s1': ('diag-top-right', 'es')}  # Round 230: streets east and south; causeway to the top-right
-CORNER = {'diag-t-c-s1': 'nw', 'diag-corner-s1': 'ne'}  # where each causeway leaves the image
+        'diag-corner-s1': ('diag-top-right', 'es'),  # Round 230: streets east and south; causeway to the top-right
+        'diag-t-b-s1': ('diag-t-left-right', 'esw')}  # Round 231: streets west, east and south; causeway to the top-left
+CORNER = {'diag-t-c-s1': 'nw', 'diag-corner-s1': 'ne', 'diag-t-b-s1': 'nw'}  # where each causeway leaves the image
+# Round 231: causeways painted in grey stone, which the trace doesn't pick up, outlined by hand (800x500).
+CAUSEWAY = {'diag-t-b-s1': [(35, 0), (115, 0), (368, 182), (350, 222), (312, 222)]}
 SMALL_GAP = 600  # holes in the traced paving smaller than this (in room pixels) are filled
 
 
@@ -44,8 +47,11 @@ def trace(im):
     return nd.binary_opening(m, structure=np.ones((3, 3)), iterations=3)[P:-P, P:-P]
 
 
-def mask(im, exits, corner=None):
-    m, bands = arms(trace(im), exits)
+def mask(im, exits, corner=None, causeway=None):
+    m = trace(im)
+    if causeway:
+        poly = Image.new('L', (800, 500), 0); ImageDraw.Draw(poly).polygon(causeway, fill=255); m |= np.asarray(poly) > 127
+    m, bands = arms(m, exits)
     if corner:  # the causeway runs off this corner of the image
         near_x = slice(None, 120) if corner[1] == 'w' else slice(-120, None)  # along the edges, near the corner
         near_y = slice(None, 120) if corner[0] == 'n' else slice(-120, None)
@@ -66,7 +72,7 @@ def main():
         if name in TURN: rgb = rgb.rotate(180)
         out = f'{SRC}/diagonal/{name}.jpg' if name in DIAG else f'{SRC}/{name}.jpg'
         rgb.save(out, quality=92)
-        m = mask(np.asarray(rgb).astype(int), exits, CORNER.get(name))
+        m = mask(np.asarray(rgb).astype(int), exits, CORNER.get(name), CAUSEWAY.get(name))
         Image.fromarray((m * 255).astype(np.uint8)).save(f'{SRC}/masks/{name}.png')
         print('tile', name)
 
