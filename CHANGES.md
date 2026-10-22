@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 241: Tailwind cards show their printed numbers outside the fight
+
+- The owner reported Tailwind cards showing wrong values on the reward page and elsewhere.
+- Cause: Tailwind, Growth and Discharge add their live bonus whenever a battle is loaded. The reward
+  screen opens while the finished battle is still loaded, so a Gust Chain on offer added last turn's
+  Tailwind to its damage.
+- Fix (`liveBattleCard` in `assets/world-mechanics.js`): the live bonus applies only during a fight
+  and only to that fight's own cards (hand, draw pile, discard, exhaust, or the card being played).
+  Everywhere else a card shows its printed numbers (after the Round 240 boost in later worlds).
+- New `tests/mech-live-values.test.cjs`.
+
 ## Round 239: Overdrive's button
 
 - Owner request: the Overdrive button on the battle screen's encounter line is renamed

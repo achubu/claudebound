@@ -85,10 +85,14 @@ function growthOf(b, c) { const self = b && b.playingUid != null && b.playingUid
 function addBonus(out, bonus, n) { for (const [k, v] of Object.entries(bonus)) out[k] = (out[k] || 0) + v * n; }
 
 // Tailwind and Growth change the card's numbers, so the card face shows the live value.
+// Round 241: only during a fight, and only for that fight's own cards (hand, draw pile, discard). The
+// reward screen comes while the finished battle is still loaded, and its offers showed last turn's
+// Tailwind; the printed numbers apply everywhere else.
+function liveBattleCard(b, c) { return !!(b && c && b.phase === 'fight' && (b.playingUid === c.uid || ['hand', 'draw', 'discard', 'exhaust'].some(z => (b[z] || []).some(x => x && x.uid === c.uid)))); } // the card being played has left the hand
 const statBeforeMechanics = stat;
 stat = function (c) {
   const d = statBeforeMechanics(c), b = typeof state === 'object' && state && state.battle;
-  if (!b || !c || !(d.tailwind || d.grow || d.discharge !== undefined)) return d;
+  if (!liveBattleCard(b, c) || !(d.tailwind || d.grow || d.discharge !== undefined)) return d;
   const out = { ...d };
   if (d.tailwind) addBonus(out, d.tailwind, tailwindCount(b, c));
   if (d.grow) addBonus(out, d.grow, growthOf(b, c));
