@@ -6,7 +6,7 @@ process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(()=>{
-const o = {};
+const o = {}; globalThis.NO_PAIRS = 1; // Round 243: one enemy at a time here
 const fight = (world, boss) => { newGame(); state.region = world; configureRegion(world); state.talents = { retainCore: 1, plating: 5 }; state.playerLevel = 30; syncTalentVitals(false); state.hp = state.maxHp;
   const pick = s => spawnAvailable(s) && !!s.boss === boss && (!boss || !enemies[s.type].miniBoss);
   const k = Object.keys(rooms).find(k => roomSpawns(k).some(pick)); state.room = k; startBattle(roomSpawns(k).find(pick).uid);
