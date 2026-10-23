@@ -20,9 +20,9 @@ const dealt = (b, i = 0) => { const before = b.enemy.hp; playCard(i); return bef
 let b = setup({ attunement: 3 }, ['cinder']); assert.equal(dealt(b), 6 + 9, 'Elemental Attunement +3 per rank on elemental cards'); // Cinder Lance is 6 since Round 189
 b = setup({ attunement: 3 }, ['strike']); assert.equal(dealt(b), 6, 'Attunement does not touch non-elemental cards');
 b = setup({ attunement: 2, kindle: 2 }, ['cinder']); playCard(0); assert.equal(b.burn, 2 + 4, 'Kindling Matrix +2 Burn per rank');
-b = setup({ attunement: 2, kindle: 1, weakpoint: 2 }, ['cinder'], { enemy: { element: 'earth' } }); assert.equal(dealt(b), Math.round((6 + 6) * 2.1), 'Exploit Weakness: +50% weakness becomes +110% at rank 2');
+b = setup({ attunement: 2, kindle: 1, weakpoint: 2 }, ['cinder'], { enemy: { element: 'earth' } }); assert.equal(dealt(b), Math.round((6 + 6) * 1.9), 'Exploit Weakness: +50% weakness becomes +90% at rank 2 (Round 253)');
 b = setup({ attunement: 2, kindle: 1, weakpoint: 2, stormcaller: 1 }, ['cinder', 'cinder']);
-assert.equal(stat(b.hand[0]).cost, 0, 'Stormcaller: first elemental card shows cost 0'); playCard(0); assert.equal(b.energy, 3, 'Stormcaller card was free');
+assert.equal(stat(b.hand[0]).cost, 0, 'Stormcaller: a 1-energy elemental card shows cost 0 (1 less, Round 253)'); playCard(0); assert.equal(b.energy, 3, 'Stormcaller card was free');
 assert.equal(stat(b.hand[0]).cost, 1, 'Stormcaller only discounts the first elemental card each turn'); playCard(0); assert.equal(b.energy, 2);
 b = setup({ powerCore: 1, amplifier: 3, edge: 1, momentum: 2 }, ['strike', 'strike']);
 const atk = attackBonus(); assert.equal(dealt(b), 6 + atk, 'first attack gets no Momentum'); assert.equal(dealt(b), 6 + atk + 6, 'Momentum +3 per rank after the first attack');
@@ -31,13 +31,13 @@ assert.equal(stat(b.hand[0]).cost, 0, 'Flurry: first 1-energy attack is free'); 
 b = setup({ sunder: 2 }, ['strike'], { enemy: { armor: 5 } }); assert.equal(dealt(b), 6 - 1, 'Sunder ignores 2 Armor per rank (5 armor - 4 = 1)');
 b = setup({ sunder: 2, shatterpoint: 1 }, ['shatter'], { enemy: { armor: 5 } }); assert.equal(dealt(b), 10 + 6, 'Shatterpoint: Pierce cards +6');
 Math.random = () => 0;
-b = setup({ powerCore: 1, critical: 2, lethal: 2 }, ['strike']); assert.equal(dealt(b), 6 * 3, 'Lethal Focus rank 2: crits x3');
-Math.random = () => 0.12; b = setup({ powerCore: 1, critical: 2, lethal: 2 }, ['strike']); assert.equal(dealt(b), 6 * 3, 'Lethal Focus adds +4% crit chance per rank (6% + 8% = 14% > 12%)');
+b = setup({ powerCore: 1, critical: 2, lethal: 2 }, ['strike']); assert.equal(dealt(b), Math.round(6 * 2.7), 'Lethal Focus rank 2: crits x2.7 (Round 253)');
+Math.random = () => 0.12; b = setup({ powerCore: 1, critical: 2, lethal: 2 }, ['strike']); assert.equal(dealt(b), Math.round(6 * 2.7), 'Lethal Focus adds +4% crit chance per rank (6% + 8% = 14% > 12%)');
 b = setup({ powerCore: 1, critical: 2 }, ['strike']); assert.equal(dealt(b), 6, 'without Lethal Focus a 12% roll is not a crit');
 Math.random = () => 0;
 b = setup({ powerCore: 1, critical: 2, lethal: 1, adrenaline: 1 }, ['strike', 'strike']); playCard(0); assert.equal(b.energy, 3, 'Adrenaline Loop refunds 1 energy on a crit'); playCard(0); assert.equal(b.energy, 2, 'only once per turn');
 Math.random = () => 0.99;
-b = setup({ powerCore: 1, critical: 2, lethal: 1, adrenaline: 1, executioner: 1 }, ['strike'], { enemy: { hp: 80, maxHp: 300 } }); assert.equal(dealt(b), Math.round(6 * 1.75), 'Executioner: +75% below 30% health');
+b = setup({ powerCore: 1, critical: 2, lethal: 1, adrenaline: 1, executioner: 1 }, ['strike'], { enemy: { hp: 80, maxHp: 300 } }); assert.equal(dealt(b), Math.round(6 * 1.5), 'Executioner: +50% below 30% health (Round 253)');
 b = setup({ powerCore: 1, critical: 2, lethal: 1, adrenaline: 1, executioner: 1 }, ['strike']); assert.equal(dealt(b), 6, 'no Executioner bonus above 30%');
 
 // ---------------- DISRUPTION ----------------
