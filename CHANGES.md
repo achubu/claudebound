@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 251: the hero's new walk
+
+- The owner sent four 3×3 sheets for the hero: walking away, left, right and toward the camera. Each
+  has a standing pose and an eight-frame walk, on transparent backgrounds.
+- `tools/build_hero_sheet.py` builds `assets/characters/protagonist-walk9.png`, 9×4 frames of 256px:
+  rows down, left, right, up; columns standing, then the walk.
+  - Each pose takes the shapes whose centre falls in its cell of the source grid, because
+    neighbours touch.
+  - All are drawn at one scale on one baseline, centred on the head and torso, so the body doesn't
+    jitter as the legs swing.
+  - The sources are kept in `assets/characters/src/`; the old generated 4×4 sheet moved to
+    `unused assets/`.
+- `animateHero` (`index.html`):
+  - Steps through the eight walk frames (85 ms each) and shows the standing pose when idle.
+  - Facing follows the way the hero actually moves, so tap-to-move routes turn him too (before,
+    only the arrow and WASD keys did).
+  - A tap route doesn't move him every frame, which kept restarting the gait on its first step. Now
+    only a pause of 0.15 s stops it.
+- New browser test `tests/hero-walk.test.cjs`.
+
 ## Round 250: Solaris's bosses at about 30%
 
 - Owner request: bring Solaris's bosses to about 30% wins. They were 31% (Cistern Warden), 14% (Noon
