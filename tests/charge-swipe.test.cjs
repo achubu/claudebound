@@ -1,14 +1,14 @@
 'use strict';
 // Round 242: on a charge turn an enemy swipes for a light hit (Block and Armor apply), and you discard
 // a card of your choice at the start of your next turn. (Neon Aftermath's patrols have no element and
-// never charge; its elemental bosses do.)
+// never charge; its elemental bosses do.) Fire enemies are left out: their 🥵 Sunstroke hurts on top of the swipe.
 process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(()=>{
 newGame(); state.region='elaris'; configureRegion('elaris'); state.talents={};
-const k=Object.keys(rooms).find(k=>roomSpawns(k).some(s=>spawnAvailable(s)&&!s.boss&&enemies[s.type].element)); state.room=k;
-startBattle(roomSpawns(k).find(s=>spawnAvailable(s)&&!s.boss&&enemies[s.type].element).uid);
+const k=Object.keys(rooms).find(k=>roomSpawns(k).some(s=>spawnAvailable(s)&&!s.boss&&enemies[s.type].element&&enemies[s.type].element!=='fire')); state.room=k;
+startBattle(roomSpawns(k).find(s=>spawnAvailable(s)&&!s.boss&&enemies[s.type].element&&enemies[s.type].element!=='fire').uid);
 const b=state.battle; b.enemy.hp=b.enemy.maxHp=999; b.enemy.attack=20;
 const t=[...Array(12).keys()].find(t=>t>0&&enemyPlan(b,t).kind==='charge'); b.turn=t; const plan=enemyPlan(b);
 const o={ name: plan.name, swipe: plan.swipe, bubble: intentBubble(plan,'now','x',false) };

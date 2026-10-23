@@ -3507,6 +3507,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - It is a `WILDLIFE_ART` entry with `poses: { attack: 2, hurt: 1, walk }`, like the Briar Sentinel.
   The old `assets/monsters/ember-jackal.png` stays as the base fallback.
 - `SPRITE_VERSION` 252. New `tests/ember-jackal.test.cjs`.
+- Fixed a flaky `tests/charge-swipe.test.cjs`. It picked a random Solaris enemy, and fire enemies add
+  🥵 Sunstroke on top of the swipe. It now picks one of another element.
 
 ## Round 251: the hero's new walk
 
