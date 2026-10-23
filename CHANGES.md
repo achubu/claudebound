@@ -3496,6 +3496,54 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 253: a fair Difficulty lab, fights that vary, and a re-tune
+
+The owner asked how an attack-only deck with Surge talents does, then for win rates nearer 40%.
+Measuring it turned up a lab bug that changes every past difficulty number.
+
+- **Lab bug, fixed.** `simFight` sized the deck before counting the bosses already beaten, so
+  since deck slots began counting bosses (Rounds 163 and 233) every simulated deck was cut to 6 cards
+  (plus Deck Matrix), and the 6 were the oldest cards in its list. With full decks most builds won
+  90-100% of regular fights, and bosses tuned against the thin decks were far too easy or too hard.
+- **Lab decks.** The later worlds now play the deck a player would hold there (`SIM_DECKS` in
+  `assets/sim/lab.js`): that world's best attacks and Block, a Prismatic Counter and a heal. Solaris
+  keeps Neon Aftermath's upgraded cards at the front, since its deck holds only 8.
+- **Fights vary** (`assets/enemy-temper.js`). Enemy moves were fixed, so a build either beat a boss
+  nearly always or almost never. Now:
+  - each enemy rolls a temper when the fight starts and shows it in its name: one in four is
+    🔥 Fierce (hits 20% harder, 15% less health), one in four 🛡 Hardy (25% more health, hits 15%
+    softer);
+  - every attack rolls up to ±15%, fixed per turn, so the intent shows the exact number;
+  - Neon Aftermath's levels 1-3 stay plain, for new players.
+  Tests run without these unless `TEMPER=1` (the lab scripts set it). Builds stuck at 0% or 100%
+  against a boss fell from most of them to about a quarter to a half.
+- **Surge trims (slight).**
+  - Lethal Focus: +35% crit damage per rank (was +50%; ×2.7 at most).
+  - Exploit Weakness: +20% per rank (was +30%; +90% at most).
+  - Executioner Protocol: +50% (was +75%).
+  - Stormcaller: the first elemental card each turn costs 1 less (it made 2-3 energy cards free).
+- **Re-tune** to the lab's old targets with the fixed lab (16 builds × 2 play styles):
+  - Regular fights: about 70% for the average build in every world (`normalHp`, and `normalAttack`,
+    now a per-world multiplier). Neon Aftermath's levels 1-2 stay at 100%; level 4 has an entry
+    ramp.
+  - Bosses and mini-bosses: about 35-50% (each boss's `perEnemy` health).
+
+| World | Regular (avg) | Mini-bosses | Final boss |
+|---|---|---|---|
+| Neon Aftermath | 74% | Lunar Enforcer 53%, Crown Sentinel 44% | Thorn Warden 45% |
+| Solaris | 68% | Cistern Warden 35%, Noon Toller 41% | Sun Pharaoh 34% |
+| Sky Isles | 70% | Stormbell Warden 48%, Featherfall Matriarch 44% | Zenith Roc 34% |
+| Elaris | 70% | Tidebound Warden 41%, Gale Sovereign 36% | Bloom Tyrant 39% |
+| Vespera | 71% | Arc Sentinel 40%, Resonant Phantom 38% | Tempest Colossus 43% |
+| Chronospire | 64% | Clockwarden 47%, Paradox Twin 45% | Chronarch 42% |
+
+- **The attack-only build** (attacks and heals, no Block, every point in Surge) still wins most boss
+  fights (75-100%), and 54-96% of regular fights. It is not near the tipping point the variance
+  works on: a full Surge tree late in the game out-races the bosses. Talent trims, a lower Pressure
+  cap, and bosses that hit harder with less health each moved it little. Solaris is the exception
+  (Cistern Warden 17%).
+- `tests/enemy-temper.test.cjs` is new; `talent-matrix` and `card-variety` tests follow the new numbers.
+
 ## Round 252: the Ember Jackal is animated
 
 - The owner sent two sheets for Neon Aftermath's Ember Jackal (`emberling`): four battle poses
