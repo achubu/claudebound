@@ -68,7 +68,7 @@ Object.assign(BOSS_PATTERNS, {
 Object.assign(BALANCE.perEnemy, {
   // Round 183: re-tuned with gear worn (assets/sim/lab.js). Round 226: again after ⚔ Pressure.
   // Round 253: re-tuned to about 40 percent for the average build with full decks.
-  stormbellWarden: { hp: 1.41 }, featherMatriarch: { hp: 1.61 }, zenithRoc: { hp: 0.632 },
+  stormbellWarden: { hp: 1.52 }, featherMatriarch: { hp: 1.61 }, zenithRoc: { hp: 0.632 },
   tideboundWarden: { hp: 3.51 }, galeSovereignElaris: { hp: 1.88 }, elarisTyrant: { hp: 1.37 }, elarisHeron: { hp: .9 }
 });
 const SKY_ZONE_ENEMY = ['skyDrake', 'skyDrake', 'skyWisp', 'skyWisp', 'skyHarpy', 'skyHarpy', 'skyRam', 'skyRam'];
