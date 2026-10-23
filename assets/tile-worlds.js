@@ -67,15 +67,16 @@ Object.assign(BOSS_PATTERNS, {
 // Round 177: tuned with tests/balance-sim.cjs (regular fights ~75% wins, mini-bosses ~42%, final bosses ~29%).
 Object.assign(BALANCE.perEnemy, {
   // Round 183: re-tuned with gear worn (assets/sim/lab.js). Round 226: again after ⚔ Pressure.
-  stormbellWarden: { hp: .93 }, featherMatriarch: { hp: 1.15 }, zenithRoc: { hp: .79 },
-  tideboundWarden: { hp: 1.31 }, galeSovereignElaris: { hp: 1.01 }, elarisTyrant: { hp: .8 }, elarisHeron: { hp: .9 }
+  // Round 253: re-tuned to about 40 percent for the average build with full decks.
+  stormbellWarden: { hp: 1.13 }, featherMatriarch: { hp: 1.61 }, zenithRoc: { hp: 0.632 },
+  tideboundWarden: { hp: 2.42 }, galeSovereignElaris: { hp: 1.62 }, elarisTyrant: { hp: 1.12 }, elarisHeron: { hp: .9 }
 });
 const SKY_ZONE_ENEMY = ['skyDrake', 'skyDrake', 'skyWisp', 'skyWisp', 'skyHarpy', 'skyHarpy', 'skyRam', 'skyRam'];
 const WILDS_ZONE_ENEMY = ['elarisFox', 'elarisFox', 'elarisAntler', 'elarisAntler', 'elarisHeron', 'elarisHeron', 'elarisMoth', 'elarisMoth'];
 
 // --- Balance: each new world sits where the old worlds 3 and 4 were ---
 for (const [table, sky, wilds] of [['hpPerLevel', .05, .05], ['attackPerLevel', .25, .25], ['regionHp', 2.2, 2.22], ['regionAttack', 16, 25],
-  ['difficulty', 1, 1], ['regionLevelBase', 19, 28], ['eliteHp', 1.25, 1.25], ['normalHp', 1.1, 1.1]]) Object.assign(BALANCE[table], { sky, wilds });
+  ['difficulty', 1, 1], ['regionLevelBase', 19, 28], ['eliteHp', 1.25, 1.25], ['normalHp', 1.65, 1.65]]) Object.assign(BALANCE[table], { sky, wilds });
 
 // --- Rooms ------------------------------------------------------------
 function tileWorldRooms(id, roleEnemy) {
