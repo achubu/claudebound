@@ -78,8 +78,9 @@ function simFight(region, enc, plan, policy, i, opts = {}) {
   globalThis.POLICY = policy;
   let seed = (i + 1 + (opts.seed || 0) * 1000) * 48271 + lv; Math.random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   newGame(); configureRegion(region); state.region = region; state.playerLevel = level; allocate(plan); syncTalentVitals(false); state.hp = state.maxHp;
+  state.bosses = [...(SIM_PRIOR_BOSSES[region] || [])]; // before the deck: bosses beaten open deck slots (Round 163/233)
   state.pool = simDeckFor(region, enc.level, opts.basicDecks).slice(0, maxDeckSize()).map(id => { const c = make(id); c.level = simCardLevelFor(level); return c; });
-  state.deck = state.pool.map(c => c.uid); state.cooldowns = {}; state.bosses = [...(SIM_PRIOR_BOSSES[region] || [])];
+  state.deck = state.pool.map(c => c.uid); state.cooldowns = {};
   ensureSide(); for (const id of SIM_PRIOR_SIDE[region] || []) state.side.pool.push({ uid: 's' + (state.side.next++), id }); for (const c of state.side.pool) { if (state.side.deck.length >= sideDeckMax()) break; if (!state.side.deck.includes(c.uid)) state.side.deck.push(c.uid); } // the sim player equips what it has
   if (opts.withGear && typeof ensureGear === 'function') {
     state.relics = [...(enc.gear || [])]; ensureGear();
