@@ -30,10 +30,12 @@ const BALANCE={
  // Round 43: regular and elite enemies have 10% more health; bosses and mini-bosses unchanged.
  // Round 49: city regulars eased to 0.95 (early city fights ran ~23 turns).
  // (+10% attack as well was simulated and proved far too steep: ~+21% total strength.)
- normalHp:{city:.95,elaris:1.1,vespera:1.1,chronospire:1.1},normalAttack:1,
+ // Round 253: the Difficulty lab now plays full decks (and enemies roll tempers); regular fights re-tuned to about 70%
+ // for the average build. normalAttack multiplies regular enemies' attack.
+ normalHp:{city:.95,elaris:1.13,vespera:1.21,chronospire:1.22},normalAttack:{city:1,elaris:1.03,vespera:1.04,chronospire:1.06,sky:1.08,wilds:1.07},
  // Round 51: regular enemies in a world's first levels ease in instead of
  // jumping at the portal (you arrive with your old world's deck).
- entryRamp:{elaris:{10:{hp:.9,attack:-1},11:{hp:.88,attack:-1},12:{hp:.9,attack:-1},13:{hp:.95,attack:0}}},
+ entryRamp:{city:{4:{hp:1.4,attack:1}},elaris:{10:{hp:.9,attack:-1},11:{hp:.88,attack:-1},12:{hp:.9,attack:-1},13:{hp:.95,attack:0}}},
  // Heavy hit = attack x (heavyBase + heavyDistance x distance from start, 0..1).
  heavyBase:1.5,heavyDistance:.25,
  bossHeavyMax:1.3,              // bosses' heavy hits are capped, so one hit can't decide the fight
@@ -47,9 +49,10 @@ const BALANCE={
  // builds covering every talent path.
  perEnemy:{
   // Round 183: re-tuned with gear worn (assets/sim/lab.js); Neon Aftermath's three bosses at about 40% (owner request). Round 185: Crown Sentinel, Noon Toller and Resonant Phantom re-tuned for their mechanic afflictions.
-  moonKnight:{hp:0.55},crownSentinel:{hp:1.45},thornWarden:{hp:0.75},
-  tidewardenElaris:{hp:2.4,attack:7},galeSovereign:{hp:1.32},bloomTyrant:{hp:0.86},/* Round 250: Noon Toller and Sun Pharaoh to about 30% (owner) */
-  arcSentinel:{hp:1.03},resonantPhantom:{hp:1.7},stormTyrant:{hp:0.77},
+  // Round 253: every boss re-tuned to about 40 percent for the average build with full decks.
+  moonKnight:{hp:0.43},crownSentinel:{hp:1.04},thornWarden:{hp:0.622},
+  tidewardenElaris:{hp:0.957,attack:7},galeSovereign:{hp:0.65},bloomTyrant:{hp:0.447},/* Round 250: Noon Toller and Sun Pharaoh to about 30% (owner) */
+  arcSentinel:{hp:1.59},resonantPhantom:{hp:2.69},stormTyrant:{hp:0.759},
   // Round 51: the Drowned Heron (water, Siphon) was the worst early Elaris fight.
   drownedHeron:{hp:0.85},stormMoth:{hp:0.9}
  }

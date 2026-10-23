@@ -7,6 +7,9 @@ const root=path.resolve(__dirname,'..');
 function node(){const classes=new Set(['hidden']);return {style:{setProperty(){}},dataset:{},classList:{add:x=>classes.add(x),remove:x=>classes.delete(x),contains:x=>classes.has(x),toggle(x,v){v?classes.add(x):classes.delete(x)}},append(){},prepend(){},setAttribute(){},remove(){},click(){},focus(){},querySelector:()=>node(),querySelectorAll:()=>[],getContext:()=>new Proxy({},{get:()=>()=>{}})}}
 const nodes=new Map(),storage=new Map();
 const context=vm.createContext({console,assert,Image:process.env.AETHERCEDE_RENDER?require('@napi-rs/canvas').Image:class{constructor(){this.complete=false}},document:{getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},querySelector:()=>node(),querySelectorAll:()=>[],createElement:()=>node(),head:node(),body:node()},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},setTimeout:()=>0,clearTimeout(){},requestAnimationFrame(){},addEventListener(){},innerWidth:1280,innerHeight:800,confirm:()=>true,Blob,URL});
+// Round 253: enemy tempers and attack rolls (enemy-temper.js) are random, so tests run without them
+// unless TEMPER=1 (the Difficulty lab scripts set it).
+if(!process.env.TEMPER)context.NO_TEMPER=1;
 // Round 91: page scripts loaded once by this harness are skipped if a test loads them again.
 const loadedScripts=new Set();
 const run=s=>{if(loadedScripts.has(s))return;return vm.runInContext(s,context)};
@@ -22,7 +25,7 @@ run(fs.readFileSync(path.join(root,'assets/cards.js'),'utf8'));
 for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
 run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
 run(fs.readFileSync(path.join(root,'assets/solaris-data.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));
-for(const f of ['encounter-depth','talent-matrix','aether-deck','card-variety','battle-hud','sun-revenant','combined-rooms','diagonals','city-paintings','organic-paths','plazas','organic-areas','exploration','neon-world','solaris','chronospire','sky-data','wilds-data','vespera-data','chronospire-data','tile-worlds','world-cards','world-mechanics','stagger','card-mechanics','pressure','pickups','cardsmith','gear','waypoints','deck-choice','room-preload','cycle-card','sky-storm','status-dots','attack-boost','charge-swipe','enemy-pairs','enemy-armor'])load('assets/'+f+'.js');
+for(const f of ['encounter-depth','talent-matrix','aether-deck','card-variety','battle-hud','sun-revenant','combined-rooms','diagonals','city-paintings','organic-paths','plazas','organic-areas','exploration','neon-world','solaris','chronospire','sky-data','wilds-data','vespera-data','chronospire-data','tile-worlds','world-cards','world-mechanics','stagger','card-mechanics','pressure','pickups','cardsmith','gear','waypoints','deck-choice','room-preload','cycle-card','sky-storm','status-dots','attack-boost','charge-swipe','enemy-pairs','enemy-armor','enemy-temper'])load('assets/'+f+'.js');
 if(process.env.HARNESS_ONLY){module.exports={context,run};return}
 run(`
 newGame();

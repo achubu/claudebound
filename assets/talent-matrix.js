@@ -23,14 +23,14 @@ TALENT_TIERS.splice(0, TALENT_TIERS.length, 0, 1, 3, 5, 7, 10, 13, 16, 20);
 
 TALENT_BRANCHES.surge.nodes.push(
   // Critical path (from Precision Strike)
-  { id: 'lethal', name: 'Lethal Focus', icon: '✶', max: 2, tier: 3, req: ['critical', 2], desc: 'Per rank: +4% critical chance, and critical strikes deal +50% more (×2 becomes ×2.5, then ×3).' },
+  { id: 'lethal', name: 'Lethal Focus', icon: '✶', max: 2, tier: 3, req: ['critical', 2], desc: 'Per rank: +4% critical chance, and critical strikes deal +35% more (×2 becomes ×2.35, then ×2.7).' },
   { id: 'adrenaline', name: 'Adrenaline Loop', icon: '⟳', max: 1, tier: 5, req: ['lethal', 1], desc: 'Once per turn, a critical strike refunds 1 energy.' },
-  { id: 'executioner', name: 'Executioner Protocol', icon: '☠', max: 1, tier: 8, req: ['adrenaline', 1], desc: 'Your attacks deal +75% damage to enemies below 30% health.' },
+  { id: 'executioner', name: 'Executioner Protocol', icon: '☠', max: 1, tier: 8, req: ['adrenaline', 1], desc: 'Your attacks deal +50% damage to enemies below 30% health.' },
   // Elemental path
   { id: 'attunement', name: 'Elemental Attunement', icon: '♨', max: 3, tier: 1, desc: 'Elemental attack cards (fire, earth, air, water, ice, lightning) deal +3 damage per rank.' },
   { id: 'kindle', name: 'Kindling Matrix', icon: '🔥', max: 2, tier: 3, req: ['attunement', 2], desc: 'Burn and Poison you apply are +2 stronger per rank.' },
-  { id: 'weakpoint', name: 'Exploit Weakness', icon: '◎', max: 2, tier: 5, req: ['kindle', 1], desc: 'Hitting an elemental weakness deals +30% more per rank: +50% becomes +80%, then +110%.' },
-  { id: 'stormcaller', name: 'Stormcaller', icon: 'ϟ', max: 1, tier: 8, req: ['weakpoint', 2], desc: 'The first elemental card you play each turn costs 0 energy.' },
+  { id: 'weakpoint', name: 'Exploit Weakness', icon: '◎', max: 2, tier: 5, req: ['kindle', 1], desc: 'Hitting an elemental weakness deals +20% more per rank: +50% becomes +70%, then +90%.' },
+  { id: 'stormcaller', name: 'Stormcaller', icon: 'ϟ', max: 1, tier: 8, req: ['weakpoint', 2], desc: 'The first elemental card you play each turn costs 1 less energy.' },
   // Momentum path (from Edge Calibration)
   { id: 'momentum', name: 'Momentum', icon: '»', max: 2, tier: 3, req: ['edge', 1], desc: 'Every attack after your first in a turn deals +3 damage per rank.' },
   { id: 'flurry', name: 'Flurry', icon: '≫', max: 1, tier: 7, req: ['momentum', 2], desc: 'The first 1-energy attack you play each turn costs 0.' },
@@ -104,15 +104,15 @@ const talentMatrix = {
     if (b.preparedUid === c.uid) bonus += talentRank('recall') + (hasTalent('preparation') ? 2 : 0);
     return bonus;
   },
-  critMultiplier() { return 2 + talentRank('lethal') * .5; },
+  critMultiplier() { return 2 + talentRank('lethal') * .35; }, // Round 253: was +.5 per rank
   onCrit(b) {
     const f = turnFlags(b);
     if (hasTalent('adrenaline') && !f.crits) { b.energy += 1; b.logs.push('Adrenaline Loop: +1 energy.'); }
     f.crits++;
   },
-  weaknessMultiplier() { return 1.5 + talentRank('weakpoint') * .3; },
+  weaknessMultiplier() { return 1.5 + talentRank('weakpoint') * .2; }, // Round 253: was +.3 per rank
   finalDamage(damage, b) {
-    if (hasTalent('executioner') && b.enemy.hp < b.enemy.maxHp * .3) { b.logs.push('Executioner Protocol: +75% damage.'); return Math.round(damage * 1.75); }
+    if (hasTalent('executioner') && b.enemy.hp < b.enemy.maxHp * .3) { b.logs.push('Executioner Protocol: +50% damage.'); return Math.round(damage * 1.5); }
     return damage;
   },
   armorIgnore(b) { return 2 * talentRank('sunder') + (hasTalent('dominion') && b.enemyDebuff > 0 ? 2 : 0); },
@@ -153,7 +153,7 @@ stat = function (c) {
   if (!c || c.uid == null || !state || !state.battle) return d;
   const source = costDiscountSource(c, d);
   if (!source) return d;
-  return { ...d, cost: 0 };
+  return { ...d, cost: source === 'storm' ? Math.max(0, d.cost - 1) : 0 }; // Round 253: Stormcaller takes 1 off (it made 2-3 energy cards free)
 };
 
 const playCardBeforeTalents = playCard;
@@ -164,7 +164,7 @@ playCard = function (i) {
   const f = turnFlags(b);
   playCardBeforeTalents(i);
   if (b.hand.some(h => h.uid === c.uid)) return; // not played (e.g. not enough energy)
-  if (source === 'storm') { f.storm = true; b.logs.push('Stormcaller: elemental card played for free.'); }
+  if (source === 'storm') { f.storm = true; b.logs.push('Stormcaller: elemental card costs 1 less.'); }
   if (source === 'flurry') { f.flurry = true; b.logs.push('Flurry: attack played for free.'); }
   if (b.preparedUid === c.uid) b.preparedUid = null;
   if (cost === 0 && hasTalent('cycle') && f.cycle < talentRank('cycle') && b.phase === 'fight') { f.cycle++; drawCards(1); b.logs.push('Recycler: drew 1 card.'); }

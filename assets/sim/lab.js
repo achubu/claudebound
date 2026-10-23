@@ -39,11 +39,20 @@ function simDeckFor(region, L, basic = false) {
   const base = simBaseDeck(region, L, basic), m = !basic && typeof WORLD_MECHANICS === 'object' && WORLD_MECHANICS[region];
   return m && !(region === 'city' && L <= 1) ? [...base, ...m.gift] : base;
 }
+// Round 253: each world's deck is the one a player would hold there: that world's strongest attacks
+// and Block, a Prismatic Counter and a heal, topped up with the best cards of the worlds before.
+// (Before, the later worlds played mostly Neon Aftermath and Solaris cards.)
+const SIM_DECKS = {
+  elaris: ['cleave', 'solarLance', 'bastion', 'noonBlaze', 'counter', 'sunflare', 'sandVeil', 'oasisDraught', 'shatter', 'cinder', 'mend', 'riposte'], // Neon Aftermath's upgraded cards still carry the first rooms
+  sky: ['chainLightning', 'skyfall', 'featherguard', 'tempestSurge', 'thunderclap', 'counter', 'skydive', 'windWall', 'solarLance', 'oasisDraught', 'noonBlaze', 'sandVeil'],
+  wilds: ['wildfire', 'elderRoot', 'briarWall', 'ancientOak', 'thornlash', 'counter', 'chainLightning', 'barkskin', 'skyfall', 'verdantPact', 'tempestSurge', 'featherguard'],
+  vespera: ['prismLance', 'crystalShard', 'mirrorguard', 'riptide', 'chainLightning', 'crystalWard', 'skyfall', 'counter', 'tempestSurge', 'verdantPact', 'wildfire', 'squallStep'],
+  chronospire: ['temporalBarrage', 'clockworkVolley', 'delayedBulwark', 'chronoSpike', 'wardbreakerStep', 'counter', 'prismLance', 'afterimageWard', 'chainLightning', 'rewindMend', 'skyfall', 'mirrorguard']
+};
 function simBaseDeck(region, L, basic) {
   if (region === 'city') return L <= 3 ? ['strike', 'strike', 'guard', 'guard', 'focus', 'mend'] : basic ? ['strike', 'cleave', 'riposte', 'bastion', 'shatter', 'mend', 'cleave', 'bastion', 'riposte', 'shatter'] : ['strike', 'cleave', 'bastion', 'breachSpike', 'shatter', 'staticShield', 'riposte', 'mend', 'bulwarkBash', 'arcJab'];
-  if (basic || region === 'elaris') return basic ? ['cleave', 'counter', 'bastion', 'cinder', 'venom', 'riposte', 'shatter', 'cleave', 'bastion', 'counter', 'mend', 'strike'] : ['cleave', 'counter', 'bastion', 'cinder', 'thornlash', 'rootbind', 'riposte', 'wildfire', 'shatter', 'bastion', 'mend', 'tidecall'];
-  if (region === 'chronospire') return ['temporalBarrage', 'chronoSpike', 'delayedBulwark', 'counter', 'bastion', 'chainLightning', 'prismLance', 'mirrorguard', 'clockworkVolley', 'rewindMend', 'cleave', 'accelerate'];
-  return ['cleave', 'counter', 'bastion', 'chainLightning', 'prismLance', 'cinder', 'mirrorguard', 'bastion', 'venom', 'counter', 'mend', 'stormBattery'];
+  if (basic) return ['cleave', 'counter', 'bastion', 'cinder', 'venom', 'riposte', 'shatter', 'cleave', 'bastion', 'counter', 'mend', 'strike'];
+  return SIM_DECKS[region] || SIM_DECKS.elaris;
 }
 // Round 75: fights see the progress a player would have by then: bosses already beaten (side
 // deck capacity grows with them) and the side cards that drop along the way.
@@ -78,8 +87,9 @@ function simFight(region, enc, plan, policy, i, opts = {}) {
   globalThis.POLICY = policy;
   let seed = (i + 1 + (opts.seed || 0) * 1000) * 48271 + lv; Math.random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   newGame(); configureRegion(region); state.region = region; state.playerLevel = level; allocate(plan); syncTalentVitals(false); state.hp = state.maxHp;
+  state.bosses = [...(SIM_PRIOR_BOSSES[region] || [])]; // before the deck: bosses beaten open deck slots (Round 163/233)
   state.pool = simDeckFor(region, enc.level, opts.basicDecks).slice(0, maxDeckSize()).map(id => { const c = make(id); c.level = simCardLevelFor(level); return c; });
-  state.deck = state.pool.map(c => c.uid); state.cooldowns = {}; state.bosses = [...(SIM_PRIOR_BOSSES[region] || [])];
+  state.deck = state.pool.map(c => c.uid); state.cooldowns = {};
   ensureSide(); for (const id of SIM_PRIOR_SIDE[region] || []) state.side.pool.push({ uid: 's' + (state.side.next++), id }); for (const c of state.side.pool) { if (state.side.deck.length >= sideDeckMax()) break; if (!state.side.deck.includes(c.uid)) state.side.deck.push(c.uid); } // the sim player equips what it has
   if (opts.withGear && typeof ensureGear === 'function') {
     state.relics = [...(enc.gear || [])]; ensureGear();
