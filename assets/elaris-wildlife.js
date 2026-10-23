@@ -31,6 +31,11 @@ const cityMonsterArt=monsterArt;
 const SPRITE_VERSION='234';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
+// Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which
+// stretched the 3:4 sheet frames of every tile-world boss and mini-boss. Boss creature sprites keep 3:4.
+const wildlifeBossStyle=document.createElement('style');
+wildlifeBossStyle.textContent='.enemy-node.boss .monster-sprite.wildlife-sprite{width:128px;height:170.667px;position:absolute;left:50%;top:-44px;margin-left:-64px}';
+document.head.append(wildlifeBossStyle);
 const wildlifeStyle=document.createElement('style');
 wildlifeStyle.textContent=`
 .enemy-node .wildlife-sprite,.battle-monster .wildlife-sprite{display:block;background-repeat:no-repeat;background-size:400% 100%;background-position:0 0;image-rendering:auto;animation:wildlifeFrames var(--wildlife-cycle,1s) steps(1,end) infinite;transform:scaleX(var(--enemy-facing,1));transform-origin:center;filter:drop-shadow(0 5px 3px #0009)}

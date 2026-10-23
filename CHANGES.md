@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 249: no stretched creatures on the map
+
+- The owner saw some enemies drawn stretched. Measured in the browser, every creature on every map:
+  33 of 135 were 33% too wide, square boxes for 3:4 sprite-sheet frames.
+  - **Every mini-boss and final boss in the tile worlds.** Boss nodes give their sprite a square
+    142px box, sized for Neon Aftermath's boss pictures. Creature bosses now get a 3:4 box (128×171)
+    (`elaris-wildlife.js`).
+  - **Every pair partner** (Round 247's CSS forced its sprite into the node's square). The partner
+    now uses the same 3:4 box as any patrol.
+- Regular patrols and Neon Aftermath's pictures were already right. The battle screen shows no
+  enemy picture, so it was not affected.
+- New browser test `tests/sprite-aspect.test.cjs`: no creature sprite on any map is drawn more than
+  6% off its frame's shape.
+
 ## Round 248: a pair walks side by side, without overlapping
 
 - Owner request: a group's units should stand close together but never overlap.
