@@ -43,7 +43,7 @@ function simDeckFor(region, L, basic = false) {
 // and Block, a Prismatic Counter and a heal, topped up with the best cards of the worlds before.
 // (Before, the later worlds played mostly Neon Aftermath and Solaris cards.)
 const SIM_DECKS = {
-  elaris: ['solarLance', 'noonBlaze', 'sandVeil', 'cinder', 'sunflare', 'counter', 'oasisDraught', 'cinderCapacitor', 'bastion', 'gale', 'scarabSwarm', 'mend'],
+  elaris: ['cleave', 'solarLance', 'bastion', 'noonBlaze', 'counter', 'sunflare', 'sandVeil', 'oasisDraught', 'shatter', 'cinder', 'mend', 'riposte'], // Neon Aftermath's upgraded cards still carry the first rooms
   sky: ['chainLightning', 'skyfall', 'featherguard', 'tempestSurge', 'thunderclap', 'counter', 'skydive', 'windWall', 'solarLance', 'oasisDraught', 'noonBlaze', 'sandVeil'],
   wilds: ['wildfire', 'elderRoot', 'briarWall', 'ancientOak', 'thornlash', 'counter', 'chainLightning', 'barkskin', 'skyfall', 'verdantPact', 'tempestSurge', 'featherguard'],
   vespera: ['prismLance', 'crystalShard', 'mirrorguard', 'riptide', 'chainLightning', 'crystalWard', 'skyfall', 'counter', 'tempestSurge', 'verdantPact', 'wildfire', 'squallStep'],
