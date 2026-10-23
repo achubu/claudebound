@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 250: Solaris's bosses at about 30%
+
+- Owner request: bring Solaris's bosses to about 30% wins. They were 31% (Cistern Warden), 14% (Noon
+  Toller) and 9% (Sun Pharaoh) typical in the Difficulty lab, with gear.
+- HP multipliers (`BALANCE.perEnemy`): Noon Toller 1.35 → 1.32, Sun Pharaoh 0.96 → 0.86. The
+  Cistern Warden is unchanged.
+- Checked with the lab at 6 fights per build and style: Cistern Warden 30%, Noon Toller 32%, Sun
+  Pharaoh 31%. The trials (4 fights) were noisy, so the final values were checked with more fights.
+
 ## Round 249: no stretched creatures on the map
 
 - The owner saw some enemies drawn stretched. Measured in the browser, every creature on every map:
