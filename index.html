@@ -85,7 +85,7 @@
 .hero-portrait{display:block;width:100%;max-height:340px;object-fit:cover;object-position:center;border:1px solid #8cb8bf;border-radius:8px;margin:15px auto}.opening-portrait{aspect-ratio:16/9;max-height:none;box-shadow:0 0 28px #50d6ff35,0 14px 35px #000a;border-color:#64dce7}.sheet-portrait{max-height:240px;object-position:center 32%}
 #player{width:84px;height:84px;overflow:visible;filter:drop-shadow(0 3px 2px #0008);pointer-events:none}
 #player:after{display:block;left:31px;bottom:2px;width:22px;height:7px;border:0;border-radius:50%;background:#0005;z-index:-1}
-#player .hero-sprite{display:block;width:84px;height:84px;background-image:url('assets/characters/protagonist-walk.png');background-size:336px 336px;background-repeat:no-repeat;image-rendering:pixelated;transform-origin:50% 90%;transform:scale(.8)}
+#player .hero-sprite{display:block;width:84px;height:84px;background-image:url('assets/characters/protagonist-walk9.png?v=round251');background-size:756px 336px;background-repeat:no-repeat;image-rendering:pixelated;transform-origin:50% 90%;transform:scale(.8)}
 #player:not(.walking) .hero-sprite{animation:hero-breathe 2.4s ease-in-out infinite}
 @keyframes hero-breathe{0%,100%{transform:scale(.8)}50%{transform:scale(.8,.812)}}
 @media(prefers-reduced-motion:reduce){#player:not(.walking) .hero-sprite{animation:none}}
@@ -527,13 +527,18 @@ const destroy=document.createElement('button');destroy.className='danger';destro
 destroy.onclick=()=>{const victim=out.length?out.reduce((a,b)=>(a.uses||0)<=(b.uses||0)?a:b):inDeck[inDeck.length-1];if(!victim)return;if(state.deck.includes(victim.uid)&&state.deck.length<=MIN_DECK)return toast('Replace this active card first.');state.pool=state.pool.filter(x=>x.uid!==victim.uid);state.deck=state.deck.filter(id=>id!==victim.uid);const salvage=destroySalvage(victim);state.shards=(state.shards||0)+salvage;toast(stat(victim).name+' destroyed: +'+salvage+' Shards ('+state.shards+' total).');save();showDeck()};
 actions.append(add,rem,up,destroy);wrap.append(actions);$('poolCards').append(wrap)});
 $('closeMenu').onclick=closeMenu}
-// Four rows: down, left, right, up; four gait frames per row.
-let heroFacing=0,heroWalkTime=0;
+// Round 251: four rows (down, left, right, up), nine columns: standing, then an eight-frame walk.
+// Facing follows the way the hero actually moves (keys or a tap route).
+let heroFacing=0,heroWalkTime=0,heroLast=null,heroStill=0;
 function animateHero(dt,moved){
  const p=$('player');if(!p)return;
- if(moved){const dx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);heroFacing=dx?(dx<0?1:2):(dy<0?3:0);heroWalkTime+=dt}else heroWalkTime=0;
- p.classList.toggle('walking',moved);
- const frame=moved?Math.floor(heroWalkTime/.12)%4:0;
+ const pos=state&&state.pos,last=heroLast;heroLast=pos?{x:pos.x,y:pos.y,room:state.room}:null;
+ if(moved){let dx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);
+  if(!dx&&!dy&&last&&pos&&last.room===state.room){const mx=pos.x-last.x,my=pos.y-last.y;if(Math.abs(mx)>Math.abs(my))dx=Math.sign(mx);else dy=Math.sign(my)}
+  if(dx||dy)heroFacing=dx&&(!dy||Math.abs(dx)>=Math.abs(dy))?(dx<0?1:2):(dy<0?3:0);heroWalkTime+=dt;heroStill=0}else if((heroStill+=dt)>.15)heroWalkTime=0;
+ const walking=moved||heroWalkTime>0;/* a tap route skips frames now and then: only a pause of 0.15s stops the gait */
+ p.classList.toggle('walking',walking);
+ const frame=walking?1+Math.floor(heroWalkTime/.085)%8:0;
  p.querySelector('.hero-sprite').style.backgroundPosition=(-frame*84)+'px '+(-heroFacing*84)+'px';
 }
 function loop(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;const previous=state?{...state.pos,room:state.room}:null;move(dt);animateEnemy(dt);const moved=!!(previous&&state&&!state.battle&&$('menuOverlay').classList.contains('hidden')&&(previous.room!==state.room||Math.hypot(state.pos.x-previous.x,state.pos.y-previous.y)>.01));animateHero(dt,moved);requestAnimationFrame(loop)}
