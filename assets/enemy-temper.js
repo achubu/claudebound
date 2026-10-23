@@ -47,11 +47,18 @@ startBattle = function (spawnId) {
   temperEnemy(b.enemy);
   if (b.pair && b.pair.other && b.pair.other.enemy) temperEnemy(b.pair.other.enemy);
   b.tempered = true;
-  if (b.enemy.temper) b.logs.push(TEMPER_TEXT[b.enemy.temper]);
   save(); renderBattle();
   return r;
 };
 const TEMPER_TEXT = { fierce: '🔥 Fierce: it hits 20% harder but has 15% less health.', hardy: '🛡 Hardy: it has 25% more health but hits 15% softer.' };
+// The temper is explained in the intent on the fight's first turn (the battle log stays empty until
+// the first move, as in battle-header's checks).
+const intentBubbleBeforeTemper = intentBubble;
+intentBubble = function (plan, cls, label, frozen) {
+  const html = intentBubbleBeforeTemper(plan, cls, label, frozen), b = state && state.battle;
+  if (cls !== 'now' || !b || b.turn !== 1 || !b.enemy || !TEMPER_TEXT[b.enemy.temper]) return html;
+  return html.replace(/<\/div>$/, '<p class="affliction temper-line">' + TEMPER_TEXT[b.enemy.temper] + '</p></div>');
+};
 const enemyPlanBeforeTemper = enemyPlan;
 enemyPlan = function (b = state.battle, turn = b?.turn) {
   const plan = enemyPlanBeforeTemper(b, turn);
