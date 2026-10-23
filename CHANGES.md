@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 252: the Ember Jackal is animated
+
+- The owner sent two sheets for Neon Aftermath's Ember Jackal (`emberling`): four battle poses
+  (stand, rearing with a hind leg up, lunging with a front paw raised, stand) and an eight-frame
+  walk, both already transparent. Sources are in `assets/monsters/city/src/`.
+- Composed with `tools/compose_sprite_sheet.py` into `assets/monsters/city/ember-jackal.png`. The
+  walk uses frames 1, 3, 5 and 7 in `ember-jackal-walk.png`. Both are padded with
+  `pad_sprite_frames.py`.
+- It is a `WILDLIFE_ART` entry with `poses: { attack: 2, hurt: 1, walk }`, like the Briar Sentinel.
+  The old `assets/monsters/ember-jackal.png` stays as the base fallback.
+- `SPRITE_VERSION` 252. New `tests/ember-jackal.test.cjs`.
+- Fixed a flaky `tests/charge-swipe.test.cjs`. It picked a random Solaris enemy, and fire enemies add
+  🥵 Sunstroke on top of the swipe. It now picks one of another element.
+
 ## Round 251: the hero's new walk
 
 - The owner sent four 3×3 sheets for the hero: walking away, left, right and toward the camera. Each
