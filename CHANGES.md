@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 254: effects as chips on the battle screen
+
+- The owner asked for less text on the battle screen: every effect one or two words, with the full
+  description in a pop-up bubble on hover.
+- New `assets/battle-chips.js` rewrites the fight after each redraw (`compactBattle()`):
+  - **Intent bubbles.**
+    - "Enemy move next turn:" becomes "Next turn"; a pair's bubbles show the enemy's name, with 🎯 on
+      the target.
+    - Move names are short ("Charging", "Cataclysm", "Shearing strike"), with the full name in the bubble.
+    - "45 damage · counter window" becomes "45 dmg" and a ◈ Counter chip.
+    - Every effect line becomes a chip: afflictions, with their answers, named after the move's rider
+      (`afflictionLine` tags them); ⚔ Pressure; 🗡 Swipe 9; 🌪 Shear; the 🔥 Fierce / 🛡 Hardy temper.
+  - **Top line:** "⚔ name" and an element chip.
+  - **Battle log:** one 📜 Log chip holding the entries.
+  - **Aether:** "+3 / turn".
+  - **Bounty:** "★ Swift ◇8".
+  - **Mechanic trays:** the note moves into the bubble, and "How Heat works" becomes "?".
+  - **Hand hints:** they become ⓘ.
+  - **Titles:** title tooltips outside the cards use the same bubble.
+- **The bubble.** It opens on hover or keyboard focus, and a tap opens or closes it on phones (the
+  hover a tap sends is ignored). It stays on screen and closes on scroll. Card faces are unchanged.
+- New `tests/battle-chips.test.cjs` (desktop and phone); `battle-header` follows the new top line and log.
+
 ## Round 253: a fair Difficulty lab, fights that vary, and a re-tune
 
 The owner asked how an attack-only deck with Surge talents does, then for win rates nearer 40%.

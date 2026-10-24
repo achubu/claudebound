@@ -23,22 +23,23 @@ server.listen(0, async () => {
       const look = () => page.evaluate(() => {
         const tops = [...document.querySelectorAll('#battleModal .combat-tools')], log = document.getElementById('combatLog');
         return { tops: tops.length, first: document.querySelector('#battleModal').firstElementChild === tops[0], text: tops[0] && tops[0].textContent.replace(/\s+/g, ' ').trim(),
-          lines: tops[0] && Math.round(tops[0].getBoundingClientRect().height), log: log.textContent, logShown: getComputedStyle(log).display !== 'none' };
+          lines: tops[0] && Math.round(tops[0].getBoundingClientRect().height), log: log.textContent, logTip: log.dataset.tip || '', logShown: getComputedStyle(log).display !== 'none',
+          el: (tops[0] && tops[0].querySelector('.fx-chip.element') || {}).dataset?.tip || '' };
       });
       // A fight with an element (Elaris) and one without (Neon Aftermath's first street).
       await page.evaluate(() => { newGame(); state.region = 'wilds'; configureRegion('wilds'); state.room = '1,0'; renderWorld(); startBattle(roomSpawns(state.room).find(s => spawnAvailable(s)).uid); });
       let r = await look();
       assert(r.tops === 1 && r.first, name + ': one top line, at the very top');
-      assert(/^Encounter: .+ · Element: \w+/.test(r.text), name + ': encounter and element share it (' + r.text + ')');
+      assert(/^⚔ .+/.test(r.text) && /^Element: \w+/.test(r.el), name + ': encounter and element share it, the element as a chip (' + r.text + ' / ' + r.el + ')');
       assert(!r.logShown, name + ': no log line before the first move');
       await page.evaluate(() => { const b = state.battle; const i = b.hand.findIndex(c => stat(c).cost <= b.energy); playCard(i); });
       r = await look();
-      assert(r.tops === 1 && /^Encounter: /.test(r.text), name + ': still one top line after a move');
-      assert(r.logShown && r.log && !/Encounter/.test(r.log), name + ': the log line shows the move, not the encounter (' + r.log + ')');
+      assert(r.tops === 1 && /^⚔ /.test(r.text), name + ': still one top line after a move');
+      assert(r.logShown && /Log/.test(r.log) && r.logTip && !/Encounter/.test(r.logTip), name + ': the log chip holds the move, not the encounter (' + r.logTip + ')');
       await page.evaluate(() => { state.battle = null; document.getElementById('battleOverlay').classList.add('hidden'); newGame(); state.region = 'city'; configureRegion('city'); state.room = '0,5'; renderWorld();
         const k = Object.keys(rooms).find(k => (state.room = k, roomSpawns(k).some(s => spawnAvailable(s) && !s.element))); state.room = k; renderWorld(); startBattle(roomSpawns(k).find(s => spawnAvailable(s) && !s.element).uid); });
       r = await look();
-      assert(r.tops === 1 && /^Encounter: \S/.test(r.text), name + ': a fight with no element still names the encounter at the top (' + r.text + ')');
+      assert(r.tops === 1 && /^⚔ \S/.test(r.text) && !r.el, name + ': a fight with no element still names the encounter at the top (' + r.text + ')');
       assert(errors.length === 0, name + ': no page errors ' + errors.join('; '));
       await page.close();
     }
