@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 256: three favorite decks
+
+- The owner asked for favorite decks: build several and switch with one click, with three slots on the Deck page.
+- New `assets/deck-presets.js` adds a FAVORITE DECKS panel at the top of the Deck Workshop with three named slots.
+  Each slot keeps a main deck and a side deck.
+  - **Save current** (or **Save here** on an empty slot) stores what you are playing now.
+  - **Use** switches to that deck in one click. The slot in use is outlined and marked ✓ In use.
+  - **✎** renames a slot inline (Enter saves, Escape cancels, up to 18 characters).
+- **Loading** leaves out cards no longer in your collection, keeps the copy limit, trims to today's deck
+  and side-deck sizes, and refuses a deck that would fall below the minimum. It's not allowed during a fight.
+  A toast says what was left out.
+- **Saving:** stored in the save as `state.deckPresets`. New `tests/deck-presets.test.cjs`.
+
 ## Round 255: the Circuit Thornling is animated
 
 - The owner sent an eight-frame walk for Neon Aftermath's Circuit Thornling (`thornling`), on
