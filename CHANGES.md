@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 255: the Circuit Thornling is animated
+
+- The owner sent an eight-frame walk for Neon Aftermath's Circuit Thornling (`thornling`), on
+  transparent 704×704 frames. The sources are in `assets/monsters/city/src/` (`circuit-thornling-walk8.png`).
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/city/circuit-thornling.png`, then padded.
+- It is a plain `WILDLIFE_ART` entry (it scuttles on the map and in battle; there are no attack or
+  hurt poses yet). Vespera's Prism Thornling borrows it, recoloured as before.
+- `SPRITE_VERSION` 255. New `tests/circuit-thornling.test.cjs`.
+
 ## Round 254: effects as chips on the battle screen
 
 - The owner asked for less text on the battle screen: every effect one or two words, with the full
