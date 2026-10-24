@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 257: the Briar Sentinel's new walk; the Ember Jackal faces the right way
+
+- **Briar Sentinel.** The owner sent an eight-frame side-on walk for it (transparent, 4×2). Frames 1, 3,
+  5 and 7 replace its map walk (`assets/monsters/city/briar-sentinel-walk.png`). The source is in
+  `assets/monsters/city/src/briar-sentinel-walk8.webp`. Its battle poses are unchanged.
+- **Ember Jackal fix.** Creature art is drawn facing right: the map flips a sprite when it walks left, and
+  battle flips it to face the player. The Ember Jackal's sheets (Round 252) faced left, so it walked
+  backwards and faced away from you in battle. Each frame of both sheets is now mirrored in place, so
+  the frame order and poses stay the same.
+- `SPRITE_VERSION` 257.
+
 ## Round 256: three favorite decks
 
 - The owner asked for favorite decks: build several and switch with one click, with three slots on the Deck page.
