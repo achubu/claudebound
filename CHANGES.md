@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 258: the Tunnel Borehound is animated
+
+- The owner sent an eight-frame, right-facing walk for Neon Aftermath's Tunnel Borehound (`burrower`), on
+  transparent 704×704 frames. The source strip is `assets/monsters/city/src/tunnel-borehound-walk8.png`.
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/city/tunnel-borehound.png`, then padded. It is a
+  plain `WILDLIFE_ART` entry: it walks on the map and in battle, with no attack or hurt poses yet.
+- `SPRITE_VERSION` 258. New `tests/tunnel-borehound.test.cjs`.
+
 ## Round 257: the Briar Sentinel's new walk; the Ember Jackal faces the right way
 
 - **Briar Sentinel.** The owner sent an eight-frame side-on walk for it (transparent, 4×2). Frames 1, 3,
