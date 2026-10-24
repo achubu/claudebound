@@ -141,7 +141,8 @@ const renderBattleBeforeChips = renderBattle;
 renderBattle = function () {
   const r = renderBattleBeforeChips.apply(this, arguments), b = state && state.battle;
   fxHide();
-  if (b && b.phase === 'fight' && typeof document !== 'undefined') compactBattle(document.getElementById('battleModal'));
+  const m = typeof document !== 'undefined' && document.getElementById('battleModal');
+  if (b && b.phase === 'fight' && typeof HTMLElement !== 'undefined' && m instanceof HTMLElement) compactBattle(m); // real pages only (not the test harness's stub DOM)
   return r;
 };
 // --- The bubble ---------------------------------------------------------
