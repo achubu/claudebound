@@ -3496,6 +3496,28 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 261: ⛓ Chain
+
+- **The keyword.** The owner chose option 1 of the chain proposals: a shared ⛓ Chain counter with small fixed
+  thresholds, in the manner of Slay the Spire's Shuriken and Follow-Up rather than Magic's open-ended Storm.
+- **New `assets/chain.js`** (after `card-mechanics.js`):
+  - Every card you play by hand this turn adds a link. Side cards, pitching and Suspend's automatic plays
+    don't, as with Follow-through. A card that couldn't be played adds none.
+  - A card with **⛓ Chain N** gets its bonus when at least N cards were played before it this turn.
+  - Ready cards glow blue in hand, and a ⛓ N chip beside the turn badge shows the count (only for decks
+    holding Chain cards). The count resets each turn.
+  - The bonus only applies in the fight (`liveBattleCard`), so reward screens and the deck viewer show the
+    printed numbers. The rules text names the bonus.
+- **Existing cards with Chain:**
+  - Chain Lightning: Chain 3, +1 hit.
+  - Clockwork Volley: Chain 3, +2/+2/+3/+3 damage per hit.
+  - Spark: Chain 3, double damage.
+  - Scarab Swarm: Chain 3, +2/+2/+3/+3 Poison.
+  - Arc Jab: Chain 2, +1 Aether.
+- **Unchanged:** Gust Chain keeps its own 🪶 Tailwind rule (the Sky Isles' flavour), and Cinder Lance's ✸ Daze
+  keeps its two-Lance rule.
+- New `tests/chain.test.cjs`.
+
 ## Round 260: a small buff for Resolve
 
 - The owner asked for a small Resolve buff after Round 259 left the tree trailing (34% on bosses, against
