@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 269: the Solar Scarab walks
+
+- The owner sent an eight-frame, right-facing walk for Solaris's Solar Scarab (`cinderFox`). It is based on the
+  old four-frame sheet and keeps the sun-emblem shell and sun orb. The source strip is
+  `assets/monsters/elaris/src/solar-scarab-walk8.png`.
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/elaris/solar-scarab.png` (replacing the old sheet), then
+  padded. The cycle is .8s, down from .95s, to match the owner's timing.
+- `SPRITE_VERSION` 269. New `tests/solar-scarab.test.cjs`.
+
 ## Round 268: the Lunar Enforcer glides
 
 - The owner sent an eight-frame levitating glide for Neon Aftermath's mini-boss, the Lunar Enforcer (`moonKnight`).
