@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 266: Vespera's Armor +10%; the Crown Observer hovers
+
+- The owner asked for 10% more Armor on Vespera's enemies. `ARMOR_WORLD_MULT` in `assets/enemy-armor.js` multiplies
+  a world's Armor and rounds it. Vespera's regulars go from 5–8 to 6–9 and its bosses from 10–11 to 11–12. Traits
+  such as Hardened still add on top. Other worlds are unchanged.
+- The owner sent an eight-frame hover for Neon Aftermath's Crown Observer (`crownEye`). The source strip is
+  `assets/monsters/city/src/crown-observer-glide8.png`.
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/city/crown-observer.png`, then padded. It is a plain
+  `WILDLIFE_ART` entry with no battle poses yet.
+- Chronospire's Clockwarden borrows its art, so it animates too. The Crown Sentinel keeps its still picture.
+- `SPRITE_VERSION` 266. New `tests/crown-observer.test.cjs`.
+- VESPERA_LAB
+
 ## Round 265: no two enemies fight the same way
 
 - The owner asked that every new enemy feel different. Inside each world, no two enemies share a move

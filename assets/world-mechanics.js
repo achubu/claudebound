@@ -11,7 +11,7 @@
 // Aftermath: after your first win), shows a tray in battle with a short guide, and has enemies
 // with an affliction that works against it.
 // =====================================================================
-const HACK_LIMIT = 5, HACK_PATCH = 2; // a crash patches the enemy: the next crash needs 2 more Glitch
+const HACK_LIMIT = 5; // Round 266 (owner request): every crash needs 5 Glitch; crashes no longer patch the enemy
 const HEAT_MAX = 6, HEAT_SEAR = 2;
 const TAILWIND_MAX = 4;
 const GROW_MAX = 4;
@@ -47,8 +47,8 @@ tieredCard('lightningRod', 'Lightning Rod', 1, 'Lightning Attack', '⫯', [{ dis
 const WORLD_MECHANICS = {
   city: { key: 'hack', name: 'Hack', icon: '⌁', color: '#5ff2e0', cards: ['packetSniff', 'logicBomb', 'ghostProtocol', 'zeroDay'], gift: ['packetSniff', 'ghostProtocol'], world: 'Neon Aftermath',
     tagline: 'A RUINED CITY STILL RUNNING ON BROKEN CODE',
-    steps: ['<b>⌁ Hack cards add Glitch to the enemy.</b> The tray shows how much it has.', '<b>At ' + HACK_LIMIT + ' Glitch it crashes</b> and skips its next action.', '<b>Each crash patches it:</b> the next crash needs ' + HACK_PATCH + ' more Glitch.'],
-    tip: 'Enemies with <b>🛡 Firewall</b> wipe their Glitch and patch themselves.' },
+    steps: ['<b>⌁ Hack cards add Glitch to the enemy.</b> The tray shows how much it has.', '<b>At ' + HACK_LIMIT + ' Glitch it crashes</b> and skips its next action.', '<b>Every crash needs ' + HACK_LIMIT + ' Glitch</b>, so you can crash it again and again.'],
+    tip: 'Enemies with <b>🛡 Firewall</b> wipe their Glitch.' },
   elaris: { key: 'heat', name: 'Heat', icon: '☀', color: '#ffb347', cards: ['sunstoke', 'scorchingSands', 'heatwave', 'noonBlaze'], gift: ['sunstoke', 'scorchingSands'], world: 'Solaris',
     tagline: 'A DESERT UNDER A SUN THAT NEVER SETS',
     steps: ['<b>☀ Heat cards build Heat</b>, up to ' + HEAT_MAX + '. It lasts between turns.', '<b>Your next attack sears</b> for ' + HEAT_SEAR + ' extra damage per Heat and uses it all up.', '<b>Build first, then strike:</b> 6 Heat is 12 extra damage on one hit.'],
@@ -79,7 +79,7 @@ Object.assign(VARIETY_POOLS, {
 for (const [w, m] of Object.entries(WORLD_MECHANICS)) for (const id of m.cards) NEW_CARD_WORLD[id] = w;
 
 // --- Battle state ---
-function hackLimit(b) { return HACK_LIMIT + (b.patch || 0); }
+function hackLimit(b) { return HACK_LIMIT; }
 function tailwindCount(b, c) { const self = c && b.playingUid != null && b.playingUid === c.uid ? 1 : 0; return Math.max(0, Math.min(TAILWIND_MAX, (b.tailwind || 0) - self - (b.headwindNow || 0))); }
 function growthOf(b, c) { const self = b && b.playingUid != null && b.playingUid === c.uid ? 1 : 0; return Math.max(0, Math.min(GROW_MAX, (((b && b.growth) || {})[c.uid] || 0) - self)); }
 function addBonus(out, bonus, n) { for (const [k, v] of Object.entries(bonus)) out[k] = (out[k] || 0) + v * n; }
@@ -130,8 +130,8 @@ cardEffect = function (c, empowered, doubleAttack) {
   if (d.hack && b.enemy.hp > 0) {
     b.glitch = (b.glitch || 0) + d.hack;
     if (b.glitch >= hackLimit(b)) {
-      b.freeze = Math.max(b.freeze || 0, 1); b.glitch = 0; b.patch = (b.patch || 0) + HACK_PATCH; b.crashes = (b.crashes || 0) + 1;
-      b.logs.push('⌁ System crash! ' + b.enemy.name + ' skips its next action (next crash needs ' + hackLimit(b) + ' Glitch).');
+      b.freeze = Math.max(b.freeze || 0, 1); b.glitch = 0; b.crashes = (b.crashes || 0) + 1;
+      b.logs.push('⌁ System crash! ' + b.enemy.name + ' skips its next action.');
     } else b.logs.push('⌁ Glitch ' + b.glitch + '/' + hackLimit(b) + '.');
   }
   if (d.discharge !== undefined) { if (b.stormcharge) b.logs.push('⚡ Discharge: ' + b.stormcharge + ' Stormcharge released.'); b.stormcharge = 0; }
@@ -173,7 +173,7 @@ endTurn = function () {
 
 // --- Afflictions that work against each mechanic ---
 Object.assign(AFFLICTIONS, {
-  firewall:  { name: 'Firewall', icon: '🛡', type: 'hex', desc: () => 'Firewall: the enemy wipes its Glitch and patches itself (its next crash needs 1 more Glitch).', answer: ['dispel', 'anchor'] },
+  firewall:  { name: 'Firewall', icon: '🛡', type: 'hex', desc: () => 'Firewall: the enemy wipes its Glitch.', answer: ['dispel', 'anchor'] },
   sunstroke: { name: 'Sunstroke', icon: '🥵', type: 'hex', amount: [2, 2, 3, 3, 4, 4], desc: n => 'Sunstroke: you lose all your Heat and 1 HP for each. With no Heat, you lose ' + n + ' HP.', answer: ['purify', 'anchor'] },
   headwind:  { name: 'Headwind', icon: '🌬', type: 'hex', desc: () => 'Headwind: your first 2 cards next turn add no Tailwind.', answer: ['purify', 'anchor'] },
   blight:    { name: 'Blight', icon: '🍂', type: 'hex', amount: [2, 2, 3, 3, 4, 4], desc: n => 'Blight: your most-grown card loses its Growth. If nothing has grown, you lose ' + n + ' HP.', answer: ['purify', 'anchor'] },
@@ -189,7 +189,7 @@ Object.assign(ENEMY_AFFLICTIONS, {
 const applyHexBeforeMechanics = applyHex;
 applyHex = function (b, id) {
   const n = AFFLICTIONS[id] && AFFLICTIONS[id].amount ? afflictionAmount(id) : 0, hurt = k => { const loss = Math.max(0, Math.min(k, state.hp - 1)); state.hp -= loss; return loss; };
-  if (id === 'firewall') { b.glitch = 0; b.patch = (b.patch || 0) + 1; b.logs.push('🛡 Firewall: Glitch wiped; the next crash needs ' + hackLimit(b) + '.'); }
+  if (id === 'firewall') { b.glitch = 0; b.logs.push('🛡 Firewall: Glitch wiped.'); }
   else if (id === 'sunstroke') { const h = b.heat || 0; b.heat = 0; b.logs.push(h ? '🥵 Sunstroke: your ' + h + ' Heat burns off, −' + hurt(h) + ' HP.' : '🥵 Sunstroke: −' + hurt(n) + ' HP.'); }
   else if (id === 'headwind') { b.headwind = 2; b.logs.push('🌬 Headwind: your first 2 cards next turn add no Tailwind.'); }
   else if (id === 'blight') {

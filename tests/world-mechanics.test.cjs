@@ -22,13 +22,13 @@ for (const w of WORLD_ORDER.filter(w => w !== 'chronospire')) {
   for (const id of m.cards) { assert(VARIETY_POOLS[w].includes(id), id + ' drops in ' + w); assert.equal(NEW_CARD_WORLD[id], w); assert(rules(make(id)).includes(m.icon), id + ' explains ' + m.name); }
   for (const id of m.gift) assert(m.cards.includes(id));
 }
-// Hack: Glitch builds; at 5 the enemy crashes (skips its action); the next crash needs 7.
+// Hack: Glitch builds; at 5 the enemy crashes (skips its action); every crash needs 5.
 let b = setup(['packetSniff', 'logicBomb', 'zeroDay']);
 play('packetSniff'); assert.equal(b.glitch, 2); assert.equal(b.freeze, 0);
-play('logicBomb'); assert.equal(b.glitch, 0, 'crash resets Glitch'); assert.equal(b.freeze, 1, 'and the enemy skips its next action'); assert.equal(hackLimit(b), 7, 'patched');
+play('logicBomb'); assert.equal(b.glitch, 0, 'crash resets Glitch'); assert.equal(b.freeze, 1, 'and the enemy skips its next action'); assert.equal(hackLimit(b), 5, 'the crash point stays at 5 (Round 266)');
 let hp = state.hp; endTurn(); assert.equal(state.hp, hp, 'crashed enemy does not attack');
-// Firewall wipes Glitch and patches.
-b.glitch = 4; applyHex(b, 'firewall'); assert.equal(b.glitch, 0); assert.equal(hackLimit(b), 8);
+// Firewall wipes Glitch; the crash point stays at 5.
+b.glitch = 4; applyHex(b, 'firewall'); assert.equal(b.glitch, 0); assert.equal(hackLimit(b), 5);
 // Heat: builds, lasts, and the next attack sears 2 per Heat (Noon Blaze: 3 per Heat).
 b = setup(['sunstoke', 'scorchingSands', 'strike', 'heatwave', 'noonBlaze']);
 play('sunstoke'); assert.equal(b.heat, 2); assert.equal(b.block, 3);
