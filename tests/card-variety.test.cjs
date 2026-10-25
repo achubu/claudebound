@@ -66,7 +66,7 @@ assert.equal(enemyStats('bloomTyrant', { region: 'elaris', level: 10, boss: true
 for (let r = 0; r <= 5; r++) { state.talents = { amplifier: r, jammer: r }; assert.equal(boostAmount(), 1 + r, 'Boost +1 per Signal Amplifier rank'); assert.equal(weakenAmount(), 3 * (1 + [0, 1, 2, 4, 6, 8][r]), 'Weaken 3 + 3 per Deep Interference step (1/2/4/6/8)'); }
 state.talents = {};
 // City regulars eased.
-assert.equal(balanceFor('normalHp', 'city'), .95); assert(balanceFor('normalHp', 'elaris') > balanceFor('normalHp', 'city'), 'Solaris regulars are tougher than in the city');
+assert.equal(balanceFor('normalHp', 'city'), .85); assert.equal(balanceFor('normalHp', 'elaris'), .76, 'Solaris regulars have less health but Armor and traits (Round 265)');
 Math.random = realRandom;
 console.log('PASS: all 15 new cards with exact numbers, world reward pools, choose-1-of-3 card rewards (and leaving them), and city regular health.');
 }`);

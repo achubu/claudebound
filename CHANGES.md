@@ -3496,6 +3496,50 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 265: no two enemies fight the same way
+
+- The owner asked that every new enemy feel different. Inside each world, no two enemies share a move
+  pattern, a trait or (for regular enemies) an affliction. No enemy anywhere has the same full kit
+  (pattern, trait and afflictions) as another. The code is in the new `assets/enemy-traits.js`, loaded
+  after `armor-hud.js`.
+- **Traits.** Every species has one trait (`SPECIES_TRAIT`). It shows as a chip by the enemy's name, and the
+  chip's bubble explains it; a pair's partner shows its own. There are 20 traits:
+  - Attack: 😤 Frenzy (+8% attack per attack), 💢 Wrath (+20% below half health), 📯 Rally (+30% after a
+    guard or charge turn), ⚖ Punisher (+25% if you have no Block), ⚔ Twin strike (an extra 30% hit after
+    Strike), 🔋 Overcharged (charged strikes +25%), 🔩 Drill (ignores your Armor).
+  - Defense: 🪨 Stoneskin (Block of 12% of its attack each turn), 👻 Phasing (the first damaging card each turn
+    deals −30%), 🛡 Resistant (non-elemental cards −25%), 🧱 Hardened (+50% Armor), 🧊 Brittle (each damaging
+    card cracks 1 Armor until its turn ends; a weakness).
+  - Sustain: 💚 Regeneration (2% a turn), 🩸 Bloodthirst (heals half the HP it takes), 💀 Undying (gets back up
+    once at 20%), 🫧 Purging (halves Poison and Burn on it).
+  - Disruption: 🌵 Thorns (12% of its attack back per damaging card), 🌀 Aether drain (−2 Aether per hit),
+    ⚡ Static field (on odd turns the first card costs 1 more), 👁 Menacing (−1 energy on turn 1).
+- **Patterns.** Every regular species has its own move cycle (`SPECIES_PATTERN`), and so do Chronospire's three
+  bosses, which used the default pattern before. Other bosses keep their patterns. Neon Aftermath's patrols
+  have no element, so their patterns have no charged strike.
+- **Afflictions.** The Chronospire Wisp now casts Static and the Lag Wraith casts Shackle, so no two regular
+  Chronospire enemies share one.
+- The first trait pass was far too harsh (city bosses at 15–31% for smart play). Regeneration, Stoneskin,
+  Static field, Wrath, Phasing and Twin strike were softened, and boss and regular health re-tuned
+  (`BALANCE.normalHp`, `bossHp` and `miniBossHp` in `assets/expansion.js`; Sky Isles and Elaris in
+  `assets/tile-worlds.js`). Solaris stays near its reference.
+- Difficulty lab, all builds averaged (win %, smart / naive):
+
+  | World | Regular, smart | Regular, naive | Bosses, smart | Bosses, naive |
+  |---|---|---|---|---|
+  | Neon Aftermath | 69 | 31 | 38 | 7 |
+  | Solaris | 76 | 28 | 42 | 9 |
+  | Sky Isles | 67 | 27 | 39 | 3 |
+  | Elaris | 62 | 14 | 42 | 1 |
+  | Vespera | 82 | 14 | 38 | 0 |
+  | Chronospire | 72 | 1 | 40 | 0 |
+
+  By tree on bosses: Surge 39, Disruption 47, Resolve 36, Hybrid 25. Health now: regulars city .85, Vespera .84.
+
+- The test harness turns traits and species patterns off unless `TRAITS=1` (like tempers), so older tests keep
+  their exact numbers; `useEnemyTraits(on)` switches them at runtime. New `tests/enemy-traits.test.cjs` (runs with them on). It checks that every enemy has a trait, the uniqueness rules, and how
+  Thorns, Phasing, Static field, Undying, Regeneration, Frenzy and Punisher behave.
+
 ## Round 264: the Phase Shade is animated
 
 - The owner sent an eight-frame, right-facing glide for Neon Aftermath's Phase Shade (`shade`). The source strip is
