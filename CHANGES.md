@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 267: the Thorn Warden strides
+
+- The owner sent an eight-frame, right-facing side walk for Neon Aftermath's final boss, the Thorn Warden
+  (`thornWarden`). The source strip is `assets/monsters/city/src/thorn-warden-walk8.png`.
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/city/thorn-warden.png`, then padded. It is a plain
+  `WILDLIFE_ART` entry (1.1s cycle) with no battle poses yet. It replaces the still `assets/monsters/thorn-warden.png`
+  on the map and in battle.
+- `SPRITE_VERSION` 267. New `tests/thorn-warden.test.cjs`.
+
 ## Round 266: Vespera's Armor +10%; Hack crashes at a fixed 5; the Crown Observer hovers
 
 - The owner asked for 10% more Armor on Vespera's enemies. `ARMOR_WORLD_MULT` in `assets/enemy-armor.js` multiplies
