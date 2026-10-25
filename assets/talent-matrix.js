@@ -63,11 +63,11 @@ TALENT_BRANCHES.resolve.nodes.push(
   // Block path
   { id: 'bulwark', name: 'Bulwark Doctrine', icon: '▣', max: 3, tier: 1, desc: 'Defense cards grant +1 / +2 / +4 more Block (ranks 1-3).' },
   { id: 'thorns', name: 'Retaliation Coil', icon: '✺', max: 3, tier: 3, req: ['bulwark', 2], desc: 'When your Block absorbs an enemy hit, deal 1 / 2 / 4 damage back (ranks 1-3).' },
-  { id: 'fortress', name: 'Fortress Protocol', icon: '⛫', max: 1, tier: 5, req: ['thorns', 1], desc: 'Keep half of your unused Block (up to 6) into the next turn.' },
-  { id: 'unbreakable', name: 'Unbreakable', icon: '⬢', max: 1, tier: 8, req: ['fortress', 1], desc: 'Begin every encounter with 6 Block.' },
+  { id: 'fortress', name: 'Fortress Protocol', icon: '⛫', max: 1, tier: 5, req: ['thorns', 1], desc: 'Keep half of your unused Block (up to 10) into the next turn.' },
+  { id: 'unbreakable', name: 'Unbreakable', icon: '⬢', max: 1, tier: 8, req: ['fortress', 1], desc: 'Begin every encounter with 10 Block.' },
   // Sustain path (from Vital Mesh)
   { id: 'leech', name: 'Siphon Edge', icon: '❦', max: 2, tier: 3, req: ['vitality', 1], desc: 'Your first attack each turn heals 1 / 2 HP (ranks 1-2).' },
-  { id: 'secondWind', name: 'Second Wind', icon: '❂', max: 1, tier: 5, req: ['leech', 2], desc: 'The first time you fall below half health in an encounter, heal 6 HP.' },
+  { id: 'secondWind', name: 'Second Wind', icon: '❂', max: 1, tier: 5, req: ['leech', 2], desc: 'The first time you fall below half health in an encounter, heal 15% of your maximum health.' },
   { id: 'undying', name: 'Undying Core', icon: '✚', max: 1, tier: 8, req: ['secondWind', 1], desc: 'Once per encounter, a hit that would defeat you leaves you at 1 HP instead.' },
   // Retain path (from Memory Buffer)
   { id: 'preparation', name: 'Preparation', icon: '⌛', max: 1, tier: 3, req: ['retainCore', 1], desc: 'Your retained card gains +2 damage and +2 Block when you play it next turn.' },
@@ -157,7 +157,8 @@ const talentMatrix = {
 
 function checkSecondWind(b) {
   if (hasTalent('secondWind') && !b.secondWindUsed && state.hp > 0 && state.hp < state.maxHp / 2) {
-    b.secondWindUsed = true; state.hp = Math.min(state.maxHp, state.hp + 6); b.logs.push('Second Wind: +6 HP.');
+    const heal = Math.max(6, Math.round(state.maxHp * .15)); // Round 260: was a flat 6
+    b.secondWindUsed = true; state.hp = Math.min(state.maxHp, state.hp + heal); b.logs.push('Second Wind: +' + heal + ' HP.');
   }
 }
 
@@ -242,7 +243,7 @@ endTurn = function () {
   }
   if (!b.enemy.hp) { winBattle(); save(); renderBattle(); return; }
   // Fortress Protocol: half of the Block left over after the hit.
-  if (hasTalent('fortress')) { const kept = Math.min(6, Math.floor(Math.max(0, before.block - absorbed) / 2)); if (kept) { b.block += kept; b.logs.push('Fortress Protocol: ' + kept + ' Block carried over.'); } }
+  if (hasTalent('fortress')) { const kept = Math.min(10, Math.floor(Math.max(0, before.block - absorbed) / 2)); if (kept) { b.block += kept; b.logs.push('Fortress Protocol: ' + kept + ' Block carried over.'); } }
   // Foresight
   if (hasTalent('foresight')) drawCards(1);
   // Preparation / Total Recall apply to the card that was retained.
@@ -274,7 +275,7 @@ startBattle = function (spawnId) {
   if (b && b.phase === 'fight' && b.turn === 1) b.flowReady = true; // after the opening hand
   if (!b || b.phase !== 'fight' || b.turn !== 1 || b.tmStarted) return;
   b.tmStarted = true;
-  if (hasTalent('unbreakable')) { b.block += 6; b.logs.push('Unbreakable: 6 Block.'); }
+  if (hasTalent('unbreakable')) { b.block += 10; b.logs.push('Unbreakable: 10 Block.'); } // Round 260: was 6
   if (hasTalent('steadyMind')) { b.energy += 1; b.logs.push('Steady Mind: +1 energy.'); }
   save(); renderBattle();
 };
