@@ -49,9 +49,9 @@ b = setup({ weakenCore: 1 }, []); assert.equal(weakenCharges(), 2, 'Weaken has 2
 b = setup({ weakenCore: 1, jammer: 3, reserve: 2 }, [], { turn: 1 }); assert.equal(weakenCharges(), 4, 'Jammer Reserve: +1 charge per rank');
 useWeaken(); assert.equal(b.enemyDebuff, weakenAmount()); assert(!b.debuffUsed); useWeaken(); assert.equal(b.weakenUses, 1, 'only one Weaken at a time');
 b.block = 999; endTurn(); assert.equal(b.enemyDebuff, 0, 'it wears off after the attack'); useWeaken(); assert.equal(b.weakenUses, 2); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 3); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 4); assert(b.debuffUsed, 'all 4 charges spent');
-b = setup({ weakenCore: 1, jammer: 5 }, [], { enemy: { attack: 80 } }); assert.equal(weakenAmount(), 40, 'Weaken: half the attack of a strong enemy at rank 5'); b.enemy.attack = 10; assert.equal(weakenAmount(), 27, 'or the flat amount when that is more');
+b = setup({ weakenCore: 1, jammer: 5 }, [], { enemy: { attack: 80 } }); assert.equal(weakenAmount(), 32, 'Weaken: 40% of the attack of a strong enemy at rank 5'); b.enemy.attack = 10; assert.equal(weakenAmount(), 27, 'or the flat amount when that is more');
 // Round 259: the deep Disruption talents serve a large deck, deck cycling and elemental attacks.
-b = setup({ silence: 1 }, ['strike']); assert.equal(dealt(b), 6 + Math.floor(state.deck.length / 4), 'Arsenal: +1 damage per 4 cards in the deck');
+b = setup({ silence: 1 }, ['strike']); assert.equal(dealt(b), 6 + Math.floor(state.deck.length / 5), 'Arsenal: +1 damage per 5 cards in the deck');
 b = setup({ dominion: 1 }, ['strike']); assert.equal(dealt(b), 8, 'Grand Library: the first play of a card deals +25%'); b.hand.push(b.discard.pop()); b.energy = 3; assert.equal(dealt(b), 6, 'only the first play');
 b = setup({ dominion: 1 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 1, 'Grand Library: +25% Block on the first play');
 b = setup({ weakenCore: 1, jammer: 3, quickdraw: 1, foresight: 1 }, []); endTurn(); assert.equal(b.hand.length, 4 + 1, 'Foresight draws 1 extra card per turn');

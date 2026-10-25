@@ -44,7 +44,7 @@ TALENT_BRANCHES.disruption.nodes.push(
   { id: 'suppression', name: 'Suppression Field', icon: '▼', max: 3, tier: 3, req: ['jammer', 2], desc: 'Enemy heavy attacks and charged strikes deal 10% less damage per rank.' },
   // Round 259 (owner request): the deep Disruption talents serve a large deck, deck cycling and elemental attacks.
   // They keep their old ids (silence, dominion, battery, reflux, nullField) so saved talent points stay where they are.
-  { id: 'silence', name: 'Arsenal', icon: '▤', max: 1, tier: 7, req: ['deckMatrix', 3], desc: 'Your attacks deal +1 damage for every 4 cards in your deck.' },
+  { id: 'silence', name: 'Arsenal', icon: '▤', max: 1, tier: 7, req: ['deckMatrix', 3], desc: 'Your attacks deal +1 damage for every 5 cards in your deck.' },
   { id: 'reserve', name: 'Jammer Reserve', icon: '⌁', max: 2, tier: 3, req: ['jammer', 3], desc: '+1 Weaken charge per encounter for every rank (up to 3 charges). One Weaken at a time: a new charge is ready once the last one wears off.' },
   { id: 'dominion', name: 'Grand Library', icon: '📚', max: 1, tier: 8, req: ['silence', 1], desc: 'The first time each card is played in an encounter, its damage and Block are +25%.' },
   // Draw-engine path (from Predictive Draw)
@@ -75,10 +75,10 @@ TALENT_BRANCHES.resolve.nodes.push(
   { id: 'steadyMind', name: 'Steady Mind', icon: '☯', max: 1, tier: 7, req: ['recall', 1], desc: 'Start every encounter with +1 energy on the first turn.' }
 );
 
-// Round 259: Weaken scales with the enemy. It takes the larger of its flat amount and 25% (+5% per Deep
-// Interference rank, so 50% at rank 5) of the enemy's attack off its next attack, so early points stay
+// Round 259: Weaken scales with the enemy. It takes the larger of its flat amount and 20% (+4% per Deep
+// Interference rank, so 40% at rank 5) of the enemy's attack off its next attack, so early points stay
 // useful in every world.
-function weakenPercent() { return .25 + .05 * talentRank('jammer'); }
+function weakenPercent() { return .2 + .04 * talentRank('jammer'); }
 // Two charges from the start (Jammer Reserve adds one per rank).
 weakenCharges = function () { return hasTalent('weakenCore') ? 2 + talentRank('reserve') : 0; };
 weakenAmount = function () {
@@ -86,9 +86,9 @@ weakenAmount = function () {
   return b && b.enemy && b.enemy.attack ? Math.max(flat, Math.round(b.enemy.attack * weakenPercent())) : flat;
 };
 for (const n of TALENT_BRANCHES.disruption.nodes) {
-  if (n.id === 'weakenCore') n.desc = 'Unlock Weaken (2 charges per encounter): the enemy\'s next attack loses 3 or 25% of its attack, whichever is more. Jammer Reserve adds more charges.';
+  if (n.id === 'weakenCore') n.desc = 'Unlock Weaken (2 charges per encounter): the enemy\'s next attack loses 3 or 20% of its attack, whichever is more. Jammer Reserve adds more charges.';
   if (n.id === 'reserve') n.desc = '+1 Weaken charge per encounter for every rank (up to 4 charges). One Weaken at a time: a new charge is ready once the last one wears off.';
-  if (n.id === 'jammer') n.desc = 'Weaken strength: +3 / +6 / +12 / +18 / +24 flat, or +5% per rank (up to 50% of the enemy\'s attack), whichever is more.';
+  if (n.id === 'jammer') n.desc = 'Weaken strength: +3 / +6 / +12 / +18 / +24 flat, or +4% per rank (up to 40% of the enemy\'s attack), whichever is more.';
 }
 Object.assign(TALENT_BRANCHES.surge, { subtitle: 'Offense: burst turns and big hits', paths: ['Boost & Overdrive', 'Critical strikes', 'Elemental burn & poison', 'Momentum combos', 'Armor breaking'] });
 Object.assign(TALENT_BRANCHES.disruption, { subtitle: 'Control: tempo, cards and enemy pressure', paths: ['Weaken & Suppression', 'Large deck', 'Deck cycling', 'Energy', 'Elements & counters'] });
@@ -119,7 +119,7 @@ const talentMatrix = {
     if (f.attacks > 0) bonus += 3 * talentRank('momentum');
     if (d.pierce && hasTalent('shatterpoint')) bonus += 6;
     if (b.preparedUid === c.uid) bonus += talentRank('recall') + (hasTalent('preparation') ? 2 : 0);
-    if (hasTalent('silence')) bonus += Math.floor(state.deck.length / 4); // Arsenal
+    if (hasTalent('silence')) bonus += Math.floor(state.deck.length / 5); // Arsenal
     if (hasTalent('battery')) bonus += b.flow || 0; // Flow State
     return bonus;
   },

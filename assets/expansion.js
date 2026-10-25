@@ -25,8 +25,8 @@ const BALANCE={
  // Elaris rooms are hand-set to 10-18 and Vespera's to 19-27.
  regionLevelBase:{city:1,elaris:1,vespera:37,chronospire:46},
  eliteHp:{city:1.15,elaris:1.25,vespera:1.25,chronospire:1.25},eliteAttack:2,
- bossHp:1,bossAttack:0,         // extra for region bosses only
- miniBossHp:1,miniBossAttack:0, // extra for mini-bosses only
+ bossHp:1.12,bossAttack:0,         // extra for region bosses only (Round 259: +12% after the Disruption rework made Weaken stronger)
+ miniBossHp:1.12,miniBossAttack:0, // extra for mini-bosses only
  // Round 43: regular and elite enemies have 10% more health; bosses and mini-bosses unchanged.
  // Round 49: city regulars eased to 0.95 (early city fights ran ~23 turns).
  // (+10% attack as well was simulated and proved far too steep: ~+21% total strength.)
