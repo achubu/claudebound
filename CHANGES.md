@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 264: the Phase Shade is animated
+
+- The owner sent an eight-frame, right-facing glide for Neon Aftermath's Phase Shade (`shade`). The source strip is
+  `assets/monsters/city/src/phase-shade-glide8.png`.
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/city/phase-shade.png`, then padded. It is a plain
+  `WILDLIFE_ART` entry with no battle poses yet.
+- The enemies that borrow its art animate too, recoloured as before: Vespera's Ion Shade and Resonant Phantom,
+  and Chronospire's Lag Wraith and Paradox Twin.
+- `SPRITE_VERSION` 264. New `tests/phase-shade.test.cjs`.
+
 ## Round 263: Solaris is the reference difficulty
 
 - The owner said Solaris is the difficulty they like most. Nothing in Solaris changes.
