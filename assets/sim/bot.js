@@ -62,8 +62,21 @@ function botPitch(){
  }
 }
 function botIntentFor(t){try{return enemyPlan(state.battle,t)}catch(e){return{kind:'attack',damage:0}}}
+// Round 263: the 'naive' player the owner wants to lose: it plays whatever comes first in hand (left
+// to right) while it has the energy. No counter timing, no Weaken, no side deck, no Boost, no order for
+// Chain or Follow-through, no blocking or healing by plan.
+function botTurnNaive(){
+ const b=state.battle;let guard=0;
+ while(guard++<20&&state.battle===b&&b.phase==='fight'){
+  if(typeof siftPending==='function'&&siftPending(b)){siftDiscard(siftDefaultIndex(b));continue}
+  const i=b.hand.findIndex(c=>{const d=stat(c);return d.cost<=b.energy&&!d.unplayable&&!(d.xCost&&b.energy<1)});
+  if(i<0)break;const before=b.hand.length;playCard(i);if(state.battle===b&&b.hand.length>=before&&b.phase==='fight')break;
+ }
+ if(state.battle===b&&b.phase==='fight')endTurn();
+}
 function botTurn(){
  const b=state.battle;if(!b||b.phase!=='fight')return;
+ if(globalThis.POLICY==='naive')return botTurnNaive();
  // Round 77: suspend expensive Suspend cards (free now, charged later).
  if(typeof suspendCard==='function'&&!globalThis.NO_SUSPEND)for(const c of b.hand.slice()){if((b.suspended||[]).length>=3)break;const info=suspendInfo(c);if(info&&stat(c).cost>=2)suspendCard(c.uid)}
  chooseBoosts();
@@ -95,7 +108,7 @@ function botTurn(){
  if(state.battle&&state.battle.phase==='fight'){chooseRetain();botPitch();endTurn()}
 }
 function playOutBattle(maxTurns=40){
- useTalentsAtStart();
+ if(globalThis.POLICY!=='naive')useTalentsAtStart();
  let t=0;while(state.battle&&state.battle.phase==='fight'&&t++<maxTurns)botTurn();
  const won=!!(state.battle&&state.battle.phase==='reward');
  return {won,hp:state.hp,maxHp:state.maxHp,turns:t};
