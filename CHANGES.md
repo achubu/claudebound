@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 268: the Lunar Enforcer glides
+
+- The owner sent an eight-frame levitating glide for Neon Aftermath's mini-boss, the Lunar Enforcer (`moonKnight`).
+  It has a rippling holographic cape, and its polearm stays upright. The source strip is
+  `assets/monsters/city/src/lunar-enforcer-glide8.png`.
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/city/lunar-enforcer.png`, then padded. It is a plain
+  `WILDLIFE_ART` entry (.8s cycle) with no battle poses yet.
+- `SPRITE_VERSION` 268. New `tests/lunar-enforcer.test.cjs`.
+
 ## Round 267: the Thorn Warden strides
 
 - The owner sent an eight-frame, right-facing side walk for Neon Aftermath's final boss, the Thorn Warden
