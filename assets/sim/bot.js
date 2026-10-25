@@ -6,6 +6,13 @@ function useTalentsAtStart(){
  const b=state.battle;
  if(hasTalent('weakenCore')&&!b.debuffUsed&&!b.enemyDebuff){b.weakenUses=(b.weakenUses||0)+1;b.debuffUsed=b.weakenUses>=weakenCharges();b.enemyDebuff=weakenAmount()}
 }
+// Round 259: Weaken waits for a big hit (it lasts until the enemy's next real attack), and Jammer
+// Reserve's extra charges get used: any attack is worth one while two or more charges remain.
+function useWeakenNow(){
+ const b=state.battle;if(!b||!hasTalent('weakenCore')||b.enemyDebuff||b.debuffUsed||typeof useWeaken!=='function')return;
+ const p=botIntent(),left=weakenCharges()-(b.weakenUses||0);
+ if(p.kind==='elemental'||p.kind==='heavy'||(p.damage>0&&left>=2)||(p.kind==='charge'))useWeaken();
+}
 function chooseBoosts(){
  const b=state.battle;if(!hasTalent('powerCore'))return;
  const chosen=boostedCardUids(b);if(chosen.length>=boostCharges())return;
@@ -60,6 +67,7 @@ function botTurn(){
  // Round 77: suspend expensive Suspend cards (free now, charged later).
  if(typeof suspendCard==='function'&&!globalThis.NO_SUSPEND)for(const c of b.hand.slice()){if((b.suspended||[]).length>=3)break;const info=suspendInfo(c);if(info&&stat(c).cost>=2)suspendCard(c.uid)}
  chooseBoosts();
+ useWeakenNow();
  botSide();if(!state.battle||state.battle.phase!=='fight')return;
  let guard=0;
  while(guard++<20&&state.battle&&state.battle.phase==='fight'){

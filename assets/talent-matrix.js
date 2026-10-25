@@ -41,20 +41,22 @@ TALENT_BRANCHES.surge.nodes.push(
 
 TALENT_BRANCHES.disruption.nodes.push(
   // Suppression path (from Deep Interference)
-  { id: 'suppression', name: 'Suppression Field', icon: '▼', max: 3, tier: 3, req: ['jammer', 2], desc: 'Enemy heavy attacks and charged strikes deal 7% less damage per rank.' },
-  { id: 'silence', name: 'Static Silence', icon: '⊘', max: 1, tier: 7, req: ['suppression', 3], desc: 'Once per encounter: cancel the enemy\'s next action.' },
+  { id: 'suppression', name: 'Suppression Field', icon: '▼', max: 3, tier: 3, req: ['jammer', 2], desc: 'Enemy heavy attacks and charged strikes deal 10% less damage per rank.' },
+  // Round 259 (owner request): the deep Disruption talents serve a large deck, deck cycling and elemental attacks.
+  // They keep their old ids (silence, dominion, battery, reflux, nullField) so saved talent points stay where they are.
+  { id: 'silence', name: 'Arsenal', icon: '▤', max: 1, tier: 7, req: ['deckMatrix', 3], desc: 'Your attacks deal +1 damage for every 3 cards in your deck.' },
   { id: 'reserve', name: 'Jammer Reserve', icon: '⌁', max: 2, tier: 3, req: ['jammer', 3], desc: '+1 Weaken charge per encounter for every rank (up to 3 charges). One Weaken at a time: a new charge is ready once the last one wears off.' },
-  { id: 'dominion', name: 'Dominion', icon: '♛', max: 1, tier: 8, req: ['silence', 1], desc: 'While Weaken is active, the enemy also loses 2 Armor.' },
+  { id: 'dominion', name: 'Grand Library', icon: '📚', max: 1, tier: 8, req: ['silence', 1], desc: 'The first time each card is played in an encounter, its damage and Block are +50%.' },
   // Draw-engine path (from Predictive Draw)
   { id: 'foresight', name: 'Foresight', icon: '◈', max: 1, tier: 5, req: ['quickdraw', 1], desc: 'Draw 1 extra card at the start of each turn after the first.' },
   { id: 'cycle', name: 'Recycler', icon: '♻', max: 3, tier: 7, req: ['foresight', 1], desc: 'Playing a 0-energy card draws 1 card, once per turn per rank.' },
   // Energy path (from Flux Capacitor)
-  { id: 'battery', name: 'Surge Battery', icon: '🔋', max: 1, tier: 7, req: ['capacitor', 1], desc: 'Carry up to 1 unspent energy into your next turn.' },
+  { id: 'battery', name: 'Flow State', icon: '≈', max: 1, tier: 7, req: ['foresight', 1], desc: 'Every card you draw during your turn adds +3 damage to your next attack (up to +15).' },
   // Counter path
   { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals +2 / +4 / +8 damage (ranks 1-3).' },
   { id: 'resonance', name: 'Resonant Rebound', icon: '↺', max: 1, tier: 3, req: ['counterWeave', 2], desc: 'A successful counter gives you +1 energy next turn.' },
-  { id: 'reflux', name: 'Reflux', icon: '♥', max: 3, tier: 5, req: ['resonance', 1], desc: 'A successful counter heals 2 / 4 / 8 HP (ranks 1-3).' },
-  { id: 'nullField', name: 'Null Field', icon: '∅', max: 1, tier: 8, req: ['reflux', 1], desc: 'Enemy charged strikes can no longer burn, poison, drain or expose you.' }
+  { id: 'reflux', name: 'Prism Shift', icon: '◇', max: 2, tier: 5, req: ['resonance', 1], desc: 'Playing an elemental attack of a different element than your last one draws 1 card (once per turn per rank).' },
+  { id: 'nullField', name: 'Prismatic Cascade', icon: '✦', max: 1, tier: 8, req: ['reflux', 1], desc: 'Your elemental attacks deal +15% damage for each different element you have attacked with this encounter (up to +60%).' }
 );
 
 TALENT_BRANCHES.resolve.nodes.push(
@@ -74,14 +76,14 @@ TALENT_BRANCHES.resolve.nodes.push(
 );
 
 Object.assign(TALENT_BRANCHES.surge, { subtitle: 'Offense: burst turns and big hits', paths: ['Boost & Overdrive', 'Critical strikes', 'Elemental burn & poison', 'Momentum combos', 'Armor breaking'] });
-Object.assign(TALENT_BRANCHES.disruption, { subtitle: 'Control: tempo, cards and enemy pressure', paths: ['Weaken & Silence', 'Card draw engine', 'Energy', 'Deck size & copies', 'Counter mastery'] });
+Object.assign(TALENT_BRANCHES.disruption, { subtitle: 'Control: tempo, cards and enemy pressure', paths: ['Weaken & Suppression', 'Large deck', 'Deck cycling', 'Energy', 'Elements & counters'] });
 Object.assign(TALENT_BRANCHES.resolve, { subtitle: 'Defense: survive, retain and recover', paths: ['Armor, Echo & Mirror', 'Block & retaliation', 'Life steal & survival', 'Retained-card tempo'] });
 
 Object.assign(TALENT_ART, {
   lethal: 'precision', adrenaline: 'precision', executioner: 'precision', momentum: 'precision', flurry: 'precision', sunder: 'precision', shatterpoint: 'precision',
   attunement: 'power', kindle: 'power', weakpoint: 'power', stormcaller: 'power',
-  suppression: 'jammer', reserve: 'jammer', silence: 'jammer', dominion: 'jammer', foresight: 'cards', cycle: 'cards', battery: 'clockwork',
-  counterWeave: 'mirror', resonance: 'mirror', reflux: 'mirror', nullField: 'mirror',
+  suppression: 'jammer', reserve: 'jammer', silence: 'cards', dominion: 'cards', foresight: 'cards', cycle: 'cards', battery: 'cards',
+  counterWeave: 'mirror', resonance: 'mirror', reflux: 'power', nullField: 'power',
   bulwark: 'aegis', thorns: 'aegis', fortress: 'aegis', unbreakable: 'aegis', leech: 'aegis', secondWind: 'aegis', undying: 'aegis',
   preparation: 'cards', recall: 'cards', steadyMind: 'clockwork'
 });
@@ -102,6 +104,8 @@ const talentMatrix = {
     if (f.attacks > 0) bonus += 3 * talentRank('momentum');
     if (d.pierce && hasTalent('shatterpoint')) bonus += 6;
     if (b.preparedUid === c.uid) bonus += talentRank('recall') + (hasTalent('preparation') ? 2 : 0);
+    if (hasTalent('silence')) bonus += Math.floor(state.deck.length / 3); // Arsenal
+    if (hasTalent('battery')) bonus += b.flow || 0; // Flow State
     return bonus;
   },
   critMultiplier() { return 2 + talentRank('lethal') * .35; }, // Round 253: was +.5 per rank
@@ -112,15 +116,23 @@ const talentMatrix = {
   },
   weaknessMultiplier() { return 1.5 + talentRank('weakpoint') * .2; }, // Round 253: was +.3 per rank
   finalDamage(damage, b) {
+    if (b.libraryFirst) damage = Math.round(damage * 1.5); // Grand Library
+    if (b.cascadeMult > 1) damage = Math.round(damage * b.cascadeMult); // Prismatic Cascade
     if (hasTalent('executioner') && b.enemy.hp < b.enemy.maxHp * .3) { b.logs.push('Executioner Protocol: +50% damage.'); return Math.round(damage * 1.5); }
     return damage;
   },
-  armorIgnore(b) { return 2 * talentRank('sunder') + (hasTalent('dominion') && b.enemyDebuff > 0 ? 2 : 0); },
-  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0); },
+  armorIgnore(b) { return 2 * talentRank('sunder'); },
+  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0) + (b.libraryFirst && d.block ? Math.round(d.block * .5) : 0); },
   dotBonus() { return 2 * talentRank('kindle'); },
   afterCard(c, d, b, damage) {
     const f = turnFlags(b);
     if (d.damage) {
+      if (b.flow) b.flow = 0; // Flow State is spent by the attack
+      // Prism Shift: a different element than the last elemental attack draws a card.
+      if (isElemental(d)) {
+        if (b.lastElement && b.lastElement !== d.element && (f.prism || 0) < talentRank('reflux')) { f.prism = (f.prism || 0) + 1; drawCards(1); b.logs.push('Prism Shift: drew 1 card.'); }
+        b.lastElement = d.element; (b.elementsUsed ||= []).includes(d.element) || b.elementsUsed.push(d.element);
+      }
       if (!f.leech && hasTalent('leech')) { const heal = scaledRank('leech'); state.hp = Math.min(state.maxHp, state.hp + heal); b.logs.push('Siphon Edge: +' + heal + ' HP.'); f.leech = true; }
       f.attacks++;
     }
@@ -178,22 +190,20 @@ const enemyPlanBeforeTalents = enemyPlan;
 enemyPlan = function (b = state.battle, turn = b?.turn) {
   const plan = enemyPlanBeforeTalents(b, turn);
   if (!b) return plan;
-  if (b.silenceTurn === turn) return { kind: 'silenced', element: plan.element, damage: 0, name: 'Silenced', enraged: plan.enraged };
   const rank = talentRank('suppression');
   let out = plan;
-  if (rank && (plan.kind === 'heavy' || plan.kind === 'elemental') && plan.damage) out = { ...out, damage: Math.round(plan.damage * (1 - .07 * rank)) };
-  if (plan.kind === 'elemental' && hasTalent('nullField')) out = { ...out, noStatus: true };
+  if (rank && (plan.kind === 'heavy' || plan.kind === 'elemental') && plan.damage) out = { ...out, damage: Math.round(plan.damage * (1 - .1 * rank)) };
   return out;
 };
 
 // ---------------------------------------------------------------------
 // End of turn: Retaliation Coil, Fortress, Surge Battery, Foresight,
-// Counter Weave / Resonant Rebound / Reflux, Preparation. (Null Field is
-// applied in enemyPlan via plan.noStatus.)
+// Counter Weave / Resonant Rebound, Preparation. Flow State counts draws only between turns' openings.
 // ---------------------------------------------------------------------
 const endTurnBeforeTalents = endTurn;
 endTurn = function () {
   const b = state.battle; if (!b || b.phase !== 'fight') return;
+  b.flowReady = false;
   const plan = enemyPlan(b), startTurn = b.turn;
   const before = { block: b.block, energy: b.energy };
   const plating = scaledRank('plating');
@@ -214,19 +224,16 @@ endTurn = function () {
     const weave = scaledRank('counterWeave');
     if (weave && b.enemy.hp > 0) { b.enemy.hp = Math.max(0, b.enemy.hp - 2 * weave); b.logs.push('Counter Weave: +' + 2 * weave + ' damage.'); }
     if (hasTalent('resonance')) { b.energy += 1; b.logs.push('Resonant Rebound: +1 energy.'); }
-    const reflux = scaledRank('reflux');
-    if (reflux) { state.hp = Math.min(state.maxHp, state.hp + 2 * reflux); b.logs.push('Reflux: +' + 2 * reflux + ' HP.'); }
   }
   if (!b.enemy.hp) { winBattle(); save(); renderBattle(); return; }
   // Fortress Protocol: half of the Block left over after the hit.
   if (hasTalent('fortress')) { const kept = Math.min(6, Math.floor(Math.max(0, before.block - absorbed) / 2)); if (kept) { b.block += kept; b.logs.push('Fortress Protocol: ' + kept + ' Block carried over.'); } }
-  // Surge Battery
-  if (hasTalent('battery') && before.energy > 0) { b.energy += 1; b.logs.push('Surge Battery: +1 stored energy.'); }
   // Foresight
   if (hasTalent('foresight')) drawCards(1);
   // Preparation / Total Recall apply to the card that was retained.
   b.preparedUid = (hasTalent('preparation') || hasTalent('recall')) && retainedUid && b.hand.some(h => h.uid === retainedUid) ? retainedUid : null;
   checkSecondWind(b);
+  b.flowReady = true;
   save(); renderBattle();
 };
 
@@ -249,6 +256,7 @@ const startBattleBeforeTalents = startBattle;
 startBattle = function (spawnId) {
   startBattleBeforeTalents(spawnId);
   const b = state.battle;
+  if (b && b.phase === 'fight' && b.turn === 1) b.flowReady = true; // after the opening hand
   if (!b || b.phase !== 'fight' || b.turn !== 1 || b.tmStarted) return;
   b.tmStarted = true;
   if (hasTalent('unbreakable')) { b.block += 6; b.logs.push('Unbreakable: 6 Block.'); }
@@ -256,18 +264,23 @@ startBattle = function (spawnId) {
   save(); renderBattle();
 };
 
-// Active: Static Silence button, next to the other once-per-encounter abilities.
-const renderBattleBeforeTalents = renderBattle;
-renderBattle = function () {
-  renderBattleBeforeTalents();
-  const b = state && state.battle;
-  if (!b || b.phase !== 'fight' || !hasTalent('silence')) return;
-  const bar = $('battleModal').querySelector('.compact-bar') || $('battleModal');
-  const btn = document.createElement('button');
-  btn.id = 'silenceEnemy'; btn.className = 'ability small';
-  const armed = b.silenceTurn === b.turn;
-  btn.textContent = b.silenceUsed ? (armed ? '✓ Enemy silenced' : 'Silence spent') : 'Silence · cancel next action';
-  btn.disabled = !!b.silenceUsed;
-  btn.onclick = () => { if (b.silenceUsed) return; b.silenceUsed = true; b.silenceTurn = b.turn; b.logs.push('Static Silence: the enemy\'s next action is cancelled.'); save(); renderBattle(); };
-  bar.append(btn);
+// Round 259: Grand Library and Prismatic Cascade are set for the card being played; Flow State counts
+// the cards drawn during your turn (not the turn's opening draw).
+const playCardBeforeLibrary = playCard;
+playCard = function (i) {
+  const b = state.battle, c = b && b.hand && b.hand[i];
+  if (!b || b.phase !== 'fight' || !c) return playCardBeforeLibrary.apply(this, arguments);
+  const d = stat(c), played = (b.playedUids ||= []);
+  b.libraryFirst = hasTalent('dominion') && !played.includes(c.uid);
+  const kinds = new Set([...(b.elementsUsed || []), ...(isElemental(d) && d.damage ? [d.element] : [])]);
+  b.cascadeMult = hasTalent('nullField') && isElemental(d) && d.damage ? 1 + .15 * Math.min(4, kinds.size) : 1;
+  try { return playCardBeforeLibrary.apply(this, arguments); }
+  finally { if (!b.hand.some(h => h.uid === c.uid) && !played.includes(c.uid)) played.push(c.uid); b.libraryFirst = false; b.cascadeMult = 1; }
+};
+const drawCardsBeforeFlow = drawCards;
+drawCards = function (n) {
+  const b = state && state.battle, before = b && b.hand ? b.hand.length : 0;
+  const r = drawCardsBeforeFlow.apply(this, arguments);
+  if (b && b.phase === 'fight' && b.flowReady && hasTalent('battery')) b.flow = Math.min(15, (b.flow || 0) + 3 * Math.max(0, b.hand.length - before));
+  return r;
 };

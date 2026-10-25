@@ -42,25 +42,28 @@ b = setup({ powerCore: 1, critical: 2, lethal: 1, adrenaline: 1, executioner: 1 
 
 // ---------------- DISRUPTION ----------------
 b = setup({}, [], { turn: 3 }); const plainHeavy = enemyPlan(b, 3); b = setup({ weakenCore: 1, jammer: 2, suppression: 3 }, [], { turn: 3 });
-assert.equal(plainHeavy.kind, 'heavy'); assert.equal(enemyPlan(b, 3).damage, Math.round(plainHeavy.damage * .79), 'Suppression Field -7% per rank on heavy hits');
+assert.equal(plainHeavy.kind, 'heavy'); assert.equal(enemyPlan(b, 3).damage, Math.round(plainHeavy.damage * .7), 'Suppression Field -10% per rank on heavy hits (Round 259)');
 assert.equal(enemyPlan(b, 1).damage, enemyPlan(setup({}, []), 1).damage, 'Suppression leaves normal strikes alone');
-b = setup({ weakenCore: 1, jammer: 3, suppression: 3, silence: 1 }, []); b.silenceUsed = true; b.silenceTurn = 1; let hp0 = state.hp;
-assert.equal(enemyPlan(b).kind, 'silenced'); endTurn(); assert.equal(state.hp, hp0, 'Static Silence cancels the next action'); assert.equal(b.turn, 2);
 // Jammer Reserve: extra Weaken charges, one active at a time.
 b = setup({ weakenCore: 1 }, []); assert.equal(weakenCharges(), 1); useWeaken(); assert.equal(b.enemyDebuff, 3, 'Weaken 3 with no Deep Interference'); assert(b.debuffUsed, 'one charge without Jammer Reserve');
 b = setup({ weakenCore: 1, jammer: 3, reserve: 2 }, [], { turn: 1 }); assert.equal(weakenCharges(), 3, 'Jammer Reserve: +1 charge per rank');
 useWeaken(); assert.equal(b.enemyDebuff, weakenAmount()); assert(!b.debuffUsed); useWeaken(); assert.equal(b.weakenUses, 1, 'only one Weaken at a time');
 b.block = 999; endTurn(); assert.equal(b.enemyDebuff, 0, 'it wears off after the attack'); useWeaken(); assert.equal(b.weakenUses, 2); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 3); assert(b.debuffUsed, 'all 3 charges spent');
-b = setup({ weakenCore: 1, dominion: 1 }, ['strike'], { enemy: { armor: 4 } }); b.enemyDebuff = 2; assert.equal(dealt(b), 6 - 2, 'Dominion: Weaken removes 2 Armor');
+// Round 259: the deep Disruption talents serve a large deck, deck cycling and elemental attacks.
+b = setup({ silence: 1 }, ['strike']); assert.equal(dealt(b), 6 + Math.floor(state.deck.length / 3), 'Arsenal: +1 damage per 3 cards in the deck');
+b = setup({ dominion: 1 }, ['strike']); assert.equal(dealt(b), 9, 'Grand Library: the first play of a card deals +50%'); b.hand.push(b.discard.pop()); b.energy = 3; assert.equal(dealt(b), 6, 'only the first play');
+b = setup({ dominion: 1 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 3, 'Grand Library: +50% Block on the first play');
 b = setup({ weakenCore: 1, jammer: 3, quickdraw: 1, foresight: 1 }, []); endTurn(); assert.equal(b.hand.length, 4 + 1, 'Foresight draws 1 extra card per turn');
 b = setup({ weakenCore: 1, jammer: 3, quickdraw: 1, foresight: 1, cycle: 1 }, ['spark', 'spark']); playCard(0); assert.equal(b.hand.length, 1 + 1, 'Recycler: a 0-energy card draws 1'); playCard(0); assert.equal(b.hand.length, 1, 'Recycler rank 1: once per turn');
-b = setup({ weakenCore: 1, capacitor: 1, battery: 1 }, [], { energy: 2 }); endTurn(); assert.equal(b.energy, maxEnergy() + 1, 'Surge Battery carries 1 energy');
+b = setup({ foresight: 1, battery: 1 }, ['focus', 'strike']); playCard(0); assert.equal(b.flow, 6, 'Flow State: +3 per card drawn during your turn'); assert.equal(dealt(b, 0), 12, 'the next attack gets it'); assert.equal(b.flow || 0, 0, 'and spends it');
+endTurn(); assert.equal(b.flow || 0, 0, 'the opening draw of a turn does not count');
 // Counter mastery: turn 3 of an elemental enemy's cycle is its charged strike.
-b = setup({ counterWeave: 3, resonance: 1, reflux: 2 }, [], { turn: 3, enemy: { element: 'fire' } }); b.counter = COUNTERS.fire; state.hp = 20; const ehp = b.enemy.hp;
+b = setup({ counterWeave: 3, resonance: 1 }, [], { turn: 3, enemy: { element: 'fire' } }); b.counter = COUNTERS.fire; const ehp = b.enemy.hp;
 assert.equal(enemyPlan(b).kind, 'elemental'); endTurn();
-assert.equal(ehp - b.enemy.hp, 6 + 8, 'Counter Weave rank 3: +8 on a successful counter (steps 1/2/4)'); assert.equal(b.energy, maxEnergy() + 1, 'Resonant Rebound +1 energy'); assert.equal(state.hp, 20 + 4, 'Reflux rank 2 heals 4');
-b = setup({ counterWeave: 1, nullField: 1 }, [], { turn: 3, enemy: { element: 'fire' } }); endTurn(); assert.equal(b.playerBurn || 0, 0, 'Null Field: charged strikes cannot burn you');
-b = setup({}, [], { turn: 3, enemy: { element: 'fire' } }); endTurn(); assert(b.playerBurn > 0, 'without Null Field the same strike burns');
+assert.equal(ehp - b.enemy.hp, 6 + 8, 'Counter Weave rank 3: +8 on a successful counter (steps 1/2/4)'); assert.equal(b.energy, maxEnergy() + 1, 'Resonant Rebound +1 energy');
+b = setup({ reflux: 1 }, ['cinder', 'venom', 'cinder']); playCard(0); assert.equal(b.hand.length, 2, 'Prism Shift: the first elemental attack draws nothing');
+playCard(0); assert.equal(b.hand.length, 2, 'a different element draws 1'); playCard(0); assert.equal(b.hand.length, 1, 'once per turn at rank 1');
+b = setup({ nullField: 1 }, ['cinder', 'venom']); assert.equal(dealt(b), Math.round(6 * 1.15), 'Prismatic Cascade: +15% with one element'); assert.equal(dealt(b), Math.round(3 * 1.3), '+30% with two');
 
 // ---------------- RESOLVE ----------------
 b = setup({ bulwark: 3 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 4, 'Bulwark Doctrine rank 3: +4 Block on Defense cards');
