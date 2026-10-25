@@ -3496,6 +3496,47 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 262: Armor that matters, and fights you win by playing well
+
+- **Owner requests:** make Armor matter (or remove it); show and feel enemy Armor, always near its health;
+  hit the difficulty targets; never win a fight by just playing cards without countering, comboing or a
+  Pressure-and-heal plan.
+- **Your Armor grows with the world** (new `assets/armor-scale.js`). Plating's flat 1/2/4/6/8 blocked two
+  thirds of a Neon Aftermath hit and about 15% of a Chronospire one.
+  - Plating now gives 1/2/3/4/5 base Armor, gear adds its own, and the total is multiplied per world
+    (×1 Neon Aftermath, 1.5 Solaris, 1.7 Sky Isles, 2.2 Elaris, 2 Vespera, 2.6 Chronospire).
+  - Full Plating is about a quarter of a regular hit from Solaris on (5 → 13 Armor).
+  - A first try at 40% everywhere made the late worlds near-certain wins (bosses 80-93%).
+- **Enemy Armor, felt and seen:**
+  - It is roughly doubled after Neon Aftermath (`ARMOR_BY_WORLD`, `assets/enemy-armor.js`): Solaris 2-4,
+    Sky Isles 3-5, Elaris 4-7, Vespera 5-8, Chronospire 6-10; mini-bosses and bosses carry more.
+  - New `assets/armor-hud.js`: the enemy's Armor shield always sits beside its health bar (0 shows dimmed).
+  - Every hit Armor softens shows a 🛡 −N popup for the card just played, and the shield pulses.
+    Pierce, Sunder and Breach Spike now count.
+- **Charged strikes hit harder:** ×2.1 for regular enemies (was 1.8) and ×1.7 for bosses (was 1.5). An
+  uncountered charged strike now hurts, which is what separates good play from bad.
+- **A naive player in the Difficulty lab** (`POLICY: 'naive'`, `botTurnNaive` in `assets/sim/bot.js`): it
+  plays whatever comes first in hand while it has the energy. No counter timing, Weaken, side deck, Boost,
+  Chain or Follow-through order, and no planned Block or healing.
+- **Re-tune:** regular-enemy health (`normalHp`; Elaris and the Sky Isles in `tile-worlds.js`) and boss and
+  mini-boss health (`bossHp`, `miniBossHp`, now per world).
+
+| World | Regular: smart / naive | Bosses: smart / naive |
+|---|---|---|
+| Neon Aftermath | 75% / 32% | 48% / 9% |
+| Solaris | 72% / 24% | 41% / 7% |
+| Sky Isles | 66% / 11% | 37% / 1% |
+| Elaris | 74% / 15% | 42% / 2% |
+| Vespera | 76% / 12% | 45% / 0% |
+| Chronospire | 70% / 1% | 47% / 0% |
+
+- **Reading the table.** Smart is the average of the 16 lab builds × 2 play styles, regular fights sampled.
+  Trees on bosses: Surge 46%, Disruption 47%, Resolve 41%.
+  - The naive player loses nearly every boss fight.
+  - It still wins some regular fights early: Neon Aftermath's first levels are tutorial fights, and
+    Solaris's patrols lose to raw damage a quarter of the time.
+- New `tests/armor-scale.test.cjs`; `plating-armor` follows the new wording.
+
 ## Round 261: ⛓ Chain
 
 - **The keyword.** The owner chose option 1 of the chain proposals: a shared ⛓ Chain counter with small fixed
