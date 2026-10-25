@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 262) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 263) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -146,7 +146,9 @@ change set.
 - Browser check: serve with `python3 -m http.server 8123` and drive it with
   Playwright. `node tests/playtest-walk.cjs [world]` walks every door and item with tap routes.
 - Difficulty: compendium → Difficulty lab, or `node tests/difficulty-report.cjs [fights] [world]`
-  (shared code in `assets/sim/`; `POLICY: 'naive'` plays cards left to right with no counters or combos, and should lose, Round 262). Tune bosses with the lab (it wears gear and, since Round 253, plays full
+  (shared code in `assets/sim/`; `POLICY: 'naive'` plays cards left to right with no counters or combos, and should lose, Round 262).
+  **Solaris is the owner's favourite difficulty (Round 263):** with the Round 262 tuning the lab gives it about 72% on regular
+  fights and 41% on bosses for the average build (24% / 7% for the naive player). Keep Solaris there and tune the other worlds toward it. Tune bosses with the lab (it wears gear and, since Round 253, plays full
   decks of each world's cards, `SIM_DECKS`); `tests/balance-sim.cjs` plays without gear (and has an older script list).
 
 ## Working conventions
