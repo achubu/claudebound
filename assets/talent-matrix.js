@@ -46,7 +46,7 @@ TALENT_BRANCHES.disruption.nodes.push(
   // They keep their old ids (silence, dominion, battery, reflux, nullField) so saved talent points stay where they are.
   { id: 'silence', name: 'Arsenal', icon: '▤', max: 1, tier: 7, req: ['deckMatrix', 3], desc: 'Your attacks deal +1 damage for every 4 cards in your deck.' },
   { id: 'reserve', name: 'Jammer Reserve', icon: '⌁', max: 2, tier: 3, req: ['jammer', 3], desc: '+1 Weaken charge per encounter for every rank (up to 3 charges). One Weaken at a time: a new charge is ready once the last one wears off.' },
-  { id: 'dominion', name: 'Grand Library', icon: '📚', max: 1, tier: 8, req: ['silence', 1], desc: 'The first time each card is played in an encounter, its damage and Block are +35%.' },
+  { id: 'dominion', name: 'Grand Library', icon: '📚', max: 1, tier: 8, req: ['silence', 1], desc: 'The first time each card is played in an encounter, its damage and Block are +25%.' },
   // Draw-engine path (from Predictive Draw)
   { id: 'foresight', name: 'Foresight', icon: '◈', max: 1, tier: 5, req: ['quickdraw', 1], desc: 'Draw 1 extra card at the start of each turn after the first.' },
   { id: 'cycle', name: 'Recycler', icon: '♻', max: 3, tier: 7, req: ['foresight', 1], desc: 'Playing a 0-energy card draws 1 card, once per turn per rank.' },
@@ -55,7 +55,7 @@ TALENT_BRANCHES.disruption.nodes.push(
   // Counter path
   { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals back 10% / 20% / 40% of the strike it cancels (at least 2 / 4 / 8).' },
   { id: 'resonance', name: 'Resonant Rebound', icon: '↺', max: 1, tier: 3, req: ['counterWeave', 2], desc: 'A successful counter gives you +1 energy next turn.' },
-  { id: 'reflux', name: 'Prism Shift', icon: '◇', max: 2, tier: 5, req: ['resonance', 1], desc: 'Playing an elemental attack of a different element than your last one draws 1 card (once per turn per rank).' },
+  { id: 'reflux', name: 'Prism Shift', icon: '◇', max: 2, tier: 5, req: ['resonance', 1], desc: 'Playing an elemental attack of a different element than your last one draws 1 card and gives +1 energy (once per turn per rank).' },
   { id: 'nullField', name: 'Prismatic Cascade', icon: '✦', max: 1, tier: 8, req: ['reflux', 1], desc: 'Your elemental attacks deal +20% damage for each different element you have attacked with this encounter (up to +80%).' }
 );
 
@@ -79,12 +79,15 @@ TALENT_BRANCHES.resolve.nodes.push(
 // Interference rank, so 50% at rank 5) of the enemy's attack off its next attack, so early points stay
 // useful in every world.
 function weakenPercent() { return .25 + .05 * talentRank('jammer'); }
+// Two charges from the start (Jammer Reserve adds one per rank).
+weakenCharges = function () { return hasTalent('weakenCore') ? 2 + talentRank('reserve') : 0; };
 weakenAmount = function () {
   const flat = 3 * (1 + scaledRank('jammer')), b = state && state.battle;
   return b && b.enemy && b.enemy.attack ? Math.max(flat, Math.round(b.enemy.attack * weakenPercent())) : flat;
 };
 for (const n of TALENT_BRANCHES.disruption.nodes) {
-  if (n.id === 'weakenCore') n.desc = 'Unlock Weaken: once per encounter, the enemy\'s next attack loses 3 or 25% of its attack, whichever is more. Jammer Reserve adds more charges.';
+  if (n.id === 'weakenCore') n.desc = 'Unlock Weaken (2 charges per encounter): the enemy\'s next attack loses 3 or 25% of its attack, whichever is more. Jammer Reserve adds more charges.';
+  if (n.id === 'reserve') n.desc = '+1 Weaken charge per encounter for every rank (up to 4 charges). One Weaken at a time: a new charge is ready once the last one wears off.';
   if (n.id === 'jammer') n.desc = 'Weaken strength: +3 / +6 / +12 / +18 / +24 flat, or +5% per rank (up to 50% of the enemy\'s attack), whichever is more.';
 }
 Object.assign(TALENT_BRANCHES.surge, { subtitle: 'Offense: burst turns and big hits', paths: ['Boost & Overdrive', 'Critical strikes', 'Elemental burn & poison', 'Momentum combos', 'Armor breaking'] });
@@ -128,13 +131,13 @@ const talentMatrix = {
   },
   weaknessMultiplier() { return 1.5 + talentRank('weakpoint') * .2; }, // Round 253: was +.3 per rank
   finalDamage(damage, b) {
-    if (b.libraryFirst) damage = Math.round(damage * 1.35); // Grand Library
+    if (b.libraryFirst) damage = Math.round(damage * 1.25); // Grand Library
     if (b.cascadeMult > 1) damage = Math.round(damage * b.cascadeMult); // Prismatic Cascade
     if (hasTalent('executioner') && b.enemy.hp < b.enemy.maxHp * .3) { b.logs.push('Executioner Protocol: +50% damage.'); return Math.round(damage * 1.5); }
     return damage;
   },
   armorIgnore(b) { return 2 * talentRank('sunder'); },
-  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0) + (b.libraryFirst && d.block ? Math.round(d.block * .35) : 0); },
+  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0) + (b.libraryFirst && d.block ? Math.round(d.block * .25) : 0); },
   dotBonus() { return 2 * talentRank('kindle'); },
   afterCard(c, d, b, damage) {
     const f = turnFlags(b);
@@ -142,7 +145,7 @@ const talentMatrix = {
       if (b.flow) b.flow = 0; // Flow State is spent by the attack
       // Prism Shift: a different element than the last elemental attack draws a card.
       if (isElemental(d)) {
-        if (b.lastElement && b.lastElement !== d.element && (f.prism || 0) < talentRank('reflux')) { f.prism = (f.prism || 0) + 1; drawCards(1); b.logs.push('Prism Shift: drew 1 card.'); }
+        if (b.lastElement && b.lastElement !== d.element && (f.prism || 0) < talentRank('reflux')) { f.prism = (f.prism || 0) + 1; drawCards(1); b.energy += 1; b.logs.push('Prism Shift: drew 1 card, +1 energy.'); }
         b.lastElement = d.element; (b.elementsUsed ||= []).includes(d.element) || b.elementsUsed.push(d.element);
       }
       if (!f.leech && hasTalent('leech')) { const heal = scaledRank('leech'); state.hp = Math.min(state.maxHp, state.hp + heal); b.logs.push('Siphon Edge: +' + heal + ' HP.'); f.leech = true; }

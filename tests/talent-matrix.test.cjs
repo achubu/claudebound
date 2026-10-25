@@ -45,15 +45,15 @@ b = setup({}, [], { turn: 3 }); const plainHeavy = enemyPlan(b, 3); b = setup({ 
 assert.equal(plainHeavy.kind, 'heavy'); assert.equal(enemyPlan(b, 3).damage, Math.round(plainHeavy.damage * .7), 'Suppression Field -10% per rank on heavy hits (Round 259)');
 assert.equal(enemyPlan(b, 1).damage, enemyPlan(setup({}, []), 1).damage, 'Suppression leaves normal strikes alone');
 // Jammer Reserve: extra Weaken charges, one active at a time.
-b = setup({ weakenCore: 1 }, []); assert.equal(weakenCharges(), 1); useWeaken(); assert.equal(b.enemyDebuff, 3, 'Weaken 3 with no Deep Interference'); assert(b.debuffUsed, 'one charge without Jammer Reserve');
-b = setup({ weakenCore: 1, jammer: 3, reserve: 2 }, [], { turn: 1 }); assert.equal(weakenCharges(), 3, 'Jammer Reserve: +1 charge per rank');
+b = setup({ weakenCore: 1 }, []); assert.equal(weakenCharges(), 2, 'Weaken has 2 charges (Round 259)'); useWeaken(); assert.equal(b.enemyDebuff, 3, 'Weaken 3 with no Deep Interference'); assert(!b.debuffUsed, 'a second charge is left');
+b = setup({ weakenCore: 1, jammer: 3, reserve: 2 }, [], { turn: 1 }); assert.equal(weakenCharges(), 4, 'Jammer Reserve: +1 charge per rank');
 useWeaken(); assert.equal(b.enemyDebuff, weakenAmount()); assert(!b.debuffUsed); useWeaken(); assert.equal(b.weakenUses, 1, 'only one Weaken at a time');
-b.block = 999; endTurn(); assert.equal(b.enemyDebuff, 0, 'it wears off after the attack'); useWeaken(); assert.equal(b.weakenUses, 2); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 3); assert(b.debuffUsed, 'all 3 charges spent');
+b.block = 999; endTurn(); assert.equal(b.enemyDebuff, 0, 'it wears off after the attack'); useWeaken(); assert.equal(b.weakenUses, 2); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 3); b.enemyDebuff = 0; useWeaken(); assert.equal(b.weakenUses, 4); assert(b.debuffUsed, 'all 4 charges spent');
 b = setup({ weakenCore: 1, jammer: 5 }, [], { enemy: { attack: 80 } }); assert.equal(weakenAmount(), 40, 'Weaken: half the attack of a strong enemy at rank 5'); b.enemy.attack = 10; assert.equal(weakenAmount(), 27, 'or the flat amount when that is more');
 // Round 259: the deep Disruption talents serve a large deck, deck cycling and elemental attacks.
 b = setup({ silence: 1 }, ['strike']); assert.equal(dealt(b), 6 + Math.floor(state.deck.length / 4), 'Arsenal: +1 damage per 4 cards in the deck');
-b = setup({ dominion: 1 }, ['strike']); assert.equal(dealt(b), 8, 'Grand Library: the first play of a card deals +35%'); b.hand.push(b.discard.pop()); b.energy = 3; assert.equal(dealt(b), 6, 'only the first play');
-b = setup({ dominion: 1 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 2, 'Grand Library: +35% Block on the first play');
+b = setup({ dominion: 1 }, ['strike']); assert.equal(dealt(b), 8, 'Grand Library: the first play of a card deals +25%'); b.hand.push(b.discard.pop()); b.energy = 3; assert.equal(dealt(b), 6, 'only the first play');
+b = setup({ dominion: 1 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 1, 'Grand Library: +25% Block on the first play');
 b = setup({ weakenCore: 1, jammer: 3, quickdraw: 1, foresight: 1 }, []); endTurn(); assert.equal(b.hand.length, 4 + 1, 'Foresight draws 1 extra card per turn');
 b = setup({ weakenCore: 1, jammer: 3, quickdraw: 1, foresight: 1, cycle: 1 }, ['spark', 'spark']); playCard(0); assert.equal(b.hand.length, 1 + 1, 'Recycler: a 0-energy card draws 1'); playCard(0); assert.equal(b.hand.length, 1, 'Recycler rank 1: once per turn');
 b = setup({ foresight: 1, battery: 1 }, ['focus', 'strike']); playCard(0); assert.equal(b.flow, 6, 'Flow State: +3 per card drawn during your turn'); assert.equal(dealt(b, 0), 12, 'the next attack gets it'); assert.equal(b.flow || 0, 0, 'and spends it');
