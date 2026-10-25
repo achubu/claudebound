@@ -132,7 +132,8 @@ change set.
 - Real-script Node harness: `tests/expansion.test.cjs` loads the page
   scripts in order. `HARNESS_ONLY=1` exports `{run, context}` without running
   its own checks. `run(code)` returns the value of the code it runs. It turns enemy tempers off
-  unless `TEMPER=1` (Round 253), so tests see exact numbers; Difficulty lab runs should set it.
+  unless `TEMPER=1` (Round 253), so tests see exact numbers; Difficulty lab runs should set it. Enemy traits and species patterns
+  (Round 265) are off the same way unless `TRAITS=1`.
 - Run everything (takes several minutes):
   `for t in tests/*.test.cjs; do timeout 300 node $t || echo FAIL $t; done`
 - Key suites:

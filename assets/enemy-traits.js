@@ -70,16 +70,30 @@ const SPECIES_PATTERN = {
   clockwarden: ['guard', 'attack', 'guard', 'charge', 'elemental', 'heavy'],
   paradoxTwin: ['attack', 'charge', 'elemental', 'attack', 'charge', 'elemental', 'heavy']
 };
-for (const [id, p] of Object.entries(SPECIES_PATTERN)) if (enemies[id] && !(BOSS_PATTERNS[id] && !['chronarch', 'clockwarden', 'paradoxTwin'].includes(id))) BOSS_PATTERNS[id] = p;
 // Chronospire's patrols all brought Rewind; two get other afflictions.
-if (ENEMY_AFFLICTIONS.chronoWisp) ENEMY_AFFLICTIONS.chronoWisp = ['static'];
-if (ENEMY_AFFLICTIONS.chronoWraith) ENEMY_AFFLICTIONS.chronoWraith = ['shackle'];
+const SPECIES_AFFLICTION = { chronoWisp: ['static'], chronoWraith: ['shackle'] };
+// The test harness turns traits off (globalThis.NO_TRAITS) unless TRAITS=1, so older tests keep exact numbers.
+const TRAITS_PLAIN = { patterns: {}, afflictions: {} };
+function useEnemyTraits(on) {
+  for (const [id, p] of Object.entries(SPECIES_PATTERN)) {
+    if (!enemies[id] || (BOSS_PATTERNS[id] && !(id in TRAITS_PLAIN.patterns) && !['chronarch', 'clockwarden', 'paradoxTwin'].includes(id))) continue;
+    if (!(id in TRAITS_PLAIN.patterns)) TRAITS_PLAIN.patterns[id] = BOSS_PATTERNS[id];
+    if (on) BOSS_PATTERNS[id] = p; else if (TRAITS_PLAIN.patterns[id]) BOSS_PATTERNS[id] = TRAITS_PLAIN.patterns[id]; else delete BOSS_PATTERNS[id];
+  }
+  for (const [id, a] of Object.entries(SPECIES_AFFLICTION)) {
+    if (!ENEMY_AFFLICTIONS[id]) continue;
+    if (!(id in TRAITS_PLAIN.afflictions)) TRAITS_PLAIN.afflictions[id] = ENEMY_AFFLICTIONS[id];
+    ENEMY_AFFLICTIONS[id] = on ? a : TRAITS_PLAIN.afflictions[id];
+  }
+  globalThis.NO_TRAITS = on ? 0 : 1;
+}
+useEnemyTraits(!globalThis.NO_TRAITS);
 
 function traitOf(e) { return e && e.trait && ENEMY_TRAITS[e.trait] ? e.trait : null; }
 function hasTrait(b, id) { return !!(b && b.enemy && b.enemy.trait === id); }
 function giveTrait(e, id) {
   if (!e || e.trait !== undefined) return;
-  e.trait = SPECIES_TRAIT[id] || null; e.baseAttack = e.attack;
+  e.trait = (!globalThis.NO_TRAITS && SPECIES_TRAIT[id]) || null; e.baseAttack = e.attack;
   if (e.trait === 'hardened') e.armor = (e.armor || 0) + Math.max(2, Math.round((e.armor || 0) * .5));
 }
 const startBattleBeforeTraits = startBattle;

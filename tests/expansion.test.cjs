@@ -8,8 +8,9 @@ function node(){const classes=new Set(['hidden']);return {style:{setProperty(){}
 const nodes=new Map(),storage=new Map();
 const context=vm.createContext({console,assert,Image:process.env.AETHERCEDE_RENDER?require('@napi-rs/canvas').Image:class{constructor(){this.complete=false}},document:{getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},querySelector:()=>node(),querySelectorAll:()=>[],createElement:()=>node(),head:node(),body:node()},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},setTimeout:()=>0,clearTimeout(){},requestAnimationFrame(){},addEventListener(){},innerWidth:1280,innerHeight:800,confirm:()=>true,Blob,URL});
 // Round 253: enemy tempers and attack rolls (enemy-temper.js) are random, so tests run without them
-// unless TEMPER=1 (the Difficulty lab scripts set it).
-if(!process.env.TEMPER)context.NO_TEMPER=1;
+// unless TEMPER=1 (the Difficulty lab scripts set it). Round 265: likewise enemy traits and species patterns
+// (enemy-traits.js) unless TRAITS=1.
+if(!process.env.TEMPER)context.NO_TEMPER=1;if(!process.env.TRAITS)context.NO_TRAITS=1;
 // Round 91: page scripts loaded once by this harness are skipped if a test loads them again.
 const loadedScripts=new Set();
 const run=s=>{if(loadedScripts.has(s))return;return vm.runInContext(s,context)};

@@ -1,7 +1,7 @@
 'use strict';
 // Round 265: no two enemies fight the same way. Inside each world no two enemies share a move pattern or a
 // signature trait, and no two regular enemies share an affliction; no enemy anywhere has the same full set.
-process.env.HARNESS_ONLY = '1';
+process.env.HARNESS_ONLY = '1'; process.env.TRAITS = '1';
 const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(()=>{ const o = { worlds: {}, kits: [] };
