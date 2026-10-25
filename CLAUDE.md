@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 264) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 265) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -22,7 +22,7 @@ change set.
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
     on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), `cycle-card` (Round 236: Sift and
     its discard choice), `sky-storm` and `status-dots` (Round 237), `attack-boost` (Round 240), `charge-swipe` (Round 242),
-    `enemy-pairs` (Round 243: two enemies at once from the Sky Isles on), `enemy-armor` (Round 244; doubled in Round 262), `armor-hud` (Round 262: enemy Armor beside its health, 🛡 −N popups), `enemy-temper` (Round 253: 🔥 Fierce / 🛡 Hardy tempers and ±15% attack rolls), `battle-recap`
+    `enemy-pairs` (Round 243: two enemies at once from the Sky Isles on), `enemy-armor` (Round 244; doubled in Round 262), `armor-hud` (Round 262: enemy Armor beside its health, 🛡 −N popups), `enemy-traits` (Round 265: every enemy has its own move pattern and trait; none repeat within a world), `enemy-temper` (Round 253: 🔥 Fierce / 🛡 Hardy tempers and ±15% attack rolls), `battle-recap`
     (Round 211: the final turn on the victory screens), `tutorial` (Round 226: a new journey's guide and
     starting-deck pick; it hangs off the New journey buttons, not `newGame()`), `battle-chips` (Round 254: every
     battle-screen effect as a one- or two-word chip with a hover/tap bubble; keep new battle text short or it gets chipped), then

@@ -32,7 +32,7 @@ const BALANCE={
  // (+10% attack as well was simulated and proved far too steep: ~+21% total strength.)
  // Round 253: the Difficulty lab now plays full decks (and enemies roll tempers); regular fights re-tuned to about 70%
  // for the average build. normalAttack multiplies regular enemies' attack.
- normalHp:{city:.9,elaris:.76,vespera:.9,chronospire:1.25},normalAttack:{city:1,elaris:1.03,vespera:1.04,chronospire:1.06,sky:1.08,wilds:1.07},
+ normalHp:{city:.85,elaris:.76,vespera:.84,chronospire:1.25},normalAttack:{city:1,elaris:1.03,vespera:1.04,chronospire:1.06,sky:1.08,wilds:1.07},
  // Round 51: regular enemies in a world's first levels ease in instead of
  // jumping at the portal (you arrive with your old world's deck).
  entryRamp:{city:{4:{hp:1.4,attack:1}},elaris:{10:{hp:.9,attack:-1},11:{hp:.88,attack:-1},12:{hp:.9,attack:-1},13:{hp:.95,attack:0}}},
