@@ -44,19 +44,19 @@ TALENT_BRANCHES.disruption.nodes.push(
   { id: 'suppression', name: 'Suppression Field', icon: '▼', max: 3, tier: 3, req: ['jammer', 2], desc: 'Enemy heavy attacks and charged strikes deal 10% less damage per rank.' },
   // Round 259 (owner request): the deep Disruption talents serve a large deck, deck cycling and elemental attacks.
   // They keep their old ids (silence, dominion, battery, reflux, nullField) so saved talent points stay where they are.
-  { id: 'silence', name: 'Arsenal', icon: '▤', max: 1, tier: 7, req: ['deckMatrix', 3], desc: 'Your attacks deal +1 damage for every 3 cards in your deck.' },
+  { id: 'silence', name: 'Arsenal', icon: '▤', max: 1, tier: 7, req: ['deckMatrix', 3], desc: 'Your attacks deal +1 damage for every 4 cards in your deck.' },
   { id: 'reserve', name: 'Jammer Reserve', icon: '⌁', max: 2, tier: 3, req: ['jammer', 3], desc: '+1 Weaken charge per encounter for every rank (up to 3 charges). One Weaken at a time: a new charge is ready once the last one wears off.' },
-  { id: 'dominion', name: 'Grand Library', icon: '📚', max: 1, tier: 8, req: ['silence', 1], desc: 'The first time each card is played in an encounter, its damage and Block are +50%.' },
+  { id: 'dominion', name: 'Grand Library', icon: '📚', max: 1, tier: 8, req: ['silence', 1], desc: 'The first time each card is played in an encounter, its damage and Block are +35%.' },
   // Draw-engine path (from Predictive Draw)
   { id: 'foresight', name: 'Foresight', icon: '◈', max: 1, tier: 5, req: ['quickdraw', 1], desc: 'Draw 1 extra card at the start of each turn after the first.' },
   { id: 'cycle', name: 'Recycler', icon: '♻', max: 3, tier: 7, req: ['foresight', 1], desc: 'Playing a 0-energy card draws 1 card, once per turn per rank.' },
   // Energy path (from Flux Capacitor)
   { id: 'battery', name: 'Flow State', icon: '≈', max: 1, tier: 7, req: ['foresight', 1], desc: 'Every card you draw during your turn adds +3 damage to your next attack (up to +15).' },
   // Counter path
-  { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals +2 / +4 / +8 damage (ranks 1-3).' },
+  { id: 'counterWeave', name: 'Counter Weave', icon: '◇', max: 3, tier: 1, desc: 'A successful Prismatic Counter deals back 10% / 20% / 40% of the strike it cancels (at least 2 / 4 / 8).' },
   { id: 'resonance', name: 'Resonant Rebound', icon: '↺', max: 1, tier: 3, req: ['counterWeave', 2], desc: 'A successful counter gives you +1 energy next turn.' },
   { id: 'reflux', name: 'Prism Shift', icon: '◇', max: 2, tier: 5, req: ['resonance', 1], desc: 'Playing an elemental attack of a different element than your last one draws 1 card (once per turn per rank).' },
-  { id: 'nullField', name: 'Prismatic Cascade', icon: '✦', max: 1, tier: 8, req: ['reflux', 1], desc: 'Your elemental attacks deal +15% damage for each different element you have attacked with this encounter (up to +60%).' }
+  { id: 'nullField', name: 'Prismatic Cascade', icon: '✦', max: 1, tier: 8, req: ['reflux', 1], desc: 'Your elemental attacks deal +20% damage for each different element you have attacked with this encounter (up to +80%).' }
 );
 
 TALENT_BRANCHES.resolve.nodes.push(
@@ -75,6 +75,18 @@ TALENT_BRANCHES.resolve.nodes.push(
   { id: 'steadyMind', name: 'Steady Mind', icon: '☯', max: 1, tier: 7, req: ['recall', 1], desc: 'Start every encounter with +1 energy on the first turn.' }
 );
 
+// Round 259: Weaken scales with the enemy. It takes the larger of its flat amount and 25% (+5% per Deep
+// Interference rank, so 50% at rank 5) of the enemy's attack off its next attack, so early points stay
+// useful in every world.
+function weakenPercent() { return .25 + .05 * talentRank('jammer'); }
+weakenAmount = function () {
+  const flat = 3 * (1 + scaledRank('jammer')), b = state && state.battle;
+  return b && b.enemy && b.enemy.attack ? Math.max(flat, Math.round(b.enemy.attack * weakenPercent())) : flat;
+};
+for (const n of TALENT_BRANCHES.disruption.nodes) {
+  if (n.id === 'weakenCore') n.desc = 'Unlock Weaken: once per encounter, the enemy\'s next attack loses 3 or 25% of its attack, whichever is more. Jammer Reserve adds more charges.';
+  if (n.id === 'jammer') n.desc = 'Weaken strength: +3 / +6 / +12 / +18 / +24 flat, or +5% per rank (up to 50% of the enemy\'s attack), whichever is more.';
+}
 Object.assign(TALENT_BRANCHES.surge, { subtitle: 'Offense: burst turns and big hits', paths: ['Boost & Overdrive', 'Critical strikes', 'Elemental burn & poison', 'Momentum combos', 'Armor breaking'] });
 Object.assign(TALENT_BRANCHES.disruption, { subtitle: 'Control: tempo, cards and enemy pressure', paths: ['Weaken & Suppression', 'Large deck', 'Deck cycling', 'Energy', 'Elements & counters'] });
 Object.assign(TALENT_BRANCHES.resolve, { subtitle: 'Defense: survive, retain and recover', paths: ['Armor, Echo & Mirror', 'Block & retaliation', 'Life steal & survival', 'Retained-card tempo'] });
@@ -104,7 +116,7 @@ const talentMatrix = {
     if (f.attacks > 0) bonus += 3 * talentRank('momentum');
     if (d.pierce && hasTalent('shatterpoint')) bonus += 6;
     if (b.preparedUid === c.uid) bonus += talentRank('recall') + (hasTalent('preparation') ? 2 : 0);
-    if (hasTalent('silence')) bonus += Math.floor(state.deck.length / 3); // Arsenal
+    if (hasTalent('silence')) bonus += Math.floor(state.deck.length / 4); // Arsenal
     if (hasTalent('battery')) bonus += b.flow || 0; // Flow State
     return bonus;
   },
@@ -116,13 +128,13 @@ const talentMatrix = {
   },
   weaknessMultiplier() { return 1.5 + talentRank('weakpoint') * .2; }, // Round 253: was +.3 per rank
   finalDamage(damage, b) {
-    if (b.libraryFirst) damage = Math.round(damage * 1.5); // Grand Library
+    if (b.libraryFirst) damage = Math.round(damage * 1.35); // Grand Library
     if (b.cascadeMult > 1) damage = Math.round(damage * b.cascadeMult); // Prismatic Cascade
     if (hasTalent('executioner') && b.enemy.hp < b.enemy.maxHp * .3) { b.logs.push('Executioner Protocol: +50% damage.'); return Math.round(damage * 1.5); }
     return damage;
   },
   armorIgnore(b) { return 2 * talentRank('sunder'); },
-  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0) + (b.libraryFirst && d.block ? Math.round(d.block * .5) : 0); },
+  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0) + (b.libraryFirst && d.block ? Math.round(d.block * .35) : 0); },
   dotBonus() { return 2 * talentRank('kindle'); },
   afterCard(c, d, b, damage) {
     const f = turnFlags(b);
@@ -222,7 +234,7 @@ endTurn = function () {
   // Counter mastery
   if (counterHit) {
     const weave = scaledRank('counterWeave');
-    if (weave && b.enemy.hp > 0) { b.enemy.hp = Math.max(0, b.enemy.hp - 2 * weave); b.logs.push('Counter Weave: +' + 2 * weave + ' damage.'); }
+    if (weave && b.enemy.hp > 0) { const back = Math.max(2 * weave, Math.round((plan.damage || 0) * .1 * weave)); b.enemy.hp = Math.max(0, b.enemy.hp - back); b.logs.push('Counter Weave: ' + back + ' damage back.'); } // Round 259: a share of the cancelled strike
     if (hasTalent('resonance')) { b.energy += 1; b.logs.push('Resonant Rebound: +1 energy.'); }
   }
   if (!b.enemy.hp) { winBattle(); save(); renderBattle(); return; }
@@ -273,7 +285,7 @@ playCard = function (i) {
   const d = stat(c), played = (b.playedUids ||= []);
   b.libraryFirst = hasTalent('dominion') && !played.includes(c.uid);
   const kinds = new Set([...(b.elementsUsed || []), ...(isElemental(d) && d.damage ? [d.element] : [])]);
-  b.cascadeMult = hasTalent('nullField') && isElemental(d) && d.damage ? 1 + .15 * Math.min(4, kinds.size) : 1;
+  b.cascadeMult = hasTalent('nullField') && isElemental(d) && d.damage ? 1 + .2 * Math.min(4, kinds.size) : 1;
   try { return playCardBeforeLibrary.apply(this, arguments); }
   finally { if (!b.hand.some(h => h.uid === c.uid) && !played.includes(c.uid)) played.push(c.uid); b.libraryFirst = false; b.cascadeMult = 1; }
 };
