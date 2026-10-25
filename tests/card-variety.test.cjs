@@ -55,7 +55,7 @@ assert.equal(state.pool.length, n2, 'leaving them adds nothing'); assert.equal(b
 newGame(); const offers = offerArrivalCard(); assert.equal(offers.length, 3); assert(offers.every(c => ELARIS_ARRIVAL_POOL.includes(c.id)), 'arrival offers Elaris cards');
 const ramp = lv => enemyStats('stormMoth', { region: 'elaris', level: lv }).hp / (enemies.stormMoth.hp * balanceFor('regionHp', 'elaris') * (1 + (lv - 1) * balanceFor('hpPerLevel', 'elaris')) * BALANCE.perEnemy.stormMoth.hp * balanceFor('normalHp', 'elaris'));
 assert(ramp(10) < ramp(14) && ramp(12) < ramp(14) && Math.abs(ramp(14) - 1) < .02, 'Elaris regular health ramps up over levels 10-13');
-assert.equal(enemyStats('bloomTyrant', { region: 'elaris', level: 10, boss: true }).hp, Math.round(enemies.bloomTyrant.hp * balanceFor('regionHp', 'elaris') * (1 + 9 * balanceFor('hpPerLevel', 'elaris')) * BALANCE.perEnemy.bloomTyrant.hp), 'bosses are not ramped');
+assert.equal(enemyStats('bloomTyrant', { region: 'elaris', level: 10, boss: true }).hp, Math.round(enemies.bloomTyrant.hp * balanceFor('regionHp', 'elaris') * (1 + 9 * balanceFor('hpPerLevel', 'elaris')) * BALANCE.perEnemy.bloomTyrant.hp * balanceFor('bossHp', 'elaris')), 'bosses are not ramped');
 // Deck Workshop stacks copies (same card, level and Soulbound/Impermanent).
 { const list = [make('cleave', 0, false), make('cleave', 0, false), make('cleave', 1, false), make('cleave', 0, true), make('strike', 0, false)];
   list[1].uses = 40; const g = stackCards(list);

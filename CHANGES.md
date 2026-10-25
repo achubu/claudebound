@@ -3496,6 +3496,51 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 259: the Disruption tree reworked
+
+- **Request.** The owner asked to test the Disruption tree and improve it if it was lacking: its early points
+  should be useful to every build, and its later talents should be about a large deck, deck cycling and
+  elemental attacks.
+- **Measured** with the Difficulty lab (16 builds × 2 play styles, every world, tempers on). Disruption builds
+  won 31% of boss fights, against 51% for Surge and 44% for Resolve. They did worst in Neon Aftermath
+  (4-13%), where Weaken took only 6-15 off one hit.
+- **Lab fix.** The bot spent Weaken once, on turn 1, so Jammer Reserve's extra charges were never used. It
+  now saves Weaken for a charged or heavy hit (`useWeakenNow`, `assets/sim/bot.js`).
+- **Early points, useful for all builds:**
+  - **Weaken** has 2 charges per encounter (Jammer Reserve adds up to 2 more).
+  - Weaken takes the larger of its flat amount and 20% of the enemy's attack (+4% per Deep Interference
+    rank, 40% at rank 5), so it keeps up with late enemies.
+  - **Suppression Field** is 10% per rank (was 7%).
+  - **Counter Weave** returns 10/20/40% of the strike a counter cancels (at least 2/4/8).
+- **Deep talents.** They keep their old ids, so saved points stay where they were:
+  - **Large deck:**
+    - **Arsenal** (was Static Silence; needs Deck Matrix 3): attacks deal +1 damage for every 5 cards in your deck.
+    - **Grand Library** (was Dominion): the first time each card is played in an encounter, its damage and Block are +25%.
+  - **Deck cycling:** **Flow State** (was Surge Battery; needs Foresight): every card you draw during your
+    turn adds +3 to your next attack (up to +15). The opening draw doesn't count.
+  - **Elemental:**
+    - **Prism Shift** (was Reflux): an elemental attack of a different element than your last one draws a
+      card and gives +1 energy (once per turn per rank).
+    - **Prismatic Cascade** (was Null Field): elemental attacks deal +20% for each different element used
+      this encounter (up to +80%).
+  - Paths shown on the tree: Weaken & Suppression, Large deck, Deck cycling, Energy, Elements & counters.
+- **Lab builds.** D·Silence became D·Library, D·Counter became D·Prism, and D·Draw takes Flow State. A
+  large-deck build fills its extra slots with the previous world's cards.
+- **Boss HP.** Every boss and mini-boss has +12% health (`bossHp`, `miniBossHp`), because the stronger
+  Weaken helps many builds.
+
+| Tree | Regular before → after | Bosses before → after |
+|---|---|---|
+| Surge | 72% → 76% | 51% → 44% |
+| Disruption | 66% → 78% | 31% → 43% |
+| Resolve | 67% → 72% | 44% → 34% |
+
+- **Per world:** the all-build boss average is 31-46% (it was 37-46%). Chronospire's bosses are the lowest at 31%.
+- **Still to watch:**
+  - D·Library is the strongest build late on (69% on bosses).
+  - Resolve now trails (34% on bosses): it gains little from Weaken and pays for the boss health.
+- `tests/talent-matrix.test.cjs` covers every new talent.
+
 ## Round 258: the Tunnel Borehound is animated
 
 - The owner sent an eight-frame, right-facing walk for Neon Aftermath's Tunnel Borehound (`burrower`), on
