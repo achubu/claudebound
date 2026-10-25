@@ -76,7 +76,7 @@ const WILDS_ZONE_ENEMY = ['elarisFox', 'elarisFox', 'elarisAntler', 'elarisAntle
 
 // --- Balance: each new world sits where the old worlds 3 and 4 were ---
 for (const [table, sky, wilds] of [['hpPerLevel', .05, .05], ['attackPerLevel', .25, .25], ['regionHp', 2.2, 2.22], ['regionAttack', 16, 25],
-  ['difficulty', 1, 1], ['regionLevelBase', 19, 28], ['eliteHp', 1.25, 1.25], ['normalHp', 1.32, 1.3]]) Object.assign(BALANCE[table], { sky, wilds });
+  ['difficulty', 1, 1], ['regionLevelBase', 19, 28], ['eliteHp', 1.25, 1.25], ['normalHp', 1.2, 1.28]]) Object.assign(BALANCE[table], { sky, wilds });
 
 // --- Rooms ------------------------------------------------------------
 function tileWorldRooms(id, roleEnemy) {

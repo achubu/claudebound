@@ -30,9 +30,9 @@ b.playerBurn = 3; b.burnPower = 3; const first = cleanseOne(b); b.playerPoison =
 o.lists = { drake: ENEMY_AFFLICTIONS.skyDrake, harpy: ENEMY_AFFLICTIONS.skyHarpy, roc: ENEMY_AFFLICTIONS.zenithRoc, tyrant: ENEMY_AFFLICTIONS.elarisTyrant };
 b = fight('elaris', false); o.otherShear = [...Array(30).keys()].some(t => enemyPlan(b, t + 1).shear);
 return JSON.stringify(o); })()`));
-assert.strictEqual(r.plating, 8, 'Reactive Plating 5 gives 8 Armor');
+assert.strictEqual(r.plating, Math.round(5 * 1.7), 'Reactive Plating 5 gives 5 Armor, ×1.7 in the Sky Isles (Round 262)');
 assert(r.shear.name.startsWith('🌪 Shearing') && !r.plain.name.startsWith('🌪'), 'a Shear is named in the intent');
-assert.strictEqual(r.plain.lost, Math.max(0, r.plain.dmg - 8), 'a normal hit loses 8 to Plating');
+assert.strictEqual(r.plain.lost, Math.max(0, r.plain.dmg - r.plating), 'a normal hit loses the Plating Armor');
 assert.strictEqual(r.shear.lost, r.shear.dmg, 'a Shear ignores Plating');
 assert.strictEqual(r.shearBlocked.lost, Math.max(0, r.shear.dmg - 10), 'Block from cards still stops a Shear');
 assert(r.bubble.includes('🌪 Shear'), 'the intent explains it');
