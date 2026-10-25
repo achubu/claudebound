@@ -25,14 +25,14 @@ const BALANCE={
  // Elaris rooms are hand-set to 10-18 and Vespera's to 19-27.
  regionLevelBase:{city:1,elaris:1,vespera:37,chronospire:46},
  eliteHp:{city:1.15,elaris:1.25,vespera:1.25,chronospire:1.25},eliteAttack:2,
- bossHp:{city:1.12,elaris:1.12,sky:1.12,wilds:1.25,vespera:1.12,chronospire:1.23},bossAttack:0,         // extra for region bosses only (Round 259: +12% after the Disruption rework made Weaken stronger)
- miniBossHp:{city:1.12,elaris:1.12,sky:1.12,wilds:1.25,vespera:1.12,chronospire:1.23},miniBossAttack:0, // extra for mini-bosses only
+ bossHp:{city:1,elaris:1.05,sky:1,wilds:1.05,vespera:1.08,chronospire:1.05},bossAttack:0,         // extra for region bosses only (Round 259: +12% after the Disruption rework made Weaken stronger)
+ miniBossHp:{city:1,elaris:1.05,sky:1,wilds:1.05,vespera:1.08,chronospire:1.05},miniBossAttack:0, // extra for mini-bosses only
  // Round 43: regular and elite enemies have 10% more health; bosses and mini-bosses unchanged.
  // Round 49: city regulars eased to 0.95 (early city fights ran ~23 turns).
  // (+10% attack as well was simulated and proved far too steep: ~+21% total strength.)
  // Round 253: the Difficulty lab now plays full decks (and enemies roll tempers); regular fights re-tuned to about 70%
  // for the average build. normalAttack multiplies regular enemies' attack.
- normalHp:{city:1.05,elaris:1.22,vespera:1.28,chronospire:1.45},normalAttack:{city:1,elaris:1.03,vespera:1.04,chronospire:1.06,sky:1.08,wilds:1.07},
+ normalHp:{city:.95,elaris:1.08,vespera:1.2,chronospire:1.25},normalAttack:{city:1,elaris:1.03,vespera:1.04,chronospire:1.06,sky:1.08,wilds:1.07},
  // Round 51: regular enemies in a world's first levels ease in instead of
  // jumping at the portal (you arrive with your old world's deck).
  entryRamp:{city:{4:{hp:1.4,attack:1}},elaris:{10:{hp:.9,attack:-1},11:{hp:.88,attack:-1},12:{hp:.9,attack:-1},13:{hp:.95,attack:0}}},
