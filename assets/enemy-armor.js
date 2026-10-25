@@ -10,7 +10,9 @@
 // (ARMOR_HP_FACTOR, tuned with the Difficulty lab) so win rates stay where they were.
 // Applied when a fight starts, after enemy-pairs.js, so both of a pair get it.
 // =====================================================================
-const ARMOR_BY_WORLD = { elaris: [1, 2], sky: [2, 3], wilds: [2, 4], vespera: [3, 5], chronospire: [4, 6] };
+// Round 262 (owner: "I never see or feel enemy Armor"): roughly doubled, so it takes a real share of a hit
+// (most of a small multi-hit one) and Pierce, Sunder and Breach Spike matter.
+const ARMOR_BY_WORLD = { elaris: [2, 4], sky: [3, 5], wilds: [4, 7], vespera: [5, 8], chronospire: [6, 10] };
 const ARMOR_HP_FACTOR = { elaris: 0.95, sky: 0.88, wilds: 0.75, vespera: 0.8, chronospire: 0.82 }; // tuned with the Difficulty lab (CHANGES.md)
 // Solaris's bosses keep their own Armor: cards are still small there and they were already hard.
 const ARMOR_BOSS_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
