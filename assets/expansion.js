@@ -25,22 +25,22 @@ const BALANCE={
  // Elaris rooms are hand-set to 10-18 and Vespera's to 19-27.
  regionLevelBase:{city:1,elaris:1,vespera:37,chronospire:46},
  eliteHp:{city:1.15,elaris:1.25,vespera:1.25,chronospire:1.25},eliteAttack:2,
- bossHp:1.12,bossAttack:0,         // extra for region bosses only (Round 259: +12% after the Disruption rework made Weaken stronger)
- miniBossHp:1.12,miniBossAttack:0, // extra for mini-bosses only
+ bossHp:{city:1.12,elaris:1.12,sky:1.12,wilds:1.25,vespera:1.12,chronospire:1.23},bossAttack:0,         // extra for region bosses only (Round 259: +12% after the Disruption rework made Weaken stronger)
+ miniBossHp:{city:1.12,elaris:1.12,sky:1.12,wilds:1.25,vespera:1.12,chronospire:1.23},miniBossAttack:0, // extra for mini-bosses only
  // Round 43: regular and elite enemies have 10% more health; bosses and mini-bosses unchanged.
  // Round 49: city regulars eased to 0.95 (early city fights ran ~23 turns).
  // (+10% attack as well was simulated and proved far too steep: ~+21% total strength.)
  // Round 253: the Difficulty lab now plays full decks (and enemies roll tempers); regular fights re-tuned to about 70%
  // for the average build. normalAttack multiplies regular enemies' attack.
- normalHp:{city:.95,elaris:1.13,vespera:1.21,chronospire:1.22},normalAttack:{city:1,elaris:1.03,vespera:1.04,chronospire:1.06,sky:1.08,wilds:1.07},
+ normalHp:{city:1.05,elaris:1.22,vespera:1.28,chronospire:1.45},normalAttack:{city:1,elaris:1.03,vespera:1.04,chronospire:1.06,sky:1.08,wilds:1.07},
  // Round 51: regular enemies in a world's first levels ease in instead of
  // jumping at the portal (you arrive with your old world's deck).
  entryRamp:{city:{4:{hp:1.4,attack:1}},elaris:{10:{hp:.9,attack:-1},11:{hp:.88,attack:-1},12:{hp:.9,attack:-1},13:{hp:.95,attack:0}}},
  // Heavy hit = attack x (heavyBase + heavyDistance x distance from start, 0..1).
  heavyBase:1.5,heavyDistance:.25,
  bossHeavyMax:1.3,              // bosses' heavy hits are capped, so one hit can't decide the fight
- elementalMult:1.8,             // charged elemental strike
- bossElementalMult:1.5,         // same, for bosses and mini-bosses
+ elementalMult:2.1,             // charged elemental strike (Round 263: was 1.8, so an uncountered one hurts)
+ bossElementalMult:1.7,         // same, for bosses and mini-bosses (was 1.5)
  // Individual health tuning, set with tests/balance-sim.cjs so that at a
  // fair-fight level (player level = boss level) a typical build beats each
  // final boss about 28 times in 100 and each mini-boss about 40, with every
