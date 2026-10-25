@@ -14,6 +14,8 @@
 // (most of a small multi-hit one) and Pierce, Sunder and Breach Spike matter.
 const ARMOR_BY_WORLD = { elaris: [2, 4], sky: [3, 5], wilds: [4, 7], vespera: [5, 8], chronospire: [6, 10] };
 const ARMOR_HP_FACTOR = { elaris: 0.95, sky: 0.88, wilds: 0.75, vespera: 0.8, chronospire: 0.82 }; // tuned with the Difficulty lab (CHANGES.md)
+// Round 266 (owner request): Vespera's enemies wear 10% more Armor, rounded (5-8 becomes 6-9).
+const ARMOR_WORLD_MULT = { vespera: 1.1 };
 // Solaris's bosses keep their own Armor: cards are still small there and they were already hard.
 const ARMOR_BOSS_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
 function worldArmor(e, region = activeRegion, frac = 0) {
@@ -21,7 +23,7 @@ function worldArmor(e, region = activeRegion, frac = 0) {
   const [lo, hi] = range;
   if (e.boss && !ARMOR_BOSS_WORLDS.includes(region)) return e.armor || 0;
   const base = e.boss ? hi + (e.miniBoss ? 2 : 3) : lo + Math.round(Math.max(0, Math.min(1, frac)) * (hi - lo)) + (e.elite ? 1 : 0);
-  return Math.max(e.armor || 0, base);
+  return Math.round(Math.max(e.armor || 0, base) * (ARMOR_WORLD_MULT[region] || 1));
 }
 function armEnemy(e, frac) {
   if (!e || e.worldArmor) return;
