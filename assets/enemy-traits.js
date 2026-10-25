@@ -9,16 +9,16 @@
 const ENEMY_TRAITS = {
   frenzy: { name: 'Frenzy', icon: '😤', desc: 'Every time it attacks, its attack rises by 8% of its starting attack.' },
   thorns: { name: 'Thorns', icon: '🌵', desc: 'Each card that damages it costs you HP equal to 12% of its attack.' },
-  stoneskin: { name: 'Stoneskin', icon: '🪨', desc: 'At the end of each of its turns it gains Block equal to 25% of its attack.' },
+  stoneskin: { name: 'Stoneskin', icon: '🪨', desc: 'At the end of each of its turns it gains Block equal to 12% of its attack.' },
   drill: { name: 'Drill', icon: '🔩', desc: 'Its hits ignore your Armor.' },
-  phasing: { name: 'Phasing', icon: '👻', desc: 'The first card that damages it each turn deals half.' },
+  phasing: { name: 'Phasing', icon: '👻', desc: 'The first card that damages it each turn deals 30% less.' },
   aetherDrain: { name: 'Aether drain', icon: '🌀', desc: 'Each time it hits you, you lose 2 Aether.' },
   punisher: { name: 'Punisher', icon: '⚖', desc: 'Its hits deal 25% more if you have no Block when it attacks.' },
-  wrath: { name: 'Wrath', icon: '💢', desc: 'Below half health its hits deal 30% more.' },
+  wrath: { name: 'Wrath', icon: '💢', desc: 'Below half health its hits deal 20% more.' },
   rally: { name: 'Rally', icon: '📯', desc: 'After a turn without attacking (guarding or charging), its next hit deals 30% more.' },
-  staticField: { name: 'Static field', icon: '⚡', desc: 'The first card you play each turn costs 1 more energy.' },
-  regen: { name: 'Regeneration', icon: '💚', desc: 'At the end of each of its turns it heals 5% of its health.' },
-  twinStrike: { name: 'Twin strike', icon: '⚔', desc: 'After its plain Strike it strikes again for 40% (Armor applies).' },
+  staticField: { name: 'Static field', icon: '⚡', desc: 'Every other turn (turns 1, 3, 5…), the first card you play costs 1 more energy.' },
+  regen: { name: 'Regeneration', icon: '💚', desc: 'At the end of each of its turns it heals 2% of its health.' },
+  twinStrike: { name: 'Twin strike', icon: '⚔', desc: 'After its plain Strike it strikes again for 30% (Armor applies).' },
   undying: { name: 'Undying', icon: '💀', desc: 'The first time it would fall, it gets back up with 20% of its health.' },
   resistant: { name: 'Resistant', icon: '🛡', desc: 'Non-elemental cards deal 25% less to it.' },
   bloodthirst: { name: 'Bloodthirst', icon: '🩸', desc: 'It heals half of the HP damage it deals.' },
@@ -52,7 +52,7 @@ const SPECIES_TRAIT = {
 const SPECIES_PATTERN = {
   emberling: ['attack', 'attack', 'heavy'], thornling: ['attack', 'guard', 'heavy'], vineguard: ['guard', 'attack', 'guard', 'heavy'],
   burrower: ['heavy', 'attack', 'guard'], shade: ['attack', 'heavy', 'attack', 'guard'], cryptWisp: ['attack', 'attack', 'guard', 'heavy'],
-  crownEye: ['guard', 'heavy', 'attack'], forgeBeast: ['attack', 'heavy', 'heavy', 'guard'],
+  crownEye: ['guard', 'heavy', 'attack'], forgeBeast: ['attack', 'heavy', 'guard', 'attack'],
   cinderFox: ['attack', 'charge', 'elemental', 'guard'], sunRevenant: ['guard', 'attack', 'charge', 'elemental'], blightAntler: ['attack', 'heavy', 'charge', 'elemental'],
   drownedHeron: ['charge', 'elemental', 'attack', 'attack'], stormMoth: ['attack', 'attack', 'charge', 'elemental', 'guard'],
   skyDrake: ['attack', 'charge', 'elemental', 'guard'], skyWisp: ['charge', 'elemental', 'guard', 'attack', 'heavy'], skyHarpy: ['attack', 'guard', 'attack', 'charge', 'elemental'],
@@ -99,7 +99,7 @@ enemyPlan = function (b = state.battle, turn = b?.turn) {
   if (!t || !plan || !(plan.damage > 0)) return plan;
   let m = 1;
   if (t === 'punisher' && turn === b.turn && !(b.block > 0)) m *= 1.25;
-  if (t === 'wrath' && b.enemy.hp < b.enemy.maxHp / 2) m *= 1.3;
+  if (t === 'wrath' && b.enemy.hp < b.enemy.maxHp / 2) m *= 1.2;
   if (t === 'overcharged' && plan.kind === 'elemental') m *= 1.25;
   if (t === 'rally' && turn > 1) { const prev = enemyPlanBeforeTraits(b, turn - 1); if (prev && ['guard', 'charge'].includes(prev.kind)) m *= 1.3; }
   return m === 1 ? plan : { ...plan, damage: Math.round(plan.damage * m), trait: t };
@@ -112,7 +112,7 @@ scaledRank = function (id) {
   return scaledRankBeforeTraits.apply(this, arguments);
 };
 // Static field: the first card each turn costs 1 more.
-function staticFieldOn(b) { return !!(b && b.phase === 'fight' && [b.enemy, b.pair && b.pair.other && b.pair.other.enemy].some(e => e && e.trait === 'staticField' && e.hp > 0) && b.staticTurn !== b.turn); }
+function staticFieldOn(b) { return !!(b && b.phase === 'fight' && [b.enemy, b.pair && b.pair.other && b.pair.other.enemy].some(e => e && e.trait === 'staticField' && e.hp > 0) && b.turn % 2 === 1 && b.staticTurn !== b.turn); }
 const statBeforeTraits = stat;
 stat = function (c) {
   const d = statBeforeTraits(c), b = typeof state === 'object' && state && state.battle;
@@ -130,7 +130,7 @@ playCard = function (i) {
   if (wasStatic) b.staticTurn = b.turn;
   const dealt = hp - e.hp;
   if (t && dealt > 0 && e.hp > 0) {
-    if (t === 'phasing' && b.phaseTurn !== b.turn) { const back = Math.floor(dealt / 2); e.hp = Math.min(e.maxHp, e.hp + back); b.phaseTurn = b.turn; b.logs.push('👻 Phasing: ' + back + ' of that hit passes through.'); }
+    if (t === 'phasing' && b.phaseTurn !== b.turn) { const back = Math.floor(dealt * .3); e.hp = Math.min(e.maxHp, e.hp + back); b.phaseTurn = b.turn; b.logs.push('👻 Phasing: ' + back + ' of that hit passes through.'); }
     if (t === 'resistant' && !(d && ['fire', 'earth', 'air', 'water', 'ice', 'lightning'].includes(d.element))) { const back = Math.floor(dealt * .25); if (back) { e.hp = Math.min(e.maxHp, e.hp + back); b.logs.push('🛡 Resistant: ' + back + ' shrugged off.'); } }
     if (t === 'thorns') { const hurt = Math.max(1, Math.round((e.baseAttack || e.attack) * .12)); state.hp = Math.max(1, state.hp - hurt); b.logs.push('🌵 Thorns: you take ' + hurt + '.'); }
     if (t === 'brittle' && e.armor > 0) { e.armor--; b.cracked = (b.cracked || 0) + 1; b.logs.push('🧊 Brittle: 1 Armor cracks.'); }
@@ -154,12 +154,12 @@ endTurn = function () {
   for (const [e, plan] of plans) {
     const t = traitOf(e); if (!t || !(e.hp > 0)) continue;
     const attacked = !!(plan && plan.damage > 0 && !['charge', 'guard', 'silenced'].includes(plan.kind)) && !(b.freeze > 0);
-    if (t === 'twinStrike' && attacked && plan.kind === 'attack') { const hit = Math.max(0, Math.round(plan.damage * .4) - scaledRank('plating')); state.hp = Math.max(0, state.hp - hit); b.logs.push('⚔ Twin strike: ' + hit + ' more.'); }
+    if (t === 'twinStrike' && attacked && plan.kind === 'attack') { const hit = Math.max(0, Math.round(plan.damage * .3) - scaledRank('plating')); state.hp = Math.max(0, state.hp - hit); b.logs.push('⚔ Twin strike: ' + hit + ' more.'); }
     if (t === 'bloodthirst' && lost > 0) { const heal = Math.ceil(lost / 2); e.hp = Math.min(e.maxHp, e.hp + heal); b.logs.push('🩸 Bloodthirst: it heals ' + heal + '.'); }
     if (t === 'aetherDrain' && attacked && lost > 0 && b.aether > 0) { const n = Math.min(2, b.aether); b.aether -= n; b.logs.push('🌀 Aether drain: −' + n + ' Aether.'); }
     if (t === 'frenzy' && attacked) { const up = Math.max(1, Math.round((e.baseAttack || e.attack) * .08)); e.attack += up; b.logs.push('😤 Frenzy: its attack rises by ' + up + '.'); }
-    if (t === 'stoneskin') { const g = Math.round(e.attack * .25); e.guard = (e.guard || 0) + g; b.logs.push('🪨 Stoneskin: +' + g + ' Block.'); }
-    if (t === 'regen' && e.hp < e.maxHp) { const h = Math.max(1, Math.round(e.maxHp * .05)); e.hp = Math.min(e.maxHp, e.hp + h); b.logs.push('💚 Regeneration: +' + h + ' HP.'); }
+    if (t === 'stoneskin') { const g = Math.round(e.attack * .12); e.guard = (e.guard || 0) + g; b.logs.push('🪨 Stoneskin: +' + g + ' Block.'); }
+    if (t === 'regen' && e.hp < e.maxHp) { const h = Math.max(1, Math.round(e.maxHp * .02)); e.hp = Math.min(e.maxHp, e.hp + h); b.logs.push('💚 Regeneration: +' + h + ' HP.'); }
     if (t === 'purging' && e === b.enemy && (b.poison > 0 || b.burn > 0)) { b.poison = Math.floor((b.poison || 0) / 2); b.burn = Math.floor((b.burn || 0) / 2); b.logs.push('🫧 Purging: its Poison and Burn are halved.'); }
     if (t === 'brittle' && b.cracked) { e.armor += b.cracked; b.cracked = 0; }
   }
