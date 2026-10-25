@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 263: Solaris is the reference difficulty
+
+- The owner said Solaris is the difficulty they like most. Nothing in Solaris changes.
+- CLAUDE.md now records it as the reference: about 72% on regular fights and 41% on bosses for the
+  average build, and 24% / 7% for the naive player (Round 262). Future tuning keeps Solaris there and
+  brings the other worlds toward it.
+
 ## Round 262: Armor that matters, and fights you win by playing well
 
 - **Owner requests:** make Armor matter (or remove it); show and feel enemy Armor, always near its health;
