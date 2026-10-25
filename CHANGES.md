@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 260: a small buff for Resolve
+
+- The owner asked for a small Resolve buff after Round 259 left the tree trailing (34% on bosses, against
+  44% for Surge and 43% for Disruption).
+- Changes, all in Resolve's own paths (no other lab build takes them):
+  - **Bulwark Doctrine:** Defense cards +2 / +4 / +6 Block (was +1 / +2 / +4).
+  - **Siphon Edge:** your first attack each turn heals 2 / 4 (was 1 / 2).
+  - **Fortress Protocol:** keeps up to 10 unused Block (was 6).
+  - **Second Wind:** heals 15% of your max health, at least 6 (was a flat 6).
+  - **Unbreakable:** start each fight with 10 Block (was 6).
+- **Difficulty lab** (Resolve builds, every world): regular fights 72% → 77%, bosses 34% → 41%.
+  - R·Thorns 29 → 40, R·Leech 40 → 47, R·Retain 42 → 52, R·Fortress 30 → 38.
+  - Old·Resolve stays at 29% (it takes none of these talents).
+
 ## Round 259: the Disruption tree reworked
 
 - **Request.** The owner asked to test the Disruption tree and improve it if it was lacking: its early points
