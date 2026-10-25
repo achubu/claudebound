@@ -61,12 +61,12 @@ TALENT_BRANCHES.disruption.nodes.push(
 
 TALENT_BRANCHES.resolve.nodes.push(
   // Block path
-  { id: 'bulwark', name: 'Bulwark Doctrine', icon: '▣', max: 3, tier: 1, desc: 'Defense cards grant +1 / +2 / +4 more Block (ranks 1-3).' },
+  { id: 'bulwark', name: 'Bulwark Doctrine', icon: '▣', max: 3, tier: 1, desc: 'Defense cards grant +2 / +4 / +6 more Block (ranks 1-3).' },
   { id: 'thorns', name: 'Retaliation Coil', icon: '✺', max: 3, tier: 3, req: ['bulwark', 2], desc: 'When your Block absorbs an enemy hit, deal 1 / 2 / 4 damage back (ranks 1-3).' },
   { id: 'fortress', name: 'Fortress Protocol', icon: '⛫', max: 1, tier: 5, req: ['thorns', 1], desc: 'Keep half of your unused Block (up to 10) into the next turn.' },
   { id: 'unbreakable', name: 'Unbreakable', icon: '⬢', max: 1, tier: 8, req: ['fortress', 1], desc: 'Begin every encounter with 10 Block.' },
   // Sustain path (from Vital Mesh)
-  { id: 'leech', name: 'Siphon Edge', icon: '❦', max: 2, tier: 3, req: ['vitality', 1], desc: 'Your first attack each turn heals 1 / 2 HP (ranks 1-2).' },
+  { id: 'leech', name: 'Siphon Edge', icon: '❦', max: 2, tier: 3, req: ['vitality', 1], desc: 'Your first attack each turn heals 2 / 4 HP (ranks 1-2).' },
   { id: 'secondWind', name: 'Second Wind', icon: '❂', max: 1, tier: 5, req: ['leech', 2], desc: 'The first time you fall below half health in an encounter, heal 15% of your maximum health.' },
   { id: 'undying', name: 'Undying Core', icon: '✚', max: 1, tier: 8, req: ['secondWind', 1], desc: 'Once per encounter, a hit that would defeat you leaves you at 1 HP instead.' },
   // Retain path (from Memory Buffer)
@@ -137,7 +137,7 @@ const talentMatrix = {
     return damage;
   },
   armorIgnore(b) { return 2 * talentRank('sunder'); },
-  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? scaledRank('bulwark') : 0) + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0) + (b.libraryFirst && d.block ? Math.round(d.block * .25) : 0); },
+  blockBonus(c, d, b) { return (/Defense/.test(d.kind || '') ? 2 * talentRank('bulwark') : 0) /* Round 260: was 1/2/4 */ + (b.preparedUid === c.uid ? talentRank('recall') + (hasTalent('preparation') ? 2 : 0) : 0) + (b.libraryFirst && d.block ? Math.round(d.block * .25) : 0); },
   dotBonus() { return 2 * talentRank('kindle'); },
   afterCard(c, d, b, damage) {
     const f = turnFlags(b);
@@ -148,7 +148,7 @@ const talentMatrix = {
         if (b.lastElement && b.lastElement !== d.element && (f.prism || 0) < talentRank('reflux')) { f.prism = (f.prism || 0) + 1; drawCards(1); b.energy += 1; b.logs.push('Prism Shift: drew 1 card, +1 energy.'); }
         b.lastElement = d.element; (b.elementsUsed ||= []).includes(d.element) || b.elementsUsed.push(d.element);
       }
-      if (!f.leech && hasTalent('leech')) { const heal = scaledRank('leech'); state.hp = Math.min(state.maxHp, state.hp + heal); b.logs.push('Siphon Edge: +' + heal + ' HP.'); f.leech = true; }
+      if (!f.leech && hasTalent('leech')) { const heal = 2 * talentRank('leech') /* Round 260: was 1/2 */; state.hp = Math.min(state.maxHp, state.hp + heal); b.logs.push('Siphon Edge: +' + heal + ' HP.'); f.leech = true; }
       f.attacks++;
     }
     checkSecondWind(b);

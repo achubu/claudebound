@@ -67,14 +67,14 @@ playCard(0); assert.equal(b.hand.length, 2, 'a different element draws 1'); play
 b = setup({ nullField: 1 }, ['cinder', 'venom']); assert.equal(dealt(b), Math.round(6 * 1.2), 'Prismatic Cascade: +20% with one element'); assert.equal(dealt(b), Math.round(3 * 1.4), '+40% with two');
 
 // ---------------- RESOLVE ----------------
-b = setup({ bulwark: 3 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 4, 'Bulwark Doctrine rank 3: +4 Block on Defense cards');
+b = setup({ bulwark: 3 }, ['guard']); playCard(0); assert.equal(b.block, 5 + 6, 'Bulwark Doctrine rank 3: +6 Block on Defense cards');
 b = setup({ bulwark: 3 }, ['riposte']); playCard(0); assert.equal(b.block, 3, 'Bulwark does not apply to attack cards that also block');
 b = setup({ bulwark: 2, thorns: 2 }, []); b.block = 30; const e1 = b.enemy.hp; endTurn(); assert.equal(e1 - b.enemy.hp, 2, 'Retaliation Coil rank 2 returns 2 when Block absorbs a hit');
 b = setup({ bulwark: 2, thorns: 1, fortress: 1 }, []); b.block = 30; const hit = enemyPlan(b).damage; endTurn(); assert.equal(b.block, Math.min(10, Math.floor((30 - hit) / 2)), 'Fortress keeps half of the unused Block, up to 10');
 b = setup({ bulwark: 2, thorns: 1, fortress: 1, unbreakable: 1 }, []); newGame(); state.talents = { bulwark: 2, thorns: 1, fortress: 1, unbreakable: 1, retainCore: 1, preparation: 1, recall: 1, steadyMind: 1 }; state.playerLevel = 30; state.room = '1,5'; state.cooldowns = {};
 startBattle(roomSpawns('1,5').find(s => !s.boss).uid); assert.equal(state.battle.block, 10 + crystalOpeningBlock(), 'Unbreakable: 10 Block at the start'); assert.equal(state.battle.energy, maxEnergy() + 1, 'Steady Mind: +1 energy on turn 1');
-b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2 }, ['strike', 'strike']); state.hp = 10; playCard(0); assert.equal(state.hp, 12, 'Siphon Edge rank 2 heals 2'); playCard(0); assert.equal(state.hp, 12, 'only the first attack each turn');
-b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2, secondWind: 1 }, ['strike']); state.hp = 10; const sw = state.hp; playCard(0); assert.equal(state.hp, sw + 2 + Math.max(6, Math.round(state.maxHp * .15)), 'Second Wind heals 15% of max health once below half health');
+b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2 }, ['strike', 'strike']); state.hp = 10; playCard(0); assert.equal(state.hp, 14, 'Siphon Edge rank 2 heals 4'); playCard(0); assert.equal(state.hp, 14, 'only the first attack each turn');
+b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2, secondWind: 1 }, ['strike']); state.hp = 10; const sw = state.hp; playCard(0); assert.equal(state.hp, sw + 4 + Math.max(6, Math.round(state.maxHp * .15)), 'Second Wind heals 15% of max health once below half health');
 b = setup({ retainCore: 1, plating: 3, vitality: 1, leech: 2, secondWind: 1, undying: 1 }, []); state.hp = 1; b.secondWindUsed = true; b.enemy.attack = 99; endTurn();
 assert.equal(state.hp, 1, 'Undying Core: survive at 1 HP'); assert.equal(b.phase, 'fight'); assert.equal(b.turn, 2, 'the fight continues to the next turn');
 for (let k = 0; k < 3 && b.phase === 'fight'; k++) endTurn(); assert.equal(b.phase, 'lost', 'Undying works once per encounter');
