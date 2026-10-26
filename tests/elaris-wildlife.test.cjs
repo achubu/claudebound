@@ -6,7 +6,7 @@ const observed=new Set();
 for(const seed of [1,1234,98765]){state.seed=seed;configureRegion('elaris');for(const key of Object.keys(rooms))for(const spawn of roomSpawns(key)){if(spawn.boss){assert(['bloomTyrant','tidewardenElaris','galeSovereign'].includes(spawn.type),'boss spawn must be the region boss or one of its two designated mini-bosses, got '+spawn.type);continue}assert(ELARIS_WILDLIFE[spawn.type],'City enemy leaked into Elaris');assert.equal(spawn.element,ELARIS_WILDLIFE[spawn.type].element);observed.add(spawn.type)}}
 assert.equal(observed.size,5,'Round 169: four wildlife species plus the Sunwrapped Revenant');
 for(const id of Object.keys(ELARIS_WILDLIFE)){assert(monsterArt(id).includes('wildlife-sprite'));assert(monsterArt(id).includes('aria-label="'+enemies[id].name+'"'))}
-configureRegion('city');assert(!monsterArt('cryptWisp').includes('wildlife-sprite')); // a city monster not yet animated (the Phase Shade is, Round 264)
+configureRegion('city');assert(!monsterArt('forgeBeast').includes('wildlife-sprite')); // a city monster not yet animated (the Phase Shade and Data Wisp are, Rounds 264 and 273)
 console.log('PASS: all five Solaris species spawn, elements match, animated markup and city art preserved.');
 `);
 for(const name of ['cinder-fox','drowned-heron','blight-antler','storm-moth','sun-revenant','sun-revenant-walk','solar-scarab','dust-devil','dune-scorpion','cistern-warden','noon-toller','sun-pharaoh','mirage-ibis']){

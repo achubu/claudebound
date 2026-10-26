@@ -3504,7 +3504,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   Devil (Round 272). This keeps the core still. The result is `assets/monsters/city/data-wisp.png`, then padded. It is a
   plain `WILDLIFE_ART` entry (.8s cycle) with no battle poses yet.
 - Vespera's Arc Wisp and Chronospire's Rust Wisp borrow its art, so they animate too, recoloured as before.
-- `SPRITE_VERSION` 273. New `tests/data-wisp.test.cjs`.
+- `SPRITE_VERSION` 273. New `tests/data-wisp.test.cjs`; `elaris-wildlife` now checks the Reactor Mauler as a still city picture.
 
 ## Round 272: the Dust Devil spins
 
