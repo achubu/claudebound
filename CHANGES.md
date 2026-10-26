@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 272: the Dust Devil spins
+
+- The owner sent an eight-frame spinning glide for Solaris's Dust Devil (`stormMoth`). It has moving sand ribbons,
+  orbiting stones and a curled funnel tip. The source strip is `assets/monsters/elaris/src/dust-devil-spin8.png`.
+- The owner aligned every frame on the cyan eyes, so frames 1, 3, 5 and 7 are cut with one shared window instead of
+  `compose_sprite_sheet.py`, which centres each pose on its base and would make the eyes jitter. The window puts the
+  funnel tip near the frame's bottom like the other creatures. The result is `assets/monsters/elaris/dust-devil.png`
+  (replacing the old sheet), then padded. The cycle is .8s, up from .7s, to match the owner's timing.
+- `SPRITE_VERSION` 272. New `tests/dust-devil.test.cjs`.
+
 ## Round 271: the Dune Scorpion scuttles
 
 - The owner sent an eight-frame, right-facing scuttle for Solaris's Dune Scorpion (`blightAntler`). The source strip is

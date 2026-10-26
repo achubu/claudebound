@@ -7,7 +7,7 @@ const ELARIS_WILDLIFE={
  cinderFox:{name:'Solar Scarab',icon:'☼',hp:38,attack:7,element:'fire',sheet:'solar-scarab',cycle:'.8s'}, // Round 269: the owner's eight-frame walk (four frames used)
  drownedHeron:{name:'Mirage Ibis',icon:'≈',hp:55,attack:9,element:'water',sheet:'mirage-ibis',cycle:'.8s'}, // Round 270: the owner's eight-frame walk (four frames used)
  blightAntler:{name:'Dune Scorpion',icon:'◆',hp:44,attack:8,element:'earth',sheet:'dune-scorpion',cycle:'.8s'}, // Round 271: the owner's eight-frame walk (four frames used)
- stormMoth:{name:'Dust Devil',icon:'≋',hp:52,attack:9,element:'air',sheet:'dust-devil',cycle:'.7s'},
+ stormMoth:{name:'Dust Devil',icon:'≋',hp:52,attack:9,element:'air',sheet:'dust-devil',cycle:'.8s'}, // Round 272: the owner's eight-frame spin (four frames used)
  // Round 22 mini-bosses (own sheets since Round 195).
  tidewardenElaris:{name:'The Cistern Warden',icon:'≈',hp:70,attack:11,armor:3,element:'water',sheet:'cistern-warden',cycle:'1.4s',boss:true,miniBoss:true},
  galeSovereign:{name:'The Noon Toller',icon:'🔔',hp:66,attack:11,armor:3,element:'air',sheet:'noon-toller',cycle:'1.2s',boss:true,miniBoss:true}
@@ -42,7 +42,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='271';
+const SPRITE_VERSION='272';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which
