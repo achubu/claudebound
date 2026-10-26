@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 271: the Dune Scorpion scuttles
+
+- The owner sent an eight-frame, right-facing scuttle for Solaris's Dune Scorpion (`blightAntler`). The source strip is
+  `assets/monsters/elaris/src/dune-scorpion-walk8.png`.
+- Frames 1, 3, 5 and 7 are composed into `assets/monsters/elaris/dune-scorpion.png` (replacing the old sheet), then
+  padded. The cycle is .8s, down from 1.2s, to match the owner's timing.
+- `SPRITE_VERSION` 271. New `tests/dune-scorpion.test.cjs`.
+
 ## Round 270: the Mirage Ibis walks
 
 - The owner sent an eight-frame, right-facing walk for Solaris's Mirage Ibis (`drownedHeron`). It steps with folded
