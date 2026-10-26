@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 273: the Data Wisp orbits
+
+- The owner sent an eight-frame orbit for Neon Aftermath's Data Wisp (`cryptWisp`): bronze fragments circling a steady
+  cyan-white core. The source strip is `assets/monsters/city/src/data-wisp-orbit8.png`.
+- The owner aligned every frame on the core, so frames 1, 3, 5 and 7 are cut with one shared window, as for the Dust
+  Devil (Round 272). This keeps the core still. The result is `assets/monsters/city/data-wisp.png`, then padded. It is a
+  plain `WILDLIFE_ART` entry (.8s cycle) with no battle poses yet.
+- Vespera's Arc Wisp and Chronospire's Rust Wisp borrow its art, so they animate too, recoloured as before.
+- `SPRITE_VERSION` 273. New `tests/data-wisp.test.cjs`; `elaris-wildlife` now checks the Reactor Mauler as a still city picture.
+
 ## Round 272: the Dust Devil spins
 
 - The owner sent an eight-frame spinning glide for Solaris's Dust Devil (`stormMoth`). It has moving sand ribbons,

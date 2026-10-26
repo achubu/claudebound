@@ -36,13 +36,16 @@ const WILDLIFE_ART={
  // Round 267: Neon Aftermath's final boss, the Thorn Warden, strides (four of the owner's eight side-walk frames).
  thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden',cycle:'1.1s'},
  // Round 268: the mini-boss Lunar Enforcer glides (four of the owner's eight frames; no battle poses yet).
- moonKnight:{name:'Lunar Enforcer',sheet:'city/lunar-enforcer',cycle:'.8s'}
+ moonKnight:{name:'Lunar Enforcer',sheet:'city/lunar-enforcer',cycle:'.8s'},
+ // Round 273: the Data Wisp's fragments orbit its core (four of the owner's eight frames). Vespera's Arc Wisp and
+ // Chronospire's Rust Wisp borrow it.
+ cryptWisp:{name:'Data Wisp',sheet:'city/data-wisp',cycle:'.8s'}
 };
 const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='272';
+const SPRITE_VERSION='273';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which
