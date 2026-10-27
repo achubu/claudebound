@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 274: the Noon Toller walks
+
+- The owner sent an eight-frame walk for Solaris's mini-boss, the Noon Toller (`galeSovereign`). It holds its hammer
+  in both hands. The source strip is `assets/monsters/elaris/src/noon-toller-walk8.png`.
+- The owner anchored every frame on the upper body with the feet on one baseline, so frames 1, 3, 5 and 7 are cut
+  with one shared window, as for the Dust Devil and Data Wisp. The result is `assets/monsters/elaris/noon-toller.png`
+  (replacing the old sheet), then padded. The cycle is .8s, down from 1.2s, to match the owner's timing.
+- `SPRITE_VERSION` 274. New `tests/noon-toller.test.cjs`.
+
 ## Round 273: the Data Wisp orbits
 
 - The owner sent an eight-frame orbit for Neon Aftermath's Data Wisp (`cryptWisp`): bronze fragments circling a steady
