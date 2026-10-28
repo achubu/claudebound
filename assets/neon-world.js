@@ -229,7 +229,7 @@ move = function (dt) {
   const room = state && state.room, before = state && { ...state.pos }; moveBeforeNeonWorld(dt);
   // The room movement clamps you inside a 12px margin; if that clamp lands on
   // scenery (a street running right along the edge), stay where you were.
-  if (state && !state.battle && state.room === room && before && organicDef(room) && !walkable(room, state.pos.x, state.pos.y)) state.pos = before;
+  if (state && !state.battle && state.room === room && before && organicDef(room) && !walkable(room, state.pos.x, state.pos.y) && !(typeof itemPadAt === 'function' && itemPadAt(room, state.pos.x, state.pos.y))) state.pos = before; // Round 275: item pads
   if (!state || state.battle || state.room !== room || !neonWorldCell(state.room)) return;
   for (const dir of ['n', 's', 'e', 'w']) {
     if (!NEON_EDGE[dir](state.pos) || !neonHeading(dir) || !rooms[state.room].exits[dir]) continue;
@@ -304,7 +304,7 @@ if (typeof poiAt === 'function') {
 // arriving by portal, Nexus Waypoint or after a defeat at a fixed spot).
 const renderWorldBeforeNeonWorld = renderWorld;
 renderWorld = function () {
-  if (state && rooms[state.room] && organicDef(state.room) && !walkable(state.room, state.pos.x, state.pos.y)) {
+  if (state && rooms[state.room] && organicDef(state.room) && !walkable(state.room, state.pos.x, state.pos.y) && !(typeof itemPadAt === 'function' && itemPadAt(state.room, state.pos.x, state.pos.y))) {
     const p = organicSpot(state.room, state.pos.x, state.pos.y); if (p) state.pos = p;
   }
   return renderWorldBeforeNeonWorld.apply(this, arguments);

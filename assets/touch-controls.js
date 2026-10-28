@@ -131,7 +131,7 @@ move=function(dt){
 const originalTouchAnimation=animateHero;
 animateHero=function(dt,moved){const original=keys;if(touchFacing&&moved)keys={[touchFacing]:true};originalTouchAnimation(dt,moved);keys=original};
 addEventListener('blur',cancelTouchRoute);addEventListener('pagehide',cancelTouchRoute);
-addEventListener('keydown',e=>{if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','w','a','s','d'].includes(e.key))cancelTouchRoute()});
+addEventListener('keydown',e=>{if(typeof typingKey==='function'&&typingKey(e))return;if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','w','a','s','d'].includes(e.key))cancelTouchRoute()});
 document.querySelectorAll('#touch button').forEach(button=>{const down=button.onpointerdown;button.onpointerdown=e=>{cancelTouchRoute();down(e)}});
 const touchMenu=showMainMenu;
 showMainMenu=function(){cancelTouchRoute();touchMenu();const toggle=document.createElement('button');toggle.textContent='Touch controls: '+(touchMode()?'On':'Off');toggle.onclick=()=>{localStorage.setItem('aethercede-touch-mode',touchMode()?'off':'on');syncTouchMode();showMainMenu()};$('menuModal').append(toggle)};

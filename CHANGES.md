@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 275: walk straight up to every item; deck names take every key
+
+- **Item pads.** The owner kept hitting invisible boundaries on the way to chests and other objects.
+  - Items stand just beside the traced walk mask: 12-28px off the street (Round 93), or on the ground near its edge
+    (Round 212). The mask follows the painting closely and has notches and kerbs, so walking straight at an item
+    often stopped short of its reach.
+  - A new simulation starts on reachable ground near each item, holds the arrow keys toward it and slides along
+    walls as `move()` does. It counts a near miss when you stall within 40px of the item's reach.
+  - Near misses before: Elaris 36%, Vespera 41%, Neon Aftermath 9%, Chronospire 8%, Solaris 4%, Sky Isles 1%.
+  - New `assets/item-reach.js` (loaded after `room-preload.js`): every chest, relic, point of interest, Nexus
+    Waypoint, the merchant and the Cardsmith gets a walkable pad reaching 24px past its trigger radius (62-72px).
+  - Near misses after: Neon Aftermath 3%, Elaris 6%, Vespera 9%, and lower elsewhere. What is left is mostly an
+    approach from across water or a wall.
+  - The pads count for player movement only: `collides()`, plus the step-back and snap checks in `neon-world.js`.
+    `walkable()` and `NeonCity.blocked` are unchanged, so where items, patrols and pockets are placed stays exactly
+    the same.
+- **Deck names** (owner: "can't type every character"). The global key handler took W, A, S, D, the arrow keys and M
+  (map) as game keys, even inside the favourite-deck name box, so those letters never reached it. `typingKey()` in
+  `index.html` now skips keys typed into text boxes; `touch-controls.js` does the same.
+- `neon-world-pathing`'s random walks count an item's pad as ground. New `tests/item-reach.test.cjs` covers all six worlds, the pads, a sampled approach simulation (under 14% near
+  misses everywhere) and `typingKey()`. Also checked in the browser: a Vespera chest opens by holding two arrow keys,
+  and a deck name with W/A/S/D/M and the arrow keys saves as typed.
+
 ## Round 274: the Noon Toller walks
 
 - The owner sent an eight-frame walk for Solaris's mini-boss, the Noon Toller (`galeSovereign`). It holds its hammer

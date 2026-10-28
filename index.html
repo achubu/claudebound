@@ -544,7 +544,8 @@ function animateHero(dt,moved){
 function loop(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;const previous=state?{...state.pos,room:state.room}:null;move(dt);animateEnemy(dt);const moved=!!(previous&&state&&!state.battle&&$('menuOverlay').classList.contains('hidden')&&(previous.room!==state.room||Math.hypot(state.pos.x-previous.x,state.pos.y-previous.y)>.01));animateHero(dt,moved);requestAnimationFrame(loop)}
 function fitWorld(){$('world').style.setProperty('--world-scale',Math.min(innerWidth/800,innerHeight/500))}
 const inputKey=e=>e.key.length===1?e.key.toLowerCase():e.key;
-addEventListener('keydown',e=>{const key=inputKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key))e.preventDefault();if(key==='m'&&!e.repeat&&state&&!state.battle){e.preventDefault();keys={};$('menuOverlay').classList.contains('hidden')?showMap():$('menuModal').querySelector('.world-map, .region-map')?closeMenu():null;return}if(key==='Escape'&&!e.repeat&&state&&!$('menuOverlay').classList.contains('hidden')){e.preventDefault();closeMenu();return}keys[key]=true});addEventListener('keyup',e=>keys[inputKey(e)]=false);addEventListener('blur',()=>{keys={};save()});addEventListener('pagehide',save);
+function typingKey(e){const t=e.target;return !!(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))} /* Round 275: keys typed into a text box (a deck name) are not game keys */
+addEventListener('keydown',e=>{if(typingKey(e))return;const key=inputKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key))e.preventDefault();if(key==='m'&&!e.repeat&&state&&!state.battle){e.preventDefault();keys={};$('menuOverlay').classList.contains('hidden')?showMap():$('menuModal').querySelector('.world-map, .region-map')?closeMenu():null;return}if(key==='Escape'&&!e.repeat&&state&&!$('menuOverlay').classList.contains('hidden')){e.preventDefault();closeMenu();return}keys[key]=true});addEventListener('keyup',e=>keys[inputKey(e)]=false);addEventListener('blur',()=>{keys={};save()});addEventListener('pagehide',save);
 document.querySelectorAll('#touch button').forEach(b=>{const release=()=>{keys[b.dataset.key]=false;b.classList.remove('touching')};b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.key]=true;b.classList.add('touching');move(.14);animateHero(.14,true);if(b.setPointerCapture)b.setPointerCapture(e.pointerId)};b.onpointerup=b.onpointercancel=b.onlostpointercapture=release});
 $('newBtn').onclick=newGame;$('resumeBtn').onclick=load;$('mapBtn').onclick=showMap;$('deckBtn').onclick=showDeck;$('charBtn').onclick=showCharacter;$('saveBtn').onclick=()=>{save();toast('Journey saved in this browser.')};
 if(localStorage.getItem(SAVE_KEY))$('resumeBtn').classList.remove('hidden');
@@ -567,7 +568,7 @@ requestAnimationFrame(loop);
 <script src="assets/plazas.js?v=round232"></script>
 <script src="assets/organic-areas.js?v=round185"></script>
 <script src="assets/exploration.js?v=round233"></script>
-<script src="assets/neon-world.js?v=round225"></script>
+<script src="assets/neon-world.js?v=round275"></script>
 <script src="assets/solaris.js?v=round197"></script>
 <script src="assets/chronospire.js?v=round253"></script>
 <script src="assets/sky-data.js?v=round235"></script>
@@ -589,7 +590,8 @@ requestAnimationFrame(loop);
 <script src="assets/deck-choice.js?v=round233"></script>
 <script src="assets/deck-presets.js?v=round256"></script>
 <script src="assets/room-preload.js?v=round208"></script>
-<script src="assets/touch-controls.js?v=round185"></script>
+<script src="assets/item-reach.js?v=round275"></script>
+<script src="assets/touch-controls.js?v=round275"></script>
 <script src="assets/map-terrain.js?v=round185"></script>
 <script src="assets/enemy-labels.js?v=round229"></script>
 <script src="assets/layout-polish.js?v=round225"></script>
