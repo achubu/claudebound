@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 277: smaller cards, same picture; Hack gets pricier as you use it
+
+- **Smaller cards** (owner: "all 3"). The picture stays 152×152, and a desktop hand card goes from 377px to 296px
+  tall (about 21% shorter). A Round 277 section at the end of `assets/layout-polish.css`:
+  - The ownership band is a slim strip at the top. Its label is shorter, "◆ SOULBOUND" or "◇ AT RISK", with the full
+    "Soulbound · protected" / "Impermanent · at risk" as a tooltip; the Deck screen's legend still spells them out.
+  - Tighter rules box: less padding, minimum height 76 → 56px, 11.5px type.
+  - The footer folds down: level and mastery stay, with a thinner bar and smaller label, and the serial number is
+    hidden.
+  - The side deck's compact cards are untouched. `compendium.html` doesn't load this stylesheet, so the gallery
+    keeps its full-size cards.
+- **Hack** (owner: "increase hack cost by 1 every time it's used"). Every Hack card you play makes Hack cards cost
+  1 more energy for the rest of the fight (`b.hackPlays`, a `stat` wrapper in `assets/world-mechanics.js`).
+  - Zero Day (0) costs 1 after one Hack and 2 after two. The count resets each fight.
+  - The card text reads "⌁ Hack N (crash at 5). +1 cost per Hack played." The battle tray shows "Hack cards +N cost",
+    and the guide has a third step for it.
+  - `world-mechanics` test extended.
+- HACK_LAB
+
 ## Round 276: diagonal roads connect on the map; the phone map matches the desktop
 
 - **Diagonal roads** (owner: "connect them on the map, even if they don't line up"). On the map in Solaris and the
