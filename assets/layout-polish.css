@@ -161,3 +161,10 @@ body:not(.touch-mode) #touch{display:none}
 #world .map-chest{width:44px!important;height:44px!important}
 #world .map-chest.crystal-chest{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 14px #5ff2ff) drop-shadow(0 0 28px #5ff2ff)!important}
 #world .map-chest.crystal-chest::after{content:'◆';position:absolute;right:-12px;top:-18px;font:900 34px/1 system-ui;color:#9ffcff;text-shadow:0 0 6px #5ff2ff,0 0 2px #003a44}
+/* Round 279 (playtest): room above the collection headings under the gear slots and crystal sockets, and between
+   the start screen's Import and God Mode buttons. */
+.gear-slots + h2,.crystal-sockets + h2{margin-top:22px!important}
+#godStartBtn{margin-left:8px}
+/* Round 279 (playtest): on desktop the movement hint sat on the south exit's label; it now waits in the
+   bottom-left corner. Phones keep it where it was (their arrow pad and labels are laid out around it). */
+body:not(.touch-mode) .hint{left:16px!important;transform:none!important}

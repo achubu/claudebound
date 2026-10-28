@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 279: playtest fixes
+
+The owner asked for a playtest. A new journey was played in Chromium the way a player would: the tutorial and
+deck pick, walking and fighting by clicks, the victory screens, every menu, then the same on a 390px phone (taps,
+then "Play <card>"). `tests/playtest-walk.cjs city` also walked all 54 rooms: 387 crossings and 64 item routes,
+with no problems and no page errors. Fixed:
+- **New cards were hard to find.** After the first win the game says "open Deck to add them" and the button reads
+  "Deck · 2 new", but the two cards sat at the very bottom of the collection, about 1400px down, unmarked. Cards
+  gained since the Deck screen was last opened now come first, with a gold NEW ribbon, and the screen scrolls to
+  them. They stay marked while you switch filters and clear when the screen closes (`assets/deck-choice.js`).
+- **Messages hid behind menus.** `#game` is `position: fixed`, so it is its own stacking context, and the message
+  toast's z-index only counted inside it, under the menu overlays. Messages such as "Deck Matrix currently allows
+  6 cards." (clicking Add to deck with a full deck) never showed. The toast now lives on the page body, above the
+  menus (`assets/layout-polish.js`).
+- **The starting-deck pick said one thing and showed another.** The line read "The first copy of each card you
+  pick is ◆ Soulbound", while every card showed "◇ AT RISK" until picked. An unpicked card now shows what picking
+  it gives: Soulbound while no copy of it is picked yet (`assets/tutorial.js`).
+- **The movement hint covered the south exit's label** on desktop. It now sits in the bottom-left corner; phones
+  are unchanged.
+- Spacing: a gap above the "Gear collection" and "Crystal collection" headings, and between the start screen's
+  Import and God Mode buttons.
+- New `tests/deck-new.test.cjs`.
+
 ## Round 278: hidden chests are easy to see; each Hack crash needs 1 more Glitch
 
 - **Hidden chests** (owner: "the crystal in the hidden chest is not visible… I only found it by accident"). Neon
