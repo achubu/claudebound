@@ -102,6 +102,14 @@ function mapSeam(key, dir) {
   }
   return mapSeamCache[ck].map(c => ({ own: first ? c.a : c.b, meet: c.meet, width: c.width }));
 }
+// Round 276: a diagonal road on the map: [nearest street, door] in room pixels.
+function mapDiagAnchor(key, d) {
+  const r = rooms[key]; if (!r || !r.world) return null;
+  const [cx, cy] = r.world, patch = mapPatches(cx, cy), door = [Math.max(0, Math.min(800, d.x)), Math.max(0, Math.min(500, d.y))];
+  let best = null, bd = Infinity;
+  for (let y = 4; y < 500; y += 8) for (let x = 4; x < 800; x += 8) { if (patch.at(x, y) < MAP_MIN_PATCH) continue; const dd = Math.hypot(x - door[0], y - door[1]); if (dd < bd) { bd = dd; best = [x, y]; } }
+  return best && bd < 300 ? [best, door] : [door, door];
+}
 function mapPathTile(key) {
   const r = rooms[key]; if ((activeRegion !== 'city' && activeRegion !== 'elaris' && !TILE_REGIONS[activeRegion]) || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
   const ck = 'paths:' + activeRegion + ':' + key; if (mapTileCache[ck]) return mapTileCache[ck];
@@ -123,6 +131,10 @@ function mapPathTile(key) {
     const pt = (depth, along) => dir === 'w' ? [depth, along] : dir === 'e' ? [W - depth, along] : dir === 'n' ? [along, depth] : [along, H - depth];
     links.push({ width: c.width, pts: [pt(D + 4, c.own), pt(D - 6, c.own), pt(10, c.meet), pt(-4, c.meet)] });
   }
+  // Round 276: a diagonal road's door gets a connector from the nearest street (the edge trim cuts it off);
+  // drawMapTerrain then joins the two doors across the cut room.
+  const diag = typeof worldDiagTable === 'function' ? worldDiagTable()[key] : null;
+  if (diag) for (const [dir, d] of Object.entries(diag)) { const a = mapDiagAnchor(key, d); if (a && rooms[d.to] && r.exits[dir]) links.push({ width: 30, pts: a }); }
   const dabs = (style, rad, list) => { ctx.fillStyle = style; ctx.beginPath(); for (let i = 0; i < list.length; i += 2) { ctx.moveTo(list[i] + rad, list[i + 1]); ctx.arc(list[i], list[i + 1], rad, 0, Math.PI * 2); } ctx.fill(); };
   const strokes = (style, extra) => { ctx.strokeStyle = style; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; for (const l of links) { ctx.lineWidth = Math.max(2, l.width + extra); ctx.beginPath(); ctx.moveTo(...l.pts[0]); for (const p of l.pts.slice(1)) ctx.lineTo(...p); ctx.stroke(); } };
   // Neon outline: a soft glow, a bright rim, then the dark street surface inset from it.
@@ -288,6 +300,25 @@ function drawMapTerrain(canvasEl, tileW, bounds) {
   }
   L.globalCompositeOperation = 'source-over';
   ctx.drawImage(land, 0, 0);
+  // Round 276: a diagonal road crosses a cut room, which the frontier above fades out. Draw it again on top,
+  // in the street style, from one room's street through both doors to the other's street. The doors need
+  // not line up: the line simply joins them.
+  if (typeof worldDiagTable === 'function') {
+    const sxr = TW / 800, syr = TH / 500, done = new Set();
+    for (const [key, t] of Object.entries(worldDiagTable())) for (const [dir, d] of Object.entries(t)) {
+      if (!source[key] || !source[d.to] || !rooms[key] || !rooms[key].exits[dir]) continue;
+      const id = [key, d.to].sort().join('|'); if (done.has(id)) continue; done.add(id);
+      const back = worldDiagTable()[d.to] && Object.values(worldDiagTable()[d.to]).find(e => e.to === key);
+      const A = mapDiagAnchor(key, d), B = back ? mapDiagAnchor(d.to, back) : null; if (!A || !B) continue;
+      const P = (k2, q) => { const [x0, y0] = at(...XY(k2)); return [x0 + q[0] * sxr, y0 + q[1] * syr]; };
+      const pts = [P(key, A[0]), P(key, A[1]), P(d.to, B[1]), P(d.to, B[0])];
+      ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      for (const [style, w] of [[MAP_PATH_STYLE.glow, 30 + 16], [MAP_PATH_STYLE.edge, 30], [MAP_PATH_STYLE.street, 30 - 16]]) {
+        ctx.strokeStyle = style; ctx.lineWidth = Math.max(1.5, w * sxr); ctx.beginPath(); ctx.moveTo(...pts[0]); for (const q of pts.slice(1)) ctx.lineTo(...q); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
   // Where you are.
   const [hx, hy] = at(...XY(state.room));
   ctx.save(); ctx.strokeStyle = '#ffd27acc'; ctx.lineWidth = 5 * k; ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 18 * k;
@@ -308,6 +339,9 @@ function applyMapZoom(map, scroller, zoom, focus) {
   const relX = (scroller.scrollLeft + fx) / (map.offsetWidth || 1), relY = (scroller.scrollTop + fy) / (map.offsetHeight || 1);
   mapZoom = zoom; try { localStorage.setItem('aethercede-map-zoom', String(zoom)); } catch (e) { /* private mode */ }
   map.style.width = Math.round(baseW * zoom) + 'px'; map.style.height = Math.round(baseH * zoom) + 'px';
+  // Round 276: below 60% the room labels shrink with the map, so a phone (which fits the map at ~30%) shows the
+  // same picture as a desktop instead of a wall of overlapping labels.
+  map.style.setProperty('--map-label-scale', String(Math.min(1, zoom / 0.6)));
   scroller.scrollLeft = relX * map.offsetWidth - fx; scroller.scrollTop = relY * map.offsetHeight - fy;
   const label = document.querySelector('.map-zoom-level'); if (label) label.textContent = Math.round(zoom * 100) + '%';
   clearTimeout(applyMapZoom.timer);
@@ -394,6 +428,7 @@ mapTerrainStyles.textContent = '.map-canvas.map-city{background:#070b10;min-widt
   + '.minimap-terrain{display:block;width:190px;height:auto;border-radius:4px}@media(max-width:720px){.minimap-terrain{width:140px}}'
   + '.map-terrain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:auto}'
   + '.map-city .map-links{z-index:1}'
+  + '.map-city .panel{scale:var(--map-label-scale,1);transform-origin:50% 50%}'
   + '.map-city .panel{z-index:2;width:auto!important;height:auto!important;min-width:0;min-height:0;padding:5px 9px 4px;text-align:center;background:rgba(7,13,20,.4);border-color:#5d86a066;border-radius:8px;box-shadow:0 2px 10px #000a;backdrop-filter:blur(2px)}'
   + '.map-city .panel b{display:block;font-size:11px;white-space:nowrap}'
   + '.map-city .panel small{font-size:9px}'

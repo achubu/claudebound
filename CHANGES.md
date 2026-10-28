@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 276: diagonal roads connect on the map; the phone map matches the desktop
+
+- **Diagonal roads** (owner: "connect them on the map, even if they don't line up"). On the map in Solaris and the
+  Sky Isles, a diagonal road showed only as a thin dashed line with a short stub at each end. Each room's map tile
+  trims its streets back from the room edges, diagonal exits got no connector, and the cut room between the two
+  rooms is unexplored ground that the frontier fades out.
+  - Each diagonal door now gets a connector in its room's tile, from the nearest street to the door
+    (`mapDiagAnchor()` in `assets/map-terrain.js`).
+  - After the frontier pass, the map draws each diagonal again in the street style: street, door, the partner's
+    door, the partner's street. In the Sky Isles the doors sit partway along the edges and don't line up, so the
+    road bends once and still reads as one road. The minimap uses the same drawing, so it shows them too.
+- **Phone map** (owner: "make sure the mobile map is the same as the desktop map"). A phone fits the map at about
+  30%, but the room labels stayed full size, so they covered each other and the streets. Below 60% the labels now
+  shrink with the map (`--map-label-scale`), so a phone shows the same picture as a desktop. A desktop at Fit
+  (about 58%) is essentially unchanged.
+- New `tests/map-diagonals.test.cjs`.
+
 ## Round 275: walk straight up to every item; deck names take every key
 
 - **Item pads.** The owner kept hitting invisible boundaries on the way to chests and other objects.
