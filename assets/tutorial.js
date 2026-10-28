@@ -24,7 +24,7 @@ function tutorialPages() {
       + '<li>Some moves carry an <b>affliction</b> (a debuff on you or a buff on the enemy), shown a turn ahead so you can prepare.</li></ul>' },
     { title: 'Defend or press', body: '<p>Enemy hits are big, so every turn ask: defend, or press?</p>'
       + '<ul><li><b>◈ Block</b> soaks up the enemy\'s attack this turn, then it is gone.</li>'
-      + '<li><b>⚔ Pressure</b>: on a turn where you gain <b>no</b> Block, every ' + per + ' damage you deal takes 1 off the enemy\'s attack that turn, up to half. The enemy\'s move shows the lower number as you play.</li>'
+      + '<li><b>⚔ Pressure</b>: on a turn where you gain <b>no</b> Block, every ' + per + ' damage you deal takes 1 off the enemy\'s attack that turn, up to ' + Math.round(PRESSURE_CAP * 100) + '%. The enemy\'s move shows the lower number as you play.</li>'
       + '<li><b>Healing</b> cards (Bloom of Life, Nano Mend) restore HP, and HP carries over between fights.</li></ul>' },
     { title: 'Aether and the side deck', body: '<ul><li>Energy you don\'t spend becomes <b>✦ Aether</b> at the end of your turn. You can also <b>pitch</b> a card from your hand: it burns away for the rest of the fight and gives its cost + 1 Aether.</li>'
       + '<li>Aether pays for your <b>side deck</b>: answers to afflictions such as Purifying Light (cleanses debuffs), Aegis Ward (shields a big hit) and Dispel Lance (breaks enemy buffs).</li></ul>' },

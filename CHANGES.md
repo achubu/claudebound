@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 280: Pressure 10% weaker
+
+- The owner asked to reduce Pressure by 10%. `PRESSURE_STRENGTH = 0.9` in `assets/pressure.js` scales both parts
+  of it.
+  - **Rate:** each point taken off the enemy's attack costs 10% more damage. Per world: Neon Aftermath and Solaris
+    2 → 2.2, Sky Isles 3 → 3.3, Elaris 4 → 4.4, Vespera and Chronospire 6 → 6.7.
+  - **Cap:** at most 45% of the hit comes off (was half).
+- The battle bubble and the tutorial give the new numbers. `pressure` test updated.
+- LAB_TABLE
+
 ## Round 279: playtest fixes
 
 The owner asked for a playtest. A new journey was played in Chromium the way a player would: the tutorial and
