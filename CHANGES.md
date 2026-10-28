@@ -3515,7 +3515,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - **Deck names** (owner: "can't type every character"). The global key handler took W, A, S, D, the arrow keys and M
   (map) as game keys, even inside the favourite-deck name box, so those letters never reached it. `typingKey()` in
   `index.html` now skips keys typed into text boxes; `touch-controls.js` does the same.
-- New `tests/item-reach.test.cjs` covers all six worlds, the pads, a sampled approach simulation (under 14% near
+- `neon-world-pathing`'s random walks count an item's pad as ground. New `tests/item-reach.test.cjs` covers all six worlds, the pads, a sampled approach simulation (under 14% near
   misses everywhere) and `typingKey()`. Also checked in the browser: a Vespera chest opens by holding two arrow keys,
   and a deck name with W/A/S/D/M and the arrow keys saves as typed.
 

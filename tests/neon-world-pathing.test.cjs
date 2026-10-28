@@ -47,7 +47,7 @@ for(const k of Object.keys(rooms))for(let pi=0;pi<organicPockets(k).length;pi++)
   if(i>400)slow.push(k+' '+d+'->'+t.name);
  }}}
 console.log('routes tried',n);console.log('NO ROUTE ('+noRoute.length+'):',noRoute.join('; '));console.log('FAILED ('+fails.length+'):',fails.join('; '));console.log('slow:',slow.join('; '));assert.equal(noRoute.length,0,'tap routes: '+noRoute.join('; '));assert.equal(fails.length,0,'tap routes: '+fails.join('; '))}`);
-// 3) Random keyboard walks and taps: never inside scenery, never unable to move.
+// 3) Random keyboard walks and taps: never inside scenery, never unable to move. (Round 275: an item's walkable pad counts as ground.)
 run(`{newGame();configureRegion('city');state.relics=['ember','boots','lens'];for(const k of Object.keys(rooms))for(const s of roomSpawns(k))state.cooldowns[s.uid]=999;state.bosses=['thornWarden','crownSentinel','moonKnight'];checkWorldInteractions=()=>{};renderWorld();
 let seed=7;const rnd=()=>(seed=(seed*1103515245+12345)%2147483648)/2147483648;
 const dirs=[['ArrowUp'],['ArrowDown'],['ArrowLeft'],['ArrowRight'],['ArrowUp','ArrowLeft'],['ArrowUp','ArrowRight'],['ArrowDown','ArrowLeft'],['ArrowDown','ArrowRight']];
@@ -55,7 +55,7 @@ const seen=new Set([state.room]);let inWall=0,frozen=0,steps=0,taps=0,tapFail=0;
 for(let ep=0;ep<1200;ep++){
  if(rnd()<.25){ // tap a random street spot in the room
   const pts=organicGrid(state.room);const i=Math.floor(rnd()*pts.length/2)*2;taps++;if(!setTouchDestination({x:pts[i],y:pts[i+1]}))tapFail++;for(let j=0;j<300&&activeTouchRoute();j++){move(.033);steps++}
- } else {const d=dirs[Math.floor(rnd()*8)];keys=Object.fromEntries(d.map(k=>[k,true]));const n=5+Math.floor(rnd()*40);for(let j=0;j<n;j++){move(.033);steps++;seen.add(state.room);if(!walkable(state.room,state.pos.x,state.pos.y)){inWall++;wallRooms.add(state.room+'@'+Math.round(state.pos.x)+','+Math.round(state.pos.y))}}keys={}}
+ } else {const d=dirs[Math.floor(rnd()*8)];keys=Object.fromEntries(d.map(k=>[k,true]));const n=5+Math.floor(rnd()*40);for(let j=0;j<n;j++){move(.033);steps++;seen.add(state.room);if(!walkable(state.room,state.pos.x,state.pos.y)&&!itemPadAt(state.room,state.pos.x,state.pos.y)){inWall++;wallRooms.add(state.room+'@'+Math.round(state.pos.x)+','+Math.round(state.pos.y))}}keys={}}
  seen.add(state.room);
  // frozen check: can we move in at least one direction?
  const p={...state.pos},r=state.room;let can=false;for(const d of dirs.slice(0,4)){keys={[d[0]]:true};move(.033);keys={};if(state.room!==r||Math.hypot(state.pos.x-p.x,state.pos.y-p.y)>.5)can=true;neonArrival=null;state.room=r;state.pos={...p};}
