@@ -135,3 +135,23 @@ body:not(.touch-mode) #touch{display:none}
 #battleModal .combat-tools.with-encounter{display:block}#battleModal .combat-tools .encounter-line + p{display:inline;margin:0!important}
 /* Round 239: a gap before the talent buttons (Overdrive, Echo, Overload) on the encounter line */
 #battleModal .combat-tools > button.ability{margin-left:8px}
+/* Round 277 (owner request): smaller cards, same picture. The ownership band becomes a slim strip at the top,
+   the rules box is tighter, and the footer folds down (level and mastery stay, the serial number goes). */
+.card:not(.side-col-list .card){padding-top:21px!important;padding-bottom:7px!important}
+.card:not(.side-col-list .card) .ownership{top:4px!important;height:14px!important;right:46px!important;left:6px!important;padding:0 6px!important;font-size:7.5px!important;letter-spacing:.3px!important;border-radius:7px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;display:block!important;line-height:14px!important}
+.card:not(.side-col-list .card) .cost{top:4px!important}
+.card:not(.side-col-list .card) .card-name{min-height:0!important;padding:2px 30px 4px 0!important;line-height:1.15!important}
+.card:not(.side-col-list .card) .rules{min-height:56px!important;padding:6px 7px!important;font-size:11.5px!important;line-height:1.35!important}
+.card:not(.side-col-list .card) .upgrade-row{margin-top:5px!important;font-size:9.5px!important}
+.card:not(.side-col-list .card) .mastery-label{margin-top:2px!important;font-size:8px!important;line-height:1.1!important}
+.card:not(.side-col-list .card) .track{height:5px!important}
+.touch-mode .card:not(.side-col-list .card) .ownership{font-size:7px!important;letter-spacing:0!important}
+.card:not(.side-col-list .card) .card-serial{display:none!important}
+/* Round 277: nothing sits on top of card text. The small type icon in the rules box floats beside the words
+   (it was pinned over the corner and covered the end of the first line); the smallest labels are a size larger. */
+.card .rules .kind-badge{position:static!important;float:right!important;font-size:16px!important;margin:-1px 0 2px 6px!important}
+.card:not(.side-col-list .card) .ownership{font-size:8px!important}
+.card:not(.side-col-list .card) .upgrade-row{font-size:10px!important}
+.card:not(.side-col-list .card) .mastery-label{font-size:9px!important}
+.card:not(.side-col-list .card) .card-name{letter-spacing:0!important;padding-right:32px!important}
+.touch-mode #hand .card:not(.side-col-list .card) .card-name{font-size:12px!important}

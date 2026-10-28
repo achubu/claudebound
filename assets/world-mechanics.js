@@ -47,7 +47,7 @@ tieredCard('lightningRod', 'Lightning Rod', 1, 'Lightning Attack', '⫯', [{ dis
 const WORLD_MECHANICS = {
   city: { key: 'hack', name: 'Hack', icon: '⌁', color: '#5ff2e0', cards: ['packetSniff', 'logicBomb', 'ghostProtocol', 'zeroDay'], gift: ['packetSniff', 'ghostProtocol'], world: 'Neon Aftermath',
     tagline: 'A RUINED CITY STILL RUNNING ON BROKEN CODE',
-    steps: ['<b>⌁ Hack cards add Glitch to the enemy.</b> The tray shows how much it has.', '<b>At ' + HACK_LIMIT + ' Glitch it crashes</b> and skips its next action.', '<b>Every crash needs ' + HACK_LIMIT + ' Glitch</b>, so you can crash it again and again.'],
+    steps: ['<b>⌁ Hack cards add Glitch to the enemy.</b> The tray shows how much it has.', '<b>At ' + HACK_LIMIT + ' Glitch it crashes</b> and skips its next action.', '<b>Every crash needs ' + HACK_LIMIT + ' Glitch</b>, so you can crash it again and again.', '<b>Each Hack card you play</b> makes Hack cards cost 1 more for the rest of the fight.'],
     tip: 'Enemies with <b>🛡 Firewall</b> wipe their Glitch.' },
   elaris: { key: 'heat', name: 'Heat', icon: '☀', color: '#ffb347', cards: ['sunstoke', 'scorchingSands', 'heatwave', 'noonBlaze'], gift: ['sunstoke', 'scorchingSands'], world: 'Solaris',
     tagline: 'A DESERT UNDER A SUN THAT NEVER SETS',
@@ -99,6 +99,12 @@ stat = function (c) {
   if (d.discharge !== undefined) out.damage = (b.stormcharge || 0) + d.discharge;
   return out;
 };
+// Round 277 (owner request): every Hack card you play makes Hack cards cost 1 more energy for the rest of the fight.
+const statBeforeHackCost = stat;
+stat = function (c) {
+  const d = statBeforeHackCost(c), b = typeof state === 'object' && state && state.battle;
+  return d && d.hack && b && b.hackPlays ? { ...d, cost: (d.cost || 0) + b.hackPlays } : d;
+};
 const bonusWords = o => Object.entries(o).map(([k, v]) => '+' + v + ' ' + (k === 'damage' ? 'damage' : k === 'block' ? 'Block' : k === 'heal' ? 'healing' : k)).join(', ');
 const rulesBeforeMechanics = rules;
 rules = function (c) {
@@ -106,7 +112,7 @@ rules = function (c) {
   const def = defs[c && c.id]; if (!def || !def.tiers) return text;
   const t = def.tiers[c.level || 0] || def.tiers[0];
   if (t.discharge !== undefined) text = text.replace(/Deal \d+ damage\.( Pierce: ignores enemy armor\.)?/, '').trim() + ' ⚡ Discharge: deal your Stormcharge + ' + t.discharge + ' damage (ignores Armor), using it all up.';
-  if (t.hack) text += ' ⌁ Hack ' + t.hack + ': the enemy gains ' + t.hack + ' Glitch (it crashes at ' + HACK_LIMIT + ').';
+  if (t.hack) text += ' ⌁ Hack ' + t.hack + ' (crash at ' + HACK_LIMIT + '). +1 cost per Hack played.';
   if (t.heat) text += ' ☀ Heat ' + t.heat + ': your next attack sears for ' + HEAT_SEAR + ' per Heat.';
   if (t.sear) text += ' ☀ Sears for ' + t.sear + ' per Heat instead of ' + HEAT_SEAR + '.';
   if (t.tailwind) text += ' 🪶 Tailwind: ' + bonusWords(t.tailwind) + ' for each card you already played this turn (up to ' + TAILWIND_MAX + ').';
@@ -127,6 +133,7 @@ cardEffect = function (c, empowered, doubleAttack) {
     b.enemy.hp = Math.max(0, b.enemy.hp - sear); b.logs.push('☀ Heat ' + b.heat + ': ' + d.name + ' sears for ' + sear + '.'); b.heat = 0;
   }
   if (d.heat) b.heat = Math.min(HEAT_MAX, (b.heat || 0) + d.heat);
+  if (d.hack) b.hackPlays = (b.hackPlays || 0) + 1; // Round 277: every Hack card played makes Hack cards cost 1 more this fight
   if (d.hack && b.enemy.hp > 0) {
     b.glitch = (b.glitch || 0) + d.hack;
     if (b.glitch >= hackLimit(b)) {
@@ -208,7 +215,7 @@ function mechanicGuideHTML(m, closeId) {
     + '<ol class="mg-steps">' + m.steps.map((s, i) => '<li><span class="mg-n">' + (i + 1) + '</span><div>' + s + '</div></li>').join('') + '</ol><p class="mg-tip">' + m.tip + '</p></div>';
 }
 function mechanicReadout(m, b) {
-  if (m.key === 'hack') return [(b.glitch || 0) + '/' + hackLimit(b), 'Glitch on the enemy', b.crashes ? 'crashed ' + b.crashes + '×' : 'crashes at ' + hackLimit(b)];
+  if (m.key === 'hack') return [(b.glitch || 0) + '/' + hackLimit(b), 'Glitch on the enemy', (b.crashes ? 'crashed ' + b.crashes + '×' : 'crashes at ' + hackLimit(b)) + (b.hackPlays ? ' · Hack cards +' + b.hackPlays + ' cost' : '')];
   if (m.key === 'heat') return [(b.heat || 0) + '/' + HEAT_MAX, 'Heat', b.heat ? 'next attack sears +' + b.heat * HEAT_SEAR : 'build Heat, then attack'];
   if (m.key === 'tailwind') return [String(tailwindCount(b)), 'Tailwind this turn', b.headwindNow && (b.tailwind || 0) < b.headwindNow ? '🌬 Headwind: ' + (b.headwindNow - (b.tailwind || 0)) + ' more card' + (b.headwindNow - (b.tailwind || 0) > 1 ? 's' : '') + ' add nothing' : 'resets when you end your turn'];
   if (m.key === 'growth') { const best = Math.max(0, ...Object.values(b.growth || {})); return [String(best), 'most growth', 'cards grow each time you play them'] }
