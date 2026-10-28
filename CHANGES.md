@@ -3496,6 +3496,36 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 280: Pressure 10% weaker; a tougher Lunar Enforcer; the Sun Pharaoh walks
+
+- The owner asked to reduce Pressure by 10%. `PRESSURE_STRENGTH = 0.9` in `assets/pressure.js` scales both parts
+  of it.
+  - **Rate:** each point taken off the enemy's attack costs 10% more damage. Per world: Neon Aftermath and Solaris
+    2 → 2.2, Sky Isles 3 → 3.3, Elaris 4 → 4.4, Vespera and Chronospire 6 → 6.7.
+  - **Cap:** at most 45% of the hit comes off (was half).
+- The battle bubble and the tutorial give the new numbers. `pressure` test updated.
+- **The Sun Pharaoh walks.** The owner sent an eight-frame walk for Solaris's final boss (`bloomTyrant`). The source
+  strip is `assets/monsters/elaris/src/sun-pharaoh-walk8.png`.
+  - The frames are anchored on the upper body with one foot baseline, so frames 1, 3, 5 and 7 are cut with one
+    shared window, as for the Noon Toller. The result replaces `assets/monsters/elaris/sun-pharaoh.png`.
+  - It walks at the owner's 0.8s; Elaris's Bloom Tyrant, drawn by the same line, keeps 1.8s.
+  - `SPRITE_VERSION` 280. New `tests/sun-pharaoh.test.cjs`.
+- Difficulty lab after the change, all builds averaged (win %, smart / naive). Before is Round 265's table.
+
+  | World | Regular, before | Regular, after | Bosses, before | Bosses, after |
+  |---|---|---|---|---|
+  | Neon Aftermath | 69 / 31 | 67 / 27 | 38 / 7 | 37 / 6 |
+  | Solaris | 76 / 28 | 63 / 29 | 42 / 9 | 42 / 8 |
+  | Sky Isles | 67 / 27 | 76 / 16 | 39 / 3 | 38 / 2 |
+  | Elaris | 62 / 14 | 57 / 16 | 42 / 1 | 42 / 1 |
+  | Vespera | 82 / 14 | 81 / 17 | 38 / 0 | 36 / 0 |
+  | Chronospire | 72 / 1 | 64 / 1 | 40 / 0 | 38 / 0 |
+
+  Bosses moved by 0-2 points. Regular fights move about ±8 between runs, so Solaris's 63 is within the noise.
+- **Lunar Enforcer** (owner: "far too easy"). With traits and the weaker Pressure, the lab (`t2`, typical of 16
+  builds × 2 policies) had it at 59%, against 22% for the Crown Sentinel and 29% for the Thorn Warden.
+  - `BALANCE.perEnemy.moonKnight.hp` 0.43 → 0.5 puts it at 39%. Measured: 0.48 → 44%, 0.55 → 21%, 0.65 → 13%.
+
 ## Round 279: playtest fixes
 
 The owner asked for a playtest. A new journey was played in Chromium the way a player would: the tutorial and

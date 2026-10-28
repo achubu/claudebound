@@ -9,8 +9,10 @@
 // defend or press. Tuned with the Difficulty lab (assets/sim/lab.js).
 // =====================================================================
 // Damage per point taken off, by world: late decks deal far more per energy, so pressing costs more there.
-const PRESSURE_PER_BY_WORLD = { city: 2, elaris: 2, sky: 3, wilds: 4, vespera: 6, chronospire: 6 }, PRESSURE_CAP = 0.5;
-function pressurePer() { return PRESSURE_PER_BY_WORLD[typeof activeRegion === 'string' ? activeRegion : 'city'] || 3; }
+// Round 280 (owner: "reduce pressure by 10%"): PRESSURE_STRENGTH scales both the rate (2 damage per point becomes 2.2)
+// and the cap (half becomes 45%).
+const PRESSURE_PER_BY_WORLD = { city: 2, elaris: 2, sky: 3, wilds: 4, vespera: 6, chronospire: 6 }, PRESSURE_STRENGTH = 0.9, PRESSURE_CAP = 0.5 * PRESSURE_STRENGTH;
+function pressurePer() { return Math.round((PRESSURE_PER_BY_WORLD[typeof activeRegion === 'string' ? activeRegion : 'city'] || 3) / PRESSURE_STRENGTH * 10) / 10; }
 
 function pressureDealt(b) { return b && b.pressureTurn === b.turn ? b.pressureDmg || 0 : 0; }
 function pressureGuarded(b) { return !!b && b.guardTurn === b.turn; }
@@ -55,7 +57,7 @@ intentBubble = function (plan, cls, label, frozen) {
   if (cls !== 'now' || frozen || !b || !(plan.damage > 0)) return html;
   const line = plan.pressure ? '⚔ Pressure: −' + plan.pressure + (plan.hits > 1 ? ' per hit' : '') + ' (you dealt ' + pressureDealt(b) + ' this turn)'
     : pressureGuarded(b) ? '⚔ No Pressure: you gained Block this turn'
-    : '⚔ Pressure: every ' + pressurePer() + ' damage you deal this turn takes 1 off, up to half (not if you gain Block)';
+    : '⚔ Pressure: every ' + pressurePer() + ' damage you deal this turn takes 1 off, up to ' + Math.round(PRESSURE_CAP * 100) + '% (not if you gain Block)';
   return html.replace(/<\/div>$/, '<p class="affliction pressure-line' + (plan.pressure ? ' on' : '') + '">' + line + '</p></div>');
 };
 if (typeof document !== 'undefined' && document.createElement && document.head) {

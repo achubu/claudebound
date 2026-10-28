@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 279) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 280) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -96,8 +96,8 @@ change set.
   each card's description (Round 238),
   and an affliction that works against it.
 - **⚔ Pressure** (Round 226, `assets/pressure.js`): on a turn where you gain no Block from a card, every
-  `pressurePer()` damage you deal (2 in the first two worlds, rising to 6 late) takes 1 off the enemy's
-  attack that turn, up to half. It makes decks without Block viable; boss HP was re-tuned for it.
+  `pressurePer()` damage you deal (2.2 in the first two worlds, rising to 6.7 late) takes 1 off the enemy's
+  attack that turn, up to 45% (Round 280 made it 10% weaker: `PRESSURE_STRENGTH`). It makes decks without Block viable; boss HP was re-tuned for it.
 - **Concept-lab card mechanics** (Round 206, `assets/card-mechanics.js`): ⤳ Follow-through, ⚡ Amplify and
   ◇ Choose one, via a `stat` wrapper reading `b.chain`, `b.amplifyUid` and `b.modePick`.
 - **Creature sprite sheets** (4 frames, one row; magenta or, since Round 222, green background): cut generated art with `tools/cut_sprite_sheet.py`,

@@ -1,6 +1,6 @@
 'use strict';
 // Round 226: ⚔ Pressure. On a turn where you gain no Block from a card, every few damage you deal
-// (the world's rate) takes 1 off the enemy's attack at the end of that turn, up to half of it.
+// (the world's rate) takes 1 off the enemy's attack at the end of that turn, up to 45% of it (half before Round 280).
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(()=>{
 const o = {};
@@ -23,7 +23,7 @@ return JSON.stringify(o); })()`));
 const assert = (ok, msg) => { if (!ok) { console.error('FAIL', msg, JSON.stringify(r)); process.exit(1); } console.log('ok', msg); };
 assert(r.one.off === Math.floor(r.one.dmg / r.one.per) && r.one.now === r.one.full - r.one.off, 'every ' + r.one.per + ' damage dealt takes 1 off this turn\'s attack');
 assert(r.one.next === 0, 'the turn after is untouched');
-assert(r.cap.dealt / r.one.per > r.cap.full / 2 && r.cap.now === r.cap.full - Math.floor(r.cap.full / 2), 'it takes off at most half');
+assert(r.cap.dealt / r.one.per > r.cap.full * 0.45 && r.cap.now === r.cap.full - Math.floor(r.cap.full * 0.45), 'it takes off at most 45% (Round 280: was half)');
 assert(r.blocked.guarded && r.blocked.now === r.one.full && r.blocked.line, 'gaining Block from a card that turn means no Pressure, and the intent says so');
 assert(r.taken.lost === r.taken.shown && r.taken.shown > 0, 'the hit taken matches the lowered intent');
 assert(r.reset.dealt === 0 && !r.reset.guarded, 'it starts again from nothing each turn');
