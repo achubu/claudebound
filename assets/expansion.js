@@ -50,7 +50,7 @@ const BALANCE={
  perEnemy:{
   // Round 183: re-tuned with gear worn (assets/sim/lab.js); Neon Aftermath's three bosses at about 40% (owner request). Round 185: Crown Sentinel, Noon Toller and Resonant Phantom re-tuned for their mechanic afflictions.
   // Round 253: every boss re-tuned to about 40 percent for the average build with full decks.
-  moonKnight:{hp:0.5},/* Round 281: 0.43 → 0.5 (owner: "far too easy"; lab 59% → 39%) */crownSentinel:{hp:1.04},thornWarden:{hp:0.622},
+  moonKnight:{hp:0.5},/* Round 280: 0.43 → 0.5 (owner: "far too easy"; lab 59% → 39%) */crownSentinel:{hp:1.04},thornWarden:{hp:0.622},
   tidewardenElaris:{hp:0.957,attack:7},galeSovereign:{hp:0.65},bloomTyrant:{hp:0.447},/* Round 250: Noon Toller and Sun Pharaoh to about 30% (owner) */
   arcSentinel:{hp:1.59},resonantPhantom:{hp:2.69},stormTyrant:{hp:0.759},
   // Round 51: the Drowned Heron (water, Siphon) was the worst early Elaris fight.
