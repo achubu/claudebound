@@ -3496,7 +3496,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
-## Round 280: Pressure 10% weaker
+## Round 280: Pressure 10% weaker; the Sun Pharaoh walks
 
 - The owner asked to reduce Pressure by 10%. `PRESSURE_STRENGTH = 0.9` in `assets/pressure.js` scales both parts
   of it.
@@ -3504,6 +3504,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
     2 → 2.2, Sky Isles 3 → 3.3, Elaris 4 → 4.4, Vespera and Chronospire 6 → 6.7.
   - **Cap:** at most 45% of the hit comes off (was half).
 - The battle bubble and the tutorial give the new numbers. `pressure` test updated.
+- **The Sun Pharaoh walks.** The owner sent an eight-frame walk for Solaris's final boss (`bloomTyrant`). The source
+  strip is `assets/monsters/elaris/src/sun-pharaoh-walk8.png`.
+  - The frames are anchored on the upper body with one foot baseline, so frames 1, 3, 5 and 7 are cut with one
+    shared window, as for the Noon Toller. The result replaces `assets/monsters/elaris/sun-pharaoh.png`.
+  - It walks at the owner's 0.8s; Elaris's Bloom Tyrant, drawn by the same line, keeps 1.8s.
+  - `SPRITE_VERSION` 280. New `tests/sun-pharaoh.test.cjs`.
 - LAB_TABLE
 
 ## Round 279: playtest fixes
