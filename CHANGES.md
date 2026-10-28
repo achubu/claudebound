@@ -3507,13 +3507,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
     hidden.
   - The side deck's compact cards are untouched. `compendium.html` doesn't load this stylesheet, so the gallery
     keeps its full-size cards.
+- **Nothing covers card text** (owner: "the small elemental graphics can block text").
+  - The type icon in the rules box (`.kind-badge`) was pinned over the box's top-right corner and covered the end of
+    the first line. It now floats beside the "ATTACK"/"DEFENSE" line and the text wraps around it.
+  - Names keep clear of the cost circle: no letter spacing, and 12px names on phones, so "Featherguard" fits.
+  - The smallest labels are a size larger (strip 8px, level 10px, mastery 9px).
+  - New browser check `tests/card-legibility.cjs [phone]`: every card at level 3 in the hand, checked for an icon,
+    cost circle or strip lying over text. 98 cards, 0 overlaps on desktop and on a 390px phone.
 - **Hack** (owner: "increase hack cost by 1 every time it's used"). Every Hack card you play makes Hack cards cost
   1 more energy for the rest of the fight (`b.hackPlays`, a `stat` wrapper in `assets/world-mechanics.js`).
   - Zero Day (0) costs 1 after one Hack and 2 after two. The count resets each fight.
   - The card text reads "⌁ Hack N (crash at 5). +1 cost per Hack played." The battle tray shows "Hack cards +N cost",
     and the guide has a third step for it.
   - `world-mechanics` test extended.
-- HACK_LAB
+- Difficulty lab, Neon Aftermath (win %, smart / naive): bosses 38 / 7 before and after; regular fights 68 / 29 → 76 / 32, within the run-to-run noise.
 
 ## Round 276: diagonal roads connect on the map; the phone map matches the desktop
 
