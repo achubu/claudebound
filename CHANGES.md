@@ -3513,6 +3513,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   - Firewall still only wipes Glitch.
   - The card text reads "⌁ Hack N: +N Glitch (crash at 5, then +1 each)". The guide's third step and the crash log
     give the next crash point. `world-mechanics` test updated.
+  - Difficulty lab, Neon Aftermath (win %, smart / naive): bosses 38 / 7 as before, regular fights 72 / 32.
 
 ## Round 277: smaller cards, same picture; Hack gets pricier as you use it
 
