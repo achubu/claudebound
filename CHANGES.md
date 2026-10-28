@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 278: hidden chests are easy to see; each Hack crash needs 1 more Glitch
+
+- **Hidden chests** (owner: "the crystal in the hidden chest is not visible… I only found it by accident"). Neon
+  Aftermath's chests were 20px and the tile worlds' 30px, before Round 215 halved everything you can open, so about
+  10-15px on screen.
+  - Every hidden chest is now 44px before that half scale, the same as points of interest.
+  - A chest holding an Upgrade Crystal (`crystal-chest`, set in `renderWorld`) glows cyan and wears a ◆ crystal
+    badge.
+  - Styles at the end of `assets/layout-polish.css`. Checked in the browser: all three Neon Aftermath crystal chests,
+    a Solaris chest and a Sky Isles crystal chest.
+- **Hack** (owner: "a hack should happen at 5 hacks 1st, 2nd hack requires 6 hacks, the next 7"). Round 277 read
+  "increase hack cost by 1 every time it's used" as an energy cost. The owner meant the Glitch a crash needs.
+  - Round 277's energy-cost increase is removed, so Hack cards keep their printed cost.
+  - The first crash needs 5 Glitch, the next 6, then 7, and so on (`hackLimit()` is 5 + crashes so far).
+  - Firewall still only wipes Glitch.
+  - The card text reads "⌁ Hack N: +N Glitch (crash at 5, then +1 each)". The guide's third step and the crash log
+    give the next crash point. `world-mechanics` test updated.
+  - Difficulty lab, Neon Aftermath (win %, smart / naive): bosses 38 / 7 as before, regular fights 72 / 32.
+
 ## Round 277: smaller cards, same picture; Hack gets pricier as you use it
 
 - **Smaller cards** (owner: "all 3"). The picture stays 152×152, and a desktop hand card goes from 377px to 296px

@@ -22,16 +22,15 @@ for (const w of WORLD_ORDER.filter(w => w !== 'chronospire')) {
   for (const id of m.cards) { assert(VARIETY_POOLS[w].includes(id), id + ' drops in ' + w); assert.equal(NEW_CARD_WORLD[id], w); assert(rules(make(id)).includes(m.icon), id + ' explains ' + m.name); }
   for (const id of m.gift) assert(m.cards.includes(id));
 }
-// Hack: Glitch builds; at 5 the enemy crashes (skips its action); every crash needs 5.
+// Hack: Glitch builds; at 5 the enemy crashes (skips its action); the next crash needs 6, then 7.
 let b = setup(['packetSniff', 'logicBomb', 'zeroDay']);
 play('packetSniff'); assert.equal(b.glitch, 2); assert.equal(b.freeze, 0);
-play('logicBomb'); assert.equal(b.glitch, 0, 'crash resets Glitch'); assert.equal(b.freeze, 1, 'and the enemy skips its next action'); assert.equal(hackLimit(b), 5, 'the crash point stays at 5 (Round 266)');
-// Round 277: every Hack card played makes Hack cards cost 1 more this fight (Logic Bomb cost 2 + 1).
-assert.equal(b.hackPlays, 2); assert.equal(b.energy, 9 - 1 - 3, 'the second Hack card cost 1 more');
-assert.equal(stat(b.hand.find(c => c.id === 'zeroDay')).cost, 2, 'Zero Day (0) now costs 2'); assert.equal(stat(make('guard')).cost, defs.guard.cost, 'other cards are unaffected');
+play('logicBomb'); assert.equal(b.glitch, 0, 'crash resets Glitch'); assert.equal(b.freeze, 1, 'and the enemy skips its next action'); assert.equal(hackLimit(b), 6, 'the next crash needs 6 (Round 278; was 266)');
+assert.equal(b.energy, 9 - 1 - 2, 'Hack cards keep their printed cost');
 let hp = state.hp; endTurn(); assert.equal(state.hp, hp, 'crashed enemy does not attack');
-// Firewall wipes Glitch; the crash point stays at 5.
-b.glitch = 4; applyHex(b, 'firewall'); assert.equal(b.glitch, 0); assert.equal(hackLimit(b), 5);
+// Firewall wipes Glitch without moving the crash point.
+b.glitch = 4; applyHex(b, 'firewall'); assert.equal(b.glitch, 0); assert.equal(hackLimit(b), 6);
+b.crashes = 2; assert.equal(hackLimit(b), 7, 'the third crash needs 7');
 // Heat: builds, lasts, and the next attack sears 2 per Heat (Noon Blaze: 3 per Heat).
 b = setup(['sunstoke', 'scorchingSands', 'strike', 'heatwave', 'noonBlaze']);
 play('sunstoke'); assert.equal(b.heat, 2); assert.equal(b.block, 3);

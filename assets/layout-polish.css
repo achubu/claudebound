@@ -155,3 +155,9 @@ body:not(.touch-mode) #touch{display:none}
 .card:not(.side-col-list .card) .mastery-label{font-size:9px!important}
 .card:not(.side-col-list .card) .card-name{letter-spacing:0!important;padding-right:32px!important}
 .touch-mode #hand .card:not(.side-col-list .card) .card-name{font-size:12px!important}
+/* Round 278 (owner: "the crystal in the hidden chest is not visible"): hidden chests were 20px (30px in the tile
+   worlds) before Round 215's half scale, so about 10-15px on screen. They are now as big as the other points of
+   interest, and a chest holding an Upgrade Crystal glows cyan and wears a crystal badge. */
+#world .map-chest{width:44px!important;height:44px!important}
+#world .map-chest.crystal-chest{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 14px #5ff2ff) drop-shadow(0 0 28px #5ff2ff)!important}
+#world .map-chest.crystal-chest::after{content:'◆';position:absolute;right:-12px;top:-18px;font:900 34px/1 system-ui;color:#9ffcff;text-shadow:0 0 6px #5ff2ff,0 0 2px #003a44}
