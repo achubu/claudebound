@@ -112,3 +112,12 @@ renderBattle = function () {
     }
   }
 };
+// Round 279: messages ("Deck Matrix currently allows 6 cards.") showed behind open menus. #game is fixed, so it is
+// its own stacking context, and the toast's z-index only counted inside it, under the menu overlays. It now
+// lives on the page itself, above the menus.
+(function liftToast() {
+  const t = typeof document !== 'undefined' && document.getElementById && document.getElementById('toast');
+  if (!t || !document.body || !document.body.append || t.parentElement === document.body) return;
+  document.body.append(t);
+  const st = document.createElement('style'); st.textContent = '#toast{position:fixed!important;z-index:500!important}'; document.head.append(st);
+})();

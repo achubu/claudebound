@@ -60,7 +60,10 @@ function showTutorial(page = 0) {
   const offer = TUTORIAL_OFFER.map(id => make(id, 0, false)), picked = new Set();
   const draw = () => {
     // Show what you'll get: the first picked copy of each card is Soulbound.
-    const seen = new Set(); for (const c of offer) { c.soulbound = picked.has(c.uid) && !seen.has(c.id); if (c.soulbound) seen.add(c.id); }
+    // Round 279: an unpicked card shows what picking it gives: Soulbound while no copy of it is picked yet
+    // (playtest: every card read "AT RISK" under a line saying the first copy is Soulbound).
+    const first = new Map(); for (const c of offer) if (picked.has(c.uid) && !first.has(c.id)) first.set(c.id, c.uid);
+    for (const c of offer) c.soulbound = picked.has(c.uid) ? first.get(c.id) === c.uid : !first.has(c.id);
     openMenu('<div class="tutorial"><div class="eyebrow">NEW JOURNEY · ' + (last + 1) + ' / ' + (last + 1) + '</div><h2>Choose your starting deck</h2>' + tutorialPickHTML(picked)
       + '<div class="tutorial-nav"><button id="tutBack">Back</button><button id="tutStart" class="primary"' + (picked.size === TUTORIAL_PICK ? '' : ' disabled') + '>Start the journey</button></div></div>');
     const grid = $('tutorialCards');
