@@ -10,7 +10,7 @@ const context=vm.createContext({console,assert,Image:process.env.AETHERCEDE_REND
 // Round 253: enemy tempers and attack rolls (enemy-temper.js) are random, so tests run without them
 // unless TEMPER=1 (the Difficulty lab scripts set it). Round 265: likewise enemy traits and species patterns
 // (enemy-traits.js) unless TRAITS=1. Round 281: and the merchant/Cardsmith greetings (npc-greetings.js) unless NPC_GREET=1.
-if(!process.env.TEMPER)context.NO_TEMPER=1;if(!process.env.TRAITS)context.NO_TRAITS=1;if(!process.env.NPC_GREET)context.NO_NPC_GREET=1;
+if(!process.env.TEMPER)context.NO_TEMPER=1;if(!process.env.TRAITS)context.NO_TRAITS=1;if(!process.env.NPC_GREET)context.NO_NPC_GREET=1;if(!process.env.BOSS_TWISTS)context.NO_BOSS_TWISTS=1;
 // Round 91: page scripts loaded once by this harness are skipped if a test loads them again.
 const loadedScripts=new Set();
 const run=s=>{if(loadedScripts.has(s))return;return vm.runInContext(s,context)};
@@ -26,7 +26,7 @@ run(fs.readFileSync(path.join(root,'assets/cards.js'),'utf8'));
 for(const m of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))run(m[1]);
 run(fs.readFileSync(path.join(root,'assets/elaris-wildlife.js'),'utf8'));
 run(fs.readFileSync(path.join(root,'assets/solaris-data.js'),'utf8'));run(fs.readFileSync(path.join(root,'assets/expansion.js'),'utf8'));
-for(const f of ['encounter-depth','talent-matrix','aether-deck','card-variety','battle-hud','sun-revenant','combined-rooms','diagonals','city-paintings','organic-paths','plazas','organic-areas','exploration','neon-world','solaris','chronospire','sky-data','wilds-data','vespera-data','chronospire-data','tile-worlds','world-cards','world-mechanics','stagger','card-mechanics','chain','pressure','pickups','cardsmith','gear','armor-scale','waypoints','deck-choice','deck-presets','room-preload','item-reach','npc-greetings','cycle-card','sky-storm','status-dots','attack-boost','charge-swipe','enemy-pairs','enemy-armor','armor-hud','enemy-traits','enemy-temper','battle-chips'])load('assets/'+f+'.js');
+for(const f of ['encounter-depth','talent-matrix','aether-deck','card-variety','battle-hud','sun-revenant','combined-rooms','diagonals','city-paintings','organic-paths','plazas','organic-areas','exploration','neon-world','solaris','chronospire','sky-data','wilds-data','vespera-data','chronospire-data','tile-worlds','world-cards','world-mechanics','stagger','card-mechanics','chain','pressure','pickups','cardsmith','gear','armor-scale','waypoints','deck-choice','deck-presets','room-preload','item-reach','npc-greetings','cycle-card','sky-storm','status-dots','attack-boost','charge-swipe','enemy-pairs','enemy-armor','armor-hud','enemy-traits','boss-twists','enemy-temper','battle-chips'])load('assets/'+f+'.js');
 if(process.env.HARNESS_ONLY){module.exports={context,run};return}
 run(`
 newGame();
