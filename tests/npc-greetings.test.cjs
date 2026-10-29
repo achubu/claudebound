@@ -1,6 +1,6 @@
 'use strict';
 // Round 281: the merchant and the Cardsmith greet you once, the first time you enter their room.
-process.env.HARNESS_ONLY = '1';
+process.env.HARNESS_ONLY = '1'; process.env.NPC_GREET = '1';
 const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); const out = {};

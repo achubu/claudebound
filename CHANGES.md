@@ -3514,6 +3514,9 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   their shop) and "Later".
   - Once per journey for each (`state.npcMet`), never during a battle, under another menu or in God Mode.
   - New `assets/npc-greetings.js` (after `item-reach.js`) and `tests/npc-greetings.test.cjs`.
+  - The test harness turns greetings off unless `NPC_GREET=1`, like tempers and traits. Otherwise a test that moves
+    through every room meets the merchant, a menu opens, and every later tap route is refused (this broke
+    `neon-world-pathing`). `reward-escape` marks both characters as met.
 
 ## Round 280: Pressure 10% weaker; a tougher Lunar Enforcer; the Sun Pharaoh walks
 

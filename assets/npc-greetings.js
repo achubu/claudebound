@@ -33,7 +33,7 @@ function npcGreet(kind) {
   if (visit) visit.onclick = () => { if (kind === 'merchant' && p) openMerchant(p); else if (kind === 'cardsmith') openCardsmith(); else closeMenu(); };
 }
 function npcGreetingDue() {
-  if (!state || state.battle || (typeof godModeOn === 'function' && godModeOn())) return null;
+  if (!state || state.battle || globalThis.NO_NPC_GREET || (typeof godModeOn === 'function' && godModeOn())) return null; // the test harness turns greetings off unless NPC_GREET=1
   const met = state.npcMet || {};
   return ['merchant', 'cardsmith'].find(k => !met[k] && npcHere(k)) || null;
 }
