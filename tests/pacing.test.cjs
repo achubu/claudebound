@@ -5,7 +5,7 @@ run(`{
 assert.equal(xpMultiplier(5, 5), 1); assert.equal(xpMultiplier(8, 5), 1, 'higher-level enemies give full XP');
 assert.equal(xpMultiplier(4, 5), .8); assert.equal(xpMultiplier(3, 5), .6); assert.equal(xpMultiplier(2, 5), .4); assert.equal(xpMultiplier(1, 5), .25); assert.equal(xpMultiplier(1, 20), .1);
 newGame(); state.playerLevel = 10; state.xp = 0; state.room = '1,5'; startBattle(roomSpawns(state.room).find(s => !s.boss).uid);
-let b = state.battle; b.enemy.level = 3; b.enemy.elite = false; b.enemy.boss = false; b.enemy.hp = 0; winBattle();
+let b = state.battle; b.enemy.level = 3; b.enemy.elite = false; b.enemy.boss = false; b.enemy.hp = 0; b.bounty = null; winBattle();
 assert.equal(b.xpGain, Math.round(25 * .1)); assert.equal(state.xp, b.xpGain, 'a level-3 enemy gives a level-10 player 10% XP');
 newGame(); state.room = '1,5'; startBattle(roomSpawns(state.room).find(s => !s.boss).uid); b = state.battle; b.enemy.level = 1; b.enemy.hp = 0; winBattle(); assert.equal(b.xpGain, b.enemy.elite ? 40 : 25, 'same level: full XP');
 // Round 75 regression: the reward screen shows the XP and no phantom level-up line.
