@@ -3532,7 +3532,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - **Aether** (owner request). The Aether row across the battle screen is gone. A small pill, "✦ 2/8 +3", sits in the
   side deck's title line instead; the header keeps its size, and the explanation is in the pill's tooltip. With no
   side deck panel the row stays as it was (`assets/layout-polish.js`).
-- LAB_283
+- Difficulty lab, each boss with its twist (typical win % over 16 builds × 2 policies). The first column is the
+  twist's first version at the old health.
+
+  | World | Mini-boss 1 | Mini-boss 2 | Final boss |
+  |---|---|---|---|
+  | Neon Aftermath | Lunar Enforcer 29 → 42 | Crown Sentinel 5 → 38 | Thorn Warden 5 → 40 |
+  | Solaris | Cistern Warden 27 → 35 | Noon Toller 45 → 46 | Sun Pharaoh 34 → 33 |
+  | Sky Isles | Stormbell Warden 17 → 32 | Featherfall Matriarch 33 → 38 | Zenith Roc 32 → 40 |
+  | Elaris | Tidebound Warden 37 → 38 | Gale Sovereign 39 → 39 | Bloom Tyrant 18 → 33 |
+  | Vespera | Arc Sentinel 6 → 46 | Resonant Phantom 3 → 29 | Tempest Colossus 27 → 33 |
+  | Chronospire | Clockwarden 66 → 47 | Paradox Twin 9 → 32 | Chronarch 9 → 40 |
 
 ## Round 282: the Map button opens the full map; every world walked; the Sunfeather Drake walks
 
