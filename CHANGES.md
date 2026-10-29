@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 286: bounties you can plan for
+
+Each patrol's bounty is now decided before the fight, so you can choose fights (and decks) for them
+(`assets/bounty-plan.js`):
+
+- The bounty shows in the patrol's name on the map (`·★Combo`), and its tooltip gives the goal and the reward.
+- A spawn keeps its bounty until you fight it. After that it rolls a new one (seeded, `state.bountyGen`).
+- Three new kinds join Swift, Untouched, Self-reliant and Overkill:
+  - **Bare-knuckle:** win without gaining Block from a card.
+  - **Combo:** play 4+ cards in one turn.
+  - **Exploit:** hit its elemental weakness twice. Only enemies with an element get this one.
+- A completed bounty now also pays XP: +8 regular, +15 elite, +25 boss, scaled down for enemies below your level like battle XP. This is on top of its Shards.
+- The battle chip shows ◇Shards +XP and marks the bounty done or missed for every kind.
+
+Tests: `tests/bounty-plan.test.cjs`.
+
 ## Round 285: combat feel and sound
 
 Battles now react to what happens (`assets/juice.js`, loaded after `battle-chips.js`; it changes no rules):
