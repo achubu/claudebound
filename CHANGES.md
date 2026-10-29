@@ -3496,6 +3496,40 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 290: full playtest outside battle; sure heals wait until you're hurt
+
+The owner asked for a test of everything except battle, including pathing and using every object, and a list of
+objects that still need images, with prompts.
+
+- **Pathing:** `tests/playtest-walk.cjs` ran across all six worlds. Every door was crossed from every arrival
+  spot, and every item was reached by tap route.
+
+  | World | Rooms | Arrivals | Crossings | Item routes |
+  |---|---|---|---|---|
+  | Neon Aftermath | 54 | 137 | 387 | 63 |
+  | Solaris | 51 | 131 | 374 | 64 |
+  | Sky Isles | 51 | 131 | 375 | 63 |
+  | Elaris | 51 | 131 | 375 | 59 |
+  | Vespera | 51 | 131 | 375 | 60 |
+  | Chronospire | 54 | 137 | 387 | 64 |
+
+  It found no problems, no pop-ups when walking past, and no page or menu errors.
+- **Every object used:** a Playwright script stepped onto all 153 interactables in all six worlds and pressed each
+  button of each menu, one at a time from the same save. That covers shrines, campfires, caches, sealed caches,
+  lore stones, every event, hidden chests, gear pieces, the merchant and its wares, the Cardsmith (upgrade and
+  Soulbind checked separately), Nexus Waypoints and quest offers. Every one did what its label says, with no
+  page errors.
+- **Fix:** an event's sure heal could be picked at full health, which used up the event for nothing. The Street
+  Medic also took ◇6 for it. A sure heal ("· heal N HP", not a gamble) is now greyed out at full HP with
+  "(full HP)", as the Campfire's Rest already was (`eventHealWasted()` in `exploration.js`). This affects the Street
+  Medic, Moonlit Spring, Storm Shelter, Updraft Well and Paradox Pool. Test: `tests/event-heal.test.cjs`.
+- **Images needed:** `tools/art-refresh/object-prompts.md` lists them with prompts.
+  - No image yet (drawn as an emoji): the Cardsmith in five worlds, and the lore stones of the Sky Isles, Elaris,
+    Vespera and Chronospire.
+  - Sharing one placeholder: all 20 events.
+  - Optional world variants: chests, the merchant and portals.
+- Noted, not changed: Solaris (the desert) uses the forest's four events.
+
 ## Round 289: a quest log for each world
 
 The owner asked for a separate quest log per world, so you don't have to sift through another world's quests.

@@ -447,6 +447,8 @@ const EVENTS = {
 const EVENT_POOLS = { city: ['terminal', 'medic', 'vending', 'courier'], elaris: ['spring', 'ranger', 'seedpod', 'vines'], vespera: ['shelter', 'conduit', 'scavenger', 'prism'] };
 POI_INFO.event = { icon: '❖', name: 'Event' };
 POI_INFO.nexus = { icon: '⟟', name: 'Nexus Waypoint' };
+// Round 290: a sure heal ("· heal N HP", no gamble) can't be picked at full HP, so it doesn't use up the event (or Shards) for nothing.
+function eventHealWasted(c) { return !!state && state.hp >= state.maxHp && /· heal \d+ HP/.test(c.label) && !/%/.test(c.label); }
 function isQuietRoom(key, region = activeRegion) { return (QUIET_ROOMS[region] || []).includes(key); }
 // Quiet rooms never spawn enemies (bosses are never in them).
 const roomSpawnsBeforeQuiet = roomSpawns;
@@ -493,7 +495,7 @@ openPOI = function (p) {
     const e = EVENTS[p.event];
     if (poiUsed(p)) return poiMenu(e.icon + ' ' + e.name, '<p class="muted">You have already been here. The room is quiet.</p>', [{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
     return poiMenu(e.icon + ' ' + e.name, '<p>' + e.text() + '</p><p class="muted">A quiet room: no enemies here. Choose one.</p>',
-      e.choices().map((c, i) => ({ id: 'event' + i, label: c.label, primary: i === 0, disabled: !!c.disabled, onclick: () => { if (poiUsed(p)) return; const msg = c.run(); finishPOI(p, msg); } }))
+      e.choices().map((c, i) => ({ id: 'event' + i, label: c.label + (eventHealWasted(c) ? ' (full HP)' : ''), primary: i === 0, disabled: !!c.disabled || eventHealWasted(c), onclick: () => { if (poiUsed(p)) return; const msg = c.run(); finishPOI(p, msg); } }))
         .concat([{ id: 'poiLeave', label: 'Not now', onclick: closeMenu }]));
   }
   if (p.type === 'nexus') { discoverNexus(); return openNexusMenu(); }
