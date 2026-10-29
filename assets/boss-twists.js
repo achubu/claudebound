@@ -46,6 +46,9 @@ const BOSS_TWISTS = {
   paradoxTwin:         { kind: 'rewind', icon: '⏪', name: 'Rewind' },
   chronarch:           { kind: 'eclipse', icon: '🌒', name: 'Time Eclipse' }
 };
+// Round 283: boss health re-tuned for the twists, to about 40% for the average build in the Difficulty lab.
+const BOSS_TWIST_HP = {moonKnight:  0.465,  crownSentinel:  0.863,  thornWarden:  0.516,  tidewardenElaris:  0.878,  galeSovereign:  0.66,  bloomTyrant:  0.43,  arcSentinel:  1.126,  resonantPhantom:  1.789,  stormTyrant:  0.727,  clockwarden:  1.51,  paradoxTwin:  1.005,  chronarch:  0.523,  stormbellWarden:  1.278,  featherMatriarch:  1.54,  zenithRoc:  0.6,  tideboundWarden:  3.445,  galeSovereignElaris:  1.868,  elarisTyrant:  1.263};
+if (typeof BALANCE === 'object' && BALANCE.perEnemy && !globalThis.NO_BOSS_TWISTS) for (const [id, h] of Object.entries(BOSS_TWIST_HP)) BALANCE.perEnemy[id] = { ...(BALANCE.perEnemy[id] || {}), hp: h };
 function bossTwist(b = state && state.battle) {
   if (!b || globalThis.NO_BOSS_TWISTS || !b.enemy || !b.enemy.boss) return null;
   const t = BOSS_TWISTS[b.id]; return t ? { ...t, ...BOSS_TWIST_KINDS[t.kind] } : null;
