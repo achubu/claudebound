@@ -3496,6 +3496,44 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 283: boss twists; energy colours; Aether in the side deck
+
+- **Boss twists** (owner: "bosses with their own twist"). New `assets/boss-twists.js` (after `enemy-traits.js`).
+  - Every boss has a named signature twist, shown as a chip by its name with a countdown ("· in 2", "· NOW"); its
+    bubble explains it.
+  - Each twist fires on turns that are a multiple of its period, which shortens by 1 in Phase 2.
+
+  | Kind | What it does | Bosses |
+  |---|---|---|
+  | Aegis (every 3rd turn) | Block equal to 8% of its max HP | Lunar Enforcer (Moonguard), Featherfall Matriarch (Featherfall), Arc Sentinel (Arc Shield) |
+  | Countdown (every 4th) | That hit deals twice its base attack (or its own hit, if bigger); break it by dealing 10% of its max HP that turn | Crown Sentinel (Judgement), Noon Toller (Noon Bell), Tempest Colossus (Tempest) |
+  | Roots (every 3rd) | A card in your hand cannot be played that turn (greyed, 🌿 ROOTED) | Thorn Warden (Strangling Roots), Bloom Tyrant (Bramble Bind) |
+  | Undertow (every 3rd) | A card is pulled from your hand back onto your draw pile | Cistern Warden, Tidebound Warden (Riptide), Clockwarden (Unwind) |
+  | Surcharge (every 3rd) | Your most expensive card in hand costs 1 more | Stormbell Warden, Gale Sovereign (Crosswind) |
+  | Eclipse (every 3rd) | Block from cards is halved | Sun Pharaoh, Chronarch (Time Eclipse) |
+  | Mirror (every 4th) | The first card that damages it bounces 30% back to you | Zenith Roc (Mirror Dive), Resonant Phantom (Resonance) |
+  | Rewind (once) | At half health it heals 15% and sheds your Poison and Burn | Paradox Twin |
+
+  - **Phase 2.** At half health every boss enters Phase 2: a log line, a toast, and the twist comes more often. Below a
+    third of its health a final boss goes into Overdrive: its guard turns become strikes.
+  - **Tuning.** The first version was far too harsh in the Difficulty lab: Crown Sentinel 4%, Thorn Warden 0%, Arc
+    Sentinel 5%. Changes:
+    - The countdown blow no longer stacks on charged and heavy hits.
+    - Shields went from 12% to 8%.
+    - Roots went from every other turn (2 cards in Phase 2) to every third turn, 1 card.
+    - Overdrive moved from half health to a third.
+  - **Boss health.** Then each boss's health was re-tuned toward about 40% (`BOSS_TWIST_HP`, applied over the older
+    per-boss values). A player who breaks countdowns and plays around roots does better than the lab's bot, which
+    does not plan for them.
+  - **Tests.** The harness turns twists (and their health values) off unless `BOSS_TWISTS=1`, like traits. New
+    `tests/boss-twists.test.cjs`.
+- **Energy** (owner request). The count is one size ("3/3" instead of a big 3 and a small /3). The badge is green when
+  full, yellow at 2, orange at 1, and dim at 0 (`assets/battle-hud.js`, `layout-polish.css`).
+- **Aether** (owner request). The Aether row across the battle screen is gone. A small pill, "✦ 2/8 +3", sits in the
+  side deck's title line instead; the header keeps its size, and the explanation is in the pill's tooltip. With no
+  side deck panel the row stays as it was (`assets/layout-polish.js`).
+- LAB_283
+
 ## Round 282: the Map button opens the full map; every world walked; the Sunfeather Drake walks
 
 - The owner: "the map often shows up like this". It was the old map: room boxes on a dark background, with no
