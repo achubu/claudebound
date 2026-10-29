@@ -3496,6 +3496,45 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 284: gear that changes the rules
+
+The owner asked for gear that changes how you play, not only bigger numbers. Every one of the 12 pieces keeps its
+boost and now also has a rule while worn (`assets/gear-rules.js`, loaded after `armor-scale.js`). The rule shows
+with the boost on the Gear screen, in the pickup toast and in the map tooltip. In battle each one logs (and so gets a
+chip) when it fires.
+
+| Piece | Rule |
+|---|---|
+| Ember Gloves | 🔥 Kindle: your first attack each turn also Burns for 2 |
+| Briarstep Boots | 🌿 Briar Guard: when your Block stops an enemy hit completely, it takes 3 |
+| Sunwoven Shirt | ☀ Sunwell: healing past max HP becomes Block |
+| Scarab Belt | 🪲 Scarab Swarm: the first 0-energy card each turn draws a card |
+| Galeweave Pants | 🪶 Gale Rhythm: your 4th card each turn gets +4 damage (or +4 Block) |
+| Cloudstep Boots | ☁ Cloudstep: the first enemy hit of each fight is halved |
+| Thornhide Gloves | 🩸 Thirst: attacks heal 1 HP (up to 4 a fight) |
+| Mossweave Pants | 🌱 Moss Mend: heal 1 at the start of each turn (up to 6 a fight) |
+| Stormglass Belt | ⚡ Stormglass: every 7th card in a fight deals 6 more (or +6 Block) |
+| Tempest Gloves | 🌩 Arc Chain: elemental attacks strike again for 3 |
+| Timeworn Shirt | ⏳ Second Chance: once a fight, a single hit from above half health to 0 leaves you at 1 HP |
+| Hourglass Belt | ⌛ Saved Moment: up to 1 unspent energy carries over |
+
+Balance (Difficulty lab, smart policies, bosses). The first drafts were far too strong late: Chronospire bosses went
+from 39% to 96%. Per-piece runs showed the Stormglass ×2 and an unconditional Second Chance did most of it, with
+per-turn healing next. Those were cut to the versions above. Bosses then get a little more health while you wear
+gear (`GEAR_RULE_BOSS_HP`: City ×1.14, Solaris ×1.1, Sky ×1.025, Elaris ×1.045, Vespera ×1.1, Chronospire ×1.1),
+so the rules feel like an edge without undoing the Round 283 tuning.
+
+| World | Before (R283) | Rules, no HP change | Final |
+|---|---|---|---|
+| City | 41 | 56 | ~46 |
+| Solaris | 34 | 45 | ~35 |
+| Sky Isles | 35 | 39 | 37 |
+| Elaris | 34 | 41 | 36 |
+| Vespera | 38 | 51 | ~42 |
+| Chronospire | 39 | 55 | 39 |
+
+Tests: `tests/gear-rules.test.cjs` (every rule, its limits, and nothing without gear).
+
 ## Round 283: boss twists; energy colours; Aether in the side deck
 
 - **Boss twists** (owner: "bosses with their own twist"). New `assets/boss-twists.js` (after `enemy-traits.js`).
