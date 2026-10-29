@@ -18,6 +18,8 @@ reset(); const doorAt = { n: { x: 400, y: 15 }, s: { x: 400, y: 485 }, e: { x: 7
 setTouchDestination(far); assert(activeTouchRoute(), 'a route elsewhere'); checkWorldInteractions(); assert(!shown(), 'passing by on a route to somewhere else does not open it');
 // Used: walking past shows a note, not the menu; tapping it opens it.
 state.poi.used.push(p.id);
+// (Round 287: a used giver with a quest still to give does open; here the world's quests are already done.)
+if (typeof ensureQuests === 'function') { ensureQuests(); state.quests.done.push(...['hunt', 'mini', 'boss'].map(k => activeRegion + ':' + k)); }
 reset(); checkWorldInteractions(); assert(!shown() && /already used/.test(toasts.at(-1)), 'a used shrine only shows a note');
 reset(); setTouchDestination({ x: p.x, y: p.y }); cancelTouchRoute(); poiArmed = null; checkWorldInteractions(); assert(shown(), 'tapping a used shrine opens it to look again');
 // Placement: in every world and a few seeds, no point of interest under the HUD or the minimap,
