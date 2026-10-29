@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 285: combat feel and sound
+
+Battles now react to what happens (`assets/juice.js`, loaded after `battle-chips.js`; it changes no rules):
+
+- Damage, healing and Block float up from the health bar they hit: red −N, green +N, blue +N 🛡.
+- A big hit on the enemy (15% of its health, at least 12) gives a small shake. Losing a quarter of your health
+  in one hit gives a big shake and a red flash. A Hack crash flashes cyan, a counter light blue, and a boss's
+  Phase 2 orange.
+- Short sounds are made in the browser (Web Audio, no sound files): hit, heavy hit, getting hurt, Block,
+  healing, Hack crash, Phase 2, victory and defeat.
+- The 🔊 button in the battle bar mutes them. The choice is remembered in this browser (`aethercede-sound`).
+  With reduced motion turned on, there is no shake and the numbers fade faster.
+
+Tests: `tests/juice.test.cjs` (a fight plays through with the effects on, every sound runs, and the mute switch is
+remembered). Checked in Chromium: the numbers appear over the right bar and no page errors.
+
 ## Round 284: gear that changes the rules
 
 The owner asked for gear that changes how you play, not only bigger numbers. Every one of the 12 pieces keeps its
