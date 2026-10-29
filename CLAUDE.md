@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 280) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 281) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -18,7 +18,7 @@ change set.
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`, `plazas` (Round 232),
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
-    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `chain` (Round 261: ⛓ Chain N bonuses after N cards played this turn), `pressure`, `pickups`, `cardsmith`, `gear`, `armor-scale` (Round 262: your Armor grows with the world), `waypoints` (Round 229: each world's first Nexus Waypoint stands three rooms in, alone in its room), `deck-choice` (Round 233: new cards wait in the collection; +1 deck slot per boss), `deck-presets` (Round 256: three favorite decks), `room-preload`, `item-reach` (Round 275: walkable pads around every item, for player movement only). (`solaris-data.js` loads just before `expansion.js`.)
+    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `chain` (Round 261: ⛓ Chain N bonuses after N cards played this turn), `pressure`, `pickups`, `cardsmith`, `gear`, `armor-scale` (Round 262: your Armor grows with the world), `waypoints` (Round 229: each world's first Nexus Waypoint stands three rooms in, alone in its room), `deck-choice` (Round 233: new cards wait in the collection; +1 deck slot per boss), `deck-presets` (Round 256: three favorite decks), `room-preload`, `item-reach` (Round 275: walkable pads around every item, for player movement only), `npc-greetings` (Round 281: the merchant and Cardsmith greet you once). (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
     on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), `cycle-card` (Round 236: Sift and
     its discard choice), `sky-storm` and `status-dots` (Round 237), `attack-boost` (Round 240), `charge-swipe` (Round 242),
@@ -134,7 +134,7 @@ change set.
   scripts in order. `HARNESS_ONLY=1` exports `{run, context}` without running
   its own checks. `run(code)` returns the value of the code it runs. It turns enemy tempers off
   unless `TEMPER=1` (Round 253), so tests see exact numbers; Difficulty lab runs should set it. Enemy traits and species patterns
-  (Round 265) are off the same way unless `TRAITS=1`.
+  (Round 265) are off the same way unless `TRAITS=1`, and so are the merchant/Cardsmith greetings (Round 281) unless `NPC_GREET=1`.
 - Run everything (takes several minutes):
   `for t in tests/*.test.cjs; do timeout 300 node $t || echo FAIL $t; done`
 - Key suites:

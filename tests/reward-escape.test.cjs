@@ -18,13 +18,13 @@ server.listen(0, async () => {
     const page = await browser.newPage({ viewport: { width: 1280, height: 820 } });
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.goto(url); await page.waitForFunction(() => typeof startBattle === 'function');
-    await page.evaluate(() => { newGame(); state.region = 'city'; configureRegion('city'); const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => spawnAvailable(s) && !s.boss)); state.room = k; renderWorld(); startBattle(roomSpawns(k).find(s => spawnAvailable(s) && !s.boss).uid); });
+    await page.evaluate(() => { newGame(); state.npcMet = { merchant: true, cardsmith: true }; state.region = 'city'; configureRegion('city'); const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => spawnAvailable(s) && !s.boss)); state.room = k; renderWorld(); startBattle(roomSpawns(k).find(s => spawnAvailable(s) && !s.boss).uid); });
     await page.keyboard.press('Escape');
     assert(await page.evaluate(() => state.battle && state.battle.phase === 'fight'), 'Esc does nothing during a fight');
     // Every kind of chest (potions, Shards, a card choice...): Esc always gets back to the map.
     const kinds = new Set();
     for (let i = 0; i < 15; i++) {
-      const before = await page.evaluate(() => { newGame(); state.region = 'city'; configureRegion('city'); const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => spawnAvailable(s) && !s.boss)); state.room = k; renderWorld(); startBattle(roomSpawns(k).find(s => spawnAvailable(s) && !s.boss).uid);
+      const before = await page.evaluate(() => { newGame(); state.npcMet = { merchant: true, cardsmith: true }; state.region = 'city'; configureRegion('city'); const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => spawnAvailable(s) && !s.boss)); state.room = k; renderWorld(); startBattle(roomSpawns(k).find(s => spawnAvailable(s) && !s.boss).uid);
         const b = state.battle; b.enemy.hp = 1; b.hand = [make('strike')]; b.energy = 3; playCard(0); window.__won = b; return { phase: b.phase, chest: !!document.getElementById('openChest') }; });
       assert(before.phase === 'reward' && before.chest, 'a win shows the loot chest');
       await page.keyboard.press('Escape');
