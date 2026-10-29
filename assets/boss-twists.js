@@ -2,11 +2,11 @@
 // =====================================================================
 // Round 283 (owner request): every boss has a signature twist, a mechanic you learn to play around, shown as a
 // chip by its name with a countdown. At half health a boss enters Phase 2 (announced) and its twist comes
-// more often; final bosses also go into Overdrive (their guard turns become attacks).
+// more often; final bosses also go into Overdrive in their last third of health (their guard turns become attacks).
 //
 // Twists, keyed by boss id. A twist fires on turns that are a multiple of its period (period - 1 in Phase 2).
-//   aegis      at the end of its turn it gains Block equal to 12% of its max HP
-//   countdown  a charged blow: that turn's hit deals ×2.2, unless you "break" it by dealing 12% of its max HP that
+//   aegis      at the end of its turn it gains Block equal to 8% of its max HP
+//   countdown  a charged blow: that turn's hit deals ×2, unless you "break" it by dealing 10% of its max HP that
 //              turn (the intent shows the big number and how much breaks it; it drops as you hit)
 //   roots      at the start of your turn a card in your hand is rooted and cannot be played (2 in Phase 2)
 //   undertow   at the start of your turn a card is pulled from your hand back onto your draw pile
@@ -17,8 +17,8 @@
 // The test harness turns twists off unless BOSS_TWISTS=1 (like traits), so older tests keep exact numbers.
 // =====================================================================
 const BOSS_TWIST_KINDS = {
-  aegis:     { period: 3, desc: 'Every third turn it raises a shield: Block equal to 12% of its health.' },
-  countdown: { period: 4, desc: 'Every fourth turn it unleashes a charged blow for ×2.2 damage. Break it by dealing enough damage that turn (the intent shows how much).' },
+  aegis:     { period: 3, desc: 'Every third turn it raises a shield: Block equal to 8% of its health.' },
+  countdown: { period: 4, desc: 'Every fourth turn it unleashes a charged blow for ×2 damage. Break it by dealing enough damage that turn (the intent shows how much).' },
   roots:     { period: 2, desc: 'Every other turn one card in your hand is rooted and cannot be played that turn.' },
   undertow:  { period: 3, desc: 'Every third turn it pulls a card from your hand back onto your draw pile.' },
   surcharge: { period: 3, desc: 'Every third turn your most expensive card in hand costs 1 more.' },
@@ -54,7 +54,7 @@ function bossFinal(b) { return !!(b && b.enemy && b.enemy.boss && !(enemies[b.id
 function twistPeriod(b, t = bossTwist(b)) { return t && t.period ? Math.max(2, t.period - (b.twistPhase2 ? 1 : 0)) : 0; }
 function twistOn(b, turn, kind) { const t = bossTwist(b); return !!(t && t.kind === kind && t.period && turn > 1 && turn % twistPeriod(b, t) === 0); }
 function twistNext(b) { const t = bossTwist(b), p = twistPeriod(b, t); if (!p) return null; const n = Math.max(2, Math.ceil(b.turn / p) * p); return n - b.turn; }
-function countdownNeed(b) { return Math.max(6, Math.round(b.enemy.maxHp * .12)); }
+function countdownNeed(b) { return Math.max(6, Math.round(b.enemy.maxHp * .1)); }
 function countdownBroken(b) { return typeof pressureDealt === 'function' && pressureDealt(b) >= countdownNeed(b); }
 
 // Phase 2: the first time it drops to half health.
@@ -62,12 +62,12 @@ function checkBossPhase(b) {
   const t = bossTwist(b); if (!t || b.twistPhase2 || !(b.enemy.hp > 0) || b.enemy.hp > b.enemy.maxHp / 2) return;
   b.twistPhase2 = true;
   const extra = t.kind === 'rewind' ? '' : ' ' + t.name + ' comes more often.';
-  b.logs.push('⚠ Phase 2: ' + b.enemy.name + ' is enraged.' + extra + (bossFinal(b) ? ' Overdrive: it stops guarding.' : ''));
+  b.logs.push('⚠ Phase 2: ' + b.enemy.name + ' is enraged.' + extra + (bossFinal(b) ? ' At a third of its health it goes into Overdrive and stops guarding.' : ''));
   if (t.kind === 'rewind') {
     const h = Math.round(b.enemy.maxHp * .15); b.enemy.hp = Math.min(b.enemy.maxHp, b.enemy.hp + h); b.poison = 0; b.burn = 0;
     b.logs.push(t.icon + ' ' + t.name + ': it heals ' + h + ' and sheds your Poison and Burn.');
   }
-  if (typeof toast === 'function' && typeof document !== 'undefined' && document.getElementById) toast('⚠ Phase 2: ' + b.enemy.name + (bossFinal(b) ? ' goes into Overdrive!' : ' grows stronger!'));
+  if (typeof toast === 'function' && typeof document !== 'undefined' && document.getElementById) toast('⚠ Phase 2: ' + b.enemy.name + ' grows stronger!');
   b.phaseFlash = b.turn;
 }
 
@@ -76,10 +76,10 @@ const enemyPlanBeforeTwists = enemyPlan;
 enemyPlan = function (b = state.battle, turn = b?.turn) {
   let plan = enemyPlanBeforeTwists(b, turn); const t = bossTwist(b);
   if (!t || !plan) return plan;
-  if (bossFinal(b) && b.twistPhase2 && plan.kind === 'guard') plan = { ...plan, kind: 'attack', damage: Math.max(1, b.enemy.attack - (b.enemyDebuff || 0)) + 2, name: 'Overdrive strike' };
+  if (bossFinal(b) && b.twistPhase2 && b.enemy.hp <= b.enemy.maxHp / 3 && plan.kind === 'guard') plan = { ...plan, kind: 'attack', damage: Math.max(1, b.enemy.attack - (b.enemyDebuff || 0)) + 2, name: 'Overdrive strike' };
   if (t.kind === 'countdown' && twistOn(b, turn, 'countdown') && plan.damage > 0 && !(turn === b.turn && countdownBroken(b))) {
     const left = Math.max(0, countdownNeed(b) - (turn === b.turn && typeof pressureDealt === 'function' ? pressureDealt(b) : 0));
-    plan = { ...plan, damage: Math.round(plan.damage * 2.2), name: t.icon + ' ' + t.name + ' (break: deal ' + left + ' more)', twist: true };
+    plan = { ...plan, damage: Math.round(plan.damage * 2), name: t.icon + ' ' + t.name + ' (break: deal ' + left + ' more)', twist: true };
   }
   return plan;
 };
@@ -119,7 +119,7 @@ endTurn = function () {
   const r = endTurnBeforeTwists.apply(this, arguments);
   if (state.battle !== b || b.phase !== 'fight' || b.turn <= turn) return r;
   if (broke) b.logs.push(t.icon + ' You broke the ' + t.name + '!');
-  if (twistOn(b, turn, 'aegis') && b.enemy.hp > 0) { const g = Math.round(b.enemy.maxHp * .12); b.enemy.guard = (b.enemy.guard || 0) + g; b.logs.push(t.icon + ' ' + t.name + ': +' + g + ' Block.'); }
+  if (twistOn(b, turn, 'aegis') && b.enemy.hp > 0) { const g = Math.round(b.enemy.maxHp * .08); b.enemy.guard = (b.enemy.guard || 0) + g; b.logs.push(t.icon + ' ' + t.name + ': +' + g + ' Block.'); }
   const now = b.turn;
   if (twistOn(b, now, 'roots') && b.hand.length) {
     const pool = b.hand.filter(c => !(defs[c.id] && defs[c.id].unplayable)), n = Math.min(pool.length, b.twistPhase2 ? 2 : 1);
@@ -146,7 +146,7 @@ renderBattle = function () {
   const next = twistNext(b), now = t.period && next === 0 && b.turn > 1, chip = document.createElement('span');
   chip.className = 'fx-chip twist-chip' + (now ? ' twist-now' : '') + (b.twistPhase2 ? ' twist-p2' : ''); chip.tabIndex = 0;
   chip.textContent = t.icon + ' ' + t.name + (t.period ? (now ? ' · NOW' : ' · in ' + next) : (b.twistPhase2 ? ' · used' : '')) + (b.twistPhase2 ? ' · P2' : '');
-  chip.dataset.tip = t.name + ': ' + t.desc + ' At half health it enters Phase 2: ' + (t.kind === 'rewind' ? 'the rewind happens.' : 'the twist comes more often.') + (bossFinal(b) ? ' As a final boss it also goes into Overdrive and stops guarding.' : '');
+  chip.dataset.tip = t.name + ': ' + t.desc + ' At half health it enters Phase 2: ' + (t.kind === 'rewind' ? 'the rewind happens.' : 'the twist comes more often.') + (bossFinal(b) ? ' As a final boss, below a third of its health it goes into Overdrive and stops guarding.' : '');
   head.append(chip);
   for (const w of document.querySelectorAll('#hand .card-wrap')) {
     const i = [...w.parentElement.children].indexOf(w), c = b.hand[i]; if (!c) continue;

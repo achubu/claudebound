@@ -11,7 +11,7 @@ const r = JSON.parse(run(`(() => { const o = {};
   const fight = (id) => { newGame(); configureRegion('city'); state.hp = state.maxHp = 200; const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => s.type === 'thornWarden')); state.room = k;
     const s = roomSpawns(k).find(s => s.type === 'thornWarden'); startBattle(s.uid); const b = state.battle; b.id = id; b.enemy = { ...b.enemy, boss: true, hp: 400, maxHp: 400, armor: 0, guard: 0, attack: 10 };
     b.hand = ['strike', 'strike', 'guard', 'guard', 'riposte'].map(x => make(x)); b.draw = Array.from({ length: 20 }, () => make('strike')); b.discard = []; b.energy = 9; b.turn = 1; return b; };
-  // countdown: turn 4 hits x2.2 unless broken
+  // countdown: turn 4 hits x2 unless broken
   let b = fight('crownSentinel'); const plain = enemyPlanBeforeTwists(b, 4).damage, blow = enemyPlan(b, 4).damage;
   o.countdown = { plain, blow, need: countdownNeed(b) };
   b.turn = 4; b.pressureTurn = 4; b.pressureDmg = countdownNeed(b); o.countdown.broken = !!enemyPlan(b, 4).twist;
@@ -25,18 +25,18 @@ const r = JSON.parse(run(`(() => { const o = {};
   // aegis: after turn 3 ends it has Block
   b = fight('moonKnight'); b.turn = 3; endTurn(); o.aegis = b.enemy.guard;
   // phase 2 + overdrive on a final boss
-  b = fight('thornWarden'); b.enemy.hp = 150; checkBossPhase(b); o.phase2 = !!b.twistPhase2;
+  b = fight('thornWarden'); b.enemy.hp = 120; checkBossPhase(b); o.phase2 = !!b.twistPhase2;
   let guardTurn = 0; for (let t = 1; t < 12; t++) if (enemyPlanBeforeTwists(b, t).kind === 'guard') { guardTurn = t; break; }
   o.overdrive = guardTurn ? enemyPlan(b, guardTurn).kind : 'no guard turn';
   // rewind heals once at half
   b = fight('paradoxTwin'); b.enemy.hp = 190; b.poison = 5; checkBossPhase(b); o.rewind = { hp: b.enemy.hp, poison: b.poison };
   return JSON.stringify(o); })()`));
 assert.deepStrictEqual(r.missing, [], 'every boss has a twist');
-assert(r.countdown.blow === Math.round(r.countdown.plain * 2.2) && r.countdown.broken === false, 'the countdown blow hits x2.2 unless broken');
+assert(r.countdown.blow === Math.round(r.countdown.plain * 2) && r.countdown.broken === false, 'the countdown blow hits x2 unless broken');
 assert(r.roots.turn === 2 && r.roots.rooted === 1 && r.roots.unplayable >= 1 && r.roots.stillThere, 'a rooted card cannot be played');
 assert(r.eclipse.block === Math.ceil(r.eclipse.full / 2), 'Eclipse halves Block from cards');
 assert.strictEqual(r.surcharge, 1, 'Surcharge raises one card by 1');
-assert.strictEqual(r.aegis, 48, 'Aegis gives 12% of max HP as Block');
+assert.strictEqual(r.aegis, 32, 'Aegis gives 8% of max HP as Block');
 assert(r.phase2 && r.overdrive === 'attack', 'Phase 2 at half health; final bosses stop guarding');
 assert(r.rewind.hp === 250 && r.rewind.poison === 0, 'Rewind heals 15% and clears Poison');
 console.log('PASS: boss twists, Phase 2 and Overdrive.');

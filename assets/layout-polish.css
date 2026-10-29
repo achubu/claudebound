@@ -173,3 +173,19 @@ body:not(.touch-mode) .hint{left:16px!important;transform:none!important}
    shows the hero's head (it was cut at the neck). */
 #menuOverlay .talent-detail{position:sticky!important;top:-24px!important;bottom:auto!important;margin:0 0 14px!important;box-shadow:0 8px 18px #0009}
 #menuOverlay .sheet-portrait{max-height:200px!important;object-position:center 24%!important}
+/* Round 283 (owner request): energy is green when full, yellow at 2, orange at 1 (dim at 0). */
+.energy-hud.energy-full{border-color:#4fe07a!important;background:linear-gradient(180deg,#0f3a1c,#07190c)!important;box-shadow:0 0 10px #4fe07a55!important}
+.energy-hud.energy-full .orb.on:not(.bonus){background:radial-gradient(circle at 35% 30%,#f0fff4 0,#8dff9e 30%,#25c24a 70%,#0b6a22 100%)!important;box-shadow:0 0 8px #4fe07a!important}
+.energy-hud.energy-full .num{color:#dcffe4!important;text-shadow:0 0 6px #2ed15a!important}
+.energy-hud.energy-two{border-color:#f2d64c!important}
+.energy-hud.energy-two .num{color:#fff6c4!important;text-shadow:0 0 6px #f5cf1e!important}
+.energy-hud.energy-one{border-color:#ff8a2a!important;background:linear-gradient(180deg,#3d1e08,#1d0e04)!important;box-shadow:0 0 10px #ff8a2a55!important}
+.energy-hud.energy-one .orb.on:not(.bonus){background:radial-gradient(circle at 35% 30%,#fff1e0 0,#ffb066 30%,#f06a00 70%,#8a3400 100%)!important;box-shadow:0 0 8px #ff8a2a!important}
+.energy-hud.energy-one .num{color:#ffe2c4!important;text-shadow:0 0 6px #ff7a1a!important}
+.energy-hud.energy-empty{border-color:#6b5a3a!important;opacity:.8}
+.energy-hud .num small{font-size:1em!important}
+/* Round 283: the Aether row moves into the side deck header. */
+#battleModal .aether-panel.aether-moved{display:none!important}
+#battleModal .side-col-head .aether-mini{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;background:#2a1f55;border:1px solid #9b86ff;color:#e3dcff;font:800 11px/1.6 system-ui;white-space:nowrap;vertical-align:middle;cursor:help}
+#battleModal .side-col-head > b{display:inline!important}
+#battleModal .side-col-head .aether-mini{font-size:10px;line-height:1.5;padding:0 6px;margin-left:5px}
