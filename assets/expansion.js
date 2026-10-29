@@ -47,6 +47,9 @@ const BALANCE={
  // Round 44 affliction active, the bot using pitch + side deck, and (Round 49)
  // decks that include the new reward cards. "Typical" is the average over 16
  // builds covering every talent path.
+ // Round 288 (owner): win-rate targets 20% lower: regular fights about 58% and bosses about 33% for the average
+ // build (Solaris was 72% / 41%). Extra health per world, set with the Difficulty lab; bosses include mini-bosses.
+ targetHp:{regular:{city:1.15,elaris:1.29,sky:1.34,wilds:1.13,vespera:1.26,chronospire:1.13},boss:{city:1.074,elaris:1.025,sky:1.054,wilds:1.04,vespera:1.06,chronospire:1.074}},
  perEnemy:{
   // Round 183: re-tuned with gear worn (assets/sim/lab.js); Neon Aftermath's three bosses at about 40% (owner request). Round 185: Crown Sentinel, Noon Toller and Resonant Phantom re-tuned for their mechanic afflictions.
   // Round 253: every boss re-tuned to about 40 percent for the average build with full decks.
@@ -67,8 +70,9 @@ function enemyStats(id,{region=activeRegion,level=1,elite=false,boss=!!enemies[i
  const hp=base.hp*(get('regionHp')??1)*(elite?get('eliteHp'):1)*(1+(level-1)*get('hpPerLevel'))*(tune.hp??1)*(final?get('bossHp'):mini?get('miniBossHp'):get('normalHp')??1);
  const attack=base.attack+(get('regionAttack')??0)+(elite?get('eliteAttack'):0)+Math.round((level-1)*get('attackPerLevel'))+(final?get('bossAttack'):mini?get('miniBossAttack'):0)+(tune.attack??0);
  const ramp=!boss&&BALANCE.entryRamp&&BALANCE.entryRamp[region]&&BALANCE.entryRamp[region][level]||{hp:1,attack:0};
+ const t=BALANCE.targetHp&&BALANCE.targetHp[boss?'boss':'regular'],th=t?(t[region]??1):1;
  const d=get('difficulty')??1,atk=boss?attack:Math.max(1,Math.round(attack*(get('normalAttack')??1))+ramp.attack);
- return{hp:Math.round(hp*ramp.hp*d),attack:Math.max(1,Math.round(atk*d))};
+ return{hp:Math.round(hp*ramp.hp*d*th),attack:Math.max(1,Math.round(atk*d))};
 }
 // Elaris expansion: world generation and combat share the adventure's existing state.
 const EXPANSION_VERSION=3;

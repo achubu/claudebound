@@ -4,9 +4,9 @@
 // settings (player level = enemy level, talent points spent up to that level, card level
 // growing with player level, and the bosses, side cards and gear a player has by then).
 // Not loaded by the game itself.
-const SIM_TARGET = { zone: [30, 100], mini: [34, 50], boss: [22, 36] }; // Round 44: afflictions + side deck
+const SIM_TARGET = { zone: [24, 100], mini: [27, 40], boss: [18, 29] }; // Round 44: afflictions + side deck. Round 288: 20% lower (owner)
 // Round 183: Neon Aftermath's final boss aims at about 40% like its mini-bosses (owner request).
-const SIM_TARGET_BY_WORLD = { city: { boss: [34, 50] } };
+const SIM_TARGET_BY_WORLD = { city: { boss: [27, 40] } };
 // 16 builds: the 4 original archetypes plus 4 per tree covering every Round 40 talent path.
 // Each ends with a spill list so no point is wasted.
 const SIM_SPILL = [['plating', 5], ['jammer', 5], ['amplifier', 5], ['vitality', 5], ['edge', 5], ['quickdraw', 2], ['capacitor', 1], ['overcharge', 1], ['recovery', 3], ['deckMatrix', 4]];
