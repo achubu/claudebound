@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 282: the Map button opens the full map; every world walked; the Sunfeather Drake walks
+
+- The owner: "the map often shows up like this". It was the old map: room boxes on a dark background, with no
+  streets, no zoom bar and no waypoint list.
+- `expansion.js` (and `combined-rooms.js`) bound the Map button to the map function of that moment
+  (`$('mapBtn').onclick = showMap`). `exploration.js` (points of interest, Nexus Waypoints, completion) and
+  `map-terrain.js` (street terrain, fog, zoom, the Round 276 diagonals and phone labels) wrap it later, so clicking
+  Map skipped all of them. The M key calls the current `showMap()`, which is why it only happened "often".
+- `layout-polish.js` now binds the Map, Deck and Character buttons to call the current function when clicked. Deck
+  had already been rebound this way in Round 233; Character was unaffected but is covered for future wrappers.
+- New `tests/nav-buttons.test.cjs`.
+- **Every world walked.** `tests/playtest-walk.cjs` walked all five other worlds with tap routes, after Neon Aftermath in
+  Round 281. Solaris, Sky Isles, Elaris and Vespera: 51 rooms each, about 375 crossings, 61-66 item routes.
+  Chronospire: 54 rooms, 387 crossings, 61 item routes. Every room reached, with no problems and no page errors.
+- **The Sunfeather Drake walks.** The owner sent an eight-frame grounded walk for the Sky Isles' Sunfeather Drake
+  (`skyDrake`, art `skyDrakeArt`). The source strip is `assets/monsters/sky/src/sunfeather-drake-walk8.png`.
+  - Anchored on the body with one foot baseline, so frames 1, 3, 5 and 7 are cut with one shared window, centred on
+    the body (the drake sits right of centre). The result replaces `assets/monsters/sky/sunfeather-drake.png`.
+  - `SPRITE_VERSION` 282. New `tests/sunfeather-drake.test.cjs`.
+
 ## Round 281: the Character screen; the merchant and Cardsmith say hello
 
 - **Character screen** (owner: "fix the character screen"):

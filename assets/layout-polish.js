@@ -121,3 +121,11 @@ renderBattle = function () {
   document.body.append(t);
   const st = document.createElement('style'); st.textContent = '#toast{position:fixed!important;z-index:500!important}'; document.head.append(st);
 })();
+// Round 282: the Map button was bound in expansion.js to the map function of that moment, before exploration.js and
+// map-terrain.js wrapped it (street terrain, fog, zoom, completion), so clicking Map showed the old box-only map
+// while the M key showed the full one. The nav buttons now call whatever the function is when clicked.
+(function rebindNav() {
+  if (typeof $ !== 'function') return;
+  const bind = (id, fn) => { const b = $(id); if (b) b.onclick = () => fn(); };
+  bind('mapBtn', () => showMap()); bind('deckBtn', () => showDeck()); bind('charBtn', () => showCharacter());
+})();
