@@ -6,9 +6,9 @@
 //
 // Twists, keyed by boss id. A twist fires on turns that are a multiple of its period (period - 1 in Phase 2).
 //   aegis      at the end of its turn it gains Block equal to 8% of its max HP
-//   countdown  a charged blow: that turn's hit deals ×2, unless you "break" it by dealing 10% of its max HP that
+//   countdown  a charged blow: that turn's hit deals twice its base attack (or its own hit, if bigger), unless you "break" it by dealing 10% of its max HP that
 //              turn (the intent shows the big number and how much breaks it; it drops as you hit)
-//   roots      at the start of your turn a card in your hand is rooted and cannot be played (2 in Phase 2)
+//   roots      at the start of your turn a card in your hand is rooted and cannot be played
 //   undertow   at the start of your turn a card is pulled from your hand back onto your draw pile
 //   surcharge  your most expensive card in hand costs 1 more that turn
 //   eclipse    Block you gain from cards that turn is halved
@@ -18,8 +18,8 @@
 // =====================================================================
 const BOSS_TWIST_KINDS = {
   aegis:     { period: 3, desc: 'Every third turn it raises a shield: Block equal to 8% of its health.' },
-  countdown: { period: 4, desc: 'Every fourth turn it unleashes a charged blow for ×2 damage. Break it by dealing enough damage that turn (the intent shows how much).' },
-  roots:     { period: 2, desc: 'Every other turn one card in your hand is rooted and cannot be played that turn.' },
+  countdown: { period: 4, desc: 'Every fourth turn it unleashes a charged blow: twice its base attack. Break it by dealing enough damage that turn (the intent shows how much).' },
+  roots:     { period: 3, desc: 'Every third turn one card in your hand is rooted and cannot be played that turn.' },
   undertow:  { period: 3, desc: 'Every third turn it pulls a card from your hand back onto your draw pile.' },
   surcharge: { period: 3, desc: 'Every third turn your most expensive card in hand costs 1 more.' },
   eclipse:   { period: 3, desc: 'Every third turn the Block you gain from cards is halved.' },
@@ -79,7 +79,7 @@ enemyPlan = function (b = state.battle, turn = b?.turn) {
   if (bossFinal(b) && b.twistPhase2 && b.enemy.hp <= b.enemy.maxHp / 3 && plan.kind === 'guard') plan = { ...plan, kind: 'attack', damage: Math.max(1, b.enemy.attack - (b.enemyDebuff || 0)) + 2, name: 'Overdrive strike' };
   if (t.kind === 'countdown' && twistOn(b, turn, 'countdown') && plan.damage > 0 && !(turn === b.turn && countdownBroken(b))) {
     const left = Math.max(0, countdownNeed(b) - (turn === b.turn && typeof pressureDealt === 'function' ? pressureDealt(b) : 0));
-    plan = { ...plan, damage: Math.round(plan.damage * 2), name: t.icon + ' ' + t.name + ' (break: deal ' + left + ' more)', twist: true };
+    plan = { ...plan, damage: Math.max(plan.damage, Math.round((b.enemy.attack - (b.enemyDebuff || 0)) * 2)), name: t.icon + ' ' + t.name + ' (break: deal ' + left + ' more)', twist: true };
   }
   return plan;
 };
@@ -122,7 +122,7 @@ endTurn = function () {
   if (twistOn(b, turn, 'aegis') && b.enemy.hp > 0) { const g = Math.round(b.enemy.maxHp * .08); b.enemy.guard = (b.enemy.guard || 0) + g; b.logs.push(t.icon + ' ' + t.name + ': +' + g + ' Block.'); }
   const now = b.turn;
   if (twistOn(b, now, 'roots') && b.hand.length) {
-    const pool = b.hand.filter(c => !(defs[c.id] && defs[c.id].unplayable)), n = Math.min(pool.length, b.twistPhase2 ? 2 : 1);
+    const pool = b.hand.filter(c => !(defs[c.id] && defs[c.id].unplayable)), n = Math.min(pool.length, 1);
     const rand = seeded(hashSeed(state.seed + ':' + b.id + ':' + now)); const picked = [];
     while (picked.length < n) { const c = pool[Math.floor(rand() * pool.length)]; if (!picked.includes(c.uid)) picked.push(c.uid); }
     b.rooted = picked; b.rootTurn = now; b.logs.push(t.icon + ' ' + t.name + ': ' + picked.map(u => stat(b.hand.find(c => c.uid === u)).name).join(' and ') + ' cannot be played this turn.');

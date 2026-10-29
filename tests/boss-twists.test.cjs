@@ -11,12 +11,12 @@ const r = JSON.parse(run(`(() => { const o = {};
   const fight = (id) => { newGame(); configureRegion('city'); state.hp = state.maxHp = 200; const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => s.type === 'thornWarden')); state.room = k;
     const s = roomSpawns(k).find(s => s.type === 'thornWarden'); startBattle(s.uid); const b = state.battle; b.id = id; b.enemy = { ...b.enemy, boss: true, hp: 400, maxHp: 400, armor: 0, guard: 0, attack: 10 };
     b.hand = ['strike', 'strike', 'guard', 'guard', 'riposte'].map(x => make(x)); b.draw = Array.from({ length: 20 }, () => make('strike')); b.discard = []; b.energy = 9; b.turn = 1; return b; };
-  // countdown: turn 4 hits x2 unless broken
+  // countdown: turn 4 hits twice its base attack unless broken
   let b = fight('crownSentinel'); const plain = enemyPlanBeforeTwists(b, 4).damage, blow = enemyPlan(b, 4).damage;
   o.countdown = { plain, blow, need: countdownNeed(b) };
   b.turn = 4; b.pressureTurn = 4; b.pressureDmg = countdownNeed(b); o.countdown.broken = !!enemyPlan(b, 4).twist;
-  // roots: after turn 1 ends, turn 2 has a rooted card that cannot be played
-  b = fight('thornWarden'); endTurn(); o.roots = { turn: b.turn, rooted: (b.rooted || []).length, unplayable: b.hand.filter(c => stat(c).unplayable).length };
+  // roots: after turn 2 ends, turn 3 has a rooted card that cannot be played
+  b = fight('thornWarden'); b.turn = 2; endTurn(); o.roots = { turn: b.turn, rooted: (b.rooted || []).length, unplayable: b.hand.filter(c => stat(c).unplayable).length };
   const ri = b.hand.findIndex(c => stat(c).rooted), before = b.hand.length; playCard(ri); o.roots.stillThere = b.hand.length === before;
   // eclipse: block halved on turn 3
   b = fight('bloomTyrant'); b.turn = 3; b.block = 0; b.hand = [make('guard')]; playCard(0); o.eclipse = { block: b.block, full: statBeforeTwists(make('guard')).block };
@@ -32,8 +32,8 @@ const r = JSON.parse(run(`(() => { const o = {};
   b = fight('paradoxTwin'); b.enemy.hp = 190; b.poison = 5; checkBossPhase(b); o.rewind = { hp: b.enemy.hp, poison: b.poison };
   return JSON.stringify(o); })()`));
 assert.deepStrictEqual(r.missing, [], 'every boss has a twist');
-assert(r.countdown.blow === Math.round(r.countdown.plain * 2) && r.countdown.broken === false, 'the countdown blow hits x2 unless broken');
-assert(r.roots.turn === 2 && r.roots.rooted === 1 && r.roots.unplayable >= 1 && r.roots.stillThere, 'a rooted card cannot be played');
+assert(r.countdown.blow === Math.max(r.countdown.plain, 20) && r.countdown.broken === false, 'the countdown blow hits twice its base attack unless broken');
+assert(r.roots.turn === 3 && r.roots.rooted === 1 && r.roots.unplayable >= 1 && r.roots.stillThere, 'a rooted card cannot be played');
 assert(r.eclipse.block === Math.ceil(r.eclipse.full / 2), 'Eclipse halves Block from cards');
 assert.strictEqual(r.surcharge, 1, 'Surcharge raises one card by 1');
 assert.strictEqual(r.aegis, 32, 'Aegis gives 8% of max HP as Block');
