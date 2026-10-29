@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 288: win-rate targets 20% lower
+
+The owner asked to lower the win-rate targets across the board by 20%. This round reads that as relative: the Round
+263 Solaris benchmark of about 72% on regular fights and 41% on bosses becomes about **58% and 33%**, for the
+average build in the Difficulty lab (smart policies, gear worn). Every world is now tuned toward those numbers.
+
+- `BALANCE.targetHp` in `assets/expansion.js` adds health per world, one factor for regular and elite enemies and one for
+  bosses and mini-bosses. `enemyStats()` applies it, so the game and the compendium agree. Attack is unchanged, so
+  fights get longer rather than burstier.
+  - Regular: City ×1.15, Solaris ×1.29, Sky ×1.34, Elaris ×1.13, Vespera ×1.26, Chronospire ×1.13.
+  - Bosses: ×1.025–1.074.
+- The Difficulty lab's target bands are 20% lower as well: mini-bosses 27–40%, bosses 18–29%, City bosses 27–40%.
+- CLAUDE.md now gives the new targets.
+
+Lab, average build, smart policies (regular fights carry about ±4 of noise at this sample size):
+
+| World | Regular before | Regular after | Bosses before | Bosses after |
+|---|---|---|---|---|
+| City | 67 | ~56 | 46 | 32 |
+| Solaris | 72 | ~60 | 35 | 32 |
+| Sky Isles | 76 | 59 | 37 | 32 |
+| Elaris | 67 | 58 | 36 | 31 |
+| Vespera | 86 | 57 | 42 | 33 |
+| Chronospire | 74 | ~58 | 39 | 33 |
+
 ## Round 287: quests
 
 The owner asked for XP quests picked up at the existing interactables, with a Quests tab (`assets/quests.js`):
