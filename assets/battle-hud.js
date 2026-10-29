@@ -23,8 +23,10 @@ renderBattle = function () {
   if (badge) {
     const max = maxEnergy(), n = b.energy, orbs = [];
     for (let k = 0; k < Math.max(max, n); k++) orbs.push('<i class="orb ' + (k < n ? (k >= max ? 'on bonus' : 'on') : 'off') + '"></i>');
-    badge.className = 'energy-hud'; badge.title = n + ' energy of ' + max;
-    badge.innerHTML = '<span class="bolt">' + HUD_ICONS.bolt + '</span><span class="orbs">' + orbs.join('') + '</span><b class="num">' + n + '<small>/' + max + '</small></b>';
+    // Round 283 (owner request): the count is one size ("3/3"), and the badge is green when full, yellow at 2, orange at 1.
+    const level = n >= max ? 'full' : n >= 2 ? 'two' : n === 1 ? 'one' : 'empty';
+    badge.className = 'energy-hud energy-' + level; badge.title = n + ' energy of ' + max;
+    badge.innerHTML = '<span class="bolt">' + HUD_ICONS.bolt + '</span><span class="orbs">' + orbs.join('') + '</span><b class="num">' + n + '/' + max + '</b>';
   }
   // Health: tall bars with an icon and big numbers; the player's bar changes colour as it drops.
   m.querySelectorAll('.compact-combatants .meter').forEach(meter => {

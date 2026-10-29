@@ -129,3 +129,23 @@ renderBattle = function () {
   const bind = (id, fn) => { const b = $(id); if (b) b.onclick = () => fn(); };
   bind('mapBtn', () => showMap()); bind('deckBtn', () => showDeck()); bind('charBtn', () => showCharacter());
 })();
+// Round 283 (owner request): the Aether count lives in the side deck's header ("✦ 2/8 +3") instead of its own row
+// across the battle screen. The header keeps its size; the per-turn chip keeps its explanation as a tooltip.
+// Without a side deck panel (nothing in the side deck) the Aether row stays where it was.
+(function aetherInSideDeck() {
+  if (typeof renderBattle !== 'function') return;
+  const before = renderBattle;
+  renderBattle = function () {
+    const out = before.apply(this, arguments);
+    const m = typeof $ === 'function' && $('battleModal'); if (!m || !m.querySelector) return out;
+    const panel = m.querySelector('.aether-panel'), head = m.querySelector('.side-col-head'), b = state && state.battle;
+    if (!panel || !head || !b || b.phase !== 'fight' || head.querySelector('.aether-mini')) return out;
+    const count = ((panel.querySelector('.aether-row b') || {}).textContent || '').replace(/[^0-9/]/g, ''), chip = panel.querySelector('.fx-chip.aether, .aether-row small');
+    if (!count) return out;
+    const pill = document.createElement('span'); pill.className = 'aether-mini'; pill.title = 'Aether ' + count + ((chip && (chip.dataset.tip || chip.textContent)) ? ' · ' + (chip.dataset.tip || chip.textContent) : '');
+    const per = chip && /\+\s*\d+/.exec(chip.textContent || ''); pill.textContent = '✦ ' + count + (per ? ' ' + per[0].replace(/\s/g, '') : '');
+    const title = head.querySelector('b'); if (title) { title.textContent = 'Side deck'; title.append(pill); } else head.prepend(pill);
+    panel.classList.add('aether-moved');
+    return out;
+  };
+})();
