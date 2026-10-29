@@ -99,16 +99,29 @@ poiNode = function (p) {
   return node;
 };
 // --- The Quests screen ---
-function showQuests() {
+// Round 289 (owner): one quest log per world. It opens on the world you are in; tabs switch to the others.
+function questWorlds() {
+  const q = ensureQuests(), seen = new Set([activeRegion, ...Object.values(q.taken).map(x => x.world), ...q.done.map(id => id.split(':')[0])]);
+  return (typeof WORLD_ORDER !== 'undefined' ? WORLD_ORDER : [...seen]).filter(w => seen.has(w));
+}
+function showQuests(world = activeRegion) {
   if (!state) return; ensureQuests();
-  const taken = Object.values(state.quests.taken), givers = questGivers(), open = Object.values(worldPOIs()).filter(p => givers[p.id] && questOffer(p));
-  const row = q => '<article class="quest-row"><span class="quest-icon">' + QUEST_KINDS[q.kind].icon + '</span><div><b>' + q.text + '</b><small>' + questWorldName(q.world) + ' · Reward: ' + questReward(q) + '</small>'
+  const here = world === activeRegion, taken = Object.values(state.quests.taken).filter(q => q.world === world);
+  const done = state.quests.done.filter(id => id.split(':')[0] === world);
+  const givers = here ? questGivers() : {}, open = here ? Object.values(worldPOIs()).filter(p => givers[p.id] && questOffer(p)) : [];
+  const row = q => '<article class="quest-row"><span class="quest-icon">' + QUEST_KINDS[q.kind].icon + '</span><div><b>' + q.text + '</b><small>Reward: ' + questReward(q) + '</small>'
     + '<div class="quest-bar"><i style="width:' + Math.round((q.have || 0) / q.need * 100) + '%"></i></div></div><span class="quest-count">' + (q.have || 0) + '/' + q.need + '</span></article>';
-  const done = state.quests.done.length;
+  const tabs = questWorlds().map(w => { const n = Object.values(state.quests.taken).filter(q => q.world === w).length;
+    return '<button class="quest-tab' + (w === world ? ' active' : '') + '" data-quest-world="' + w + '">' + questWorldName(w) + (w === activeRegion ? ' ◉' : '') + (n ? ' <span>' + n + '</span>' : '') + '</button>'; }).join('');
+  const kindName = { hunt: '⚔ Hunt', mini: '⚑ Mini-boss', boss: '♛ Boss' };
+  const finished = done.length ? '<p class="muted quest-done">Finished: ' + done.map(id => kindName[id.split(':')[1]] || id).join(' · ') + '</p>' : '';
+  const note = here ? '<p class="notice">' + (open.length ? open.length + ' quest' + (open.length > 1 ? 's' : '') + ' still to pick up here' + (open.some(p => areaSeen(p.key)) ? '.' : ' (explore to find the givers).') : 'No more quests to pick up here.') + '</p>' : '';
   openMenu('<div class="eyebrow">JOURNEY · QUESTS</div><h1>Quests</h1><p>Points of interest marked ❗ hand out quests: hunt enemies, defeat a mini-boss, defeat the world\'s boss. Each pays XP; the boss quests also give a card.</p>'
-    + '<h2>Active</h2>' + (taken.length ? taken.map(row).join('') : '<p class="muted">No quests yet.</p>')
-    + '<p class="notice">' + (open.length ? open.length + ' quest' + (open.length > 1 ? 's' : '') + ' still to pick up in ' + questWorldName() + (open.some(p => areaSeen(p.key)) ? '.' : ' (explore to find the givers).') : 'No more quests to pick up in ' + questWorldName() + '.') + (done ? ' Finished: ' + done + '.' : '') + '</p>'
+    + '<div class="quest-tabs">' + tabs + '</div>'
+    + '<h2>' + questWorldName(world) + '</h2>' + (taken.length ? taken.map(row).join('') : '<p class="muted">No active quests in ' + questWorldName(world) + '.</p>')
+    + finished + note
     + '<p><button id="questsClose" class="primary">Close</button></p>');
+  if (document.querySelectorAll) document.querySelectorAll('[data-quest-world]').forEach(t => t.onclick = () => showQuests(t.dataset.questWorld));
   const close = $('questsClose'); if (close) close.onclick = closeMenu;
 }
 const newGameBeforeQuests = newGame;
@@ -127,6 +140,7 @@ if (typeof document !== 'undefined' && document.createElement) {
     + '.quest-row{display:flex;gap:10px;align-items:center;padding:8px 10px;margin:6px 0;border:1px solid #2e5566;border-radius:10px;background:#0b1a26}.quest-row>div{flex:1}.quest-row small{display:block;opacity:.8}'
     + '.quest-icon{font-size:22px}.quest-count{font-weight:800;color:#ffe7b0}.quest-bar{height:6px;margin-top:5px;border-radius:3px;background:#1b3442;overflow:hidden}.quest-bar i{display:block;height:100%;background:linear-gradient(90deg,#e5bc62,#ffe7b0)}'
     + '.poi-node .quest-mark{position:absolute;left:50%;top:-20px;transform:translateX(-50%);font-size:16px;filter:drop-shadow(0 0 4px #ffcf5a);animation:questBob 1.2s ease-in-out infinite;pointer-events:none}'
-    + '@keyframes questBob{50%{transform:translate(-50%,-4px)}}';
+    + '@keyframes questBob{50%{transform:translate(-50%,-4px)}}'
+    + '.quest-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}.quest-tab{padding:5px 10px;border-radius:999px;font-size:13px}.quest-tab.active{border-color:#e5bc62;background:#2a2110;color:#ffe7b0}.quest-tab span{display:inline-block;min-width:16px;margin-left:4px;padding:0 4px;border-radius:8px;background:#e5bc62;color:#1a1206;font-weight:800;font-size:11px}';
   document.head.append(style);
 }
