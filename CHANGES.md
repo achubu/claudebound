@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 282: the Map button opens the full map
+
+- The owner: "the map often shows up like this". It was the old map: room boxes on a dark background, with no
+  streets, no zoom bar and no waypoint list.
+- `expansion.js` (and `combined-rooms.js`) bound the Map button to the map function of that moment
+  (`$('mapBtn').onclick = showMap`). `exploration.js` (points of interest, Nexus Waypoints, completion) and
+  `map-terrain.js` (street terrain, fog, zoom, the Round 276 diagonals and phone labels) wrap it later, so clicking
+  Map skipped all of them. The M key calls the current `showMap()`, which is why it only happened "often".
+- `layout-polish.js` now binds the Map, Deck and Character buttons to call the current function when clicked. Deck
+  had already been rebound this way in Round 233; Character was unaffected but is covered for future wrappers.
+- New `tests/nav-buttons.test.cjs`.
+
 ## Round 281: the Character screen; the merchant and Cardsmith say hello
 
 - **Character screen** (owner: "fix the character screen"):
