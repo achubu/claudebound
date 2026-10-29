@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 289: a quest log for each world
+
+The owner asked for a separate quest log per world, so you don't have to sift through another world's quests.
+
+- The Quests screen opens on the world you are in (marked ◉). It lists only that world's active quests, its finished
+  ones (for example "Finished: ⚔ Hunt · ⚑ Mini-boss"), and how many are still to pick up there.
+- A tab for each world where you have quests switches to that world's log. Each tab shows a badge with its number of
+  active quests.
+- Progress already counted only kills in the quest's own world; that is unchanged.
+
+Tests: `tests/quests.test.cjs` checks that a Solaris quest stays out of the city log, shows on the Solaris tab, and
+that there is one tab per world with quests. Checked in Chromium.
+
 ## Round 288: win-rate targets 20% lower
 
 The owner asked to lower the win-rate targets across the board by 20%. This round reads that as relative: the Round

@@ -25,6 +25,10 @@ const r = JSON.parse(run(`(() => { const o = {};
   // Quests screen and saves.
   takeQuest(questOffer(giverOf('hunt')) || { id: 'x', kind: 'hunt', world: 'city', need: 10, have: 3, xp: 60, text: 'Defeat 10 enemies in Neon Aftermath' });
   showQuests(); o.screen = document.getElementById('menuModal').innerHTML || '';
+  // Round 289: one log per world. A Solaris quest stays out of the city's log and shows on the Solaris tab.
+  state.quests.taken['elaris:hunt'] = { id: 'elaris:hunt', kind: 'hunt', world: 'elaris', need: 10, have: 4, xp: 60, text: 'Defeat 10 enemies in Solaris' };
+  showQuests(); o.cityLog = document.getElementById('menuModal').innerHTML || ''; showQuests('elaris'); o.solarisLog = document.getElementById('menuModal').innerHTML || '';
+  o.worlds = questWorlds(); delete state.quests.taken['elaris:hunt'];
   save(); state = null; load(); o.kept = state.quests.done.length;
   const bad = JSON.parse(JSON.stringify(state)); bad.quests = 'x'; try { validateImport(bad); o.junk = 'accepted'; } catch (e) { o.junk = 'rejected'; }
   return JSON.stringify(o); })()`));
@@ -36,6 +40,9 @@ assert(r.huntDone && /Quest complete/.test(r.special), 'ten wins finish the hunt
 assert(r.xpGain >= 60 + 10 * 1, 'the hunt pays its XP on top of the fights');
 assert(r.mini.target && r.mini.card && r.miniDone && r.cardAdded, 'the mini-boss quest pays a card');
 assert(r.bossTarget && r.bossGone === null, 'the boss quest names an unbeaten boss and goes away once it falls');
-assert(/Quests/.test(r.screen) && /Finished: 2/.test(r.screen), 'the Quests screen lists progress');
+assert(/Quests/.test(r.screen) && /Finished: ⚔ Hunt · ⚑ Mini-boss/.test(r.screen), 'the Quests screen lists progress');
+assert(!/in Solaris/.test(r.cityLog) && /Defeat 10 enemies in Neon/.test(r.cityLog), 'the city log shows only city quests');
+assert(/Defeat 10 enemies in Solaris/.test(r.solarisLog) && !/in Neon Aftermath<\/b>/.test(r.solarisLog) && !/still to pick up/.test(r.solarisLog), 'the Solaris tab shows only Solaris quests');
+assert.deepStrictEqual(r.worlds, ['city', 'elaris'], 'a tab for each world with quests');
 assert.strictEqual(r.kept, 2, 'quests survive a save'); assert.strictEqual(r.junk, 'rejected');
 console.log('quests ok');
