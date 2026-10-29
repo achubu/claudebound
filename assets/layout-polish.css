@@ -168,3 +168,8 @@ body:not(.touch-mode) #touch{display:none}
 /* Round 279 (playtest): on desktop the movement hint sat on the south exit's label; it now waits in the
    bottom-left corner. Phones keep it where it was (their arrow pad and labels are laid out around it). */
 body:not(.touch-mode) .hint{left:16px!important;transform:none!important}
+/* Round 281 (owner: "fix the character screen"): the talent panel sits under the branch tabs and sticks to the top
+   while the tree scrolls (it was pinned to the bottom and covered the tabs and the lowest talents); the banner
+   shows the hero's head (it was cut at the neck). */
+#menuOverlay .talent-detail{position:sticky!important;top:-24px!important;bottom:auto!important;margin:0 0 14px!important;box-shadow:0 8px 18px #0009}
+#menuOverlay .sheet-portrait{max-height:200px!important;object-position:center 24%!important}

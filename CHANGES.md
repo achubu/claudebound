@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 281: the Character screen; the merchant and Cardsmith say hello
+
+- **Character screen** (owner: "fix the character screen"):
+  - The talent panel (the selected talent and its Invest button) was pinned to the bottom of the screen. On opening it
+    covered the Surge / Disruption / Resolve tabs, and while scrolling it hid the lowest talents. It now sits under the
+    tabs and sticks to the top while the tree scrolls, so the talent you picked and its button stay in view.
+  - The banner was a 132px strip centred low on the painting, which cut the hero off at the neck. It is now 200px tall
+    and centred on the hero's head and shoulders.
+  - "Boost locked · Weaken locked" now says what unlocks them: "Boost (learn Power Core) · Weaken (learn Signal
+    Jammer)".
+  - Tree rows that hold no talent are dropped from the layout. Today every row of each tree holds a talent, so the
+    trees look the same.
+  - Styles at the end of `assets/layout-polish.css`; layout in `talentTreeHTML` in `index.html`.
+- **Greetings** (owner request). The first time you walk into a room with the Wandering Merchant or the Cardsmith,
+  they greet you in a popup with a line of character and three lines on what they offer, plus "Visit now" (opens
+  their shop) and "Later".
+  - Once per journey for each (`state.npcMet`), never during a battle, under another menu or in God Mode.
+  - New `assets/npc-greetings.js` (after `item-reach.js`) and `tests/npc-greetings.test.cjs`.
+
 ## Round 280: Pressure 10% weaker; a tougher Lunar Enforcer; the Sun Pharaoh walks
 
 - The owner asked to reduce Pressure by 10%. `PRESSURE_STRENGTH = 0.9` in `assets/pressure.js` scales both parts
