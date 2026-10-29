@@ -53,4 +53,6 @@ assert.strictEqual(r.win.phase, 'reward', 'both down wins');
 assert(r.xp[1] > r.xp[0], 'a pair gives more XP');
 assert(/Both act every turn/.test(r.guide) && /switch target/.test(r.guide), 'the first pair fight explains it');
 assert.strictEqual(r.clash, 0, 'Round 246: the pair never lands two charged strikes on the same turn');
+// Round 287: the partner walks round to its new side when the pair turns (no jump).
+assert(/pair-ghost\{[^}]*transition:transform/.test(require('fs').readFileSync(require('path').join(__dirname, '../assets/enemy-pairs.js'), 'utf8')), 'the partner\'s side change is animated');
 console.log('enemy-pairs ok');

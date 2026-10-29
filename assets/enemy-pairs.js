@@ -210,6 +210,7 @@ if (typeof document !== 'undefined' && document.createElement && document.head) 
     + '#battleModal .pair-mate .pm-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}#battleModal .pair-mate b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#battleModal .pair-mate small{font-size:10px;color:#e8c9a0}'
     + '#battleModal .pair-mate .meter{height:12px}#battleModal .pair-mate .pm-short{display:none}'
     + '@media(max-width:560px){#battleModal .pair-row>.compact-side.enemy{flex-basis:55%}#battleModal .pair-mate{flex-basis:45%;padding:4px}#battleModal .pair-mate b{font-size:11px;white-space:normal;line-height:1.15}#battleModal .pair-mate .pm-long{display:none}#battleModal .pair-mate .pm-short{display:inline}}'
-    + '.enemy-node .pair-ghost{position:absolute;left:0;top:6%;width:100%;height:100%;pointer-events:none;transform:translateX(calc(var(--enemy-facing,1) * (-100% - 4px)))}';
+    + '.enemy-node .pair-ghost{position:absolute;left:0;top:6%;width:100%;height:100%;pointer-events:none;transform:translateX(calc(var(--enemy-facing,1) * (-100% - 4px)));transition:transform .7s ease-in-out}' // Round 287: the partner walks round to its new side instead of jumping when the pair turns
+    + '@media(prefers-reduced-motion:reduce){.enemy-node .pair-ghost{transition:none}}';
   document.head.append(st);
 }

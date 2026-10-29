@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 287: quests
+
+The owner asked for XP quests picked up at the existing interactables, with a Quests tab (`assets/quests.js`):
+
+- In each world, three points of interest also give a quest. Lore stones never do. A ❗ floats over a giver until
+  you take its quest. Its menu shows the quest and its reward beside its usual choice, with a **📜 Take quest**
+  button. A used point of interest still opens when you walk to it while it has a quest to give.
+- The three quests:
+  - **Hunt:** defeat 10 enemies in this world. +60 XP.
+  - **Mini-boss:** defeat one of the world's unbeaten mini-bosses. +80 XP and a world card at +1.
+  - **Boss:** defeat the world's final boss. +120 XP and a world card at +1.
+- Kills count from when you take the quest. A finished quest pays at once, on the victory screen. Its card goes
+  into your collection, not your deck. A boss quest is not offered once that boss is beaten.
+- The **Quests** button (beside Gear) lists active quests with progress bars. It also says how many are still to
+  pick up in this world and how many you have finished.
+- Quests are saved (`state.quests`), and imports check them.
+
+Tests: `tests/quests.test.cjs`.
+
+Also (owner report): when a doubled-up patrol turned around, its partner jumped from one side of the leader to the
+other in a single frame. The partner now walks round to its new side over 0.7s (a CSS transition on `.pair-ghost`;
+off with reduced motion). In Chromium the largest step was 212px in one frame before the fix and 34px per 50ms
+after it. `tests/enemy-pairs.test.cjs` checks for the transition.
+
 ## Round 286: bounties you can plan for
 
 Each patrol's bounty is now decided before the fight, so you can choose fights (and decks) for them
