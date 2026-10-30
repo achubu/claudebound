@@ -31,7 +31,7 @@ function temperEnemy(e) {
   e.temperSeed = Math.floor(Math.random() * 4294967296) >>> 0;
   if (globalThis.NO_TEMPER || (activeRegion === 'city' && (e.level || 1) < TEMPER_FROM_LEVEL)) { e.temperSeed = null; e.temperPlain = true; return; }
   const t = rollTemper(); if (!t.id) return;
-  e.temper = t.id; e.name = t.icon + ' ' + t.name + ' ' + e.name;
+  e.temper = t.id; e.name = /^The /.test(e.name) ? t.icon + ' The ' + t.name + ' ' + e.name.slice(4) : t.icon + ' ' + t.name + ' ' + e.name; // Round 291: "The Fierce Crown Sentinel", not "Fierce The Crown Sentinel"
   e.maxHp = Math.max(1, Math.round(e.maxHp * t.hp)); e.hp = Math.min(e.maxHp, Math.max(1, Math.round(e.hp * t.hp)));
   e.attack = Math.max(1, Math.round(e.attack * t.attack));
 }

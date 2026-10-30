@@ -41,7 +41,7 @@ function fxWhen(text) {
   if (/^Enemy move next turn/i.test(t)) return 'Next turn';
   if (/^Enemy move the turn after/i.test(t)) return 'Turn after';
   const pair = t.match(/^(.*?)( \(target\))?, (next turn|the turn after)$/i);
-  if (pair) return pair[1].replace(/^[🔥🛡]\s*(Fierce|Hardy)\s+/u, '') + (pair[2] ? ' 🎯' : '');
+  if (pair) return pair[1].replace(/^[🔥🛡]\s*(The\s+)?(Fierce|Hardy)\s+/u, '$1') + (pair[2] ? ' 🎯' : '');
   return t;
 }
 function fxDamage(text) {

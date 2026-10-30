@@ -189,3 +189,12 @@ body:not(.touch-mode) .hint{left:16px!important;transform:none!important}
 #battleModal .side-col-head .aether-mini{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;background:#2a1f55;border:1px solid #9b86ff;color:#e3dcff;font:800 11px/1.6 system-ui;white-space:nowrap;vertical-align:middle;cursor:help}
 #battleModal .side-col-head > b{display:inline!important}
 #battleModal .side-col-head .aether-mini{font-size:10px;line-height:1.5;padding:0 6px;margin-left:5px}
+/* Round 291 (playtest): card names were a gradient that faded into the frame (dark orange on gold, dark purple on
+   the Soulbound purple). A light fill with a dark outline reads on every frame and keeps the gold / lavender tint. */
+.card .card-name,.card.soulbound .card-name{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:#fff1c9!important;color:#fff1c9!important;-webkit-text-stroke:0!important;filter:none!important;text-shadow:0 1px 0 #2a1604,1px 0 0 #2a1604,-1px 0 0 #2a1604,0 -1px 0 #2a1604,0 2px 3px #000c!important}
+.card.soulbound .card-name{-webkit-text-fill-color:#f7ecff!important;color:#f7ecff!important;text-shadow:0 1px 0 #1d0b36,1px 0 0 #1d0b36,-1px 0 0 #1d0b36,0 -1px 0 #1d0b36,0 2px 3px #000c!important}
+/* Round 291 (playtest): the ×N copies badge sat on the card's energy cost. It now hangs on the right edge beside the art. */
+.card .stack-count-badge,.stack-count-badge{top:34%!important;right:-10px!important}
+/* Round 291 (playtest): on phones a pair's leader panel is ~95px wide and its Armor badge squeezed the health bar to
+   0px. The badge keeps its shield and number (the word "Armor" goes) and the bar keeps at least 44px. */
+@media(max-width:560px){#battleModal .compact-side.enemy .hp-row .hud-cap{display:none}#battleModal .compact-side.enemy .hp-row .meter{min-width:44px;flex:1 1 44px}#battleModal .compact-side.enemy .hp-row .meter-label{font-size:10px}}

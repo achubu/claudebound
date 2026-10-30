@@ -29,3 +29,11 @@ assert(r.stable, 'a turn\'s roll is the same every time the intent is read');
 assert(r.inRange && r.varied > 5, 'attack rolls stay within ±15% and vary');
 assert.strictEqual(r.cityEarly, 0, 'Neon Aftermath\'s first levels stay plain');
 console.log('enemy-temper ok');
+// Round 291 (playtest): a boss called "The …" reads "🔥 The Fierce Crown Sentinel", not "🔥 Fierce The Crown Sentinel".
+const names = JSON.parse(run(`(()=>{ globalThis.NO_TEMPER = 0; const out = [];
+  for (let s = 0; s < 30 && out.length < 3; s++) { newGame(); configureRegion('city'); state.hp = state.maxHp = 999;
+    const k = Object.keys(rooms).find(k => roomSpawns(k).some(x => x.type === 'crownSentinel')); state.room = k; state.seed = 'temper-name-' + s;
+    startBattle(roomSpawns(k).find(x => x.type === 'crownSentinel').uid); const e = state.battle.enemy; if (e.temper) out.push(e.name); state.battle = null; }
+  globalThis.NO_TEMPER = 1; return JSON.stringify(out); })()`));
+assert(names.length && names.every(n => /^(🔥|🛡) The (Fierce|Hardy) Crown Sentinel$/u.test(n)), 'tempered "The" names read naturally: ' + names.join(', '));
+console.log('temper names ok:', names.join(' | '));
