@@ -216,3 +216,17 @@ body:not(.touch-mode) .hint{left:16px!important;transform:none!important}
 }
 /* World: the movement hint goes after the first three rooms. */
 body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
+/* Round 293 (owner: go ahead with all the suggestions). */
+/* The encounter bar folds away (its element badge sits beside the enemy's name). */
+#battleModal .combat-tools.with-encounter.bar-folded{display:none!important}
+#battleModal .compact-side.enemy .compact-head .fx-el-moved{display:inline-flex;margin-left:2px}
+/* "Next turn" / "Turn after": one line each: label, move, damage, then its chips. */
+#battleModal .intent-bubble{display:flex!important;flex-wrap:wrap;align-items:center;gap:3px 8px;padding:6px 10px!important;min-height:0!important}
+#battleModal .intent-bubble .when{font-size:10px!important;letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin:0!important}
+#battleModal .intent-bubble .what{font-size:14px!important;margin:0!important}
+#battleModal .intent-bubble .dmg{font-size:13px!important;margin:0!important;font-weight:700}
+#battleModal .intent-bubble .dmg::before{content:'· ';opacity:.6}
+#battleModal .intent-bubble .fx-row{display:inline-flex!important;flex-wrap:wrap;gap:4px;margin:0!important}
+/* Slim Pitch buttons under the cards. */
+#battleModal .card-wrap .ability.pitch{min-height:0!important;padding:4px 8px!important;font-size:13px!important;line-height:1.2!important}
+#battleModal .compact-head b .fx-el-moved{margin-left:4px;vertical-align:middle}#battleModal .fx-el-moved .fx-chip.icon-only{padding:0 4px!important;min-width:0!important;font-size:12px!important}

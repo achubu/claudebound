@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 293: a slimmer battle screen
+
+The owner said to go ahead with the three Round 292 suggestions (`ui-clarity.js`, `layout-polish.css`):
+
+- **The top encounter bar is gone.** It only repeated the enemy's name ("⚔ Ember Jackal"), which the enemy panel
+  shows.
+  - Its element badge (🌪 Air, 🔥 Fire…) moves into the enemy panel beside the trait and twist chips.
+  - On phones, where a pair's panel is narrow, the badge shrinks to its icon at the end of the name line; its
+    bubble still explains it.
+  - If anything else ever sits in that bar, the bar stays.
+- **"Next turn" / "Turn after" forecasts are one line each:** a small label, the move, "· N dmg", then its chips.
+  They were about 90px tall and are now 38px on desktop.
+- **Pitch buttons are slim:** 26px instead of about 38px, with the same text and tooltip.
+
+On desktop the hand now sits about 80px higher.
+
+Tests: `tests/ui-clarity.test.cjs` adds three checks:
+- the bar folds and the Crown Sentinel's 🌪 Air badge is in its panel;
+- each forecast is under 50px;
+- Pitch is at most 30px.
+
+`tests/battle-header.test.cjs` (Round 225) now checks the new arrangement: the top line folds away, the element
+chip is in the enemy panel, and a fight with no element has no badge. It still checks the log chip.
+
 ## Round 292: a simpler, clearer interface
 
 The owner asked to make everything simpler and clearer. This round removes clutter and makes the next action obvious

@@ -30,6 +30,14 @@ server.listen(0, async () => {
       const head = document.querySelector('#battleModal .hand-title'); return { withEnergy, without, headH: head ? head.getBoundingClientRect().height : 0 }; });
     assert(!battle.withEnergy && battle.without, 'End turn glows only when nothing is playable');
     assert(battle.headH <= 1, 'no "Your hand" heading');
+    // Round 293: the encounter bar folds (its element badge moves beside the enemy's name), forecasts are one line, Pitch is slim.
+    const slim = await page.evaluate(() => { configureRegion('city'); const k = Object.keys(rooms).find(k => roomSpawns(k).some(s => s.type === 'crownSentinel')); state.room = k; renderWorld(); startBattle(roomSpawns(k).find(s => s.type === 'crownSentinel').uid);
+      const bar = document.querySelector('#battleModal .combat-tools.with-encounter'), el = document.querySelector('#battleModal .compact-side.enemy .fx-el-moved');
+      const bubbles = [...document.querySelectorAll('#battleModal .intent-bubble')].map(x => x.getBoundingClientRect().height), pitch = document.querySelector('#battleModal .card-wrap .ability.pitch');
+      return { barShown: bar && getComputedStyle(bar).display !== 'none', element: el ? el.textContent.trim() : '', bubbles, pitchH: pitch ? pitch.getBoundingClientRect().height : 0 }; });
+    assert(!slim.barShown && /Air/.test(slim.element), 'the encounter bar folds and its element badge sits in the enemy panel (' + slim.element + ')');
+    assert(slim.bubbles.length && slim.bubbles.every(h => h < 50), 'each forecast is one line (' + slim.bubbles.map(Math.round).join(', ') + 'px)');
+    assert(slim.pitchH > 0 && slim.pitchH <= 30, 'Pitch buttons are slim (' + Math.round(slim.pitchH) + 'px)');
     const hint = await page.evaluate(() => { state.battle = null; document.getElementById('battleOverlay').classList.add('hidden'); state.visited = ['0,5']; renderWorld(); const h = document.querySelector('.hint'); const shown = h && getComputedStyle(h).display !== 'none'; state.visited = ['0,5', '1,5', '2,5']; renderWorld(); const gone = h && getComputedStyle(h).display === 'none'; return { shown, gone }; });
     assert(hint.shown && hint.gone, 'the movement hint shows at first and goes after three rooms');
     assert(!errs.length, 'no page errors (' + errs.join(' | ') + ')');
