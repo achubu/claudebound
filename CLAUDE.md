@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 292) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 293) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -25,7 +25,7 @@ change set.
     `enemy-pairs` (Round 243: two enemies at once from the Sky Isles on), `enemy-armor` (Round 244; doubled in Round 262; Vespera +10% in Round 266), `armor-hud` (Round 262: enemy Armor beside its health, 🛡 −N popups), `enemy-traits` (Round 265: every enemy has its own move pattern and trait; none repeat within a world), `boss-twists` (Round 283: each boss's signature twist, Phase 2 at half health, Overdrive; off in the harness unless `BOSS_TWISTS=1`), `enemy-temper` (Round 253: 🔥 Fierce / 🛡 Hardy tempers and ±15% attack rolls), `battle-recap`
     (Round 211: the final turn on the victory screens), `tutorial` (Round 226: a new journey's guide and
     starting-deck pick; it hangs off the New journey buttons, not `newGame()`), `battle-chips` (Round 254: every
-    battle-screen effect as a one- or two-word chip with a hover/tap bubble; keep new battle text short or it gets chipped), `juice` (Round 285: floating numbers, shake, flashes and Web Audio sounds; 🔊 mutes), `ui-clarity` (Round 292: six top-bar buttons, with Save in the Menu and Aetherlink in Gear; End turn glows when nothing is playable), then
+    battle-screen effect as a one- or two-word chip with a hover/tap bubble; keep new battle text short or it gets chipped), `juice` (Round 285: floating numbers, shake, flashes and Web Audio sounds; 🔊 mutes), `ui-clarity` (Round 292: six top-bar buttons, with Save in the Menu and Aetherlink in Gear; End turn glows when nothing is playable; Round 293: no encounter bar, one-line forecasts, slim Pitch buttons), then
     `god-mode` (Round 198: any card wins, all waypoints and maps open; while it is on, writes to the
     save keys are ignored, so leaving rolls back).
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.

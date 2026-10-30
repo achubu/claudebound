@@ -49,9 +49,27 @@ renderBattle = function () {
   const b = state && state.battle, end = typeof $ === 'function' && $('endTurn');
   const bar = typeof document !== 'undefined' && document.querySelector && document.querySelector('#battleModal .compact-bar');
   if (bar && bar.children) for (const el of bar.children) if (el.classList && /^Lv \d/.test((el.textContent || '').trim())) el.classList.add('xp-pill');
+  uiFoldEncounterBar();
   if (end && end.classList) { const idle = uiNothingPlayable(b); end.classList.toggle('end-turn-ready', idle); end.title = idle ? 'Nothing left to play: end your turn' : 'End your turn'; }
   return out;
 };
+// Battle (Round 293): the top bar only repeated the enemy's name. Its element badge moves into the enemy panel beside
+// the name, and the bar folds away when nothing else is left in it.
+function uiFoldEncounterBar() {
+  if (typeof document === 'undefined' || !document.querySelector) return;
+  const bar = document.querySelector('#battleModal .combat-tools.with-encounter'), head = document.querySelector('#battleModal .compact-side.enemy .compact-head');
+  if (!bar || !head || !bar.querySelectorAll) return;
+  // On a phone the enemy panel is narrow: the badge shrinks to its icon at the end of the name line (its bubble still explains it).
+  const narrow = typeof innerWidth === 'number' && innerWidth <= 560, name = head.querySelector('b');
+  const list = x => { try { return Array.from(x || []); } catch (e) { return []; } }; // the test harness's stand-in DOM has no real node lists
+  for (const el of list(bar.querySelectorAll('.fx-el'))) {
+    el.classList.add('fx-el-moved');
+    if (narrow && name) { for (const chip of list(el.querySelectorAll('.fx-chip'))) { chip.textContent = (chip.textContent || '').trim().split(/\s+/)[0]; chip.classList.add('icon-only'); } name.append(el); }
+    else head.append(el);
+  }
+  const rest = list(bar.childNodes).filter(n => !(n.classList && n.classList.contains('encounter-line')) && (n.textContent || '').trim());
+  if (bar.classList) bar.classList.toggle('bar-folded', !rest.length);
+}
 // World: the movement hint goes once you have found your feet.
 const renderWorldBeforeClarity = renderWorld;
 renderWorld = function () {
