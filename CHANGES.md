@@ -3496,6 +3496,44 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 291: playtest fixes (card names, copies badge, phone pair HP, boss names, map text)
+
+The owner asked for a bug playtest. This round played the game in Chromium, battles included, with real clicks and
+taps:
+- a new journey through the tutorial and the starting-deck pick;
+- an autoplayer that taps patrols, plays cards and presses End turn, takes victory and loot screens, and walks
+  doors (4 wins, 6 rooms and a level-up in Neon Aftermath, with no page errors, stuck screens or
+  "NaN"/"undefined" text);
+- boss fights with twists, Phase 2 and the swipe discard;
+- every nav screen at 1280×800 and 390×844, saving and reloading, export and import, and every compendium section
+  including the Difficulty lab;
+- the phone two-step play (tap a card, then "Play …").
+
+Fixed:
+- **Card names were hard to read.** They were a gradient fading into the frame: dark orange on the gold
+  "At risk" frame, dark purple on the Soulbound purple. Names now use a light fill (cream on gold, pale lavender on
+  Soulbound) with a dark outline (`layout-polish.css`).
+- **The ×N copies badge covered the energy cost** on the Deck screen. It now hangs on the card's right edge beside
+  the art.
+- **On phones, a pair's leader had no health bar.** Its panel is about 95px wide and the Armor badge squeezed the
+  bar to 0px. Under 560px the badge keeps its shield and number (the word "Armor" goes) and the bar keeps at
+  least 44px.
+- **Tempered bosses read "🔥 Fierce The Crown Sentinel".** The 16 bosses named "The …" now read "🔥 The Fierce
+  Crown Sentinel" (`enemy-temper.js`). The battle chips strip either form.
+- **"1 areas explored"** on the map now says "1 area explored".
+
+Checked and fine:
+- Static field charges +1 on the first card exactly as shown.
+- Every door crossing works when tapped (a tap near an edge carries its exit).
+- Phone touch taps on patrols start fights.
+
+Noted, not changed:
+- The new Hack cards (Packet Sniff, Ghost Protocol) still have placeholder drawings.
+- The compendium's boss dossiers don't yet mention the Round 283 twists.
+
+Tests: `tests/playtest-fixes.test.cjs` (Chromium: name fill, badge clear of the cost, phone pair health bar). It
+fails on the old stylesheet. `tests/enemy-temper.test.cjs` checks the "The Fierce …" names.
+
 ## Round 290: full playtest outside battle; sure heals wait until you're hurt
 
 The owner asked for a test of everything except battle, including pathing and using every object, and a list of
