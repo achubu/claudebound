@@ -104,7 +104,10 @@ async function session(name, ctxOpts) {
     }
 
     // Save / reload / resume
-    await page.click('#saveBtn').catch(() => issues.push('[ui] save button not clickable'));
+    // Round 292: Save lives in the Menu (Save now); the journey also saves by itself.
+    await page.evaluate(() => [...document.querySelectorAll('#nav button')].find(b => b.textContent.trim() === 'Menu').click());
+    await page.click('#saveNowBtn').catch(() => issues.push('[ui] Save now not clickable'));
+    await page.evaluate(() => closeMenu());
     const before = await page.evaluate(() => JSON.stringify({ lvl: state.playerLevel, xp: state.xp, pool: state.pool.length, room: state.room }));
     await page.reload({ waitUntil: 'networkidle' });
     const resumeVisible = await page.isVisible('#resumeBtn');

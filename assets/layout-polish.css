@@ -198,3 +198,21 @@ body:not(.touch-mode) .hint{left:16px!important;transform:none!important}
 /* Round 291 (playtest): on phones a pair's leader panel is ~95px wide and its Armor badge squeezed the health bar to
    0px. The badge keeps its shield and number (the word "Armor" goes) and the bar keeps at least 44px. */
 @media(max-width:560px){#battleModal .compact-side.enemy .hp-row .hud-cap{display:none}#battleModal .compact-side.enemy .hp-row .meter{min-width:44px;flex:1 1 44px}#battleModal .compact-side.enemy .hp-row .meter-label{font-size:10px}}
+/* Round 292 (owner: simpler, clearer). Six top-bar buttons: Save moved into the Menu, Aetherlink into the Gear screen. */
+#nav button.nav-folded{display:none!important}
+.save-now-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0}
+/* Battle: no "Your hand" heading (the cards say it); End turn glows when nothing is left to play. */
+#battleModal .hand-title{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;margin:0!important;padding:0!important}
+#battleModal #endTurn.end-turn-ready{border-color:#ffe08a!important;box-shadow:0 0 0 2px #ffcf5a66,0 0 18px #ffcf5acc!important;animation:endTurnReady 1.3s ease-in-out infinite}
+@keyframes endTurnReady{50%{box-shadow:0 0 0 3px #ffcf5a99,0 0 26px #ffcf5a}}
+@media(prefers-reduced-motion:reduce){#battleModal #endTurn.end-turn-ready{animation:none}}
+/* Phones: the battle bar drops the level/XP pill (it's on the map HUD and the victory screen), the Character button
+   becomes an icon, and End turn joins the same row instead of taking one of its own. */
+@media(max-width:560px){
+  #battleModal .compact-bar>.xp-pill{display:none}
+  #battleModal .compact-bar #battleChar{font-size:0!important;padding:6px 10px!important}
+  #battleModal .compact-bar #battleChar::before{content:'👤';font-size:16px}
+  #battleModal .compact-bar #endTurn{min-height:44px}
+}
+/* World: the movement hint goes after the first three rooms. */
+body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
