@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 292: a simpler, clearer interface
+
+The owner asked to make everything simpler and clearer. This round removes clutter and makes the next action obvious
+(`assets/ui-clarity.js`, styles at the end of `layout-polish.css`):
+
+- **Six top-bar buttons instead of eight:** Map, Deck, Character, Gear, Quests, Menu. On phones that is two rows
+  instead of three.
+  - **Save** moved into the Menu as **💾 Save now**, with a note that the journey saves by itself. Checked: walk
+    through a door, reload, and you are in the new room without saving.
+  - The **Aetherlink Gauntlet** (a wrist device) opens from the Gear screen.
+  - The old buttons stay in the page, hidden (`.nav-folded`).
+- **End turn glows** when nothing in your hand or side deck can be played: no card you can afford, and no side card
+  you have the Aether for. Its tooltip says so.
+- **No "Your hand" heading** in battle; the cards say it. The heading is visually hidden rather than removed, because
+  other scripts place panels beside it.
+- **Phone battle bar:** two rows instead of three, so End turn no longer sits alone on its own row.
+  - The level/XP pill goes; it's on the map HUD and the victory screen.
+  - Character becomes a 👤 icon.
+- **The movement hint** ("Click a path to move…" / "Tap a path…") goes once you have visited three rooms. It was
+  partly covered by the arrow pad on phones.
+
+Tests: `tests/ui-clarity.test.cjs` (Chromium: the six buttons, Save now really saves, Gear opens the Aetherlink, End turn
+glows only with nothing playable, no heading, the hint goes after three rooms, phones hide the XP pill).
+`tests/browser-playtest.cjs` now saves through the Menu.
+
 ## Round 291: playtest fixes (card names, copies badge, phone pair HP, boss names, map text)
 
 The owner asked for a bug playtest. This round played the game in Chromium, battles included, with real clicks and
