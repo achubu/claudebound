@@ -40,6 +40,18 @@ server.listen(0, async () => {
     assert(slim.pitchH > 0 && slim.pitchH <= 30, 'Pitch buttons are slim (' + Math.round(slim.pitchH) + 'px)');
     const hint = await page.evaluate(() => { state.battle = null; document.getElementById('battleOverlay').classList.add('hidden'); state.visited = ['0,5']; renderWorld(); const h = document.querySelector('.hint'); const shown = h && getComputedStyle(h).display !== 'none'; state.visited = ['0,5', '1,5', '2,5']; renderWorld(); const gone = h && getComputedStyle(h).display === 'none'; return { shown, gone }; });
     assert(hint.shown && hint.gone, 'the movement hint shows at first and goes after three rooms');
+    // Round 294: a ✕ on every top-bar screen, a shorter Character page, and only pressable buttons under deck cards.
+    const r294 = await page.evaluate(() => {
+      const out = { x: {} };
+      for (const f of ['showMap', 'showDeck', 'showCharacter', 'showGear', 'showQuests', 'showMainMenu', 'showDevice']) { closeMenu(); window[f](); const x = document.querySelector('#menuModal .menu-x'); out.x[f] = !!x; if (x) x.click(); out.x[f] = out.x[f] && document.getElementById('menuOverlay').classList.contains('hidden'); }
+      state.playerLevel = 8; showCharacter(); const m = document.getElementById('menuModal');
+      out.hero = !!m.querySelector('.char-hero h2'); out.cols = getComputedStyle(m.querySelector('.sheet-grid')).gridTemplateColumns.split(' ').length;
+      out.nodeH = Math.round(m.querySelector('.talent-node').getBoundingClientRect().height); out.charH = m.scrollHeight;
+      showDeck(); out.greyInfo = [...document.querySelectorAll('#menuModal .workshop .card-wrap .actions button')].filter(b => b.disabled && b.offsetParent && !/^\+\s*Add/.test(b.textContent.trim())).length;
+      closeMenu(); return out; });
+    assert(Object.values(r294.x).every(Boolean), 'every top-bar screen has a ✕ that closes it (' + JSON.stringify(r294.x) + ')');
+    assert(r294.hero && r294.cols === 4 && r294.nodeH <= 92 && r294.charH < 2000, 'Character: hero strip, stats in one row, smaller talents (' + r294.charH + 'px tall, was ~2440)');
+    assert(r294.greyInfo === 0, 'no greyed-out notice buttons under deck cards');
     assert(!errs.length, 'no page errors (' + errs.join(' | ') + ')');
     await page.close();
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }); const phone = await ctx.newPage(); await start(phone);

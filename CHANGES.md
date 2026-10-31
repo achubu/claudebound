@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 294: friendlier menus; a shorter Character page
+
+The owner asked to improve the menus' look and usability, and said the Character page was much too long. Changes are in
+`ui-clarity.js` and at the end of `layout-polish.css`.
+
+- **A ✕ on every top-bar screen** (Map, Deck, Character, Gear, Quests, Menu, Aetherlink). It stays in the top-right
+  corner while you scroll, so a long screen closes without scrolling to its Close button. Escape still works.
+- **One heading size** on every screen. Gear and Quests used a bigger h1.
+- **Character page** (desktop 2,441px → 1,802px; phone 2,627px → 2,080px):
+  - The 200px portrait banner is now a 130px hero strip with your name and level on it.
+  - The four stat boxes (Experience, Battle loadout, Card upgrades, Relics) sit in one row: two on tablets, two on
+    phones.
+  - Talent tiles are 74×88 instead of 86×116, and the tree's rows fit the tiles instead of a fixed 116px with
+    40px gaps. The connector lines are measured, so they are redrawn after the hero strip moves the tree.
+- **Deck screen** (desktop 2,097px → 1,932px; phone 6,255px → 3,265px):
+  - Under each card, only buttons you can press stay, in one compact row. The greyed-out notices ("Soulbound
+    protected", "Auto-upgrade · 0/100 uses") repeated what the card shows. A greyed "+ Add" still says the deck is
+    full.
+  - On phones, cards show two to a row, and the three favorite decks sit side by side.
+
+Tests: `tests/ui-clarity.test.cjs` checks:
+- every top-bar screen's ✕ closes it;
+- the Character hero strip, the 4-column stat row, smaller tiles and a page under 2,000px;
+- no greyed notice buttons under deck cards.
+
 ## Round 293: a slimmer battle screen
 
 The owner said to go ahead with the three Round 292 suggestions (`ui-clarity.js`, `layout-polish.css`):
