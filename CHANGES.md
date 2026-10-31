@@ -3496,6 +3496,33 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 297: gameplay playtest; intended design recorded
+
+The owner asked for a playtest looking for gameplay improvements. The Difficulty lab (8 builds, careful play,
+tempers, traits and boss twists on) measured fight length and the HP left after wins in every world, and win rates by
+starting HP.
+
+| Starting HP | Neon Aftermath (regular fights) | Vespera (regular fights) |
+|---|---|---|
+| 100% | 63% | 75% |
+| 75% | 50% | 58% |
+| 50% | 6% | 44% |
+| 30% | 2% | 29% |
+
+A regular win leaves about 54–75% HP. Some boss and mini-boss fights run long: Vespera mini-bosses about 23 turns and
+its boss about 18, the Elaris boss about 15, Chronospire mini-bosses about 15.
+
+The owner confirmed all of these are intended:
+- HP carries over with scarce healing;
+- the long boss fights;
+- card loss on defeat;
+- flat potions;
+- the ◇500 Soulbind;
+- Solaris using the forest's events.
+
+CLAUDE.md now lists them under "Intended design" so later sessions don't propose changing them. No game code
+changed.
+
 ## Round 296: a stat breakdown on the Character page; exploration in the quest log
 
 The owner said the Character page didn't need all its extra info, just a breakdown of the boosts from talents and gear:
