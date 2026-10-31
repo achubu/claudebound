@@ -78,3 +78,30 @@ renderWorld = function () {
   return out;
 };
 uiTidyNav();
+// Round 294 (owner: nicer, friendlier menus; a shorter Character page).
+// Every top-bar screen gets a ✕ in its top-right corner (Escape already closes menus), so a long screen can be
+// closed without scrolling to its bottom.
+function uiAddCloseX() {
+  const modal = typeof $ === 'function' && $('menuModal'); if (!modal || !modal.prepend || (modal.querySelector && modal.querySelector('.menu-x'))) return;
+  const x = document.createElement('button'); x.className = 'menu-x'; x.type = 'button'; x.title = 'Close (Esc)'; x.setAttribute('aria-label', 'Close'); x.textContent = '✕';
+  x.onclick = () => closeMenu();
+  const pin = document.createElement('div'); pin.className = 'menu-x-pin'; pin.append(x); modal.prepend(pin); // a zero-height sticky holder: the ✕ stays top-right while you scroll and takes no room
+}
+// The Character page: the portrait becomes a short hero strip with your name and level on it.
+function uiCharacterHero() {
+  const modal = typeof $ === 'function' && $('menuModal'); if (!modal || !modal.querySelector) return;
+  const img = modal.querySelector('.sheet-portrait'), eyebrow = modal.querySelector('.eyebrow'), title = modal.querySelector('h2');
+  if (!img || !eyebrow || !title || img.closest('.char-hero')) return;
+  const hero = document.createElement('div'); hero.className = 'char-hero'; img.before(hero);
+  const text = document.createElement('div'); text.className = 'char-hero-text'; text.append(eyebrow, title); hero.append(img, text);
+}
+// Deck: the greyed-out notice buttons under each card ("Locked · 0/50 uses", "Soulbound protected", "Auto-upgrade · 0/100
+// uses") repeat what the card itself shows, so only buttons you can press stay (a greyed "+ Add" still says the deck is full).
+function uiTidyDeck() {
+  const modal = typeof $ === 'function' && $('menuModal'); if (!modal || !modal.querySelectorAll) return;
+  for (const b of modal.querySelectorAll('.workshop .card-wrap .actions button')) if (b.disabled && !/^\+\s*Add/.test((b.textContent || '').trim())) b.classList.add('info-only');
+}
+for (const name of ['showMap', 'showDeck', 'showCharacter', 'showGear', 'showQuests', 'showMainMenu', 'showDevice']) {
+  const before = globalThis[name]; if (typeof before !== 'function') continue;
+  globalThis[name] = function () { const out = before.apply(this, arguments); try { if (name === 'showDeck') uiTidyDeck(); if (name === 'showCharacter') { uiCharacterHero(); if (typeof renderTalentConnectors === 'function') renderTalentConnectors(); /* the hero strip moves the tree: redraw its lines */ } uiAddCloseX(); } catch (e) { /* cosmetic only */ } return out; };
+}
