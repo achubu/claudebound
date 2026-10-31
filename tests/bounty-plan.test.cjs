@@ -13,7 +13,7 @@ const r = JSON.parse(run(`(() => { const o = {};
   // Combo: four cards in a turn
   b.bounty = 'combo'; b.bountyCombo = 0; b.hand = ['strike', 'strike', 'strike', 'strike'].map(x => make(x)); b.energy = 9; b.enemy.hp = 999; for (let i = 0; i < 4; i++) playCard(0); o.combo = bountyMet(b);
   // Completing a bounty pays XP too; the spawn then rolls a new one
-  b.bounty = 'combo'; const xp0 = state.xp + state.playerLevel * 100, sh0 = state.shards; b.enemy.hp = 0; winBattle();
+  b.bounty = 'combo'; b.enemy.elite = false; b.enemy.boss = false; const xp0 = state.xp + state.playerLevel * 100, sh0 = state.shards; b.enemy.hp = 0; winBattle();
   o.xp = state.xp + state.playerLevel * 100 - xp0 - (b.xpGain || 0); o.shards = state.shards - sh0; o.special = (b.special || []).join(' ');
   o.gen = state.bountyGen[s.uid];
   // Every spawn in every world has a known bounty; exploit only with an element
