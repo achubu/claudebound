@@ -25,17 +25,7 @@ showMainMenu = function () {
   }
   return out;
 };
-// Gear screen: the Aetherlink Gauntlet lives here now.
-const showGearBeforeClarity = showGear;
-showGear = function () {
-  const out = showGearBeforeClarity.apply(this, arguments);
-  const close = typeof $ === 'function' && $('gearClose');
-  if (close && close.before && !$('gearDeviceBtn')) {
-    const b = document.createElement('button'); b.id = 'gearDeviceBtn'; b.textContent = '⌚ Aetherlink Gauntlet'; b.title = 'Socket crystals into your wrist device';
-    b.onclick = () => showDevice(); close.before(b); close.before(document.createTextNode(' '));
-  }
-  return out;
-};
+// Gear screen: the Aetherlink Gauntlet lives inside it (Round 295, at the end of this file).
 // Battle: End turn glows when there is nothing left to play.
 function uiNothingPlayable(b) {
   if (!b || b.phase !== 'fight') return false;
@@ -87,13 +77,10 @@ function uiAddCloseX() {
   x.onclick = () => closeMenu();
   const pin = document.createElement('div'); pin.className = 'menu-x-pin'; pin.append(x); modal.prepend(pin); // a zero-height sticky holder: the ✕ stays top-right while you scroll and takes no room
 }
-// The Character page: the portrait becomes a short hero strip with your name and level on it.
+// The Character page has no portrait (Round 295, owner: "we don't need it"); the name and level head the page.
 function uiCharacterHero() {
   const modal = typeof $ === 'function' && $('menuModal'); if (!modal || !modal.querySelector) return;
-  const img = modal.querySelector('.sheet-portrait'), eyebrow = modal.querySelector('.eyebrow'), title = modal.querySelector('h2');
-  if (!img || !eyebrow || !title || img.closest('.char-hero')) return;
-  const hero = document.createElement('div'); hero.className = 'char-hero'; img.before(hero);
-  const text = document.createElement('div'); text.className = 'char-hero-text'; text.append(eyebrow, title); hero.append(img, text);
+  const img = modal.querySelector('.sheet-portrait'); if (img && img.remove) img.remove();
 }
 // Deck: the greyed-out notice buttons under each card ("Locked · 0/50 uses", "Soulbound protected", "Auto-upgrade · 0/100
 // uses") repeat what the card itself shows, so only buttons you can press stay (a greyed "+ Add" still says the deck is full).
@@ -103,5 +90,33 @@ function uiTidyDeck() {
 }
 for (const name of ['showMap', 'showDeck', 'showCharacter', 'showGear', 'showQuests', 'showMainMenu', 'showDevice']) {
   const before = globalThis[name]; if (typeof before !== 'function') continue;
-  globalThis[name] = function () { const out = before.apply(this, arguments); try { if (name === 'showDeck') uiTidyDeck(); if (name === 'showCharacter') { uiCharacterHero(); if (typeof renderTalentConnectors === 'function') renderTalentConnectors(); /* the hero strip moves the tree: redraw its lines */ } uiAddCloseX(); } catch (e) { /* cosmetic only */ } return out; };
+  globalThis[name] = function () { const out = before.apply(this, arguments); try { if (name === 'showDeck') uiTidyDeck(); if (name === 'showCharacter') { uiCharacterHero(); if (typeof renderTalentConnectors === 'function') renderTalentConnectors(); /* the tree moved up: redraw its lines */ } uiAddCloseX(); } catch (e) { /* cosmetic only */ } return out; };
 }
+// Round 295 (owner: "Where is the aether link? Let's combine it with gear"): the Aetherlink Gauntlet is a section of the
+// Gear screen. Its own screen is drawn as before (gauntlet painting, sockets wired to installCrystal), then moved into
+// Gear; anything that used to open it (including socketing a crystal) shows the Gear screen, keeping your place.
+const showDeviceAlone = showDevice, showGearAlone = showGear;
+function uiEmbedDevice() {
+  const modal = typeof $ === 'function' && $('menuModal'); if (!modal || !modal.replaceChildren || !modal.childNodes) return;
+  const gearNodes = Array.from(modal.childNodes);
+  showDeviceAlone();
+  const dev = Array.from(modal.childNodes).filter(n => !(n.classList && (n.classList.contains('menu-x-pin') || n.classList.contains('eyebrow'))));
+  modal.replaceChildren(...gearNodes);
+  const section = document.createElement('section'); section.className = 'gear-aetherlink'; section.id = 'gearAetherlink';
+  for (const n of dev) {
+    if (n.querySelector && n.querySelector('#deviceClose')) { n.querySelector('#deviceClose').remove(); if (!(n.textContent || '').trim()) continue; }
+    if (n.tagName === 'H1') { const h = document.createElement('h2'); h.textContent = '⌚ ' + n.textContent; section.append(h); continue; }
+    section.append(n);
+  }
+  const stray = section.querySelector && section.querySelector('#deviceClose'); if (stray) { const holder = stray.parentElement; stray.remove(); if (holder && holder !== section && !(holder.textContent || '').trim()) holder.remove(); } // its own Return button: Gear has Close
+  const close = $('gearClose'), at = close && close.closest ? close.closest('p') : null;
+  if (at && at.before) at.before(section); else modal.append(section);
+}
+showGear = function () {
+  const modal = typeof $ === 'function' && $('menuModal'), keep = modal && modal.querySelector && modal.querySelector('.gear-aetherlink') ? modal.scrollTop : null;
+  const out = showGearAlone.apply(this, arguments);
+  try { uiEmbedDevice(); } catch (e) { /* the test harness has no real DOM */ }
+  if (keep != null && modal) modal.scrollTop = keep;
+  return out;
+};
+showDevice = function () { return showGear(); };

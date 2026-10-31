@@ -237,19 +237,13 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 #menuModal .menu-x:hover,#menuModal .menu-x:focus-visible{background:#164056;border-color:#9fe7f5;color:#fff}
 /* One heading size on every screen (Gear and Quests used a bigger h1). */
 #menuModal>h1{font-size:26px;margin:2px 0 10px}
-/* Character: a short hero strip with the name and level on the portrait. */
-#menuModal .char-hero{position:relative;height:130px;border-radius:12px;overflow:hidden;margin:0 0 12px;border:1px solid #2e5566}
-#menuModal .char-hero .sheet-portrait{width:100%!important;height:100%!important;max-height:none!important;object-fit:cover;object-position:center 22%;display:block;margin:0!important;border:0!important;border-radius:0!important}
-#menuModal .char-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#07121bf0 0,#07121bb0 38%,#07121b10 70%);pointer-events:none}
-#menuModal .char-hero-text{position:absolute;left:18px;bottom:14px;z-index:1;text-shadow:0 2px 6px #000}
-#menuModal .char-hero-text .eyebrow{margin:0 0 2px}#menuModal .char-hero-text h2{margin:0;font-size:26px}
+/* Character: no portrait (Round 295); the name and level head the page. */
 /* Character: the four stat boxes in one row, tighter. */
 #menuModal .sheet-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;margin-bottom:14px}
 #menuModal .sheet-grid>*{padding:10px 12px!important;margin:0!important;min-height:0!important;font-size:13px;line-height:1.45}
 #menuModal .sheet-grid h3,#menuModal .sheet-grid b:first-child{font-size:14px;margin:0 0 4px!important}
 #menuModal .sheet-grid p{margin:2px 0!important}
 @media(max-width:900px){#menuModal .sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:560px){#menuModal .char-hero{height:110px}#menuModal .char-hero-text h2{font-size:21px}}
 /* Character: smaller talent tiles and tighter rows (the connector lines are measured, so they follow). */
 #menuModal .talent-lane{gap:14px!important;padding:8px 4px!important}
 #menuModal .talent-node{width:74px!important;height:88px!important;flex-basis:74px!important;padding:4px!important}
@@ -272,3 +266,7 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
   #menuModal .deck-presets .preset-actions{display:flex;flex-direction:column;gap:4px}
   #menuModal .deck-presets .preset-actions button{width:100%;min-height:30px;padding:4px!important;font-size:11px!important}
 }
+/* Round 295: talent connectors are straight lines with square corners. */
+.talent-connectors path{stroke-linejoin:miter;stroke-linecap:butt}
+/* Round 295: the Aetherlink Gauntlet is a section of the Gear screen. */
+#menuModal .gear-aetherlink{margin-top:18px;padding-top:14px;border-top:1px solid #2e5566}#menuModal .gear-aetherlink>h2{margin-top:0}

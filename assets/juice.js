@@ -57,12 +57,12 @@ function juiceReact(b, prev, now) {
   const dealt = prev.ehp - now.ehp, lost = prev.hp - now.hp, gained = now.block - prev.block;
   if (dealt > 0) { juiceFloat(enemyBar, '−' + dealt, 'dmg'); const big = dealt >= Math.max(12, b.enemy.maxHp * .15); juiceSound(big ? 'bigHit' : 'hit'); if (big) juiceShake(false); }
   if (dealt < 0) juiceFloat(enemyBar, '+' + (-dealt), 'heal');
-  if (lost > 0) { juiceFloat(youBar, '−' + lost, 'dmg'); juiceSound('hurt'); if (lost >= state.maxHp * .25) { juiceShake(true); juiceFlash('#ff3b3b'); } else juiceShake(false); }
+  if (lost > 0) { juiceFloat(youBar, '−' + lost, 'dmg'); juiceSound('hurt'); if (lost >= state.maxHp * .25) { juiceShake(true); juiceFlash('#ff3b3b'); } } // Round 295 (owner): the screen shakes only on big hits
   if (lost < 0) { juiceFloat(youBar, '+' + (-lost), 'heal'); juiceSound('heal'); }
   if (gained > 0 && now.turn === prev.turn) { juiceFloat(youBar, '+' + gained + ' 🛡', 'block'); juiceSound('block'); }
   if (/System crash/.test(newLogs)) { juiceFlash('#5ff2e0'); juiceSound('crash'); }
   if (/countered|Counter/.test(newLogs) && dealt <= 0) juiceFlash('#8fd8ff');
-  if (/Phase 2/.test(newLogs)) { juiceFlash('#ff9a3c'); juiceSound('phase'); juiceShake(true); }
+  if (/Phase 2/.test(newLogs)) { juiceFlash('#ff9a3c'); juiceSound('phase'); }
 }
 const renderBattleBeforeJuice = renderBattle;
 renderBattle = function () {
