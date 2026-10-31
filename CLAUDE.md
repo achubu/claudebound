@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 296) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 297) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -153,6 +153,17 @@ change set.
   regular fights and 33% on bosses for the average build, in every world (`BALANCE.targetHp` in `expansion.js`; the naive
   player should still lose). Tune each world toward these. Tune bosses with the lab (it wears gear and, since Round 253, plays full
   decks of each world's cards, `SIM_DECKS`); `tests/balance-sim.cjs` plays without gear (and has an older script list).
+
+## Intended design (owner, Round 297): don't propose changing these
+
+A playtest flagged these and the owner confirmed they are intended:
+- HP carries over between fights, with little healing outside battle (campfires, potions, level-ups). Fights started
+  hurt are meant to be much harder.
+- Long boss and mini-boss fights in the later worlds (Vespera, Elaris, Chronospire).
+- Losing a fight destroys a random non-Soulbound card and sends you back to the world's start at full HP.
+- Potions heal a flat amount.
+- Soulbinding costs ◇500.
+- Solaris uses the forest's events.
 
 ## Working conventions
 
