@@ -3496,6 +3496,38 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 295: straight talent lines; no Character portrait; calmer shake; Aetherlink inside Gear
+
+The owner asked for the lines between talents to be straight, with no curves. `renderTalentConnectors()` in
+`index.html` drew each link as a curve. It now draws:
+- a single vertical line when a talent sits right below the one it needs;
+- otherwise straight down, straight across at the midpoint, then straight down into the talent.
+
+The corners are square (`stroke-linejoin: miter`, in `layout-polish.css`). The lines are still measured from the
+tiles, so they follow any layout. All 44 links across Surge, Disruption and Resolve were checked in Chromium.
+
+The owner also asked, during this round:
+
+- **"Remove the image at the top of the character page"**: the portrait is gone (the Round 294 hero strip with it).
+  The page opens on your name and level, then the stats. It is 1,714px tall at level 14, down from about 2,440px
+  before Round 294.
+- **"Only have the screen shake on big hits"**: in `juice.js`, an ordinary hit you take no longer shakes the screen.
+  A hit of 25%+ of your max HP still gives the big shake and red flash, and a big hit you deal still gives the
+  light shake. Phase 2 keeps its flash and sound but no longer shakes.
+- **"Where is the aether link? Let's combine it with gear"**: the Aetherlink Gauntlet is now a section of the Gear
+  screen, under your gear.
+  - It has the gauntlet painting, the sockets and the crystal collection. Its separate Return button is gone, since
+    Gear has Close and the ✕.
+  - Anything that opened the Aetherlink (and socketing a crystal, which redraws the screen) now shows the Gear
+    screen at the same scroll position.
+  - The Round 292 "⌚ Aetherlink Gauntlet" button is gone.
+
+Tests: `tests/ui-clarity.test.cjs` checks:
+- the talent lines contain no curve commands;
+- there is no portrait;
+- the Aetherlink section is inside Gear, with its sockets and no Return button, and `showDevice()` shows Gear;
+- a 2-HP hit doesn't shake the screen and a 30% hit does.
+
 ## Round 294: friendlier menus; a shorter Character page
 
 The owner asked to improve the menus' look and usability, and said the Character page was much too long. Changes are in
