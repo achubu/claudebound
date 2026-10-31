@@ -3496,6 +3496,41 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 296: a stat breakdown on the Character page; exploration in the quest log
+
+The owner said the Character page didn't need all its extra info, just a breakdown of the boosts from talents and gear:
+damage, armor penetration, health, armor and so on. They also asked for the quests to show exploration details and the
+objects found. Both are in `ui-clarity.js`, with styles in `layout-polish.css`.
+
+- **Character page.** The four boxes (Experience, Battle loadout, Card upgrades, Exploration relics) and the
+  Aetherlink notice are replaced by a slim XP bar and one table.
+  - Each row gives a stat's total and where it comes from, as coloured tags: Base, Levels, Talents (purple), Gear
+    (green), Aetherlink (blue), World (amber, for Armor scaling).
+  - Rows: max health, armor, attack damage, elemental damage, armor pierce, Block bonus, critical chance (with crit
+    damage), weakness bonus, energy, opening hand, deck size and copies, potion heal.
+  - The numbers come from the game's own formulas (`scaledRank`, `gearStat`, `deviceBonus`, `talentRank`,
+    `talentMatrix`), so they match what fights use.
+  - Under the table, **Gear rules in effect** lists each worn piece's Round 284 rule.
+  - On phones each row wraps its sources under the stat.
+- **Quest log.** Each world's tab has an exploration panel.
+  - For the world you're in: the completion percentage with a bar, and the counts for:
+    - rooms explored;
+    - hidden chests;
+    - gear and relics;
+    - points of interest found and used;
+    - lore read;
+    - Nexus Waypoints.
+  - It also notes the +35 Shards reward for 100%.
+  - Other worlds' tabs show the rooms visited, or "100% explored" once claimed.
+
+Tests: `tests/ui-clarity.test.cjs` checks:
+- the breakdown table replaces the boxes;
+- with the Ember Gloves worn, Attack damage shows "Gear +1" and the Kindle rule is listed;
+- the quest log shows "Exploration · N%" with rooms and chests.
+
+Also: `tests/bounty-plan.test.cjs` (Round 286) sometimes picked an elite patrol, whose bounty correctly pays +15 XP, while
+it expected +8. It now makes the fight's enemy a regular one before checking.
+
 ## Round 295: straight talent lines; no Character portrait; calmer shake; Aetherlink inside Gear
 
 The owner asked for the lines between talents to be straight, with no curves. `renderTalentConnectors()` in

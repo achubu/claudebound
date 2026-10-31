@@ -53,14 +53,21 @@ server.listen(0, async () => {
       const out = { x: {} };
       for (const f of ['showMap', 'showDeck', 'showCharacter', 'showGear', 'showQuests', 'showMainMenu', 'showDevice']) { closeMenu(); window[f](); const x = document.querySelector('#menuModal .menu-x'); out.x[f] = !!x; if (x) x.click(); out.x[f] = out.x[f] && document.getElementById('menuOverlay').classList.contains('hidden'); }
       state.playerLevel = 8; showCharacter(); const m = document.getElementById('menuModal');
-      out.hero = !m.querySelector('.sheet-portrait') && /Level/.test((m.querySelector('h2') || {}).textContent || ''); out.cols = getComputedStyle(m.querySelector('.sheet-grid')).gridTemplateColumns.split(' ').length;
+      out.hero = !m.querySelector('.sheet-portrait') && /Level/.test((m.querySelector('h2') || {}).textContent || ''); out.cols = m.querySelectorAll('.char-stats tr').length; out.oldBoxes = !!m.querySelector('.sheet-grid');
       out.nodeH = Math.round(m.querySelector('.talent-node').getBoundingClientRect().height); out.charH = m.scrollHeight;
       const wires = [...m.querySelectorAll('.talent-connectors .connector-wire')].map(p => p.getAttribute('d')); out.wires = wires.length; out.curved = wires.filter(d => /[CcQqSsAa]/.test(d)).length;
       showDeck(); out.greyInfo = [...document.querySelectorAll('#menuModal .workshop .card-wrap .actions button')].filter(b => b.disabled && b.offsetParent && !/^\+\s*Add/.test(b.textContent.trim())).length;
       closeMenu(); return out; });
     assert(Object.values(r294.x).every(Boolean), 'every top-bar screen has a ✕ that closes it (' + JSON.stringify(r294.x) + ')');
-    assert(r294.hero && r294.cols === 4 && r294.nodeH <= 92 && r294.charH < 2000, 'Character: no portrait (Round 295), stats in one row, smaller talents (' + r294.charH + 'px tall, was ~2440)');
+    assert(r294.hero && r294.cols >= 10 && !r294.oldBoxes && r294.nodeH <= 92 && r294.charH < 2000, 'Character: no portrait, a stat breakdown table instead of the four boxes (Round 296), smaller talents (' + r294.charH + 'px tall, was ~2440)');
     assert(r294.wires > 0 && r294.curved === 0, 'Round 295: talent lines are straight (' + r294.wires + ' lines, ' + r294.curved + ' curved)');
+    // Round 296: the breakdown names gear as a source when you wear some, and the quest log shows exploration.
+    const r296 = await page.evaluate(() => { state.relics.push('ember'); ensureGear(); equipGear('gloves', 'ember'); showCharacter();
+      const row = [...document.querySelectorAll('#menuModal .char-stats tr')].find(t => /Attack damage/.test(t.textContent)); const rules = (document.querySelector('#menuModal .char-rules') || {}).textContent || '';
+      closeMenu(); showQuests(); const ex = (document.querySelector('#menuModal .quest-explore') || {}).textContent || ''; closeMenu();
+      return { gearSrc: !!row && /Gear \+1/.test(row.textContent), rules: /Kindle/.test(rules), explore: /Exploration · \d+%/.test(ex) && /Rooms explored/.test(ex) && /Hidden chests/.test(ex) }; });
+    assert(r296.gearSrc && r296.rules, 'Character: attack damage shows Gear +1 and the gear rule in effect (Round 296)');
+    assert(r296.explore, 'Quests: the world\'s exploration percentage and objects found');
     assert(r294.greyInfo === 0, 'no greyed-out notice buttons under deck cards');
     assert(!errs.length, 'no page errors (' + errs.join(' | ') + ')');
     await page.close();

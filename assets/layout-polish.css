@@ -270,3 +270,22 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 .talent-connectors path{stroke-linejoin:miter;stroke-linecap:butt}
 /* Round 295: the Aetherlink Gauntlet is a section of the Gear screen. */
 #menuModal .gear-aetherlink{margin-top:18px;padding-top:14px;border-top:1px solid #2e5566}#menuModal .gear-aetherlink>h2{margin-top:0}
+/* Round 296: the Character page's stat breakdown, and exploration in the quest log. */
+#menuModal .char-stats-panel{margin:4px 0 16px}
+#menuModal .char-xp{display:flex;align-items:center;gap:12px;margin:0 0 10px;font-size:13px;color:#cfe6ef}#menuModal .char-xp .track{flex:1;max-width:340px;margin:0}
+#menuModal .char-stats{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #2e5566;border-radius:10px;overflow:hidden;background:#0b1a26;font-size:13px}
+#menuModal .char-stats th,#menuModal .char-stats td{padding:6px 10px;border-bottom:1px solid #18303e;text-align:left;vertical-align:middle}
+#menuModal .char-stats tr:last-child th,#menuModal .char-stats tr:last-child td{border-bottom:0}
+#menuModal .char-stats th{font-weight:700;color:#e8f6fb;white-space:nowrap;width:1%}#menuModal .char-stats .st-icon{display:inline-block;width:22px;text-align:center;margin-right:4px}
+#menuModal .char-stats .st-total{font:800 15px system-ui;color:#ffe7b0;white-space:nowrap;width:1%;text-align:right}
+#menuModal .char-stats .st-from{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}#menuModal .char-stats .st-from small{color:#8fb3c2;font-size:11.5px}
+#menuModal .char-stats .src{padding:1px 7px;border-radius:999px;font-size:11.5px;background:#173042;color:#cde7f1;border:1px solid #2e5566}
+#menuModal .char-stats .src-talents{background:#2b2140;border-color:#6f56a8;color:#e2d4ff}#menuModal .char-stats .src-gear{background:#1d3324;border-color:#4f8d5c;color:#d4f5d8}
+#menuModal .char-stats .src-aetherlink{background:#103540;border-color:#3aa7c0;color:#c8f3ff}#menuModal .char-stats .src-world{background:#3a2a14;border-color:#a87b3a;color:#ffe2b3}
+#menuModal .char-rules{margin-top:10px;padding:8px 12px;border:1px solid #4f8d5c;border-radius:10px;background:#10201a;font-size:13px}#menuModal .char-rules ul{margin:4px 0 0;padding-left:18px}
+@media(max-width:560px){#menuModal .char-stats th,#menuModal .char-stats td{padding:5px 6px}#menuModal .char-stats tr{display:grid;grid-template-columns:1fr auto}#menuModal .char-stats th,#menuModal .char-stats .st-total{border-bottom:0}#menuModal .char-stats .st-from{grid-column:1 / -1;padding-top:0}}
+#menuModal .quest-explore{margin:12px 0;padding:10px 12px;border:1px solid #2e5566;border-radius:10px;background:#0b1a26}
+#menuModal .quest-explore>b{display:block;margin-bottom:6px;color:#ffe7b0}#menuModal .quest-explore .track{margin:0 0 8px}
+#menuModal .quest-explore ul{list-style:none;margin:0 0 6px;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 16px}
+#menuModal .quest-explore li{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-bottom:1px dotted #22404f;padding:2px 0}
+#menuModal .quest-explore small{color:#8fb3c2}
