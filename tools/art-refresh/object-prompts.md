@@ -36,9 +36,9 @@ A single generic `cardsmith.webp` would cover all five. One per world fits each 
 | File | World | Name | Subject |
 |---|---|---|---|
 | `sky-lore.webp` ✅ done (Round 310) | Sky Isles | Wind Chime | A tall white stone post on a small cloud-edged rock, hung with long glass and brass wind chimes, faint glowing runes along the post, ribbons streaming sideways in the wind. |
-| `wilds-lore.webp` | Elaris (forest) | Elder Stone | An ancient standing stone covered in moss and carved glowing green runes, roots curling around its base, small mushrooms and fireflies. |
+| `wilds-lore.webp` ✅ done (Round 311) | Elaris (forest) | Elder Stone | An ancient standing stone covered in moss and carved glowing green runes, roots curling around its base, small mushrooms and fireflies. |
 | `vespera-lore.webp` | Vespera | Storm Glyph | A dark slate obelisk on wet rock with a large carved lightning glyph glowing electric violet, small arcs of lightning crawling over it, rain-slick surface. |
-| `chronospire-lore.webp` | Chronospire | Chrono Inscription | A bronze-and-marble plaque on a short pedestal, engraved with a clock face and glowing amber script, a small floating hourglass above it, drifting golden sand motes. |
+| `chronospire-lore.webp` ✅ done (Round 311) | Chronospire | Chrono Inscription | A bronze-and-marble plaque on a short pedestal, engraved with a clock face and glowing amber script, a small floating hourglass above it, drifting golden sand motes. |
 
 ## 2. Sharing one generic image (`event.webp`, a "?" pedestal)
 
