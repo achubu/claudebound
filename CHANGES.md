@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 304: the Blight Antler walks and the Storm Moth flies
+
+The owner sent eight-frame animations for two more Elaris creatures. Each is cut like Rounds 299–303: frames 1, 3, 5
+and 7, one shared window, then padded. The sources are kept in `assets/monsters/elaris/src/`.
+
+| Creature | Animation | Source | Cycle |
+|---|---|---|---|
+| **Blight Antler** (`elarisAntler`, art `forestStag`) | a mossy stag with green crystals and purple-corrupted antlers walks | `blight-antler-walk8.png` | 1.2s → .8s |
+| **Storm Moth** (`elarisMoth`, art `forestMoth`) | a violet and cyan moth flies with coordinated wingbeats and trailing streamers | `storm-moth-flight8.png` | .7s → .8s |
+
+**Cleaning the stag:** the stag's source frames carried a semi-transparent grey fill between the antler tines, left over
+from removing the generator's background. It showed as a pale halo on the map. Before cutting, that grey is removed in
+two passes:
+1. a flood fill in from the empty background, through faint low-saturation pixels;
+2. any remaining grey patch of 40+ pixels (pockets enclosed by the drips).
+
+The crystals' small highlights and the purple drips are untouched. An earlier per-pixel pass punched holes in them and
+was dropped.
+
+Both sheets are shared art, so Vespera's Rimeglass Stag and Tempest Moth and Chronospire's Pendulum Stag and Tick Moth
+use them too, still recolored. They were checked in Chromium.
+
+`SPRITE_VERSION` 304. New `tests/forest-anim.test.cjs`.
+
 ## Round 303: the Cinder Fox walks
 
 - The owner sent an eight-frame walk for Elaris's Cinder Fox (`elarisFox`): a charcoal fox with ember crystals and a
