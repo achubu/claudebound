@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 306: Vespera's Prism Thornling gets its own art
+
+- The owner sent an eight-frame walk for Vespera's Prism Thornling (`vespThorn`): a crab-legged thornling whose stalks end
+  in violet prism crystals. Until now it borrowed Neon Aftermath's Circuit Thornling, recolored with the Vespera tint.
+- Like the Static Fox (Round 305), it gets its own sheet: `assets/monsters/vespera/prism-thornling.png`, with the source
+  strip in `src/prism-thornling-walk8.png`.
+- The source frames had the same grey background haze as the Blight Antler (Round 304). It is removed with the same
+  two passes before cutting; the crystals' highlights are untouched. Frames 1, 3, 5 and 7 are then cut with one shared
+  window and padded.
+- New art key `prismThornling` (.8s). `vespThorn` now uses it with `tint: 'none'`. The Circuit Thornling keeps its own
+  sheet.
+- `SPRITE_VERSION` 306. New `tests/prism-thornling.test.cjs`. `circuit-thornling` now expects the Prism Thornling's own
+  sheet. Checked in Chromium on the map and in battle (untinted).
+
 ## Round 305: Vespera's Static Fox gets its own art
 
 - The owner sent an eight-frame walk for Vespera's Static Fox (`vespFox`): a storm-world fox in the Cinder Fox's style,
