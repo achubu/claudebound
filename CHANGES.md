@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 321: the Strangling Vines get their painting
+
+- The owner's **Strangling Vines** replace the shared "?" pedestal for that forest event: a leather satchel half
+  swallowed by thorny purple-black vines with dark-red berries, its flap pried open on spilling gold coins and a golden
+  pendant, on a patch of mossy forest floor with dead leaves and a broken arrow (`assets/items/poi/events/vines.webp`;
+  the original is in `events/src/`). All four forest events (also used in Solaris) now have paintings.
+- Keyed with `tools/key_object.py ... 80 145 --keep-green`. The gaps between the vines are background-coloured, so
+  they clear.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 320: the Glowing Seedpod gets its painting
 
 - The owner's **Glowing Seedpod** replaces the shared "?" pedestal for that forest event. It's a ribbed, lantern-like
