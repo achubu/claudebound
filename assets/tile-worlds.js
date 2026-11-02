@@ -25,9 +25,9 @@ Object.assign(WILDLIFE_ART, {
   skyWispArt:   { name: 'Rain Drone', sheet: 'sky/rain-drone', cycle: '.8s' }, // Round 222: replaces the Cloud Wisp; Round 299: the owner's eight-frame hover
   skyHarpyArt:  { name: 'Gale Harpy', sheet: 'sky/gale-harpy', cycle: '.8s' }, // Round 300: the owner's eight-frame flight
   skyRamArt:    { name: 'Thunderhorn Ram', sheet: 'sky/thunderhorn-ram', cycle: '.8s' }, // Round 301: the owner's eight-frame walk
-  stormbellArt: { name: 'The Stormbell Warden', sheet: 'sky/stormbell-warden', cycle: '1.4s' },
-  matriarchArt: { name: 'The Featherfall Matriarch', sheet: 'sky/featherfall-matriarch', cycle: '1.4s' },
-  zenithRocArt: { name: 'The Zenith Roc', sheet: 'sky/zenith-roc', cycle: '1.2s', big: true }
+  stormbellArt: { name: 'The Stormbell Warden', sheet: 'sky/stormbell-warden', cycle: '.8s' }, // Round 302: the owner's eight-frame walk
+  matriarchArt: { name: 'The Featherfall Matriarch', sheet: 'sky/featherfall-matriarch', cycle: '.8s' }, // Round 302: the owner's eight-frame flight
+  zenithRocArt: { name: 'The Zenith Roc', sheet: 'sky/zenith-roc', cycle: '.8s', big: true }
 });
 const SKY_ENEMIES = {
   skyDrake:   { name: 'Sunfeather Drake', icon: '☀', hp: 44, attack: 9, element: 'fire', art: 'skyDrakeArt', tint: 'none' },
