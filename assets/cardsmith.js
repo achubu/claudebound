@@ -112,6 +112,12 @@ if (typeof poiArt === 'function') {
   const poiArtBeforeSolaris = poiArt;
   poiArt = function (p) { return (activeRegion === 'elaris' && p && SOLARIS_POI_ART[p.type]) || poiArtBeforeSolaris(p); };
 }
+// Round 307: per-world object art (the owner's paintings), one entry per world and type. Solaris's set is above.
+const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith' } };
+if (typeof poiArt === 'function') {
+  const poiArtBeforeWorlds = poiArt;
+  poiArt = function (p) { const w = WORLD_POI_ART[activeRegion]; return (w && p && w[p.type]) || poiArtBeforeWorlds(p); };
+}
 const solarisSpriteStyles = document.createElement('style');
 solarisSpriteStyles.textContent = '.poi-node.poi-art.poi-cardsmith{width:56px!important;height:56px!important;border:0!important;box-shadow:none!important;background:var(--poi-art) no-repeat center bottom/contain!important;filter:drop-shadow(0 0 6px #ffb35acc) drop-shadow(0 0 2px #000)}.poi-node.poi-art.poi-cardsmith::after{top:58px!important}'
   + '#world[data-environment="solaris"] .map-chest.elaris-chest{background-image:url(assets/items/poi/sol-chest.webp)!important}';

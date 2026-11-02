@@ -1,0 +1,18 @@
+'use strict';
+// Round 307: Neon Aftermath's Cardsmith is drawn with the owner's painting instead of the ⚒ glyph.
+process.env.HARNESS_ONLY = '1';
+const assert = require('assert');
+const fs = require('fs');
+const { run } = require('./expansion.test.cjs');
+const r = JSON.parse(run(`(() => { newGame(); const o = {};
+  configureRegion('city'); o.city = poiArt({ type: 'cardsmith' }); o.cityShop = poiArt({ type: 'merchant' });
+  configureRegion('elaris'); o.solaris = poiArt({ type: 'cardsmith' });
+  configureRegion('sky'); o.sky = poiArt({ type: 'cardsmith' });
+  configureRegion('city'); return JSON.stringify(o); })()`));
+assert.strictEqual(r.city, 'city-cardsmith', 'the city Cardsmith uses its painting');
+assert.strictEqual(r.cityShop, 'merchant', 'the city merchant is unchanged');
+assert.strictEqual(r.solaris, 'sol-cardsmith', 'Solaris keeps its own');
+assert(!r.sky, 'worlds without a painting keep the glyph for now');
+const b = fs.readFileSync('assets/items/poi/city-cardsmith.webp');
+assert.strictEqual(b.toString('ascii', 0, 4), 'RIFF', 'a WebP image');
+console.log('city-cardsmith-art ok');
