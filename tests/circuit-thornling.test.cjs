@@ -7,7 +7,7 @@ const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`JSON.stringify({ html: monsterArt('thornling'), prism: monsterArt('vespThorn'), version: SPRITE_VERSION })`));
 assert(r.html.includes('wildlife-sprite') && r.html.includes('city/circuit-thornling.png?v=' + r.version), 'the Circuit Thornling uses its animated sheet');
-assert(r.prism.includes('city/circuit-thornling.png'), 'the Prism Thornling borrows it');
+assert(r.prism.includes('vespera/prism-thornling.png'), 'Round 306: the Prism Thornling has its own sheet');
 const b = fs.readFileSync('assets/monsters/city/circuit-thornling.png');
 assert.strictEqual(b.readUInt32BE(16), 2064, 'a 4-frame sheet'); assert.strictEqual(b.readUInt32BE(20), 688);
 console.log('circuit-thornling ok');
