@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 301: the Thunderhorn Ram walks
+
+- The owner sent an eight-frame walk for the Sky Isles' Thunderhorn Ram (`skyRam`), a mechanical ram with articulated
+  legs and steady curled horns. The source strip is `assets/monsters/sky/src/thunderhorn-ram-walk8.png`.
+- Frames 1, 3, 5 and 7 are cut with one shared window, as in Rounds 299 and 300, so the body and horns stay still while
+  the legs step. The hooves sit near the frame's bottom. The result replaces `assets/monsters/sky/thunderhorn-ram.png`
+  and is padded.
+- The cycle is .8s (the owner's 800ms), down from 1.1s.
+- `SPRITE_VERSION` 301. New `tests/thunderhorn-ram.test.cjs`. Checked in Chromium on the map (paired with a Gale
+  Harpy) and in battle.
+
 ## Round 300: the Gale Harpy flies
 
 - The owner sent an eight-frame flight for the Sky Isles' Gale Harpy (`skyHarpy`): two articulated wing-arms, tucked
