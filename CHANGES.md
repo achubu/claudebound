@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 309: the Sky Isles Cardsmith gets its painting
+
+- The owner generated the Sky Isles Cardsmith: a floating marble-and-brass platform on a cloud, with a sail-cloth
+  awning, a glowing silver anvil, a windmill-topped brass forge with a cyan flame, cards and feathers drifting in an
+  updraft, and a potted fern. It replaces the ⚒ glyph in that world (`WORLD_POI_ART.sky`,
+  `assets/items/poi/sky-cardsmith.webp`; the original is kept in `src/`).
+- It is keyed the same way as Round 308: greenness fading between 90 and 170, then despill. The white clouds and the
+  open space under the awning come out clean. Checked over dark, light and sky-blue grounds.
+- `tests/city-cardsmith-art.test.cjs` also checks the Sky Isles. Vespera now stands in as the "still a glyph" world.
+  Checked in Chromium on the map.
+- Cardsmiths with paintings are now in Neon Aftermath, Solaris, the Sky Isles and Elaris. Vespera and Chronospire
+  still use the glyph.
+
 ## Round 308: the Elaris Cardsmith gets its painting
 
 - The owner generated the Elaris (forest) Cardsmith: a mossy tree-stump forge with a root-wrapped anvil, a stone fire
