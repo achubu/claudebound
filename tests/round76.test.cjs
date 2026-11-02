@@ -4,7 +4,7 @@ run(`{
 const realRandom = Math.random;
 function fight(opts = {}) {
   newGame(); state.room = '1,5'; state.cooldowns = {}; startBattle(roomSpawns(state.room).find(s => !s.boss).uid);
-  const b = state.battle; b.enemy.elite = !!opts.elite; b.enemy.boss = false; b.enemy.level = state.playerLevel; return b;
+  const b = state.battle; b.enemy.elite = !!opts.elite; b.enemy.boss = false; b.enemy.level = state.playerLevel; b.wanted = null; return b; // Round 303: never a Round 298 Wanted rogue
 }
 // Elites: a card choice instead of an empty chest or a potion, and 6 Shards.
 for (const r of [.1, .5]) {

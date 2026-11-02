@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 303: the Cinder Fox walks
+
+- The owner sent an eight-frame walk for Elaris's Cinder Fox (`elarisFox`): a charcoal fox with ember crystals and a
+  curled bushy tail. The source strip is `assets/monsters/elaris/src/cinder-fox-walk8.png`.
+- Frames 1, 3, 5 and 7 are cut with one shared window, as in Rounds 299–302, then padded. The result replaces
+  `assets/monsters/elaris/cinder-fox.png`. The sheet is now 2064×688; the forest sheets were 2172×724, and the layout
+  check accepts both.
+- The cycle is .8s (the owner's 800ms), down from .95s.
+- The sheet is the shared `forestFox` art, so Vespera's Static Fox (blue hue) and Chronospire's Gearhound (bronze
+  sepia) walk with it too, still recolored. Both were checked in Chromium.
+- `SPRITE_VERSION` 303. New `tests/cinder-fox.test.cjs`.
+- Test fix: in about 1 journey in 20, the patrol `pacing` and `round76` fight in Neon Aftermath's room 1,5 is a Round 298
+  Wanted rogue, whose +40 XP broke the exact-XP check. Both tests now clear `b.wanted`, as they already clear the bounty.
+
 ## Round 302: the Sky Isles bosses move
 
 The owner sent eight-frame animations for the Sky Isles' two mini-bosses and its final boss. Each is cut like Rounds
