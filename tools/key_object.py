@@ -1,6 +1,7 @@
-# Key a painted map object off a bright green background (Rounds 307-316).
+# Key a painted map object off a bright green background (Rounds 307-317).
 # Usage: python3 tools/key_object.py source.jpg out.webp [lo hi]   (greenness fades from opaque at lo to clear at hi; default 90 170)
-# Green is capped at max(red, blue) everywhere (despill), green patches the background does not reach stay opaque,
+# Green is capped at max(red, blue) everywhere (despill), green patches the background does not reach stay opaque
+# when their colour differs from the background (Round 317: holes in the art, same colour as the background, still clear),
 # the result is trimmed and scaled to 256px, and a preview over four grounds is written beside it.
 import sys
 from PIL import Image
@@ -13,7 +14,10 @@ alpha = np.clip((hi - gx) / (hi - lo), 0, 1)
 g2 = np.minimum(g, np.maximum(r, b))
 lab, n = ndimage.label(alpha < 0.5)
 edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
-inner = (lab > 0) & ~np.isin(lab, list(edge))
+# Round 317: only patches whose colour differs from the background (a green light, not a hole in a rotor ring).
+bg = np.median(a[np.isin(lab, list(edge))], axis=0)
+keep = [i for i in range(1, n + 1) if i not in edge and np.linalg.norm(a[lab == i].mean(0) - bg) > 40]
+inner = np.isin(lab, keep)
 grown = ndimage.binary_dilation(inner, iterations=3) & (alpha < 1)
 print('enclosed green px kept:', int(grown.sum()))
 alpha = np.where(grown, 1, alpha); g2 = np.where(grown, g, g2)
