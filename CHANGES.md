@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 316: the Busted Vending Machine gets its painting; the keying script joins the repo
+
+- The owner's **Busted Vending Machine** replaces the shared "?" pedestal for that Neon Aftermath event. It's a dented,
+  graffiti-covered machine with pink and cyan neon trim and cracked glass over red and blue potions. One bottle hangs
+  out of the slot, a coin slot sparks, and coins and a crushed can lie on its cracked curb
+  (`assets/items/poi/events/vending.webp`; the original is in `events/src/`).
+- The keyer used for Rounds 307–316 now lives in the repo as `tools/key_object.py`. It:
+  - fades out greenness;
+  - caps green at the larger of red and blue (despill);
+  - trims and scales to 256px;
+  - writes a preview over four grounds.
+- New in the keyer: green patches the background can't reach stay opaque in their own colour. That keeps the
+  machine's small green display light from being punched out.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 315: the Street Medic gets its painting
 
 - The owner's **Street Medic** replaces the shared "?" pedestal for that Neon Aftermath event: a burned-out kiosk with
