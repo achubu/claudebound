@@ -140,7 +140,7 @@ const VESPERA_ROOM_KEYS=Object.keys(VESPERA_ROOM_DATA);
 // Storm-touched creatures. Each borrows an existing sprite (art) and is
 // recolored with the Vespera tint so it reads as a distinct species.
 const VESPERA_ENEMIES={
- vespFox:{name:'Static Fox',icon:'ϟ',hp:44,attack:9,element:'fire',art:'forestFox'},
+ vespFox:{name:'Static Fox',icon:'ϟ',hp:44,attack:9,element:'fire',art:'staticFox',tint:'none'},
  vespThorn:{name:'Prism Thornling',icon:'✦',hp:46,attack:9,armor:1,element:'earth',art:'thornling'},
  vespMoth:{name:'Tempest Moth',icon:'≋',hp:48,attack:9,element:'air',art:'forestMoth'},
  vespHeron:{name:'Brinewing Heron',icon:'≈',hp:50,attack:10,element:'water',art:'forestHeron'},

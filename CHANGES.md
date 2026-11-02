@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 305: Vespera's Static Fox gets its own art
+
+- The owner sent an eight-frame walk for Vespera's Static Fox (`vespFox`): a storm-world fox in the Cinder Fox's style,
+  with violet crystals and lightning veins. Until now it borrowed the Cinder Fox, recolored with the Vespera tint.
+- It is the first Vespera creature with its own sheet. The source strip is
+  `assets/monsters/vespera/src/static-fox-walk8.png`; the sheet is `assets/monsters/vespera/static-fox.png`. Frames 1,
+  3, 5 and 7 are cut with one shared window, as in Rounds 299–304, then padded.
+- New art key `staticFox` (`elaris-wildlife.js`, .8s). `vespFox` now uses it with `tint: 'none'`, so it shows in its own
+  colours. Chronospire's Gearhound still borrows the Cinder Fox.
+- `SPRITE_VERSION` 305. New `tests/static-fox.test.cjs`. `solaris-roster` and `cinder-fox` now expect the Static Fox's
+  own sheet. Checked in Chromium on the map and in battle (untinted).
+
 ## Round 304: the Blight Antler walks and the Storm Moth flies
 
 The owner sent eight-frame animations for two more Elaris creatures. Each is cut like Rounds 299–303: frames 1, 3, 5

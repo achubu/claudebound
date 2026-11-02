@@ -19,6 +19,7 @@ const WILDLIFE_ART={
  forestFox:{name:'Cinder Fox',sheet:'cinder-fox',cycle:'.8s'}, // Round 303: the owner's eight-frame walk (also the Static Fox and Gearhound, recolored)
  forestHeron:{name:'Drowned Heron',sheet:'drowned-heron',cycle:'1.4s'},
  forestStag:{name:'Blight Antler',sheet:'blight-antler',cycle:'.8s'}, // Round 304: the owner's eight-frame walk (also the Rimeglass and Pendulum Stags, recolored)
+ staticFox:{name:'Static Fox',sheet:'vespera/static-fox',cycle:'.8s'}, // Round 305: Vespera's own storm fox (the owner's eight-frame walk), no longer the recolored Cinder Fox
  forestMoth:{name:'Storm Moth',sheet:'storm-moth',cycle:'.8s'}, // Round 304: the owner's eight-frame flight (also the Tempest and Tick Moths, recolored)
  // Round 234: Neon Aftermath's Briar Sentinel is animated: stand, shield up, slash (poses: sun-revenant.js),
  // and a walk on the map. The Arc Sentinel and the Brass Sentry borrow it.
@@ -45,7 +46,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='304';
+const SPRITE_VERSION='305';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which
