@@ -57,7 +57,7 @@ Every event in every world uses the same picture. Each could have its own. Files
 | `vines` ✅ done (Round 321) | Elaris (forest) | Strangling Vines | A leather satchel half swallowed by thorny dark vines, something glinting gold inside. |
 | `updraft` ✅ done (Round 322) | Sky Isles | Updraft Well | A round stone opening in a floating island with warm golden air rising out of it, feathers and leaves spiralling upward. |
 | `aerie` ✅ done (Round 322) | Sky Isles | Abandoned Aerie | A huge twig nest as wide as a cart on a rocky ledge, lined with lost travellers' things: a lantern, a satchel, a few coins. |
-| `chimes` | Sky Isles | Singing Chimes | A bare white dead tree hung with hundreds of small glass chimes, soft blue glow, all swaying the same way. |
+| `chimes` ✅ done (Round 323) | Sky Isles | Singing Chimes | A bare white dead tree hung with hundreds of small glass chimes, soft blue glow, all swaying the same way. |
 | `starwell` | Sky Isles | Starwell | A small round pool in white stone that reflects a starry night sky even though it is day, little stars glittering in the water. |
 | `shelter` | Vespera | Storm Shelter | A small glass dome shelter on wet rock, warm light inside with a bedroll and lockers, rain streaking the glass. |
 | `conduit` | Vespera | Humming Conduit | A cracked metal conduit pipe sticking out of wet stone, raw violet electricity arcing out of the crack. |

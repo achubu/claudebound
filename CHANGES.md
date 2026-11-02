@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 323: the Singing Chimes get their painting
+
+- The owner's **Singing Chimes** replace the shared "?" pedestal for that Sky Isles event: a bleached-white dead tree
+  on a cloud-wrapped rock, every branch hung with glowing pale-blue glass chimes, with swirls of wind and sparkles
+  drifting off to one side (`assets/items/poi/events/chimes.webp`; the original is in `events/src/`).
+- New `tools/key_object.py` flag `--clear-enclosed`:
+  - The wind swirls trap pockets of background tinted by the chimes' glow. Their median colour (60–75 from the
+    background) passed the keep-enclosed-green rule, so they showed as bright-green patches.
+  - The vending machine's display light (84) is too close in colour for a threshold to separate them, so this flag
+    turns the rule off for paintings like this one.
+  - Keyed with `--clear-enclosed`. The vending machine re-keys byte for byte the same.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 322: the Updraft Well and the Abandoned Aerie get their paintings
 
 - Two Sky Isles events get the owner's paintings in place of the shared "?" pedestal (`assets/items/poi/events/`;
