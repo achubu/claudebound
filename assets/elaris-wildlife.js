@@ -16,7 +16,7 @@ Object.assign(enemies,ELARIS_WILDLIFE);
 // Round 172: art-only keys for the old forest sheets. Vespera and Chronospire recolor these,
 // so Solaris species can get their own art without changing the other worlds.
 const WILDLIFE_ART={
- forestFox:{name:'Cinder Fox',sheet:'cinder-fox',cycle:'.95s'},
+ forestFox:{name:'Cinder Fox',sheet:'cinder-fox',cycle:'.8s'}, // Round 303: the owner's eight-frame walk (also the Static Fox and Gearhound, recolored)
  forestHeron:{name:'Drowned Heron',sheet:'drowned-heron',cycle:'1.4s'},
  forestStag:{name:'Blight Antler',sheet:'blight-antler',cycle:'1.2s'},
  forestMoth:{name:'Storm Moth',sheet:'storm-moth',cycle:'.7s'},
@@ -45,7 +45,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='302';
+const SPRITE_VERSION='303';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which
