@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 310: the Sky Isles Wind Chimes get their painting
+
+- The owner generated the Sky Isles lore stone, the **Wind Chime**: a white marble post on a cloud, with a brass arm
+  hung with glass and brass chimes, teal runes, and ribbons and a feather streaming in the wind. It replaces the ☁
+  glyph at the world's five lore spots (`WORLD_POI_ART.sky.lore`, `assets/items/poi/sky-lore.webp`; the original is
+  kept in `src/`).
+- Keyed like Rounds 307–309 (greenness fading between 90 and 170, then despill). The keying step is now a reusable
+  script for the next objects. The see-through glass chimes keep a light teal glass look.
+- Checked over dark, light, sky-blue and forest grounds, and in Chromium on the map, where it is drawn at the usual
+  lore-stone size. `tests/city-cardsmith-art.test.cjs` also checks it.
+- Lore stones with paintings: Neon Aftermath, Solaris and the Sky Isles. Elaris, Vespera and Chronospire still use
+  their glyphs.
+
 ## Round 309: the Sky Isles Cardsmith gets its painting
 
 - The owner generated the Sky Isles Cardsmith: a floating marble-and-brass platform on a cloud, with a sail-cloth
