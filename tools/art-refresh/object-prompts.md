@@ -51,7 +51,7 @@ Every event in every world uses the same picture. Each could have its own. Files
 | `medic` ✅ done (Round 315) | Neon Aftermath | Street Medic | A burned-out kiosk turned into a tiny clinic, a white cross sign glowing teal, a cot, bandages and potion bottles on a crate. |
 | `vending` ✅ done (Round 316) | Neon Aftermath | Busted Vending Machine | A dented neon vending machine with cracked glass, glowing red and green potion bottles inside, one hanging half out of the slot. |
 | `courier` ✅ done (Round 317) | Neon Aftermath | Lost Courier | A sealed parcel with glowing tape lying next to a crashed delivery drone with a bent rotor, a blinking light. |
-| `spring` | Elaris (forest) | Moonlit Spring | A small clear pool between mossy roots, silver moonlight shimmering on the water, a few lily pads and drifting motes of light. |
+| `spring` ✅ done (Round 318) | Elaris (forest) | Moonlit Spring | A small clear pool between mossy roots, silver moonlight shimmering on the water, a few lily pads and drifting motes of light. |
 | `ranger` | Elaris (forest) | Wounded Ranger | A hooded ranger sitting against a tree trunk with a bandaged arm, bow and quiver beside her, a small campfire glow. |
 | `seedpod` | Elaris (forest) | Glowing Seedpod | A lantern-sized seedpod on a thick stem, its translucent shell pulsing with green-gold Aether light. |
 | `vines` | Elaris (forest) | Strangling Vines | A leather satchel half swallowed by thorny dark vines, something glinting gold inside. |

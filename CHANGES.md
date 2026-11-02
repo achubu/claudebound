@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 318: the Moonlit Spring gets its painting
+
+- The owner's **Moonlit Spring** replaces the shared "?" pedestal for that forest event. It's a deep blue pool with
+  moonlight on the water, three lily pads (one with a white flower) and drifting motes of light, ringed by mossy
+  roots, grey stones and ferns (`assets/items/poi/events/spring.webp`; the original is in `events/src/`). Solaris
+  borrows the forest events, so it shows there too.
+- `tools/key_object.py` changes:
+  - New `--keep-green` option for art with real greens (moss, leaves, lily pads). It despills only the see-through
+    edge, as in Round 311, instead of capping green everywhere, which would turn them grey. Used here with the fade
+    at 80–145.
+  - The keep-enclosed-green rule now judges each patch by its median colour and needs at least 200px, with the
+    median more than 60 from the background. Thin slivers of background between roots and ferns, darkened by
+    blended edges, now clear instead of showing as bright green flecks. The vending machine's display light is
+    still kept (924px, 83 away), and that painting re-keys byte for byte the same.
+  - The Lost Courier was re-keyed with the current tool. It loses a 40px speck by its holographic tag; no visible
+    change.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it, Solaris included.
+
 ## Round 317: the Lost Courier gets its painting
 
 - The owner's **Lost Courier** replaces the shared "?" pedestal for that Neon Aftermath event: a crashed four-rotor
