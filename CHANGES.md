@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 307: the Neon Aftermath Cardsmith gets its painting
+
+- The owner generated the Neon Aftermath Cardsmith from the Round 290 prompt list
+  (`tools/art-refresh/object-prompts.md`): a scrap-metal kiosk with a neon anvil-and-hammer sign, a cyan plasma
+  forge, a glowing anvil and a fan of holographic cards. Until now this world's Cardsmith was a ⚒ glyph in a circle.
+- The 2000px JPEG on bright green is keyed out softly by how much green exceeds red and blue. The green spill on the
+  edges is pulled down to the larger of red and blue, so there is no green fringe on dark or light ground. It is
+  trimmed and scaled to 256px tall: `assets/items/poi/city-cardsmith.webp`, with the original in
+  `assets/items/poi/src/`.
+- New `WORLD_POI_ART` table in `cardsmith.js`: per-world object art, one entry per world and type. City → Cardsmith is
+  the first entry; the other worlds' Cardsmiths and lore stones join with one line each as their paintings arrive.
+  It is drawn at the existing 56px Cardsmith sprite size.
+- New `tests/city-cardsmith-art.test.cjs`:
+  - the city Cardsmith uses the painting;
+  - the merchant is unchanged;
+  - Solaris keeps its own art;
+  - the Sky Isles still has the glyph.
+
+  Checked in Chromium on the map.
+
 ## Round 306: Vespera's Prism Thornling gets its own art
 
 - The owner sent an eight-frame walk for Vespera's Prism Thornling (`vespThorn`): a crab-legged thornling whose stalks end

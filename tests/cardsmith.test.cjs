@@ -15,7 +15,7 @@ console.log('PASS: a Cardsmith in every world sells card upgrades and Make Soulb
 { const fs=require('node:fs'),path=require('node:path');
   for(const n of ['sol-merchant','sol-cardsmith','sol-sundial','sol-chest'])assert(fs.existsSync(path.join(__dirname,'../assets/items/poi/'+n+'.webp')),'sprite '+n);
   const a=JSON.parse(run(`(()=>{const o={};configureRegion('elaris');o.sol=['merchant','cardsmith','lore'].map(t=>poiArt({type:t}));configureRegion('city');o.city=['merchant','cardsmith','lore'].map(t=>poiArt({type:t}));return JSON.stringify(o)})()`));
-  assert.deepEqual(a,{sol:['sol-merchant','sol-cardsmith','sol-sundial'],city:['merchant',null,'terminal']},'Solaris sprites are used in Solaris only');
+  assert.deepEqual(a,{sol:['sol-merchant','sol-cardsmith','sol-sundial'],city:['merchant','city-cardsmith','terminal']},'Solaris sprites are used in Solaris only (Round 307: the city Cardsmith has its own painting)');
   console.log('PASS: Solaris merchant, Cardsmith, Sun Dial and chest sprites (Solaris only).'); }
 // Round 212: a Cardsmith upgrade keeps the card's progress toward its next level.
 { const u = JSON.parse(run(`(()=>{newGame();const c=make('strike',0,false);state.pool.push(c);c.uses=42;state.shards=999;const ok=cardsmithUpgrade(c);return JSON.stringify({ok,level:c.level,uses:c.uses,soul:cardsmithUpgrade(make('strike',0,true))})})()`));
