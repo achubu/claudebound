@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 322: the Updraft Well and the Abandoned Aerie get their paintings
+
+- Two Sky Isles events get the owner's paintings in place of the shared "?" pedestal (`assets/items/poi/events/`;
+  originals in `events/src/`):
+  - **Updraft Well**: a round marble well with brass bands and wind runes on a floating rock in clouds. Streams of
+    golden air rise from it, carrying feathers, autumn leaves and sparks.
+  - **Abandoned Aerie**: a huge twig nest ringed with blue-white feathers on a grey rock ledge over clouds. Inside are a
+    glowing brass lantern, a satchel, a rolled map and gold coins.
+- Both keyed with plain `tools/key_object.py` (no real greens in either). The well's rising air is painted an
+  olive-gold. A one-off test that separated each wisp's own colour from the green behind it gave the same result, so
+  the colour is the painting's and the standard keying stays.
+- Checked over four grounds; `tests/event-art.test.cjs` covers both.
+
 ## Round 321: the Strangling Vines get their painting
 
 - The owner's **Strangling Vines** replace the shared "?" pedestal for that forest event: a leather satchel half
