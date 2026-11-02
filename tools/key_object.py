@@ -1,5 +1,5 @@
-# Key a painted map object off a bright green background (Rounds 307-318).
-# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--keep-green]   (greenness fades from opaque at lo to clear at hi; default 90 170)
+# Key a painted map object off a bright green background (Rounds 307-320).
+# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--keep-green [--despill-circle=x,y,r]]   (greenness fades from opaque at lo to clear at hi; default 90 170)
 # Green is capped at max(red, blue) everywhere (despill), green patches the background does not reach stay opaque
 # when their colour differs from the background (Round 317: holes in the art, same colour as the background, still clear;
 # Round 318: judged by median colour, patches of 200px or more),
@@ -8,13 +8,22 @@ import sys
 from PIL import Image
 import numpy as np
 from scipy import ndimage
-keep_green = '--keep-green' in sys.argv; args = [x for x in sys.argv[1:] if x != '--keep-green']
+keep_green = '--keep-green' in sys.argv; circle = None; args = []
+for x in sys.argv[1:]:
+    if x == '--keep-green': continue
+    if x.startswith('--despill-circle='): circle = [float(v) for v in x.split('=', 1)[1].split(',')]; continue
+    args.append(x)
 src, out_path = args[0], args[1]; lo = float(args[2]) if len(args) > 2 else 90; hi = float(args[3]) if len(args) > 3 else 170
 a = np.asarray(Image.open(src).convert('RGB')).astype(np.float32); r, g, b = a[..., 0], a[..., 1], a[..., 2]
 gx = g - np.maximum(r, b)
 alpha = np.clip((hi - gx) / (hi - lo), 0, 1)
 # --keep-green (Round 318, for art with real greens: moss, leaves): despill only the see-through edge, as in Round 311.
 g2 = np.where(alpha < 0.98, np.minimum(g, np.maximum(r, b) + 20), g) if keep_green else np.minimum(g, np.maximum(r, b))
+# --despill-circle=x,y,r (Round 320, source pixels): with --keep-green, a glow that is as green as the leaves (the seedpod's halo)
+# still gets the full despill inside this circle, blending back to --keep-green over its outer fifth.
+if circle and keep_green:
+    yy, xx = np.mgrid[0:a.shape[0], 0:a.shape[1]]; d = np.hypot(xx - circle[0], yy - circle[1]) / circle[2]
+    w = np.clip((1 - d) / 0.2, 0, 1); g2 = g2 * (1 - w) + np.minimum(g, np.maximum(r, b)) * w
 lab, n = ndimage.label(alpha < 0.5)
 edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
 # Round 317: only patches whose colour differs from the background (a green light, not a hole in a rotor ring).
