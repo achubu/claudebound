@@ -74,6 +74,7 @@ const only = process.argv[2];
         if (p) list.push([p.type, p, 40]);
         if (m && m.key === key) list.push(['merchant', m, 40]);
         if (cs && cs.key === key) list.push(['cardsmith', cs, 40]);
+        if (typeof cityNightsItems === 'function') for (const it of cityNightsItems(key)) list.push([it.type, it, 40]); // Round 298
         return list;
       };
       const inBox = (b, p, pad = 0) => b && p.x > b.x0 - pad && p.x < b.x1 + pad && p.y > b.y0 - pad && p.y < b.y1 + pad;
