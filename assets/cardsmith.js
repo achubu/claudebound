@@ -118,6 +118,12 @@ if (typeof poiArt === 'function') {
   const poiArtBeforeWorlds = poiArt;
   poiArt = function (p) { const w = WORLD_POI_ART[activeRegion]; return (w && p && w[p.type]) || poiArtBeforeWorlds(p); };
 }
+// Round 314: events get one painting each (assets/items/poi/events/<id>.webp), in whatever world they appear.
+const EVENT_ART = ['terminal'];
+if (typeof poiArt === 'function') {
+  const poiArtBeforeEvents = poiArt;
+  poiArt = function (p) { return (p && p.type === 'event' && EVENT_ART.indexOf(p.event) >= 0 && 'events/' + p.event) || poiArtBeforeEvents(p); };
+}
 const solarisSpriteStyles = document.createElement('style');
 solarisSpriteStyles.textContent = '.poi-node.poi-art.poi-cardsmith{width:56px!important;height:56px!important;border:0!important;box-shadow:none!important;background:var(--poi-art) no-repeat center bottom/contain!important;filter:drop-shadow(0 0 6px #ffb35acc) drop-shadow(0 0 2px #000)}.poi-node.poi-art.poi-cardsmith::after{top:58px!important}'
   + '#world[data-environment="solaris"] .map-chest.elaris-chest{background-image:url(assets/items/poi/sol-chest.webp)!important}';
