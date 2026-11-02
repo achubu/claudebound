@@ -20,7 +20,7 @@ assert.strictEqual(r.sky, 'sky-cardsmith', 'Round 309: the Sky Isles Cardsmith u
 assert.strictEqual(r.skyLore, 'sky-lore', 'Round 310: the Sky Isles Wind Chimes use their painting');
 assert.strictEqual(r.wildsLore, 'wilds-lore', 'Round 311: the Elaris Elder Stone uses its painting');
 assert.strictEqual(r.chronoLore, 'chronospire-lore', 'Round 311: the Chronospire inscription uses its painting');
-assert(!r.chrono, 'the Chronospire Cardsmith keeps the glyph for now');
+assert.strictEqual(r.chrono, 'chronospire-cardsmith', 'Round 312: the Chronospire Cardsmith uses its painting');
 assert(!r.vespera, 'worlds without a painting keep the glyph for now');
-for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
+for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore', 'chronospire-cardsmith']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
 console.log('city-cardsmith-art ok');
