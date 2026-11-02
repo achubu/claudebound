@@ -55,8 +55,8 @@ Every event in every world uses the same picture. Each could have its own. Files
 | `ranger` ✅ done (Round 319) | Elaris (forest) | Wounded Ranger | A hooded ranger sitting against a tree trunk with a bandaged arm, bow and quiver beside her, a small campfire glow. |
 | `seedpod` ✅ done (Round 320) | Elaris (forest) | Glowing Seedpod | A lantern-sized seedpod on a thick stem, its translucent shell pulsing with green-gold Aether light. |
 | `vines` ✅ done (Round 321) | Elaris (forest) | Strangling Vines | A leather satchel half swallowed by thorny dark vines, something glinting gold inside. |
-| `updraft` | Sky Isles | Updraft Well | A round stone opening in a floating island with warm golden air rising out of it, feathers and leaves spiralling upward. |
-| `aerie` | Sky Isles | Abandoned Aerie | A huge twig nest as wide as a cart on a rocky ledge, lined with lost travellers' things: a lantern, a satchel, a few coins. |
+| `updraft` ✅ done (Round 322) | Sky Isles | Updraft Well | A round stone opening in a floating island with warm golden air rising out of it, feathers and leaves spiralling upward. |
+| `aerie` ✅ done (Round 322) | Sky Isles | Abandoned Aerie | A huge twig nest as wide as a cart on a rocky ledge, lined with lost travellers' things: a lantern, a satchel, a few coins. |
 | `chimes` | Sky Isles | Singing Chimes | A bare white dead tree hung with hundreds of small glass chimes, soft blue glow, all swaying the same way. |
 | `starwell` | Sky Isles | Starwell | A small round pool in white stone that reflects a starry night sky even though it is day, little stars glittering in the water. |
 | `shelter` | Vespera | Storm Shelter | A small glass dome shelter on wet rock, warm light inside with a bedroll and lockers, rain streaking the glass. |
