@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 312: the Chronospire Cardsmith gets its painting
+
+- The owner's **clockwork forge** replaces the ⚒ glyph at Chronospire's Cardsmith: a bronze furnace with gears and a
+  pendulum, an anvil with a clock face, glowing amber cards and cogs orbiting in a ring of golden sand, and an
+  hourglass, all on a marble-and-bronze gear platform (`WORLD_POI_ART.chronospire.cardsmith`,
+  `assets/items/poi/chronospire-cardsmith.webp`; the original is kept in `src/`).
+- Keyed as usual (greenness fading between 90 and 170). The sand ring's glow had picked up the green background and
+  looked lime over light ground, so green is now capped at the larger of red and blue across the whole painting
+  (nothing in it is meant to be green). The ring reads gold, and the teal patina stays.
+- Checked over four grounds and decoded in Chromium; `tests/city-cardsmith-art.test.cjs` covers it.
+- Cardsmiths with paintings: every world but Vespera.
+
 ## Round 311: the Elaris Elder Stone and the Chronospire inscription get their paintings
 
 - Two more lore stones from the owner replace their glyphs:
