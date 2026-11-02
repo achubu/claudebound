@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 319: the Wounded Ranger gets her painting
+
+- The owner's **Wounded Ranger** replaces the shared "?" pedestal for that forest event. She is a hooded ranger in a
+  green cloak with her arm in a sling, resting against the trees on a round mossy clearing ringed by roots. Her bow
+  and quiver lean beside her, with a stone-ringed campfire, her pack and waterskin, mushrooms and fireflies around
+  (`assets/items/poi/events/ranger.webp`; the original is in `events/src/`).
+- The owner replaced a first version, whose tree trunk ran off the top of the image, with this one, which fits the
+  frame.
+- Keyed with `tools/key_object.py ... 80 145 --keep-green`, so the foliage, cloak and moss keep their greens.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 318: the Moonlit Spring gets its painting
 
 - The owner's **Moonlit Spring** replaces the shared "?" pedestal for that forest event. It's a deep blue pool with
