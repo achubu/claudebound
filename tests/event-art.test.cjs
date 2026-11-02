@@ -5,7 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); const o = {};
-  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.lore = poiArt({ type: 'lore' });
+  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.updraft = poiArt({ type: 'event', event: 'updraft' }); o.lore = poiArt({ type: 'lore' });
   configureRegion('wilds'); o.wildsTerminal = poiArt({ type: 'event', event: 'terminal' });
   configureRegion('elaris'); o.solSpring = poiArt({ type: 'event', event: 'spring' });
   configureRegion('city'); return JSON.stringify(o); })()`));
@@ -18,7 +18,8 @@ assert.strictEqual(r.spring, 'events/spring', 'Round 318: the Moonlit Spring use
 assert.strictEqual(r.solSpring, 'events/spring', 'Solaris borrows the forest events, paintings included');
 assert.strictEqual(r.ranger, 'events/ranger', 'Round 319: the Wounded Ranger uses her painting');
 assert.strictEqual(r.seedpod, 'events/seedpod', 'Round 320: the Glowing Seedpod uses its painting');
-assert.strictEqual(r.vines, 'event', 'events without a painting keep the shared one');
+assert.strictEqual(r.vines, 'events/vines', 'Round 321: the Strangling Vines use their painting');
+assert.strictEqual(r.updraft, 'event', 'events without a painting keep the shared one');
 assert.strictEqual(r.lore, 'terminal', 'the city lore terminal is unchanged');
 const ids = JSON.parse(run('JSON.stringify(EVENT_ART)'));
 const known = JSON.parse(run('JSON.stringify(Object.keys(EVENTS))'));
