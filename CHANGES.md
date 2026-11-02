@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 320: the Glowing Seedpod gets its painting
+
+- The owner's **Glowing Seedpod** replaces the shared "?" pedestal for that forest event. It's a ribbed, lantern-like
+  pod glowing amber, with seeds showing through, hanging from a curling stem over broad leaves, moss and roots, with
+  golden spores drifting up (`assets/items/poi/events/seedpod.webp`; the original is in `events/src/`).
+- The pod's glow spills over the green background as a yellow-green halo, which is as green as the real leaves:
+  - The full despill turned the halo gold but the leaves olive.
+  - `--keep-green` kept the leaves but left a lime ring.
+- New `tools/key_object.py` option `--despill-circle=x,y,r` (with `--keep-green`, in source pixels) applies the full
+  despill inside a circle around the glow, blending back over its outer fifth. Here it was `40 150 --keep-green
+  --despill-circle=1124,905,400`, giving a golden halo with green leaves. The spring and ranger re-key byte for byte
+  the same.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 319: the Wounded Ranger gets her painting
 
 - The owner's **Wounded Ranger** replaces the shared "?" pedestal for that forest event. She is a hooded ranger in a
