@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 300: the Gale Harpy flies
+
+- The owner sent an eight-frame flight for the Sky Isles' Gale Harpy (`skyHarpy`): two articulated wing-arms, tucked
+  talons, a steady body. The source strip is `assets/monsters/sky/src/gale-harpy-flight8.png`.
+- Frames 1, 3, 5 and 7 (wings up, spread, down, rising) are cut with one shared window, as in Rounds 272 and 299.
+  The window is sized to the widest wingspan (frame 3), so the body stays the same size in every frame and the talons
+  sit near the bottom. The result replaces `assets/monsters/sky/gale-harpy.png` and is padded.
+- The cycle stays .8s, which matches the owner's 800ms.
+- `SPRITE_VERSION` 300. New `tests/gale-harpy.test.cjs`. Checked in Chromium on the map and in battle.
+
 ## Round 299: the Rain Drone hovers
 
 - The owner sent an eight-frame hover for the Sky Isles' Rain Drone (`skyWisp`), with spinning rotors and a swaying
