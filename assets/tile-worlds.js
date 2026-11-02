@@ -22,7 +22,7 @@ Object.assign(WORLD_NAMES, { sky: 'Sky Isles', wilds: 'Elaris' });
 // untinted through art-only keys.
 Object.assign(WILDLIFE_ART, {
   skyDrakeArt:  { name: 'Sunfeather Drake', sheet: 'sky/sunfeather-drake', cycle: '.8s' },
-  skyWispArt:   { name: 'Rain Drone', sheet: 'sky/rain-drone', cycle: '1.2s' }, // Round 222: replaces the Cloud Wisp
+  skyWispArt:   { name: 'Rain Drone', sheet: 'sky/rain-drone', cycle: '.8s' }, // Round 222: replaces the Cloud Wisp; Round 299: the owner's eight-frame hover
   skyHarpyArt:  { name: 'Gale Harpy', sheet: 'sky/gale-harpy', cycle: '.8s' },
   skyRamArt:    { name: 'Thunderhorn Ram', sheet: 'sky/thunderhorn-ram', cycle: '1.1s' },
   stormbellArt: { name: 'The Stormbell Warden', sheet: 'sky/stormbell-warden', cycle: '1.4s' },
