@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 317: the Lost Courier gets its painting
+
+- The owner's **Lost Courier** replaces the shared "?" pedestal for that Neon Aftermath event: a crashed four-rotor
+  delivery drone with a red eye and a smoking bent rotor, beside a parcel sealed with glowing cyan tape under a
+  holographic shipping tag, on a slab of cracked asphalt with screws, wires and a snapped antenna
+  (`assets/items/poi/events/courier.webp`; the original is in `events/src/`). All four Neon Aftermath events now have
+  paintings.
+- `tools/key_object.py` fix: the drone's rotor rings enclose patches of background. Round 316's rule (keep green
+  that the background can't reach) would have filled them in. Now a patch stays opaque only when its average colour
+  is more than 40 away from the background's. The rotor holes are within 12, so they clear; the vending machine's
+  display light is 84 away, so it stays, and that painting re-keys byte for byte the same.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 316: the Busted Vending Machine gets its painting; the keying script joins the repo
 
 - The owner's **Busted Vending Machine** replaces the shared "?" pedestal for that Neon Aftermath event. It's a dented,
