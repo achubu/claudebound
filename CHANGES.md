@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 311: the Elaris Elder Stone and the Chronospire inscription get their paintings
+
+- Two more lore stones from the owner replace their glyphs:
+  - Elaris: the **Elder Stone**, a grey standing stone with a moss cap, glowing teal spiral and leaf runes, pale roots,
+    ferns, blue mushrooms and fireflies (`WORLD_POI_ART.wilds.lore`, `assets/items/poi/wilds-lore.webp`).
+  - Chronospire: the **Chrono Inscription**, a bronze plaque with a clock face and amber runes on a fluted marble
+    pedestal with gears, under a floating hourglass and drifting sand (`WORLD_POI_ART.chronospire.lore`,
+    `assets/items/poi/chronospire-lore.webp`).
+  - The originals are kept in `src/`.
+- Both backgrounds were a slightly darker green than before (greenness about 165), so they were keyed with the fade
+  between 80 and 145 instead of 90 and 170. The olive moss, ferns and teal runes keep their colour.
+- A re-sent copy of the Sky Isles Wind Chime was the same painting as Round 310's, so it was not swapped.
+- Checked over four grounds and decoded in Chromium; `tests/city-cardsmith-art.test.cjs` covers both.
+- Lore stones with paintings: every world but Vespera (its Storm Glyph is next).
+
 ## Round 310: the Sky Isles Wind Chimes get their painting
 
 - The owner generated the Sky Isles lore stone, the **Wind Chime**: a white marble post on a cloud, with a brass arm
