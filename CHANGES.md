@@ -3496,6 +3496,57 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 298: Neon Aftermath Nights (a content pack for the first world)
+
+The owner asked for more content in Neon Aftermath, to expand to other worlds if they like it. `assets/city-nights.js`
+(loaded after `quests.js`) adds three things to the city only. They are placed from the journey's seed, one thing per
+room, like the Cardsmith.
+
+- **The Wanted Board** (📋, in the Afterlight Refuge) names three rogues hiding among the city's patrols, one each in
+  a near, a middle and a far room. The board gives where each was last seen.
+  - Each rogue is a tougher, named version of the patrol it replaces: ×1.5 health and ×1.15 attack, counted as an
+    elite.
+  - On the street it glows red with "☠ WANTED · Name".
+  - The rewards:
+
+    | Rogue | Reward |
+    |---|---|
+    | Glitchjaw, the Wire-Eater | ◇30 + 40 XP |
+    | Mother Static, of the Scrap Gangs | ◇40 + 50 XP |
+    | The Chrome Widow | ◇60 + 60 XP + an Upgrade Crystal |
+
+  - A rogue you have brought in becomes an ordinary patrol again.
+- **The Blackout.** Three breaker boxes (⚡) stand alone in rooms near, middle and far across the city; they are
+  taken out of the points-of-interest pool.
+  - Throw all three to power the **Afterlight Vault** (🔒/🔓) in the Refuge.
+  - The vault pays once: ◇50, an Upgrade Crystal and a city card for your collection.
+  - Its label shows the grid's progress ("0/3 power").
+- **Four more street events:**
+
+  | Event | Choices |
+  |---|---|
+  | 🕹 Arcade Cabinet | gamble ◇3 for ◇12, or pry the coin box |
+  | 🏍 Drone Racers | back a drone, or help for a Surge Rite blessing |
+  | 📺 Glitched Billboard | train your deck, or strip its wiring |
+  | 💀 Gang Toll | pay for a potion, or fight for their takings |
+
+  The city's three event rooms now draw from eight events, so journeys differ more.
+
+No difficulty rules change. The rogues are optional, and HP carry-over and card loss work as before (CLAUDE.md,
+"Intended design"). Checked in Chromium: the board, a rogue on the street and in battle, a breaker, the vault and the
+map. `playtest-walk` reaches every new item in Neon Aftermath (77 item routes, no problems).
+
+Tests:
+- `tests/city-nights.test.cjs`:
+  - placement and room-sharing rules, and reachability;
+  - one marked patrol per rogue room;
+  - a rogue fight is named and tougher, pays once and is then cleared;
+  - the vault is locked until three breakers are thrown, then pays once;
+  - the eight events run;
+  - saves are kept and validated;
+  - nothing appears in other worlds.
+- `tests/playtest-walk.cjs` now walks to the new items too.
+
 ## Round 297: gameplay playtest; intended design recorded
 
 The owner asked for a playtest looking for gameplay improvements. The Difficulty lab (8 builds, careful play,
