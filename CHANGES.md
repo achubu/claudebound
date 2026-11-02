@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 314: events get their own paintings, starting with the Abandoned Terminal
+
+- Every event used to share one "?" pedestal (`event.webp`). Events can now have a painting each:
+  - The paintings live in `assets/items/poi/events/<id>.webp`, with originals in `events/src/`.
+  - `EVENT_ART` in `assets/cardsmith.js` lists the event ids that have one.
+  - The painting follows the event, not the world, so Solaris's forest events will pick theirs up too.
+  - Events without one keep `event.webp`.
+- First one, from the owner: the **Abandoned Terminal** (Neon Aftermath). It's a cracked CRT on a rusty stand with a
+  red padlock on screen, sparking wires, a dangling keyboard, a toppled stool and pink and cyan rim light.
+- Keyed like Round 312 (green capped at the larger of red and blue everywhere).
+- Checked over four grounds. In Chromium the map node draws it.
+- New `tests/event-art.test.cjs` checks that:
+  - the terminal uses its painting in any world;
+  - other events and the city lore terminal are unchanged;
+  - every listed event is a real event with a WebP image.
+
 ## Round 313: the Vespera Cardsmith gets its painting
 
 - The owner's **storm-pier forge** replaces the ⚒ glyph at Vespera's Cardsmith: a weathered pier with barnacled posts,
