@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 308: the Elaris Cardsmith gets its painting
+
+- The owner generated the Elaris (forest) Cardsmith: a mossy tree-stump forge with a root-wrapped anvil, a stone fire
+  pit with green flame, glowing cards hanging from a vine, a lantern and blue mushrooms. It replaces the ⚒ glyph in
+  that world (`WORLD_POI_ART.wilds`, `assets/items/poi/wilds-cardsmith.webp`; the original is kept in `src/`).
+- Keying a green-heavy painting on a green background: the art's own greens all have a "greenness" (green minus the
+  larger of red and blue) of 70 or less, while the background and its blends sit at 148 or more.
+  - Alpha fades between 90 and 170. This also clears the enclosed pockets between the cards and the roots, which a
+    flood from the edges missed.
+  - The lantern's glow was painted over the green as a lime ring. It is faded to a soft glow: bright, low-blue, lime
+    pixels touching the keyed area.
+  - Partly clear pixels are despilled.
+  - The image was checked over dark, light and forest-green grounds.
+- `tests/city-cardsmith-art.test.cjs` also checks the Elaris Cardsmith. Checked in Chromium on the map.
+
 ## Round 307: the Neon Aftermath Cardsmith gets its painting
 
 - The owner generated the Neon Aftermath Cardsmith from the Round 290 prompt list
