@@ -28,7 +28,7 @@ A single generic `cardsmith.webp` would cover all five. One per world fits each 
 | `city-cardsmith.webp` ✅ done (Round 307) | Neon Aftermath | A cyberpunk street forge kiosk built from scrap metal and a shipping crate, neon-cyan sign shaped like an anvil, a glowing plasma forge, holographic cards hovering over the anvil, cables everywhere. |
 | `sky-cardsmith.webp` ✅ done (Round 309) | Sky Isles | A floating workshop platform of white stone and brass with a small sail awning, a wind-powered forge with spinning vanes, an anvil with feather-shaped tools, glowing cards fluttering above it like birds. |
 | `wilds-cardsmith.webp` ✅ done (Round 308) | Elaris (forest) | A forest forge built into a mossy tree stump, an anvil wrapped in roots, a glowing green ember forge, cards hanging from vines like leaves, mushrooms and lantern light. |
-| `vespera-cardsmith.webp` | Vespera | A storm-coast forge on a weathered pier plank, a lightning rod channeling a crackling bolt into an anvil, wet slate-blue stone, glowing violet cards, a tarp flapping in the wind. |
+| `vespera-cardsmith.webp` ✅ done (Round 313) | Vespera | A storm-coast forge on a weathered pier plank, a lightning rod channeling a crackling bolt into an anvil, wet slate-blue stone, glowing violet cards, a tarp flapping in the wind. |
 | `chronospire-cardsmith.webp` ✅ done (Round 312) | Chronospire | A clockwork forge of bronze gears and a pendulum, an anvil with a clock face set into it, glowing amber cards orbiting slowly, tiny floating cogs and sand. |
 
 ### Lore stones (4 worlds, glyph). City (`terminal.webp`) and Solaris (`sol-sundial.webp`) have theirs

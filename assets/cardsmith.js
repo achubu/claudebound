@@ -113,7 +113,7 @@ if (typeof poiArt === 'function') {
   poiArt = function (p) { return (activeRegion === 'elaris' && p && SOLARIS_POI_ART[p.type]) || poiArtBeforeSolaris(p); };
 }
 // Round 307: per-world object art (the owner's paintings), one entry per world and type. Solaris's set is above.
-const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore' }, chronospire: { cardsmith: 'chronospire-cardsmith', lore: 'chronospire-lore' } };
+const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore' }, chronospire: { cardsmith: 'chronospire-cardsmith', lore: 'chronospire-lore' }, vespera: { cardsmith: 'vespera-cardsmith' } };
 if (typeof poiArt === 'function') {
   const poiArtBeforeWorlds = poiArt;
   poiArt = function (p) { const w = WORLD_POI_ART[activeRegion]; return (w && p && w[p.type]) || poiArtBeforeWorlds(p); };

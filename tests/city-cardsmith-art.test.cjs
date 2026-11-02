@@ -8,7 +8,7 @@ const r = JSON.parse(run(`(() => { newGame(); const o = {};
   configureRegion('city'); o.city = poiArt({ type: 'cardsmith' }); o.cityShop = poiArt({ type: 'merchant' });
   configureRegion('elaris'); o.solaris = poiArt({ type: 'cardsmith' });
   configureRegion('sky'); o.sky = poiArt({ type: 'cardsmith' }); o.skyLore = poiArt({ type: 'lore' });
-  configureRegion('vespera'); o.vespera = poiArt({ type: 'cardsmith' });
+  configureRegion('vespera'); o.vespera = poiArt({ type: 'cardsmith' }); o.vesperaLore = poiArt({ type: 'lore' });
   configureRegion('wilds'); o.wilds = poiArt({ type: 'cardsmith' }); o.wildsLore = poiArt({ type: 'lore' });
   configureRegion('chronospire'); o.chronoLore = poiArt({ type: 'lore' }); o.chrono = poiArt({ type: 'cardsmith' });
   configureRegion('city'); return JSON.stringify(o); })()`));
@@ -21,6 +21,7 @@ assert.strictEqual(r.skyLore, 'sky-lore', 'Round 310: the Sky Isles Wind Chimes 
 assert.strictEqual(r.wildsLore, 'wilds-lore', 'Round 311: the Elaris Elder Stone uses its painting');
 assert.strictEqual(r.chronoLore, 'chronospire-lore', 'Round 311: the Chronospire inscription uses its painting');
 assert.strictEqual(r.chrono, 'chronospire-cardsmith', 'Round 312: the Chronospire Cardsmith uses its painting');
-assert(!r.vespera, 'worlds without a painting keep the glyph for now');
-for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore', 'chronospire-cardsmith']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
+assert.strictEqual(r.vespera, 'vespera-cardsmith', 'Round 313: the Vespera Cardsmith uses its painting');
+for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore', 'chronospire-cardsmith', 'vespera-cardsmith']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
+assert(!r.vesperaLore, 'the Vespera Storm Glyph keeps its glyph for now');
 console.log('city-cardsmith-art ok');
