@@ -48,7 +48,7 @@ Every event in every world uses the same picture. Each could have its own. Files
 | File (id) | World | Name | Subject |
 |---|---|---|---|
 | `terminal` ✅ done (Round 314) | Neon Aftermath | Abandoned Terminal | A cracked public terminal on a scrap stand, flickering red security prompt on the screen, sparking wires, a toppled stool. |
-| `medic` | Neon Aftermath | Street Medic | A burned-out kiosk turned into a tiny clinic, a white cross sign glowing teal, a cot, bandages and potion bottles on a crate. |
+| `medic` ✅ done (Round 315) | Neon Aftermath | Street Medic | A burned-out kiosk turned into a tiny clinic, a white cross sign glowing teal, a cot, bandages and potion bottles on a crate. |
 | `vending` | Neon Aftermath | Busted Vending Machine | A dented neon vending machine with cracked glass, glowing red and green potion bottles inside, one hanging half out of the slot. |
 | `courier` | Neon Aftermath | Lost Courier | A sealed parcel with glowing tape lying next to a crashed delivery drone with a bent rotor, a blinking light. |
 | `spring` | Elaris (forest) | Moonlit Spring | A small clear pool between mossy roots, silver moonlight shimmering on the water, a few lily pads and drifting motes of light. |

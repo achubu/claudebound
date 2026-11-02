@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 315: the Street Medic gets its painting
+
+- The owner's **Street Medic** replaces the shared "?" pedestal for that Neon Aftermath event: a burned-out kiosk with
+  a glowing teal cross sign, a patched awning, a folding cot, potions and first-aid kits on a crate, and a hanging
+  lantern (`EVENT_ART` in `assets/cardsmith.js`, `assets/items/poi/events/medic.webp`; the original is in `events/src/`).
+- Keyed with green capped at the larger of red and blue (as in Round 312). The fade also starts lower than usual
+  (30–110) so the lantern's half-green glow turns see-through instead of an olive disc.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 314: events get their own paintings, starting with the Abandoned Terminal
 
 - Every event used to share one "?" pedestal (`event.webp`). Events can now have a painting each:
