@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 299: the Rain Drone hovers
+
+- The owner sent an eight-frame hover for the Sky Isles' Rain Drone (`skyWisp`), with spinning rotors and a swaying
+  cable. The source strip is `assets/monsters/sky/src/rain-drone-hover8.png`.
+- The frames were already aligned (upper body at x352, base at y600), so frames 1, 3, 5 and 7 are cut with one shared
+  window, as in Round 272, so the body doesn't jitter.
+- The window places the drone like the old sheet: about 484px wide, its cable near the frame's bottom. The result
+  replaces `assets/monsters/sky/rain-drone.png` and is padded.
+- The cycle is .8s (the owner's 800ms), down from 1.2s.
+- `SPRITE_VERSION` 299. New `tests/rain-drone.test.cjs`. Checked in Chromium on the map and in battle.
+
 ## Round 298: Neon Aftermath Nights (a content pack for the first world)
 
 The owner asked for more content in Neon Aftermath, to expand to other worlds if they like it. `assets/city-nights.js`
