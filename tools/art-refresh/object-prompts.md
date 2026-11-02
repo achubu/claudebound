@@ -14,7 +14,7 @@ in a three-quarter top-down view, about 256 px, on a transparent background.
 > readable at 48 px. Plain flat bright green (#00FF00) background with no shadow or ground tile on it,
 > no text, no border, square image.
 
-The green background gets keyed out when the image is wired in (as with the creature sheets).
+The green background gets keyed out when the image is wired in, with `tools/key_object.py` (Round 316).
 
 ## 1. No image yet (drawn as an emoji glyph)
 
@@ -49,7 +49,7 @@ Every event in every world uses the same picture. Each could have its own. Files
 |---|---|---|---|
 | `terminal` ✅ done (Round 314) | Neon Aftermath | Abandoned Terminal | A cracked public terminal on a scrap stand, flickering red security prompt on the screen, sparking wires, a toppled stool. |
 | `medic` ✅ done (Round 315) | Neon Aftermath | Street Medic | A burned-out kiosk turned into a tiny clinic, a white cross sign glowing teal, a cot, bandages and potion bottles on a crate. |
-| `vending` | Neon Aftermath | Busted Vending Machine | A dented neon vending machine with cracked glass, glowing red and green potion bottles inside, one hanging half out of the slot. |
+| `vending` ✅ done (Round 316) | Neon Aftermath | Busted Vending Machine | A dented neon vending machine with cracked glass, glowing red and green potion bottles inside, one hanging half out of the slot. |
 | `courier` | Neon Aftermath | Lost Courier | A sealed parcel with glowing tape lying next to a crashed delivery drone with a bent rotor, a blinking light. |
 | `spring` | Elaris (forest) | Moonlit Spring | A small clear pool between mossy roots, silver moonlight shimmering on the water, a few lily pads and drifting motes of light. |
 | `ranger` | Elaris (forest) | Wounded Ranger | A hooded ranger sitting against a tree trunk with a bandaged arm, bow and quiver beside her, a small campfire glow. |
