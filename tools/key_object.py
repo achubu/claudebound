@@ -1,5 +1,5 @@
-# Key a painted map object off a bright green background (Rounds 307-320).
-# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--keep-green [--despill-circle=x,y,r]]   (greenness fades from opaque at lo to clear at hi; default 90 170)
+# Key a painted map object off a bright green background (Rounds 307-323).
+# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--keep-green [--despill-circle=x,y,r]] [--clear-enclosed]   (greenness fades from opaque at lo to clear at hi; default 90 170)
 # Green is capped at max(red, blue) everywhere (despill), green patches the background does not reach stay opaque
 # when their colour differs from the background (Round 317: holes in the art, same colour as the background, still clear;
 # Round 318: judged by median colour, patches of 200px or more),
@@ -8,9 +8,10 @@ import sys
 from PIL import Image
 import numpy as np
 from scipy import ndimage
-keep_green = '--keep-green' in sys.argv; circle = None; args = []
+keep_green = '--keep-green' in sys.argv; circle = None; clear_enclosed = False; args = []
 for x in sys.argv[1:]:
     if x == '--keep-green': continue
+    if x == '--clear-enclosed': clear_enclosed = True; continue
     if x.startswith('--despill-circle='): circle = [float(v) for v in x.split('=', 1)[1].split(',')]; continue
     args.append(x)
 src, out_path = args[0], args[1]; lo = float(args[2]) if len(args) > 2 else 90; hi = float(args[3]) if len(args) > 3 else 170
@@ -30,7 +31,7 @@ edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) 
 bg = np.median(a[np.isin(lab, list(edge))], axis=0)
 # Round 318: median colour, and at least 200px, so thin slivers between leaves or roots (darkened by blended edges) still clear.
 keep = [i for i in range(1, n + 1) if i not in edge and (lab == i).sum() >= 200 and np.linalg.norm(np.median(a[lab == i], 0) - bg) > 60]
-inner = np.isin(lab, keep)
+inner = np.isin(lab, [] if clear_enclosed else keep)  # --clear-enclosed (Round 323): glow-tinted background trapped in swirls is not a light
 grown = ndimage.binary_dilation(inner, iterations=3) & (alpha < 1)
 print('enclosed green px kept:', int(grown.sum()))
 alpha = np.where(grown, 1, alpha); g2 = np.where(grown, g, g2)
