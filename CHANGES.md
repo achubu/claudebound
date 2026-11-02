@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 302: the Sky Isles bosses move
+
+The owner sent eight-frame animations for the Sky Isles' two mini-bosses and its final boss. Each is cut like Rounds
+299–301: frames 1, 3, 5 and 7, one shared window sized to the widest pose, then padded. The eight-frame strips are kept
+in `assets/monsters/sky/src/`.
+
+| Boss | Animation | Source | Cycle |
+|---|---|---|---|
+| The Stormbell Warden (`stormbellWarden`) | walks: hammer held low, folded rear panels, a gently swinging chest bell | `stormbell-warden-walk8.png` | 1.4s → .8s |
+| The Featherfall Matriarch (`featherMatriarch`) | flies: articulated wingbeats, tucked talons, trailing tailfeathers | `featherfall-matriarch-flight8.png` | 1.4s → .8s |
+| The Zenith Roc (`zenithRoc`) | flies: wingbeats around a steady sun core | `zenith-roc-flight8.png` (832px frames) | 1.2s → .8s |
+
+The new cycles match the owner's 800ms. The Zenith Roc keeps its `big` size.
+
+`SPRITE_VERSION` 302. New `tests/sky-bosses-anim.test.cjs`. All three were checked in Chromium on the map and in
+battle.
+
 ## Round 301: the Thunderhorn Ram walks
 
 - The owner sent an eight-frame walk for the Sky Isles' Thunderhorn Ram (`skyRam`), a mechanical ram with articulated
