@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 313: the Vespera Cardsmith gets its painting
+
+- The owner's **storm-pier forge** replaces the ⚒ glyph at Vespera's Cardsmith: a weathered pier with barnacled posts,
+  a torn dark tarp, a trident lightning rod sending a violet bolt into a wet slate-blue anvil, three glowing violet
+  cards, a coil of rope and a lantern (`WORLD_POI_ART.vespera.cardsmith`, `assets/items/poi/vespera-cardsmith.webp`;
+  the original is kept in `src/`).
+- Keyed like Round 312 (green capped at the larger of red and blue everywhere, since nothing in it is green).
+- Checked over four grounds and decoded in Chromium; `tests/city-cardsmith-art.test.cjs` covers it.
+- Every world's Cardsmith now has a painting. The Vespera Storm Glyph is the last lore stone still drawn as a glyph.
+
 ## Round 312: the Chronospire Cardsmith gets its painting
 
 - The owner's **clockwork forge** replaces the ⚒ glyph at Chronospire's Cardsmith: a bronze furnace with gears and a
