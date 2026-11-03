@@ -1,0 +1,20 @@
+'use strict';
+// Round 326 (owner): all text in the world view is one style and one on-screen size, 10% smaller than the old enemy labels.
+process.env.HARNESS_ONLY = '1';
+const assert = require('assert');
+const fs = require('fs');
+const { run } = require('./expansion.test.cjs');
+const css = fs.readFileSync('assets/layout-polish.css', 'utf8'), js = fs.readFileSync('assets/world-font.js', 'utf8');
+const block = css.slice(css.indexOf('Round 326'));
+for (const sel of ['#world', '#hud', '#minimap', '#nav button', '#toast', '.enemy-node::after']) assert(block.includes(sel), sel + ' is covered');
+assert(/font-family:system-ui[^;]*!important;font-size:var\(--wtext/.test(block), 'one family, one size variable');
+assert(/font-weight:600!important/.test(block), 'one weight');
+assert(!/#menuModal|#battleModal|\.modal/.test(block.split('*/').slice(1).join('')), 'menus and battle keep their type');
+const m = /WORLD_TEXT_MAP_PX = ([\d.]+), WORLD_TEXT_MIN_PX = ([\d.]+)/.exec(js);
+assert(m && Math.abs(+m[1] - 9 * 0.8 * 0.9) < 0.01, '90% of the old enemy label (9px in a node at 0.8)');
+assert(+m[2] >= 8, 'readable floor on small screens');
+const html = fs.readFileSync('index.html', 'utf8');
+assert(html.indexOf('world-font.js') > html.indexOf('item-names.js') && html.indexOf('world-font.js') < html.indexOf('god-mode.js'), 'load order');
+const r = JSON.parse(run(`(() => { newGame(); return JSON.stringify({ fit: typeof fitWorldText, wrapped: String(renderWorld).includes('fitWorldText'), n: fitWorldText() }); })()`));
+assert.strictEqual(r.fit, 'function'); assert(r.wrapped, 'sizes are refreshed after every render'); assert.strictEqual(r.n, 0, 'harmless without a real page');
+console.log('world-font ok');
