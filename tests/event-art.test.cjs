@@ -5,7 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); const o = {};
-  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.updraft = poiArt({ type: 'event', event: 'updraft' }); o.aerie = poiArt({ type: 'event', event: 'aerie' }); o.chimes = poiArt({ type: 'event', event: 'chimes' }); o.starwell = poiArt({ type: 'event', event: 'starwell' }); o.shelter = poiArt({ type: 'event', event: 'shelter' }); o.conduit = poiArt({ type: 'event', event: 'conduit' }); o.scavenger = poiArt({ type: 'event', event: 'scavenger' }); o.prism = poiArt({ type: 'event', event: 'prism' }); o.clockmaker = poiArt({ type: 'event', event: 'clockmaker' }); o.paradoxPool = poiArt({ type: 'event', event: 'paradoxPool' }); o.sandglass = poiArt({ type: 'event', event: 'sandglass' }); o.lore = poiArt({ type: 'lore' });
+  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.updraft = poiArt({ type: 'event', event: 'updraft' }); o.aerie = poiArt({ type: 'event', event: 'aerie' }); o.chimes = poiArt({ type: 'event', event: 'chimes' }); o.starwell = poiArt({ type: 'event', event: 'starwell' }); o.shelter = poiArt({ type: 'event', event: 'shelter' }); o.conduit = poiArt({ type: 'event', event: 'conduit' }); o.scavenger = poiArt({ type: 'event', event: 'scavenger' }); o.prism = poiArt({ type: 'event', event: 'prism' }); o.clockmaker = poiArt({ type: 'event', event: 'clockmaker' }); o.paradoxPool = poiArt({ type: 'event', event: 'paradoxPool' }); o.sandglass = poiArt({ type: 'event', event: 'sandglass' }); o.echoes = poiArt({ type: 'event', event: 'echoes' }); o.lore = poiArt({ type: 'lore' });
   configureRegion('wilds'); o.wildsTerminal = poiArt({ type: 'event', event: 'terminal' });
   configureRegion('elaris'); o.solSpring = poiArt({ type: 'event', event: 'spring' });
   configureRegion('city'); return JSON.stringify(o); })()`));
@@ -29,7 +29,8 @@ assert.strictEqual(r.scavenger, 'events/scavenger', 'Round 328: the Glass Scaven
 assert.strictEqual(r.prism, 'events/prism', 'Round 329: the Echoing Prism uses its painting');
 assert.strictEqual(r.clockmaker, 'events/clockmaker', 'Round 330: the Clockmaker\'s Bench uses its painting');
 assert.strictEqual(r.paradoxPool, 'events/paradoxPool', 'Round 331: the Paradox Pool uses its painting');
-assert.strictEqual(r.sandglass, 'event', 'events without a painting keep the shared one');
+assert.strictEqual(r.sandglass, 'events/sandglass', 'Round 332: the Giant Hourglass uses its painting');
+assert.strictEqual(r.echoes, 'event', 'events without a painting keep the shared one');
 assert.strictEqual(r.lore, 'terminal', 'the city lore terminal is unchanged');
 const ids = JSON.parse(run('JSON.stringify(EVENT_ART)'));
 const known = JSON.parse(run('JSON.stringify(Object.keys(EVENTS))'));

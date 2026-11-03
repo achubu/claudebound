@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 332: Vespera's Tempest Moth flies on its own sheet; the Giant Hourglass painting
+
+- **Tempest Moth** (Vespera): until now it borrowed the Elaris Storm Moth sheet, recolored. It now has its own
+  four-frame flight (`assets/monsters/vespera/tempest-moth.png`, `WILDLIFE_ART.tempestMoth`, cycle `.8s`,
+  `tint:'none'`):
+  - The source is a draft of eight transparent 480px frames drawn from the Storm Moth. The full eight-frame sheet is
+    kept in `src/tempest-moth-flight8.png`.
+  - Cleaned before cutting: haze under alpha 16 and stray specks under 200px dropped.
+  - Built like the other eight-frame creatures: frames 1, 3, 5 and 7 in one shared window, then
+    `tools/pad_sprite_frames.py`. That also handles the draft's note that the lowest wing pose's tail comes close to
+    the image edge.
+  - `SPRITE_VERSION` is now '332'.
+- The owner's **Giant Hourglass** replaces the shared "?" pedestal for that Chronospire event. It's a tall
+  hourglass in a twisted bronze frame with gear-shaped caps on a marble base, with glowing golden sand swirling
+  upward (`assets/items/poi/events/sandglass.webp`):
+  - Keyed with `tools/key_object.py ... 20 110 --clear-enclosed`.
+  - The glass panels beside the bulbs had a yellow-green glow over the green background. The usual fade left them
+    olive; the lower fade makes them see-through glass with a golden edge.
+- `tests/forest-anim.test.cjs` now expects the moth's own sheet; `tests/event-art.test.cjs` covers the hourglass.
+
 ## Round 331: the Paradox Pool gets its painting
 
 - The owner's **Paradox Pool** replaces the shared "?" pedestal for that Chronospire event: a round marble-and-bronze
