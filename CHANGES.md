@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 325: quieter interactable objects; their names pop up on interaction; the Storm Shelter painting
+
+- Owner request: interactable objects glow less, lose the text under them, and show their name when you interact.
+  New `assets/item-names.js` (loaded after `ui-clarity`):
+  - No name labels under points of interest, the merchant, Nexus Waypoints or relics. Enemy labels (level, bounty,
+    Wanted) are unchanged.
+  - A softer glow. The pulse on painted objects, chests and relics peaked at 12px + 22px; it now peaks at 7px and is
+    fainter (`itemGlowSoft`). It needs its own name: `layout-polish.css` loads later and would win a same-named
+    `@keyframes`. The merchant's and Cardsmiths' halos and the ring around glyph-drawn objects are toned down too.
+  - When you open a point of interest (`openPOI`) or take a relic (`collectRelic`), the nearest object's name pops up
+    above it in a small dark tag for about 2.5 seconds (`showItemName`). Chests already announce themselves with a
+    toast.
+- The owner's **Storm Shelter** replaces the shared "?" pedestal for that Vespera event. It's a rain-streaked glass
+  dome with an iron frame on wet black rock, warm lamplight inside on lockers and a bedroll, and violet sparks on the
+  frame (`assets/items/poi/events/shelter.webp`). The green showing through the upper glass keys to clear tinted
+  glass.
+- New `tests/item-names.test.cjs`; `tests/event-art.test.cjs` covers the shelter. In Chromium the label is gone, the
+  glow is softer, and opening the Data Terminal pops "Data Terminal" above it.
+
 ## Round 324: the Starwell gets its painting
 
 - The owner's **Starwell** replaces the shared "?" pedestal for that Sky Isles event: a round marble pool with gold
