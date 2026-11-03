@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 338: Vespera's Thunder Mauler walks on its own sheet; the Glitched Billboard painting
+
+- **Thunder Mauler** (Vespera): until now it borrowed the Neon Aftermath Reactor Mauler sheet, recolored. It now
+  has its own four-frame walk (`assets/monsters/vespera/thunder-mauler.png`, `WILDLIFE_ART.thunderMauler`, cycle
+  `.8s`, `tint:'none'`):
+  - The source is the owner's draft of eight 704px frames, an armored quadruped with a violet storm reactor and
+    cyan vents.
+  - The draft noted a light matte fringe. Six passes peel light, unsaturated pixels off the silhouette's edge.
+    Enclosed near-white matte patches of 250px or more are cleared too, unless they sit inside the saturated violet
+    core (a first try without that check punched holes in the core's sparkles).
+  - The eight-frame strip is kept in `src/`. `SPRITE_VERSION` is now '338'.
+- The owner's **Glitched Billboard** replaces the shared "?" pedestal for that Neon Aftermath night event. It's a
+  rusty two-post billboard with a cracked screen of scrambled magenta and cyan blocks, hanging cables and a junction
+  box with a blinking light, over wet pavement (`events/billboard.webp`).
+- Left on the map: the Gang Toll event and the Vespera Storm Glyph.
+- Tests: `forest-anim` (mauler sheet), `event-art` (billboard).
+
 ## Round 337: the Drone Racers get their painting
 
 - The owner's **Drone Racers** replace the shared "?" pedestal for that Neon Aftermath night event: two taped-together

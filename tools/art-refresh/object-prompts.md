@@ -83,7 +83,7 @@ through `WORLD_POI_ART.city`); events go in `events/` (wired through `EVENT_ART`
 | `city-vault.webp` ✅ done (Round 335) | Afterlight Vault | A heavy round vault door set into a concrete wall, glowing cyan seams and a dead keypad, locked until the breakers are on. |
 | `events/arcade` ✅ done (Round 336) | Arcade Cabinet | A rain-soaked retro arcade cabinet with a glowing screen and joystick under a scrap awning. |
 | `events/racer` ✅ done (Round 337) | Drone Racers | Two small scrap racing drones on a chalk-marked start line, a battered trophy and a crate. |
-| `events/billboard` | Glitched Billboard | A small standing digital billboard with a glitching, pixel-scrambled screen. |
+| `events/billboard` ✅ done (Round 338) | Glitched Billboard | A small standing digital billboard with a glitching, pixel-scrambled screen. |
 | `events/toll` | Gang Toll | A road barricade of tyres, crates and barbed wire with a spray-painted skull and a tin toll cup. |
 
 ## 3. Optional: world variants of shared objects
@@ -105,7 +105,7 @@ has a painting except:
 | Still a glyph or the shared image | Where |
 |---|---|
 | Storm Glyph lore stone (`vespera-lore.webp`), drawn as ϟ | Vespera (5 spots) |
-| Glitched Billboard, Gang Toll events (shared "?" pedestal) | Neon Aftermath |
+| Gang Toll event (shared "?" pedestal) | Neon Aftermath |
 
 Shared on purpose, so optional (see section 3):
 - The hidden loot chest (`loot-chest.png`) in five worlds; Solaris has its own.
@@ -120,12 +120,12 @@ Shared on purpose, so optional (see section 3):
 |---|---|
 | `city/briar-sentinel-walk` | The Arc Sentinel (Vespera mini-boss), Brass Sentry (Chronospire) |
 | `city/crown-observer` | The Clockwarden (Chronospire) |
-| `city/data-wisp` | Rust Wisp (Chronospire) |
+| `city/data-wisp` | Rust Wisp (Chronospire); Arc Wisp has its own since Round 336 |
 | `city/phase-shade` | The Resonant Phantom (Vespera mini-boss), Lag Wraith, The Paradox Twin (Chronospire) |
 | `elaris/blight-antler` | Pendulum Stag (Chronospire) |
 | `elaris/bloom-tyrant` | The Tempest Colossus (Vespera boss), The Chronarch (Chronospire boss) |
 | `elaris/cinder-fox` | Gearhound (Chronospire) |
 | `elaris/drowned-heron` | Hourglass Heron (Chronospire); The Tidebound Warden (Elaris mini-boss, not recolored) |
 | `elaris/storm-moth` | Tick Moth (Chronospire); The Gale Sovereign (Elaris mini-boss, not recolored) |
-| `reactor-mauler` | Thunder Mauler (Vespera), Cog Mauler (Chronospire) |
+| `reactor-mauler` | Cog Mauler (Chronospire); Thunder Mauler has its own since Round 338 |
 
