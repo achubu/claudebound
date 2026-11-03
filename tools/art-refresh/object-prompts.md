@@ -124,7 +124,7 @@ Shared on purpose, so optional (see section 3):
 | `elaris/bloom-tyrant` | The Chronarch (Chronospire boss); The Tempest Colossus has its own since Round 340 |
 | `elaris/cinder-fox` | none since Round 341 (the Gearhound has its own) |
 | `elaris/drowned-heron` | Hourglass Heron (Chronospire); The Tidebound Warden (Elaris mini-boss, not recolored) |
-| `elaris/storm-moth` | Tick Moth (Chronospire); The Gale Sovereign (Elaris mini-boss, not recolored) |
+| `elaris/storm-moth` | The Gale Sovereign (Elaris mini-boss, not recolored); the Tick Moth has its own since Round 342 |
 | `reactor-mauler` | Cog Mauler (Chronospire); Thunder Mauler has its own since Round 338 |
 
 ## 5. Nexus Waypoints, one per world (owner request, Round 339)
@@ -150,7 +150,20 @@ Solaris already has `sol-chest.webp`.
 |---|---|---|
 | `city-chest.webp` | Neon Aftermath | A dented steel strongbox salvaged from the ruins, lid open a crack on cyan light, coins and a crystal, hazard tape and a blinking pink keypad, on wet cracked asphalt. |
 | `sky-chest.webp` ✅ done (Round 341) | Sky Isles | A white-washed wooden chest bound in brass with feather hinges and a wind rune, on a puff of cloud, pale-blue light and coins inside, a ribbon streaming in the wind. |
-| `wilds-chest.webp` | Elaris (forest) | A moss-covered wooden chest bound in roots and old iron, lid open a crack on green-gold light and coins, ferns and mushrooms around it. |
-| `vespera-chest.webp` | Vespera | A barnacled sea chest of dark wood and iron washed up on wet black rock, violet light and coins inside, a coil of rope and a few shells. |
-| `chronospire-chest.webp` | Chronospire | A bronze clockwork chest with gear hinges and a small clock-face lock, amber light and coins inside, on a marble tile with sand grains. |
+| `wilds-chest.webp` ✅ done (Round 342) | Elaris (forest) | A moss-covered wooden chest bound in roots and old iron, lid open a crack on green-gold light and coins, ferns and mushrooms around it. |
+| `vespera-chest.webp` ✅ done (Round 342) | Vespera | A barnacled sea chest of dark wood and iron washed up on wet black rock, violet light and coins inside, a coil of rope and a few shells. |
+| `chronospire-chest.webp` ✅ done (Round 342) | Chronospire | A bronze clockwork chest with gear hinges and a small clock-face lock, amber light and coins inside, on a marble tile with sand grains. |
+
+## 7. Merchants and portals, one per world (Round 342)
+
+Merchants go through `WORLD_POI_ART.<world>.merchant` (`assets/items/poi/<world>-merchant.webp`); all five are done in
+Round 342 (Solaris has `sol-merchant.webp`). Portals go through `WORLD_PORTAL_ART` in `assets/cardsmith.js`
+(`assets/environment/<world>-portal.webp`), replacing the shared `elaris-portal.png`:
+
+| File | World | Subject |
+|---|---|---|
+| `sky-portal.webp` ✅ done (Round 342) | Sky Isles | A white marble arch trimmed in brass with feather carvings and a wind-rune keystone, on a marble step on a cloud, a swirling pale-blue sky portal inside. |
+| `wilds-portal.webp` | Elaris (forest) | An archway of two great twisted trees whose branches meet overhead, hung with moss and glowing lanterns, a swirling green-gold portal between their trunks, roots and ferns at the base. |
+| `vespera-portal.webp` | Vespera | A tall arch of dark wet slate pillars bound in iron, a lightning glyph at its keystone, a swirling violet storm portal crackling inside, on wet black rock. |
+| `chronospire-portal.webp` | Chronospire | A bronze-and-marble arch shaped like a giant clock ring with gears at its base, a swirling amber portal with faint clock hands inside, sand motes drifting. |
 

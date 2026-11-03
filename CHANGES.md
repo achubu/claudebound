@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 342: every world's merchant, three more chests, the Sky Isles portal, and Chronospire's Tick Moth
+
+- The owner's batch of eight object paintings, plus one more:
+  - **Merchants for all five worlds** (Solaris already had one), through `WORLD_POI_ART.<world>.merchant`:
+    - Neon Aftermath: a hooded trader with a visor beside a patched-tarp scrap cart strung with neon.
+    - Sky Isles: an aviator-scarfed trader at a striped-awning brass stall on a cloud.
+    - Elaris: a mushroom-hatted peddler with a mossy lantern cart and a jar of fireflies, keyed with `--keep-green`.
+    - Vespera: a sou'wester-hatted trader at a beached rowboat under a tarp.
+    - Chronospire: a top-hatted clockwork peddler at a walking bronze cart hung with pocket watches.
+  - **Loot chests** for Elaris (root-bound and mossy), Vespera (a barnacled sea chest with violet light) and
+    Chronospire (bronze, with a clock-face lock on a marble tile). `WORLD_CHEST_ART` now covers four worlds; the city
+    keeps `loot-chest.png` until its chest arrives.
+  - The **Sky Isles portal**: a white marble, brass-trimmed arch on a cloud with a swirling sky portal. New
+    `WORLD_PORTAL_ART` in `assets/cardsmith.js` swaps the portal image per world after each render; other worlds keep
+    `elaris-portal.png`.
+- **Tick Moth** (Chronospire): until now it borrowed the Elaris Storm Moth, recolored. It now flies on its own
+  amber-and-cream sheet from the owner's eight-frame draft (`assets/monsters/chronospire/tick-moth.png`).
+  - The draft's preview sheet shows red and green blotches by the head in a few poses. The eight frames themselves
+    don't have them (checked pixel by pixel), so the game sheet, cut from the frames, is clean.
+  - `SPRITE_VERSION` is now '342'.
+- `object-prompts.md` gains section 7: merchants and portals per world, with prompts for the remaining three portals.
+- Tests: `city-cardsmith-art` (merchants, chests, portal), `poi-art` and `cardsmith` (the city merchant's own
+  painting). In Chromium each world's chest, the Sky Isles portal and the Tick Moth draw their new images, and the
+  city chest and the Elaris portal are unchanged.
+
 ## Round 341: three more world waypoints, the Vespera Storm Glyph, the Sky Isles chest, and Chronospire's Gearhound
 
 - The owner's batch of five object paintings:
