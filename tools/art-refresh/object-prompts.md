@@ -65,7 +65,7 @@ Every event in every world uses the same picture. Each could have its own. Files
 | `prism` ✅ done (Round 329) | Vespera | Echoing Prism | A tall crystal prism on a stone base, rainbow light inside it and a faint ghostly afterimage beside it. |
 | `clockmaker` ✅ done (Round 330) | Chronospire | Clockmaker's Bench | A workbench covered in tiny gears, springs and a half-built pocket watch, a magnifying lamp glowing warm. |
 | `paradoxPool` ✅ done (Round 331) | Chronospire | Paradox Pool | A circular pool framed in bronze clockwork, its water swirling like a clock face, shimmering with amber light. |
-| `sandglass` | Chronospire | Giant Hourglass | A giant hourglass in a bronze frame, glowing golden sand flowing upward. |
+| `sandglass` ✅ done (Round 332) | Chronospire | Giant Hourglass | A giant hourglass in a bronze frame, glowing golden sand flowing upward. |
 | `echoes` | Chronospire | Echoing Corridor | A short archway of bronze and marble with several fading ghostly copies of the arch behind it, like an echo in stone. |
 
 Solaris uses the four forest events too (`spring`, `ranger`, `seedpod`, `vines`), which don't fit a desert city.

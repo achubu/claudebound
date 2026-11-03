@@ -12,5 +12,8 @@ for (const [k, sheet, src] of [['stag', 'blight-antler', 'blight-antler-walk8'],
   assert.strictEqual(b.readUInt32BE(16), 2064, sheet + ': a 4-frame sheet'); assert.strictEqual(b.readUInt32BE(20), 688);
   assert(fs.existsSync('assets/monsters/elaris/src/' + src + '.png'), sheet + ': the eight-frame source is kept');
 }
-assert(r.vStag.includes('blight-antler.png') && r.vMoth.includes('storm-moth.png'), 'Vespera still borrows both sheets');
+assert(r.vStag.includes('blight-antler.png'), 'Vespera still borrows the antler sheet');
+assert(r.vMoth.includes('vespera/tempest-moth.png?v=' + r.version) && r.vMoth.includes('.8s'), 'Round 332: Vespera\'s Tempest Moth has its own sheet');
+const tm = fs.readFileSync('assets/monsters/vespera/tempest-moth.png'); assert.strictEqual(tm.readUInt32BE(16), 2064); assert.strictEqual(tm.readUInt32BE(20), 688);
+assert(fs.existsSync('assets/monsters/vespera/src/tempest-moth-flight8.png'), 'the eight-frame source is kept');
 console.log('forest-anim ok');
