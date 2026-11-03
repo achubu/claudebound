@@ -82,7 +82,7 @@ through `WORLD_POI_ART.city`); events go in `events/` (wired through `EVENT_ART`
 | `city-breaker.webp` ✅ done (Round 334) | Breaker Box (3) | A dented utility breaker cabinet on a pole, door hanging open on a big lever switch, sparking fuses and thick cables. |
 | `city-vault.webp` ✅ done (Round 335) | Afterlight Vault | A heavy round vault door set into a concrete wall, glowing cyan seams and a dead keypad, locked until the breakers are on. |
 | `events/arcade` ✅ done (Round 336) | Arcade Cabinet | A rain-soaked retro arcade cabinet with a glowing screen and joystick under a scrap awning. |
-| `events/racer` | Drone Racers | Two small scrap racing drones on a chalk-marked start line, a battered trophy and a crate. |
+| `events/racer` ✅ done (Round 337) | Drone Racers | Two small scrap racing drones on a chalk-marked start line, a battered trophy and a crate. |
 | `events/billboard` | Glitched Billboard | A small standing digital billboard with a glitching, pixel-scrambled screen. |
 | `events/toll` | Gang Toll | A road barricade of tyres, crates and barbed wire with a spray-painted skull and a tin toll cup. |
 
@@ -105,7 +105,7 @@ has a painting except:
 | Still a glyph or the shared image | Where |
 |---|---|
 | Storm Glyph lore stone (`vespera-lore.webp`), drawn as ϟ | Vespera (5 spots) |
-| Drone Racers, Glitched Billboard, Gang Toll events (shared "?" pedestal) | Neon Aftermath |
+| Glitched Billboard, Gang Toll events (shared "?" pedestal) | Neon Aftermath |
 
 Shared on purpose, so optional (see section 3):
 - The hidden loot chest (`loot-chest.png`) in five worlds; Solaris has its own.

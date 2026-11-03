@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 337: the Drone Racers get their painting
+
+- The owner's **Drone Racers** replace the shared "?" pedestal for that Neon Aftermath night event: two taped-together
+  scrap racing drones with cyan and magenta lights over a chalked checkered start line on cracked wet asphalt, with
+  traffic cones, a crate holding a controller and a pipe trophy, and loose cables (`events/racer.webp`).
+- Keyed with `--clear-enclosed`, so the background inside the rotor rings clears.
+- `tests/event-art.test.cjs` covers it. Left on the map: the Glitched Billboard and Gang Toll events, and the
+  Vespera Storm Glyph.
+
 ## Round 336: Vespera's Arc Wisp glides on its own sheet; the Arcade Cabinet painting; an audit of all map art
 
 - **Arc Wisp** (Vespera): until now it borrowed the Neon Aftermath Data Wisp sheet. It now has its own four-frame
