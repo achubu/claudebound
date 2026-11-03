@@ -167,3 +167,21 @@ Round 342 (Solaris has `sol-merchant.webp`). Portals go through `WORLD_PORTAL_AR
 | `vespera-portal.webp` | Vespera | A tall arch of dark wet slate pillars bound in iron, a lightning glyph at its keystone, a swirling violet storm portal crackling inside, on wet black rock. |
 | `chronospire-portal.webp` | Chronospire | A bronze-and-marble arch shaped like a giant clock ring with gears at its base, a swirling amber portal with faint clock hands inside, sand motes drifting. |
 
+## 8. The switch puzzle in every world (Round 345)
+
+Each world's three switches and its vault (`WORLD_RELAYS` in `assets/world-relays.js`) are drawn as glyphs until
+painted. Wire paintings through `WORLD_POI_ART.<world>.<type>` (`assets/items/poi/<world>-<type>.webp`).
+
+| Type | World | Subject |
+|---|---|---|
+| `sunMirror` | Solaris | A tall bronze mirror on a carved sandstone pivot, tilted toward the sun, a beam of golden light glancing off it. |
+| `sunVault` | Solaris | A squat sandstone vault with a big carved sun-disc lock and gold trim, half-buried in sand. |
+| `windVane` | Sky Isles | A great brass weather vane on a marble post on a cloud, its arrow and feathered tail spinning in the wind. |
+| `galeStrongbox` | Sky Isles | A brass-bound strongbox chained to a scrap of white deck, a spinning wind-lock dial on its front. |
+| `spiritLantern` | Elaris | An old wardens' lantern on a root-wrapped wooden post, glowing green-gold, moss and ferns at its base. |
+| `heartHollow` | Elaris | A great hollow tree trunk with a doorway grown over with bark, glowing runes around it, roots and mushrooms. |
+| `stormRod` | Vespera | A tall iron lightning rod on wet black rock, a crackling violet bolt striking its tip, a snapped cable at its base. |
+| `stormStrongroom` | Vespera | A squat slate strongroom with an iron door and a storm-lock crackling with violet sparks, rain on the stone. |
+| `stoppedClock` | Chronospire | A tall bronze-and-marble standing clock with a pendulum and glowing amber dial, gears showing through its side. |
+| `chronoVault` | Chronospire | A bronze vault with a large clock-face lock, golden sand drifting upward around it, on a marble tile. |
+
