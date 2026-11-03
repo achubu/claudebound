@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 331: the Paradox Pool gets its painting
+
+- The owner's **Paradox Pool** replaces the shared "?" pedestal for that Chronospire event: a round marble-and-bronze
+  pool ringed with clockwork gears. Its dark water swirls into a clock face with glowing amber hands and marks, and
+  small gears and sparks float above it (`assets/items/poi/events/paradoxPool.webp`; the original is in
+  `events/src/`).
+- Keyed with `tools/key_object.py ... 30 130 --clear-enclosed`:
+  - The painting's rising mist is a thin green-tinted haze, and the usual fade left it as an olive smudge.
+  - The lower fade turns it into a faint warm haze.
+  - `--clear-enclosed` clears the mist-tinted green trapped inside the floating gears.
+- CLAUDE.md's note on map-object keying is brought up to date (it still said Rounds 307–324) and mentions
+  `--clear-enclosed`.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 330: the Clockmaker's Bench gets its painting
 
 - The owner's **Clockmaker's Bench** replaces the shared "?" pedestal for that Chronospire event: a bronze-cornered
