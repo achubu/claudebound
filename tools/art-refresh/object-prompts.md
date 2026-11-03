@@ -122,7 +122,7 @@ Shared on purpose, so optional (see section 3):
 | `city/data-wisp` | Rust Wisp (Chronospire); Arc Wisp has its own since Round 336 |
 | `city/phase-shade` | The Resonant Phantom (Vespera mini-boss), Lag Wraith, The Paradox Twin (Chronospire) |
 | `elaris/blight-antler` | Pendulum Stag (Chronospire) |
-| `elaris/bloom-tyrant` | The Tempest Colossus (Vespera boss), The Chronarch (Chronospire boss) |
+| `elaris/bloom-tyrant` | The Chronarch (Chronospire boss); The Tempest Colossus has its own since Round 340 |
 | `elaris/cinder-fox` | Gearhound (Chronospire) |
 | `elaris/drowned-heron` | Hourglass Heron (Chronospire); The Tidebound Warden (Elaris mini-boss, not recolored) |
 | `elaris/storm-moth` | Tick Moth (Chronospire); The Gale Sovereign (Elaris mini-boss, not recolored) |
@@ -135,7 +135,7 @@ Every world uses the same `nexus.webp`. Each world gets its own, wired through `
 
 | File | World | Subject |
 |---|---|---|
-| `city-nexus.webp` | Neon Aftermath | A waist-high cyberpunk teleport pad: a round scrap-metal platform ringed with cyan neon tubing, with a holographic ring of glowing cyan glyphs spinning in the air above it, cables snaking from its base into cracked asphalt, and a small flickering control post beside it. |
+| `city-nexus.webp` ✅ done (Round 340) | Neon Aftermath | A waist-high cyberpunk teleport pad: a round scrap-metal platform ringed with cyan neon tubing, with a holographic ring of glowing cyan glyphs spinning in the air above it, cables snaking from its base into cracked asphalt, and a small flickering control post beside it. |
 | `elaris-nexus.webp` | Solaris | A sun-temple waypoint: a round sandstone dais with a carved golden sunburst inlaid in its floor, two short obelisks with glowing amber hieroglyph-like runes at its sides, and a warm golden beam of light rising from the centre, with sand drifting across the steps. |
 | `sky-nexus.webp` | Sky Isles | A floating sky-shrine waypoint: a round white marble platform with brass rails hovering over a small cloud, with three tall curved brass vanes around it and a pale-blue swirling wind portal glowing between them, plus feathers and wisps of cloud circling it. |
 | `wilds-nexus.webp` | Elaris (forest) | A druidic forest waypoint: a ring of mossy standing stones around a flat stone disc carved with a glowing green spiral, with roots and ferns at its base, fireflies, and a soft column of green light rising from the spiral. |

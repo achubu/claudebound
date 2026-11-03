@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 340: Vespera's Tempest Colossus walks on its own sheet; the Neon Aftermath waypoint painting
+
+- **The Tempest Colossus** (Vespera boss): until now it borrowed the old Bloom Tyrant sheet. It now walks on its own
+  sheet (`assets/monsters/vespera/tempest-colossus.png`, `WILDLIFE_ART.tempestColossus`, `big:true` for the boss
+  box, cycle `.8s`, `tint:'none'`):
+  - The source is the owner's draft of eight 704px frames, a great storm stag of dark bark with blue-teal crystal
+    leaves, violet wisteria and a cyan heart core.
+  - Built like the other Vespera creatures. A pass for big near-grey enclosed patches found none in the frames used,
+    and nothing shows on light or dark ground.
+  - The eight-frame strip is kept in `src/`. `SPRITE_VERSION` is now '340'. The Chronarch still borrows the Bloom
+    Tyrant sheet.
+- The owner's **Neon Aftermath Nexus Waypoint** replaces the shared `nexus.webp` in the city. It's a rusted round
+  teleport pad with a glowing cyan ring, a hologram ring of glyphs above it, cables into cracked stone and a small
+  control post (`WORLD_POI_ART.city.nexus`, `assets/items/poi/city-nexus.webp`). It's the first of the six per-world
+  waypoints from the Round 339 prompts; the other worlds keep the shared one for now.
+- Tests: `solaris-roster` (the Colossus's own sheet), `city-cardsmith-art` (the city waypoint, others unchanged).
+
 ## Round 339: the terminal in Floodgate's factory yard is reached from the left; The Arc Sentinel and Gang Toll art; waypoint prompts
 
 - **Route fix (owner report):** in room 1,6, the terminal in the yard behind the cyan-sign factory could only be
