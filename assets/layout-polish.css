@@ -289,3 +289,15 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 #menuModal .quest-explore ul{list-style:none;margin:0 0 6px;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:4px 16px}
 #menuModal .quest-explore li{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-bottom:1px dotted #22404f;padding:2px 0}
 #menuModal .quest-explore small{color:#8fb3c2}
+/* Round 326 (owner): every piece of text in the world view is one style and size: system-ui, semibold, 10% smaller
+   than the old enemy labels (--wtext, set by assets/world-font.js; it follows the map's scale like they did).
+   That is the map itself (room and street signs, door labels, enemy labels, item name pop-ups), the HUD, the
+   minimap, the top-bar buttons, the hint line and toasts. Menus and the battle screen keep their own type.
+   Emoji glyphs (icons, not text) keep their size. */
+#world,#world *:not(.poi-glyph):not(.art-glyph),#world .enemy-node::after,#world .enemy-node:after,
+#hud,#hud *,#minimap,#minimap *,#nav,#nav button,#game>.hint,#toast{
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif!important;font-size:var(--wtext,10px)!important;font-weight:600!important;
+  letter-spacing:normal!important;font-style:normal!important}
+/* The map is scaled to fit the screen, and some labels sit inside scaled nodes, so a label's size is set per element
+   (--wf, by assets/world-font.js) to look --wtext on screen, like the HUD. */
+#world *:not(.poi-glyph):not(.art-glyph),#world .enemy-node::after,#world .enemy-node:after,#world .item-name-pop{font-size:var(--wf,10px)!important}

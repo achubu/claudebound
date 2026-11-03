@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 326: one font and one size for all text in the world
+
+- Owner request: all text in the world view is the same style and size, about 10% smaller than the old enemy
+  labels. Menus and the battle screen are left as they were.
+- Before, the world view mixed Georgia, system-ui and monospace at eight sizes from 8 to 18px:
+  - Georgia: room title, top-bar buttons, potion button.
+  - system-ui: HUD, minimap, enemy labels.
+  - monospace: door signs, district signs, street names.
+  - Labels on the map also scaled with the map's fit-to-screen zoom, and enemy labels sat in a node drawn at 0.8.
+- Now everything uses system-ui semibold at one on-screen size. That covers the map, the HUD, the minimap, the
+  top-bar buttons, the hint line, toasts and the item-name pop-ups:
+  - The size is 90% of the old enemy label (9px × 0.8 node scale × the map's scale, so 6.48px × the map scale), with
+    an 8px floor on small screens. That's about 9.7px at 1280 wide, 13.2px at 1920 and 8px on a phone.
+  - `assets/world-font.js` measures each map label's real drawn scale after every render and on resize. It sets a
+    per-element `--wf` and a page-wide `--wtext`; the rules are at the end of `layout-polish.css`.
+  - Emoji glyphs and the touch d-pad arrows are icons, so they keep their size.
+- New `tests/world-font.test.cjs`. In Chromium, every text element in the world view measures within 0.3px of the
+  target at 1280, 1920 and 390 wide.
+
 ## Round 325: quieter interactable objects; their names pop up on interaction; the Storm Shelter painting
 
 - Owner request: interactable objects glow less, lose the text under them, and show their name when you interact.
