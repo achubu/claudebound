@@ -5,7 +5,7 @@ process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
-const r = JSON.parse(run(`JSON.stringify({ version: SPRITE_VERSION, stag: monsterArt('elarisAntler'), moth: monsterArt('elarisMoth'), vStag: monsterArt('vespStag'), vMoth: monsterArt('vespMoth'), vHeron: monsterArt('vespHeron'), vShade: monsterArt('vespShade'), vWisp: monsterArt('vespWisp') })`));
+const r = JSON.parse(run(`JSON.stringify({ version: SPRITE_VERSION, stag: monsterArt('elarisAntler'), moth: monsterArt('elarisMoth'), vStag: monsterArt('vespStag'), vMoth: monsterArt('vespMoth'), vHeron: monsterArt('vespHeron'), vShade: monsterArt('vespShade'), vWisp: monsterArt('vespWisp'), vMauler: monsterArt('vespMauler') })`));
 for (const [k, sheet, src] of [['stag', 'blight-antler', 'blight-antler-walk8'], ['moth', 'storm-moth', 'storm-moth-flight8']]) {
   assert(r[k].includes('elaris/' + sheet + '.png?v=' + r.version) && r[k].includes('.8s'), sheet + ' uses its new sheet at the owner timing');
   const b = fs.readFileSync('assets/monsters/elaris/' + sheet + '.png');
@@ -27,4 +27,7 @@ assert(fs.existsSync('assets/monsters/vespera/src/ion-shade-glide8.png'));
 assert(r.vWisp.includes('vespera/arc-wisp.png?v=' + r.version) && r.vWisp.includes('.8s'), 'Round 336: Vespera\'s Arc Wisp has its own sheet');
 const aw = fs.readFileSync('assets/monsters/vespera/arc-wisp.png'); assert.strictEqual(aw.readUInt32BE(16), 2064); assert.strictEqual(aw.readUInt32BE(20), 688);
 assert(fs.existsSync('assets/monsters/vespera/src/arc-wisp-glide8.png'));
+assert(r.vMauler.includes('vespera/thunder-mauler.png?v=' + r.version) && r.vMauler.includes('.8s'), 'Round 338: Vespera\'s Thunder Mauler has its own sheet');
+const tmr = fs.readFileSync('assets/monsters/vespera/thunder-mauler.png'); assert.strictEqual(tmr.readUInt32BE(16), 2064); assert.strictEqual(tmr.readUInt32BE(20), 688);
+assert(fs.existsSync('assets/monsters/vespera/src/thunder-mauler-walk8.png'));
 console.log('forest-anim ok');
