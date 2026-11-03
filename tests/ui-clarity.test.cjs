@@ -56,10 +56,14 @@ server.listen(0, async () => {
       out.hero = !m.querySelector('.sheet-portrait') && /Level/.test((m.querySelector('h2') || {}).textContent || ''); out.cols = m.querySelectorAll('.char-stats tr').length; out.oldBoxes = !!m.querySelector('.sheet-grid');
       out.nodeH = Math.round(m.querySelector('.talent-node').getBoundingClientRect().height); out.charH = m.scrollHeight;
       const wires = [...m.querySelectorAll('.talent-connectors .connector-wire')].map(p => p.getAttribute('d')); out.wires = wires.length; out.curved = wires.filter(d => /[CcQqSsAa]/.test(d)).length;
+      const pop = m.querySelector('.char-stats-pop'), btn = m.querySelector('.char-stats-btn'); out.statsHidden = !!pop && pop.classList.contains('hidden') && !m.querySelector('.char-stats-panel .char-stats');
+      if (btn) btn.click(); out.statsOpen = !!pop && !pop.classList.contains('hidden') && pop.getBoundingClientRect().width > 0;
+      const sx = m.querySelector('.char-stats-x'); if (sx) sx.click(); out.statsClosed = !!pop && pop.classList.contains('hidden');
       showDeck(); out.greyInfo = [...document.querySelectorAll('#menuModal .workshop .card-wrap .actions button')].filter(b => b.disabled && b.offsetParent && !/^\+\s*Add/.test(b.textContent.trim())).length;
       closeMenu(); return out; });
     assert(Object.values(r294.x).every(Boolean), 'every top-bar screen has a ✕ that closes it (' + JSON.stringify(r294.x) + ')');
     assert(r294.hero && r294.cols >= 10 && !r294.oldBoxes && r294.nodeH <= 92 && r294.charH < 2000, 'Character: no portrait, a stat breakdown table instead of the four boxes (Round 296), smaller talents (' + r294.charH + 'px tall, was ~2440)');
+    assert(r294.statsHidden && r294.statsOpen && r294.statsClosed, 'Round 344: the stats are behind a 📊 Stats button that opens and closes a pop-up');
     assert(r294.wires > 0 && r294.curved === 0, 'Round 295: talent lines are straight (' + r294.wires + ' lines, ' + r294.curved + ' curved)');
     // Round 296: the breakdown names gear as a source when you wear some, and the quest log shows exploration.
     const r296 = await page.evaluate(() => { state.relics.push('ember'); ensureGear(); equipGear('gloves', 'ember'); showCharacter();

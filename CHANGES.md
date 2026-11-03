@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 344: the Character page's stats open from a 📊 Stats button
+
+- Owner request: make the character stats part of the Character screen a button that opens the stats.
+- The Character page now shows the XP bar with a **📊 Stats** button beside it, then the talent tree.
+- The stat breakdown (each stat, its total and where it comes from) and any gear rules in effect open in a pop-up
+  over the page.
+- ✕, Esc or a click outside the card closes just the pop-up; the Character screen stays open. The table is still
+  built with the page (hidden), so everything that reads it keeps working.
+- `tests/ui-clarity.test.cjs`: the stats start hidden behind the button, open on click and close with ✕. Checked in
+  Chromium.
+
 ## Round 343: every world's map is redrawn as clean vector roads that line up exactly
 
 - Owner request: redraw the city **map** (the Map screen and the minimap, not the room paintings) with vector graphics

@@ -152,11 +152,32 @@ function uiStatsHTML() {
     + '<table class="char-stats"><tbody>' + rows + '</tbody></table>'
     + (rules ? '<div class="char-rules"><b>Gear rules in effect</b><ul>' + rules + '</ul></div>' : '');
 }
+// Round 344 (owner): the stat breakdown sits behind a 📊 Stats button on the Character page and opens in a pop-up;
+// the page itself keeps just the XP bar above the talent tree.
 function uiCharacterStats() {
   const modal = typeof $ === 'function' && $('menuModal'); if (!modal || !modal.querySelector) return;
   const grid = modal.querySelector('.sheet-grid'); if (!grid || !grid.replaceWith) return;
-  const box = document.createElement('div'); box.className = 'char-stats-panel'; box.innerHTML = uiStatsHTML(); grid.replaceWith(box);
+  const html = uiStatsHTML(), cut = html.indexOf('<table');
+  const box = document.createElement('div'); box.className = 'char-stats-panel';
+  box.innerHTML = html.slice(0, cut) + '<button class="char-stats-btn" type="button">📊 Stats</button>'; grid.replaceWith(box);
+  const pop = document.createElement('div'); pop.className = 'char-stats-pop hidden'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Stats');
+  pop.innerHTML = '<div class="char-stats-card"><div class="char-stats-head"><b>📊 Stats</b><button class="char-stats-x" type="button" aria-label="Close">✕</button></div>' + html.slice(cut) + '</div>';
+  modal.append(pop);
+  const open = () => pop.classList.remove('hidden'), close = () => pop.classList.add('hidden');
+  box.querySelector('.char-stats-btn').addEventListener('click', open);
+  pop.querySelector('.char-stats-x').addEventListener('click', close);
+  pop.addEventListener('click', e => { if (e.target === pop) close(); });
+  if (!uiCharacterStats.keys && typeof document.addEventListener === 'function') { uiCharacterStats.keys = true; document.addEventListener('keydown', e => { if (e.key === 'Escape') { const p = document.querySelector('#menuModal .char-stats-pop:not(.hidden)'); if (p) { p.classList.add('hidden'); e.stopPropagation(); } } }, true); }
   for (const p of modal.querySelectorAll('p.notice')) if (/^Aetherlink:/.test(p.textContent || '')) p.remove(); // its crit and HP notes are in the table now
+}
+if (typeof document !== 'undefined' && document.createElement) {
+  const st = document.createElement('style');
+  st.textContent = '.char-stats-panel{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.char-stats-panel .char-xp{flex:1;min-width:200px}'
+    + '.char-stats-btn{padding:6px 14px;border-radius:8px;font-weight:700}'
+    + '.char-stats-pop{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:#02060ccc;padding:16px}.char-stats-pop.hidden{display:none}'
+    + '.char-stats-card{width:min(620px,100%);max-height:86vh;overflow:auto;background:#0b1622;border:1px solid #2e5566;border-radius:12px;padding:12px 14px;box-shadow:0 10px 40px #000a}'
+    + '.char-stats-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:16px}.char-stats-x{min-width:32px;padding:4px 8px}';
+  document.head.append(st);
 }
 const showCharacterBeforeStats = showCharacter;
 showCharacter = function () {
