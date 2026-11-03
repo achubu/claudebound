@@ -3503,6 +3503,9 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   glowing violet puddle (`assets/items/poi/events/conduit.webp`; the original is in `events/src/`).
 - Keyed with plain `tools/key_object.py`.
 - Checked over four grounds; `tests/event-art.test.cjs` covers it.
+- Test fix: `tests/bounty-plan.test.cjs` failed once with 48 XP where it expected 8. A Round 298 Wanted rogue had
+  landed on the tested patrol and paid its own XP on the win. It now clears `b.wanted` before the win, like
+  `pacing` and `round76`.
 
 ## Round 326: one font and one size for all text in the world
 
