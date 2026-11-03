@@ -3496,6 +3496,32 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 339: the terminal in Floodgate's factory yard is reached from the left; The Arc Sentinel and Gang Toll art; waypoint prompts
+
+- **Route fix (owner report):** in room 1,6, the terminal in the yard behind the cyan-sign factory could only be
+  reached through the building.
+  - The yard is a separate walkable pocket. `axis_bridges()` had joined it to the north street with a straight
+    corridor cut through the factory (x 675–718, y 292–375).
+  - New hand fixes in `tools/build_room_masks.py`. `BRIDGE_CUTS` removes added street inside a box (traced street is
+    kept). `STREET_LINKS` adds a corridor over open ground.
+  - For 1,6 the factory bridge and a filled strip on the next roof are removed. A 24px corridor runs from the left
+    street along the open ground between the factory and the shipping containers into the yard.
+  - Re-running the builder changed only room 1,6 (132 mask cells and its nook path). `neon-world.js?v` is bumped.
+- **Route review note (owner request):** `tools/route-review.md` lists all 38 remaining automatic bridges of 300px or
+  more in 18 rooms, to check one by one for the same problem. Nook footpaths and the tile worlds' item pads should get
+  the same pass. New `tools/nook_view.py` draws a room with its walk mask and footpaths. CLAUDE.md points to the note.
+- **The Arc Sentinel** (Vespera mini-boss): until now it borrowed the Briar Sentinel sheets, recolored. It now walks
+  in its own storm armor, with a cyan visor, a lightning blade and a violet-gemmed shield, from the owner's
+  eight-frame draft (`assets/monsters/vespera/arc-sentinel.png`, `WILDLIFE_ART.arcSentinelArt`). It walks on one
+  sheet with no separate attack or hurt poses. `SPRITE_VERSION` is now '339'.
+- The owner's **Gang Toll** replaces the shared "?" pedestal for that Neon Aftermath night event. It's a barricade of
+  tyres, crates and rusty corrugated metal with a magenta spray-painted skull, barbed wire, a toll mug and a burning
+  barrel (`events/toll.webp`, keyed with `--clear-enclosed` for the wire coils). All 24 events now have paintings.
+  The only map object still drawn as a glyph is the Vespera Storm Glyph.
+- **Waypoint prompts (owner request):** `tools/art-refresh/object-prompts.md` section 5 has one Nexus Waypoint
+  prompt per world, to replace the shared `nexus.webp`.
+- Tests: `briar-sentinel` (the Arc Sentinel's own sheet), `event-art` (toll).
+
 ## Round 338: Vespera's Thunder Mauler walks on its own sheet; the Glitched Billboard painting
 
 - **Thunder Mauler** (Vespera): until now it borrowed the Neon Aftermath Reactor Mauler sheet, recolored. It now

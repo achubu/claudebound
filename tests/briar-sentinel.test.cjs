@@ -10,7 +10,8 @@ const r = JSON.parse(run(`JSON.stringify({ html: monsterArt('vineguard'), arc: m
 assert(r.html.includes('pose-sprite') && r.html.includes('has-walk'), 'the Briar Sentinel has poses and a walk');
 assert(r.html.includes('city/briar-sentinel.png') && r.html.includes('city/briar-sentinel-walk.png'), 'it uses the new sheets');
 assert(r.html.includes('--pose-attack:66.666667%') && r.html.includes('--pose-hurt:33.333333%'), 'slash is frame 3, shield-up frame 2');
-assert(r.arc.includes('pose-sprite') && r.arc.includes('Arc Sentinel') && r.sentry, 'enemies borrowing its art animate too');
+assert(r.sentry, 'the Brass Sentry, which borrows its art, animates too');
+assert(r.arc.includes('vespera/arc-sentinel.png') && !r.arc.includes('briar-sentinel'), 'Round 339: The Arc Sentinel has its own sheet');
 assert.deepStrictEqual(r.revenant, { attack: 1, hurt: 3, walk: 'elaris/sun-revenant-walk' }, 'the Revenant keeps its poses');
 assert(r.revenantHtml.includes('sun-revenant-walk.png') && r.revenantHtml.includes('--pose-attack:33.333333%'), 'and its walk');
 for (const f of ['assets/monsters/city/briar-sentinel.png', 'assets/monsters/city/briar-sentinel-walk.png']) {

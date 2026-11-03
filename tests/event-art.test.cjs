@@ -5,7 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); const o = {};
-  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.updraft = poiArt({ type: 'event', event: 'updraft' }); o.aerie = poiArt({ type: 'event', event: 'aerie' }); o.chimes = poiArt({ type: 'event', event: 'chimes' }); o.starwell = poiArt({ type: 'event', event: 'starwell' }); o.shelter = poiArt({ type: 'event', event: 'shelter' }); o.conduit = poiArt({ type: 'event', event: 'conduit' }); o.scavenger = poiArt({ type: 'event', event: 'scavenger' }); o.prism = poiArt({ type: 'event', event: 'prism' }); o.clockmaker = poiArt({ type: 'event', event: 'clockmaker' }); o.paradoxPool = poiArt({ type: 'event', event: 'paradoxPool' }); o.sandglass = poiArt({ type: 'event', event: 'sandglass' }); o.echoes = poiArt({ type: 'event', event: 'echoes' }); o.arcade = poiArt({ type: 'event', event: 'arcade' }); o.racer = poiArt({ type: 'event', event: 'racer' }); o.billboard = poiArt({ type: 'event', event: 'billboard' }); o.toll = poiArt({ type: 'event', event: 'toll' }); o.lore = poiArt({ type: 'lore' });
+  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.updraft = poiArt({ type: 'event', event: 'updraft' }); o.aerie = poiArt({ type: 'event', event: 'aerie' }); o.chimes = poiArt({ type: 'event', event: 'chimes' }); o.starwell = poiArt({ type: 'event', event: 'starwell' }); o.shelter = poiArt({ type: 'event', event: 'shelter' }); o.conduit = poiArt({ type: 'event', event: 'conduit' }); o.scavenger = poiArt({ type: 'event', event: 'scavenger' }); o.prism = poiArt({ type: 'event', event: 'prism' }); o.clockmaker = poiArt({ type: 'event', event: 'clockmaker' }); o.paradoxPool = poiArt({ type: 'event', event: 'paradoxPool' }); o.sandglass = poiArt({ type: 'event', event: 'sandglass' }); o.echoes = poiArt({ type: 'event', event: 'echoes' }); o.arcade = poiArt({ type: 'event', event: 'arcade' }); o.racer = poiArt({ type: 'event', event: 'racer' }); o.billboard = poiArt({ type: 'event', event: 'billboard' }); o.toll = poiArt({ type: 'event', event: 'toll' }); o.noArt = poiArt({ type: 'event', event: 'noSuchEvent' }); o.lore = poiArt({ type: 'lore' });
   configureRegion('wilds'); o.wildsTerminal = poiArt({ type: 'event', event: 'terminal' });
   configureRegion('elaris'); o.solSpring = poiArt({ type: 'event', event: 'spring' });
   configureRegion('city'); return JSON.stringify(o); })()`));
@@ -34,7 +34,7 @@ assert.strictEqual(r.echoes, 'events/echoes', 'Round 333: the Echoing Corridor u
 assert.strictEqual(r.arcade, 'events/arcade', 'Round 336: the Arcade Cabinet uses its painting');
 assert.strictEqual(r.racer, 'events/racer', 'Round 337: the Drone Racers use their painting');
 assert.strictEqual(r.billboard, 'events/billboard', 'Round 338: the Glitched Billboard uses its painting');
-assert.strictEqual(r.toll, 'event', 'events without a painting keep the shared one');
+assert.strictEqual(r.toll, 'events/toll', 'Round 339: the Gang Toll uses its painting');
 assert.strictEqual(r.lore, 'terminal', 'the city lore terminal is unchanged');
 const ids = JSON.parse(run('JSON.stringify(EVENT_ART)'));
 const known = JSON.parse(run('JSON.stringify(Object.keys(EVENTS))'));
@@ -42,4 +42,5 @@ for (const id of ids) {
   assert(known.includes(id), id + ' is a real event');
   assert.strictEqual(fs.readFileSync('assets/items/poi/events/' + id + '.webp').toString('ascii', 0, 4), 'RIFF', id + ' is a WebP image');
 }
+assert.strictEqual(r.noArt, 'event', 'an event without a painting keeps the shared one');
 console.log('event-art ok');

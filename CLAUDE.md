@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 338) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 339) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -67,6 +67,9 @@ change set.
     Crossings to or from these rooms are loose: any street reaching the edge
     lands on the nearest street across (`neonLandingFrom`). Rooms without an
     image use the old district slices.
+  - Round 339: `BRIDGE_CUTS` / `STREET_LINKS` in `tools/build_room_masks.py` are hand fixes for automatic bridges that
+    run through buildings; `tools/nook_view.py` draws a room with its walk mask and footpaths. **Open owner note:**
+    recheck every route for this problem, starting with the list in `tools/route-review.md`.
   - Round 101+: each painted room also lists hand-checked open-ground spots
     beside the street (`NOOKS` in the build tool), each with a footpath.
     Chests, relics and points of interest stand there as small markers. When
@@ -90,7 +93,7 @@ change set.
   they stand on the walkable ground 22–40px inside its edge instead (Round 212, `itemsOnGround()`). Round 232: in the tile worlds
   they stand in hand-picked open squares beside the road first (`tools/plazas.py`, opened up to the walk mask by the builders;
   `assets/plazas.js`). When adding tile paintings, pick 2-3 such spots for each in `PLAZAS` and rebuild. Enemies and bosses stand on paths. On a tap route only
-  the tapped item opens (Round 184). Map-object paintings (Cardsmiths, lore stones, events: `WORLD_POI_ART` and `EVENT_ART` in `assets/cardsmith.js`, Rounds 307–338) are keyed off green with `tools/key_object.py` (`--keep-green` for art with real greens,
+  the tapped item opens (Round 184). Map-object paintings (Cardsmiths, lore stones, events: `WORLD_POI_ART` and `EVENT_ART` in `assets/cardsmith.js`, Rounds 307–339) are keyed off green with `tools/key_object.py` (`--keep-green` for art with real greens,
   `--clear-enclosed` when glow-tinted background is trapped inside the art, `--warm-olive` for see-through parts that
   key to olive). Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
   movement uses (`collides()`), so placement code must keep using `walkable()`/`NeonCity.blocked`.

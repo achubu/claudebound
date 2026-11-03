@@ -84,7 +84,7 @@ through `WORLD_POI_ART.city`); events go in `events/` (wired through `EVENT_ART`
 | `events/arcade` ✅ done (Round 336) | Arcade Cabinet | A rain-soaked retro arcade cabinet with a glowing screen and joystick under a scrap awning. |
 | `events/racer` ✅ done (Round 337) | Drone Racers | Two small scrap racing drones on a chalk-marked start line, a battered trophy and a crate. |
 | `events/billboard` ✅ done (Round 338) | Glitched Billboard | A small standing digital billboard with a glitching, pixel-scrambled screen. |
-| `events/toll` | Gang Toll | A road barricade of tyres, crates and barbed wire with a spray-painted skull and a tin toll cup. |
+| `events/toll` ✅ done (Round 339) | Gang Toll | A road barricade of tyres, crates and barbed wire with a spray-painted skull and a tin toll cup. |
 
 ## 3. Optional: world variants of shared objects
 
@@ -105,7 +105,6 @@ has a painting except:
 | Still a glyph or the shared image | Where |
 |---|---|
 | Storm Glyph lore stone (`vespera-lore.webp`), drawn as ϟ | Vespera (5 spots) |
-| Gang Toll event (shared "?" pedestal) | Neon Aftermath |
 
 Shared on purpose, so optional (see section 3):
 - The hidden loot chest (`loot-chest.png`) in five worlds; Solaris has its own.
@@ -118,7 +117,7 @@ Shared on purpose, so optional (see section 3):
 
 | Sheet | Borrowed by |
 |---|---|
-| `city/briar-sentinel-walk` | The Arc Sentinel (Vespera mini-boss), Brass Sentry (Chronospire) |
+| `city/briar-sentinel-walk` | Brass Sentry (Chronospire); The Arc Sentinel has its own since Round 339 |
 | `city/crown-observer` | The Clockwarden (Chronospire) |
 | `city/data-wisp` | Rust Wisp (Chronospire); Arc Wisp has its own since Round 336 |
 | `city/phase-shade` | The Resonant Phantom (Vespera mini-boss), Lag Wraith, The Paradox Twin (Chronospire) |
@@ -128,4 +127,18 @@ Shared on purpose, so optional (see section 3):
 | `elaris/drowned-heron` | Hourglass Heron (Chronospire); The Tidebound Warden (Elaris mini-boss, not recolored) |
 | `elaris/storm-moth` | Tick Moth (Chronospire); The Gale Sovereign (Elaris mini-boss, not recolored) |
 | `reactor-mauler` | Cog Mauler (Chronospire); Thunder Mauler has its own since Round 338 |
+
+## 5. Nexus Waypoints, one per world (owner request, Round 339)
+
+Every world uses the same `nexus.webp`. Each world gets its own, wired through `WORLD_POI_ART.<world>.nexus`
+(`assets/items/poi/<world>-nexus.webp`). Use the shared style lines above, with a green background.
+
+| File | World | Subject |
+|---|---|---|
+| `city-nexus.webp` | Neon Aftermath | A waist-high cyberpunk teleport pad: a round scrap-metal platform ringed with cyan neon tubing, with a holographic ring of glowing cyan glyphs spinning in the air above it, cables snaking from its base into cracked asphalt, and a small flickering control post beside it. |
+| `elaris-nexus.webp` | Solaris | A sun-temple waypoint: a round sandstone dais with a carved golden sunburst inlaid in its floor, two short obelisks with glowing amber hieroglyph-like runes at its sides, and a warm golden beam of light rising from the centre, with sand drifting across the steps. |
+| `sky-nexus.webp` | Sky Isles | A floating sky-shrine waypoint: a round white marble platform with brass rails hovering over a small cloud, with three tall curved brass vanes around it and a pale-blue swirling wind portal glowing between them, plus feathers and wisps of cloud circling it. |
+| `wilds-nexus.webp` | Elaris (forest) | A druidic forest waypoint: a ring of mossy standing stones around a flat stone disc carved with a glowing green spiral, with roots and ferns at its base, fireflies, and a soft column of green light rising from the spiral. |
+| `vespera-nexus.webp` | Vespera | A storm-coast waypoint: a round slate platform on wet black rock, ringed by three iron lightning rods, with a crackling ring of violet lightning hovering above its centre and rain-slick stone reflecting the violet glow. |
+| `chronospire-nexus.webp` | Chronospire | A clockwork waypoint: a round bronze-and-marble platform inlaid with a large clock face, two interlocking golden gear rings slowly turning upright above it, and an amber light shimmering through their middle, with sand motes drifting upward. |
 
