@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 324: the Starwell gets its painting
+
+- The owner's **Starwell** replaces the shared "?" pedestal for that Sky Isles event: a round marble pool with gold
+  and silver rims on a floating rock wrapped in cloud. Its water shows a midnight sky with stars and a violet nebula,
+  and star motes rise from it (`assets/items/poi/events/starwell.webp`; the original is in `events/src/`). All four
+  Sky Isles events now have paintings.
+- Keyed with plain `tools/key_object.py`.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 323: the Singing Chimes get their painting
 
 - The owner's **Singing Chimes** replace the shared "?" pedestal for that Sky Isles event: a bleached-white dead tree

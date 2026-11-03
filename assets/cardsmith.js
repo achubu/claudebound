@@ -119,7 +119,7 @@ if (typeof poiArt === 'function') {
   poiArt = function (p) { const w = WORLD_POI_ART[activeRegion]; return (w && p && w[p.type]) || poiArtBeforeWorlds(p); };
 }
 // Round 314: events get one painting each (assets/items/poi/events/<id>.webp), in whatever world they appear.
-const EVENT_ART = ['terminal', 'medic', 'vending', 'courier', 'spring', 'ranger', 'seedpod', 'vines', 'updraft', 'aerie', 'chimes'];
+const EVENT_ART = ['terminal', 'medic', 'vending', 'courier', 'spring', 'ranger', 'seedpod', 'vines', 'updraft', 'aerie', 'chimes', 'starwell'];
 if (typeof poiArt === 'function') {
   const poiArtBeforeEvents = poiArt;
   poiArt = function (p) { return (p && p.type === 'event' && EVENT_ART.indexOf(p.event) >= 0 && 'events/' + p.event) || poiArtBeforeEvents(p); };
