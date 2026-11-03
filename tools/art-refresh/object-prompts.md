@@ -81,7 +81,7 @@ through `WORLD_POI_ART.city`); events go in `events/` (wired through `EVENT_ART`
 | `city-wanted-board.webp` ✅ done (Round 333) | Wanted Board | A scrap-metal notice board on rusty legs under a dented awning with a red neon strip, three wanted posters with red X stamps. |
 | `city-breaker.webp` ✅ done (Round 334) | Breaker Box (3) | A dented utility breaker cabinet on a pole, door hanging open on a big lever switch, sparking fuses and thick cables. |
 | `city-vault.webp` ✅ done (Round 335) | Afterlight Vault | A heavy round vault door set into a concrete wall, glowing cyan seams and a dead keypad, locked until the breakers are on. |
-| `events/arcade` | Arcade Cabinet | A rain-soaked retro arcade cabinet with a glowing screen and joystick under a scrap awning. |
+| `events/arcade` ✅ done (Round 336) | Arcade Cabinet | A rain-soaked retro arcade cabinet with a glowing screen and joystick under a scrap awning. |
 | `events/racer` | Drone Racers | Two small scrap racing drones on a chalk-marked start line, a battered trophy and a crate. |
 | `events/billboard` | Glitched Billboard | A small standing digital billboard with a glitching, pixel-scrambled screen. |
 | `events/toll` | Gang Toll | A road barricade of tyres, crates and barbed wire with a spray-painted skull and a tin toll cup. |
@@ -96,3 +96,36 @@ through `WORLD_POI_ART.city`); events go in `events/` (wired through `EVENT_ART`
 
 Once images are delivered they need wiring in (`POI_ART` / `SOLARIS_POI_ART` in `assets/pickups.js` and
 `assets/cardsmith.js`, plus a per-event and per-world lookup).
+
+## 4. Audit (Round 336): everything on the map, checked in every room of all six worlds
+
+A Chromium pass rendered every room of every world and recorded each interactable and how it is drawn. Everything
+has a painting except:
+
+| Still a glyph or the shared image | Where |
+|---|---|
+| Storm Glyph lore stone (`vespera-lore.webp`), drawn as ϟ | Vespera (5 spots) |
+| Drone Racers, Glitched Billboard, Gang Toll events (shared "?" pedestal) | Neon Aftermath |
+
+Shared on purpose, so optional (see section 3):
+- The hidden loot chest (`loot-chest.png`) in five worlds; Solaris has its own.
+- The merchant (`merchant.webp`) in five worlds; Solaris has its own.
+- The world portal (`elaris-portal.png`) in four worlds.
+- The shrine, campfire, cache, sealed cache and Nexus Waypoint images, one each across all worlds.
+- The twelve gear relics each have their own image (`assets/items/gear/`), and none are broken.
+
+### Creatures that still borrow another creature's sheet (recolored)
+
+| Sheet | Borrowed by |
+|---|---|
+| `city/briar-sentinel-walk` | The Arc Sentinel (Vespera mini-boss), Brass Sentry (Chronospire) |
+| `city/crown-observer` | The Clockwarden (Chronospire) |
+| `city/data-wisp` | Rust Wisp (Chronospire) |
+| `city/phase-shade` | The Resonant Phantom (Vespera mini-boss), Lag Wraith, The Paradox Twin (Chronospire) |
+| `elaris/blight-antler` | Pendulum Stag (Chronospire) |
+| `elaris/bloom-tyrant` | The Tempest Colossus (Vespera boss), The Chronarch (Chronospire boss) |
+| `elaris/cinder-fox` | Gearhound (Chronospire) |
+| `elaris/drowned-heron` | Hourglass Heron (Chronospire); The Tidebound Warden (Elaris mini-boss, not recolored) |
+| `elaris/storm-moth` | Tick Moth (Chronospire); The Gale Sovereign (Elaris mini-boss, not recolored) |
+| `reactor-mauler` | Thunder Mauler (Vespera), Cog Mauler (Chronospire) |
+
