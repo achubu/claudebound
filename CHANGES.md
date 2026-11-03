@@ -3518,7 +3518,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
     - The vault avoids the start room's waypoint, merchant and Cardsmith.
   - Set switches and an emptied vault count as used, so they're dimmed in the room and on the map. Their names show
     progress ("Sunvault · 1/3").
-  - Progress is saved per world (`state.worldRelays`).
+  - Progress is saved per world (`state.worldRelays`). It is only written when you use a switch or the vault; just
+    drawing the world doesn't touch the save (caught by `save-roundtrip`).
   - The switches and vaults also show as small icons on the map (`mapRoomObjects`).
   - They are drawn as glyphs until painted; `object-prompts.md` section 8 has a prompt for each of the 10 objects.
 - **Map diagonals (owner: "they don't quite line up"):**

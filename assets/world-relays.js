@@ -46,8 +46,11 @@ const WORLD_RELAYS = {
 const RELAY_TYPES = {};
 for (const [w, d] of Object.entries(WORLD_RELAYS)) { POI_INFO[d.sw.type] = { icon: d.sw.icon, name: d.sw.name }; POI_INFO[d.vault.type] = { icon: d.vault.icon, name: d.vault.name }; RELAY_TYPES[d.sw.type] = w; RELAY_TYPES[d.vault.type] = w; }
 
-function worldRelayState(world = activeRegion) {
+// Reading never writes to the save (so drawing the world doesn't change it); pass create to start this world's entry.
+function worldRelayState(world = activeRegion, create) {
   if (!state || !WORLD_RELAYS[world]) return null;
+  const saved = state.worldRelays && typeof state.worldRelays === 'object' && state.worldRelays[world];
+  if (!saved && !create) return { on: [], vault: false };
   const all = state.worldRelays && typeof state.worldRelays === 'object' ? state.worldRelays : (state.worldRelays = {});
   const s = all[world] && typeof all[world] === 'object' ? all[world] : (all[world] = {});
   if (!Array.isArray(s.on)) s.on = []; s.vault = !!s.vault;
@@ -114,7 +117,7 @@ poiNode = function (p) {
 };
 function relayMenu(title, body, buttons) { poiMenu(title, body, buttons.concat([{ id: 'relayLeave', label: 'Leave', onclick: closeMenu }])); }
 function openRelay(p) {
-  const d = WORLD_RELAYS[activeRegion], s = worldRelayState(); if (!d || !s) return;
+  const d = WORLD_RELAYS[activeRegion], s = worldRelayState(activeRegion, true); if (!d || !s) return;
   const title = d.sw.icon + ' ' + d.sw.name;
   if (s.on.includes(p.index)) return relayMenu(title, '<p>' + d.onText + '. <b>' + s.on.length + '/3</b> ' + d.grid + '.</p>', []);
   relayMenu(title, '<p>' + d.swText + '</p><p class="muted">' + s.on.length + '/3 ' + d.grid + '. All three open the ' + d.vault.name + ' at ' + d.home + '.</p>',
@@ -129,7 +132,7 @@ function relayVaultCard(world = activeRegion) {
   return pool.length ? pool[hashSeed(state.seed + 'relayVault' + world) % pool.length] : null;
 }
 function openRelayVault() {
-  const d = WORLD_RELAYS[activeRegion], s = worldRelayState(); if (!d || !s) return;
+  const d = WORLD_RELAYS[activeRegion], s = worldRelayState(activeRegion, true); if (!d || !s) return;
   const shut = d.vault.icon + ' ' + d.vault.name;
   if (s.vault) return relayMenu(shut, '<p>It stands open and empty. You took what was left.</p>', []);
   if (s.on.length < 3) return relayMenu(shut, '<p>' + d.lockedText + '</p><p class="notice"><b>' + s.on.length + '/3</b> ' + d.grid + '. Look for the ' + d.sw.name + 's (' + d.sw.icon + ') out in the world.</p>', []);
