@@ -5,7 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); const o = {};
-  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.updraft = poiArt({ type: 'event', event: 'updraft' }); o.aerie = poiArt({ type: 'event', event: 'aerie' }); o.chimes = poiArt({ type: 'event', event: 'chimes' }); o.starwell = poiArt({ type: 'event', event: 'starwell' }); o.lore = poiArt({ type: 'lore' });
+  configureRegion('city'); o.terminal = poiArt({ type: 'event', event: 'terminal' }); o.medic = poiArt({ type: 'event', event: 'medic' }); o.vending = poiArt({ type: 'event', event: 'vending' }); o.courier = poiArt({ type: 'event', event: 'courier' }); o.spring = poiArt({ type: 'event', event: 'spring' }); o.ranger = poiArt({ type: 'event', event: 'ranger' }); o.seedpod = poiArt({ type: 'event', event: 'seedpod' }); o.vines = poiArt({ type: 'event', event: 'vines' }); o.updraft = poiArt({ type: 'event', event: 'updraft' }); o.aerie = poiArt({ type: 'event', event: 'aerie' }); o.chimes = poiArt({ type: 'event', event: 'chimes' }); o.starwell = poiArt({ type: 'event', event: 'starwell' }); o.shelter = poiArt({ type: 'event', event: 'shelter' }); o.lore = poiArt({ type: 'lore' });
   configureRegion('wilds'); o.wildsTerminal = poiArt({ type: 'event', event: 'terminal' });
   configureRegion('elaris'); o.solSpring = poiArt({ type: 'event', event: 'spring' });
   configureRegion('city'); return JSON.stringify(o); })()`));
@@ -22,7 +22,8 @@ assert.strictEqual(r.vines, 'events/vines', 'Round 321: the Strangling Vines use
 assert.strictEqual(r.updraft, 'events/updraft', 'Round 322: the Updraft Well uses its painting');
 assert.strictEqual(r.aerie, 'events/aerie', 'Round 322: the Abandoned Aerie uses its painting');
 assert.strictEqual(r.chimes, 'events/chimes', 'Round 323: the Singing Chimes use their painting');
-assert.strictEqual(r.starwell, 'event', 'events without a painting keep the shared one');
+assert.strictEqual(r.starwell, 'events/starwell', 'Round 324: the Starwell uses its painting');
+assert.strictEqual(r.shelter, 'event', 'events without a painting keep the shared one');
 assert.strictEqual(r.lore, 'terminal', 'the city lore terminal is unchanged');
 const ids = JSON.parse(run('JSON.stringify(EVENT_ART)'));
 const known = JSON.parse(run('JSON.stringify(Object.keys(EVENTS))'));
