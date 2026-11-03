@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 333: Vespera's Brinewing Heron walks on its own sheet; the Echoing Corridor and Wanted Board paintings
+
+- **Brinewing Heron** (Vespera): until now it borrowed the Elaris Drowned Heron sheet. It now has its own four-frame
+  walk (`assets/monsters/vespera/brinewing-heron.png`, `WILDLIFE_ART.brinewingHeron`, cycle `.8s`, `tint:'none'`):
+  - The source is the owner's draft of eight 704px frames, a storm-coast heron with crystal shoulders and
+    drip-tipped plumage.
+  - Built like the Tempest Moth: haze under alpha 16 and specks dropped, frames 1, 3, 5 and 7 in one shared window,
+    gutters padded. The eight-frame strip is kept in `src/`.
+  - `SPRITE_VERSION` is now '333'.
+- The owner's **Echoing Corridor** replaces the shared "?" pedestal for that Chronospire event. It's a white marble
+  arch with a clock keystone and a golden swirl inside, with four fading copies of the arch behind it
+  (`events/echoes.webp`). All 20 events from the Round 290 list now have paintings.
+  - The see-through echoes were painted over the green and keyed to olive.
+  - New `tools/key_object.py` option `--warm-olive` shifts olive-coloured pixels to warm amber at the same
+    brightness. The echoes now fade in amber as the prompt intended, and the rest of the painting is untouched.
+  - Keyed with `--clear-enclosed --warm-olive`.
+- The owner's **Wanted Board** (Neon Aftermath, Round 298) replaces its 📋 glyph. It's a scrap-metal board on rusty
+  legs under a dented awning with a red neon strip, three wanted posters with red X stamps, and a puddle reflecting
+  the neon (`WORLD_POI_ART.city.wantedBoard`, `assets/items/poi/city-wanted-board.webp`).
+- `tools/art-refresh/object-prompts.md` gains a section for the Round 298 city-night objects, which were made after
+  the Round 290 list: the Breaker Box, Afterlight Vault and four city events still need paintings.
+- Tests: `forest-anim` (heron sheet), `event-art` (echoes) and `city-cardsmith-art` (Wanted Board; the Vault keeps
+  its glyph for now).
+
 ## Round 332: Vespera's Tempest Moth flies on its own sheet; the Giant Hourglass painting
 
 - **Tempest Moth** (Vespera): until now it borrowed the Elaris Storm Moth sheet, recolored. It now has its own

@@ -1,5 +1,5 @@
-# Key a painted map object off a bright green background (Rounds 307-323).
-# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--keep-green [--despill-circle=x,y,r]] [--clear-enclosed]   (greenness fades from opaque at lo to clear at hi; default 90 170)
+# Key a painted map object off a bright green background (Rounds 307-333).
+# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--keep-green [--despill-circle=x,y,r]] [--clear-enclosed] [--warm-olive]   (greenness fades from opaque at lo to clear at hi; default 90 170)
 # Green is capped at max(red, blue) everywhere (despill), green patches the background does not reach stay opaque
 # when their colour differs from the background (Round 317: holes in the art, same colour as the background, still clear;
 # Round 318: judged by median colour, patches of 200px or more),
@@ -8,10 +8,11 @@ import sys
 from PIL import Image
 import numpy as np
 from scipy import ndimage
-keep_green = '--keep-green' in sys.argv; circle = None; clear_enclosed = False; args = []
+keep_green = '--keep-green' in sys.argv; circle = None; clear_enclosed = False; warm_olive = False; args = []
 for x in sys.argv[1:]:
     if x == '--keep-green': continue
     if x == '--clear-enclosed': clear_enclosed = True; continue
+    if x == '--warm-olive': warm_olive = True; continue
     if x.startswith('--despill-circle='): circle = [float(v) for v in x.split('=', 1)[1].split(',')]; continue
     args.append(x)
 src, out_path = args[0], args[1]; lo = float(args[2]) if len(args) > 2 else 90; hi = float(args[3]) if len(args) > 3 else 170
@@ -38,6 +39,12 @@ alpha = np.where(grown, 1, alpha); g2 = np.where(grown, g, g2)
 o = Image.fromarray(np.dstack([r, g2, b, alpha * 255]).clip(0, 255).astype(np.uint8), 'RGBA')
 bb = o.getchannel('A').point(lambda v: 255 if v > 60 else 0).getbbox(); o = o.crop(bb)
 w, h = o.size; s = 256 / max(w, h); o = o.resize((round(w * s), round(h * s)), Image.LANCZOS)
+if warm_olive:  # Round 333: translucent parts painted over green key to olive; shift them to warm amber at the same brightness
+    q = np.asarray(o).astype(np.float32); qr, qg, qb = q[..., 0], q[..., 1], q[..., 2]
+    ol = np.clip((qg - qb - 25) / 30, 0, 1) * np.clip(1 - (qr - qg) / 28, 0, 1) * np.clip(1 - (qg - qr) / 40, 0, 1)
+    lum = (0.299 * qr + 0.587 * qg + 0.114 * qb)[..., None]; w = (ol * 0.9)[..., None]
+    q[..., :3] = q[..., :3] * (1 - w) + np.clip(lum * np.array([1.22, 0.97, 0.70]), 0, 255) * w
+    o = Image.fromarray(q.astype(np.uint8), 'RGBA')
 o.save(out_path, quality=92, method=6); print('bbox', bb, 'size', o.size)
 grounds = [(30, 40, 60), (200, 190, 170), (150, 215, 235), (60, 95, 50)]
 prev = Image.new('RGBA', (len(grounds) * (o.width + 10) + 10, o.height + 20), (0, 0, 0, 255))

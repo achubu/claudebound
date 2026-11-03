@@ -113,13 +113,13 @@ if (typeof poiArt === 'function') {
   poiArt = function (p) { return (activeRegion === 'elaris' && p && SOLARIS_POI_ART[p.type]) || poiArtBeforeSolaris(p); };
 }
 // Round 307: per-world object art (the owner's paintings), one entry per world and type. Solaris's set is above.
-const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore' }, chronospire: { cardsmith: 'chronospire-cardsmith', lore: 'chronospire-lore' }, vespera: { cardsmith: 'vespera-cardsmith' } };
+const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith', wantedBoard: 'city-wanted-board' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore' }, chronospire: { cardsmith: 'chronospire-cardsmith', lore: 'chronospire-lore' }, vespera: { cardsmith: 'vespera-cardsmith' } };
 if (typeof poiArt === 'function') {
   const poiArtBeforeWorlds = poiArt;
   poiArt = function (p) { const w = WORLD_POI_ART[activeRegion]; return (w && p && w[p.type]) || poiArtBeforeWorlds(p); };
 }
 // Round 314: events get one painting each (assets/items/poi/events/<id>.webp), in whatever world they appear.
-const EVENT_ART = ['terminal', 'medic', 'vending', 'courier', 'spring', 'ranger', 'seedpod', 'vines', 'updraft', 'aerie', 'chimes', 'starwell', 'shelter', 'conduit', 'scavenger', 'prism', 'clockmaker', 'paradoxPool', 'sandglass'];
+const EVENT_ART = ['terminal', 'medic', 'vending', 'courier', 'spring', 'ranger', 'seedpod', 'vines', 'updraft', 'aerie', 'chimes', 'starwell', 'shelter', 'conduit', 'scavenger', 'prism', 'clockmaker', 'paradoxPool', 'sandglass', 'echoes'];
 if (typeof poiArt === 'function') {
   const poiArtBeforeEvents = poiArt;
   poiArt = function (p) { return (p && p.type === 'event' && EVENT_ART.indexOf(p.event) >= 0 && 'events/' + p.event) || poiArtBeforeEvents(p); };
