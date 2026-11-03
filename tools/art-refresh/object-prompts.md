@@ -37,7 +37,7 @@ A single generic `cardsmith.webp` would cover all five. One per world fits each 
 |---|---|---|---|
 | `sky-lore.webp` ✅ done (Round 310) | Sky Isles | Wind Chime | A tall white stone post on a small cloud-edged rock, hung with long glass and brass wind chimes, faint glowing runes along the post, ribbons streaming sideways in the wind. |
 | `wilds-lore.webp` ✅ done (Round 311) | Elaris (forest) | Elder Stone | An ancient standing stone covered in moss and carved glowing green runes, roots curling around its base, small mushrooms and fireflies. |
-| `vespera-lore.webp` | Vespera | Storm Glyph | A dark slate obelisk on wet rock with a large carved lightning glyph glowing electric violet, small arcs of lightning crawling over it, rain-slick surface. |
+| `vespera-lore.webp` ✅ done (Round 341) | Vespera | Storm Glyph | A dark slate obelisk on wet rock with a large carved lightning glyph glowing electric violet, small arcs of lightning crawling over it, rain-slick surface. |
 | `chronospire-lore.webp` ✅ done (Round 311) | Chronospire | Chrono Inscription | A bronze-and-marble plaque on a short pedestal, engraved with a clock face and glowing amber script, a small floating hourglass above it, drifting golden sand motes. |
 
 ## 2. Sharing one generic image (`event.webp`, a "?" pedestal)
@@ -104,7 +104,6 @@ has a painting except:
 
 | Still a glyph or the shared image | Where |
 |---|---|
-| Storm Glyph lore stone (`vespera-lore.webp`), drawn as ϟ | Vespera (5 spots) |
 
 Shared on purpose, so optional (see section 3):
 - The hidden loot chest (`loot-chest.png`) in five worlds; Solaris has its own.
@@ -123,7 +122,7 @@ Shared on purpose, so optional (see section 3):
 | `city/phase-shade` | The Resonant Phantom (Vespera mini-boss), Lag Wraith, The Paradox Twin (Chronospire) |
 | `elaris/blight-antler` | Pendulum Stag (Chronospire) |
 | `elaris/bloom-tyrant` | The Chronarch (Chronospire boss); The Tempest Colossus has its own since Round 340 |
-| `elaris/cinder-fox` | Gearhound (Chronospire) |
+| `elaris/cinder-fox` | none since Round 341 (the Gearhound has its own) |
 | `elaris/drowned-heron` | Hourglass Heron (Chronospire); The Tidebound Warden (Elaris mini-boss, not recolored) |
 | `elaris/storm-moth` | Tick Moth (Chronospire); The Gale Sovereign (Elaris mini-boss, not recolored) |
 | `reactor-mauler` | Cog Mauler (Chronospire); Thunder Mauler has its own since Round 338 |
@@ -137,8 +136,21 @@ Every world uses the same `nexus.webp`. Each world gets its own, wired through `
 |---|---|---|
 | `city-nexus.webp` ✅ done (Round 340) | Neon Aftermath | A waist-high cyberpunk teleport pad: a round scrap-metal platform ringed with cyan neon tubing, with a holographic ring of glowing cyan glyphs spinning in the air above it, cables snaking from its base into cracked asphalt, and a small flickering control post beside it. |
 | `elaris-nexus.webp` | Solaris | A sun-temple waypoint: a round sandstone dais with a carved golden sunburst inlaid in its floor, two short obelisks with glowing amber hieroglyph-like runes at its sides, and a warm golden beam of light rising from the centre, with sand drifting across the steps. |
-| `sky-nexus.webp` | Sky Isles | A floating sky-shrine waypoint: a round white marble platform with brass rails hovering over a small cloud, with three tall curved brass vanes around it and a pale-blue swirling wind portal glowing between them, plus feathers and wisps of cloud circling it. |
-| `wilds-nexus.webp` | Elaris (forest) | A druidic forest waypoint: a ring of mossy standing stones around a flat stone disc carved with a glowing green spiral, with roots and ferns at its base, fireflies, and a soft column of green light rising from the spiral. |
-| `vespera-nexus.webp` | Vespera | A storm-coast waypoint: a round slate platform on wet black rock, ringed by three iron lightning rods, with a crackling ring of violet lightning hovering above its centre and rain-slick stone reflecting the violet glow. |
+| `sky-nexus.webp` ✅ done (Round 341) | Sky Isles | A floating sky-shrine waypoint: a round white marble platform with brass rails hovering over a small cloud, with three tall curved brass vanes around it and a pale-blue swirling wind portal glowing between them, plus feathers and wisps of cloud circling it. |
+| `wilds-nexus.webp` ✅ done (Round 341) | Elaris (forest) | A druidic forest waypoint: a ring of mossy standing stones around a flat stone disc carved with a glowing green spiral, with roots and ferns at its base, fireflies, and a soft column of green light rising from the spiral. |
+| `vespera-nexus.webp` ✅ done (Round 341) | Vespera | A storm-coast waypoint: a round slate platform on wet black rock, ringed by three iron lightning rods, with a crackling ring of violet lightning hovering above its centre and rain-slick stone reflecting the violet glow. |
 | `chronospire-nexus.webp` | Chronospire | A clockwork waypoint: a round bronze-and-marble platform inlaid with a large clock face, two interlocking golden gear rings slowly turning upright above it, and an amber light shimmering through their middle, with sand motes drifting upward. |
+
+## 6. Hidden loot chests, one per world (optional, Round 341)
+
+Wired through `WORLD_CHEST_ART` in `assets/cardsmith.js` (`assets/items/poi/<world>-chest.webp`, a CSS rule per world).
+Solaris already has `sol-chest.webp`.
+
+| File | World | Subject |
+|---|---|---|
+| `city-chest.webp` | Neon Aftermath | A dented steel strongbox salvaged from the ruins, lid open a crack on cyan light, coins and a crystal, hazard tape and a blinking pink keypad, on wet cracked asphalt. |
+| `sky-chest.webp` ✅ done (Round 341) | Sky Isles | A white-washed wooden chest bound in brass with feather hinges and a wind rune, on a puff of cloud, pale-blue light and coins inside, a ribbon streaming in the wind. |
+| `wilds-chest.webp` | Elaris (forest) | A moss-covered wooden chest bound in roots and old iron, lid open a crack on green-gold light and coins, ferns and mushrooms around it. |
+| `vespera-chest.webp` | Vespera | A barnacled sea chest of dark wood and iron washed up on wet black rock, violet light and coins inside, a coil of rope and a few shells. |
+| `chronospire-chest.webp` | Chronospire | A bronze clockwork chest with gear hinges and a small clock-face lock, amber light and coins inside, on a marble tile with sand grains. |
 

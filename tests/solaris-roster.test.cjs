@@ -24,7 +24,7 @@ assert(r.bossArt.includes('aria-label="The Sun Pharaoh"') && r.foxArt.includes('
 assert(/Sun Pharaoh|Cistern Warden/.test(r.objective), 'the objective names the new enemies (Round 176: their gear first)');
 // Other worlds borrow art-only keys, so Solaris art can change without touching them.
 for (const a of r.borrowers) assert(!['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth', 'bloomTyrant'].includes(a), 'borrows a Solaris id: ' + a);
-assert(r.vespFox.includes('vespera/static-fox.png') && r.chronoHound.includes('cinder-fox.png'), 'Round 305: Vespera has its own Static Fox; Chronospire keeps the fox sheet');
+assert(r.vespFox.includes('vespera/static-fox.png') && r.chronoHound.includes('chronospire/gearhound.png'), 'Round 305: Vespera has its own Static Fox; Chronospire keeps the fox sheet');
 assert(r.chronarch.includes('bloom-tyrant.png'), 'Chronospire keeps the old boss sheet');
 assert(r.vespBoss.includes('vespera/tempest-colossus.png') && r.vespBoss.includes('bloom-tyrant'), 'Round 340: the Tempest Colossus has its own sheet, drawn in the big boss box');
 assert(r.vespFox.includes('aria-label="Static Fox"') && r.vespBoss.includes('aria-label="The Tempest Colossus"'));
