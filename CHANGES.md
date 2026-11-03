@@ -3496,6 +3496,28 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 336: Vespera's Arc Wisp glides on its own sheet; the Arcade Cabinet painting; an audit of all map art
+
+- **Arc Wisp** (Vespera): until now it borrowed the Neon Aftermath Data Wisp sheet. It now has its own four-frame
+  glide (`assets/monsters/vespera/arc-wisp.png`, `WILDLIFE_ART.arcWisp`, cycle `.8s`, `tint:'none'`):
+  - The source is the owner's draft of eight 704px frames, a blue-white core ringed by bronze arc plates in a violet
+    storm flame with cyan data glyphs.
+  - Built like the other Vespera creatures. The eight-frame strip is kept in `src/`.
+  - `SPRITE_VERSION` is now '336'.
+- The owner's **Arcade Cabinet** replaces the shared "?" pedestal for that Neon Aftermath night event. It's a
+  battered cabinet with a magenta spaceship screen under a dripping scrap awning, with peeling stickers, glowing coin
+  slots and a puddle reflecting the screen (`events/arcade.webp`).
+- **Audit (owner request):** a Chromium pass rendered every room of all six worlds and recorded each interactable
+  and how it is drawn. Results are in `tools/art-refresh/object-prompts.md` section 4. Still missing:
+  - the Vespera Storm Glyph lore stone;
+  - three city events (Drone Racers, Glitched Billboard, Gang Toll).
+  - Every gear relic image loads.
+  - The chest, merchant and portal are shared on purpose (optional variants).
+- The audit also lists the 14 enemies, bosses included, that still borrow another creature's sheet, mostly recolored
+  for Chronospire. The Elaris mini-bosses The Tidebound Warden and The Gale Sovereign use the Drowned Heron and Storm
+  Moth sheets unchanged.
+- Tests: `forest-anim` (wisp sheet), `event-art` (arcade).
+
 ## Round 335: Vespera's Rimeglass Stag walks on its own sheet; the Afterlight Vault painting
 
 - **Rimeglass Stag** (Vespera): until now it borrowed the Elaris Blight Antler sheet. It now has its own four-frame
