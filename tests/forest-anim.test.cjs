@@ -12,7 +12,9 @@ for (const [k, sheet, src] of [['stag', 'blight-antler', 'blight-antler-walk8'],
   assert.strictEqual(b.readUInt32BE(16), 2064, sheet + ': a 4-frame sheet'); assert.strictEqual(b.readUInt32BE(20), 688);
   assert(fs.existsSync('assets/monsters/elaris/src/' + src + '.png'), sheet + ': the eight-frame source is kept');
 }
-assert(r.vStag.includes('blight-antler.png'), 'Vespera still borrows the antler sheet');
+assert(r.vStag.includes('vespera/rimeglass-stag.png?v=' + r.version) && r.vStag.includes('.8s'), 'Round 335: Vespera\'s Rimeglass Stag has its own sheet');
+const rs = fs.readFileSync('assets/monsters/vespera/rimeglass-stag.png'); assert.strictEqual(rs.readUInt32BE(16), 2064); assert.strictEqual(rs.readUInt32BE(20), 688);
+assert(fs.existsSync('assets/monsters/vespera/src/rimeglass-stag-walk8.png'));
 assert(r.vMoth.includes('vespera/tempest-moth.png?v=' + r.version) && r.vMoth.includes('.8s'), 'Round 332: Vespera\'s Tempest Moth has its own sheet');
 const tm = fs.readFileSync('assets/monsters/vespera/tempest-moth.png'); assert.strictEqual(tm.readUInt32BE(16), 2064); assert.strictEqual(tm.readUInt32BE(20), 688);
 assert(fs.existsSync('assets/monsters/vespera/src/tempest-moth-flight8.png'), 'the eight-frame source is kept');

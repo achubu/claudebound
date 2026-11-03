@@ -145,7 +145,7 @@ const VESPERA_ENEMIES={
  vespMoth:{name:'Tempest Moth',icon:'≋',hp:48,attack:9,element:'air',art:'tempestMoth',tint:'none'},
  vespHeron:{name:'Brinewing Heron',icon:'≈',hp:50,attack:10,element:'water',art:'brinewingHeron',tint:'none'},
  vespShade:{name:'Ion Shade',icon:'☄',hp:52,attack:10,armor:2,element:'air',art:'ionShade',tint:'none'},
- vespStag:{name:'Rimeglass Stag',icon:'◆',hp:54,attack:10,armor:2,element:'earth',art:'forestStag'},
+ vespStag:{name:'Rimeglass Stag',icon:'◆',hp:54,attack:10,armor:2,element:'earth',art:'rimeglassStag',tint:'none'},
  vespWisp:{name:'Arc Wisp',icon:'✧',hp:56,attack:10,armor:2,element:'water',art:'cryptWisp'},
  vespMauler:{name:'Thunder Mauler',icon:'♨',hp:58,attack:11,armor:2,element:'fire',art:'forgeBeast'},
  arcSentinel:{name:'The Arc Sentinel',icon:'⚡',hp:84,attack:11,armor:4,boss:true,miniBoss:true,element:'water',art:'vineguard'},
