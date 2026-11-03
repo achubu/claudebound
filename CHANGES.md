@@ -3496,6 +3496,50 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 343: every world's map is redrawn as clean vector roads that line up exactly
+
+- Owner request: redraw the city **map** (the Map screen and the minimap, not the room paintings) with vector graphics
+  that mimic the road shapes, so every room lines up perfectly. Owner notes during the round:
+  - main roads only;
+  - straight or angled, not crooked;
+  - thicker;
+  - roads like the owner's example: dark asphalt, pale kerbs and a dashed white centre line;
+  - small graphics where the interactable objects are, placed correctly relative to the roads.
+- How the roads are built (`mapRoadNet` in `assets/map-terrain.js`):
+  - Every exit crossing takes `mapSeam`'s shared meeting point on the edge, snapped to a 40px grid. Both rooms snap
+    the same shared point, so they agree exactly.
+  - A road runs straight in from the edge to the room's hub, with at most one 45° jog just inside the edge if it has
+    to shift across.
+  - Vertical roads set the hub's x and horizontal roads its y, so a T, a cross or an L reads like the room's real
+    layout. A dead end stops where its street stops in the room.
+  - Courtyards, footpaths and plazas are left out.
+- How they're drawn (`mapRoadSvg`, `mapRoadTile`):
+  - The roads are SVG path data (straight lines with rounded turns) drawn through `Path2D`.
+  - Layers: a soft shadow, a pale kerb, a 64px asphalt road and a white dashed centre line.
+  - A room with two roads (a straight run or a corner) is drawn as one continuous road, so its turn is rounded
+    rather than notched.
+  - The old traced-blob drawing is kept for Solaris and the tile worlds.
+- Objects (`mapRoomObjects`, `mapObjectSpot`):
+  - The room's point of interest, merchant, Cardsmith, city-night objects, unopened chest and gear relic each show as
+    a small copy of their own painting.
+  - Each is projected onto the nearest straight road and placed just past the kerb, on the same side as it stands in
+    the room. Used objects are dimmed.
+  - Tiles redraw once their images load.
+- **All worlds (owner: "do this for all worlds moving forward"):**
+  - Solaris, the Sky Isles, Elaris, Vespera and Chronospire use the same road map. Before, they used the old
+    traced-blob drawing.
+  - The diagonal walkways across their cut corners are drawn as the same asphalt road, hub to door to door to hub.
+    They used to be a thin cyan line.
+- Fix: the map's street-patch and seam caches (and the new road caches) are now keyed by world. Before, they were
+  keyed by room only, so after travelling, a world's map could reuse the previous world's street data for the same
+  room key.
+- New `tests/map-roads.test.cjs`:
+  - in every world, every crossing meets its neighbour at exactly the same point (136 in Neon Aftermath and
+    Chronospire, 124 in each of the others);
+  - every exit has a road;
+  - every segment is straight or 45°.
+  `map-terrain` and `map-diagonals` still pass. Checked in Chromium at fit and 156% zoom.
+
 ## Round 342: every world's merchant, three more chests, the Sky Isles portal, and Chronospire's Tick Moth
 
 - The owner's batch of eight object paintings, plus one more:
