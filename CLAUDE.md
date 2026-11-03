@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 341) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 342) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -93,7 +93,7 @@ change set.
   they stand on the walkable ground 22–40px inside its edge instead (Round 212, `itemsOnGround()`). Round 232: in the tile worlds
   they stand in hand-picked open squares beside the road first (`tools/plazas.py`, opened up to the walk mask by the builders;
   `assets/plazas.js`). When adding tile paintings, pick 2-3 such spots for each in `PLAZAS` and rebuild. Enemies and bosses stand on paths. On a tap route only
-  the tapped item opens (Round 184). Map-object paintings (Cardsmiths, lore stones, waypoints, events, chests: `WORLD_POI_ART`, `EVENT_ART` and `WORLD_CHEST_ART` in `assets/cardsmith.js`, Rounds 307–341) are keyed off green with `tools/key_object.py` (`--keep-green` for art with real greens,
+  the tapped item opens (Round 184). Map-object paintings (Cardsmiths, lore stones, waypoints, events, merchants, chests, portals: `WORLD_POI_ART`, `EVENT_ART`, `WORLD_CHEST_ART` and `WORLD_PORTAL_ART` in `assets/cardsmith.js`, Rounds 307–342) are keyed off green with `tools/key_object.py` (`--keep-green` for art with real greens,
   `--clear-enclosed` when glow-tinted background is trapped inside the art, `--warm-olive` for see-through parts that
   key to olive). Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
   movement uses (`collides()`), so placement code must keep using `walkable()`/`NeonCity.blocked`.

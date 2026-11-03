@@ -15,7 +15,7 @@ const CHRONO_TINT = 'sepia(.75) saturate(1.8) hue-rotate(-12deg) brightness(1.06
 const CHRONO_GROUND_FILTER = 'sepia(.7) hue-rotate(-10deg) saturate(1.35) brightness(.74) contrast(1.1)';
 const CHRONO_ENEMIES = {
   chronoHound:  { name: 'Gearhound', icon: '⚙', hp: 48, attack: 10, element: 'fire', art: 'gearhound', tint: 'none' },
-  chronoMoth:   { name: 'Tick Moth', icon: '≋', hp: 50, attack: 10, element: 'air', art: 'forestMoth', tint: CHRONO_TINT },
+  chronoMoth:   { name: 'Tick Moth', icon: '≋', hp: 50, attack: 10, element: 'air', art: 'tickMoth', tint: 'none' },
   chronoSentry: { name: 'Brass Sentry', icon: '♜', hp: 54, attack: 10, armor: 2, element: 'earth', art: 'vineguard', tint: CHRONO_TINT },
   chronoWraith: { name: 'Lag Wraith', icon: '☾', hp: 54, attack: 11, armor: 1, element: 'air', art: 'shade', tint: CHRONO_TINT },
   chronoHeron:  { name: 'Hourglass Heron', icon: '⏳', hp: 56, attack: 11, element: 'water', art: 'forestHeron', tint: CHRONO_TINT },
