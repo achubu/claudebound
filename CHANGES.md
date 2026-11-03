@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 328: the Glass Scavenger gets its painting
+
+- The owner's **Glass Scavenger** replaces the shared "?" pedestal for that Vespera event. A hooded scavenger in a
+  rain-soaked storm coat and violet-glinting goggles stands by a wooden handcart heaped with glass shards and glowing
+  crystals, with sacks, rope and a lantern, on wet rock and sand (`assets/items/poi/events/scavenger.webp`; the
+  original is in `events/src/`).
+- Keyed with plain `tools/key_object.py`. The crystals' green-tinted glow turns a soft teal.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 327: the Humming Conduit gets its painting
 
 - The owner's **Humming Conduit** replaces the shared "?" pedestal for that Vespera event: a rusted iron pipe with a
