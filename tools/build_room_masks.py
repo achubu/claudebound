@@ -172,6 +172,31 @@ NOOKS = {
     '8,8': [(536, 387), (151, 142), (161, 364)],
     '8,9': [(609, 172), (592, 334)],
 }
+# Round 339: hand fixes for rooms where an automatic bridge (axis_bridges) runs through a building.
+# BRIDGE_CUTS clears added (bridged or filled-in) street inside these rectangles (x0, y0, x1, y1), leaving traced street alone;
+# STREET_LINKS adds walkable corridors (polyline, width) across open ground instead.
+BRIDGE_CUTS = {
+    '1,6': [(660, 280, 730, 385), (590, 250, 700, 278)],  # the bridge cut north through the cyan-sign factory, and a filled strip on its roof
+}
+STREET_LINKS = {
+    '1,6': [([(430, 392), (520, 392), (575, 400)], 24)],  # the courtyard and its terminal, reached from the left street
+}
+
+
+def room_fixes(key, traced, road):
+    road = road.copy()
+    for x0, y0, x1, y1 in BRIDGE_CUTS.get(key, []):
+        box = np.zeros_like(road); box[y0:y1, x0:x1] = True
+        road[box & ~traced] = False
+    if key in STREET_LINKS:
+        im = Image.fromarray((road * 255).astype(np.uint8)); d = ImageDraw.Draw(im)
+        for pts, wd in STREET_LINKS[key]:
+            d.line(pts, fill=255, width=wd)
+            for x, y in pts: d.ellipse((x - wd // 2, y - wd // 2, x + wd // 2, y + wd // 2), fill=255)
+        road = np.asarray(im) > 0
+    return road
+
+
 NOOK_STOP = 16   # the path ends this far short of the object's base (you stand beside it, not on it)
 NOOK_WIDTH = 22
 FOOT = 22        # the game tests walkability at the feet, 22px below a position
@@ -224,7 +249,8 @@ def main():
         if key not in exits:
             print('skip (no such room)', key)
             continue
-        road = keep_exits(fill_road_objects(extend_to_edges(axis_bridges(trace(path)), exits[key])), exits[key])
+        traced = trace(path)
+        road = keep_exits(room_fixes(key, traced, fill_road_objects(extend_to_edges(axis_bridges(traced), exits[key]))), exits[key])
         nooks[key] = nook_paths(key, road)
         w = bake_paths(road, nooks[key])
         wy = cy - 4  # world row of this room
