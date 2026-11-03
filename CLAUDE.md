@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 342) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 343) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -70,6 +70,10 @@ change set.
   - Round 339: `BRIDGE_CUTS` / `STREET_LINKS` in `tools/build_room_masks.py` are hand fixes for automatic bridges that
     run through buildings; `tools/nook_view.py` draws a room with its walk mask and footpaths. **Open owner note:**
     recheck every route for this problem, starting with the list in `tools/route-review.md`.
+  - Round 343: the **Map** screen and minimap don't use the paintings or traced blobs. Each room's main roads are vector
+    paths (`mapRoadNet` / `mapRoadSvg` in `assets/map-terrain.js`): one road per exit at a 40px-snapped shared edge
+    point, straight or with one 45° jog, meeting at the room's hub, drawn like the owner's example (asphalt, pale kerbs,
+    dashed centre line, rounded turns). Objects show as small paintings beside the nearest road (`mapRoomObjects`).
   - Round 101+: each painted room also lists hand-checked open-ground spots
     beside the street (`NOOKS` in the build tool), each with a footpath.
     Chests, relics and points of interest stand there as small markers. When

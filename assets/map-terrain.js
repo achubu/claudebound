@@ -110,8 +110,160 @@ function mapDiagAnchor(key, d) {
   for (let y = 4; y < 500; y += 8) for (let x = 4; x < 800; x += 8) { if (patch.at(x, y) < MAP_MIN_PATCH) continue; const dd = Math.hypot(x - door[0], y - door[1]); if (dd < bd) { bd = dd; best = [x, y]; } }
   return best && bd < 300 ? [best, door] : [door, door];
 }
-function mapPathTile(key) {
+// Round 343 (owner): Neon Aftermath's map shows only the main roads, as clean vector paths that mimic each room's
+// road shapes and line up exactly between rooms. From every exit crossing (mapSeam's shared meeting point on the
+// edge, snapped to a 40px grid) a straight road runs in, with at most one 45° jog, to the room's hub. Courtyards, footpaths and plazas are left out. The roads are built as SVG path data
+// (mapRoadSvg) and drawn with Path2D, all at one width, so a road leaving one room enters the next one seamlessly.
+const MAP_ROAD_W = 64, MAP_ROAD_GRID = 40; // owner: thick roads
+const mapRoadCache = {};
+// A crossing's spot on the shared edge, snapped to a 40px grid. Both rooms use mapSeam's shared meeting point, so they
+// snap it the same way and the road lines up exactly across the edge.
+function mapRoadSnap(v, len) { return Math.max(MAP_ROAD_GRID, Math.min(len - MAP_ROAD_GRID, Math.round(v / MAP_ROAD_GRID) * MAP_ROAD_GRID)); }
+function mapRoadNet(key) {
+  const r = rooms[key]; if (!r || !r.world || typeof neonWorldWalk !== 'function') return null;
+  if (mapRoadCache[key]) return mapRoadCache[key];
+  const [cx, cy] = r.world, patch = mapPatches(cx, cy), W = 800, H = 500, D = MAP_SEAM_DEPTH, G = MAP_ROAD_GRID;
+  const exits = [];
+  for (const dir of ['n', 's', 'e', 'w']) {
+    const seen = new Set();
+    for (const c of mapSeam(key, dir)) {
+      const vert = dir === 'n' || dir === 's', m = mapRoadSnap(c.meet, vert ? W : H);
+      if (seen.has(m)) continue; seen.add(m);
+      // How far the street runs straight in from this edge (used for a dead end's length).
+      let depth = D + 4; const len = vert ? H : W;
+      for (; depth < len - D - 4; depth += 8) { const x = vert ? c.own : dir === 'w' ? depth : W - depth, y = vert ? (dir === 'n' ? depth : H - depth) : c.own; if (patch.at(x, y) < MAP_MIN_PATCH) break; }
+      exits.push({ dir, vert, m, depth });
+    }
+  }
+  if (!exits.length) return mapRoadCache[key] = { hub: [W / 2, H / 2], paths: [] };
+  // The hub: where the room's straight roads meet. Vertical roads set its x, horizontal ones its y; a room whose roads
+  // all run one way meets them halfway (a dead end stops where its street stops).
+  const V = exits.filter(e => e.vert), Hz = exits.filter(e => !e.vert), snapG = v => Math.round(v / G) * G, mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  let hx = V.length ? snapG(mean(V.map(e => e.m))) : null, hy = Hz.length ? snapG(mean(Hz.map(e => e.m))) : null;
+  if (hy === null) hy = V.length === 1 ? (V[0].dir === 'n' ? Math.min(H - G, snapG(V[0].depth)) : Math.max(G, snapG(H - V[0].depth))) : H / 2;
+  if (hx === null) hx = Hz.length === 1 ? (Hz[0].dir === 'w' ? Math.min(W - G, snapG(Hz[0].depth)) : Math.max(G, snapG(W - Hz[0].depth))) : W / 2;
+  const hub = [hx, hy];
+  // Each road: straight in from the edge; if it must shift across to the hub's line, one 45° jog just inside the
+  // edge; then straight on to the hub. Only straight lines and 45° angles.
+  const paths = exits.map(e => {
+    const sign = e.dir === 'n' || e.dir === 'w' ? 1 : -1, edge = e.dir === 'n' || e.dir === 'w' ? -4 : (e.vert ? H : W) + 4;
+    const hubAlong = e.vert ? hx : hy, hubDepth = e.vert ? hy : hx, shift = hubAlong - e.m, P = (along, d) => e.vert ? [along, d] : [d, along];
+    const pts = [P(e.m, edge)];
+    if (shift) {
+      const j0 = e.dir === 'n' || e.dir === 'w' ? G : (e.vert ? H : W) - G, j1 = j0 + sign * Math.abs(shift);
+      if (sign * (hubDepth - j1) >= 0) { pts.push(P(e.m, j0), P(hubAlong, j1)); }
+      else { pts.push(P(e.m, hubDepth)); } // too close to fit a jog: a square corner at the hub
+    }
+    pts.push(P(hubAlong, hubDepth));
+    return pts;
+  });
+  return mapRoadCache[key] = { hub, paths };
+}
+// The room's roads as drawable polylines: a room with just two roads (a straight run or a corner) is one continuous
+// road through its hub, so the turn is rounded rather than notched.
+function mapRoadLines(net, extra) {
+  let lines = net.paths.slice();
+  if (lines.length === 2) lines = [lines[0].concat(lines[1].slice(0, -1).reverse())];
+  return lines.concat(extra || []).filter(p => p.length > 1);
+}
+// SVG path data for a room's roads, in room pixels: straight segments, each turn rounded (radius up to MAP_ROAD_R).
+const MAP_ROAD_R = 56;
+function mapRoadSvg(key, extra) {
+  const net = mapRoadNet(key); if (!net) return '';
+  const f = n => Math.round(n * 10) / 10;
+  return mapRoadLines(net, extra).map(p => {
+    let d = 'M' + f(p[0][0]) + ' ' + f(p[0][1]);
+    for (let i = 1; i < p.length - 1; i++) {
+      const [ax, ay] = p[i - 1], [bx, by] = p[i], [cx, cy] = p[i + 1];
+      const l1 = Math.hypot(bx - ax, by - ay), l2 = Math.hypot(cx - bx, cy - by); if (!l1 || !l2) continue;
+      const r = Math.min(MAP_ROAD_R, l1 / 2, l2 / 2);
+      d += ' L' + f(bx - (bx - ax) / l1 * r) + ' ' + f(by - (by - ay) / l1 * r) + ' Q' + f(bx) + ' ' + f(by) + ' ' + f(bx + (cx - bx) / l2 * r) + ' ' + f(by + (cy - by) / l2 * r);
+    }
+    return d + ' L' + f(p[p.length - 1][0]) + ' ' + f(p[p.length - 1][1]);
+  }).join(' ');
+}
+// Round 343 (owner): the room's interactable objects, each with its own painting, for small icons on the map.
+function mapRoomObjects(key) {
+  const out = [], add = (x, y, src, used, glyph) => { if (typeof x === 'number' && typeof y === 'number') out.push({ x, y, src, used: !!used, glyph }); };
+  const poiSrc = p => { const art = typeof poiArt === 'function' ? poiArt(p) : null; return art ? 'assets/items/poi/' + art + '.webp' : null; };
+  const glyph = p => { try { const d = poiDisplay(p); return d && d.icon; } catch (e) { return '◆'; } };
+  const used = p => { try { return p.type !== 'merchant' && typeof poiUsed === 'function' && poiUsed(p); } catch (e) { return false; } };
+  const p = typeof poiAt === 'function' ? poiAt(key) : null; if (p) add(p.x, p.y, poiSrc(p), used(p), glyph(p));
+  const shop = typeof merchantRoom === 'function' ? merchantRoom() : null; if (shop && shop.key === key) add(shop.x, shop.y, poiSrc(shop), false, '🛒');
+  if (typeof cardsmithRoom === 'function' && cardsmithRoom() === key && typeof cardsmithSpot === 'function') { const c = cardsmithSpot(key), cp = { type: 'cardsmith', key }; if (c) add(c.x, c.y, poiSrc(cp), false, '⚒'); }
+  if (typeof cityNightsItems === 'function') for (const it of cityNightsItems(key)) add(it.x, it.y, poiSrc(it), used(it), glyph(it));
+  const chest = typeof chestFor === 'function' ? chestFor(key) : null;
+  if (chest && !(state.chests || []).includes(chest.id)) {
+    const art = typeof WORLD_CHEST_ART !== 'undefined' && WORLD_CHEST_ART[activeRegion];
+    add(chest.x, chest.y, art ? 'assets/items/poi/' + art + '.webp' : 'assets/items/loot-chest.png', false, '▣');
+  }
+  const q = rooms[key] && rooms[key].relic;
+  if (q && q[0] !== 'material' && !(typeof hasRelic === 'function' && hasRelic(q[0]))) add(q[3], q[4], typeof GEAR !== 'undefined' && GEAR[q[0]] && typeof gearArtPath === 'function' ? gearArtPath(q[0]) : null, false, q[2]);
+  return out;
+}
+// Where an object goes on the schematic map: projected onto the nearest straight road, then set just past the kerb
+// on the same side of the road as it stands in the room (so it keeps its place relative to the roads).
+const MAP_ICON = 112;
+function mapObjectSpot(net, o) {
+  let best = null;
+  for (const pts of net.paths) for (let i = 1; i < pts.length; i++) {
+    const [ax, ay] = pts[i - 1], [bx, by] = pts[i], dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy; if (!L2) continue;
+    const t = Math.max(0, Math.min(1, ((o.x - ax) * dx + (o.y - ay) * dy) / L2)), px = ax + dx * t, py = ay + dy * t, d = Math.hypot(o.x - px, o.y - py);
+    if (!best || d < best.d) { const L = Math.sqrt(L2); let nx = -dy / L, ny = dx / L; if ((o.x - px) * nx + (o.y - py) * ny < 0) { nx = -nx; ny = -ny; } best = { d, px, py, nx, ny }; }
+  }
+  if (!best) return [o.x, o.y];
+  const off = MAP_ROAD_W / 2 + 10 + MAP_ICON / 2;
+  return [Math.max(MAP_ICON / 2, Math.min(800 - MAP_ICON / 2, best.px + best.nx * off)), Math.max(MAP_ICON / 2, Math.min(500 - MAP_ICON / 2, best.py + best.ny * off))];
+}
+const MAP_ROAD_STYLE = { shadow: 'rgba(0,0,0,.35)', kerb: '#cfe6ee', asphalt: '#36424f', dash: 'rgba(255,255,255,.9)' };
+function mapRoadTile(key, onReady) {
+  const r = rooms[key], net = mapRoadNet(key); if (!net) return null;
+  const objs = mapRoomObjects(key), sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
+  const ck = 'roads:' + key + ':' + sig; if (mapTileCache[ck]) return mapTileCache[ck];
+  const W = 800, H = 500, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
+  const ctx = tile.getContext('2d'); if (!ctx) return null;
+  ctx.fillStyle = MAP_PATH_STYLE.ground; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = MAP_PATH_STYLE.block;
+  for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28);
+  // A diagonal road (Round 276) joins its door to this room's hub; drawMapTerrain joins the doors across the cut room.
+  const extra = [], diag = typeof worldDiagTable === 'function' ? worldDiagTable()[key] : null;
+  if (diag) for (const [dir, d] of Object.entries(diag)) if (rooms[d.to] && r.exits[dir]) extra.push([net.hub, [Math.max(0, Math.min(W, d.x)), Math.max(0, Math.min(H, d.y))]]);
+  const svg = mapRoadSvg(key, extra), lines = mapRoadLines(net, extra);
+  const stroke = (style, width, dash, cap) => {
+    ctx.strokeStyle = style; ctx.lineWidth = width; ctx.lineCap = cap || 'square'; ctx.lineJoin = 'round';
+    if (ctx.setLineDash) ctx.setLineDash(dash || []);
+    if (typeof Path2D === 'function') ctx.stroke(new Path2D(svg));
+    else for (const pts of lines) { ctx.beginPath(); ctx.moveTo(...pts[0]); for (const p of pts.slice(1)) ctx.lineTo(...p); ctx.stroke(); }
+  };
+  // Round 343 (owner's example): dark asphalt roads with a pale kerb on each side and a white dashed centre line.
+  stroke(MAP_ROAD_STYLE.shadow, MAP_ROAD_W + 26); stroke(MAP_ROAD_STYLE.kerb, MAP_ROAD_W + 14); stroke(MAP_ROAD_STYLE.asphalt, MAP_ROAD_W);
+  stroke(MAP_ROAD_STYLE.dash, 4, [18, 16], 'butt');
+  if (ctx.setLineDash) ctx.setLineDash([]);
+  // Small paintings of the room's objects beside the roads (dimmed once used).
+  let complete = true; const placed = [];
+  for (const o of objs) {
+    let [x, y] = mapObjectSpot(net, o);
+    for (const q of placed) if (Math.hypot(q[0] - x, q[1] - y) < MAP_ICON) x = Math.min(W - MAP_ICON / 2, x + MAP_ICON); // nudge apart
+    placed.push([x, y]);
+    ctx.globalAlpha = o.used ? 0.45 : 1;
+    const img = o.src && typeof Image !== 'undefined' ? mapImage(o.src, onReady) : null;
+    if (img && img.complete && img.naturalWidth) {
+      const k = MAP_ICON / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k;
+      ctx.fillStyle = 'rgba(5,10,16,.55)'; ctx.beginPath(); if (ctx.ellipse) ctx.ellipse(x, y + h / 2 - 4, w * 0.42, 7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+    } else {
+      if (img) complete = false;
+      ctx.fillStyle = '#16222e'; ctx.strokeStyle = MAP_ROAD_STYLE.kerb; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, MAP_ICON / 2 - 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      if (o.glyph) { ctx.fillStyle = '#eaf6ff'; ctx.font = '700 30px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.glyph, x, y + 1); }
+    }
+    ctx.globalAlpha = 1;
+  }
+  if (complete) mapTileCache[ck] = tile;
+  return tile;
+}
+function mapPathTile(key, onReady) {
   const r = rooms[key]; if ((activeRegion !== 'city' && activeRegion !== 'elaris' && !TILE_REGIONS[activeRegion]) || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
+  if (activeRegion === 'city') return mapRoadTile(key, onReady); // Round 343: main roads only, as vector paths
   const ck = 'paths:' + activeRegion + ':' + key; if (mapTileCache[ck]) return mapTileCache[ck];
   const W = 800, H = 500, C = 8, D = MAP_SEAM_DEPTH, [cx, cy] = r.world, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;
@@ -198,7 +350,7 @@ function drawMapTerrain(canvasEl, tileW, bounds) {
     if (area.art && area.cells.length > 1) {
       const tile = mapAreaTile(area, redraw); if (!tile) continue;
       const [kx, ky] = XY(key); source[key] = { img: tile, sx: (kx - area.left) * tile.width / (area.width / 800), sy: (ky - area.top) * tile.height / (area.height / 500), sw: tile.width / (area.width / 800), sh: tile.height / (area.height / 500) };
-    } else { const tile = mapPathTile(key) || mapRoomTile(key, redraw); if (tile) source[key] = { img: tile, sx: 0, sy: 0, sw: tile.width, sh: tile.height }; }
+    } else { const tile = mapPathTile(key, redraw) || mapRoomTile(key, redraw); if (tile) source[key] = { img: tile, sx: 0, sy: 0, sw: tile.width, sh: tile.height }; }
   }
   // 1) Fog beyond the frontier: dark ground with a faint survey grid.
   ctx.fillStyle = theme.fog; ctx.fillRect(0, 0, W, H);
