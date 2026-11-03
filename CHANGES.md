@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 329: the Echoing Prism gets its painting
+
+- The owner's **Echoing Prism** replaces the shared "?" pedestal for that Vespera event. A tall six-sided crystal
+  with rainbow light bands stands on wet black rock and slate, beside a pale, ghostly copy of itself, with prismatic
+  sparkles (`assets/items/poi/events/prism.webp`; the original is in `events/src/`). All four Vespera events now have
+  paintings.
+- Keyed with plain `tools/key_object.py`. The ghostly copy keys to a pale see-through lavender.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 328: the Glass Scavenger gets its painting
 
 - The owner's **Glass Scavenger** replaces the shared "?" pedestal for that Vespera event. A hooded scavenger in a

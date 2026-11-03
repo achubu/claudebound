@@ -62,7 +62,7 @@ Every event in every world uses the same picture. Each could have its own. Files
 | `shelter` ✅ done (Round 325) | Vespera | Storm Shelter | A small glass dome shelter on wet rock, warm light inside with a bedroll and lockers, rain streaking the glass. |
 | `conduit` ✅ done (Round 327) | Vespera | Humming Conduit | A cracked metal conduit pipe sticking out of wet stone, raw violet electricity arcing out of the crack. |
 | `scavenger` ✅ done (Round 328) | Vespera | Glass Scavenger | A hunched scavenger in a long coat and mirrored goggles beside a cart of glass shards and salvaged crystals. |
-| `prism` | Vespera | Echoing Prism | A tall crystal prism on a stone base, rainbow light inside it and a faint ghostly afterimage beside it. |
+| `prism` ✅ done (Round 329) | Vespera | Echoing Prism | A tall crystal prism on a stone base, rainbow light inside it and a faint ghostly afterimage beside it. |
 | `clockmaker` | Chronospire | Clockmaker's Bench | A workbench covered in tiny gears, springs and a half-built pocket watch, a magnifying lamp glowing warm. |
 | `paradoxPool` | Chronospire | Paradox Pool | A circular pool framed in bronze clockwork, its water swirling like a clock face, shimmering with amber light. |
 | `sandglass` | Chronospire | Giant Hourglass | A giant hourglass in a bronze frame, glowing golden sand flowing upward. |
