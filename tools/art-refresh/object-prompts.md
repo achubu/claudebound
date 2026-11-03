@@ -59,7 +59,7 @@ Every event in every world uses the same picture. Each could have its own. Files
 | `aerie` ✅ done (Round 322) | Sky Isles | Abandoned Aerie | A huge twig nest as wide as a cart on a rocky ledge, lined with lost travellers' things: a lantern, a satchel, a few coins. |
 | `chimes` ✅ done (Round 323) | Sky Isles | Singing Chimes | A bare white dead tree hung with hundreds of small glass chimes, soft blue glow, all swaying the same way. |
 | `starwell` ✅ done (Round 324) | Sky Isles | Starwell | A small round pool in white stone that reflects a starry night sky even though it is day, little stars glittering in the water. |
-| `shelter` | Vespera | Storm Shelter | A small glass dome shelter on wet rock, warm light inside with a bedroll and lockers, rain streaking the glass. |
+| `shelter` ✅ done (Round 325) | Vespera | Storm Shelter | A small glass dome shelter on wet rock, warm light inside with a bedroll and lockers, rain streaking the glass. |
 | `conduit` | Vespera | Humming Conduit | A cracked metal conduit pipe sticking out of wet stone, raw violet electricity arcing out of the crack. |
 | `scavenger` | Vespera | Glass Scavenger | A hunched scavenger in a long coat and mirrored goggles beside a cart of glass shards and salvaged crystals. |
 | `prism` | Vespera | Echoing Prism | A tall crystal prism on a stone base, rainbow light inside it and a faint ghostly afterimage beside it. |
