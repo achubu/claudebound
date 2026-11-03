@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 327: the Humming Conduit gets its painting
+
+- The owner's **Humming Conduit** replaces the shared "?" pedestal for that Vespera event: a rusted iron pipe with a
+  bolted flange and frayed cable, jutting from wet black rock, with violet electricity arcing out of a crack over a
+  glowing violet puddle (`assets/items/poi/events/conduit.webp`; the original is in `events/src/`).
+- Keyed with plain `tools/key_object.py`.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 326: one font and one size for all text in the world
 
 - Owner request: all text in the world view is the same style and size, about 10% smaller than the old enemy
