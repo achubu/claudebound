@@ -25,6 +25,7 @@ assert(/Sun Pharaoh|Cistern Warden/.test(r.objective), 'the objective names the 
 // Other worlds borrow art-only keys, so Solaris art can change without touching them.
 for (const a of r.borrowers) assert(!['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth', 'bloomTyrant'].includes(a), 'borrows a Solaris id: ' + a);
 assert(r.vespFox.includes('vespera/static-fox.png') && r.chronoHound.includes('cinder-fox.png'), 'Round 305: Vespera has its own Static Fox; Chronospire keeps the fox sheet');
-assert(r.vespBoss.includes('bloom-tyrant.png') && r.chronarch.includes('bloom-tyrant.png'), 'and the old boss sheet');
+assert(r.chronarch.includes('bloom-tyrant.png'), 'Chronospire keeps the old boss sheet');
+assert(r.vespBoss.includes('vespera/tempest-colossus.png') && r.vespBoss.includes('bloom-tyrant'), 'Round 340: the Tempest Colossus has its own sheet, drawn in the big boss box');
 assert(r.vespFox.includes('aria-label="Static Fox"') && r.vespBoss.includes('aria-label="The Tempest Colossus"'));
 console.log('PASS: Solaris roster is desert-themed; Vespera and Chronospire keep their own borrowed art.');

@@ -150,7 +150,7 @@ const VESPERA_ENEMIES={
  vespMauler:{name:'Thunder Mauler',icon:'♨',hp:58,attack:11,armor:2,element:'fire',art:'thunderMauler',tint:'none'},
  arcSentinel:{name:'The Arc Sentinel',icon:'⚡',hp:84,attack:11,armor:4,boss:true,miniBoss:true,element:'water',art:'arcSentinelArt',tint:'none'},
  resonantPhantom:{name:'The Resonant Phantom',icon:'☄',hp:80,attack:12,armor:3,boss:true,miniBoss:true,element:'air',art:'shade'},
- stormTyrant:{name:'The Tempest Colossus',icon:'🌩',hp:150,attack:11,armor:2,boss:true,element:'water',shift:['water','air'],shiftEvery:4,art:'forestTyrant'}
+ stormTyrant:{name:'The Tempest Colossus',icon:'🌩',hp:150,attack:11,armor:2,boss:true,element:'water',shift:['water','air'],shiftEvery:4,art:'tempestColossus',tint:'none'}
 };
 Object.assign(enemies,VESPERA_ENEMIES);
 const VESPERA_ZONE_ENEMY=['vespFox','vespThorn','vespMoth','vespHeron','vespShade','vespStag','vespWisp','vespMauler'];
