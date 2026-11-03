@@ -5,7 +5,7 @@ process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
-const r = JSON.parse(run(`JSON.stringify({ version: SPRITE_VERSION, stag: monsterArt('elarisAntler'), moth: monsterArt('elarisMoth'), vStag: monsterArt('vespStag'), vMoth: monsterArt('vespMoth') })`));
+const r = JSON.parse(run(`JSON.stringify({ version: SPRITE_VERSION, stag: monsterArt('elarisAntler'), moth: monsterArt('elarisMoth'), vStag: monsterArt('vespStag'), vMoth: monsterArt('vespMoth'), vHeron: monsterArt('vespHeron') })`));
 for (const [k, sheet, src] of [['stag', 'blight-antler', 'blight-antler-walk8'], ['moth', 'storm-moth', 'storm-moth-flight8']]) {
   assert(r[k].includes('elaris/' + sheet + '.png?v=' + r.version) && r[k].includes('.8s'), sheet + ' uses its new sheet at the owner timing');
   const b = fs.readFileSync('assets/monsters/elaris/' + sheet + '.png');
@@ -16,4 +16,7 @@ assert(r.vStag.includes('blight-antler.png'), 'Vespera still borrows the antler 
 assert(r.vMoth.includes('vespera/tempest-moth.png?v=' + r.version) && r.vMoth.includes('.8s'), 'Round 332: Vespera\'s Tempest Moth has its own sheet');
 const tm = fs.readFileSync('assets/monsters/vespera/tempest-moth.png'); assert.strictEqual(tm.readUInt32BE(16), 2064); assert.strictEqual(tm.readUInt32BE(20), 688);
 assert(fs.existsSync('assets/monsters/vespera/src/tempest-moth-flight8.png'), 'the eight-frame source is kept');
+assert(r.vHeron.includes('vespera/brinewing-heron.png?v=' + r.version) && r.vHeron.includes('.8s'), 'Round 333: Vespera\'s Brinewing Heron has its own sheet');
+const bh = fs.readFileSync('assets/monsters/vespera/brinewing-heron.png'); assert.strictEqual(bh.readUInt32BE(16), 2064); assert.strictEqual(bh.readUInt32BE(20), 688);
+assert(fs.existsSync('assets/monsters/vespera/src/brinewing-heron-walk8.png'));
 console.log('forest-anim ok');

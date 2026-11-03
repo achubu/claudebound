@@ -66,10 +66,25 @@ Every event in every world uses the same picture. Each could have its own. Files
 | `clockmaker` ✅ done (Round 330) | Chronospire | Clockmaker's Bench | A workbench covered in tiny gears, springs and a half-built pocket watch, a magnifying lamp glowing warm. |
 | `paradoxPool` ✅ done (Round 331) | Chronospire | Paradox Pool | A circular pool framed in bronze clockwork, its water swirling like a clock face, shimmering with amber light. |
 | `sandglass` ✅ done (Round 332) | Chronospire | Giant Hourglass | A giant hourglass in a bronze frame, glowing golden sand flowing upward. |
-| `echoes` | Chronospire | Echoing Corridor | A short archway of bronze and marble with several fading ghostly copies of the arch behind it, like an echo in stone. |
+| `echoes` ✅ done (Round 333) | Chronospire | Echoing Corridor | A short archway of bronze and marble with several fading ghostly copies of the arch behind it, like an echo in stone. |
 
 Solaris uses the four forest events too (`spring`, `ranger`, `seedpod`, `vines`), which don't fit a desert city.
 Desert events of its own would need new event designs as well as art.
+
+## 2b. Neon Aftermath night objects (Round 298, added to this list in Round 333)
+
+The Round 298 city nights added objects after this list was made. World objects go in `assets/items/poi/` (wired
+through `WORLD_POI_ART.city`); events go in `events/` (wired through `EVENT_ART`).
+
+| File | Object | Subject |
+|---|---|---|
+| `city-wanted-board.webp` ✅ done (Round 333) | Wanted Board | A scrap-metal notice board on rusty legs under a dented awning with a red neon strip, three wanted posters with red X stamps. |
+| `city-breaker.webp` | Breaker Box (3) | A dented utility breaker cabinet on a pole, door hanging open on a big lever switch, sparking fuses and thick cables. |
+| `city-vault.webp` | Afterlight Vault | A heavy round vault door set into a concrete wall, glowing cyan seams and a dead keypad, locked until the breakers are on. |
+| `events/arcade` | Arcade Cabinet | A rain-soaked retro arcade cabinet with a glowing screen and joystick under a scrap awning. |
+| `events/racer` | Drone Racers | Two small scrap racing drones on a chalk-marked start line, a battered trophy and a crate. |
+| `events/billboard` | Glitched Billboard | A small standing digital billboard with a glitching, pixel-scrambled screen. |
+| `events/toll` | Gang Toll | A road barricade of tyres, crates and barbed wire with a spray-painted skull and a tin toll cup. |
 
 ## 3. Optional: world variants of shared objects
 
