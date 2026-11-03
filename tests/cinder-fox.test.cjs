@@ -7,7 +7,7 @@ const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`JSON.stringify({ version: SPRITE_VERSION, fox: monsterArt('elarisFox'), hound: monsterArt('chronoHound') })`));
 assert(r.fox.includes('elaris/cinder-fox.png?v=' + r.version) && r.fox.includes('.8s'), 'the Cinder Fox uses its walk sheet at the owner timing');
-assert(r.hound.includes('cinder-fox.png'), 'the Gearhound still borrows it');
+assert(r.hound.includes('chronospire/gearhound.png'), 'Round 341: the Gearhound has its own sheet');
 const b = fs.readFileSync('assets/monsters/elaris/cinder-fox.png');
 assert.strictEqual(b.readUInt32BE(16), 2064, 'a 4-frame sheet'); assert.strictEqual(b.readUInt32BE(20), 688);
 assert(fs.existsSync('assets/monsters/elaris/src/cinder-fox-walk8.png'), 'the eight-frame source is kept');

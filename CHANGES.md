@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 341: three more world waypoints, the Vespera Storm Glyph, the Sky Isles chest, and Chronospire's Gearhound
+
+- The owner's batch of five object paintings:
+  - **Nexus Waypoints** for the Sky Isles (a marble platform on a cloud with brass vanes around a pale-blue wind
+    portal), Elaris (a ring of mossy standing stones round a glowing green spiral, keyed with `--keep-green`) and
+    Vespera (a slate rune disc on floating black rock with three lightning rods and a violet lightning ring).
+    `WORLD_POI_ART.<world>.nexus`; Neon Aftermath got its own in Round 340, and Solaris and Chronospire still use the
+    shared one.
+  - The **Vespera Storm Glyph** lore stone: a dark slate obelisk with a glowing violet lightning glyph, arcs crawling
+    over it and rain. It was the last map object drawn as an emoji glyph. Keyed with `--clear-enclosed` (a green
+    speck by its tip was kept as a "light" otherwise).
+  - The **Sky Isles hidden loot chest**: a white-washed, brass-bound chest on a cloud with a wind rune, pale-blue light
+    and a streaming ribbon. New `WORLD_CHEST_ART` in `assets/cardsmith.js` adds a CSS rule per world
+    (`#world[data-environment="<world>"] .map-chest`); the other worlds keep `loot-chest.png` (Solaris its own).
+- **Gearhound** (Chronospire): until now it borrowed the Elaris Cinder Fox, recolored. It now walks on its own sheet
+  from the owner's eight-frame draft, a brown fox with amber crystal spines and a clockwork collar
+  (`assets/monsters/chronospire/gearhound.png`, `WILDLIFE_ART.gearhound`, `tint:'none'`). `SPRITE_VERSION` is now
+  '341'.
+- `tools/art-refresh/object-prompts.md` gains section 6, a chest prompt per world.
+- Tests: `city-cardsmith-art` (waypoints, glyph, chest), `cinder-fox`, `static-fox` and `solaris-roster` (the
+  Gearhound's own sheet). In Chromium the Sky Isles chest draws `sky-chest.webp`, other worlds' chests are unchanged,
+  and the Gearhound walks its new sheet.
+
 ## Round 340: Vespera's Tempest Colossus walks on its own sheet; the Neon Aftermath waypoint painting
 
 - **The Tempest Colossus** (Vespera boss): until now it borrowed the old Bloom Tyrant sheet. It now walks on its own

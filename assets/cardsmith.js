@@ -113,7 +113,7 @@ if (typeof poiArt === 'function') {
   poiArt = function (p) { return (activeRegion === 'elaris' && p && SOLARIS_POI_ART[p.type]) || poiArtBeforeSolaris(p); };
 }
 // Round 307: per-world object art (the owner's paintings), one entry per world and type. Solaris's set is above.
-const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith', wantedBoard: 'city-wanted-board', breaker: 'city-breaker', vault: 'city-vault', nexus: 'city-nexus' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore' }, chronospire: { cardsmith: 'chronospire-cardsmith', lore: 'chronospire-lore' }, vespera: { cardsmith: 'vespera-cardsmith' } };
+const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith', wantedBoard: 'city-wanted-board', breaker: 'city-breaker', vault: 'city-vault', nexus: 'city-nexus' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore', nexus: 'wilds-nexus' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore', nexus: 'sky-nexus' }, chronospire: { cardsmith: 'chronospire-cardsmith', lore: 'chronospire-lore' }, vespera: { cardsmith: 'vespera-cardsmith', lore: 'vespera-lore', nexus: 'vespera-nexus' } };
 if (typeof poiArt === 'function') {
   const poiArtBeforeWorlds = poiArt;
   poiArt = function (p) { const w = WORLD_POI_ART[activeRegion]; return (w && p && w[p.type]) || poiArtBeforeWorlds(p); };
@@ -123,6 +123,13 @@ const EVENT_ART = ['terminal', 'medic', 'vending', 'courier', 'spring', 'ranger'
 if (typeof poiArt === 'function') {
   const poiArtBeforeEvents = poiArt;
   poiArt = function (p) { return (p && p.type === 'event' && EVENT_ART.indexOf(p.event) >= 0 && 'events/' + p.event) || poiArtBeforeEvents(p); };
+}
+// Round 341: per-world hidden loot chests (the owner's paintings); worlds not listed keep loot-chest.png.
+const WORLD_CHEST_ART = { sky: 'sky-chest' };
+if (typeof document !== 'undefined' && document.createElement) {
+  const worldChestStyles = document.createElement('style');
+  worldChestStyles.textContent = Object.entries(WORLD_CHEST_ART).map(([w, f]) => '#world[data-environment="' + w + '"] .map-chest{background-image:url(assets/items/poi/' + f + '.webp)!important}').join('');
+  document.head.append(worldChestStyles);
 }
 const solarisSpriteStyles = document.createElement('style');
 solarisSpriteStyles.textContent = '.poi-node.poi-art.poi-cardsmith{width:56px!important;height:56px!important;border:0!important;box-shadow:none!important;background:var(--poi-art) no-repeat center bottom/contain!important;filter:drop-shadow(0 0 6px #ffb35acc) drop-shadow(0 0 2px #000)}.poi-node.poi-art.poi-cardsmith::after{top:58px!important}'
