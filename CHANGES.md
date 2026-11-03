@@ -3496,6 +3496,41 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 345: the Blackout puzzle in every world; straight diagonal roads on the map
+
+- Owner request: add Neon Aftermath's breaker-switch puzzle (Round 298) to the other worlds, customised for each.
+  New `assets/world-relays.js` (after `city-nights`). In every other world, three switches stand in rooms near,
+  mid-way and far from the start; setting all three opens a sealed vault in the start room:
+
+  | World | Switches | Vault | Shards |
+  |---|---|---|---|
+  | Solaris | ☀ Sun Mirrors (turn the beam toward Dawnfire Gate) | 🏺 Sunvault | 70 |
+  | Sky Isles | 🌀 Wind Vanes (free the jammed vanes) | 🎁 Gale Strongbox | 90 |
+  | Elaris | 🏮 Spirit Lanterns (relight the wardens' lanterns) | 🌳 Heartwood Hollow | 110 |
+  | Vespera | ⚡ Lightning Rods (raise the toppled rods) | ⛈ Stormlocked Strongroom | 130 |
+  | Chronospire | 🕰 Stopped Clocks (wind the clocks) | ⌛ Chrono Vault | 150 |
+
+  - The vault also gives an Upgrade Crystal and one of that world's cards (seeded), like the Afterlight Vault.
+  - Placement follows the city:
+    - Rooms come from the journey's seed, one near, one mid-way and one far, in rooms with nothing else in them.
+      Those rooms are taken out of the point-of-interest pool.
+    - Each item stands at a clear spot away from patrols, with a walkable pad.
+    - The vault avoids the start room's waypoint, merchant and Cardsmith.
+  - Set switches and an emptied vault count as used, so they're dimmed in the room and on the map. Their names show
+    progress ("Sunvault · 1/3").
+  - Progress is saved per world (`state.worldRelays`).
+  - The switches and vaults also show as small icons on the map (`mapRoomObjects`).
+  - They are drawn as glyphs until painted; `object-prompts.md` section 8 has a prompt for each of the 10 objects.
+- **Map diagonals (owner: "they don't quite line up"):**
+  - The diagonal walkway ran hub → corner door → the other room's door → hub. The two doors sit almost side by side
+    across the corner, so the road kinked, and each room tile drew its own half.
+  - It is now one straight road between the two rooms' hubs, drawn once over the whole map.
+- New `tests/world-relays.test.cjs`, for every world:
+  - three switches, one near and one far;
+  - nothing else in their rooms, and every item within reach of the path;
+  - the vault is locked at first, the switches show as used, and the vault pays once.
+- `tests/map-diagonals.test.cjs` now expects the straight hub-to-hub road. Checked in Chromium.
+
 ## Round 344: the Character page's stats open from a 📊 Stats button
 
 - Owner request: make the character stats part of the Character screen a button that opens the stats.

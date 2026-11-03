@@ -192,6 +192,7 @@ function mapRoomObjects(key) {
   const shop = typeof merchantRoom === 'function' ? merchantRoom() : null; if (shop && shop.key === key) add(shop.x, shop.y, poiSrc(shop), false, '🛒');
   if (typeof cardsmithRoom === 'function' && cardsmithRoom() === key && typeof cardsmithSpot === 'function') { const c = cardsmithSpot(key), cp = { type: 'cardsmith', key }; if (c) add(c.x, c.y, poiSrc(cp), false, '⚒'); }
   if (typeof cityNightsItems === 'function') for (const it of cityNightsItems(key)) add(it.x, it.y, poiSrc(it), used(it), glyph(it));
+  if (typeof worldRelayItems === 'function') for (const it of worldRelayItems(key)) add(it.x, it.y, poiSrc(it), used(it), glyph(it)); // Round 345
   const chest = typeof chestFor === 'function' ? chestFor(key) : null;
   if (chest && !(state.chests || []).includes(chest.id)) {
     const art = typeof WORLD_CHEST_ART !== 'undefined' && WORLD_CHEST_ART[activeRegion];
@@ -225,9 +226,8 @@ function mapRoadTile(key, onReady) {
   ctx.fillStyle = MAP_PATH_STYLE.ground; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = MAP_PATH_STYLE.block;
   for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28);
-  // A diagonal road (Round 276) joins its door to this room's hub; drawMapTerrain joins the doors across the cut room.
   const extra = [], diag = typeof worldDiagTable === 'function' ? worldDiagTable()[key] : null;
-  if (diag) for (const [dir, d] of Object.entries(diag)) if (rooms[d.to] && r.exits[dir]) extra.push([net.hub, [Math.max(0, Math.min(W, d.x)), Math.max(0, Math.min(H, d.y))]]);
+  // Round 345: diagonal walkways are drawn once, hub to hub, over the whole map by drawMapTerrain (not per room tile).
   const svg = mapRoadSvg(key, extra), lines = mapRoadLines(net, extra);
   const stroke = (style, width, dash, cap) => {
     ctx.strokeStyle = style; ctx.lineWidth = width; ctx.lineCap = cap || 'square'; ctx.lineJoin = 'round';
@@ -461,11 +461,11 @@ function drawMapTerrain(canvasEl, tileW, bounds) {
       if (!source[key] || !source[d.to] || !rooms[key] || !rooms[key].exits[dir]) continue;
       const id = [key, d.to].sort().join('|'); if (done.has(id)) continue; done.add(id);
       const back = worldDiagTable()[d.to] && Object.values(worldDiagTable()[d.to]).find(e => e.to === key);
-      // Round 343: hub to door to door to hub, drawn as the same asphalt road as the rest of the map.
+      // Round 343/345: a diagonal walkway is one straight asphalt road between the two rooms' hubs.
       const na = mapRoadNet(key), nb = mapRoadNet(d.to); if (!na || !nb || !back) continue;
       const door = q => [Math.max(0, Math.min(800, q.x)), Math.max(0, Math.min(500, q.y))];
       const P = (k2, q) => { const [x0, y0] = at(...XY(k2)); return [x0 + q[0] * sxr, y0 + q[1] * syr]; };
-      const pts = [P(key, na.hub), P(key, door(d)), P(d.to, door(back)), P(d.to, nb.hub)];
+      const pts = [P(key, na.hub), P(d.to, nb.hub)]; // one straight road hub to hub across the cut corner (no kink at the doors)
       ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       for (const [style, w, dash] of [[MAP_ROAD_STYLE.shadow, MAP_ROAD_W + 26], [MAP_ROAD_STYLE.kerb, MAP_ROAD_W + 14], [MAP_ROAD_STYLE.asphalt, MAP_ROAD_W], [MAP_ROAD_STYLE.dash, 4, [18, 16]]]) {
         ctx.strokeStyle = style; ctx.lineWidth = Math.max(1, w * sxr); if (ctx.setLineDash) ctx.setLineDash(dash ? dash.map(v => v * sxr) : []);

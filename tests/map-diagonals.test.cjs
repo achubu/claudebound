@@ -1,6 +1,7 @@
 'use strict';
 // Round 276: diagonal roads (Solaris, the Sky Isles) are drawn as connected streets on the map, door to door
-// across the cut room even where the doors don't line up; and on a phone the room labels shrink with the map.
+// across the cut room even where the doors don't line up (Round 345: straight hub to hub); and on a phone the room labels
+// shrink with the map.
 const fs = require('node:fs'), path = require('node:path');
 process.env.HARNESS_ONLY = '1';
 const { run } = require('./expansion.test.cjs');
@@ -22,12 +23,14 @@ for (const region of ['elaris', 'sky']) {
   }
   assert(pairs >= 4, region + ' has diagonal roads');
   strokes.length = 0; const c = document.createElement('canvas'); drawMapTerrain(c, 256);
-  const joins = strokes.filter(s => s.length === 4).length; // street, door, partner's door, partner's street
-  assert(joins >= 3 * pairs / 2, region + ': every diagonal is drawn door to door (' + joins + ' strokes for ' + pairs / 2 + ' roads)');
+  // Round 345 (owner: the diagonals didn't quite line up): one straight road from hub to hub, drawn in 4 layers
+  // (shadow, kerb, asphalt, centre line), so each diagonal is 4 two-point strokes.
+  const joins = strokes.filter(s => s.length === 2).length;
+  assert(joins >= 4 * pairs / 2, region + ': every diagonal is drawn as one straight hub-to-hub road (' + joins + ' strokes for ' + pairs / 2 + ' roads)');
 }
 const props = {}; const map = { dataset: { baseW: 1000, baseH: 600 }, style: { setProperty: (k, v) => { props[k] = v; } }, offsetWidth: 1000, offsetHeight: 600, querySelector: () => null };
 const scroller = { clientWidth: 400, clientHeight: 300, scrollLeft: 0, scrollTop: 0 };
 applyMapZoom(map, scroller, 0.3); assert.equal(props['--map-label-scale'], '0.5', 'a phone-sized map shrinks its labels');
 applyMapZoom(map, scroller, 1); assert.equal(props['--map-label-scale'], '1', 'a full-size map keeps them');
-console.log('PASS: diagonal roads join door to door on the map in Solaris and the Sky Isles; labels shrink with a small map.');
+console.log('PASS: diagonal roads join hub to hub on the map in Solaris and the Sky Isles; labels shrink with a small map.');
 }`);
