@@ -3511,7 +3511,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   teleport pad with a glowing cyan ring, a hologram ring of glyphs above it, cables into cracked stone and a small
   control post (`WORLD_POI_ART.city.nexus`, `assets/items/poi/city-nexus.webp`). It's the first of the six per-world
   waypoints from the Round 339 prompts; the other worlds keep the shared one for now.
-- Tests: `solaris-roster` (the Colossus's own sheet), `city-cardsmith-art` (the city waypoint, others unchanged).
+- Tests: `solaris-roster` (the Colossus's own sheet), `city-cardsmith-art` (the city waypoint, others unchanged), and
+  `poi-art`, which expected the city's waypoint to be the shared image.
 
 ## Round 339: the terminal in Floodgate's factory yard is reached from the left; The Arc Sentinel and Gang Toll art; waypoint prompts
 
