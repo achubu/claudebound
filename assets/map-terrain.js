@@ -54,7 +54,7 @@ const MAP_SEAM_DEPTH = 32, MAP_MIN_PATCH = 120; // patches smaller than this (8p
 const mapPatchCache = {};
 function mapPatches(cx, cy) {
   // Connected street patches of one room's trimmed street cells: label per cell and size per label.
-  const ck = cx + ',' + cy; if (mapPatchCache[ck]) return mapPatchCache[ck];
+  const ck = activeRegion + ':' + cx + ',' + cy; if (mapPatchCache[ck]) return mapPatchCache[ck]; // Round 343: per world
   const C = 8, D = MAP_SEAM_DEPTH, cols = 100, rows = 63, lab = new Int32Array(cols * rows), size = [0];
   const ok = (i, j) => { const x = i * C + 4, y = j * C + 4; return x > D - 4 && x < 800 - D + 4 && y > D - 4 && y < 500 - D + 4 && neonWorldWalk(cx * 800 + x, cy * 500 + y); };
   for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
@@ -83,7 +83,7 @@ function mapSeam(key, dir) {
   const r = rooms[key], raw = r && r.exits[dir], to = raw && (typeof raw === 'string' ? raw : raw.to);
   if (!to || !rooms[to] || !rooms[to].world) return [];
   const opp = { n: 's', s: 'n', e: 'w', w: 'e' }[dir], first = dir === 'e' || dir === 's';
-  const ck = first ? key + dir : to + opp;
+  const ck = activeRegion + ':' + (first ? key + dir : to + opp); // Round 343: per world
   if (!(ck in mapSeamCache)) {
     // Computed once per shared edge, from the west/north room's side, so both rooms agree.
     const [A, B, dA] = first ? [key, to, dir] : [to, key, opp], [ax, ay] = rooms[A].world, [bx, by] = rooms[B].world;
@@ -110,7 +110,7 @@ function mapDiagAnchor(key, d) {
   for (let y = 4; y < 500; y += 8) for (let x = 4; x < 800; x += 8) { if (patch.at(x, y) < MAP_MIN_PATCH) continue; const dd = Math.hypot(x - door[0], y - door[1]); if (dd < bd) { bd = dd; best = [x, y]; } }
   return best && bd < 300 ? [best, door] : [door, door];
 }
-// Round 343 (owner): Neon Aftermath's map shows only the main roads, as clean vector paths that mimic each room's
+// Round 343 (owner): every world's map shows only the main roads, as clean vector paths that mimic each room's
 // road shapes and line up exactly between rooms. From every exit crossing (mapSeam's shared meeting point on the
 // edge, snapped to a 40px grid) a straight road runs in, with at most one 45° jog, to the room's hub. Courtyards, footpaths and plazas are left out. The roads are built as SVG path data
 // (mapRoadSvg) and drawn with Path2D, all at one width, so a road leaving one room enters the next one seamlessly.
@@ -121,7 +121,7 @@ const mapRoadCache = {};
 function mapRoadSnap(v, len) { return Math.max(MAP_ROAD_GRID, Math.min(len - MAP_ROAD_GRID, Math.round(v / MAP_ROAD_GRID) * MAP_ROAD_GRID)); }
 function mapRoadNet(key) {
   const r = rooms[key]; if (!r || !r.world || typeof neonWorldWalk !== 'function') return null;
-  if (mapRoadCache[key]) return mapRoadCache[key];
+  const rk = activeRegion + ':' + key; if (mapRoadCache[rk]) return mapRoadCache[rk];
   const [cx, cy] = r.world, patch = mapPatches(cx, cy), W = 800, H = 500, D = MAP_SEAM_DEPTH, G = MAP_ROAD_GRID;
   const exits = [];
   for (const dir of ['n', 's', 'e', 'w']) {
@@ -135,7 +135,7 @@ function mapRoadNet(key) {
       exits.push({ dir, vert, m, depth });
     }
   }
-  if (!exits.length) return mapRoadCache[key] = { hub: [W / 2, H / 2], paths: [] };
+  if (!exits.length) return mapRoadCache[rk] = { hub: [W / 2, H / 2], paths: [] };
   // The hub: where the room's straight roads meet. Vertical roads set its x, horizontal ones its y; a room whose roads
   // all run one way meets them halfway (a dead end stops where its street stops).
   const V = exits.filter(e => e.vert), Hz = exits.filter(e => !e.vert), snapG = v => Math.round(v / G) * G, mean = a => a.reduce((s, v) => s + v, 0) / a.length;
@@ -157,7 +157,7 @@ function mapRoadNet(key) {
     pts.push(P(hubAlong, hubDepth));
     return pts;
   });
-  return mapRoadCache[key] = { hub, paths };
+  return mapRoadCache[rk] = { hub, paths };
 }
 // The room's roads as drawable polylines: a room with just two roads (a straight run or a corner) is one continuous
 // road through its hub, so the turn is rounded rather than notched.
@@ -219,7 +219,7 @@ const MAP_ROAD_STYLE = { shadow: 'rgba(0,0,0,.35)', kerb: '#cfe6ee', asphalt: '#
 function mapRoadTile(key, onReady) {
   const r = rooms[key], net = mapRoadNet(key); if (!net) return null;
   const objs = mapRoomObjects(key), sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
-  const ck = 'roads:' + key + ':' + sig; if (mapTileCache[ck]) return mapTileCache[ck];
+  const ck = 'roads:' + activeRegion + ':' + key + ':' + sig; if (mapTileCache[ck]) return mapTileCache[ck];
   const W = 800, H = 500, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;
   ctx.fillStyle = MAP_PATH_STYLE.ground; ctx.fillRect(0, 0, W, H);
@@ -263,7 +263,7 @@ function mapRoadTile(key, onReady) {
 }
 function mapPathTile(key, onReady) {
   const r = rooms[key]; if ((activeRegion !== 'city' && activeRegion !== 'elaris' && !TILE_REGIONS[activeRegion]) || !r || !r.world || typeof neonWorldWalk !== 'function') return null;
-  if (activeRegion === 'city') return mapRoadTile(key, onReady); // Round 343: main roads only, as vector paths
+  return mapRoadTile(key, onReady); // Round 343: every world's map shows its main roads as vector paths
   const ck = 'paths:' + activeRegion + ':' + key; if (mapTileCache[ck]) return mapTileCache[ck];
   const W = 800, H = 500, C = 8, D = MAP_SEAM_DEPTH, [cx, cy] = r.world, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;
@@ -461,13 +461,17 @@ function drawMapTerrain(canvasEl, tileW, bounds) {
       if (!source[key] || !source[d.to] || !rooms[key] || !rooms[key].exits[dir]) continue;
       const id = [key, d.to].sort().join('|'); if (done.has(id)) continue; done.add(id);
       const back = worldDiagTable()[d.to] && Object.values(worldDiagTable()[d.to]).find(e => e.to === key);
-      const A = mapDiagAnchor(key, d), B = back ? mapDiagAnchor(d.to, back) : null; if (!A || !B) continue;
+      // Round 343: hub to door to door to hub, drawn as the same asphalt road as the rest of the map.
+      const na = mapRoadNet(key), nb = mapRoadNet(d.to); if (!na || !nb || !back) continue;
+      const door = q => [Math.max(0, Math.min(800, q.x)), Math.max(0, Math.min(500, q.y))];
       const P = (k2, q) => { const [x0, y0] = at(...XY(k2)); return [x0 + q[0] * sxr, y0 + q[1] * syr]; };
-      const pts = [P(key, A[0]), P(key, A[1]), P(d.to, B[1]), P(d.to, B[0])];
+      const pts = [P(key, na.hub), P(key, door(d)), P(d.to, door(back)), P(d.to, nb.hub)];
       ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      for (const [style, w] of [[MAP_PATH_STYLE.glow, 30 + 16], [MAP_PATH_STYLE.edge, 30], [MAP_PATH_STYLE.street, 30 - 16]]) {
-        ctx.strokeStyle = style; ctx.lineWidth = Math.max(1.5, w * sxr); ctx.beginPath(); ctx.moveTo(...pts[0]); for (const q of pts.slice(1)) ctx.lineTo(...q); ctx.stroke();
+      for (const [style, w, dash] of [[MAP_ROAD_STYLE.shadow, MAP_ROAD_W + 26], [MAP_ROAD_STYLE.kerb, MAP_ROAD_W + 14], [MAP_ROAD_STYLE.asphalt, MAP_ROAD_W], [MAP_ROAD_STYLE.dash, 4, [18, 16]]]) {
+        ctx.strokeStyle = style; ctx.lineWidth = Math.max(1, w * sxr); if (ctx.setLineDash) ctx.setLineDash(dash ? dash.map(v => v * sxr) : []);
+        ctx.beginPath(); ctx.moveTo(...pts[0]); for (const q of pts.slice(1)) ctx.lineTo(...q); ctx.stroke();
       }
+      if (ctx.setLineDash) ctx.setLineDash([]);
       ctx.restore();
     }
   }

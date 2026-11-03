@@ -70,7 +70,7 @@ change set.
   - Round 339: `BRIDGE_CUTS` / `STREET_LINKS` in `tools/build_room_masks.py` are hand fixes for automatic bridges that
     run through buildings; `tools/nook_view.py` draws a room with its walk mask and footpaths. **Open owner note:**
     recheck every route for this problem, starting with the list in `tools/route-review.md`.
-  - Round 343: the **Map** screen and minimap don't use the paintings or traced blobs. Each room's main roads are vector
+  - Round 343: in **every world** the Map screen and minimap don't use the paintings or traced blobs. Each room's main roads are vector
     paths (`mapRoadNet` / `mapRoadSvg` in `assets/map-terrain.js`): one road per exit at a 40px-snapped shared edge
     point, straight or with one 45° jog, meeting at the room's hub, drawn like the owner's example (asphalt, pale kerbs,
     dashed centre line, rounded turns). Objects show as small paintings beside the nearest road (`mapRoomObjects`).

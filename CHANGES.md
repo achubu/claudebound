@@ -3496,7 +3496,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
-## Round 343: Neon Aftermath's map is redrawn as clean vector roads that line up exactly
+## Round 343: every world's map is redrawn as clean vector roads that line up exactly
 
 - Owner request: redraw the city **map** (the Map screen and the minimap, not the room paintings) with vector graphics
   that mimic the road shapes, so every room lines up perfectly. Owner notes during the round:
@@ -3525,8 +3525,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   - Each is projected onto the nearest straight road and placed just past the kerb, on the same side as it stands in
     the room. Used objects are dimmed.
   - Tiles redraw once their images load.
+- **All worlds (owner: "do this for all worlds moving forward"):**
+  - Solaris, the Sky Isles, Elaris, Vespera and Chronospire use the same road map. Before, they used the old
+    traced-blob drawing.
+  - The diagonal walkways across their cut corners are drawn as the same asphalt road, hub to door to door to hub.
+    They used to be a thin cyan line.
+- Fix: the map's street-patch and seam caches (and the new road caches) are now keyed by world. Before, they were
+  keyed by room only, so after travelling, a world's map could reuse the previous world's street data for the same
+  room key.
 - New `tests/map-roads.test.cjs`:
-  - all 136 crossings meet their neighbour at exactly the same point;
+  - in every world, every crossing meets its neighbour at exactly the same point (136 in Neon Aftermath and
+    Chronospire, 124 in each of the others);
   - every exit has a road;
   - every segment is straight or 45°.
   `map-terrain` and `map-diagonals` still pass. Checked in Chromium at fit and 156% zoom.
