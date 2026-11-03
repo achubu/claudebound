@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 334: Vespera's Ion Shade glides on its own sheet; the Breaker Box painting
+
+- **Ion Shade** (Vespera): until now it borrowed the Neon Aftermath Phase Shade sheet. It now has its own four-frame
+  glide (`assets/monsters/vespera/ion-shade.png`, `WILDLIFE_ART.ionShade`, cycle `.8s`, `tint:'none'`):
+  - The source is the owner's draft of eight 704px frames, a hooded storm wraith with a violet slit of a face,
+    lightning veins and a frayed cyan cloak.
+  - Built like the Tempest Moth and Brinewing Heron. The eight-frame strip is kept in `src/`.
+  - `SPRITE_VERSION` is now '334'.
+- The owner's **Breaker Box** (Neon Aftermath, Round 298) replaces the ⚡ glyph at the city's three Blackout
+  breakers. It's a rusty grey cabinet on a concrete post with hazard stripes, its door open on a red lever and a
+  sparking fuse bank, with an amber warning light and cables into cracked pavement
+  (`WORLD_POI_ART.city.breaker`, `assets/items/poi/city-breaker.webp`). Breakers already switched on show it greyed,
+  like any used object.
+  - Keyed with `--warm-olive`, so the warning light's halo is amber, not olive.
+- Tests: `forest-anim` (shade sheet) and `city-cardsmith-art` (Breaker Box; the Vault keeps its glyph for now).
+
 ## Round 333: Vespera's Brinewing Heron walks on its own sheet; the Echoing Corridor and Wanted Board paintings
 
 - **Brinewing Heron** (Vespera): until now it borrowed the Elaris Drowned Heron sheet. It now has its own four-frame
