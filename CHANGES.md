@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 330: the Clockmaker's Bench gets its painting
+
+- The owner's **Clockmaker's Bench** replaces the shared "?" pedestal for that Chronospire event: a bronze-cornered
+  wooden workbench with drawers, covered in gears, springs, screws and fine tools around a glowing open pocket
+  watch. A brass magnifying lamp on a jointed arm lights it warm gold, with a stool and dropped gears on the plank
+  floor (`assets/items/poi/events/clockmaker.webp`; the original is in `events/src/`).
+- Keyed with plain `tools/key_object.py`.
+- Checked over four grounds; `tests/event-art.test.cjs` covers it.
+
 ## Round 329: the Echoing Prism gets its painting
 
 - The owner's **Echoing Prism** replaces the shared "?" pedestal for that Vespera event. A tall six-sided crystal
