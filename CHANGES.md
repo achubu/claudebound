@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 335: Vespera's Rimeglass Stag walks on its own sheet; the Afterlight Vault painting
+
+- **Rimeglass Stag** (Vespera): until now it borrowed the Elaris Blight Antler sheet. It now has its own four-frame
+  walk (`assets/monsters/vespera/rimeglass-stag.png`, `WILDLIFE_ART.rimeglassStag`, cycle `.8s`, `tint:'none'`):
+  - The source is the owner's draft of eight 704px frames, a frost-furred stag with icicled antlers and blue-violet
+    crystals along its back.
+  - Each frame had a pale grey blob of leftover background between the antlers and the neck. It was removed as
+    near-white, unsaturated patches of 1500px or more (minimum channel over 200), grown 3px into similar pixels.
+    A looser first try also cut into the frosted fur along the back, so the threshold sits above the fur's
+    brightness. A faint frost haze stays around the icicles.
+  - Then built like the other Vespera creatures. The eight-frame strip is kept in `src/`.
+  - `SPRITE_VERSION` is now '335'.
+- The owner's **Afterlight Vault** (Neon Aftermath, Round 298) replaces its 🔒/🔓 glyph. It's a round riveted steel
+  vault door with a spoked wheel in a cracked concrete wall, with cyan light leaking from its seam, a keypad with a
+  red light, and rubble and cables at its base (`WORLD_POI_ART.city.vault`, `assets/items/poi/city-vault.webp`).
+  All three Round 298 city-night objects now have paintings.
+- Tests: `forest-anim` (stag sheet) and `city-cardsmith-art` (vault).
+
 ## Round 334: Vespera's Ion Shade glides on its own sheet; the Breaker Box painting
 
 - **Ion Shade** (Vespera): until now it borrowed the Neon Aftermath Phase Shade sheet. It now has its own four-frame

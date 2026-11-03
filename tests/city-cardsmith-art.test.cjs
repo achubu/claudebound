@@ -16,7 +16,7 @@ assert.strictEqual(r.city, 'city-cardsmith', 'the city Cardsmith uses its painti
 assert.strictEqual(r.cityShop, 'merchant', 'the city merchant is unchanged');
 assert.strictEqual(r.board, 'city-wanted-board', 'Round 333: the Wanted Board uses its painting');
 assert.strictEqual(r.breaker, 'city-breaker', 'Round 334: the Breaker Boxes use their painting');
-assert(!r.vault, 'the Afterlight Vault keeps its glyph for now');
+assert.strictEqual(r.vault, 'city-vault', 'Round 335: the Afterlight Vault uses its painting');
 assert.strictEqual(r.solaris, 'sol-cardsmith', 'Solaris keeps its own');
 assert.strictEqual(r.wilds, 'wilds-cardsmith', 'Round 308: the Elaris Cardsmith uses its painting');
 assert.strictEqual(r.sky, 'sky-cardsmith', 'Round 309: the Sky Isles Cardsmith uses its painting');
@@ -25,6 +25,6 @@ assert.strictEqual(r.wildsLore, 'wilds-lore', 'Round 311: the Elaris Elder Stone
 assert.strictEqual(r.chronoLore, 'chronospire-lore', 'Round 311: the Chronospire inscription uses its painting');
 assert.strictEqual(r.chrono, 'chronospire-cardsmith', 'Round 312: the Chronospire Cardsmith uses its painting');
 assert.strictEqual(r.vespera, 'vespera-cardsmith', 'Round 313: the Vespera Cardsmith uses its painting');
-for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore', 'chronospire-cardsmith', 'vespera-cardsmith', 'city-wanted-board', 'city-breaker']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
+for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore', 'chronospire-cardsmith', 'vespera-cardsmith', 'city-wanted-board', 'city-breaker', 'city-vault']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
 assert(!r.vesperaLore, 'the Vespera Storm Glyph keeps its glyph for now');
 console.log('city-cardsmith-art ok');

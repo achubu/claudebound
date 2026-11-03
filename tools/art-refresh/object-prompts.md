@@ -80,7 +80,7 @@ through `WORLD_POI_ART.city`); events go in `events/` (wired through `EVENT_ART`
 |---|---|---|
 | `city-wanted-board.webp` ✅ done (Round 333) | Wanted Board | A scrap-metal notice board on rusty legs under a dented awning with a red neon strip, three wanted posters with red X stamps. |
 | `city-breaker.webp` ✅ done (Round 334) | Breaker Box (3) | A dented utility breaker cabinet on a pole, door hanging open on a big lever switch, sparking fuses and thick cables. |
-| `city-vault.webp` | Afterlight Vault | A heavy round vault door set into a concrete wall, glowing cyan seams and a dead keypad, locked until the breakers are on. |
+| `city-vault.webp` ✅ done (Round 335) | Afterlight Vault | A heavy round vault door set into a concrete wall, glowing cyan seams and a dead keypad, locked until the breakers are on. |
 | `events/arcade` | Arcade Cabinet | A rain-soaked retro arcade cabinet with a glowing screen and joystick under a scrap awning. |
 | `events/racer` | Drone Racers | Two small scrap racing drones on a chalk-marked start line, a battered trophy and a crate. |
 | `events/billboard` | Glitched Billboard | A small standing digital billboard with a glitching, pixel-scrambled screen. |
