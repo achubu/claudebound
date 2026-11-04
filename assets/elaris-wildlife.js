@@ -39,11 +39,18 @@ const WILDLIFE_ART={
  forestMoth:{name:'Storm Moth',sheet:'storm-moth',cycle:'.8s'}, // Round 304: the owner's eight-frame flight (also the Tempest and Tick Moths, recolored)
  // Round 234: Neon Aftermath's Briar Sentinel is animated: stand, shield up, slash (poses: sun-revenant.js),
  // and a walk on the map. The Arc Sentinel and the Brass Sentry borrow it.
- vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel',cycle:'1.6s',poses:{attack:2,hurt:1,walk:'city/briar-sentinel-walk'}},
+ // Round 356 (trial of the owner's refreshed art): the new walk is used everywhere. Before:
+ // vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel',cycle:'1.6s',poses:{attack:2,hurt:1,walk:'city/briar-sentinel-walk'}},
+ vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel-v2',cycle:'.8s'},
+ // The Brass Sentry (Chronospire) keeps borrowing the old Briar Sentinel art, recoloured, until it has its own.
+ briarSentinelOld:{name:'Brass Sentry',sheet:'city/briar-sentinel',cycle:'1.6s',poses:{attack:2,hurt:1,walk:'city/briar-sentinel-walk'}},
  // Round 252: the Ember Jackal is animated too: stand, rear back when hit, lunge with a raised paw.
- emberling:{name:'Ember Jackal',sheet:'city/ember-jackal',cycle:'1.2s',poses:{attack:2,hurt:1,walk:'city/ember-jackal-walk'}},
+ // Round 356 (trial of the owner's refreshed art): the new walk is used everywhere. Before:
+ // emberling:{name:'Ember Jackal',sheet:'city/ember-jackal',cycle:'1.2s',poses:{attack:2,hurt:1,walk:'city/ember-jackal-walk'}},
+ emberling:{name:'Ember Jackal',sheet:'city/ember-jackal-v2',cycle:'.8s'},
  // Round 255: the Circuit Thornling scuttles (four of the owner's eight walk frames; no battle poses yet).
- thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling',cycle:'.8s'},
+ // Round 356 (trial): before, thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling',cycle:'.8s'},
+ thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling-v2',cycle:'.8s'},
  // Round 258: the Tunnel Borehound walks (four of the owner's eight frames; no battle poses yet).
  burrower:{name:'Tunnel Borehound',sheet:'city/tunnel-borehound',cycle:'.8s'},
  // Round 264: the Phase Shade glides (four of the owner's eight frames; no battle poses yet).
@@ -51,6 +58,8 @@ const WILDLIFE_ART={
  // Round 266: the Crown Observer hovers (four of the owner's eight frames; no battle poses yet).
  crownEye:{name:'Crown Observer',sheet:'city/crown-observer',cycle:'.8s'},
  // Round 354: the Reactor Mauler walks (four of the owner's eight frames; it had a single still picture, clipped at both sides).
+ // Round 356: the Crown Sentinel (mini-boss) floats on its own sheet; it borrowed the Crown Observer's still picture.
+ crownSentinel:{name:'The Crown Sentinel',sheet:'city/crown-sentinel',cycle:'.8s'},
  forgeBeast:{name:'Reactor Mauler',sheet:'city/reactor-mauler',cycle:'.8s'},
  // Round 267: Neon Aftermath's final boss, the Thorn Warden, strides (four of the owner's eight side-walk frames).
  thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden',cycle:'1.1s'},
@@ -64,7 +73,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='354';
+const SPRITE_VERSION='356';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which

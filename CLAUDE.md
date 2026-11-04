@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 355) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 356) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -122,7 +122,8 @@ change set.
   Creature art faces right (the map flips it when walking left, battle flips it to face the player); mirror
   left-facing art per frame (Round 257). Round 351: after adding or re-cutting sheets, run `python3 tools/enemy_sizes.py`
   (it writes `assets/enemy-sizes.css`, which scales each creature on the map toward one painted size), then
-  `python3 tools/sprite_audit.py` (Round 352: stray fragments, clipped edges, keying fringe, pale matte).
+  `python3 tools/sprite_audit.py` (Round 352: stray fragments, clipped edges, keying fringe, pale matte). Round 356: a draft that is
+  one image with eight walk frames in a row on green goes through `python3 tools/strip_to_sheet.py draft.jpeg assets/monsters/<world>/<name>.png`.
 - **Card art** comes from `cardArtPath()` in `assets/cards.js`. The refreshed
   WebP illustrations are listed in `refreshedCardArt`. Status and pending
   prompts: `assets/cards/art-refresh.md` and `tools/art-refresh/`. When art
