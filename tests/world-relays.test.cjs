@@ -32,4 +32,13 @@ for (const [w, o] of Object.entries(r)) {
   assert(o.paid, w + ': the vault pays its Shards, an Upgrade Crystal and a card once');
 }
 assert(r.cityAlone, 'Neon Aftermath keeps its own Blackout (city-nights.js)');
+// Round 346: the owner's paintings for the switches and vaults (Solaris's two still to come), and two Chronospire creatures.
+const fs = require('fs');
+const art = JSON.parse(run(`(() => { const o = {}; for (const w of Object.keys(WORLD_RELAYS)) { configureRegion(w); const d = WORLD_RELAYS[w]; o[w] = [poiArt({ type: d.sw.type }), poiArt({ type: d.vault.type })]; } configureRegion('city');
+  o.stag = monsterArt('chronoStag'); o.heron = monsterArt('chronoHeron'); return JSON.stringify(o); })()`));
+for (const w of ['sky', 'wilds', 'vespera', 'chronospire']) for (const a of art[w]) {
+  assert(a && a.startsWith(w + '-'), w + ': switch and vault use their paintings (' + art[w] + ')');
+  assert.strictEqual(fs.readFileSync('assets/items/poi/' + a + '.webp').toString('ascii', 0, 4), 'RIFF', a);
+}
+assert(art.stag.includes('chronospire/pendulum-stag.png') && art.heron.includes('chronospire/hourglass-heron.png'), 'Chronospire\'s Pendulum Stag and Hourglass Heron have their own sheets');
 console.log('world-relays ok');

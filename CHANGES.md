@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 346: the switches and vaults get their paintings; Chronospire's Pendulum Stag and Hourglass Heron
+
+- The owner's paintings for eight of the ten Round 345 puzzle objects replace their glyphs, through
+  `WORLD_POI_ART.<world>.<type>` (`assets/items/poi/<world>-<type>.webp`):
+  - Sky Isles: a brass weather vane on a marble post on a cloud, and a chained brass-bound strongbox with a
+    wind-lock dial and three pale-blue gems.
+  - Elaris: a wardens' lantern on a root-wrapped post, and an old tree stump with a bark-sealed door and three
+    glowing runes. Both keyed with `--keep-green`.
+  - Vespera: an iron lightning rod struck by a violet bolt, and a slate strongroom with a storm-lock and three violet
+    bulbs.
+  - Chronospire: a bronze-and-marble standing clock with a winding key, and a bronze vault with a clock-face lock and
+    gear hinges.
+  - Solaris's Sun Mirror and Sunvault are still to come.
+  - The paintings show in the rooms and on the map (Chromium checked).
+- **Pendulum Stag** and **Hourglass Heron** (Chronospire): until now they borrowed the Elaris Blight Antler and
+  Drowned Heron, recolored. They now walk on their own sheets from the owner's eight-frame drafts
+  (`assets/monsters/chronospire/pendulum-stag.png` and `hourglass-heron.png`; strips in `src/`).
+  `SPRITE_VERSION` is now '346'.
+- `tests/world-relays.test.cjs` checks the paintings and both creature sheets.
+
 ## Round 345: the Blackout puzzle in every world; straight diagonal roads on the map
 
 - Owner request: add Neon Aftermath's breaker-switch puzzle (Round 298) to the other worlds, customised for each.

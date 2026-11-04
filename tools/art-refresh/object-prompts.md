@@ -120,10 +120,10 @@ Shared on purpose, so optional (see section 3):
 | `city/crown-observer` | The Clockwarden (Chronospire) |
 | `city/data-wisp` | Rust Wisp (Chronospire); Arc Wisp has its own since Round 336 |
 | `city/phase-shade` | The Resonant Phantom (Vespera mini-boss), Lag Wraith, The Paradox Twin (Chronospire) |
-| `elaris/blight-antler` | Pendulum Stag (Chronospire) |
+| `elaris/blight-antler` | none since Round 346 (the Pendulum Stag has its own) |
 | `elaris/bloom-tyrant` | The Chronarch (Chronospire boss); The Tempest Colossus has its own since Round 340 |
 | `elaris/cinder-fox` | none since Round 341 (the Gearhound has its own) |
-| `elaris/drowned-heron` | Hourglass Heron (Chronospire); The Tidebound Warden (Elaris mini-boss, not recolored) |
+| `elaris/drowned-heron` | The Tidebound Warden (Elaris mini-boss, not recolored); the Hourglass Heron has its own since Round 346 |
 | `elaris/storm-moth` | The Gale Sovereign (Elaris mini-boss, not recolored); the Tick Moth has its own since Round 342 |
 | `reactor-mauler` | Cog Mauler (Chronospire); Thunder Mauler has its own since Round 338 |
 
@@ -176,12 +176,12 @@ painted. Wire paintings through `WORLD_POI_ART.<world>.<type>` (`assets/items/po
 |---|---|---|
 | `sunMirror` | Solaris | A tall bronze mirror on a carved sandstone pivot, tilted toward the sun, a beam of golden light glancing off it. |
 | `sunVault` | Solaris | A squat sandstone vault with a big carved sun-disc lock and gold trim, half-buried in sand. |
-| `windVane` | Sky Isles | A great brass weather vane on a marble post on a cloud, its arrow and feathered tail spinning in the wind. |
-| `galeStrongbox` | Sky Isles | A brass-bound strongbox chained to a scrap of white deck, a spinning wind-lock dial on its front. |
-| `spiritLantern` | Elaris | An old wardens' lantern on a root-wrapped wooden post, glowing green-gold, moss and ferns at its base. |
-| `heartHollow` | Elaris | A great hollow tree trunk with a doorway grown over with bark, glowing runes around it, roots and mushrooms. |
-| `stormRod` | Vespera | A tall iron lightning rod on wet black rock, a crackling violet bolt striking its tip, a snapped cable at its base. |
-| `stormStrongroom` | Vespera | A squat slate strongroom with an iron door and a storm-lock crackling with violet sparks, rain on the stone. |
-| `stoppedClock` | Chronospire | A tall bronze-and-marble standing clock with a pendulum and glowing amber dial, gears showing through its side. |
-| `chronoVault` | Chronospire | A bronze vault with a large clock-face lock, golden sand drifting upward around it, on a marble tile. |
+| `windVane` ✅ done (Round 346) | Sky Isles | A great brass weather vane on a marble post on a cloud, its arrow and feathered tail spinning in the wind. |
+| `galeStrongbox` ✅ done (Round 346) | Sky Isles | A brass-bound strongbox chained to a scrap of white deck, a spinning wind-lock dial on its front. |
+| `spiritLantern` ✅ done (Round 346) | Elaris | An old wardens' lantern on a root-wrapped wooden post, glowing green-gold, moss and ferns at its base. |
+| `heartHollow` ✅ done (Round 346) | Elaris | A great hollow tree trunk with a doorway grown over with bark, glowing runes around it, roots and mushrooms. |
+| `stormRod` ✅ done (Round 346) | Vespera | A tall iron lightning rod on wet black rock, a crackling violet bolt striking its tip, a snapped cable at its base. |
+| `stormStrongroom` ✅ done (Round 346) | Vespera | A squat slate strongroom with an iron door and a storm-lock crackling with violet sparks, rain on the stone. |
+| `stoppedClock` ✅ done (Round 346) | Chronospire | A tall bronze-and-marble standing clock with a pendulum and glowing amber dial, gears showing through its side. |
+| `chronoVault` ✅ done (Round 346) | Chronospire | A bronze vault with a large clock-face lock, golden sand drifting upward around it, on a marble tile. |
 
