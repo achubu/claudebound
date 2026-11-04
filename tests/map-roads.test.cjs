@@ -31,4 +31,7 @@ assert(r.objs >= 0);
 assert(r.style.kerb && r.style.asphalt && r.style.dash, 'owner-example road style: asphalt, kerb, dashed centre line');
 console.log('map-roads ' + world + ': ' + checked + ' crossings line up');
 }
+// Round 355 (owner): no road jogs at a seam: a road crossing an edge alone runs straight through both rooms.
+{ const jog = JSON.parse(run(`(() => { const out = []; for (const w of WORLD_ORDER) { configureRegion(w); for (const k of Object.keys(rooms)) { const n = mapRoadNet(k); if (n) for (const p of n.paths) if (p.length > 2) out.push(w + ' ' + k); } } return JSON.stringify(out); })()`));
+  assert.deepStrictEqual(jog, [], 'roads with a jog: ' + jog.join(', ')); }
 console.log('map-roads ok');

@@ -119,9 +119,10 @@ const mapRoadCache = {};
 // A crossing's spot on the shared edge, snapped to a 40px grid. Both rooms use mapSeam's shared meeting point, so they
 // snap it the same way and the road lines up exactly across the edge.
 function mapRoadSnap(v, len) { return Math.max(MAP_ROAD_GRID, Math.min(len - MAP_ROAD_GRID, Math.round(v / MAP_ROAD_GRID) * MAP_ROAD_GRID)); }
-function mapRoadNet(key) {
+const mapRoadRawCache = {};
+function mapRoadRaw(key) {
   const r = rooms[key]; if (!r || !r.world || typeof neonWorldWalk !== 'function') return null;
-  const rk = activeRegion + ':' + key; if (mapRoadCache[rk]) return mapRoadCache[rk];
+  const rk = activeRegion + ':' + key; if (mapRoadRawCache[rk]) return mapRoadRawCache[rk];
   const [cx, cy] = r.world, patch = mapPatches(cx, cy), W = 800, H = 500, D = MAP_SEAM_DEPTH, G = MAP_ROAD_GRID;
   const exits = [];
   for (const dir of ['n', 's', 'e', 'w']) {
@@ -135,13 +136,49 @@ function mapRoadNet(key) {
       exits.push({ dir, vert, m, depth });
     }
   }
-  if (!exits.length) return mapRoadCache[rk] = { hub: [W / 2, H / 2], paths: [] };
+  if (!exits.length) return mapRoadRawCache[rk] = { exits, hub: [W / 2, H / 2] };
   // The hub: where the room's straight roads meet. Vertical roads set its x, horizontal ones its y; a room whose roads
   // all run one way meets them halfway (a dead end stops where its street stops).
   const V = exits.filter(e => e.vert), Hz = exits.filter(e => !e.vert), snapG = v => Math.round(v / G) * G, mean = a => a.reduce((s, v) => s + v, 0) / a.length;
   let hx = V.length ? snapG(mean(V.map(e => e.m))) : null, hy = Hz.length ? snapG(mean(Hz.map(e => e.m))) : null;
   if (hy === null) hy = V.length === 1 ? (V[0].dir === 'n' ? Math.min(H - G, snapG(V[0].depth)) : Math.max(G, snapG(H - V[0].depth))) : H / 2;
   if (hx === null) hx = Hz.length === 1 ? (Hz[0].dir === 'w' ? Math.min(W - G, snapG(Hz[0].depth)) : Math.max(G, snapG(W - Hz[0].depth))) : W / 2;
+  return mapRoadRawCache[rk] = { exits, hub: [hx, hy] };
+}
+// Round 355 (owner: "adjust the map roads so they never have these slight misalignments ... draw the roads so they are
+// straight even if you need to move the road up or down"): rooms joined east-west share one hub height and rooms joined
+// north-south share one hub column (the snapped median of their own hubs), and an edge with a single crossing is crossed
+// on that line, so a road running through several rooms is one straight line with no jog at the seams.
+const mapRoadAlignCache = {};
+function mapRoadAlign() {
+  if (mapRoadAlignCache[activeRegion]) return mapRoadAlignCache[activeRegion];
+  const keys = Object.keys(rooms).filter(k => rooms[k] && rooms[k].world), parent = {};
+  const find = (a) => { while (parent[a] !== a) a = parent[a] = parent[parent[a]]; return a; };
+  const groups = (axis) => {
+    for (const k of keys) parent[k] = k;
+    for (const k of keys) for (const d of axis === 'y' ? ['e'] : ['s']) {
+      if (mapSeam(k, d).length !== 1) continue;
+      const raw = rooms[k].exits[d], to = typeof raw === 'string' ? raw : raw && raw.to; if (to && parent[to] !== undefined) parent[find(k)] = find(to);
+    }
+    const members = {}; for (const k of keys) (members[find(k)] = members[find(k)] || []).push(k);
+    const out = {};
+    for (const list of Object.values(members)) {
+      const vals = list.map(k => mapRoadRaw(k).hub[axis === 'y' ? 1 : 0]).sort((a, b) => a - b), med = vals[Math.floor(vals.length / 2)];
+      for (const k of list) out[k] = med;
+    }
+    return out;
+  };
+  return mapRoadAlignCache[activeRegion] = { y: groups('y'), x: groups('x') };
+}
+function mapRoadNet(key) {
+  const r = rooms[key]; if (!r || !r.world || typeof neonWorldWalk !== 'function') return null;
+  const rk = activeRegion + ':' + key; if (mapRoadCache[rk]) return mapRoadCache[rk];
+  const W = 800, H = 500, G = MAP_ROAD_GRID, base = mapRoadRaw(key); if (!base) return null;
+  if (!base.exits.length) return mapRoadCache[rk] = { hub: base.hub, paths: [] };
+  const al = mapRoadAlign(), hx = al.x[key] !== undefined ? al.x[key] : base.hub[0], hy = al.y[key] !== undefined ? al.y[key] : base.hub[1];
+  // An edge with one crossing is crossed on the hub's own line (its neighbour shares that line), so the road is straight.
+  const perEdge = {}; for (const e of base.exits) perEdge[e.dir] = (perEdge[e.dir] || 0) + 1;
+  const exits = base.exits.map(e => perEdge[e.dir] === 1 ? { ...e, m: e.vert ? hx : hy } : e);
   const hub = [hx, hy];
   // Each road: straight in from the edge; if it must shift across to the hub's line, one 45° jog just inside the
   // edge; then straight on to the hub. Only straight lines and 45° angles.

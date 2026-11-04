@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 355: map roads never jog at a room edge
+
+- Owner: "adjust the map roads so they never have these slight misalignments ... draw the roads so they are straight in
+  this situation even if you need to move the road up or down". The example was Canal Walk to Glowstep Lane in Neon
+  Aftermath, where a road shifted half a lane at the seam.
+- Cause: each room's hub (where its roads meet) was placed from its own streets, so two neighbours often sat a grid
+  step apart and the road between them took a 45° jog.
+- Now (`assets/map-terrain.js`) `mapRoadAlign()` groups rooms joined east-west and gives each group one hub height,
+  and does the same for hub columns among rooms joined north-south: the snapped median of their own hubs. An edge with a
+  single crossing is crossed on that line (`mapRoadRaw` keeps the old per-room computation). Edges with two crossings
+  keep their own spots.
+- Before, Neon Aftermath had 10 jogged roads and Solaris 1. Now every world has none, and all crossings still line
+  up. `tests/map-roads.test.cjs` checks that no road has a jog. Diagonal roads still join hub to hub.
+
 ## Round 354: the Reactor Mauler walks
 
 - The owner's eight-frame walk for Neon Aftermath's **Reactor Mauler**: a furnace-bellied brass brute with three
