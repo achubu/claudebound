@@ -301,3 +301,15 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 /* The map is scaled to fit the screen, and some labels sit inside scaled nodes, so a label's size is set per element
    (--wf, by assets/world-font.js) to look --wtext on screen, like the HUD. */
 #world *:not(.poi-glyph):not(.art-glyph),#world .enemy-node::after,#world .enemy-node:after,#world .item-name-pop{font-size:var(--wf,10px)!important}
+/* Round 348 (owner: "all of the interactable objects are too small, increase size by 25% and standardize it across all
+   maps; make sure they are not see-through at all until interacted with"). Every world draws them at one size: 32px on
+   screen for points of interest, chests, relics, switches and vaults (paintings were 26px, chests 22px, relics 18px),
+   44px for the merchant and the Cardsmith (were 36px and 28px). The boxes are twice that because of Round 215's half
+   scale. Until used they are fully opaque: a guarded relic is no longer faded, and glyph objects get a solid disc. */
+#world .poi-node,#world .poi-node.poi-art,#world .map-chest,#world .relic:not(.hidden-crystal){width:64px!important;height:64px!important}
+#world .poi-node.poi-merchant,#world .poi-node.poi-art.poi-merchant,#world .poi-node.poi-cardsmith,#world .poi-node.poi-art.poi-cardsmith{width:88px!important;height:88px!important}
+#world .relic.gear-relic img{width:54px;height:54px}
+#world .poi-node:not(.poi-art) .poi-glyph{font-size:36px!important}
+#world .poi-node:not(.used),#world .map-chest,#world .relic{opacity:1!important}
+#world .poi-node:not(.poi-art):not(.used){background:radial-gradient(circle,#2b1f4c,#140f26)!important}
+#world .relic.relic-guarded{filter:drop-shadow(0 0 1px #000)!important}

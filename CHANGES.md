@@ -3496,6 +3496,40 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 348: interactable objects are 25% bigger, one size in every world, and solid until used
+
+- Owner: "all of the interactable objects are too small, lets increase size by 25% and standardize it across all maps",
+  and "make sure they are not opaque at all until interacted with" (taken to mean: no see-through objects before you use them).
+- Measured in the browser across all six worlds before the change: paintings drew at 26px on screen, hidden chests
+  22px, relics 18px, the merchant 36px, the Cardsmith 28px, and the two Solaris puzzle objects without art yet only 10px.
+- A Round 348 block at the end of `assets/layout-polish.css` (it loads last) now sets one size everywhere:
+  - 32px on screen for every point of interest, chest, relic, switch and vault (25% over the 26px paintings);
+  - 44px for the merchant and the Cardsmith.
+  The boxes are 64px and 88px because of Round 215's half scale. Hidden crystals keep their own small size.
+- Until used, every object is fully opaque:
+  - Guarded relics are no longer faded or greyed (the 🔒 badge stays).
+  - Glyph objects get a solid disc instead of a see-through one.
+  - Used objects still dim after you interact with them.
+- Verified in the browser: every object measures 32px (NPCs 44px) at opacity 1 in all six worlds.
+- New `tests/item-size.test.cjs`.
+
+## Round 347: the Wanted Board posts contracts you take as quests
+
+- Owner: "the wanted board should have quests on it not just a notice".
+- The board lists the three rogues, each with:
+  - its status: contract open, on the hunt (with the room where it was last seen), or brought in;
+  - its reward.
+- A **Take contract** button turns a contract into a ☠ Wanted quest in the Quests screen, for example
+  "Bring in Mother Static (last seen: Holo Stage)", with its reward.
+- A rogue now only appears (☠ on its patrol) once its contract is taken. Catching it finishes the quest and pays as before.
+- The board shows ❗ on the map while contracts are open.
+- Code: `assets/city-nights.js` (`takeWantedContract`, `wantedContract`, `cityWantedFor` gated) and `assets/quests.js`
+  (the `wanted` kind, `rewardText`).
+- `tests/city-nights.test.cjs` checks:
+  - no rogue is marked before its contract is taken;
+  - each contract becomes a quest;
+  - the caught rogue's contract moves to done.
+
 ## Round 346: the switches and vaults get their paintings; Chronospire's Pendulum Stag and Hourglass Heron
 
 - The owner's paintings for eight of the ten Round 345 puzzle objects replace their glyphs, through

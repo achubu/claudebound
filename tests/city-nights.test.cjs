@@ -12,12 +12,16 @@ const r = JSON.parse(run(`(() => { const o = {};
   o.refuge = cityNightsItems(regionStartRoom()).map(i => i.type).sort();
   o.walkable = br.concat([regionStartRoom()]).flatMap(k => cityNightsItems(k)).every(i => walkable(i.key, i.x, i.y, 0) || (typeof organicItemStand === 'function' && organicItemStand(i.key, i) && organicItemStand(i.key, i).d <= 40));
   // The rogues: three rooms, one marked patrol each.
-  const wr = cityWantedRooms(); o.wanted = wr.length; o.marked = wr.map(k => roomSpawns(k).filter(s => cityWantedFor(s)).length);
+  const wr = cityWantedRooms(); o.wanted = wr.length; o.before = wr.map(k => roomSpawns(k).filter(s => cityWantedFor(s)).length);
+  // Round 347: the Wanted Board posts contracts; a rogue is only marked once its contract is taken, as a quest.
+  [0, 1, 2].forEach(i => takeWantedContract(i)); o.marked = wr.map(k => roomSpawns(k).filter(s => cityWantedFor(s)).length);
+  o.taken = Object.keys(state.quests.taken).filter(id => /^city:wanted:/.test(id)).length;
   // Fighting one: tougher and named; winning pays and marks it caught.
   const k = wr[0], s = roomSpawns(k).find(x => cityWantedFor(x)); state.room = k; const plain = enemyStats(s.type, { level: enemyLevel(k) });
   startBattle(s.uid); const b = state.battle; o.name = b.enemy.name; o.tougher = b.enemy.maxHp > plain.hp; o.isWanted = b.wanted;
   const sh = state.shards, xp = state.xp + state.playerLevel * 100; b.enemy.hp = 0; winBattle();
-  o.paid = state.shards - sh; o.xp = state.xp + state.playerLevel * 100 - xp; o.caught = cityNights().caught.slice(); o.after = cityWantedFor(s); state.battle = null;
+  o.paid = state.shards - sh; o.xp = state.xp + state.playerLevel * 100 - xp; o.caught = cityNights().caught.slice(); o.after = cityWantedFor(s);
+  o.doneQuest = state.quests.done.some(d => (d.id || d) === 'city:wanted:' + cityNights().caught[0]); o.stillTaken = Object.keys(state.quests.taken).filter(id => /^city:wanted:/.test(id)).length; state.battle = null;
   // The Blackout: the vault stays shut until all three breakers are thrown, then pays once.
   const vaultLocked = cityNights().breakers.length < 3; o.locked = vaultLocked;
   cityNights().breakers = [0, 1, 2]; const crystals = materials(), sh2 = state.shards, pool = state.pool.length;
@@ -35,7 +39,9 @@ const r = JSON.parse(run(`(() => { const o = {};
 assert.strictEqual(r.breakers, 3, 'three breaker boxes'); assert.strictEqual(r.breakerClash, 0, 'each breaker has its room to itself');
 assert.deepStrictEqual(r.refuge, ['vault', 'wantedBoard'], 'the Refuge holds the Wanted Board and the vault');
 assert(r.walkable, 'every new item stands where it can be reached');
-assert.strictEqual(r.wanted, 3, 'three rogues'); assert.deepStrictEqual(r.marked, [1, 1, 1], 'one marked patrol per rogue room');
+assert.strictEqual(r.wanted, 3, 'three rogues'); assert.deepStrictEqual(r.before, [0, 0, 0], 'no rogue is marked before its contract is taken');
+assert.deepStrictEqual(r.marked, [1, 1, 1], 'one marked patrol per rogue room'); assert.strictEqual(r.taken, 3, 'each contract becomes a quest');
+assert(r.doneQuest && r.stillTaken === 2, 'the caught rogue\'s contract is done: ' + JSON.stringify([r.doneQuest, r.stillTaken]));
 assert(/^☠ /.test(r.name) && r.tougher && r.isWanted, 'a rogue fight is named and tougher: ' + r.name);
 assert(r.paid >= 30 && r.xp >= 40 && r.caught.length === 1 && r.after === null, 'bringing a rogue in pays once and clears it');
 assert(r.locked, 'the vault starts unpowered'); assert(r.vaultShards >= 50 && r.vaultCrystal === 1 && r.vaultOnce, 'the powered vault pays once');
