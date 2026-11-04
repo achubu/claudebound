@@ -3508,6 +3508,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   - In the other worlds the puzzle vault takes the nearest (`worldRelayItems`).
 - The breaker-box text and the "all switches done" messages now name the vault's room instead of the start room.
 - Portals back to the previous world still stand in the start rooms; they are the way in, not an object to use.
+- City-nights' `poiNode` wrapper now ignores other worlds' objects. Drawing a vault outside the city no longer creates an
+  empty `cityNights` save entry (caught by `save-roundtrip`, whose Vespera room is now the vault's room).
 - New `tests/one-object.test.cjs` checks every room in all six worlds over four seeds.
   `city-nights` and `world-relays` tests updated.
 

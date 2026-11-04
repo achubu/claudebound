@@ -116,7 +116,7 @@ function cityNightsItems(key = state && state.room) {
 const poiNodeBeforeNights = poiNode;
 poiNode = function (p) {
   const node = poiNodeBeforeNights.apply(this, arguments);
-  if (!p || !node || !node.classList) return node;
+  if (!p || !node || !node.classList || !['breaker', 'vault', 'wantedBoard'].includes(p.type)) return node; // Round 350: other worlds' objects never touch the city's save entry
   const n = cityNights();
   if (p.type === 'breaker' && n && n.breakers.includes(p.index)) { node.classList.add('used'); node.dataset.name = 'Breaker Box · on'; }
   if (p.type === 'vault') { const open = n && n.breakers.length >= 3; node.querySelector('.poi-glyph').textContent = n.vault ? '🔓' : open ? '🔓' : '🔒'; node.dataset.name = 'Afterlight Vault · ' + (n.vault ? 'emptied' : open ? 'powered' : n.breakers.length + '/3 power'); if (n.vault) node.classList.add('used'); }
