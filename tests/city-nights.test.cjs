@@ -9,8 +9,8 @@ const r = JSON.parse(run(`(() => { const o = {};
   // Placement: three breakers in three different rooms, none sharing a room with a point of interest, the merchant or the Cardsmith.
   const br = cityBreakerRooms(), pois = worldPOIs(), shop = merchantRoom(), smith = cardsmithRoom();
   o.breakers = br.length; o.breakerClash = br.filter(k => pois[k] || (shop && shop.key === k) || k === smith || chestFor(k) || rooms[k].relic).length;
-  o.refuge = cityNightsItems(regionStartRoom()).map(i => i.type).sort();
-  o.walkable = br.concat([regionStartRoom()]).flatMap(k => cityNightsItems(k)).every(i => walkable(i.key, i.x, i.y, 0) || (typeof organicItemStand === 'function' && organicItemStand(i.key, i) && organicItemStand(i.key, i).d <= 40));
+  o.refuge = cityNightsItems(regionStartRoom()).length; const qr = quietItemRooms(2); o.split = qr.map(k => cityNightsItems(k).map(i => i.type)); o.qrAlone = qr.every(k => !pois[k] && !(shop && shop.key === k) && k !== smith && !chestFor(k) && !rooms[k].relic && !br.includes(k));
+  o.walkable = br.concat(quietItemRooms(2)).flatMap(k => cityNightsItems(k)).every(i => walkable(i.key, i.x, i.y, 0) || (typeof organicItemStand === 'function' && organicItemStand(i.key, i) && organicItemStand(i.key, i).d <= 40));
   // The rogues: three rooms, one marked patrol each.
   const wr = cityWantedRooms(); o.wanted = wr.length; o.before = wr.map(k => roomSpawns(k).filter(s => cityWantedFor(s)).length);
   // Round 347: the Wanted Board posts contracts; a rogue is only marked once its contract is taken, as a quest.
@@ -37,7 +37,7 @@ const r = JSON.parse(run(`(() => { const o = {};
   configureRegion('elaris'); o.elaris = cityNightsItems(Object.keys(rooms)[0]).length + cityBreakerRooms().length;
   return JSON.stringify(o); })()`));
 assert.strictEqual(r.breakers, 3, 'three breaker boxes'); assert.strictEqual(r.breakerClash, 0, 'each breaker has its room to itself');
-assert.deepStrictEqual(r.refuge, ['vault', 'wantedBoard'], 'the Refuge holds the Wanted Board and the vault');
+assert.strictEqual(r.refuge, 0, 'Round 350: nothing in the Refuge'); assert.deepStrictEqual(r.split, [['wantedBoard'], ['vault']], 'the board and the vault each in a room of their own'); assert(r.qrAlone, 'nothing else in those rooms');
 assert(r.walkable, 'every new item stands where it can be reached');
 assert.strictEqual(r.wanted, 3, 'three rogues'); assert.deepStrictEqual(r.before, [0, 0, 0], 'no rogue is marked before its contract is taken');
 assert.deepStrictEqual(r.marked, [1, 1, 1], 'one marked patrol per rogue room'); assert.strictEqual(r.taken, 3, 'each contract becomes a quest');

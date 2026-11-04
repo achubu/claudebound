@@ -9,12 +9,13 @@ const r = JSON.parse(run(`(() => { const out = {}; newGame();
     configureRegion(w); const d = WORLD_RELAYS[w], start = Object.keys(rooms).find(isStartRoom), list = worldRelayRooms(), o = { rooms: list.length };
     o.frac = list.map(k => regionDistanceFrac(k)); o.noStart = !list.includes(start); o.noPoi = list.every(k => !poiAt(k));
     const reach = (k, it) => { for (let r = 0; r <= 36; r += 4) for (let a = 0; a < 16; a++) if (walkable(k, it.x + r * Math.cos(a * Math.PI / 8), it.y + r * Math.sin(a * Math.PI / 8), 0)) return true; return false; };
-    o.walk = list.concat([start]).every(k => worldRelayItems(k).every(it => reach(k, it)));
-    const vault = worldRelayItems(start).find(i => i.type === d.vault.type); o.vault = !!vault;
-    state.room = start; openPOI(vault); o.locked = /0\\/3/.test(document.getElementById('menuModal').innerHTML); closeMenu();
+    const vroom = quietItemRooms(1)[0]; o.startEmpty = worldRelayItems(start).length === 0; o.vroomAlone = !poiAt(vroom) && !list.includes(vroom) && vroom !== start;
+    o.walk = list.concat([vroom]).every(k => worldRelayItems(k).every(it => reach(k, it)));
+    const vault = worldRelayItems(vroom).find(i => i.type === d.vault.type); o.vault = !!vault;
+    state.room = vroom; openPOI(vault); o.locked = /0\\/3/.test(document.getElementById('menuModal').innerHTML); closeMenu();
     for (const k of list) { const it = worldRelayItems(k).find(i => i.type === d.sw.type); state.room = k; openPOI(it); const b = $('relayAct'); if (b && b.onclick) b.onclick(); o.used = poiUsed(it); }
     o.on = worldRelayState(w).on.length;
-    const sh = state.shards, mat = materials(), pool = state.pool.length; state.room = start; openPOI(vault);
+    const sh = state.shards, mat = materials(), pool = state.pool.length; state.room = vroom; openPOI(vault);
     const take = $('relayLoot'); if (take && take.onclick) take.onclick();
     o.paid = state.shards - sh === d.shards && materials() === mat + 1 && state.pool.length === pool + 1 && worldRelayState(w).vault && poiUsed(vault);
     out[w] = o;
@@ -27,7 +28,8 @@ for (const [w, o] of Object.entries(r)) {
   assert(o.frac[0] < .4 && o.frac[2] >= .7, w + ': one near the start and one far (' + o.frac.map(f => f.toFixed(2)) + ')');
   assert(o.noStart && o.noPoi, w + ': switch rooms hold nothing else');
   assert(o.walk, w + ': every switch and the vault stand within reach of walkable ground (items sit just off the path)');
-  assert(o.vault && o.locked, w + ': the vault in the start room is locked at first');
+  assert(o.vault && o.locked, w + ': the vault is locked at first');
+  assert(o.startEmpty && o.vroomAlone, w + ': Round 350: the vault stands alone in its own room, not in the start room');
   assert(o.used && o.on === 3, w + ': all three switches set and shown as used');
   assert(o.paid, w + ': the vault pays its Shards, an Upgrade Crystal and a card once');
 }

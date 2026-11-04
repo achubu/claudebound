@@ -113,7 +113,7 @@ if (typeof poiArt === 'function') {
   poiArt = function (p) { return (activeRegion === 'elaris' && p && SOLARIS_POI_ART[p.type]) || poiArtBeforeSolaris(p); };
 }
 // Round 307: per-world object art (the owner's paintings), one entry per world and type. Solaris's set is above.
-const WORLD_POI_ART = { city: { cardsmith: 'city-cardsmith', wantedBoard: 'city-wanted-board', breaker: 'city-breaker', vault: 'city-vault', nexus: 'city-nexus', merchant: 'city-merchant' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore', nexus: 'wilds-nexus', merchant: 'wilds-merchant', heartHollow: 'wilds-heartHollow', spiritLantern: 'wilds-spiritLantern' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore', nexus: 'sky-nexus', merchant: 'sky-merchant', galeStrongbox: 'sky-galeStrongbox', windVane: 'sky-windVane' }, chronospire: { cardsmith: 'chronospire-cardsmith', lore: 'chronospire-lore', merchant: 'chronospire-merchant', chronoVault: 'chronospire-chronoVault', stoppedClock: 'chronospire-stoppedClock' }, vespera: { cardsmith: 'vespera-cardsmith', lore: 'vespera-lore', nexus: 'vespera-nexus', merchant: 'vespera-merchant', stormStrongroom: 'vespera-stormStrongroom', stormRod: 'vespera-stormRod' } };
+const WORLD_POI_ART = { elaris: { nexus: 'elaris-nexus', sunVault: 'elaris-sunVault' }, city: { cardsmith: 'city-cardsmith', wantedBoard: 'city-wanted-board', breaker: 'city-breaker', vault: 'city-vault', nexus: 'city-nexus', merchant: 'city-merchant' }, wilds: { cardsmith: 'wilds-cardsmith', lore: 'wilds-lore', nexus: 'wilds-nexus', merchant: 'wilds-merchant', heartHollow: 'wilds-heartHollow', spiritLantern: 'wilds-spiritLantern' }, sky: { cardsmith: 'sky-cardsmith', lore: 'sky-lore', nexus: 'sky-nexus', merchant: 'sky-merchant', galeStrongbox: 'sky-galeStrongbox', windVane: 'sky-windVane' }, chronospire: { cardsmith: 'chronospire-cardsmith', nexus: 'chronospire-nexus', lore: 'chronospire-lore', merchant: 'chronospire-merchant', chronoVault: 'chronospire-chronoVault', stoppedClock: 'chronospire-stoppedClock' }, vespera: { cardsmith: 'vespera-cardsmith', lore: 'vespera-lore', nexus: 'vespera-nexus', merchant: 'vespera-merchant', stormStrongroom: 'vespera-stormStrongroom', stormRod: 'vespera-stormRod' } };
 if (typeof poiArt === 'function') {
   const poiArtBeforeWorlds = poiArt;
   poiArt = function (p) { const w = WORLD_POI_ART[activeRegion]; return (w && p && w[p.type]) || poiArtBeforeWorlds(p); };
@@ -125,14 +125,14 @@ if (typeof poiArt === 'function') {
   poiArt = function (p) { return (p && p.type === 'event' && EVENT_ART.indexOf(p.event) >= 0 && 'events/' + p.event) || poiArtBeforeEvents(p); };
 }
 // Round 341: per-world hidden loot chests (the owner's paintings); worlds not listed keep loot-chest.png.
-const WORLD_CHEST_ART = { sky: 'sky-chest', wilds: 'wilds-chest', vespera: 'vespera-chest', chronospire: 'chronospire-chest' };
+const WORLD_CHEST_ART = { city: 'city-chest', sky: 'sky-chest', wilds: 'wilds-chest', vespera: 'vespera-chest', chronospire: 'chronospire-chest' };
 if (typeof document !== 'undefined' && document.createElement) {
   const worldChestStyles = document.createElement('style');
-  worldChestStyles.textContent = Object.entries(WORLD_CHEST_ART).map(([w, f]) => '#world[data-environment="' + w + '"] .map-chest{background-image:url(assets/items/poi/' + f + '.webp)!important}').join('');
+  worldChestStyles.textContent = Object.entries(WORLD_CHEST_ART).map(([w, f]) => '#world[data-environment="' + (w === 'city' ? 'neon' : w) + '"] .map-chest{background-image:url(assets/items/poi/' + f + '.webp)!important}').join('');
   document.head.append(worldChestStyles);
 }
 // Round 342: per-world portal paintings (the gateway back to the previous world); other worlds keep elaris-portal.png.
-const WORLD_PORTAL_ART = { sky: 'sky-portal' };
+const WORLD_PORTAL_ART = { sky: 'sky-portal', wilds: 'wilds-portal', vespera: 'vespera-portal', chronospire: 'chronospire-portal' }; // Round 349: three more
 if (typeof renderWorld === 'function') {
   const renderWorldBeforeWorldPortal = renderWorld;
   renderWorld = function () {

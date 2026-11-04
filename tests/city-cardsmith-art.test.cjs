@@ -18,7 +18,7 @@ assert.strictEqual(r.board, 'city-wanted-board', 'Round 333: the Wanted Board us
 assert.strictEqual(r.breaker, 'city-breaker', 'Round 334: the Breaker Boxes use their painting');
 assert.strictEqual(r.vault, 'city-vault', 'Round 335: the Afterlight Vault uses its painting');
 assert.strictEqual(r.cityNexus, 'city-nexus', 'Round 340: the Neon Aftermath Nexus Waypoint uses its own painting');
-assert.strictEqual(r.solNexus, 'nexus', 'other worlds keep the shared waypoint for now');
+assert.strictEqual(r.solNexus, 'elaris-nexus', 'Round 349: the Solaris waypoint has its own painting');
 assert.strictEqual(r.solaris, 'sol-cardsmith', 'Solaris keeps its own');
 assert.strictEqual(r.wilds, 'wilds-cardsmith', 'Round 308: the Elaris Cardsmith uses its painting');
 assert.strictEqual(r.sky, 'sky-cardsmith', 'Round 309: the Sky Isles Cardsmith uses its painting');
@@ -34,8 +34,15 @@ assert.strictEqual(JSON.parse(run('JSON.stringify(WORLD_CHEST_ART)')).sky, 'sky-
 for (const f of ['vespera-lore', 'sky-nexus', 'wilds-nexus', 'vespera-nexus', 'sky-chest']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f);
 const r2 = JSON.parse(run(`(() => { const o = {}; for (const w of ['sky', 'wilds', 'vespera', 'chronospire', 'elaris']) { configureRegion(w); o[w] = poiArt({ type: 'merchant' }); } configureRegion('city'); return JSON.stringify(o); })()`));
 assert.deepStrictEqual(r2, { sky: 'sky-merchant', wilds: 'wilds-merchant', vespera: 'vespera-merchant', chronospire: 'chronospire-merchant', elaris: 'sol-merchant' }, 'Round 342: every world has its own merchant');
-const chests = JSON.parse(run('JSON.stringify(WORLD_CHEST_ART)')); assert.deepStrictEqual(Object.keys(chests).sort(), ['chronospire', 'sky', 'vespera', 'wilds'], 'Round 342: four worlds have their own chest');
+const chests = JSON.parse(run('JSON.stringify(WORLD_CHEST_ART)')); assert.deepStrictEqual(Object.keys(chests).sort(), ['chronospire', 'city', 'sky', 'vespera', 'wilds'], 'Rounds 342 and 349: five worlds have their own chest (Solaris has sol-chest)');
 assert.strictEqual(JSON.parse(run('JSON.stringify(WORLD_PORTAL_ART)')).sky, 'sky-portal', 'Round 342: the Sky Isles portal');
 for (const f of ['city-merchant', 'sky-merchant', 'wilds-merchant', 'vespera-merchant', 'chronospire-merchant', 'wilds-chest', 'vespera-chest', 'chronospire-chest']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f);
 assert(fs.existsSync('assets/environment/sky-portal.webp'));
 console.log('city-cardsmith-art ok');
+// Round 349: the last object paintings: Solaris and Chronospire waypoints, the Sunvault, the city chest, three portals.
+const art349 = JSON.parse(run(`(() => { const o = {}; configureRegion('chronospire'); o.chronoNexus = poiArt({ type: 'nexus' }); configureRegion('elaris'); o.sunVault = poiArt({ type: 'sunVault' }); o.portals = WORLD_PORTAL_ART; return JSON.stringify(o); })()`));
+assert.strictEqual(art349.chronoNexus, 'chronospire-nexus'); assert.strictEqual(art349.sunVault, 'elaris-sunVault');
+assert.deepStrictEqual(Object.keys(art349.portals).sort(), ['chronospire', 'sky', 'vespera', 'wilds'], 'four worlds have their own portal');
+for (const f of ['elaris-nexus', 'chronospire-nexus', 'elaris-sunVault', 'city-chest']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f);
+for (const f of ['wilds-portal', 'vespera-portal', 'chronospire-portal']) assert.strictEqual(fs.readFileSync('assets/environment/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f);
+console.log('PASS: Round 349 object paintings.');

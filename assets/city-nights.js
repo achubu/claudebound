@@ -69,7 +69,7 @@ function cityWantedFor(spawn) {
   return { ...CITY_WANTED[i], room: key };
 }
 const roomSpawnsBeforeNights = roomSpawns;
-// Interactables: the board and the vault in the Refuge, the breakers in their rooms.
+// Interactables: the board and the vault in rooms of their own near the Refuge (Round 350), the breakers in their rooms.
 const cnSpotCache = {};
 function cnSpot(key, id, avoid) {
   const ck = state.seed + ':' + id; if (ck in cnSpotCache) return cnSpotCache[ck];
@@ -85,14 +85,29 @@ function cnSpot(key, id, avoid) {
   }
   return cnSpotCache[ck] = { x: 400, y: 250 };
 }
+// Round 350 (owner: "no room should have more than 1 interactable object and dont have any in the first room of any
+// world"): the start-room objects (the Wanted Board and the Afterlight Vault here, the puzzle vault in the other worlds)
+// stand alone in the rooms nearest the start that hold no other object, boss or lock.
+const quietItemRoomCache = {};
+function quietRoomName(key) { return key && rooms[key] && rooms[key].name ? rooms[key].name : 'a room near the start'; }
+function quietItemRooms(n) {
+  if (!state || !rooms) return [];
+  const ck = activeRegion + ':' + state.seed; if (quietItemRoomCache[ck] && quietItemRoomCache[ck].length >= n) return quietItemRoomCache[ck].slice(0, n);
+  const shop = typeof merchantRoom === 'function' ? merchantRoom() : null, smith = typeof cardsmithRoom === 'function' ? cardsmithRoom() : null;
+  const busy = k => isStartRoom(k) || (typeof poiAt === 'function' && poiAt(k)) || (typeof chestFor === 'function' && chestFor(k)) || rooms[k].relic
+    || (shop && shop.key === k) || k === smith || (activeRegion === 'city' && cityBreakerRooms().includes(k))
+    || (typeof worldRelayRooms === 'function' && worldRelayRooms().includes(k))
+    || roomSpawnsBeforeNights(k).some(q => q.boss) || (rooms[k].enemy && enemies[rooms[k].enemy[0]] && enemies[rooms[k].enemy[0]].boss);
+  const dist = k => typeof regionDistance === 'function' ? regionDistance(k) : 0;
+  const keys = Object.keys(rooms).filter(k => !busy(k)).sort((a, b) => dist(a) - dist(b) || (a < b ? -1 : 1));
+  return (quietItemRoomCache[ck] = keys.slice(0, Math.max(n, 2))).slice(0, n);
+}
 function cityNightsItems(key = state && state.room) {
   if (activeRegion !== 'city' || !state || !rooms[key]) return [];
   const out = [];
-  if (isStartRoom(key)) {
-    const taken = [{ x: 400, y: 300 }], shop = typeof merchantRoom === 'function' && merchantRoom(); if (shop && shop.key === key) taken.push(shop);
-    const board = cnSpot(key, 'board', taken); out.push({ key, type: 'wantedBoard', id: 'city:wantedBoard', x: board.x, y: board.y });
-    const vault = cnSpot(key, 'vault', taken.concat([board])); out.push({ key, type: 'vault', id: 'city:vault', x: vault.x, y: vault.y });
-  }
+  const [boardRoom, vaultRoom] = quietItemRooms(2); // Round 350: each alone in its own room, near the Refuge
+  if (key === boardRoom) { const board = cnSpot(key, 'board', []); out.push({ key, type: 'wantedBoard', id: 'city:wantedBoard', x: board.x, y: board.y }); }
+  if (key === vaultRoom) { const vault = cnSpot(key, 'vault', []); out.push({ key, type: 'vault', id: 'city:vault', x: vault.x, y: vault.y }); }
   const b = cityBreakerRooms().indexOf(key);
   if (b >= 0) { const s = cnSpot(key, 'breaker' + b, []); out.push({ key, type: 'breaker', id: 'city:breaker:' + b, index: b, x: s.x, y: s.y }); }
   return out;
@@ -101,7 +116,7 @@ function cityNightsItems(key = state && state.room) {
 const poiNodeBeforeNights = poiNode;
 poiNode = function (p) {
   const node = poiNodeBeforeNights.apply(this, arguments);
-  if (!p || !node || !node.classList) return node;
+  if (!p || !node || !node.classList || !['breaker', 'vault', 'wantedBoard'].includes(p.type)) return node; // Round 350: other worlds' objects never touch the city's save entry
   const n = cityNights();
   if (p.type === 'breaker' && n && n.breakers.includes(p.index)) { node.classList.add('used'); node.dataset.name = 'Breaker Box · on'; }
   if (p.type === 'vault') { const open = n && n.breakers.length >= 3; node.querySelector('.poi-glyph').textContent = n.vault ? '🔓' : open ? '🔓' : '🔒'; node.dataset.name = 'Afterlight Vault · ' + (n.vault ? 'emptied' : open ? 'powered' : n.breakers.length + '/3 power'); if (n.vault) node.classList.add('used'); }
@@ -164,11 +179,11 @@ function openWantedBoard() {
 function openBreaker(p) {
   const n = cityNights(), on = n.breakers.includes(p.index);
   if (on) return cnMenu('⚡ Breaker Box', '<p>The breaker is thrown. The grid hums: <b>' + n.breakers.length + '/3</b> breakers on.</p>', []);
-  cnMenu('⚡ Breaker Box', '<p>A grid breaker, padlocked by someone long gone. Throwing it feeds power back toward the Afterlight Refuge.</p><p class="muted">Grid: ' + n.breakers.length + '/3 breakers on. All three power the Afterlight Vault in the Refuge.</p>',
+  cnMenu('⚡ Breaker Box', '<p>A grid breaker, padlocked by someone long gone. Throwing it feeds power back toward the Afterlight Refuge.</p><p class="muted">Grid: ' + n.breakers.length + '/3 breakers on. All three power the Afterlight Vault in ' + quietRoomName(quietItemRooms(2)[1]) + '.</p>',
     [{ id: 'cnThrow', label: '⚡ Throw the breaker', primary: true, onclick: () => {
       if (!n.breakers.includes(p.index)) n.breakers.push(p.index);
       save(); closeMenu(); renderWorld();
-      toast(n.breakers.length >= 3 ? '⚡ The grid is back! The Afterlight Vault in the Refuge has power.' : '⚡ Breaker thrown: ' + n.breakers.length + '/3. The grid flickers.');
+      toast(n.breakers.length >= 3 ? '⚡ The grid is back! The Afterlight Vault in ' + quietRoomName(quietItemRooms(2)[1]) + ' has power.' : '⚡ Breaker thrown: ' + n.breakers.length + '/3. The grid flickers.');
     } }]);
 }
 function openVault() {
