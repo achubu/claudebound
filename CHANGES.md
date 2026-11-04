@@ -3496,6 +3496,27 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 356: four refreshed Neon Aftermath enemies, on trial
+
+- The owner sent the first refresh drafts ("i want to see these in game and test them out before i make more"). Each is
+  one 2048px image on green holding eight walk frames on a 256px grid:
+  - **Ember Jackal** (`city/ember-jackal-v2.png`);
+  - **Circuit Thornling** (`city/circuit-thornling-v2.png`);
+  - **Briar Sentinel** (`city/briar-sentinel-v2.png`);
+  - **The Crown Sentinel** (mini-boss, `city/crown-sentinel.png`). Until now it borrowed the Crown Observer's still
+    picture; it was the last enemy without an animation.
+- New `tools/strip_to_sheet.py` does the Round 354 steps in one go:
+  - keys the green, including ground shadows drawn in dark green (the Crown Sentinel used `--lo 15 --hi 60`);
+  - cuts the eight cells, giving each piece of art to the cell holding its centre, so a tail spilling into the next
+    cell stays with its own frame;
+  - saves the eight-frame strip to `src/`, builds the four-frame sheet from frames 1, 3, 5 and 7, and pads it.
+- On trial, each creature uses its new walk everywhere, with no separate attack or hurt poses, so only the new look
+  shows. The old entries are kept as comments in `assets/elaris-wildlife.js`, and the old sheets are still in place.
+- The Brass Sentry (Chronospire) borrowed the Briar Sentinel's art. It keeps the old art through a new art-only key,
+  `briarSentinelOld`.
+- `SPRITE_VERSION` is now '356'; `enemy-sizes.css` was regenerated (the Jackal ×1.37, the others ×0.85–0.88). All pass
+  `tools/sprite_audit.py`. Tests updated: `ember-jackal`, `briar-sentinel`, `circuit-thornling`, `prism-thornling`.
+
 ## Round 355: map roads never jog at a room edge
 
 - Owner: "adjust the map roads so they never have these slight misalignments ... draw the roads so they are straight in

@@ -3,9 +3,13 @@
 #world .enemy-node .wildlife-sprite[style*="/chronospire/clockwarden.png"]{--enemy-fit:1.117} /* painted 0.492 */
 #world .enemy-node .wildlife-sprite[style*="/chronospire/gearhound.png"]{--enemy-fit:1.141} /* painted 0.482 */
 #world .enemy-node .wildlife-sprite[style*="/chronospire/tick-moth.png"]{--enemy-fit:1.365} /* painted 0.403 */
+#world .enemy-node .wildlife-sprite[style*="/city/briar-sentinel-v2.png"]{--enemy-fit:0.85} /* painted 0.659 */
 #world .enemy-node .wildlife-sprite[style*="/city/briar-sentinel-walk.png"]{--enemy-fit:0.874} /* painted 0.630 */
 #world .enemy-node .wildlife-sprite[style*="/city/briar-sentinel.png"]{--enemy-fit:0.958} /* painted 0.574 */
+#world .enemy-node .wildlife-sprite[style*="/city/circuit-thornling-v2.png"]{--enemy-fit:0.881} /* painted 0.624 */
+#world .enemy-node .wildlife-sprite[style*="/city/crown-sentinel.png"]{--enemy-fit:0.85} /* painted 0.678 */
 #world .enemy-node .wildlife-sprite[style*="/city/data-wisp.png"]{--enemy-fit:0.85} /* painted 0.689 */
+#world .enemy-node .wildlife-sprite[style*="/city/ember-jackal-v2.png"]{--enemy-fit:1.373} /* painted 0.401 */
 #world .enemy-node .wildlife-sprite[style*="/city/ember-jackal-walk.png"]{--enemy-fit:1.07} /* painted 0.514 */
 #world .enemy-node .wildlife-sprite[style*="/city/ember-jackal.png"]{--enemy-fit:1.11} /* painted 0.495 */
 #world .enemy-node .wildlife-sprite[style*="/city/lunar-enforcer.png"]{--enemy-fit:1.021} /* painted 0.539 */
