@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 353: the Clockwarden and the Chronarch get their own sheets
+
+- The owner's eight-frame drafts for Chronospire's mini-boss and boss. Until now both borrowed other creatures' art,
+  recoloured.
+  - **The Clockwarden** (mini-boss) hovers: a brass clock-faced eye with an amber iris and ring, drawn from the Crown
+    Observer (`assets/monsters/chronospire/clockwarden.png`, `WILDLIFE_ART.clockwardenArt`).
+  - **The Chronarch** (boss) walks: a golden-canopied stag with copper flowers and an amber heart, drawn from the Bloom
+    Tyrant (`chronarch.png`, `chronarchArt`, `big: true`).
+- Each was built the usual way: frames 1, 3, 5 and 7, cleaned and padded. The strips are kept in `src/`. Both are
+  `tint: 'none'`.
+- `SPRITE_VERSION` is now '353'. Both pass `tools/sprite_audit.py`, and `enemy-sizes.css` was regenerated.
+
 ## Round 352: every enemy animation checked; two sheets cleaned; a sprite audit
 
 - Owner: "check all enemies to make sure their animations are clean and there are no artifacts".

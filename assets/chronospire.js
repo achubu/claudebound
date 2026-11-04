@@ -22,9 +22,9 @@ const CHRONO_ENEMIES = {
   chronoStag:   { name: 'Pendulum Stag', icon: '◆', hp: 58, attack: 11, armor: 2, element: 'earth', art: 'pendulumStag', tint: 'none' },
   chronoWisp:   { name: 'Rust Wisp', icon: '✧', hp: 60, attack: 11, armor: 2, element: 'water', art: 'cryptWisp', tint: CHRONO_TINT },
   chronoMauler: { name: 'Cog Mauler', icon: '♨', hp: 62, attack: 12, armor: 2, element: 'fire', art: 'cogMauler', tint: 'none' },
-  clockwarden:  { name: 'The Clockwarden', icon: '🕰', hp: 90, attack: 12, armor: 4, boss: true, miniBoss: true, element: 'earth', art: 'crownEye', tint: CHRONO_TINT },
+  clockwarden:  { name: 'The Clockwarden', icon: '🕰', hp: 90, attack: 12, armor: 4, boss: true, miniBoss: true, element: 'earth', art: 'clockwardenArt', tint: 'none' },
   paradoxTwin:  { name: 'The Paradox Twin', icon: '♊', hp: 86, attack: 13, armor: 3, boss: true, miniBoss: true, element: 'air', art: 'shade', tint: 'sepia(.6) saturate(2) hue-rotate(160deg) brightness(1.1)' },
-  chronarch:    { name: 'The Chronarch', icon: '⌛', hp: 160, attack: 12, armor: 3, boss: true, element: 'water', shift: ['water', 'fire'], shiftEvery: 4, art: 'forestTyrant', tint: CHRONO_TINT }
+  chronarch:    { name: 'The Chronarch', icon: '⌛', hp: 160, attack: 12, armor: 3, boss: true, element: 'water', shift: ['water', 'fire'], shiftEvery: 4, art: 'chronarchArt', tint: 'none' }
 };
 Object.assign(enemies, CHRONO_ENEMIES);
 Object.assign(BALANCE.perEnemy, { clockwarden: { hp: 1.29 }, paradoxTwin: { hp: 1.33 }, chronarch: { hp: 0.693 }, chronoMauler: { hp: .88 } }); // Round 177: tuned as world 6; Round 181: after the tile rebuild; Round 183: with gear worn; Round 226: after ⚔ Pressure

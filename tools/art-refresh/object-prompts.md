@@ -117,11 +117,11 @@ Shared on purpose, so optional (see section 3):
 | Sheet | Borrowed by |
 |---|---|
 | `city/briar-sentinel-walk` | Brass Sentry (Chronospire); The Arc Sentinel has its own since Round 339 |
-| `city/crown-observer` | The Clockwarden (Chronospire) |
+| `city/crown-observer` | none since Round 353 (the Clockwarden has its own) |
 | `city/data-wisp` | Rust Wisp (Chronospire); Arc Wisp has its own since Round 336 |
 | `city/phase-shade` | The Resonant Phantom (Vespera mini-boss), Lag Wraith, The Paradox Twin (Chronospire) |
 | `elaris/blight-antler` | none since Round 346 (the Pendulum Stag has its own) |
-| `elaris/bloom-tyrant` | The Chronarch (Chronospire boss); The Tempest Colossus has its own since Round 340 |
+| `elaris/bloom-tyrant` | none since Round 353 (the Tempest Colossus since Round 340, the Chronarch since Round 353) |
 | `elaris/cinder-fox` | none since Round 341 (the Gearhound has its own) |
 | `elaris/drowned-heron` | The Tidebound Warden (Elaris mini-boss, not recolored); the Hourglass Heron has its own since Round 346 |
 | `elaris/storm-moth` | The Gale Sovereign (Elaris mini-boss, not recolored); the Tick Moth has its own since Round 342 |
