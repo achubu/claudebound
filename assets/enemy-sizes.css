@@ -14,7 +14,7 @@
 #world .enemy-node .wildlife-sprite[style*="/elaris/bloom-tyrant.png"]{--enemy-fit:0.898} /* painted 0.613 */
 #world .enemy-node .wildlife-sprite[style*="/elaris/cinder-fox.png"]{--enemy-fit:1.083} /* painted 0.508 */
 #world .enemy-node .wildlife-sprite[style*="/elaris/cistern-warden.png"]{--enemy-fit:0.935} /* painted 0.588 */
-#world .enemy-node .wildlife-sprite[style*="/elaris/drowned-heron.png"]{--enemy-fit:1.095} /* painted 0.502 */
+#world .enemy-node .wildlife-sprite[style*="/elaris/drowned-heron.png"]{--enemy-fit:1.096} /* painted 0.502 */
 #world .enemy-node .wildlife-sprite[style*="/elaris/dune-scorpion.png"]{--enemy-fit:1.1} /* painted 0.500 */
 #world .enemy-node .wildlife-sprite[style*="/elaris/dust-devil.png"]{--enemy-fit:1.11} /* painted 0.495 */
 #world .enemy-node .wildlife-sprite[style*="/elaris/mirage-ibis.png"]{--enemy-fit:1.043} /* painted 0.527 */
@@ -35,7 +35,7 @@
 #world .enemy-node .wildlife-sprite[style*="/vespera/brinewing-heron.png"]{--enemy-fit:1.205} /* painted 0.457 */
 #world .enemy-node .wildlife-sprite[style*="/vespera/ion-shade.png"]{--enemy-fit:1.097} /* painted 0.502 */
 #world .enemy-node .wildlife-sprite[style*="/vespera/prism-thornling.png"]{--enemy-fit:0.977} /* painted 0.563 */
-#world .enemy-node .wildlife-sprite[style*="/vespera/rimeglass-stag.png"]{--enemy-fit:0.95} /* painted 0.579 */
+#world .enemy-node .wildlife-sprite[style*="/vespera/rimeglass-stag.png"]{--enemy-fit:1.015} /* painted 0.542 */
 #world .enemy-node .wildlife-sprite[style*="/vespera/static-fox.png"]{--enemy-fit:1.138} /* painted 0.483 */
 #world .enemy-node .wildlife-sprite[style*="/vespera/tempest-colossus.png"]{--enemy-fit:1.119} /* painted 0.492 */
 #world .enemy-node .wildlife-sprite[style*="/vespera/tempest-moth.png"]{--enemy-fit:1.12} /* painted 0.491 */

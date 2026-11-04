@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 352: every enemy animation checked; two sheets cleaned; a sprite audit
+
+- Owner: "check all enemies to make sure their animations are clean and there are no artifacts".
+- I reviewed all 47 creature sheets frame by frame on dark and light backgrounds, after automated checks for specks,
+  clipped edges, keying fringe, haze and frame-to-frame jumps.
+- Two sheets had artifacts:
+  - **Rimeglass Stag** (Vespera): flat light-grey patches of the draft's background sat between the antler tines,
+    under the belly and between the legs, in every frame (Round 335 removed only the brightest blob). Removed by growing
+    the transparency into smooth, unsaturated grey (keeping the textured frost fur), clearing enclosed pale patches of
+    400px or more, and peeling the pale fringe three times.
+  - **Drowned Heron** (Elaris): frame 2 carried two slivers of a neighbouring frame's tail at its right edge. Removed.
+- Everything else is clean. The flagged bits are deliberate: the Phase Shade's glitch pixels, the Dust Devil's pebbles,
+  the Cistern Warden's steam, the Mirage Ibis's pink mirage fringe and the moths' and roc's wing-beat bob.
+- The city's **Reactor Mauler** still uses the old single picture, which is clipped at both sides and has no walk.
+  The Crown Sentinel boss reuses the Crown Observer picture, also without a walk. Both need new art.
+- New `tools/sprite_audit.py` checks every sheet for these problems, with deliberate effects listed in `ALLOW`.
+  `tests/sprite-audit.test.cjs` runs it. `SPRITE_VERSION` is now '352'; `enemy-sizes.css` was regenerated.
+
 ## Round 351: enemies drawn at one size in every world
 
 - Owner: "can you standardize enemy size across all worlds? similar in what we see in neon city would be good for all maps".
