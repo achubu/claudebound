@@ -3508,6 +3508,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - `WILDLIFE_ART.forgeBeast`. `SPRITE_VERSION` is now '354'; `enemy-sizes.css` was regenerated (×0.85). It passes
   `tools/sprite_audit.py`. `tests/elaris-wildlife.test.cjs` now expects the walking sheet.
 - The Crown Sentinel boss still reuses the Crown Observer's still picture.
+- Fix: drawing Neon Aftermath could write to the save. The Wanted Board, the vault, a rogue's patrol and its map marker
+  read the city's entry through `cityNights()`, which creates it, and `ensureQuests()`. Since Round 350 those objects
+  stand in ordinary rooms, so with some seeds `save-roundtrip` saw a save change on reload. Drawing now reads through
+  the read-only `cityNightsPeek()` and `state.quests`. New `tests/save-stable.test.cjs` reloads 12 seeds in three
+  worlds.
 
 ## Round 353: the Clockwarden and the Chronarch get their own sheets
 
