@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 354: the Reactor Mauler walks
+
+- The owner's eight-frame walk for Neon Aftermath's **Reactor Mauler**: a furnace-bellied brass brute with three
+  smokestacks and a vent-grille face. Until now it was the only regular enemy on a single still picture, which was
+  clipped at both sides (found in Round 352).
+- The draft was one 2048px image on green, eight frames of about 235px each on a 256px grid. Each frame was keyed
+  off green, then cut by that grid, which keeps the draft's own positions (the face vents line up within 2px).
+  Frames 1, 3, 5 and 7 were enlarged about 2× into `assets/monsters/city/reactor-mauler.png` and padded. The
+  eight-frame strip is kept in `assets/monsters/city/src/reactor-mauler-walk8.png`.
+- `WILDLIFE_ART.forgeBeast`. `SPRITE_VERSION` is now '354'; `enemy-sizes.css` was regenerated (×0.85). It passes
+  `tools/sprite_audit.py`. `tests/elaris-wildlife.test.cjs` now expects the walking sheet.
+- The Crown Sentinel boss still reuses the Crown Observer's still picture.
+
 ## Round 353: the Clockwarden and the Chronarch get their own sheets
 
 - The owner's eight-frame drafts for Chronospire's mini-boss and boss. Until now both borrowed other creatures' art,

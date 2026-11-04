@@ -125,7 +125,7 @@ Shared on purpose, so optional (see section 3):
 | `elaris/cinder-fox` | none since Round 341 (the Gearhound has its own) |
 | `elaris/drowned-heron` | The Tidebound Warden (Elaris mini-boss, not recolored); the Hourglass Heron has its own since Round 346 |
 | `elaris/storm-moth` | The Gale Sovereign (Elaris mini-boss, not recolored); the Tick Moth has its own since Round 342 |
-| `reactor-mauler` | none since Round 349 (Thunder Mauler since Round 338, Cog Mauler since Round 349) |
+| `reactor-mauler` | retired in Round 354: the city's Reactor Mauler walks on `city/reactor-mauler.png`; the Thunder and Cog Maulers have their own |
 
 ## 5. Nexus Waypoints, one per world (owner request, Round 339)
 
