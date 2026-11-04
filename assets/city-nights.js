@@ -65,7 +65,8 @@ function cityWantedFor(spawn) {
   const list = cityWantedRooms(), key = spawn.uid.replace(/^city:/, '').replace(/:\d+$/, ''), i = list.indexOf(key);
   if (i < 0 || !CITY_WANTED[i]) return null;
   const first = roomSpawnsBeforeNights(key).find(s => !s.boss); if (!first || first.uid !== spawn.uid) return null;
-  return cityNights().caught.includes(CITY_WANTED[i].id) ? null : { ...CITY_WANTED[i], room: key };
+  if (cityNights().caught.includes(CITY_WANTED[i].id) || !wantedContract(CITY_WANTED[i].id)) return null; // Round 347: only once its contract is taken
+  return { ...CITY_WANTED[i], room: key };
 }
 const roomSpawnsBeforeNights = roomSpawns;
 // Interactables: the board and the vault in the Refuge, the breakers in their rooms.
@@ -104,7 +105,8 @@ poiNode = function (p) {
   const n = cityNights();
   if (p.type === 'breaker' && n && n.breakers.includes(p.index)) { node.classList.add('used'); node.dataset.name = 'Breaker Box · on'; }
   if (p.type === 'vault') { const open = n && n.breakers.length >= 3; node.querySelector('.poi-glyph').textContent = n.vault ? '🔓' : open ? '🔓' : '🔒'; node.dataset.name = 'Afterlight Vault · ' + (n.vault ? 'emptied' : open ? 'powered' : n.breakers.length + '/3 power'); if (n.vault) node.classList.add('used'); }
-  if (p.type === 'wantedBoard') { const left = CITY_WANTED.filter(w => !n.caught.includes(w.id)).length; node.dataset.name = 'Wanted Board' + (left ? ' · ' + left + ' at large' : ' · all caught'); }
+  if (p.type === 'wantedBoard') { const left = CITY_WANTED.filter(w => !n.caught.includes(w.id)).length, open = wantedAvailable().length; node.dataset.name = 'Wanted Board' + (open ? ' · ' + open + ' contract' + (open > 1 ? 's' : '') : left ? ' · ' + left + ' at large' : ' · all caught');
+    if (open && node.append && document.createElement) { const m = document.createElement('span'); m.className = 'quest-mark'; m.textContent = '❗'; node.append(m); } } // Round 347: ❗ while contracts are open
   node.classList.add('poi-nights');
   return node;
 };
@@ -132,14 +134,32 @@ roomTag = function (key) {
 };
 // --- Interaction ---
 function cnMenu(title, body, buttons) { poiMenu(title, body, buttons.concat([{ id: 'cnLeave', label: 'Leave', onclick: closeMenu }])); }
+// Round 347 (owner: "the wanted board should have quests on it, not just a notice"): each rogue is a contract you take
+// from the board. A taken contract joins the Quests screen (☠ Wanted, with where the rogue was last seen), and only then
+// does the rogue walk the streets (☠, tougher). Bringing it in completes the contract and pays its reward.
+function wantedContractId(id) { return 'city:wanted:' + id; }
+function wantedContract(id) { const q = typeof ensureQuests === 'function' ? ensureQuests() : null; return q && q.taken ? q.taken[wantedContractId(id)] || null : null; }
+function wantedWhere(i) { const key = cityWantedRooms()[i]; return key && rooms[key] ? rooms[key].name : 'somewhere in the city'; }
+function wantedRewardText(w) { return '◇' + w.shards + ' + ' + w.xp + ' XP' + (w.crystal ? ' + an Upgrade Crystal' : ''); }
+function wantedAvailable() { const n = cityNights(); return CITY_WANTED.filter(w => !n.caught.includes(w.id) && !wantedContract(w.id)); }
+function takeWantedContract(i) {
+  const w = CITY_WANTED[i], n = cityNights(); if (!w || n.caught.includes(w.id) || wantedContract(w.id)) return null;
+  const q = { id: wantedContractId(w.id), kind: 'wanted', world: 'city', target: 'wanted:' + w.id, need: 1, have: 0, xp: w.xp,
+    text: 'Bring in ' + w.name + ' (last seen: ' + wantedWhere(i) + ')', rewardText: wantedRewardText(w) };
+  ensureQuests().taken[q.id] = q; save(); toast('☠ Contract taken: ' + w.name + '. Look for the ☠ in ' + wantedWhere(i) + '.');
+  return q;
+}
 function openWantedBoard() {
   const n = cityNights(); n.board = true; save();
   const rows = CITY_WANTED.map((w, i) => {
-    const caught = n.caught.includes(w.id), key = cityWantedRooms()[i], where = key && rooms[key] ? rooms[key].name : 'somewhere in the city';
-    return '<li class="wanted-row' + (caught ? ' caught' : '') + '"><b>☠ ' + w.name + (w.title ? ' <small>' + w.title + '</small>' : '') + '</b><span>' + w.blurb + '</span>'
-      + '<span class="wanted-meta">' + (caught ? '✔ Brought in' : 'Last seen: <b>' + where + '</b>') + ' · Reward ◇' + w.shards + ' + ' + w.xp + ' XP' + (w.crystal ? ' + an Upgrade Crystal' : '') + '</span></li>';
+    const caught = n.caught.includes(w.id), taken = !caught && wantedContract(w.id);
+    const status = caught ? '✔ Brought in' : taken ? '☠ On the hunt · last seen: <b>' + wantedWhere(i) + '</b>' : 'Contract open';
+    return '<li class="wanted-row' + (caught ? ' caught' : taken ? ' taken' : '') + '"><b>☠ ' + w.name + (w.title ? ' <small>' + w.title + '</small>' : '') + '</b><span>' + w.blurb + '</span>'
+      + '<span class="wanted-meta">' + status + ' · Reward ' + wantedRewardText(w) + '</span></li>';
   }).join('');
-  cnMenu('📋 Wanted Board', '<p>Faded posters, fresh ink. The Refuge pays for anyone who brings these three in. Each walks with an ordinary patrol (☠ on the street) and fights harder than it.</p><ul class="wanted-list">' + rows + '</ul>', []);
+  const buttons = CITY_WANTED.map((w, i) => (!n.caught.includes(w.id) && !wantedContract(w.id))
+    ? { id: 'wantedTake' + i, label: '📜 Take contract: ' + w.name, primary: true, onclick: () => { takeWantedContract(i); renderWorld(); openWantedBoard(); } } : null).filter(Boolean);
+  cnMenu('📋 Wanted Board', '<p>Faded posters, fresh ink. The Refuge pays for anyone who brings these three in. Take a contract and the rogue turns up with an ordinary patrol (☠ on the street); it fights harder than the patrol. Your contracts are in the Quests screen.</p><ul class="wanted-list">' + rows + '</ul>', buttons);
 }
 function openBreaker(p) {
   const n = cityNights(), on = n.breakers.includes(p.index);
@@ -205,6 +225,7 @@ winBattle = function () {
   const r = winBattleBeforeNights.apply(this, arguments), w = CITY_WANTED.find(x => x.id === b.wanted), n = cityNights();
   if (b.phase === 'reward' && w && !n.caught.includes(w.id)) {
     n.caught.push(w.id); state.shards += w.shards; gainXP(w.xp); if (w.crystal && typeof setMaterials === 'function') setMaterials(materials() + 1);
+    const cq = wantedContract(w.id); if (cq) { const qs = ensureQuests(); delete qs.taken[cq.id]; if (!qs.done.includes(cq.id)) qs.done.push(cq.id); } // Round 347: the contract is done
     if (Array.isArray(b.special)) b.special.push('☠ WANTED: ' + w.name + ' brought in! +◇' + w.shards + ', +' + w.xp + ' XP' + (w.crystal ? ', an Upgrade Crystal' : '') + '.');
     if (n.caught.length === CITY_WANTED.length) toast('All three rogues brought in. The Refuge sleeps easier tonight.');
     save();

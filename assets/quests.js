@@ -9,7 +9,8 @@
 const QUEST_KINDS = {
   hunt: { icon: '⚔', xp: 60, need: 10 },
   mini: { icon: '⚑', xp: 80, card: 1 },
-  boss: { icon: '♛', xp: 120, card: 1 }
+  boss: { icon: '♛', xp: 120, card: 1 },
+  wanted: { icon: '☠', xp: 0 } // Round 347: Wanted Board contracts (city-nights.js pays them)
 };
 function ensureQuests(s = state) {
   if (!s) return {};
@@ -47,7 +48,7 @@ function questOffer(p) {
   const card = pool.length ? pool[hashSeed(state.seed + id) % pool.length] : null;
   return { id, kind, world, target, need: 1, have: 0, xp: K.xp, card, text: 'Defeat ' + enemies[target].name };
 }
-function questReward(q) { return '+' + q.xp + ' XP' + (q.card && defs[q.card] ? ' and ' + defs[q.card].name + (QUEST_KINDS[q.kind].card ? ' +' + QUEST_KINDS[q.kind].card : '') : ''); }
+function questReward(q) { if (q.rewardText) return q.rewardText; return '+' + q.xp + ' XP' + (q.card && defs[q.card] ? ' and ' + defs[q.card].name + (QUEST_KINDS[q.kind].card ? ' +' + QUEST_KINDS[q.kind].card : '') : ''); }
 function takeQuest(q) { ensureQuests(); if (state.quests.taken[q.id] || state.quests.done.includes(q.id)) return; state.quests.taken[q.id] = q; save(); toast('📜 Quest taken: ' + q.text + '. Reward: ' + questReward(q) + '.'); }
 function finishQuest(q, b) {
   delete state.quests.taken[q.id]; state.quests.done.push(q.id);
@@ -113,10 +114,10 @@ function showQuests(world = activeRegion) {
     + '<div class="quest-bar"><i style="width:' + Math.round((q.have || 0) / q.need * 100) + '%"></i></div></div><span class="quest-count">' + (q.have || 0) + '/' + q.need + '</span></article>';
   const tabs = questWorlds().map(w => { const n = Object.values(state.quests.taken).filter(q => q.world === w).length;
     return '<button class="quest-tab' + (w === world ? ' active' : '') + '" data-quest-world="' + w + '">' + questWorldName(w) + (w === activeRegion ? ' ◉' : '') + (n ? ' <span>' + n + '</span>' : '') + '</button>'; }).join('');
-  const kindName = { hunt: '⚔ Hunt', mini: '⚑ Mini-boss', boss: '♛ Boss' };
+  const kindName = { hunt: '⚔ Hunt', mini: '⚑ Mini-boss', boss: '♛ Boss', wanted: '☠ Wanted' };
   const finished = done.length ? '<p class="muted quest-done">Finished: ' + done.map(id => kindName[id.split(':')[1]] || id).join(' · ') + '</p>' : '';
   const note = here ? '<p class="notice">' + (open.length ? open.length + ' quest' + (open.length > 1 ? 's' : '') + ' still to pick up here' + (open.some(p => areaSeen(p.key)) ? '.' : ' (explore to find the givers).') : 'No more quests to pick up here.') + '</p>' : '';
-  openMenu('<div class="eyebrow">JOURNEY · QUESTS</div><h1>Quests</h1><p>Points of interest marked ❗ hand out quests: hunt enemies, defeat a mini-boss, defeat the world\'s boss. Each pays XP; the boss quests also give a card.</p>'
+  openMenu('<div class="eyebrow">JOURNEY · QUESTS</div><h1>Quests</h1><p>Points of interest marked ❗ hand out quests: hunt enemies, defeat a mini-boss, defeat the world\'s boss. Each pays XP; the boss quests also give a card. In Neon Aftermath the Wanted Board posts bounty contracts too.</p>'
     + '<div class="quest-tabs">' + tabs + '</div>'
     + '<h2>' + questWorldName(world) + '</h2>' + (taken.length ? taken.map(row).join('') : '<p class="muted">No active quests in ' + questWorldName(world) + '.</p>')
     + finished + note
