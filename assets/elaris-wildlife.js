@@ -31,6 +31,8 @@ const WILDLIFE_ART={
  tempestColossus:{name:'The Tempest Colossus',sheet:'vespera/tempest-colossus',cycle:'.8s',big:true},
  gearhound:{name:'Gearhound',sheet:'chronospire/gearhound',cycle:'.8s'},
  tickMoth:{name:'Tick Moth',sheet:'chronospire/tick-moth',cycle:'.8s'},
+ clockwardenArt:{name:'The Clockwarden',sheet:'chronospire/clockwarden',cycle:'.8s'}, // Round 353: Chronospire's mini-boss hovers on its own sheet (drawn from the Crown Observer)
+ chronarchArt:{name:'The Chronarch',sheet:'chronospire/chronarch',cycle:'.8s',big:true}, // Round 353: Chronospire's boss walks on its own sheet (drawn from the Bloom Tyrant)
  cogMauler:{name:'Cog Mauler',sheet:'chronospire/cog-mauler',cycle:'.8s'}, // Round 349: Chronospire's own mauler (eight-frame walk drawn from the Reactor Mauler)
  pendulumStag:{name:'Pendulum Stag',sheet:'chronospire/pendulum-stag',cycle:'.8s'}, // Round 346: Chronospire's own stag (eight-frame walk drawn from the Blight Antler)
  hourglassHeron:{name:'Hourglass Heron',sheet:'chronospire/hourglass-heron',cycle:'.8s'}, // Round 346: Chronospire's own heron (eight-frame walk drawn from the Drowned Heron) // Round 342: Chronospire's own clockwork moth (an eight-frame flight drawn from the Storm Moth) // Round 341: Chronospire's own clockwork fox (an eight-frame walk drawn from the Cinder Fox) // Round 340: Vespera's boss in its own storm form (an eight-frame walk drawn from the Bloom Tyrant) // Round 339: Vespera's mini-boss in its own storm armor (an eight-frame walk drawn from the Briar Sentinel) // Round 338: Vespera's own storm mauler (an eight-frame walk drawn from the Reactor Mauler) // Round 336: Vespera's own storm wisp (an eight-frame glide drawn from the Data Wisp) // Round 335: Vespera's own frost stag (an eight-frame walk drawn from the Blight Antler) // Round 334: Vespera's own storm wraith (an eight-frame glide drawn from the Phase Shade) // Round 333: Vespera's own storm-coast heron (an eight-frame walk drawn from the Drowned Heron) // Round 332: Vespera's own storm moth (an eight-frame flight drawn from the Storm Moth), no longer the recolored Storm Moth // Round 305: Vespera's own storm fox (the owner's eight-frame walk), no longer the recolored Cinder Fox
@@ -46,8 +48,10 @@ const WILDLIFE_ART={
  burrower:{name:'Tunnel Borehound',sheet:'city/tunnel-borehound',cycle:'.8s'},
  // Round 264: the Phase Shade glides (four of the owner's eight frames; no battle poses yet).
  shade:{name:'Phase Shade',sheet:'city/phase-shade',cycle:'.8s'},
- // Round 266: the Crown Observer hovers (four of the owner's eight frames; no battle poses yet). The Clockwarden borrows it.
+ // Round 266: the Crown Observer hovers (four of the owner's eight frames; no battle poses yet).
  crownEye:{name:'Crown Observer',sheet:'city/crown-observer',cycle:'.8s'},
+ // Round 354: the Reactor Mauler walks (four of the owner's eight frames; it had a single still picture, clipped at both sides).
+ forgeBeast:{name:'Reactor Mauler',sheet:'city/reactor-mauler',cycle:'.8s'},
  // Round 267: Neon Aftermath's final boss, the Thorn Warden, strides (four of the owner's eight side-walk frames).
  thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden',cycle:'1.1s'},
  // Round 268: the mini-boss Lunar Enforcer glides (four of the owner's eight frames; no battle poses yet).
@@ -60,7 +64,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='349';
+const SPRITE_VERSION='354';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which

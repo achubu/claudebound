@@ -29,6 +29,12 @@ function cityNights() {
   n.vault = !!n.vault; n.board = !!n.board;
   return state.cityNights = n;
 }
+// Round 354: drawing reads without writing, so a save looks the same before and after a reload.
+function cityNightsPeek() {
+  if (!state) return null;
+  const n = state.cityNights && typeof state.cityNights === 'object' ? state.cityNights : {};
+  return { caught: Array.isArray(n.caught) ? n.caught : [], breakers: Array.isArray(n.breakers) ? n.breakers : [], vault: !!n.vault, board: !!n.board };
+}
 const cnFrac = k => typeof regionDistanceFrac === 'function' ? regionDistanceFrac(k) : .5;
 // One room in each third of the city (near, middle, far from the Refuge), picked with the journey's seed.
 function cnPickByThirds(keys, salt) {
@@ -65,7 +71,7 @@ function cityWantedFor(spawn) {
   const list = cityWantedRooms(), key = spawn.uid.replace(/^city:/, '').replace(/:\d+$/, ''), i = list.indexOf(key);
   if (i < 0 || !CITY_WANTED[i]) return null;
   const first = roomSpawnsBeforeNights(key).find(s => !s.boss); if (!first || first.uid !== spawn.uid) return null;
-  if (cityNights().caught.includes(CITY_WANTED[i].id) || !wantedContract(CITY_WANTED[i].id)) return null; // Round 347: only once its contract is taken
+  if (cityNightsPeek().caught.includes(CITY_WANTED[i].id) || !wantedContract(CITY_WANTED[i].id)) return null; // Round 347: only once its contract is taken
   return { ...CITY_WANTED[i], room: key };
 }
 const roomSpawnsBeforeNights = roomSpawns;
@@ -117,7 +123,7 @@ const poiNodeBeforeNights = poiNode;
 poiNode = function (p) {
   const node = poiNodeBeforeNights.apply(this, arguments);
   if (!p || !node || !node.classList || !['breaker', 'vault', 'wantedBoard'].includes(p.type)) return node; // Round 350: other worlds' objects never touch the city's save entry
-  const n = cityNights();
+  const n = cityNightsPeek();
   if (p.type === 'breaker' && n && n.breakers.includes(p.index)) { node.classList.add('used'); node.dataset.name = 'Breaker Box · on'; }
   if (p.type === 'vault') { const open = n && n.breakers.length >= 3; node.querySelector('.poi-glyph').textContent = n.vault ? '🔓' : open ? '🔓' : '🔒'; node.dataset.name = 'Afterlight Vault · ' + (n.vault ? 'emptied' : open ? 'powered' : n.breakers.length + '/3 power'); if (n.vault) node.classList.add('used'); }
   if (p.type === 'wantedBoard') { const left = CITY_WANTED.filter(w => !n.caught.includes(w.id)).length, open = wantedAvailable().length; node.dataset.name = 'Wanted Board' + (open ? ' · ' + open + ' contract' + (open > 1 ? 's' : '') : left ? ' · ' + left + ' at large' : ' · all caught');
@@ -144,7 +150,7 @@ roomTag = function (key) {
   const tag = roomTagBeforeNights.apply(this, arguments);
   if (tag || activeRegion !== 'city' || !state) return tag;
   const i = cityWantedRooms().indexOf(key);
-  if (i >= 0 && !cityNights().caught.includes(CITY_WANTED[i].id) && (typeof areaSeen !== 'function' || areaSeen(key))) return { color: '#ff6b5a', label: '☠ ' + CITY_WANTED[i].name };
+  if (i >= 0 && !cityNightsPeek().caught.includes(CITY_WANTED[i].id) && (typeof areaSeen !== 'function' || areaSeen(key))) return { color: '#ff6b5a', label: '☠ ' + CITY_WANTED[i].name };
   return tag;
 };
 // --- Interaction ---
@@ -153,12 +159,12 @@ function cnMenu(title, body, buttons) { poiMenu(title, body, buttons.concat([{ i
 // from the board. A taken contract joins the Quests screen (☠ Wanted, with where the rogue was last seen), and only then
 // does the rogue walk the streets (☠, tougher). Bringing it in completes the contract and pays its reward.
 function wantedContractId(id) { return 'city:wanted:' + id; }
-function wantedContract(id) { const q = typeof ensureQuests === 'function' ? ensureQuests() : null; return q && q.taken ? q.taken[wantedContractId(id)] || null : null; }
+function wantedContract(id) { const q = state && state.quests; return q && q.taken && typeof q.taken === 'object' ? q.taken[wantedContractId(id)] || null : null; } // read-only (Round 354)
 function wantedWhere(i) { const key = cityWantedRooms()[i]; return key && rooms[key] ? rooms[key].name : 'somewhere in the city'; }
 function wantedRewardText(w) { return '◇' + w.shards + ' + ' + w.xp + ' XP' + (w.crystal ? ' + an Upgrade Crystal' : ''); }
-function wantedAvailable() { const n = cityNights(); return CITY_WANTED.filter(w => !n.caught.includes(w.id) && !wantedContract(w.id)); }
+function wantedAvailable() { const n = cityNightsPeek(); return CITY_WANTED.filter(w => !n.caught.includes(w.id) && !wantedContract(w.id)); }
 function takeWantedContract(i) {
-  const w = CITY_WANTED[i], n = cityNights(); if (!w || n.caught.includes(w.id) || wantedContract(w.id)) return null;
+  const w = CITY_WANTED[i], n = cityNightsPeek(); if (!w || n.caught.includes(w.id) || wantedContract(w.id)) return null;
   const q = { id: wantedContractId(w.id), kind: 'wanted', world: 'city', target: 'wanted:' + w.id, need: 1, have: 0, xp: w.xp,
     text: 'Bring in ' + w.name + ' (last seen: ' + wantedWhere(i) + ')', rewardText: wantedRewardText(w) };
   ensureQuests().taken[q.id] = q; save(); toast('☠ Contract taken: ' + w.name + '. Look for the ☠ in ' + wantedWhere(i) + '.');

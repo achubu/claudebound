@@ -3496,6 +3496,54 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 354: the Reactor Mauler walks
+
+- The owner's eight-frame walk for Neon Aftermath's **Reactor Mauler**: a furnace-bellied brass brute with three
+  smokestacks and a vent-grille face. Until now it was the only regular enemy on a single still picture, which was
+  clipped at both sides (found in Round 352).
+- The draft was one 2048px image on green, eight frames of about 235px each on a 256px grid. Each frame was keyed
+  off green, then cut by that grid, which keeps the draft's own positions (the face vents line up within 2px).
+  Frames 1, 3, 5 and 7 were enlarged about 2× into `assets/monsters/city/reactor-mauler.png` and padded. The
+  eight-frame strip is kept in `assets/monsters/city/src/reactor-mauler-walk8.png`.
+- `WILDLIFE_ART.forgeBeast`. `SPRITE_VERSION` is now '354'; `enemy-sizes.css` was regenerated (×0.85). It passes
+  `tools/sprite_audit.py`. `tests/elaris-wildlife.test.cjs` now expects the walking sheet.
+- The Crown Sentinel boss still reuses the Crown Observer's still picture.
+- Fix: drawing Neon Aftermath could write to the save. The Wanted Board, the vault, a rogue's patrol and its map marker
+  read the city's entry through `cityNights()`, which creates it, and `ensureQuests()`. Since Round 350 those objects
+  stand in ordinary rooms, so with some seeds `save-roundtrip` saw a save change on reload. Drawing now reads through
+  the read-only `cityNightsPeek()` and `state.quests`. New `tests/save-stable.test.cjs` reloads 12 seeds in three
+  worlds.
+
+## Round 353: the Clockwarden and the Chronarch get their own sheets
+
+- The owner's eight-frame drafts for Chronospire's mini-boss and boss. Until now both borrowed other creatures' art,
+  recoloured.
+  - **The Clockwarden** (mini-boss) hovers: a brass clock-faced eye with an amber iris and ring, drawn from the Crown
+    Observer (`assets/monsters/chronospire/clockwarden.png`, `WILDLIFE_ART.clockwardenArt`).
+  - **The Chronarch** (boss) walks: a golden-canopied stag with copper flowers and an amber heart, drawn from the Bloom
+    Tyrant (`chronarch.png`, `chronarchArt`, `big: true`).
+- Each was built the usual way: frames 1, 3, 5 and 7, cleaned and padded. The strips are kept in `src/`. Both are
+  `tint: 'none'`.
+- `SPRITE_VERSION` is now '353'. Both pass `tools/sprite_audit.py`, and `enemy-sizes.css` was regenerated.
+
+## Round 352: every enemy animation checked; two sheets cleaned; a sprite audit
+
+- Owner: "check all enemies to make sure their animations are clean and there are no artifacts".
+- I reviewed all 47 creature sheets frame by frame on dark and light backgrounds, after automated checks for specks,
+  clipped edges, keying fringe, haze and frame-to-frame jumps.
+- Two sheets had artifacts:
+  - **Rimeglass Stag** (Vespera): flat light-grey patches of the draft's background sat between the antler tines,
+    under the belly and between the legs, in every frame (Round 335 removed only the brightest blob). Removed by growing
+    the transparency into smooth, unsaturated grey (keeping the textured frost fur), clearing enclosed pale patches of
+    400px or more, and peeling the pale fringe three times.
+  - **Drowned Heron** (Elaris): frame 2 carried two slivers of a neighbouring frame's tail at its right edge. Removed.
+- Everything else is clean. The flagged bits are deliberate: the Phase Shade's glitch pixels, the Dust Devil's pebbles,
+  the Cistern Warden's steam, the Mirage Ibis's pink mirage fringe and the moths' and roc's wing-beat bob.
+- The city's **Reactor Mauler** still uses the old single picture, which is clipped at both sides and has no walk.
+  The Crown Sentinel boss reuses the Crown Observer picture, also without a walk. Both need new art.
+- New `tools/sprite_audit.py` checks every sheet for these problems, with deliberate effects listed in `ALLOW`.
+  `tests/sprite-audit.test.cjs` runs it. `SPRITE_VERSION` is now '352'; `enemy-sizes.css` was regenerated.
+
 ## Round 351: enemies drawn at one size in every world
 
 - Owner: "can you standardize enemy size across all worlds? similar in what we see in neon city would be good for all maps".
