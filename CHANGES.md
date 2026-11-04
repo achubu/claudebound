@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 351: enemies drawn at one size in every world
+
+- Owner: "can you standardize enemy size across all worlds? similar in what we see in neon city would be good for all maps".
+- Every creature already uses the same sprite box (bosses a bigger one). The difference was the paintings: a moth, harpy
+  or drake covers far less of its frame than a sentinel or wisp. Measured as the square root of the share of the frame its
+  opaque pixels cover, the Sky Isles creatures averaged 0.44, Chronospire 0.51, Solaris 0.52, Vespera 0.53 and Neon
+  Aftermath 0.55.
+- New `tools/enemy_sizes.py` measures every four-frame sheet and writes `assets/enemy-sizes.css`. That stylesheet scales
+  each creature on the map toward the Neon Aftermath median (0.55), clamped to ×0.85–×1.45. For example the Gale Harpy is
+  ×1.45, the Rain Drone ×1.09 and the Data Wisp ×0.85.
+- Matching is on the sheet's URL in the sprite's style, so walk and attack poses and pair partners follow. Battle portraits
+  are not touched. Re-run the tool after adding or re-cutting creature sheets.
+- New `tests/enemy-sizes.test.cjs`.
+
 ## Round 350: one interactable object per room, and none in a world's first room
 
 - Owner: "no room should have more than 1 interactable object and dont have any in the first room of any world".
