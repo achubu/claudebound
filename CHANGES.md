@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 350: one interactable object per room, and none in a world's first room
+
+- Owner: "no room should have more than 1 interactable object and dont have any in the first room of any world".
+- Before this round, the only rooms breaking the rule were the start rooms:
+  - Neon Aftermath's Refuge held the Wanted Board and the Afterlight Vault.
+  - Every other world's start room held its Round 345 puzzle vault.
+- New `quietItemRooms(n)` in `assets/city-nights.js` lists the rooms nearest the start that hold nothing: no point of
+  interest, chest, relic, merchant, Cardsmith, breaker or switch, and no boss.
+  - The Wanted Board takes the nearest such room and the Afterlight Vault the next one.
+  - In the other worlds the puzzle vault takes the nearest (`worldRelayItems`).
+- The breaker-box text and the "all switches done" messages now name the vault's room instead of the start room.
+- Portals back to the previous world still stand in the start rooms; they are the way in, not an object to use.
+- New `tests/one-object.test.cjs` checks every room in all six worlds over four seeds.
+  `city-nights` and `world-relays` tests updated.
+
 ## Round 349: the last object paintings (two waypoints, the Sunvault, the city chest, three portals) and the Cog Mauler
 
 - The owner's paintings, keyed with `tools/key_object.py`:

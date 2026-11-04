@@ -4,7 +4,7 @@
 // Neon City"). Neon Aftermath's Blackout (Round 298: three breaker boxes power the Afterlight Vault in the Refuge)
 // now has a version in every other world. Three switches stand in rooms near, mid-way and far from the world's start
 // (placed from the journey's seed, in rooms with nothing else in them); setting all three opens a sealed vault in the
-// start room: Shards (more in later worlds), an Upgrade Crystal and one of that world's cards.
+// start room (since Round 350, a room of its own near the start): Shards (more in later worlds), an Upgrade Crystal and one of that world's cards.
 // =====================================================================
 const WORLD_RELAYS = {
   elaris: {
@@ -12,35 +12,35 @@ const WORLD_RELAYS = {
     swText: 'A tall bronze mirror on a pivot, knocked askew by a sandstorm. Turned true, it throws a beam of sunlight toward Dawnfire Gate.',
     act: '☀ Turn the mirror to the sun', onText: 'The mirror holds its beam steady', grid: 'mirrors aligned', home: 'Dawnfire Gate',
     lockedText: 'A sealed sandstone vault, its sun-disc lock dark.', openText: 'Three beams meet on the sun-disc and the stone rolls aside. Inside: tribute the old city sealed away.',
-    toastOn: '☀ Mirror aligned', toastAll: '☀ All three beams meet! The Sunvault at Dawnfire Gate is open.'
+    toastOn: '☀ Mirror aligned', toastAll: '☀ All three beams meet! The Sunvault is open.'
   },
   sky: {
     sw: { type: 'windVane', icon: '🌀', name: 'Wind Vane' }, vault: { type: 'galeStrongbox', icon: '🎁', name: 'Gale Strongbox' }, shards: 90,
     swText: 'A great brass weather vane, jammed facing the wrong way. Freed, it turns into the wind and pulls a current toward the landing.',
     act: '🌀 Free the vane', onText: 'The vane spins free in the wind', grid: 'vanes turning', home: 'the landing',
     lockedText: 'A brass strongbox chained to the deck, its wind-lock still.', openText: 'Three winds meet and the wind-lock spins open. Inside: cargo lost in the storms.',
-    toastOn: '🌀 Vane freed', toastAll: '🌀 The winds meet! The Gale Strongbox at the landing is open.'
+    toastOn: '🌀 Vane freed', toastAll: '🌀 The winds meet! The Gale Strongbox is open.'
   },
   wilds: {
     sw: { type: 'spiritLantern', icon: '🏮', name: 'Spirit Lantern' }, vault: { type: 'heartHollow', icon: '🌳', name: 'Heartwood Hollow' }, shards: 110,
     swText: 'An old wardens\' lantern on a root-wrapped post, its flame long out. Relit, its light runs along the roots toward the grove.',
     act: '🏮 Relight the lantern', onText: 'The lantern burns green-gold', grid: 'lanterns lit', home: 'the grove',
     lockedText: 'A great hollow tree, its bark grown shut over the opening.', openText: 'The three lights reach the old tree and its bark peels open. Inside: the wardens\' hidden stores.',
-    toastOn: '🏮 Lantern lit', toastAll: '🏮 All three lanterns burn! The Heartwood Hollow in the grove is open.'
+    toastOn: '🏮 Lantern lit', toastAll: '🏮 All three lanterns burn! The Heartwood Hollow is open.'
   },
   vespera: {
     sw: { type: 'stormRod', icon: '⚡', name: 'Lightning Rod' }, vault: { type: 'stormStrongroom', icon: '⛈', name: 'Stormlocked Strongroom' }, shards: 130,
     swText: 'A toppled iron lightning rod, its cable snapped. Raised again, it catches the storm and sends the charge down the coast.',
     act: '⚡ Raise the rod', onText: 'The rod crackles with stormlight', grid: 'rods raised', home: 'the harbour',
     lockedText: 'A slate strongroom with a storm-lock, cold and dead.', openText: 'Three bolts strike and the storm-lock bursts open. Inside: salvage the harbour kept from the sea.',
-    toastOn: '⚡ Rod raised', toastAll: '⚡ The storm answers! The Stormlocked Strongroom at the harbour is open.'
+    toastOn: '⚡ Rod raised', toastAll: '⚡ The storm answers! The Stormlocked Strongroom is open.'
   },
   chronospire: {
     sw: { type: 'stoppedClock', icon: '🕰', name: 'Stopped Clock' }, vault: { type: 'chronoVault', icon: '⌛', name: 'Chrono Vault' }, shards: 150,
     swText: 'A great standing clock, its hands frozen. Wound again, its ticking joins the spire\'s heartbeat.',
     act: '🕰 Wind the clock', onText: 'The clock ticks in time again', grid: 'clocks wound', home: 'the gate',
     lockedText: 'A bronze vault with a clock-face lock, its hands still.', openText: 'Three clocks strike as one and the lock\'s hands turn to open. Inside: a hoard from a moment that never ended.',
-    toastOn: '🕰 Clock wound', toastAll: '🕰 The clocks strike together! The Chrono Vault at the gate is open.'
+    toastOn: '🕰 Clock wound', toastAll: '🕰 The clocks strike together! The Chrono Vault is open.'
   }
 };
 const RELAY_TYPES = {};
@@ -90,12 +90,7 @@ function relaySpot(key, id, avoid) {
 function worldRelayItems(key = state && state.room) {
   const d = WORLD_RELAYS[activeRegion]; if (!d || !state || !rooms[key]) return [];
   const out = [];
-  if (isStartRoom(key)) {
-    const taken = [{ x: 400, y: 300 }], p = typeof poiAt === 'function' ? poiAt(key) : null, shop = typeof merchantRoom === 'function' ? merchantRoom() : null;
-    if (p) taken.push(p); if (shop && shop.key === key) taken.push(shop);
-    if (typeof cardsmithRoom === 'function' && cardsmithRoom() === key && typeof cardsmithSpot === 'function') taken.push(cardsmithSpot(key));
-    const v = relaySpot(key, 'vault', taken); out.push({ key, type: d.vault.type, id: activeRegion + ':relayVault', x: v.x, y: v.y });
-  }
+  if (key === quietItemRooms(1)[0]) { const v = relaySpot(key, 'vault', []); out.push({ key, type: d.vault.type, id: activeRegion + ':relayVault', x: v.x, y: v.y }); } // Round 350: alone in its own room near the start
   const i = worldRelayRooms().indexOf(key);
   if (i >= 0) { const s = relaySpot(key, 'relay' + i, []); out.push({ key, type: d.sw.type, id: activeRegion + ':relay:' + i, index: i, x: s.x, y: s.y }); }
   return out;
@@ -124,7 +119,7 @@ function openRelay(p) {
     [{ id: 'relayAct', label: d.act, primary: true, onclick: () => {
       if (!s.on.includes(p.index)) s.on.push(p.index);
       save(); closeMenu(); renderWorld();
-      toast(s.on.length >= 3 ? d.toastAll : d.toastOn + ': ' + s.on.length + '/3.');
+      toast(s.on.length >= 3 ? d.toastAll.replace(/ is open\.$/, ' in ' + quietRoomName(quietItemRooms(1)[0]) + ' is open.') : d.toastOn + ': ' + s.on.length + '/3.');
     } }]);
 }
 function relayVaultCard(world = activeRegion) {
