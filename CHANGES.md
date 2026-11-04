@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 349: the last object paintings (two waypoints, the Sunvault, the city chest, three portals) and the Cog Mauler
+
+- The owner's paintings, keyed with `tools/key_object.py`:
+  - `assets/items/poi/elaris-nexus.webp`: the Solaris Nexus Waypoint (`WORLD_POI_ART.elaris`, new).
+  - `elaris-sunVault.webp`: the Solaris Sunvault.
+  - `chronospire-nexus.webp`: the Chronospire Nexus Waypoint (`--clear-enclosed`).
+  - `city-chest.webp`: the Neon Aftermath hidden chest. `WORLD_CHEST_ART.city`; the CSS maps it to `data-environment="neon"`.
+  - `assets/environment/wilds-portal.webp` (`--keep-green` for the moss and swirl), `vespera-portal.webp`,
+    `chronospire-portal.webp`: three more entries in `WORLD_PORTAL_ART`. No world uses the shared `elaris-portal.png` now.
+- Only the Solaris Sun Mirror still shows a glyph (☀); its prompt is in `tools/art-refresh/object-prompts.md`.
+- The **Cog Mauler** (Chronospire) walks on its own sheet, built from the owner's eight-frame draft
+  (`assets/monsters/chronospire/cog-mauler.png`; the strip is in `src/`). Until now it borrowed the Reactor Mauler, recoloured.
+  `SPRITE_VERSION` is now '349'.
+- `tests/city-cardsmith-art.test.cjs` checks the new paintings and portals.
+
 ## Round 348: interactable objects are 25% bigger, one size in every world, and solid until used
 
 - Owner: "all of the interactable objects are too small, lets increase size by 25% and standardize it across all maps",

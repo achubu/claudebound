@@ -125,7 +125,7 @@ Shared on purpose, so optional (see section 3):
 | `elaris/cinder-fox` | none since Round 341 (the Gearhound has its own) |
 | `elaris/drowned-heron` | The Tidebound Warden (Elaris mini-boss, not recolored); the Hourglass Heron has its own since Round 346 |
 | `elaris/storm-moth` | The Gale Sovereign (Elaris mini-boss, not recolored); the Tick Moth has its own since Round 342 |
-| `reactor-mauler` | Cog Mauler (Chronospire); Thunder Mauler has its own since Round 338 |
+| `reactor-mauler` | none since Round 349 (Thunder Mauler since Round 338, Cog Mauler since Round 349) |
 
 ## 5. Nexus Waypoints, one per world (owner request, Round 339)
 
@@ -135,11 +135,11 @@ Every world uses the same `nexus.webp`. Each world gets its own, wired through `
 | File | World | Subject |
 |---|---|---|
 | `city-nexus.webp` ✅ done (Round 340) | Neon Aftermath | A waist-high cyberpunk teleport pad: a round scrap-metal platform ringed with cyan neon tubing, with a holographic ring of glowing cyan glyphs spinning in the air above it, cables snaking from its base into cracked asphalt, and a small flickering control post beside it. |
-| `elaris-nexus.webp` | Solaris | A sun-temple waypoint: a round sandstone dais with a carved golden sunburst inlaid in its floor, two short obelisks with glowing amber hieroglyph-like runes at its sides, and a warm golden beam of light rising from the centre, with sand drifting across the steps. |
+| `elaris-nexus.webp` ✅ done (Round 349) | Solaris | A sun-temple waypoint: a round sandstone dais with a carved golden sunburst inlaid in its floor, two short obelisks with glowing amber hieroglyph-like runes at its sides, and a warm golden beam of light rising from the centre, with sand drifting across the steps. |
 | `sky-nexus.webp` ✅ done (Round 341) | Sky Isles | A floating sky-shrine waypoint: a round white marble platform with brass rails hovering over a small cloud, with three tall curved brass vanes around it and a pale-blue swirling wind portal glowing between them, plus feathers and wisps of cloud circling it. |
 | `wilds-nexus.webp` ✅ done (Round 341) | Elaris (forest) | A druidic forest waypoint: a ring of mossy standing stones around a flat stone disc carved with a glowing green spiral, with roots and ferns at its base, fireflies, and a soft column of green light rising from the spiral. |
 | `vespera-nexus.webp` ✅ done (Round 341) | Vespera | A storm-coast waypoint: a round slate platform on wet black rock, ringed by three iron lightning rods, with a crackling ring of violet lightning hovering above its centre and rain-slick stone reflecting the violet glow. |
-| `chronospire-nexus.webp` | Chronospire | A clockwork waypoint: a round bronze-and-marble platform inlaid with a large clock face, two interlocking golden gear rings slowly turning upright above it, and an amber light shimmering through their middle, with sand motes drifting upward. |
+| `chronospire-nexus.webp` ✅ done (Round 349) | Chronospire | A clockwork waypoint: a round bronze-and-marble platform inlaid with a large clock face, two interlocking golden gear rings slowly turning upright above it, and an amber light shimmering through their middle, with sand motes drifting upward. |
 
 ## 6. Hidden loot chests, one per world (optional, Round 341)
 
@@ -148,7 +148,7 @@ Solaris already has `sol-chest.webp`.
 
 | File | World | Subject |
 |---|---|---|
-| `city-chest.webp` | Neon Aftermath | A dented steel strongbox salvaged from the ruins, lid open a crack on cyan light, coins and a crystal, hazard tape and a blinking pink keypad, on wet cracked asphalt. |
+| `city-chest.webp` ✅ done (Round 349) | Neon Aftermath | A dented steel strongbox salvaged from the ruins, lid open a crack on cyan light, coins and a crystal, hazard tape and a blinking pink keypad, on wet cracked asphalt. |
 | `sky-chest.webp` ✅ done (Round 341) | Sky Isles | A white-washed wooden chest bound in brass with feather hinges and a wind rune, on a puff of cloud, pale-blue light and coins inside, a ribbon streaming in the wind. |
 | `wilds-chest.webp` ✅ done (Round 342) | Elaris (forest) | A moss-covered wooden chest bound in roots and old iron, lid open a crack on green-gold light and coins, ferns and mushrooms around it. |
 | `vespera-chest.webp` ✅ done (Round 342) | Vespera | A barnacled sea chest of dark wood and iron washed up on wet black rock, violet light and coins inside, a coil of rope and a few shells. |
@@ -163,9 +163,9 @@ Round 342 (Solaris has `sol-merchant.webp`). Portals go through `WORLD_PORTAL_AR
 | File | World | Subject |
 |---|---|---|
 | `sky-portal.webp` ✅ done (Round 342) | Sky Isles | A white marble arch trimmed in brass with feather carvings and a wind-rune keystone, on a marble step on a cloud, a swirling pale-blue sky portal inside. |
-| `wilds-portal.webp` | Elaris (forest) | An archway of two great twisted trees whose branches meet overhead, hung with moss and glowing lanterns, a swirling green-gold portal between their trunks, roots and ferns at the base. |
-| `vespera-portal.webp` | Vespera | A tall arch of dark wet slate pillars bound in iron, a lightning glyph at its keystone, a swirling violet storm portal crackling inside, on wet black rock. |
-| `chronospire-portal.webp` | Chronospire | A bronze-and-marble arch shaped like a giant clock ring with gears at its base, a swirling amber portal with faint clock hands inside, sand motes drifting. |
+| `wilds-portal.webp` ✅ done (Round 349) | Elaris (forest) | An archway of two great twisted trees whose branches meet overhead, hung with moss and glowing lanterns, a swirling green-gold portal between their trunks, roots and ferns at the base. |
+| `vespera-portal.webp` ✅ done (Round 349) | Vespera | A tall arch of dark wet slate pillars bound in iron, a lightning glyph at its keystone, a swirling violet storm portal crackling inside, on wet black rock. |
+| `chronospire-portal.webp` ✅ done (Round 349) | Chronospire | A bronze-and-marble arch shaped like a giant clock ring with gears at its base, a swirling amber portal with faint clock hands inside, sand motes drifting. |
 
 ## 8. The switch puzzle in every world (Round 345)
 
@@ -175,7 +175,7 @@ painted. Wire paintings through `WORLD_POI_ART.<world>.<type>` (`assets/items/po
 | Type | World | Subject |
 |---|---|---|
 | `sunMirror` | Solaris | A tall bronze mirror on a carved sandstone pivot, tilted toward the sun, a beam of golden light glancing off it. |
-| `sunVault` | Solaris | A squat sandstone vault with a big carved sun-disc lock and gold trim, half-buried in sand. |
+| `sunVault` ✅ done (Round 349) | Solaris | A squat sandstone vault with a big carved sun-disc lock and gold trim, half-buried in sand. |
 | `windVane` ✅ done (Round 346) | Sky Isles | A great brass weather vane on a marble post on a cloud, its arrow and feathered tail spinning in the wind. |
 | `galeStrongbox` ✅ done (Round 346) | Sky Isles | A brass-bound strongbox chained to a scrap of white deck, a spinning wind-lock dial on its front. |
 | `spiritLantern` ✅ done (Round 346) | Elaris | An old wardens' lantern on a root-wrapped wooden post, glowing green-gold, moss and ferns at its base. |
