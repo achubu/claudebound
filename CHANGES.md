@@ -3516,6 +3516,9 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   `briarSentinelOld`.
 - `SPRITE_VERSION` is now '356'; `enemy-sizes.css` was regenerated (the Jackal ×1.37, the others ×0.85–0.88). All pass
   `tools/sprite_audit.py`. Tests updated: `ember-jackal`, `briar-sentinel`, `circuit-thornling`, `prism-thornling`.
+- Publishing note: GitHub Pages' deploy of this round timed out on GitHub's side ("Timeout reached, aborting!"), and its
+  re-run stayed queued, so aethercede.com kept serving Round 355. The next merge to `main` publishes it. If a deploy fails
+  like this, check the "pages build and deployment" runs under Actions.
 
 ## Round 355: map roads never jog at a room edge
 
