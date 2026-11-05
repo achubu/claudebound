@@ -288,8 +288,9 @@ if (typeof poiSpot === 'function') {
     let p = organicItemSpot(key, tx, ty, spawns, 150);
     // Round 225: rather than under the HUD or minimap, stand a little closer to a patrol.
     if (p && screenCovered(p.x, p.y)) for (const gap of [120, 90]) { const q = organicItemSpot(key, tx, ty, spawns, gap); if (q && !screenCovered(q.x, q.y)) { p = q; break; } }
-    // Round 358: rather than partly over a building or prop, stand a little closer to a patrol.
-    if (p && typeof itemGroundCover === 'function' && itemGroundCover(key, p.x, p.y) < ITEM_COVER) for (const gap of [120, 90, 70]) { const q = organicItemSpot(key, tx, ty, spawns, gap); if (q && itemGroundCover(key, q.x, q.y) >= ITEM_COVER) { p = q; break; } }
+    // Round 358: a room whose only spots clear of its patrols are partly over a building or prop gets no point of interest
+    // (it goes to another room, as for a room with no spot at all).
+    if (p && typeof itemGroundCover === 'function' && itemGroundCover(key, p.x, p.y) < (typeof isPlazaSpot === 'function' && isPlazaSpot(key, p) ? PLAZA_COVER : ITEM_COVER)) p = null;
     return itemSpotCache[ck] = p ? [p.x, p.y] : null;
   };
 }

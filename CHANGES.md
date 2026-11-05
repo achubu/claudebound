@@ -3513,8 +3513,9 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
     "off the street" had meant crates, machinery, rooftops and the spire's decorated floor.
   - `itemGroundCover()` measures how much of an item's picture, plus a 12px margin, lies on walkable ground. A spot
     needs `ITEM_COVER` (90%).
-  - Hand-picked Neon Aftermath nooks are used only when they pass that check (`neonNook`); points of interest step
-    closer to a patrol rather than stand partly on a prop.
+  - Hand-picked Neon Aftermath nooks are used only when they pass that check (`neonNook`). Points of interest keep
+    150px clear of patrols, as always. A room whose only such spots are partly over a prop gets none; the point of
+    interest goes to another room.
   - The tile worlds' plaza squares are nudged up to 32px to fit (`plazaFit`). They need only 55% (`PLAZA_COVER`),
     because the forest's and storm coast's clearings are open ground the walk mask covers only partly.
   - Before, 21 of 31 Neon Aftermath objects and 21 of 29 Chronospire objects stood less than 40% on open ground. Now
