@@ -1,0 +1,57 @@
+'use strict';
+// =====================================================================
+// Round 358 (owner review of every Neon Aftermath object, numbered #1-#31): hand-placed spots, one per room. Since
+// Round 350 a room holds at most one object, so whatever stands in one of these rooms (a point of interest, a chest,
+// gear, the merchant, the Cardsmith, a Wanted Board, vault or breaker) is drawn and used at this spot. Spots are room
+// pixels; a picture stands on its spot (rises about 31px above it).
+// =====================================================================
+const ROOM_SPOT_FIXES = {
+  city: {
+    '3,4': [580, 202],  // #3 Breaker Box: to the other side of the road
+    '5,4': [338, 262],  // #5 chest: up
+    '1,5': [468, 252],  // #7 Afterlight Vault: left, onto the road's end
+    '3,5': [470, 330],  // #8 merchant: a new spot beside the road
+    '4,5': [540, 158],  // #9 Nexus Waypoint: down slightly
+    '5,5': [470, 340],  // #10 Sealed Cache: a new spot beside the road
+    '0,6': [490, 200],  // #11 Wanted Board: a new spot by the park
+    '2,6': [576, 302],  // #13 campfire: up and right 50px
+    '3,6': [448, 340],  // #14 shrine: left
+    '6,6': [560, 198],  // #15 shrine: the walkway by the road
+    '7,6': [478, 368],  // #16 Breaker Box: onto the grass to the left
+    '8,6': [200, 195],  // #17 terminal: a new spot by the road
+    '0,7': [285, 360],  // #18 terminal: near the road
+    '2,7': [482, 330],  // #20 Cardsmith: near the road
+    '3,7': [270, 330],  // #21 chest: a new spot
+    '5,7': [480, 300],  // #22 Ember Gloves: the plaza
+    '6,7': [535, 302],  // #23 Breaker Box: up, closer to the road
+    '1,8': [600, 439],  // #25 terminal: slightly right
+    '2,8': [470, 420],  // #26 campfire: closer to the road
+    '3,8': [475, 160],  // #27 Street Medic: next to the road
+  },
+};
+function roomSpotFix(key) { const t = ROOM_SPOT_FIXES[activeRegion]; return (t && t[key]) || null; }
+function withSpotFix(key, p) { const f = p && roomSpotFix(key); return f ? { ...p, x: f[0], y: f[1] } : p; }
+if (typeof poiAt === 'function') { const poiAtBeforeFix = poiAt; poiAt = function (key) { return withSpotFix(key, poiAtBeforeFix.apply(this, arguments)); }; }
+if (typeof worldPOIs === 'function') {
+  const worldPOIsBeforeFix = worldPOIs;
+  worldPOIs = function () {
+    const all = worldPOIsBeforeFix.apply(this, arguments);
+    if (all && ROOM_SPOT_FIXES[activeRegion]) for (const k of Object.keys(ROOM_SPOT_FIXES[activeRegion])) if (all[k]) { const f = roomSpotFix(k); all[k].x = f[0]; all[k].y = f[1]; }
+    return all;
+  };
+}
+if (typeof chestFor === 'function') { const chestForBeforeFix = chestFor; chestFor = function (key) { return withSpotFix(key, chestForBeforeFix.apply(this, arguments)); }; }
+if (typeof merchantRoom === 'function') { const merchantRoomBeforeFix = merchantRoom; merchantRoom = function () { const m = merchantRoomBeforeFix.apply(this, arguments); return m ? withSpotFix(m.key, m) : m; }; }
+if (typeof cardsmithFor === 'function') { const cardsmithForBeforeFix = cardsmithFor; cardsmithFor = function () { const c = cardsmithForBeforeFix.apply(this, arguments); return c ? withSpotFix(c.key, c) : c; }; }
+if (typeof cardsmithSpot === 'function') { const cardsmithSpotBeforeFix = cardsmithSpot; cardsmithSpot = function (key) { const s = cardsmithSpotBeforeFix.apply(this, arguments), f = roomSpotFix(key); return f ? { ...s, x: f[0], y: f[1] } : s; }; }
+if (typeof cityNightsItems === 'function') { const cityNightsItemsBeforeFix = cityNightsItems; cityNightsItems = function (key = state && state.room) { return cityNightsItemsBeforeFix.apply(this, arguments).map(i => withSpotFix(i.key || key, i)); }; }
+if (typeof worldRelayItems === 'function') { const worldRelayItemsBeforeFix = worldRelayItems; worldRelayItems = function (key = state && state.room) { return worldRelayItemsBeforeFix.apply(this, arguments).map(i => withSpotFix(i.key || key, i)); }; }
+// Gear lying in a fixed room.
+if (typeof configureRegion === 'function') {
+  const configureRegionBeforeFix = configureRegion;
+  configureRegion = function () {
+    const out = configureRegionBeforeFix.apply(this, arguments);
+    for (const [k, f] of Object.entries(ROOM_SPOT_FIXES[activeRegion] || {})) if (rooms[k] && rooms[k].relic) { rooms[k].relic[3] = f[0]; rooms[k].relic[4] = f[1]; }
+    return out;
+  };
+}
