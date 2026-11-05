@@ -151,7 +151,7 @@ NOOKS = {
     '3,7': [(282, 270)],
     '3,8': [(656, 148), (669, 339)],
     '3,9': [(569, 414), (185, 290)],
-    '4,5': [(412, 97), (59, 117)],
+    '4,5': [(540, 150), (215, 165)],  # Round 358: on the pavement at the kerb (the old spots put 40px objects on the shopfronts)
     '4,6': [(664, 165)],
     '4,7': [(734, 99), (733, 362)],
     '4,8': [(660, 442), (229, 440)],
@@ -221,6 +221,8 @@ def bake_paths(w, nooks):
     d = ImageDraw.Draw(im)
     r = NOOK_WIDTH // 2
     for x, y, ax, ay, ex, ey in nooks:
+        # Round 358: a kerbside nook (its base within 24px of the street) needs no footpath: you stand on the street beside it.
+        if np.hypot(x - ax, y + FOOT - ay) <= 24: continue
         # Start a little inside the street so the path joins it across whole mask cells.
         L = max(1.0, float(np.hypot(ex - ax, ey - ay)))
         sx, sy = ax - (ex - ax) / L * 12, ay - (ey - ay) / L * 12

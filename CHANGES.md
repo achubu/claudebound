@@ -3527,6 +3527,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   Chronospire). A chest holding an Upgrade Crystal glows cyan. Everything else has a thin dark outline. Every object is
   solid until used, then dims.
 - **Card art:** the owner's Nano Mend and Sift paintings for all four levels (`refreshedCardArt`; `cards.js?v=round358`).
+- Owner (screenshot): "this waypoint is on a building". Neon Square's waypoint nook (4,5) sat in a shopfront. Neon
+  Square's two nooks moved onto the pavement at the kerb: (540,150) in front of a shutter, and (215,165).
+  `tools/build_room_masks.py` bakes no footpath for a kerbside nook (its base within 24px of the street), since you
+  stand on the street beside it. `room-art` allows such nooks.
 - Tests: `item-size` rewritten. `room-art` accepts a nook or open ground; `card-art` expects the new art.
 
 ## Round 357: the Tunnel Borehound redrawn from a 2×2 Gemini grid
