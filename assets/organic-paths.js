@@ -301,13 +301,18 @@ const ITEM_OFF = { min: 12, max: 28, ideal: 20 };
 // Round 212: in the painted tile worlds everything off the road or deck is buildings and props,
 // so items there stand ON the walkable ground instead, ITEM_IN px inside its edge: beside the
 // lane, never on a roof or wall.
-const ITEM_IN = { min: 22, max: 72, ideal: 38 }; // Round 358: up to 72px in for wide items, but they hug the side of the road (ideal 38: the picture's half-width plus its margin) // the pictures are ~50px wide, so this keeps them on the ground
-// Round 358 (owner: "make sure they are not placed over buildings or other objects in the room"): every world now stands
-// its items on the walkable ground. In Neon Aftermath and Chronospire, off the street meant crates, machinery, rooftops
-// and the spire's decorated floor.
-function itemsOnGround() { return true; }
+const ITEM_IN = { min: 20, max: 72, ideal: 22 }; // Round 358: right against the road's edge (the picture's half-width plus 2px); up to 72px in when that is all the room allows
+function itemsOnGround() { return activeRegion === 'elaris' || activeRegion === 'sky'; }
+// Round 358 (owner: "it should take up at most 10% of the width of the road"): an item beside the street may reach onto
+// it by at most a tenth of the road's width there; the rest of the picture stands on the verge.
+const ITEM_HALF = 20; // half the drawn picture's width
+const ITEM_ROAD_SHARE = 0.08; // 8% on the coarse 8px grid lands at or under 10% measured finely
+function roadWidthAt(key, x, y) {
+  const run = (dx, dy) => { let n = 0; for (let t = 4; t <= 400; t += 4) { if (!walkable(key, x + dx * t, y + dy * t)) break; n = t; } return n; };
+  return Math.max(24, Math.min(run(1, 0) + run(-1, 0), run(0, 1) + run(0, -1)) + 4);
+}
 // The picture an item draws, in room pixels around its foot point (Round 358: 40px wide), plus a margin.
-const ITEM_BOX = { w: 32, up: 44, down: 32 }; // the drawn picture (paintings rise ~31px above the spot, chests are centred on it) plus a 12px margin
+const ITEM_BOX = { w: 22, up: 33, down: 22 }; // the drawn picture (40px wide; paintings rise ~31px above the spot, chests are centred on it) plus 2px, so an object's side can touch the kerb
 // The share of an item's picture that lies over walkable ground (0-1). An item only stands where this is ITEM_COVER or
 // more, so no part of it covers a building, a prop or another painted object.
 const ITEM_COVER = 0.9;
@@ -357,10 +362,13 @@ function organicItemSpot(key, x, y, avoid = [], gap = 0) {
     // Nearest walkable grid point: it must be reachable and inside the band.
     let near = null;
     for (const [dx, dy, d] of offs) { const g = (px + dx) + ',' + (py + dy); if (any.has(g)) { near = { g, d }; break; } }
-    if (!near || near.d < ITEM_OFF.min || near.d > ITEM_OFF.max || !ok.has(near.g)) continue;
+    if (!near || near.d > ITEM_OFF.max || !ok.has(near.g)) continue;
+    // Round 358: the picture reaches ITEM_HALF - near.d onto the road; at most a tenth of the road's width.
+    const [gx, gy] = near.g.split(',').map(Number), minOff = Math.max(4, ITEM_HALF - ITEM_ROAD_SHARE * roadWidthAt(key, gx, gy));
+    if (near.d < minOff) continue;
     if (doors.some(d => Math.hypot(d.x - px, d.y - py) < 90)) continue;
     if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
-    const s = Math.hypot(px - x, py - y) + 6 * Math.abs(near.d - ITEM_OFF.ideal) + (screenCovered(px, py) ? 400 : 0);
+    const s = Math.hypot(px - x, py - y) + 6 * Math.abs(near.d - Math.max(minOff, ITEM_OFF.min)) + (screenCovered(px, py) ? 400 : 0);
     if (s < bs) { bs = s; best = { x: px, y: py }; }
   }
   return organicItemCache[ck] = best;

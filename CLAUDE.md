@@ -101,9 +101,9 @@ change set.
   `assets/plazas.js`). When adding tile paintings, pick 2-3 such spots for each in `PLAZAS` and rebuild. Enemies and bosses stand on paths. On a tap route only
   the tapped item opens (Round 184). Map-object paintings (Cardsmiths, lore stones, waypoints, events, merchants, chests, portals: `WORLD_POI_ART`, `EVENT_ART`, `WORLD_CHEST_ART` and `WORLD_PORTAL_ART` in `assets/cardsmith.js`, Rounds 307–342) are keyed off green with `tools/key_object.py` (`--keep-green` for art with real greens,
   `--clear-enclosed` when glow-tinted background is trapped inside the art, `--warm-olive` for see-through parts that
-  key to olive). Round 358: every world stands items on walkable ground with their whole picture over it (`itemGroundCover`,
-  `ITEM_COVER` 90%; plaza squares 55%), hugging the road's edge; objects draw at real size (no half `scale`); only waypoints
-  and chests glow. Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
+  key to olive). Round 358: objects draw at real size, centred on their spot (no half `scale`); beside a street they reach
+  onto it by at most 10% of its width (`ITEM_ROAD_SHARE`, `roadWidthAt`); on open ground (Solaris, Sky Isles, plaza squares)
+  the whole picture stands on it (`itemGroundCover`); only waypoints and chests glow. Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
   movement uses (`collides()`), so placement code must keep using `walkable()`/`NeonCity.blocked`.
 - **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.

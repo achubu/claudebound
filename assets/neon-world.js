@@ -252,9 +252,7 @@ function neonNookSlot(key, kind) {
 function neonNook(key, kind, ok = () => true) {
   const nooks = neonNooks(key), i = nooks ? neonNookSlot(key, kind) : -1; if (i < 0) return null;
   // A point of interest may move on to a later spot (e.g. to stay clear of patrols).
-  // Round 358: a hand-picked spot is used only if the whole picture stands over walkable ground (many sat on props).
-  const ground = n => typeof itemGroundCover !== 'function' || itemGroundCover(key, n[0], n[1]) >= ITEM_COVER;
-  const pick = (kind === 'poi' ? nooks.slice(i) : nooks.slice(i, i + 1)).find(n => ground(n) && ok({ x: n[0], y: n[1] }));
+  const pick = (kind === 'poi' ? nooks.slice(i) : nooks.slice(i, i + 1)).find(n => ok({ x: n[0], y: n[1] }));
   return pick ? { x: pick[0], y: pick[1] } : null;
 }
 const chestForBeforeNook = chestFor;
@@ -276,8 +274,7 @@ if (typeof poiSpot === 'function') {
       const clear = p => spawns.every(q => Math.hypot(q.x - p.x, q.y - p.y) > 150);
       // Round 184: a point of interest whose only spots are under the HUD or the minimap goes to another room.
       const n = neonNook(key, 'poi', p => clear(p) && !screenCovered(p.x, p.y)) || (nexus ? neonNook(key, 'poi', p => !screenCovered(p.x, p.y)) || neonNook(key, 'poi') : null);
-      if (n) return itemSpotCache[ck] = [n.x, n.y];
-      // Round 358: no hand-picked spot with open ground: find one beside the street like any other room.
+      return itemSpotCache[ck] = n ? [n.x, n.y] : null;
     }
     if (!rooms[key] || !organicDef(key)) return poiSpotBeforeNeonWorld(key);
     const ck = state.seed + ':' + activeRegion + ':' + key;
@@ -290,7 +287,7 @@ if (typeof poiSpot === 'function') {
     if (p && screenCovered(p.x, p.y)) for (const gap of [120, 90]) { const q = organicItemSpot(key, tx, ty, spawns, gap); if (q && !screenCovered(q.x, q.y)) { p = q; break; } }
     // Round 358: a room whose only spots clear of its patrols are partly over a building or prop gets no point of interest
     // (it goes to another room, as for a room with no spot at all).
-    if (p && typeof itemGroundCover === 'function' && itemGroundCover(key, p.x, p.y) < (typeof isPlazaSpot === 'function' && isPlazaSpot(key, p) ? PLAZA_COVER : ITEM_COVER)) p = null;
+    if (p && itemsOnGround() && typeof itemGroundCover === 'function' && itemGroundCover(key, p.x, p.y) < (typeof isPlazaSpot === 'function' && isPlazaSpot(key, p) ? PLAZA_COVER : ITEM_COVER)) p = null;
     return itemSpotCache[ck] = p ? [p.x, p.y] : null;
   };
 }
