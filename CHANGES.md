@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 357: the Tunnel Borehound redrawn from a 2×2 Gemini grid
+
+- The owner tuned a single Gemini prompt for a four-frame walk. It is in `tools/art-refresh/creature-walk-prompt.md`:
+  2×2 grid; the creature described first in two sentences; "16-bit walk cycle sprite sheet"; an animal comparison for
+  the gait; directions for the near legs only; "frames 1 and 3 must look clearly different". A one-frame follow-up edit
+  in the same Gemini chat fixed frame 3.
+- `tools/strip_to_sheet.py` gains two options:
+  - `--grid 2`: four frames in a 2×2 grid, each piece of art going to the quarter that holds its centre;
+  - `--align 1`: lines the frames up on the creature's front-most point and its feet. Gemini placed the Borehound up to
+    50px apart between squares, which would have made it jitter.
+- **Tunnel Borehound** (`city/tunnel-borehound-v2.png`, trial; the old entry is kept as a comment). The four-frame
+  source is in `src/tunnel-borehound-v2-walk4.png`. `SPRITE_VERSION` is now '357'; `enemy-sizes.css` was regenerated
+  (×1.30). It passes the sprite audit. `tests/tunnel-borehound.test.cjs` now expects the new sheet.
+
 ## Round 356: four refreshed Neon Aftermath enemies, on trial
 
 - The owner sent the first refresh drafts ("i want to see these in game and test them out before i make more"). Each is

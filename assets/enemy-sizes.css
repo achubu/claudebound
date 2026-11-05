@@ -16,6 +16,7 @@
 #world .enemy-node .wildlife-sprite[style*="/city/phase-shade.png"]{--enemy-fit:1.05} /* painted 0.524 */
 #world .enemy-node .wildlife-sprite[style*="/city/reactor-mauler.png"]{--enemy-fit:0.85} /* painted 0.656 */
 #world .enemy-node .wildlife-sprite[style*="/city/thorn-warden.png"]{--enemy-fit:0.853} /* painted 0.645 */
+#world .enemy-node .wildlife-sprite[style*="/city/tunnel-borehound-v2.png"]{--enemy-fit:1.299} /* painted 0.423 */
 #world .enemy-node .wildlife-sprite[style*="/city/tunnel-borehound.png"]{--enemy-fit:1.155} /* painted 0.476 */
 #world .enemy-node .wildlife-sprite[style*="/elaris/blight-antler.png"]{--enemy-fit:0.981} /* painted 0.560 */
 #world .enemy-node .wildlife-sprite[style*="/elaris/bloom-tyrant.png"]{--enemy-fit:0.898} /* painted 0.613 */
