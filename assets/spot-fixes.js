@@ -27,6 +27,42 @@ const ROOM_SPOT_FIXES = {
     '1,8': [600, 439],  // #25 terminal: slightly right
     '2,8': [470, 420],  // #26 campfire: closer to the road
     '3,8': [475, 160],  // #27 Street Medic: next to the road
+    // Owner: "only add objects to curbs or grass": every other room, picked on its painting (kerb/pavement or grass beside
+    // the street).
+    '0,4': [341, 304],  // pavement left of the road
+    '1,4': [134, 212],  // quayside pavement above the road
+    '2,4': [130, 204],  // quayside pavement above the road
+    '4,4': [484, 246],  // pavement above the road's end
+    '6,4': [320, 346],  // stone walk left of the road
+    '7,4': [660, 242],  // pavement below the road
+    '8,4': [238, 336],  // stone walk below the road
+    '0,5': [334, 226],  // quayside pavement left of the road
+    '2,5': [280, 306],  // pavement left of the road
+    '6,5': [120, 344],  // walk below the road
+    '7,5': [480, 340],  // pavement below the road
+    '8,5': [192, 360],  // walk below the road
+    '1,6': [60, 332],  // plaza paving below the road
+    '4,6': [76, 324],  // pavement below the road
+    '5,6': [92, 392],  // pavement below the road
+    '1,7': [496, 334],  // grass below the road
+    '4,7': [548, 166],  // pavement right of the road
+    '7,7': [162, 160],  // pavement above the road
+    '8,7': [142, 236],  // packed dirt beside the road
+    '0,8': [584, 162],  // pavement right of the road
+    '4,8': [542, 346],  // grass below the road
+    '5,8': [440, 170],  // pavement above the road
+    '6,8': [208, 168],  // pavement above the road
+    '7,8': [150, 340],  // ground left of the road
+    '8,8': [200, 188],  // pavement above the road
+    '0,9': [596, 334],  // grass below the road
+    '1,9': [166, 370],  // grass below the road
+    '2,9': [492, 202],  // walk right of the road
+    '3,9': [512, 392],  // grass below the road
+    '4,9': [280, 326],  // walk below the road
+    '5,9': [300, 356],  // pavement below the road
+    '6,9': [596, 204],  // pavement above the road
+    '7,9': [150, 200],  // pavement above the road
+    '8,9': [172, 140],  // pavement above the road
   },
 };
 function roomSpotFix(key) { const t = ROOM_SPOT_FIXES[activeRegion]; return (t && t[key]) || null; }
