@@ -252,7 +252,9 @@ function neonNookSlot(key, kind) {
 function neonNook(key, kind, ok = () => true) {
   const nooks = neonNooks(key), i = nooks ? neonNookSlot(key, kind) : -1; if (i < 0) return null;
   // A point of interest may move on to a later spot (e.g. to stay clear of patrols).
-  const pick = (kind === 'poi' ? nooks.slice(i) : nooks.slice(i, i + 1)).find(n => ok({ x: n[0], y: n[1] }));
+  // Round 358: a hand-picked spot is used only if the whole picture stands over walkable ground (many sat on props).
+  const ground = n => typeof itemGroundCover !== 'function' || itemGroundCover(key, n[0], n[1]) >= ITEM_COVER;
+  const pick = (kind === 'poi' ? nooks.slice(i) : nooks.slice(i, i + 1)).find(n => ground(n) && ok({ x: n[0], y: n[1] }));
   return pick ? { x: pick[0], y: pick[1] } : null;
 }
 const chestForBeforeNook = chestFor;
@@ -274,7 +276,8 @@ if (typeof poiSpot === 'function') {
       const clear = p => spawns.every(q => Math.hypot(q.x - p.x, q.y - p.y) > 150);
       // Round 184: a point of interest whose only spots are under the HUD or the minimap goes to another room.
       const n = neonNook(key, 'poi', p => clear(p) && !screenCovered(p.x, p.y)) || (nexus ? neonNook(key, 'poi', p => !screenCovered(p.x, p.y)) || neonNook(key, 'poi') : null);
-      return itemSpotCache[ck] = n ? [n.x, n.y] : null;
+      if (n) return itemSpotCache[ck] = [n.x, n.y];
+      // Round 358: no hand-picked spot with open ground: find one beside the street like any other room.
     }
     if (!rooms[key] || !organicDef(key)) return poiSpotBeforeNeonWorld(key);
     const ck = state.seed + ':' + activeRegion + ':' + key;
@@ -285,6 +288,8 @@ if (typeof poiSpot === 'function') {
     let p = organicItemSpot(key, tx, ty, spawns, 150);
     // Round 225: rather than under the HUD or minimap, stand a little closer to a patrol.
     if (p && screenCovered(p.x, p.y)) for (const gap of [120, 90]) { const q = organicItemSpot(key, tx, ty, spawns, gap); if (q && !screenCovered(q.x, q.y)) { p = q; break; } }
+    // Round 358: rather than partly over a building or prop, stand a little closer to a patrol.
+    if (p && typeof itemGroundCover === 'function' && itemGroundCover(key, p.x, p.y) < ITEM_COVER) for (const gap of [120, 90, 70]) { const q = organicItemSpot(key, tx, ty, spawns, gap); if (q && itemGroundCover(key, q.x, q.y) >= ITEM_COVER) { p = q; break; } }
     return itemSpotCache[ck] = p ? [p.x, p.y] : null;
   };
 }

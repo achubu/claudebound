@@ -12,12 +12,29 @@ function plazaSpots(key, region = activeRegion) {
     : typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA[region] ? TILE_WORLD_DATA[region].plazas : null;
   return t && t[key] && t[key].length ? t[key] : null;
 }
-function isPlazaSpot(key, p) { const s = plazaSpots(key); return !!s && s.some(([x, y]) => Math.hypot(x - p.x, y - p.y) < 6); }
+function isPlazaSpot(key, p) { const s = plazaSpots(key); return !!s && s.some(([x, y]) => Math.hypot(x - p.x, y - p.y) < 6 || Math.hypot(x - p.x, y - p.y) <= 46); } // Round 358: a nudged spot still counts
+// Round 358: the nearest point within 32px of a square where the whole object picture stands on walkable ground.
+const plazaFitCache = {}, PLAZA_COVER = 0.55;
+function plazaFit(key, x, y) {
+  if (typeof itemGroundCover !== 'function') return [x, y];
+  const ck = activeRegion + ':' + key + ':' + x + ',' + y; if (ck in plazaFitCache) return plazaFitCache[ck];
+  let best = null, bd = Infinity;
+  for (let dx = -32; dx <= 32; dx += 8) for (let dy = -32; dy <= 32; dy += 8) {
+    // The squares are hand-picked open ground beside the road; the walk mask covers only part of some (the forest's and
+    // the storm coast's clearings, about 2/3), so a square needs 55% here rather than the 90% elsewhere.
+    const d = Math.hypot(dx, dy); if (d >= bd || !walkable(key, x + dx, y + dy) || itemGroundCover(key, x + dx, y + dy) < PLAZA_COVER) continue;
+    bd = d; best = [x + dx, y + dy];
+  }
+  return plazaFitCache[ck] = best;
+}
 // The square nearest the wanted spot, clear of `avoid` by `gap`, preferring ones the HUD and minimap don't cover.
 function plazaFor(key, x, y, avoid = [], gap = 0) {
   const spots = plazaSpots(key); if (!spots) return null;
   let best = null, bs = Infinity;
-  for (const [px, py] of spots) {
+  for (const [sx, sy] of spots) {
+    // Round 358: the object must stand fully on the square's open ground; nudge it up to 32px within the square if needed.
+    const fit = plazaFit(key, sx, sy); if (!fit) continue;
+    const [px, py] = fit;
     if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
     if (typeof organicReachableAt === 'function' && !organicReachableAt(key, { x: px, y: py })) continue;
     const s = Math.hypot(px - x, py - y) + (screenCovered(px, py) ? 400 : 0);

@@ -3496,6 +3496,37 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 358: bigger objects on open ground, beside the road; only waypoints and chests glow; Nano Mend and Sift art
+
+- Owner:
+  - "increase the size of objects and make sure they are not placed over buildings or other objects in the room";
+  - "push every object that is in the middle of the road over to the side of the road";
+  - "waypoints should have a light glow that fits the world color scheme, the other objects should not. make sure no
+    object is opaque until interacted and used up";
+  - "i like the chests to glow".
+- **Drawn where they stand.** Round 215 halved objects with the CSS `scale` property, which also halved their centring
+  shift, so every picture was drawn about 20px right of and 30–40px below its spot, onto kerbs and buildings. Objects are
+  now drawn at their real size with no scale (`layout-polish.css`), centred on their spot, with paintings standing on it.
+- **Bigger:** 40px on screen (was 32px), 55px for the merchant and the Cardsmith.
+- **On open ground** (`assets/organic-paths.js`):
+  - Every world stands items on walkable ground (`itemsOnGround()` is now always true). In Neon Aftermath and Chronospire,
+    "off the street" had meant crates, machinery, rooftops and the spire's decorated floor.
+  - `itemGroundCover()` measures how much of an item's picture, plus a 12px margin, lies on walkable ground. A spot
+    needs `ITEM_COVER` (90%).
+  - Hand-picked Neon Aftermath nooks are used only when they pass that check (`neonNook`); points of interest step
+    closer to a patrol rather than stand partly on a prop.
+  - The tile worlds' plaza squares are nudged up to 32px to fit (`plazaFit`). They need only 55% (`PLAZA_COVER`),
+    because the forest's and storm coast's clearings are open ground the walk mask covers only partly.
+  - Before, 21 of 31 Neon Aftermath objects and 21 of 29 Chronospire objects stood less than 40% on open ground. Now
+    every object in every world passes, with none closer than 60px to another.
+- **Beside the road:** an item's distance from the road's edge (ideal 38px) now outweighs closeness to its wanted spot.
+- **Glow:** only Nexus Waypoints and hidden chests glow (`waypointGlow`), in their world's colour (`--wp-glow`: cyan
+  in Neon Aftermath, gold in Solaris, pale blue in the Sky Isles, green in Elaris, violet in Vespera, amber in
+  Chronospire). A chest holding an Upgrade Crystal glows cyan. Everything else has a thin dark outline. Every object is
+  solid until used, then dims.
+- **Card art:** the owner's Nano Mend and Sift paintings for all four levels (`refreshedCardArt`; `cards.js?v=round358`).
+- Tests: `item-size` rewritten. `room-art` now accepts a nook or open ground; `card-art` expects the new art.
+
 ## Round 357: the Tunnel Borehound redrawn from a 2×2 Gemini grid
 
 - The owner tuned a single Gemini prompt for a four-frame walk. It is in `tools/art-refresh/creature-walk-prompt.md`:

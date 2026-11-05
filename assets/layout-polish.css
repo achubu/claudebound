@@ -313,3 +313,36 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 #world .poi-node:not(.used),#world .map-chest,#world .relic{opacity:1!important}
 #world .poi-node:not(.poi-art):not(.used){background:radial-gradient(circle,#2b1f4c,#140f26)!important}
 #world .relic.relic-guarded{filter:drop-shadow(0 0 1px #000)!important}
+/* Round 358 (owner: "increase the size of objects"; "waypoints should have a light glow that fits the world colour
+   scheme, the other objects should not. make sure no object is opaque until interacted and used up"). Objects are 25%
+   bigger again: 40px on screen (box 80px under Round 215's half scale), the merchant and the Cardsmith 55px. Only Nexus
+   Waypoints and hidden chests glow, in their world's colour; everything else has just a thin dark outline. Every object is solid until
+   used, then dims. */
+/* Round 358 fix: Round 215 drew objects at half scale with the CSS `scale` property, which also halved their centring
+   shift, so every picture's top-left corner sat on its spot: they drew about 20px right of and 30-40px below where they
+   stand (onto kerbs and buildings). Objects are now drawn at their real size with no scale, centred on their spot as
+   intended (pictures stand on it). Hidden crystals keep their old half scale. */
+#world .poi-node,#world .map-chest,#world .relic{scale:1!important}
+#world .relic.hidden-crystal{scale:.5!important}
+#world .poi-node,#world .poi-node.poi-art,#world .map-chest,#world .relic:not(.hidden-crystal){width:40px!important;height:40px!important}
+#world .poi-node.poi-merchant,#world .poi-node.poi-art.poi-merchant,#world .poi-node.poi-cardsmith,#world .poi-node.poi-art.poi-cardsmith{width:55px!important;height:55px!important}
+#world .relic.gear-relic img{width:34px;height:34px}
+#world .poi-node:not(.poi-art) .poi-glyph{font-size:22px!important}
+#world .map-chest.crystal-chest::after{right:-6px!important;top:-9px!important;font-size:17px!important}
+#world .poi-node .quest-mark{font-size:14px}
+#world#world .poi-node,#world#world .poi-node.poi-art,#world#world .map-chest,#world#world .relic,#world#world .map-chest.crystal-chest{animation:none!important;filter:drop-shadow(0 0 1px #000c)!important;box-shadow:none!important}
+#world#world .poi-node:not(.used),#world#world .map-chest,#world#world .relic{opacity:1!important}
+#world#world .poi-node.used{opacity:.75!important;filter:grayscale(.7) brightness(.8) drop-shadow(0 0 1px #000c)!important}
+#world{--wp-glow:#ffe9a0}
+#world[data-environment="neon"]{--wp-glow:#7ff3ff}
+#world[data-environment="solaris"]{--wp-glow:#ffd36b}
+#world[data-environment="sky"]{--wp-glow:#bfe6ff}
+#world[data-environment="wilds"]{--wp-glow:#b9f07a}
+#world[data-environment="vespera"]{--wp-glow:#c69bff}
+#world[data-environment="chronospire"]{--wp-glow:#ffbe5c}
+#world#world .poi-node.poi-nexus:not(.used){animation:waypointGlow 2.6s ease-in-out infinite!important}
+/* Owner: "i like the chests to glow": hidden chests glow like waypoints; a chest holding an Upgrade Crystal keeps its cyan. */
+#world#world .map-chest{animation:waypointGlow 2.6s ease-in-out infinite!important}
+#world#world .map-chest.crystal-chest{--wp-glow:#5ff2ff}
+@keyframes waypointGlow{0%,100%{filter:drop-shadow(0 0 1px #000c) drop-shadow(0 0 4px color-mix(in srgb,var(--wp-glow) 70%,transparent))}50%{filter:drop-shadow(0 0 1px #000c) drop-shadow(0 0 9px color-mix(in srgb,var(--wp-glow) 85%,transparent))}}
+@media(prefers-reduced-motion:reduce){#world#world .poi-node.poi-nexus:not(.used),#world#world .map-chest{animation:none!important;filter:drop-shadow(0 0 1px #000c) drop-shadow(0 0 6px color-mix(in srgb,var(--wp-glow) 75%,transparent))!important}}

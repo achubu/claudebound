@@ -39,15 +39,15 @@ const nk=JSON.parse(run(`(()=>{const out={bad:[],used:[],count:0};
   else if(!stand||stand.d>30)out.bad.push(k+' too far '+(stand&&stand.d));
   else if(!organicReachableAt(k,stand))out.bad.push(k+' unreachable');
   if(Math.hypot(x-ax,y+22-ay)<30)out.bad.push(k+' not off the road');}}
- for(const p of Object.values(worldPOIs()))if((neonNooks(p.key)||[]).length)out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)?'nook':p.key+' not on a nook');
- const q=rooms['8,9'].relic;out.relic=NEON_NOOKS['8,9'].some(n=>n[0]===q[3]&&n[1]===q[4]);
- const wk=NEXUS_POINTS.city.start,nx=poiAt(wk);out.nexus=(NEON_NOOKS[wk]||[]).some(n=>n[0]===nx.x&&n[1]===nx.y); // Round 229: the first waypoint is in Blossom Grove
+ for(const p of Object.values(worldPOIs()))if((neonNooks(p.key)||[]).length)out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)||itemGroundCover(p.key,p.x,p.y)>=ITEM_COVER?'ok':p.key+' neither on a nook nor on open ground');
+ const q=rooms['8,9'].relic;out.relic=NEON_NOOKS['8,9'].some(n=>n[0]===q[3]&&n[1]===q[4])||itemGroundCover('8,9',q[3],q[4])>=ITEM_COVER; // Round 358: or on open ground
+ const wk=NEXUS_POINTS.city.start,nx=poiAt(wk);out.nexus=(NEON_NOOKS[wk]||[]).some(n=>n[0]===nx.x&&n[1]===nx.y)||itemGroundCover(wk,nx.x,nx.y)>=ITEM_COVER; // Round 229: the first waypoint is in Blossom Grove
  return JSON.stringify(out)})()`));
 assert(nk.count>=100,'about two spots per painted room (Round 133: every room)');
 const bare=JSON.parse(run(`JSON.stringify(NEON_ROOM_ART.filter(k=>!(NEON_NOOKS[k]||[]).length))`));
 assert.deepEqual(bare,['5,6'],'every painted room has item spots except Broadcast Row (no open ground beside its street)');
 assert.deepEqual(nk.bad,[],'every spot is off the road, beside its own footpath, and reachable');
-assert(nk.used.length&&nk.used.every(u=>u==='nook'),'points of interest in painted rooms use the spots: '+nk.used.join(', '));
+assert(nk.used.length&&nk.used.every(u=>u==='ok'),'Round 358: points of interest in painted rooms stand on a usable nook or on open ground: '+nk.used.join(', '));
 assert(nk.relic,'the Briarstep Boots sit on a spot (Round 176: Scrap Fortress)');assert(nk.nexus,'the first waypoint sits on a spot');
 const css=fs.readFileSync(path.join(__dirname,'../assets/neon-world.js'),'utf8');
 for(const sel of ['.map-chest{width:20px','.poi-node{width:20px','.relic{width:24px'])assert(css.includes(sel),'small marker: '+sel);
