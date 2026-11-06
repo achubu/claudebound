@@ -47,7 +47,7 @@ const WILDLIFE_ART={
  // Round 252: the Ember Jackal is animated too: stand, rear back when hit, lunge with a raised paw.
  // Round 356 (trial of the owner's refreshed art): the new walk is used everywhere. Before:
  // emberling:{name:'Ember Jackal',sheet:'city/ember-jackal',cycle:'1.2s',poses:{attack:2,hurt:1,walk:'city/ember-jackal-walk'}},
- emberling:{name:'Ember Jackal',sheet:'city/ember-jackal-v2',cycle:'.8s'},
+ emberling:{name:'Ember Jackal',sheet:'city/ember-jackal-v3',cycle:'.8s'}, // Round 358: the owner's detailed 2x2-grid redraw (v2 was Round 356's)
  // Round 255: the Circuit Thornling scuttles (four of the owner's eight walk frames; no battle poses yet).
  // Round 356 (trial): before, thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling',cycle:'.8s'},
  thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling-v2',cycle:'.8s'},
