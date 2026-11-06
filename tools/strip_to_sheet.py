@@ -88,6 +88,7 @@ strip.save(strip_path)
 pick = frames if len(frames) == 4 else [frames[i] for i in (0, 2, 4, 6)]
 # --align front (Round 357): Gemini places the creature at a slightly different spot in each grid square. Line the frames
 # up so the front-most point (a snout or drill tip) and the feet sit at the same place in every frame; only the legs move.
+PADA = 300  # room for a shifted frame, so nothing is cut off at its canvas edge
 if opt.get('align', 0) == 3:
     # --align 3 (a glowing core, like the Data Wisp's orb): line the frames up on the centre of the brightest cyan pixels.
     cs = []
@@ -96,7 +97,7 @@ if opt.get('align', 0) == 3:
         ys, xs = np.nonzero(m); cs.append((int(xs.mean()), int(ys.mean())))
     tx, ty = max(c[0] for c in cs), max(c[1] for c in cs); moved = []
     for f, (cx_, cy_) in zip(pick, cs):
-        g = Image.new('RGBA', f.size, (0, 0, 0, 0)); g.paste(f, (tx - cx_, ty - cy_)); moved.append(g)
+        g = Image.new('RGBA', (f.width + 2 * PADA, f.height + 2 * PADA), (0, 0, 0, 0)); g.paste(f, (PADA + tx - cx_, PADA + ty - cy_)); moved.append(g)
     pick = moved
 elif opt.get('align', 0) == 2:
     # --align 2 (floating creatures): line the frames up on the top of the head horizontally only, so the body stays put
@@ -107,14 +108,14 @@ elif opt.get('align', 0) == 2:
         heads.append(int(np.median(xs[ys <= top + 12])))
     hx = max(heads)
     for f, h in zip(pick, heads):
-        g = Image.new('RGBA', f.size, (0, 0, 0, 0)); g.paste(f, (hx - h, 0)); moved.append(g)
+        g = Image.new('RGBA', (f.width + 2 * PADA, f.height + 2 * PADA), (0, 0, 0, 0)); g.paste(f, (PADA + hx - h, PADA)); moved.append(g)
     pick = moved
 elif opt.get('align', 0):
     boxes = [f.getchannel('A').point(lambda v: 255 if v > 60 else 0).getbbox() for f in pick]
     fx, fy = max(b[2] for b in boxes), max(b[3] for b in boxes)
     moved = []
     for f, b in zip(pick, boxes):
-        g = Image.new('RGBA', f.size, (0, 0, 0, 0)); g.paste(f, (fx - b[2], fy - b[3])); moved.append(g)
+        g = Image.new('RGBA', (f.width + 2 * PADA, f.height + 2 * PADA), (0, 0, 0, 0)); g.paste(f, (PADA + fx - b[2], PADA + fy - b[3])); moved.append(g)
     pick = moved
 
 bb = None
@@ -126,7 +127,7 @@ x0 = (bb[0] + bb[2]) / 2 - w / 2; yb = bb[3] - 672 / s
 sheet = Image.new('RGBA', (516 * 4, 688), (0, 0, 0, 0))
 pad = int(max(w, h)) + 10
 for i, f in enumerate(pick):
-    big = Image.new('RGBA', (fw + 2 * pad, fh + 2 * pad), (0, 0, 0, 0)); big.paste(f, (pad, pad))
+    big = Image.new("RGBA", (f.width + 2 * pad, f.height + 2 * pad), (0, 0, 0, 0)); big.paste(f, (pad, pad))
     crop = big.crop((round(x0) + pad, round(yb) + pad, round(x0 + w) + pad, round(yb + h) + pad))
     sheet.paste(crop.resize((516, 688), Image.LANCZOS), (i * 516, 0))
 sheet.save(out, optimize=True)

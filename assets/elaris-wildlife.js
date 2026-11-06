@@ -74,7 +74,9 @@ const WILDLIFE_ART={
  // thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden',cycle:'1.1s'},
  thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden-v2',cycle:'1.1s'},
  // Round 268: the mini-boss Lunar Enforcer glides (four of the owner's eight frames; no battle poses yet).
- moonKnight:{name:'Lunar Enforcer',sheet:'city/lunar-enforcer',cycle:'.8s'},
+ // Round 358 (trial): the owner's detailed 2x2-grid redraw. Before:
+ // moonKnight:{name:'Lunar Enforcer',sheet:'city/lunar-enforcer',cycle:'.8s'},
+ moonKnight:{name:'Lunar Enforcer',sheet:'city/lunar-enforcer-v2',cycle:'.8s'},
  // Round 273: the Data Wisp's fragments orbit its core (four of the owner's eight frames). Vespera's Arc Wisp and
  // Chronospire's Rust Wisp borrow it.
  // Round 358 (trial): the owner's detailed 2x2-grid redraw (before: sheet 'city/data-wisp'); Chronospire's Rust Wisp keeps
