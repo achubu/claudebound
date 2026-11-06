@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+# Round 358 (owner: "any way to only add objects to curbs or grass?"): find object spots in every painted Neon Aftermath
+# room that stand only on kerb/pavement or grass, beside the street.
+#   python3 tools/kerb_spots.py            -> writes assets/kerb-spots.js (KERB_SPOTS: up to 3 spots per room)
+#   python3 tools/kerb_spots.py --sheet D  -> also writes review images to folder D
+# Ground kinds, measured on the room painting (800x500) around the traced street mask:
+#   kerb  - flat, low-detail, unsaturated (grey/blue-grey) ground within 40px of the street;
+#   grass - green, fairly even ground (lawn, verge), anywhere within 120px of the street.
+# A spot is the object's foot point. Its picture covers x-20..x+20, y-31..y+9; at least 92% of that box must be kerb or
+# grass (65%: a few painted pebbles or cracks are fine) and none of it street. The foot (y+22, where the game tests walkability) stays off the street, and the street is
+# within 28px so the object can be reached. Spots keep clear of the HUD/minimap corners, the room's exits and each other.
+import json, os, sys
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+from scipy import ndimage as nd
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build_room_masks as b
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+BOX = (-20, -31, 20, 9)
+
+def ground(img, road):
+    a = np.asarray(img).astype(float); r, g, bl = a[..., 0], a[..., 1], a[..., 2]
+    lum = a.mean(-1); sat = a.max(-1) - a.min(-1)
+    m = nd.uniform_filter(lum, 7); m2 = nd.uniform_filter(lum * lum, 7); std = np.sqrt(np.clip(m2 - m * m, 0, None))
+    dist = nd.distance_transform_edt(~road)
+    # Calm ground: little painted detail (no props, roof tiles, windows or signs) and not bright teal water.
+    calm = (std < 15) & (lum > 25)
+    water = (lum > 60) & (g > r + 25) & (bl > r + 25)
+    sea = (g > r + 18) & (bl >= g - 4)                                  # dark teal water (the sea, ponds)
+    kerb = (~road) & calm & ~water & ~sea & (dist <= 46) & (g <= r + 18)  # pavement, kerb, tarmac verge
+    grass = (~road) & calm & ~water & ~sea & (dist <= 90) & (g > r + 18)  # lawn, verge, moss (greener than blue)
+    return kerb, grass, dist
+
+def spots_for(key):
+    cx, cy = key.split(',')
+    path = os.path.join(ROOT, f'assets/environment/rooms/room-{cx}-{cy}.webp')
+    if not os.path.exists(path): return None, None
+    ex = b.room_exits()[key]
+    t = b.trace(path)
+    road = b.keep_exits(b.room_fixes(key, t, b.fill_road_objects(b.extend_to_edges(b.axis_bridges(t), ex))), ex)
+    img = Image.open(path).convert('RGB').resize((800, 500))
+    kerb, grass, dist = ground(img, road)
+    ok = (kerb | grass).astype(float); onroad = road.astype(float)
+    I = ok.cumsum(0).cumsum(1); R = onroad.cumsum(0).cumsum(1)
+    def boxsum(S, x0, y0, x1, y1): return S[y1, x1] - S[y0, x1] - S[y1, x0] + S[y0, x0]
+    # Exits: where the street meets the room's edge.
+    doors = []
+    for d, (xs, ys) in {'n': (range(0, 800, 8), [2]), 's': (range(0, 800, 8), [497]), 'w': ([2], range(0, 500, 8)), 'e': ([797], range(0, 500, 8))}.items():
+        for x in xs:
+            for y in ys:
+                if road[y, x]: doors.append((x, y))
+    cands = []
+    for y in range(40, 486, 4):
+        for x in range(26, 776, 4):
+            x0, y0, x1, y1 = x + BOX[0], y + BOX[1], x + BOX[2], y + BOX[3]
+            if y0 < 1 or y1 > 498: continue
+            area = (x1 - x0) * (y1 - y0)
+            if boxsum(R, x0, y0, x1, y1) > 0: continue
+            cover = boxsum(I, x0, y0, x1, y1) / area
+            if cover < 0.65: continue
+            if road[min(499, y + 22), x]: continue            # the foot stays off the street
+            dd = dist[y0:y1, x0:x1].min()
+            if dd > 10: continue                              # the object's side touches the kerb: right beside the street
+            if (x < 225 and y < 180) or (x > 650 and y > 350): continue  # HUD / minimap
+            if any(abs(x - dx) < 70 and abs(y - dy) < 70 for dx, dy in doors): continue
+            g = grass[y0:y1, x0:x1].mean()
+            cands.append((dd + 30 * (1 - cover) - 4 * g, x, y, round(float(cover), 2), round(float(g), 2)))
+    cands.sort()
+    chosen = []
+    for s, x, y, cv, g in cands:
+        if all(np.hypot(x - a, y - c) >= 150 for a, c, *_ in chosen): chosen.append((x, y, cv, g))
+        if len(chosen) == 3: break
+    return chosen, (img, road, kerb, grass)
+
+def main():
+    sheet = sys.argv[sys.argv.index('--sheet') + 1] if '--sheet' in sys.argv else None
+    keys = sorted(b.room_exits().keys(), key=lambda k: (int(k.split(',')[1]), int(k.split(',')[0])))
+    out, views = {}, []
+    for k in keys:
+        ch, v = spots_for(k)
+        if ch is None: continue
+        out[k] = [[x, y] for x, y, *_ in ch]
+        if sheet: views.append((k, ch, v))
+    js = ("'use strict';\n// Generated by tools/kerb_spots.py (Round 358): spots on kerb/pavement or grass beside the street, up to 3 per\n"
+          "// Neon Aftermath room (object foot points, room pixels). assets/spot-fixes.js uses the first one clear of patrols.\n"
+          "const KERB_SPOTS = " + json.dumps(out, separators=(',', ':')) + ";\n")
+    open(os.path.join(ROOT, 'assets/kerb-spots.js'), 'w').write(js)
+    print(len(out), 'rooms;', sum(1 for v in out.values() if not v), 'without a spot:', [k for k, v in out.items() if not v])
+    if sheet:
+        os.makedirs(sheet, exist_ok=True)
+        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 20)
+        for k, ch, (img, road, kerb, grass) in views:
+            im = img.copy(); a = np.asarray(im).copy()
+            a[kerb] = (a[kerb] * .55 + np.array([255, 200, 0]) * .45).astype(np.uint8)
+            a[grass] = (a[grass] * .55 + np.array([0, 255, 90]) * .45).astype(np.uint8)
+            im = Image.fromarray(a); d = ImageDraw.Draw(im)
+            for i, (x, y, cv, g) in enumerate(ch):
+                d.rectangle((x - 20, y - 31, x + 20, y + 9), outline=(255, 40, 80), width=3); d.text((x - 6, y - 56), str(i + 1), fill=(255, 255, 255), font=font, stroke_width=3, stroke_fill=(0, 0, 0))
+            d.text((8, 470), k, fill=(255, 255, 255), font=font, stroke_width=3, stroke_fill=(0, 0, 0))
+            im.save(os.path.join(sheet, 'kerb-' + k.replace(',', '-') + '.png'))
+
+if __name__ == '__main__':
+    main()

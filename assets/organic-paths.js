@@ -301,8 +301,26 @@ const ITEM_OFF = { min: 12, max: 28, ideal: 20 };
 // Round 212: in the painted tile worlds everything off the road or deck is buildings and props,
 // so items there stand ON the walkable ground instead, ITEM_IN px inside its edge: beside the
 // lane, never on a roof or wall.
-const ITEM_IN = { min: 22, max: 40, ideal: 28 }; // the pictures are ~50px wide, so this keeps them on the ground
+const ITEM_IN = { min: 20, max: 72, ideal: 22 }; // Round 358: right against the road's edge (the picture's half-width plus 2px); up to 72px in when that is all the room allows
 function itemsOnGround() { return activeRegion === 'elaris' || activeRegion === 'sky'; }
+// Round 358 (owner: "it should take up at most 10% of the width of the road"): an item beside the street may reach onto
+// it by at most a tenth of the road's width there; the rest of the picture stands on the verge.
+const ITEM_HALF = 20; // half the drawn picture's width
+const ITEM_ROAD_SHARE = 0.08; // 8% on the coarse 8px grid lands at or under 10% measured finely
+function roadWidthAt(key, x, y) {
+  const run = (dx, dy) => { let n = 0; for (let t = 4; t <= 400; t += 4) { if (!walkable(key, x + dx * t, y + dy * t)) break; n = t; } return n; };
+  return Math.max(24, Math.min(run(1, 0) + run(-1, 0), run(0, 1) + run(0, -1)) + 4);
+}
+// The picture an item draws, in room pixels around its foot point (Round 358: 40px wide), plus a margin.
+const ITEM_BOX = { w: 22, up: 33, down: 22 }; // the drawn picture (40px wide; paintings rise ~31px above the spot, chests are centred on it) plus 2px, so an object's side can touch the kerb
+// The share of an item's picture that lies over walkable ground (0-1). An item only stands where this is ITEM_COVER or
+// more, so no part of it covers a building, a prop or another painted object.
+const ITEM_COVER = 0.9;
+function itemGroundCover(key, x, y) {
+  let n = 0, w = 0;
+  for (let dx = -ITEM_BOX.w; dx <= ITEM_BOX.w; dx += 5) for (let dy = -ITEM_BOX.up; dy <= ITEM_BOX.down; dy += 6) { n++; if (walkable(key, x + dx, y + dy)) w++; }
+  return n ? w / n : 0;
+}
 const organicItemCache = {};
 // Round 184: on a 1280x800 screen the HUD panel covers the top-left of the room and the minimap
 // the bottom-right, so item spots there are avoided when the room has another one.
@@ -330,7 +348,11 @@ function organicItemSpot(key, x, y, avoid = [], gap = 0) {
       if (edge === null || edge < ITEM_IN.min || edge > ITEM_IN.max) continue;
       if (doors.some(d => Math.hypot(d.x - px, d.y - py) < 90)) continue;
       if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
-      const s = Math.hypot(px - x, py - y) + 6 * Math.abs(edge - ITEM_IN.ideal) + (screenCovered(px, py) ? 400 : 0);
+      // Round 358: the whole picture over walkable ground; failing that anywhere in the room, the best-covered spot.
+      const cover = itemGroundCover(key, px, py);
+      // Owner: "push every object that is in the middle of the road over to the side": closeness to the road's edge outweighs
+      // closeness to the wanted spot.
+      const s = 0.5 * Math.hypot(px - x, py - y) + 25 * Math.abs(edge - ITEM_IN.ideal) + (screenCovered(px, py) ? 400 : 0) + (cover >= ITEM_COVER ? 0 : 2000 + 3000 * (1 - cover));
       if (s < bs) { bs = s; best = { x: px, y: py }; }
     }
     return organicItemCache[ck] = best;
@@ -340,10 +362,13 @@ function organicItemSpot(key, x, y, avoid = [], gap = 0) {
     // Nearest walkable grid point: it must be reachable and inside the band.
     let near = null;
     for (const [dx, dy, d] of offs) { const g = (px + dx) + ',' + (py + dy); if (any.has(g)) { near = { g, d }; break; } }
-    if (!near || near.d < ITEM_OFF.min || near.d > ITEM_OFF.max || !ok.has(near.g)) continue;
+    if (!near || near.d > ITEM_OFF.max || !ok.has(near.g)) continue;
+    // Round 358: the picture reaches ITEM_HALF - near.d onto the road; at most a tenth of the road's width.
+    const [gx, gy] = near.g.split(',').map(Number), minOff = Math.max(4, ITEM_HALF - ITEM_ROAD_SHARE * roadWidthAt(key, gx, gy));
+    if (near.d < minOff) continue;
     if (doors.some(d => Math.hypot(d.x - px, d.y - py) < 90)) continue;
     if (avoid.some(a => Math.hypot(a.x - px, a.y - py) < gap)) continue;
-    const s = Math.hypot(px - x, py - y) + 6 * Math.abs(near.d - ITEM_OFF.ideal) + (screenCovered(px, py) ? 400 : 0);
+    const s = Math.hypot(px - x, py - y) + 6 * Math.abs(near.d - Math.max(minOff, ITEM_OFF.min)) + (screenCovered(px, py) ? 400 : 0);
     if (s < bs) { bs = s; best = { x: px, y: py }; }
   }
   return organicItemCache[ck] = best;

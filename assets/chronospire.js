@@ -17,13 +17,13 @@ const CHRONO_ENEMIES = {
   chronoHound:  { name: 'Gearhound', icon: '⚙', hp: 48, attack: 10, element: 'fire', art: 'gearhound', tint: 'none' },
   chronoMoth:   { name: 'Tick Moth', icon: '≋', hp: 50, attack: 10, element: 'air', art: 'tickMoth', tint: 'none' },
   chronoSentry: { name: 'Brass Sentry', icon: '♜', hp: 54, attack: 10, armor: 2, element: 'earth', art: 'briarSentinelOld', tint: CHRONO_TINT },
-  chronoWraith: { name: 'Lag Wraith', icon: '☾', hp: 54, attack: 11, armor: 1, element: 'air', art: 'shade', tint: CHRONO_TINT },
+  chronoWraith: { name: 'Lag Wraith', icon: '☾', hp: 54, attack: 11, armor: 1, element: 'air', art: 'phaseShadeOld', tint: CHRONO_TINT },
   chronoHeron:  { name: 'Hourglass Heron', icon: '⏳', hp: 56, attack: 11, element: 'water', art: 'hourglassHeron', tint: 'none' },
   chronoStag:   { name: 'Pendulum Stag', icon: '◆', hp: 58, attack: 11, armor: 2, element: 'earth', art: 'pendulumStag', tint: 'none' },
-  chronoWisp:   { name: 'Rust Wisp', icon: '✧', hp: 60, attack: 11, armor: 2, element: 'water', art: 'cryptWisp', tint: CHRONO_TINT },
+  chronoWisp:   { name: 'Rust Wisp', icon: '✧', hp: 60, attack: 11, armor: 2, element: 'water', art: 'dataWispOld', tint: CHRONO_TINT },
   chronoMauler: { name: 'Cog Mauler', icon: '♨', hp: 62, attack: 12, armor: 2, element: 'fire', art: 'cogMauler', tint: 'none' },
   clockwarden:  { name: 'The Clockwarden', icon: '🕰', hp: 90, attack: 12, armor: 4, boss: true, miniBoss: true, element: 'earth', art: 'clockwardenArt', tint: 'none' },
-  paradoxTwin:  { name: 'The Paradox Twin', icon: '♊', hp: 86, attack: 13, armor: 3, boss: true, miniBoss: true, element: 'air', art: 'shade', tint: 'sepia(.6) saturate(2) hue-rotate(160deg) brightness(1.1)' },
+  paradoxTwin:  { name: 'The Paradox Twin', icon: '♊', hp: 86, attack: 13, armor: 3, boss: true, miniBoss: true, element: 'air', art: 'phaseShadeOld', tint: 'sepia(.6) saturate(2) hue-rotate(160deg) brightness(1.1)' },
   chronarch:    { name: 'The Chronarch', icon: '⌛', hp: 160, attack: 12, armor: 3, boss: true, element: 'water', shift: ['water', 'fire'], shiftEvery: 4, art: 'chronarchArt', tint: 'none' }
 };
 Object.assign(enemies, CHRONO_ENEMIES);

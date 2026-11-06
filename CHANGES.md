@@ -3496,6 +3496,75 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 358: objects drawn where they stand, bigger, at most 10% onto the road; only waypoints and chests glow; Nano Mend and Sift art
+
+- Owner:
+  - "increase the size of objects and make sure they are not placed over buildings or other objects in the room";
+  - "push every object that is in the middle of the road over to the side of the road";
+  - "it should take up at most 10% of the width of the road";
+  - "waypoints should have a light glow that fits the world color scheme, the other objects should not. make sure no
+    object is opaque until interacted and used up";
+  - "i like the chests to glow".
+- **Drawn where they stand.** Round 215 halved objects with the CSS `scale` property, which also halved their centring
+  shift. So every picture was drawn about 20px right of and 30–40px below its spot, which is why objects looked as if
+  they stood on kerbs, roofs and props. Objects are now drawn at their real size with no scale (`layout-polish.css`),
+  centred on their spot, with paintings standing on it.
+- **Bigger:** 40px on screen (was 32px), 55px for the merchant and the Cardsmith.
+- **Beside the road, at most 10% onto it** (`assets/organic-paths.js`):
+  - Objects beside a street, in Neon Aftermath's hand-picked nooks and in Chronospire, stand off the road. A picture
+    may reach onto the road by at most 10% of the road's width there (`ITEM_ROAD_SHARE`, measured with `roadWidthAt`);
+    the rest stands on the verge. The nooks are 30–100px off the road with their own footpath, so they are kept as they
+    were.
+  - In the worlds where off the road is all buildings (Solaris, the Sky Isles, `itemsOnGround()`), and in the tile
+    worlds' plaza squares, objects stand on the open ground. `itemGroundCover()` checks that the whole picture is on it
+    (90%, or 55% for a plaza square, `PLAZA_COVER`, since the forest's and storm coast's clearings are only partly in the
+    walk mask). A square spot is nudged up to 32px to fit (`plazaFit`).
+  - On the open ground, an object hugs the edge (`ITEM_IN.ideal` 22). Points of interest keep 150px clear of patrols.
+  - A first version this round stood every object on the walkable street, against the kerb. The owner's 10% rule
+    replaced it; the before/after images showed the objects too far onto the road.
+- **Glow:** only Nexus Waypoints and hidden chests glow (`waypointGlow`), in their world's colour (`--wp-glow`: cyan in
+  Neon Aftermath, gold in Solaris, pale blue in the Sky Isles, green in Elaris, violet in Vespera, amber in
+  Chronospire). A chest holding an Upgrade Crystal glows cyan. Everything else has a thin dark outline. Every object is
+  solid until used, then dims.
+- **Card art:** the owner's Nano Mend and Sift paintings for all four levels (`refreshedCardArt`; `cards.js?v=round358`).
+- Owner (screenshot): "this waypoint is on a building". Neon Square's waypoint nook (4,5) sat in a shopfront. Neon
+  Square's two nooks moved onto the pavement at the kerb: (540,150) in front of a shutter, and (215,165).
+  `tools/build_room_masks.py` bakes no footpath for a kerbside nook (its base within 24px of the street), since you
+  stand on the street beside it. `room-art` allows such nooks.
+- **Hand-placed Neon Aftermath spots** (`assets/spot-fixes.js`, `ROOM_SPOT_FIXES`). The owner reviewed every object on
+  numbered sheets ("only add objects to curbs or grass"; several rounds of "bad / move up / move onto grass"). Each of
+  the 54 rooms now has one fixed spot on kerb, pavement, path or grass, which every kind of object in that room uses (a
+  room holds at most one since Round 350). Each spot is nudged until the player can reach it. Patrols in those rooms keep
+  150px from the object, so walking up to it never starts a fight. `tools/kerb_spots.py` (a colour-based kerb/grass
+  finder) was tried first; it mistook roofs for pavement and water for grass, so the spots were picked by eye.
+  **Open owner note:** "i'm not loving the randomness of their positions"; positions need more work later.
+- **New enemy art (trials, all Neon Aftermath).** The owner tuned a Gemini prompt (`tools/art-refresh/creature-walk-prompt.md`):
+  "highly detailed ... modern indie game ... not chibi, not cartoonish" replaced "16-bit SNES", which had made creatures
+  simple and cartoonish. New 2x2-grid sheets: Phase Shade, Data Wisp (its title, panel borders and frame numbers cropped
+  off), Crown Observer, Lunar Enforcer, Thorn Warden, Ember Jackal, Circuit Thornling, Briar Sentinel and Crown Sentinel
+  (`*-v2`/`*-v3` in `assets/monsters/city/`). Round 356's simpler trial sheets they replace are removed. Creatures that
+  borrowed the old art keep it (`phaseShadeOld`, `dataWispOld`, as `briarSentinelOld` did).
+- `tools/strip_to_sheet.py`: `--align 2` lines a floating creature up on its head, horizontally only, keeping the drawn
+  bob; `--align 3` lines it up on a glowing cyan core. Shifted frames get room, so nothing is clipped.
+- **Card art:** the owner's Sunflare paintings for all four levels.
+- Tests: `item-size` rewritten. `room-art`, `item-placement`, `neon-world`, `exploration` and `cardsmith` accept the
+  hand-placed spots but still check reach, the HUD corners and patrol distance. `card-art` and the creature tests expect
+  the new art. `SPRITE_VERSION` is now '358'.
+
+## Round 357: the Tunnel Borehound redrawn from a 2×2 Gemini grid
+
+- The owner tuned a single Gemini prompt for a four-frame walk. It is in `tools/art-refresh/creature-walk-prompt.md`:
+  2×2 grid; the creature described first in two sentences; "16-bit walk cycle sprite sheet"; an animal comparison for
+  the gait; directions for the near legs only; "frames 1 and 3 must look clearly different". A one-frame follow-up edit
+  in the same Gemini chat fixed frame 3.
+- `tools/strip_to_sheet.py` gains two options:
+  - `--grid 2`: four frames in a 2×2 grid, each piece of art going to the quarter that holds its centre;
+  - `--align 1`: lines the frames up on the creature's front-most point and its feet. Gemini placed the Borehound up to
+    50px apart between squares, which would have made it jitter.
+- **Tunnel Borehound** (`city/tunnel-borehound-v2.png`, trial; the old entry is kept as a comment). The four-frame
+  source is in `src/tunnel-borehound-v2-walk4.png`. `SPRITE_VERSION` is now '357'; `enemy-sizes.css` was regenerated
+  (×1.30). It passes the sprite audit. `tests/tunnel-borehound.test.cjs` now expects the new sheet.
+
 ## Round 356: four refreshed Neon Aftermath enemies, on trial
 
 - The owner sent the first refresh drafts ("i want to see these in game and test them out before i make more"). Each is

@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 356) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 358) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -101,7 +101,11 @@ change set.
   `assets/plazas.js`). When adding tile paintings, pick 2-3 such spots for each in `PLAZAS` and rebuild. Enemies and bosses stand on paths. On a tap route only
   the tapped item opens (Round 184). Map-object paintings (Cardsmiths, lore stones, waypoints, events, merchants, chests, portals: `WORLD_POI_ART`, `EVENT_ART`, `WORLD_CHEST_ART` and `WORLD_PORTAL_ART` in `assets/cardsmith.js`, Rounds 307–342) are keyed off green with `tools/key_object.py` (`--keep-green` for art with real greens,
   `--clear-enclosed` when glow-tinted background is trapped inside the art, `--warm-olive` for see-through parts that
-  key to olive). Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
+  key to olive). Round 358: objects draw at real size, centred on their spot (no half `scale`); beside a street they reach
+  onto it by at most 10% of its width (`ITEM_ROAD_SHARE`, `roadWidthAt`); on open ground (Solaris, Sky Isles, plaza squares)
+  the whole picture stands on it (`itemGroundCover`); only waypoints and chests glow. In Neon Aftermath every room's object
+  stands at its owner-reviewed spot (`assets/spot-fixes.js`, `ROOM_SPOT_FIXES`; loads after `world-relays`). **Open owner note:**
+  the positions still feel random; revisit them. Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
   movement uses (`collides()`), so placement code must keep using `walkable()`/`NeonCity.blocked`.
 - **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.
@@ -123,7 +127,8 @@ change set.
   left-facing art per frame (Round 257). Round 351: after adding or re-cutting sheets, run `python3 tools/enemy_sizes.py`
   (it writes `assets/enemy-sizes.css`, which scales each creature on the map toward one painted size), then
   `python3 tools/sprite_audit.py` (Round 352: stray fragments, clipped edges, keying fringe, pale matte). Round 356: a draft that is
-  one image with eight walk frames in a row on green goes through `python3 tools/strip_to_sheet.py draft.jpeg assets/monsters/<world>/<name>.png`.
+  one image with eight walk frames in a row on green goes through `python3 tools/strip_to_sheet.py draft.jpeg assets/monsters/<world>/<name>.png`;
+  Round 357: a 2×2 grid of four frames adds `--grid 2 --align 1`. The Gemini prompt that works is `tools/art-refresh/creature-walk-prompt.md`.
 - **Card art** comes from `cardArtPath()` in `assets/cards.js`. The refreshed
   WebP illustrations are listed in `refreshedCardArt`. Status and pending
   prompts: `assets/cards/art-refresh.md` and `tools/art-refresh/`. When art
