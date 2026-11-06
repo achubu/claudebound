@@ -8,8 +8,8 @@ const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`JSON.stringify({ html: monsterArt('crownEye'), version: SPRITE_VERSION,
   vesp: [worldArmor({}, 'vespera', 0), worldArmor({}, 'vespera', 1), worldArmor({ boss: true }, 'vespera')],
   wilds: [worldArmor({}, 'wilds', 0), worldArmor({}, 'wilds', 1)] })`));
-assert(r.html.includes('wildlife-sprite') && r.html.includes('city/crown-observer.png?v=' + r.version), 'the Crown Observer uses its animated sheet');
-const b = fs.readFileSync('assets/monsters/city/crown-observer.png');
+assert(r.html.includes('wildlife-sprite') && r.html.includes('city/crown-observer-v2.png?v=' + r.version), 'the Crown Observer uses its animated sheet');
+const b = fs.readFileSync('assets/monsters/city/crown-observer-v2.png');
 assert.strictEqual(b.readUInt32BE(16), 2064, 'a 4-frame sheet'); assert.strictEqual(b.readUInt32BE(20), 688);
 assert.deepStrictEqual(r.vesp, [6, 9, 12], 'Vespera Armor 5-8 (bosses 11) +10%, rounded');
 assert.deepStrictEqual(r.wilds, [4, 7], 'other worlds unchanged');

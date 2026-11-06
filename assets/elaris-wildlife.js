@@ -62,7 +62,9 @@ const WILDLIFE_ART={
  // The Lag Wraith, the Paradox Twin (Chronospire) and the Resonant Phantom (Vespera) keep the old shade art, recoloured.
  phaseShadeOld:{name:'Phase Shade',sheet:'city/phase-shade',cycle:'.8s'},
  // Round 266: the Crown Observer hovers (four of the owner's eight frames; no battle poses yet).
- crownEye:{name:'Crown Observer',sheet:'city/crown-observer',cycle:'.8s'},
+ // Round 358 (trial): the owner's detailed 2x2-grid redraw. Before:
+ // crownEye:{name:'Crown Observer',sheet:'city/crown-observer',cycle:'.8s'},
+ crownEye:{name:'Crown Observer',sheet:'city/crown-observer-v2',cycle:'.8s'},
  // Round 354: the Reactor Mauler walks (four of the owner's eight frames; it had a single still picture, clipped at both sides).
  // Round 356: the Crown Sentinel (mini-boss) floats on its own sheet; it borrowed the Crown Observer's still picture.
  crownSentinel:{name:'The Crown Sentinel',sheet:'city/crown-sentinel',cycle:'.8s'},

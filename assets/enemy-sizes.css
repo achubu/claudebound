@@ -7,6 +7,7 @@
 #world .enemy-node .wildlife-sprite[style*="/city/briar-sentinel-walk.png"]{--enemy-fit:0.874} /* painted 0.630 */
 #world .enemy-node .wildlife-sprite[style*="/city/briar-sentinel.png"]{--enemy-fit:0.958} /* painted 0.574 */
 #world .enemy-node .wildlife-sprite[style*="/city/circuit-thornling-v2.png"]{--enemy-fit:0.881} /* painted 0.624 */
+#world .enemy-node .wildlife-sprite[style*="/city/crown-observer-v2.png"]{--enemy-fit:1.319} /* painted 0.417 */
 #world .enemy-node .wildlife-sprite[style*="/city/crown-sentinel.png"]{--enemy-fit:0.85} /* painted 0.678 */
 #world .enemy-node .wildlife-sprite[style*="/city/data-wisp.png"]{--enemy-fit:0.85} /* painted 0.689 */
 #world .enemy-node .wildlife-sprite[style*="/city/ember-jackal-v2.png"]{--enemy-fit:1.373} /* painted 0.401 */
