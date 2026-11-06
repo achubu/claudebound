@@ -41,7 +41,7 @@ const WILDLIFE_ART={
  // and a walk on the map. The Arc Sentinel and the Brass Sentry borrow it.
  // Round 356 (trial of the owner's refreshed art): the new walk is used everywhere. Before:
  // vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel',cycle:'1.6s',poses:{attack:2,hurt:1,walk:'city/briar-sentinel-walk'}},
- vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel-v2',cycle:'.8s'},
+ vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel-v3',cycle:'.8s'}, // Round 358: the owner's detailed 2x2-grid redraw (v2 was Round 356's)
  // The Brass Sentry (Chronospire) keeps borrowing the old Briar Sentinel art, recoloured, until it has its own.
  briarSentinelOld:{name:'Brass Sentry',sheet:'city/briar-sentinel',cycle:'1.6s',poses:{attack:2,hurt:1,walk:'city/briar-sentinel-walk'}},
  // Round 252: the Ember Jackal is animated too: stand, rear back when hit, lunge with a raised paw.
