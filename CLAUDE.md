@@ -103,7 +103,9 @@ change set.
   `--clear-enclosed` when glow-tinted background is trapped inside the art, `--warm-olive` for see-through parts that
   key to olive). Round 358: objects draw at real size, centred on their spot (no half `scale`); beside a street they reach
   onto it by at most 10% of its width (`ITEM_ROAD_SHARE`, `roadWidthAt`); on open ground (Solaris, Sky Isles, plaza squares)
-  the whole picture stands on it (`itemGroundCover`); only waypoints and chests glow. Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
+  the whole picture stands on it (`itemGroundCover`); only waypoints and chests glow. In Neon Aftermath every room's object
+  stands at its owner-reviewed spot (`assets/spot-fixes.js`, `ROOM_SPOT_FIXES`; loads after `world-relays`). **Open owner note:**
+  the positions still feel random; revisit them. Round 275: each item also has a walkable pad (`assets/item-reach.js`) that only player
   movement uses (`collides()`), so placement code must keep using `walkable()`/`NeonCity.blocked`.
 - **World card mechanics** (Round 185, `assets/world-mechanics.js`): Neon Aftermath ⌁ Hack, Solaris ☀ Heat,
   Sky Isles 🪶 Tailwind, Elaris 🌱 Growth, Vespera ⚡ Stormcharge; Chronospire's ⏳ Suspend is in `chronospire.js`.

@@ -39,9 +39,9 @@ const nk=JSON.parse(run(`(()=>{const out={bad:[],used:[],count:0};
   else if(!stand||stand.d>30)out.bad.push(k+' too far '+(stand&&stand.d));
   else if(!organicReachableAt(k,stand))out.bad.push(k+' unreachable');
   {const g=Math.hypot(x-ax,y+22-ay);if(g<30&&g>24)out.bad.push(k+' not off the road');}}} // Round 358: a kerbside nook (base within 24px, no footpath) is allowed; otherwise 30px off
- for(const p of Object.values(worldPOIs()))if((neonNooks(p.key)||[]).length)out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)||itemGroundCover(p.key,p.x,p.y)>=ITEM_COVER?'ok':p.key+' neither on a nook nor on open ground');
- const q=rooms['8,9'].relic;out.relic=NEON_NOOKS['8,9'].some(n=>n[0]===q[3]&&n[1]===q[4])||itemGroundCover('8,9',q[3],q[4])>=ITEM_COVER; // Round 358: or on open ground
- const wk=NEXUS_POINTS.city.start,nx=poiAt(wk);out.nexus=(NEON_NOOKS[wk]||[]).some(n=>n[0]===nx.x&&n[1]===nx.y)||itemGroundCover(wk,nx.x,nx.y)>=ITEM_COVER; // Round 229: the first waypoint is in Blossom Grove
+ for(const p of Object.values(worldPOIs()))if((neonNooks(p.key)||[]).length)out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)||itemGroundCover(p.key,p.x,p.y)>=ITEM_COVER||(typeof roomSpotFix==='function'&&roomSpotFix(p.key))?'ok':p.key+' neither on a nook nor on open ground');
+ const q=rooms['8,9'].relic;out.relic=NEON_NOOKS['8,9'].some(n=>n[0]===q[3]&&n[1]===q[4])||itemGroundCover('8,9',q[3],q[4])>=ITEM_COVER||(typeof roomSpotFix==='function'&&!!roomSpotFix('8,9')); // Round 358: or on open ground
+ const wk=NEXUS_POINTS.city.start,nx=poiAt(wk);out.nexus=(NEON_NOOKS[wk]||[]).some(n=>n[0]===nx.x&&n[1]===nx.y)||itemGroundCover(wk,nx.x,nx.y)>=ITEM_COVER||(typeof roomSpotFix==='function'&&!!roomSpotFix(wk)); // Round 229: the first waypoint is in Blossom Grove
  return JSON.stringify(out)})()`));
 assert(nk.count>=100,'about two spots per painted room (Round 133: every room)');
 const bare=JSON.parse(run(`JSON.stringify(NEON_ROOM_ART.filter(k=>!(NEON_NOOKS[k]||[]).length))`));

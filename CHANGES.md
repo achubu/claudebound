@@ -3531,7 +3531,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   Square's two nooks moved onto the pavement at the kerb: (540,150) in front of a shutter, and (215,165).
   `tools/build_room_masks.py` bakes no footpath for a kerbside nook (its base within 24px of the street), since you
   stand on the street beside it. `room-art` allows such nooks.
-- Tests: `item-size` rewritten. `room-art` accepts a nook or open ground; `card-art` expects the new art.
+- **Hand-placed Neon Aftermath spots** (`assets/spot-fixes.js`, `ROOM_SPOT_FIXES`). The owner reviewed every object on
+  numbered sheets ("only add objects to curbs or grass"; several rounds of "bad / move up / move onto grass"). Each of
+  the 54 rooms now has one fixed spot on kerb, pavement, path or grass, which every kind of object in that room uses (a
+  room holds at most one since Round 350). Each spot is nudged until the player can reach it. Patrols in those rooms keep
+  150px from the object, so walking up to it never starts a fight. `tools/kerb_spots.py` (a colour-based kerb/grass
+  finder) was tried first; it mistook roofs for pavement and water for grass, so the spots were picked by eye.
+  **Open owner note:** "i'm not loving the randomness of their positions"; positions need more work later.
+- **New enemy art (trials, all Neon Aftermath).** The owner tuned a Gemini prompt (`tools/art-refresh/creature-walk-prompt.md`):
+  "highly detailed ... modern indie game ... not chibi, not cartoonish" replaced "16-bit SNES", which had made creatures
+  simple and cartoonish. New 2x2-grid sheets: Phase Shade, Data Wisp (its title, panel borders and frame numbers cropped
+  off), Crown Observer, Lunar Enforcer, Thorn Warden, Ember Jackal, Circuit Thornling, Briar Sentinel and Crown Sentinel
+  (`*-v2`/`*-v3` in `assets/monsters/city/`). Round 356's simpler trial sheets they replace are removed. Creatures that
+  borrowed the old art keep it (`phaseShadeOld`, `dataWispOld`, as `briarSentinelOld` did).
+- `tools/strip_to_sheet.py`: `--align 2` lines a floating creature up on its head, horizontally only, keeping the drawn
+  bob; `--align 3` lines it up on a glowing cyan core. Shifted frames get room, so nothing is clipped.
+- **Card art:** the owner's Sunflare paintings for all four levels.
+- Tests: `item-size` rewritten. `room-art`, `item-placement`, `neon-world`, `exploration` and `cardsmith` accept the
+  hand-placed spots but still check reach, the HUD corners and patrol distance. `card-art` and the creature tests expect
+  the new art. `SPRITE_VERSION` is now '358'.
 
 ## Round 357: the Tunnel Borehound redrawn from a 2×2 Gemini grid
 
