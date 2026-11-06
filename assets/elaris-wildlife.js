@@ -70,7 +70,9 @@ const WILDLIFE_ART={
  crownSentinel:{name:'The Crown Sentinel',sheet:'city/crown-sentinel',cycle:'.8s'},
  forgeBeast:{name:'Reactor Mauler',sheet:'city/reactor-mauler',cycle:'.8s'},
  // Round 267: Neon Aftermath's final boss, the Thorn Warden, strides (four of the owner's eight side-walk frames).
- thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden',cycle:'1.1s'},
+ // Round 358 (trial): the owner's detailed 2x2-grid redraw. Before:
+ // thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden',cycle:'1.1s'},
+ thornWarden:{name:'Thorn Warden',sheet:'city/thorn-warden-v2',cycle:'1.1s'},
  // Round 268: the mini-boss Lunar Enforcer glides (four of the owner's eight frames; no battle poses yet).
  moonKnight:{name:'Lunar Enforcer',sheet:'city/lunar-enforcer',cycle:'.8s'},
  // Round 273: the Data Wisp's fragments orbit its core (four of the owner's eight frames). Vespera's Arc Wisp and
