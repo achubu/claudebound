@@ -1,6 +1,6 @@
 # Round 356: turn one generated image holding a row of eight walk frames on bright green (the owner's Gemini drafts,
 # usually 2048px square with the frames on a 256px grid) into a four-frame creature sheet.
-#   python3 tools/strip_to_sheet.py draft.jpeg assets/monsters/<world>/<name>.png [--lo 40 --hi 120] [--grid 2] [--align 1|2]
+#   python3 tools/strip_to_sheet.py draft.jpeg assets/monsters/<world>/<name>.png [--lo 40 --hi 120] [--grid 2] [--align 1|2|3]
 # Round 357: --grid 2 takes four frames in a 2x2 grid instead (read left to right, top to bottom) and uses all four.
 # Steps: key the green off (greenness fades from opaque at --lo to clear at --hi, with despill; ground shadows drawn in
 # dark green go too), cut the row into eight equal cells (keeping the draft's own positions, so the walk does not
@@ -88,7 +88,17 @@ strip.save(strip_path)
 pick = frames if len(frames) == 4 else [frames[i] for i in (0, 2, 4, 6)]
 # --align front (Round 357): Gemini places the creature at a slightly different spot in each grid square. Line the frames
 # up so the front-most point (a snout or drill tip) and the feet sit at the same place in every frame; only the legs move.
-if opt.get('align', 0) == 2:
+if opt.get('align', 0) == 3:
+    # --align 3 (a glowing core, like the Data Wisp's orb): line the frames up on the centre of the brightest cyan pixels.
+    cs = []
+    for f in pick:
+        a_ = np.asarray(f).astype(int); m = (a_[..., 3] > 200) & (a_[..., 2] > 190) & (a_[..., 1] > 190) & (a_[..., 0] < 140)
+        ys, xs = np.nonzero(m); cs.append((int(xs.mean()), int(ys.mean())))
+    tx, ty = max(c[0] for c in cs), max(c[1] for c in cs); moved = []
+    for f, (cx_, cy_) in zip(pick, cs):
+        g = Image.new('RGBA', f.size, (0, 0, 0, 0)); g.paste(f, (tx - cx_, ty - cy_)); moved.append(g)
+    pick = moved
+elif opt.get('align', 0) == 2:
     # --align 2 (floating creatures): line the frames up on the top of the head horizontally only, so the body stays put
     # and the drawn up-and-down bob is kept.
     moved, heads = [], []
