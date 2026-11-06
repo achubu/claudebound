@@ -50,7 +50,7 @@ const WILDLIFE_ART={
  emberling:{name:'Ember Jackal',sheet:'city/ember-jackal-v3',cycle:'.8s'}, // Round 358: the owner's detailed 2x2-grid redraw (v2 was Round 356's)
  // Round 255: the Circuit Thornling scuttles (four of the owner's eight walk frames; no battle poses yet).
  // Round 356 (trial): before, thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling',cycle:'.8s'},
- thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling-v2',cycle:'.8s'},
+ thornling:{name:'Circuit Thornling',sheet:'city/circuit-thornling-v3',cycle:'.8s'}, // Round 358: the owner's detailed 2x2-grid redraw (v2 was Round 356's)
  // Round 258: the Tunnel Borehound walks (four of the owner's eight frames; no battle poses yet).
  // Round 357 (trial): the owner's 2x2-grid redraw. Before:
  // burrower:{name:'Tunnel Borehound',sheet:'city/tunnel-borehound',cycle:'.8s'},
