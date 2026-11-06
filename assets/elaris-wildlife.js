@@ -75,7 +75,10 @@ const WILDLIFE_ART={
  moonKnight:{name:'Lunar Enforcer',sheet:'city/lunar-enforcer',cycle:'.8s'},
  // Round 273: the Data Wisp's fragments orbit its core (four of the owner's eight frames). Vespera's Arc Wisp and
  // Chronospire's Rust Wisp borrow it.
- cryptWisp:{name:'Data Wisp',sheet:'city/data-wisp',cycle:'.8s'}
+ // Round 358 (trial): the owner's detailed 2x2-grid redraw (before: sheet 'city/data-wisp'); Chronospire's Rust Wisp keeps
+ // the old art through dataWispOld.
+ dataWispOld:{name:'Data Wisp',sheet:'city/data-wisp',cycle:'.8s'},
+ cryptWisp:{name:'Data Wisp',sheet:'city/data-wisp-v2',cycle:'.8s'}
 };
 const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;

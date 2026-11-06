@@ -19,7 +19,8 @@ ALLOW = {
     ('elaris/bloom-tyrant.png', 'fringe'),       # violet blossoms and green leaves at its edges
     ('elaris/blight-antler.png', 'fringe'),      # green moss and crystals along its back
     ('elaris/mirage-ibis.png', 'fringe'),
-    ('city/phase-shade-v2.png', 'fragment'),     # glitch pixel blocks breaking off its robe        # its deliberate pink mirage fringe (Round 270)
+    ('city/phase-shade-v2.png', 'fragment'),
+    ('city/data-wisp-v2.png', 'fragment'),       # sparks and glitch bits around its core     # glitch pixel blocks breaking off its robe        # its deliberate pink mirage fringe (Round 270)
 }
 
 def frames(path):
