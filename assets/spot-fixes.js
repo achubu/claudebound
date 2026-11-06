@@ -98,10 +98,12 @@ if (typeof roomSpawns === 'function') {
   roomSpawns = function (key) {
     const list = roomSpawnsBeforeFix.apply(this, arguments), f = roomSpotFix(key);
     if (!f || !Array.isArray(list) || list.spotFixed) return list;
+    // Doors count too: a patrol moved off the object must not end up in a room entrance (rebalance checks ~118px).
+    const doors = ['n', 's', 'e', 'w'].map(d => typeof organicExternalExit === 'function' && organicExternalExit(key, d) && organicDoor(key, d)).filter(Boolean).map(d => d.inward || d.edge).filter(Boolean);
     const placed = [{ x: f[0], y: f[1] }];
     for (const s of list) {
       if (Math.hypot(s.x - f[0], s.y - f[1]) >= 150) { placed.push({ x: s.x, y: s.y }); continue; }
-      const q = (typeof organicSpot === 'function') && (organicSpot(key, s.x, s.y, placed, 150) || organicSpot(key, s.x, s.y, placed, 120) || organicSpot(key, s.x, s.y, placed, 100));
+      const q = (typeof organicSpot === 'function') && (organicSpot(key, s.x, s.y, placed.concat(doors), 150) || organicSpot(key, s.x, s.y, placed.concat(doors), 125) || organicSpot(key, s.x, s.y, placed, 120) || organicSpot(key, s.x, s.y, placed, 100));
       if (q) { s.x = q.x; s.y = q.y; } placed.push({ x: s.x, y: s.y });
     }
     if (Object.isExtensible(list)) Object.defineProperty(list, 'spotFixed', { value: true });

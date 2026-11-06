@@ -41,6 +41,6 @@ Math.random = realRandom;
 }`);
 const missing = [];
 for (const id of ['sunflare', 'sandVeil', 'scarabSwarm', 'oasisDraught', 'solarLance', 'skyfall', 'featherguard', 'updraft', 'thunderclap', 'cloudburst', 'elderRoot', 'sporeCloud', 'briarWall', 'crystalShard', 'crystalWard', 'riptide', 'squallStep', 'cisternAegis', 'noonPeal', 'stormbellToll', 'featherfallGrace'])
-  for (let l = 0; l < 4; l++) if (!fs.existsSync(path.join(__dirname, '../assets/cards/level' + l, id + '.png'))) missing.push(id + ' ' + l);
+  for (let l = 0; l < 4; l++) if (!['.png', '.webp'].some(e => fs.existsSync(path.join(__dirname, '../assets/cards/level' + l, id + e)))) missing.push(id + ' ' + l); // Round 358: refreshed art is .webp
 require('assert').deepStrictEqual(missing, [], 'new cards have art at every level');
 console.log('PASS: six reward pools with no card shared between worlds (the Prismatic Counter drops in all of them), forest cards in Elaris, unique mini-boss cards, and the new cards play as written.');
