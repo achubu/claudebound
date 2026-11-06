@@ -1,6 +1,6 @@
 # Round 356: turn one generated image holding a row of eight walk frames on bright green (the owner's Gemini drafts,
 # usually 2048px square with the frames on a 256px grid) into a four-frame creature sheet.
-#   python3 tools/strip_to_sheet.py draft.jpeg assets/monsters/<world>/<name>.png [--lo 40 --hi 120] [--grid 2] [--align 1]
+#   python3 tools/strip_to_sheet.py draft.jpeg assets/monsters/<world>/<name>.png [--lo 40 --hi 120] [--grid 2] [--align 1|2]
 # Round 357: --grid 2 takes four frames in a 2x2 grid instead (read left to right, top to bottom) and uses all four.
 # Steps: key the green off (greenness fades from opaque at --lo to clear at --hi, with despill; ground shadows drawn in
 # dark green go too), cut the row into eight equal cells (keeping the draft's own positions, so the walk does not
@@ -88,7 +88,18 @@ strip.save(strip_path)
 pick = frames if len(frames) == 4 else [frames[i] for i in (0, 2, 4, 6)]
 # --align front (Round 357): Gemini places the creature at a slightly different spot in each grid square. Line the frames
 # up so the front-most point (a snout or drill tip) and the feet sit at the same place in every frame; only the legs move.
-if opt.get('align', 0):
+if opt.get('align', 0) == 2:
+    # --align 2 (floating creatures): line the frames up on the top of the head horizontally only, so the body stays put
+    # and the drawn up-and-down bob is kept.
+    moved, heads = [], []
+    for f in pick:
+        A = np.asarray(f.getchannel('A')) > 60; ys, xs = np.nonzero(A); top = ys.min()
+        heads.append(int(np.median(xs[ys <= top + 12])))
+    hx = max(heads)
+    for f, h in zip(pick, heads):
+        g = Image.new('RGBA', f.size, (0, 0, 0, 0)); g.paste(f, (hx - h, 0)); moved.append(g)
+    pick = moved
+elif opt.get('align', 0):
     boxes = [f.getchannel('A').point(lambda v: 255 if v > 60 else 0).getbbox() for f in pick]
     fx, fy = max(b[2] for b in boxes), max(b[3] for b in boxes)
     moved = []

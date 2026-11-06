@@ -13,6 +13,7 @@
 #world .enemy-node .wildlife-sprite[style*="/city/ember-jackal-walk.png"]{--enemy-fit:1.07} /* painted 0.514 */
 #world .enemy-node .wildlife-sprite[style*="/city/ember-jackal.png"]{--enemy-fit:1.11} /* painted 0.495 */
 #world .enemy-node .wildlife-sprite[style*="/city/lunar-enforcer.png"]{--enemy-fit:1.021} /* painted 0.539 */
+#world .enemy-node .wildlife-sprite[style*="/city/phase-shade-v2.png"]{--enemy-fit:1.411} /* painted 0.390 */
 #world .enemy-node .wildlife-sprite[style*="/city/phase-shade.png"]{--enemy-fit:1.05} /* painted 0.524 */
 #world .enemy-node .wildlife-sprite[style*="/city/reactor-mauler.png"]{--enemy-fit:0.85} /* painted 0.656 */
 #world .enemy-node .wildlife-sprite[style*="/city/thorn-warden.png"]{--enemy-fit:0.853} /* painted 0.645 */
