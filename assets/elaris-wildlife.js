@@ -67,7 +67,7 @@ const WILDLIFE_ART={
  crownEye:{name:'Crown Observer',sheet:'city/crown-observer-v2',cycle:'.8s'},
  // Round 354: the Reactor Mauler walks (four of the owner's eight frames; it had a single still picture, clipped at both sides).
  // Round 356: the Crown Sentinel (mini-boss) floats on its own sheet; it borrowed the Crown Observer's still picture.
- crownSentinel:{name:'The Crown Sentinel',sheet:'city/crown-sentinel',cycle:'.8s'},
+ crownSentinel:{name:'The Crown Sentinel',sheet:'city/crown-sentinel-v2',cycle:'.8s'}, // Round 358: the owner's detailed 2x2-grid redraw (Round 356's sheet before)
  forgeBeast:{name:'Reactor Mauler',sheet:'city/reactor-mauler',cycle:'.8s'},
  // Round 267: Neon Aftermath's final boss, the Thorn Warden, strides (four of the owner's eight side-walk frames).
  // Round 358 (trial): the owner's detailed 2x2-grid redraw. Before:
