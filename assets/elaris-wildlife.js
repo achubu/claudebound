@@ -33,6 +33,7 @@ const WILDLIFE_ART={
  tickMoth:{name:'Tick Moth',sheet:'chronospire/tick-moth',cycle:'.8s'},
  clockwardenArt:{name:'The Clockwarden',sheet:'chronospire/clockwarden',cycle:'.8s'}, // Round 353: Chronospire's mini-boss hovers on its own sheet (drawn from the Crown Observer)
  chronarchArt:{name:'The Chronarch',sheet:'chronospire/chronarch',cycle:'.8s',big:true}, // Round 353: Chronospire's boss walks on its own sheet (drawn from the Bloom Tyrant)
+ paradoxTwinArt:{name:'The Paradox Twin',sheet:'chronospire/paradox-twin',cycle:'.8s'}, // Round 363: Chronospire's mini-boss walks on its own sheet (the owner's detailed 2x2 grid)
  lagWraith:{name:'Lag Wraith',sheet:'chronospire/lag-wraith',cycle:'.8s'}, // Round 361: Chronospire's own wraith (the owner's detailed 2x2 grid; its olive afterimages recoloured violet)
  cogMauler:{name:'Cog Mauler',sheet:'chronospire/cog-mauler',cycle:'.8s'}, // Round 349: Chronospire's own mauler (eight-frame walk drawn from the Reactor Mauler)
  pendulumStag:{name:'Pendulum Stag',sheet:'chronospire/pendulum-stag',cycle:'.8s'}, // Round 346: Chronospire's own stag (eight-frame walk drawn from the Blight Antler)
@@ -89,7 +90,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='361';
+const SPRITE_VERSION='363';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which

@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 363: Chronospire's Paradox Twin gets its own sheet
+
+- **The Paradox Twin** (Chronospire mini-boss): until now it borrowed the old Phase Shade art, recoloured. The owner's
+  detailed 2×2 grid shows a knight split down the middle between two moments: polished bronze on one side, rusted and
+  crumbling into sand on the other, joined by an amber-and-violet seam, with a split clock-face helmet and a long blade.
+  It is built with `strip_to_sheet.py --grid 2 --align 2`. `WILDLIFE_ART.paradoxTwinArt`, `tint: 'none'`.
+  `SPRITE_VERSION` is now '363'. The orbiting gears, glass and sand are listed in the sprite audit's `ALLOW`.
+- Left on borrowed art in Chronospire: the Brass Sentry and the Rust Wisp.
+
 ## Round 362: Skyfall card art
 
 - The owner's **Skyfall** paintings for all four levels: a blue skyfire bolt striking a floating Sky Isles plaza, which
