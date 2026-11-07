@@ -21,7 +21,8 @@ ALLOW = {
     ('elaris/mirage-ibis.png', 'fringe'),
     ('city/phase-shade-v2.png', 'fragment'),
     ('city/data-wisp-v2.png', 'fragment'),
-    ('chronospire/lag-wraith.png', 'fragment'),  # gears and glass shards drifting around it       # sparks and glitch bits around its core     # glitch pixel blocks breaking off its robe        # its deliberate pink mirage fringe (Round 270)
+    ('chronospire/lag-wraith.png', 'fragment'),
+    ('chronospire/paradox-twin.png', 'fragment'), # gears, glass and sand orbiting it  # gears and glass shards drifting around it       # sparks and glitch bits around its core     # glitch pixel blocks breaking off its robe        # its deliberate pink mirage fringe (Round 270)
 }
 
 def frames(path):
