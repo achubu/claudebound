@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 361: Chronospire's Lag Wraith gets its own sheet; Solar Lance card art
+
+- **Lag Wraith** (Chronospire): until now it borrowed the old Phase Shade art, recoloured. The owner's detailed 2×2 grid
+  shows a hooded wraith with a cracked clock face, a robe hemmed in clock numerals fraying into sand, drifting gears and
+  glass, and stuttering afterimages trailing behind it. It is built with `strip_to_sheet.py --grid 2 --align 2`.
+  - The see-through afterimages had picked up the green background and keyed olive, so they were recoloured to a faint
+    violet echo at 60% opacity.
+  - `WILDLIFE_ART.lagWraith`, `tint: 'none'`. `SPRITE_VERSION` is now '361'; `enemy-sizes.css` was regenerated (×1.22).
+    The drifting bits are listed in the sprite audit's `ALLOW`.
+- The owner's **Solar Lance** paintings for all four levels (a golden spear over a sunlit altar that gains spiralling
+  solar flames), in `refreshedCardArt` (`.webp`; the old `.png` files are removed). `cards.js?v=round361`.
+- Art-only round, so the creature, card and sprite tests were run rather than the full suite.
+
 ## Round 360: the Sun Mirror painting (no glyphs left on the map); Oasis Draught card art
 
 - The owner's **Sun Mirror** painting, for the three switches in the Solaris breaker puzzle (`WORLD_POI_ART.elaris.sunMirror`,
