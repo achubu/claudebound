@@ -17,7 +17,7 @@ const CHRONO_ENEMIES = {
   chronoHound:  { name: 'Gearhound', icon: '⚙', hp: 48, attack: 10, element: 'fire', art: 'gearhound', tint: 'none' },
   chronoMoth:   { name: 'Tick Moth', icon: '≋', hp: 50, attack: 10, element: 'air', art: 'tickMoth', tint: 'none' },
   chronoSentry: { name: 'Brass Sentry', icon: '♜', hp: 54, attack: 10, armor: 2, element: 'earth', art: 'briarSentinelOld', tint: CHRONO_TINT },
-  chronoWraith: { name: 'Lag Wraith', icon: '☾', hp: 54, attack: 11, armor: 1, element: 'air', art: 'phaseShadeOld', tint: CHRONO_TINT },
+  chronoWraith: { name: 'Lag Wraith', icon: '☾', hp: 54, attack: 11, armor: 1, element: 'air', art: 'lagWraith', tint: 'none' },
   chronoHeron:  { name: 'Hourglass Heron', icon: '⏳', hp: 56, attack: 11, element: 'water', art: 'hourglassHeron', tint: 'none' },
   chronoStag:   { name: 'Pendulum Stag', icon: '◆', hp: 58, attack: 11, armor: 2, element: 'earth', art: 'pendulumStag', tint: 'none' },
   chronoWisp:   { name: 'Rust Wisp', icon: '✧', hp: 60, attack: 11, armor: 2, element: 'water', art: 'dataWispOld', tint: CHRONO_TINT },
