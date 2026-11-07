@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 359: Sand Veil and Scarab Swarm card art
+
+- The owner's paintings for two Solaris cards at all four levels, in `refreshedCardArt` (`.webp`, 512px; the old `.png`
+  files are removed):
+  - **Sand Veil:** a golden veil of light across a ruined desert arch. It grows from a thin curtain to a full shimmering
+    dome.
+  - **Scarab Swarm:** an emerald-and-gold scarab crawling out of a tomb, with more beetles and green mist at each
+    level.
+- `cards.js?v=round359`. `card-art` now expects them. This round only swaps art, so `card-art` and `world-cards` were run
+  rather than the full suite.
+
 ## Round 358: objects drawn where they stand, bigger, at most 10% onto the road; only waypoints and chests glow; Nano Mend and Sift art
 
 - Owner:
