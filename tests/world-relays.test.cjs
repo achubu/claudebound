@@ -38,7 +38,7 @@ assert(r.cityAlone, 'Neon Aftermath keeps its own Blackout (city-nights.js)');
 const fs = require('fs');
 const art = JSON.parse(run(`(() => { const o = {}; for (const w of Object.keys(WORLD_RELAYS)) { configureRegion(w); const d = WORLD_RELAYS[w]; o[w] = [poiArt({ type: d.sw.type }), poiArt({ type: d.vault.type })]; } configureRegion('city');
   o.stag = monsterArt('chronoStag'); o.heron = monsterArt('chronoHeron'); return JSON.stringify(o); })()`));
-for (const w of ['sky', 'wilds', 'vespera', 'chronospire']) for (const a of art[w]) {
+for (const w of ['elaris', 'sky', 'wilds', 'vespera', 'chronospire']) for (const a of art[w]) {
   assert(a && a.startsWith(w + '-'), w + ': switch and vault use their paintings (' + art[w] + ')');
   assert.strictEqual(fs.readFileSync('assets/items/poi/' + a + '.webp').toString('ascii', 0, 4), 'RIFF', a);
 }
