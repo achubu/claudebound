@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 364: Chronospire's Brass Sentry gets its own sheet; Featherguard card art
+
+- **Brass Sentry** (Chronospire): until now it borrowed the old Briar Sentinel art, recoloured. The owner's detailed 2×2
+  grid shows a tarnished brass clockwork knight with a ticking clock-face helmet, a clock-hand halberd, a gear-toothed
+  shield and puffing steam. It is built with `strip_to_sheet.py --grid 2 --align 2`. `WILDLIFE_ART.brassSentryArt`,
+  `tint: 'none'`. The now-unused `briarSentinelOld` key is removed. `SPRITE_VERSION` is now '364'. `briar-sentinel` now
+  checks the Brass Sentry's own sheet.
+- The owner's **Featherguard** paintings for all four levels: a dome of glowing feathers over a Sky Isles plaza that
+  thickens into a radiant shield. In `refreshedCardArt` (`.webp`; the old `.png` files are removed).
+  `cards.js?v=round364`.
+- Only the Rust Wisp is still on borrowed art in Chronospire.
+
 ## Round 363: Chronospire's Paradox Twin gets its own sheet
 
 - **The Paradox Twin** (Chronospire mini-boss): until now it borrowed the old Phase Shade art, recoloured. The owner's
