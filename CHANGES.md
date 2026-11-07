@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 360: the Sun Mirror painting (no glyphs left on the map); Oasis Draught card art
+
+- The owner's **Sun Mirror** painting, for the three switches in the Solaris breaker puzzle (`WORLD_POI_ART.elaris.sunMirror`,
+  `assets/items/poi/elaris-sunMirror.webp`). It is the last map object that still showed a glyph (☀).
+  - Keyed with `tools/key_object.py`. The see-through sunbeam had keyed to solid yellow-green, so it was recoloured warm
+    gold at 55% opacity.
+  - `world-relays` now also checks the Solaris switch and vault paintings.
+- The owner's **Oasis Draught** paintings for all four levels (a teal potion on a sunlit altar that gains a gold crown
+  and a swirling aura), in `refreshedCardArt` (`.webp`; the old `.png` files are removed). `cards.js?v=round360`.
+- This round only swaps art, so the art, card, object-painting and world-relays tests were run rather than the full
+  suite. Browser check: the mirror shows in its Solaris plaza with no errors.
+
 ## Round 359: Sand Veil and Scarab Swarm card art
 
 - The owner's paintings for two Solaris cards at all four levels, in `refreshedCardArt` (`.webp`, 512px; the old `.png`
