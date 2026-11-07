@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 362: Skyfall card art
+
+- The owner's **Skyfall** paintings for all four levels: a blue skyfire bolt striking a floating Sky Isles plaza, which
+  grows into a cascade of crystal spears and a shockwave. In `refreshedCardArt` (`.webp`; the old `.png` files are
+  removed). `cards.js?v=round362`.
+- Art-only round, so `card-art` and `world-cards` were run.
+
 ## Round 361: Chronospire's Lag Wraith gets its own sheet; Solar Lance card art
 
 - **Lag Wraith** (Chronospire): until now it borrowed the old Phase Shade art, recoloured. The owner's detailed 2×2 grid
