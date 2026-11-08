@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 369: Cloudburst card art
+
+- The owner's **Cloudburst** paintings for all four levels, in a new setting (owner: the first prompt was too similar to
+  Thunderclap's plaza): healing rain over a tiered Sky Isles garden terrace, from a soft grey cloud with thin streaks to
+  a towering aqua-lit storm with a rainbow. The files were ordered by strength. In `refreshedCardArt` (`.webp`; the old
+  `.png` files are removed). `cards.js?v=round369`. `card-art` and `world-cards` pass.
+- Every Sky Isles card now has the owner's refreshed art.
+
 ## Round 368: Thunderclap card art
 
 - The owner's **Thunderclap** paintings for all four levels: lightning striking a bronze storm-bell on a Sky Isles
