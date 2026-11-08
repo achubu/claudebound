@@ -90,10 +90,13 @@ pick = frames if len(frames) == 4 else [frames[i] for i in (0, 2, 4, 6)]
 # up so the front-most point (a snout or drill tip) and the feet sit at the same place in every frame; only the legs move.
 PADA = 300  # room for a shifted frame, so nothing is cut off at its canvas edge
 if opt.get('align', 0) == 3:
-    # --align 3 (a glowing core, like the Data Wisp's orb): line the frames up on the centre of the brightest cyan pixels.
+    # --align 3 (a glowing core, like the Data Wisp's orb): line the frames up on the centre of the brightest cyan pixels
+    # (or amber ones when there are none, like the Rust Wisp's clock face).
     cs = []
     for f in pick:
         a_ = np.asarray(f).astype(int); m = (a_[..., 3] > 200) & (a_[..., 2] > 190) & (a_[..., 1] > 190) & (a_[..., 0] < 140)
+        if not m.any():  # an amber/orange core (the Rust Wisp's clock face) instead of cyan
+            m = (a_[..., 3] > 200) & (a_[..., 0] > 220) & (a_[..., 1] > 140) & (a_[..., 2] < 120)
         ys, xs = np.nonzero(m); cs.append((int(xs.mean()), int(ys.mean())))
     tx, ty = max(c[0] for c in cs), max(c[1] for c in cs); moved = []
     for f, (cx_, cy_) in zip(pick, cs):

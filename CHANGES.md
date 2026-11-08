@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 365: Chronospire's Rust Wisp gets its own sheet: every enemy now has its own art
+
+- **Rust Wisp** (Chronospire): until now it borrowed the old Data Wisp art, recoloured. The owner's detailed 2×2 grid
+  shows a glowing amber clock face inside a cage of rusted, verdigris-crusted gears, with chains, springs and pendulum
+  weights hanging below and rust flakes drifting off.
+  - Built with `strip_to_sheet.py --grid 2 --align 3`. That mode lines the frames up on a glowing core and now also
+    finds an amber core when there is no cyan.
+  - `WILDLIFE_ART.rustWispArt`, `tint: 'none'`. The now-unused `dataWispOld` key is removed. `SPRITE_VERSION` is now
+    '365'. The drifting flakes are listed in the sprite audit's `ALLOW`.
+- No Chronospire enemy uses `CHRONO_TINT` any more: every enemy in every world has its own sheet.
+
 ## Round 364: Chronospire's Brass Sentry gets its own sheet; Featherguard card art
 
 - **Brass Sentry** (Chronospire): until now it borrowed the old Briar Sentinel art, recoloured. The owner's detailed 2×2
