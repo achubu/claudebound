@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 367: Updraft level 1 art
+
+- The owner's missing **Updraft** level 1 painting: one rising card and a few aether motes in a mid-strength wind
+  column. `refreshedCardArt.updraft` is now `[0, 1, 2, 3]`. `cards.js?v=round367`. `card-art` passes.
+
 ## Round 366: Updraft card art (levels 0, 2 and 3)
 
 - The owner's **Updraft** paintings: a rising wind column over a floating Sky Isles plaza, from a gentle draught of
