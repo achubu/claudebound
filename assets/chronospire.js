@@ -20,7 +20,7 @@ const CHRONO_ENEMIES = {
   chronoWraith: { name: 'Lag Wraith', icon: '☾', hp: 54, attack: 11, armor: 1, element: 'air', art: 'lagWraith', tint: 'none' },
   chronoHeron:  { name: 'Hourglass Heron', icon: '⏳', hp: 56, attack: 11, element: 'water', art: 'hourglassHeron', tint: 'none' },
   chronoStag:   { name: 'Pendulum Stag', icon: '◆', hp: 58, attack: 11, armor: 2, element: 'earth', art: 'pendulumStag', tint: 'none' },
-  chronoWisp:   { name: 'Rust Wisp', icon: '✧', hp: 60, attack: 11, armor: 2, element: 'water', art: 'dataWispOld', tint: CHRONO_TINT },
+  chronoWisp:   { name: 'Rust Wisp', icon: '✧', hp: 60, attack: 11, armor: 2, element: 'water', art: 'rustWispArt', tint: 'none' },
   chronoMauler: { name: 'Cog Mauler', icon: '♨', hp: 62, attack: 12, armor: 2, element: 'fire', art: 'cogMauler', tint: 'none' },
   clockwarden:  { name: 'The Clockwarden', icon: '🕰', hp: 90, attack: 12, armor: 4, boss: true, miniBoss: true, element: 'earth', art: 'clockwardenArt', tint: 'none' },
   paradoxTwin:  { name: 'The Paradox Twin', icon: '♊', hp: 86, attack: 13, armor: 3, boss: true, miniBoss: true, element: 'air', art: 'paradoxTwinArt', tint: 'none' },
