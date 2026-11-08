@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 368: Thunderclap card art
+
+- The owner's **Thunderclap** paintings for all four levels: lightning striking a bronze storm-bell on a Sky Isles
+  plaza, from a single bolt with a faint shockwave to a massive branching storm with gold sigils. The files arrived out
+  of order and were ordered by strength. In `refreshedCardArt` (`.webp`; the old `.png` files are removed).
+  `cards.js?v=round368`. `card-art` and `world-cards` pass.
+
 ## Round 367: Updraft level 1 art
 
 - The owner's missing **Updraft** level 1 painting: one rising card and a few aether motes in a mid-strength wind
