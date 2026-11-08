@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 366: Updraft card art (levels 0, 2 and 3)
+
+- The owner's **Updraft** paintings: a rising wind column over a floating Sky Isles plaza, from a gentle draught of
+  feathers to a towering vortex with gold sigils and three glowing cards.
+- The upload held three different images (one file was in it twice), so there is no level 1 painting yet.
+  `refreshedCardArt.updraft` is `[0, 2, 3]`, so level 1 shows the level 0 painting until the owner sends one. The old
+  `.png` files are removed. `cards.js?v=round366`.
+- Art-only round, so `card-art` and `world-cards` were run.
+
 ## Round 365: Chronospire's Rust Wisp gets its own sheet: every enemy now has its own art
 
 - **Rust Wisp** (Chronospire): until now it borrowed the old Data Wisp art, recoloured. The owner's detailed 2×2 grid
