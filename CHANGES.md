@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 370: Elder Root card art (levels 0, 1 and 3)
+
+- The owner's **Elder Root** paintings: venomous roots lashing up from the floor of an ancient forest, rising to an
+  awakened elder tree with glowing eyes and gold-green sigils.
+- One of the four images was a failed generation (blurry, a different style, no roots), so there is no level 2
+  painting yet. `refreshedCardArt.elderRoot` is `[0, 1, 3]`, so level 2 shows the level 1 painting until it arrives. The
+  old `.png` files are removed. `cards.js?v=round370`. `card-art` and `world-cards` pass.
+
 ## Round 369: Cloudburst card art
 
 - The owner's **Cloudburst** paintings for all four levels, in a new setting (owner: the first prompt was too similar to
