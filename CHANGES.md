@@ -3496,6 +3496,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 375: Thunderhead card art (levels 0-2)
+
+The owner's Thunderhead paintings for levels 0, 1 and 2 (a brass lightning rod on a ruined sea terrace, its storm cloud and shield of charge growing) replace the old PNGs as 512px WebP at `assets/cards/level0-2/thunderhead.webp`, listed as `thunderhead:[0,1,2]` in `refreshedCardArt` (and the card-art test). Level 3 shows the level 2 painting until its own arrives; the old level 3 PNG is removed so the card keeps one style. `cards.js?v=round375` in `index.html` and `compendium.html`.
+
 ## Round 374: Sunstoke card art
 
 The owner's four Sunstoke paintings (a golden brazier on a sun altar in a ruined desert temple, its fire growing until a sun-dome of light closes over it) replace the old PNGs as 512px WebP at `assets/cards/level0-3/sunstoke.webp`, listed in `refreshedCardArt` (and the card-art test). `cards.js?v=round374` in `index.html` and `compendium.html`.
