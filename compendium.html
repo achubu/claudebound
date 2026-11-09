@@ -427,7 +427,7 @@
             return new Promise(resolve => {
                 const frame = document.createElement('iframe');
                 window.gameFrame = frame; // Round 182: the Difficulty lab runs its battles in this frame
-                frame.src = 'index.html?v=round236';
+                frame.src = 'index.html?v=round371'; // Round 371: bumped so browsers never reuse an old copy of the game
                 frame.setAttribute('aria-hidden', 'true');
                 frame.tabIndex = -1;
                 frame.style.cssText = 'position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none;left:-9999px';
@@ -469,11 +469,11 @@
             { id: 'elaris', name: 'Solaris', blurb: 'A sun-scorched desert city reached through the boss portal.', levels: [10, 17], bossLevels: { tidewardenElaris: 10, galeSovereign: 16, bloomTyrant: 18 },
               regular: ['cinderFox', 'drownedHeron', 'blightAntler', 'stormMoth', 'sunRevenant'],
               miniBosses: ['tidewardenElaris', 'galeSovereign'], boss: 'bloomTyrant' },
-            { id: 'sky', name: 'Sky Isles', blurb: 'Floating islands above the clouds, through the portal in the Solar Crown: 54 rooms, levels 19–27.', levels: [19, 26], bossLevels: { stormbellWarden: 23, featherMatriarch: 25, zenithRoc: 27 },
+            { id: 'sky', name: 'Sky Isles', blurb: 'Floating islands above the clouds, through the portal in the Solar Crown: 51 rooms, levels 19–27.', levels: [19, 26], bossLevels: { stormbellWarden: 23, featherMatriarch: 25, zenithRoc: 27 },
               regular: ['skyDrake', 'skyWisp', 'skyHarpy', 'skyRam'], miniBosses: ['stormbellWarden', 'featherMatriarch'], boss: 'zenithRoc' },
-            { id: 'wilds', name: 'Elaris', blurb: 'The old forest and its original creatures, below the Sky Isles: 54 rooms, levels 28–36.', levels: [28, 35], bossLevels: { tideboundWarden: 32, galeSovereignElaris: 34, elarisTyrant: 36 },
+            { id: 'wilds', name: 'Elaris', blurb: 'The old forest and its original creatures, below the Sky Isles: 51 rooms, levels 28–36.', levels: [28, 35], bossLevels: { tideboundWarden: 32, galeSovereignElaris: 34, elarisTyrant: 36 },
               regular: ['elarisFox', 'elarisAntler', 'elarisHeron', 'elarisMoth'], miniBosses: ['tideboundWarden', 'galeSovereignElaris'], boss: 'elarisTyrant' },
-            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 54 rooms, levels 37–45.', levels: [37, 44], bossLevels: { arcSentinel: 41, resonantPhantom: 43, stormTyrant: 45 },
+            { id: 'vespera', name: 'Vespera', blurb: 'A storm-wracked crystal coast beyond the Bloom Tyrant: 51 rooms, levels 37–45.', levels: [37, 44], bossLevels: { arcSentinel: 41, resonantPhantom: 43, stormTyrant: 45 },
               regular: ['vespFox', 'vespThorn', 'vespMoth', 'vespHeron', 'vespShade', 'vespStag', 'vespWisp', 'vespMauler'], miniBosses: ['arcSentinel', 'resonantPhantom'], boss: 'stormTyrant' },
             { id: 'chronospire', name: 'Chronospire', blurb: 'A clockwork citadel where time is broken, through the rift in the Eye of the Tempest: a tall spire of 54 rooms, levels 46–54. Home of the ⏳ Suspend mechanic.', levels: [46, 53], bossLevels: { clockwarden: 50, paradoxTwin: 52, chronarch: 54 },
               regular: ['chronoHound', 'chronoMoth', 'chronoSentry', 'chronoWraith', 'chronoHeron', 'chronoStag', 'chronoWisp', 'chronoMauler'], miniBosses: ['clockwarden', 'paradoxTwin'], boss: 'chronarch' }

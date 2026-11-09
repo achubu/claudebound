@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 371: compendium check
+
+- Owner: "is the compendium up to date?" A browser check found it shows all 97 cards (each at its four levels, with the
+  current art) and all 55 enemies, with no missing images or errors. It reads cards, art and enemy stats live from the
+  game in a hidden frame, and its hand-written list of each world's enemies matches what actually spawns in all six
+  worlds.
+- Fixed: the Sky Isles, Elaris and Vespera blurbs said 54 rooms (they have 51), and the hidden game frame's
+  `index.html?v=` tag was bumped from round236 so browsers never reuse an old copy of the game.
+
 ## Round 370: Elder Root card art (levels 0, 1 and 3)
 
 - The owner's **Elder Root** paintings: venomous roots lashing up from the floor of an ancient forest, rising to an
