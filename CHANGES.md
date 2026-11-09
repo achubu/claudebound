@@ -3502,7 +3502,9 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
   awakened elder tree with glowing eyes and gold-green sigils.
 - One of the four images was a failed generation (blurry, a different style, no roots), so there is no level 2
   painting yet. `refreshedCardArt.elderRoot` is `[0, 1, 3]`, so level 2 shows the level 1 painting until it arrives. The
-  old `.png` files are removed. `cards.js?v=round370`. `card-art` and `world-cards` pass.
+  old `.png` files are removed. `cards.js?v=round370`.
+- `world-cards` now checks the file `cardArtPath()` actually loads for each level, instead of requiring an image named
+  after every level. `card-art` and `world-cards` pass.
 
 ## Round 369: Cloudburst card art
 
