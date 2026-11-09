@@ -3496,6 +3496,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 372: Spore Cloud card art
+
+The owner's four Spore Cloud paintings (glowing mushrooms in a forest ruin, the spore cloud growing with each level) replace the old PNGs as 512px WebP at `assets/cards/level0-3/sporeCloud.webp`, listed in `refreshedCardArt` (and the card-art test). `cards.js?v=round372` in `index.html` and `compendium.html`.
+
 ## Round 371: compendium check
 
 - Owner: "is the compendium up to date?" A browser check found it shows all 97 cards (each at its four levels, with the
