@@ -3496,6 +3496,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 373: Slipstream card art
+
+The owner's four Slipstream paintings (a ruined sky-island archway with a glowing wind current and a feather that grows into a golden quill) replace the old PNGs as 512px WebP at `assets/cards/level0-3/slipstream.webp`, listed in `refreshedCardArt` (and the card-art test). `cards.js?v=round373` in `index.html` and `compendium.html`.
+
 ## Round 372: Spore Cloud card art
 
 The owner's four Spore Cloud paintings (glowing mushrooms in a forest ruin, the spore cloud growing with each level) replace the old PNGs as 512px WebP at `assets/cards/level0-3/sporeCloud.webp`, listed in `refreshedCardArt` (and the card-art test). `cards.js?v=round372` in `index.html` and `compendium.html`.
