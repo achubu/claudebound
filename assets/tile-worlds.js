@@ -176,6 +176,7 @@ const tileWorldImages = {};
 const TILE_ART_VERSION = '235';
 function tileWorldArtSrc(id, name) { return 'assets/environment/' + id + '/' + name + '.webp?v=' + TILE_ART_VERSION; }
 function paintTileWorld(canvas, id, key) {
+  if (id === 'chronospire' && typeof paintChronoRoom === 'function') return paintChronoRoom(canvas, key); // Round 377: generated, not painted
   const plan = TILE_WORLD_DATA[id].plan[key]; if (!plan) return false;
   const [name, fx, fy] = plan, src = tileWorldArtSrc(id, name);
   let img = tileWorldImages[src];
