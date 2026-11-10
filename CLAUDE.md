@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 377) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 379) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -61,8 +61,15 @@ change set.
     seamless textures and sixteen props (`assets/environment/chronospire/gen/`, `tools/prepare_chrono_gen.py`; bump
     `CHRONO_ART_VERSION` when they change). A seed change rebuilds it and `chronoFlushCaches()` clears the caches that
     don't carry the seed: add any new world-and-room cache there. Bump `CHRONO_GEN_VERSION` when the generator changes
-    layouts, so saves resume at a hub. **Open owner note:** richer background; boss rooms locked behind breakers and
-    mini-boss loot with backtracking, planned at generation.
+    layouts (saves then restart the Chronospire at its gate). Round 378: pipe beds and chasms from world-wide noise
+    (`chronoTerrain`), floor inlays, large set pieces.
+  - Round 379: **the Chronospire's room map is generated too** (`chronoGraph`): three wings joined by two sealed doors,
+    with the roles placed for a fixed order of play (Breaker 1 → Clockwarden's gear → Boss room 1, the Mainspring
+    Colossus → Breaker 2 → Paradox Twin's gear → Boss room 2, the Hollow Hour → Breaker 3 → The Last Second).
+    `chronoApplyGraph` rewrites the world's tables in place, so **read `TILE_WORLD_DATA.chronospire.roles` only after
+    `configureRegion('chronospire')`**. `assets/chrono-locks.js` (after `spot-fixes`) puts `requires: 'chrono:<token>'` on
+    the five doors, makes the relay switches the breakers, and writes the objective. The two new bosses still need tuning
+    in the Difficulty lab.
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.

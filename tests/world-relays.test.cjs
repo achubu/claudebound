@@ -13,6 +13,10 @@ const r = JSON.parse(run(`(() => { const out = {}; newGame();
     o.walk = list.concat([vroom]).every(k => worldRelayItems(k).every(it => reach(k, it)));
     const vault = worldRelayItems(vroom).find(i => i.type === d.vault.type); o.vault = !!vault;
     state.room = vroom; openPOI(vault); o.locked = /0\\/3/.test(document.getElementById('menuModal').innerHTML); closeMenu();
+    if (w === 'chronospire') { // Round 379: breakers 2 and 3 are dead until the boss before each is beaten
+      const it = worldRelayItems(list[1]).find(i => i.type === d.sw.type); state.room = list[1]; openPOI(it); o.gated = /Mainspring Colossus carries it/.test(document.getElementById('menuModal').innerHTML); closeMenu();
+      state.bosses.push('mainspringColossus', 'hollowHour');
+    }
     for (const k of list) { const it = worldRelayItems(k).find(i => i.type === d.sw.type); state.room = k; openPOI(it); const b = $('relayAct'); if (b && b.onclick) b.onclick(); o.used = poiUsed(it); }
     o.on = worldRelayState(w).on.length;
     const sh = state.shards, mat = materials(), pool = state.pool.length; state.room = vroom; openPOI(vault);
@@ -25,7 +29,8 @@ const r = JSON.parse(run(`(() => { const out = {}; newGame();
 for (const [w, o] of Object.entries(r)) {
   if (w === 'cityAlone') continue;
   assert.strictEqual(o.rooms, 3, w + ': three switches');
-  assert(o.frac[0] < .4 && o.frac[2] >= .7, w + ': one near the start and one far (' + o.frac.map(f => f.toFixed(2)) + ')');
+  if (w === 'chronospire') assert(o.gated, 'Round 379: the second breaker is dead until the Mainspring Colossus is beaten');
+  if (w !== 'chronospire') assert(o.frac[0] < .4 && o.frac[2] >= .7, w + ': one near the start and one far (' + o.frac.map(f => f.toFixed(2)) + ')');
   assert(o.noStart && o.noPoi, w + ': switch rooms hold nothing else');
   assert(o.walk, w + ': every switch and the vault stand within reach of walkable ground (items sit just off the path)');
   assert(o.vault && o.locked, w + ': the vault is locked at first');

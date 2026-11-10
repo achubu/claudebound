@@ -24,6 +24,9 @@ const CHRONO_ENEMIES = {
   chronoMauler: { name: 'Cog Mauler', icon: '♨', hp: 62, attack: 12, armor: 2, element: 'fire', art: 'cogMauler', tint: 'none' },
   clockwarden:  { name: 'The Clockwarden', icon: '🕰', hp: 90, attack: 12, armor: 4, boss: true, miniBoss: true, element: 'earth', art: 'clockwardenArt', tint: 'none' },
   paradoxTwin:  { name: 'The Paradox Twin', icon: '♊', hp: 86, attack: 13, armor: 3, boss: true, miniBoss: true, element: 'air', art: 'paradoxTwinArt', tint: 'none' },
+  // Round 379: the two bosses behind the Chronospire's locked doors.
+  mainspringColossus: { name: 'The Mainspring Colossus', icon: '⚙', hp: 120, attack: 13, armor: 5, boss: true, element: 'earth', art: 'mainspringColossusArt', tint: 'none' },
+  hollowHour:   { name: 'The Hollow Hour', icon: '⏳', hp: 126, attack: 13, armor: 3, boss: true, element: 'air', art: 'hollowHourArt', tint: 'none' },
   chronarch:    { name: 'The Chronarch', icon: '⌛', hp: 160, attack: 12, armor: 3, boss: true, element: 'water', shift: ['water', 'fire'], shiftEvery: 4, art: 'chronarchArt', tint: 'none' }
 };
 Object.assign(enemies, CHRONO_ENEMIES);
@@ -35,7 +38,8 @@ function chronoTierTypes(key) { const z = rooms[key] && rooms[key].zone; return 
 AFFLICTIONS.rewind = { name: 'Rewind', icon: '⟲', type: 'hex', desc: () => 'Rewind: every suspended card waits 1 more turn. If nothing is suspended, you lose 1 Aether.', answer: ['purify', 'anchor'] };
 Object.assign(ENEMY_AFFLICTIONS, {
   chronoHound: ['rewind'], chronoMoth: ['fog'], chronoSentry: ['barrier'], chronoWraith: ['rewind'], chronoHeron: ['siphon'], chronoStag: ['frail'], chronoWisp: ['rewind'], chronoMauler: ['crush'],
-  clockwarden: ['rewind', 'barrier'], paradoxTwin: ['rewind', 'siphon'], chronarch: ['rewind', 'empower', 'barrage']
+  clockwarden: ['rewind', 'barrier'], paradoxTwin: ['rewind', 'siphon'], chronarch: ['rewind', 'empower', 'barrage'],
+  mainspringColossus: ['crush', 'barrier'], hollowHour: ['rewind', 'fog']
 });
 const applyHexBeforeRewind = applyHex;
 applyHex = function (b, id) {

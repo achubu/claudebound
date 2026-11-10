@@ -23,7 +23,7 @@ for (const [id, w] of Object.entries(r.worlds)) {
   assert.strictEqual(w.rooms, id === 'chronospire' ? 54 : 51, id + ' room count (the Sky Isles (Round 197), Elaris (Round 225) and Vespera (Round 227) cut three for diagonals)');
   assert.deepStrictEqual(w.errors, [], id + ' every room places its enemies');
   assert.deepStrictEqual(w.offPath, [], id + ' enemies stand on the path');
-  assert.strictEqual(w.bosses.length, 3, id + ' has two mini-bosses and a final boss');
+  assert.strictEqual(w.bosses.length, id === 'chronospire' ? 5 : 3, id + ' has two mini-bosses and a final boss (Round 379: the Chronospire also has two bosses behind locked doors)');
   assert(w.startSafe, id + ' start room is safe');
   assert(w.quiet.every(n => n === 0) && w.quiet.length === 3, id + ' quiet rooms are quiet');
   assert(w.events && w.lore === 5);

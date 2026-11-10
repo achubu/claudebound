@@ -3496,6 +3496,56 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 379: the Chronospire's room map, locks, breakers and two bosses come from the seed
+
+Owner: "per journey room map"; "create boss rooms, at least 2 in the world, these should be unlocked using a system of
+breakers in the world and require mini boss wins acquiring loot that unlocks rooms with bosses. These should require
+backtracking and moving throughout the world. This should all be planned for in the environment initial generation";
+"2 new bosses, I'll get the sheets to you".
+
+- **Room map (`chronoGraph` in `assets/chrono-gen.js`)**: a spanning tree over the 6x9 grid (mostly corridors, some
+  branches), cut at two edges into three wings: the Gate wing, wing A behind it, wing B behind A. Those two edges are the
+  only doors between wings. Up to seven extra doors make loops inside a wing. Levels 46-54 climb in the order of play.
+  `chronoApplyGraph` writes it into the game's tables in place (`TILE_WORLD_DATA.chronospire.layout/roles`,
+  `CHRONO_ROOM_DATA`, start, stops, chests, `WORLD_BOSS_ROOMS`, `NEXUS_POINTS`, `FIRST_WAYPOINT_ROOMS`, `QUIET_ROOMS`)
+  and drops the room-graph caches; the live room table is configured again when the map changes under it.
+- **The chain, planned at generation** (`chronoGraphSolvable` plays it from the gate and rejects any map where a key lies
+  behind its own lock or the order differs):
+  1. Breaker 1 (Gate wing) opens the door to wing A.
+  2. The Clockwarden, deep in A, guards the first gear piece; holding it opens **Mainspring Foundry**, a dead end back in
+     the Gate wing.
+  3. **The Mainspring Colossus** there carries the mainspring Breaker 2 (in A) needs; Breaker 2 opens wing B.
+  4. The Paradox Twin, deep in B, guards the second gear piece; holding it opens **The Hollow Hour**, a dead end back in A.
+  5. **The Hollow Hour** there frees Breaker 3 (in B), which opens The Last Second, a dead end near the gate.
+- **Locks (`assets/chrono-locks.js`, loads after `spot-fixes`)**: the five doors carry `requires: 'chrono:<token>'`
+  (breaker1-3, loot1-2) on the live room table, answered by `hasRelic()`; each locked door says what it needs and where.
+  The breakers are this world's three relay switches (Round 345), renamed Spire Breaker with the owner's off/on art and
+  standing where the map planned them, so all three still open the Chrono Vault; breakers 2 and 3 are dead until the boss
+  before each is beaten. A sealed or open gate (the owner's art) stands in each locked doorway. The objective line names
+  the next step.
+- **Two bosses** (the owner's sheets, cut with `strip_to_sheet.py --grid 2`): The Mainspring Colossus (earth; Crush and
+  Barrier; winds up then unloads; twist Wind-up) and The Hollow Hour (air; Rewind and Fog; twist Stolen Hour). Each has
+  its own trait, move pattern and status afflictions. **Not tuned yet beyond a first pass**: see the Difficulty lab numbers
+  in the pull request.
+- **Saves:** `CHRONO_GEN_VERSION` 2. A save from an older map restarts its Chronospire exploration at the new gate with the
+  breakers off (character, deck, gear and boss kills stay), like the Round 179 rebuild.
+- Tests: `chrono-gen` adds 150 maps (wings, doors, roles, dead-end boss rooms, levels, solvable in order) and plays the
+  chain in the game (each step opens exactly its door and brings the next room into reach). `chronospire`, `tile-worlds`,
+  `world-relays` and `rebuilt-worlds-migrate` read the generated roles. `playtest-walk chronospire` (breakers thrown,
+  bosses down): 54 rooms, 301 crossings, 54 item routes, no problems.
+
+## Round 378: a richer Chronospire
+
+Owner: "we need better background and more complexity in the environment, I like the road path".
+
+- Two more grounds, laid by smooth noise over the whole world's cells so they run on from room to room
+  (`chronoTerrain`): beds of steam pipes, and chasms the roads cross like bridges (a lit rim, darkness below, a shadow
+  falling in; nothing stands in one, and sand never lies in one).
+- Flat inlays (clock dial, sun and moon, gear spiral, hourglass) set into courts, arenas and a quarter of the squares.
+- Four large set pieces (aqueduct, half-buried cogwheel, boilers, fallen tower top) join the buildings.
+- The room's corners darken a little, and the last six painted rooms are kept so redrawing the world is one copy.
+- `tools/prepare_chrono_gen.py` takes the new drafts (it skips drafts a folder does not hold).
+
 ## Round 377: the Chronospire is generated from the journey's seed
 
 Owner: "procedurally generate the Chronospire (last world) on the fly with the bare minimum of assets", a new layout once per

@@ -2,9 +2,9 @@
  "chronospire": {
   "rooms": 54,
   "fights": 0,
-  "crossings": 387,
-  "arrivals": 137,
-  "itemRoutes": 63,
+  "crossings": 301,
+  "arrivals": 121,
+  "itemRoutes": 54,
   "problems": [],
   "interruptions": {},
   "unvisited": [],

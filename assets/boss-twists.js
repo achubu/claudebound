@@ -44,7 +44,9 @@ const BOSS_TWISTS = {
   stormTyrant:         { kind: 'countdown', icon: '🌀', name: 'Tempest' },
   clockwarden:         { kind: 'undertow', icon: '⏳', name: 'Unwind' },
   paradoxTwin:         { kind: 'rewind', icon: '⏪', name: 'Rewind' },
-  chronarch:           { kind: 'eclipse', icon: '🌒', name: 'Time Eclipse' }
+  chronarch:           { kind: 'eclipse', icon: '🌒', name: 'Time Eclipse' },
+  mainspringColossus:  { kind: 'countdown', icon: '⚙', name: 'Wind-up' },   // Round 379
+  hollowHour:          { kind: 'mirror', icon: '⏳', name: 'Stolen Hour' }
 };
 // Round 283: boss health re-tuned for the twists, to about 40% for the average build in the Difficulty lab.
 const BOSS_TWIST_HP = {moonKnight:  0.465,  crownSentinel:  0.797,  thornWarden:  0.477,  tidewardenElaris:  0.878,  galeSovereign:  0.66,  bloomTyrant:  0.43,  arcSentinel:  1.126,  resonantPhantom:  1.488,  stormTyrant:  0.727,  clockwarden:  1.51,  paradoxTwin:  1.005,  chronarch:  0.476,  stormbellWarden:  1.278,  featherMatriarch:  1.54,  zenithRoc:  0.6,  tideboundWarden:  3.445,  galeSovereignElaris:  1.868,  elarisTyrant:  1.263};

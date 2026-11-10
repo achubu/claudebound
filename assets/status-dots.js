@@ -24,7 +24,7 @@ Object.assign(ENEMY_AFFLICTIONS, {
   // Vespera
   vespFox: ['scorch'], vespThorn: ['venom'], vespMauler: ['bleed'], arcSentinel: ['barrier', 'scorch'], stormTyrant: ['empower', 'scorch', 'bleed'],
   // Chronospire
-  chronoMauler: ['bleed'], chronoHeron: ['venom'], paradoxTwin: ['rewind', 'venom'], chronarch: ['rewind', 'empower', 'scorch']
+  chronoMauler: ['bleed'], chronoHeron: ['venom'], paradoxTwin: ['rewind', 'venom'], chronarch: ['rewind', 'empower', 'scorch'], mainspringColossus: ['crush', 'scorch'], hollowHour: ['rewind', 'bleed']
 });
 const applyHexBeforeDots = applyHex;
 applyHex = function (b, id) {

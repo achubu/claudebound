@@ -37,6 +37,7 @@ const only = process.argv[2];
       const quiet = {}; for (const f of ['renderWorld', 'toast', 'save']) { quiet[f] = window.eval(f); window.eval(f + '=function(){}'); }
       newGame(); state.region = world; configureRegion(world); state.relics = Object.keys(GEAR); ensureGear(); state.playerLevel = 60;
       state.bosses = Object.values(WORLD_BOSS_ROOMS).map(b => b[1]); // boss doors open, bosses gone
+      if (world === 'chronospire') { state.bosses.push('mainspringColossus', 'hollowHour'); state.worldRelays = { chronospire: { on: [0, 1, 2], vault: false } }; } // Round 379: its breakers thrown and its two bosses down, so every door is open
       clear();
       const start = regionStartRoom(world), dirs = ['n', 's', 'e', 'w'], seen = new Set(), queue = [[start, { x: 400, y: 300 }, 'start']];
       const door = { n: { x: 400, y: 15 }, s: { x: 400, y: 485 }, e: { x: 785, y: 250 }, w: { x: 15, y: 250 } };
