@@ -3496,6 +3496,37 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 377: the Chronospire is generated from the journey's seed
+
+Owner: "procedurally generate the Chronospire (last world) on the fly with the bare minimum of assets", a new layout once per
+journey. The stand-in tiles are gone from the game; `assets/chrono-gen.js` (loads after `tile-worlds`) builds the inside of
+every room from `state.seed`.
+
+- **What stays fixed:** the 6x9 room graph, names, levels, the boss and mini-boss rooms and the waypoints
+  (`TILE_WORLD_DATA.chronospire.layout`), so quests, gear, saves and the Map screen keep working.
+- **What is generated:** each 800x500 room is a 16x10 grid of 50px cells. A road two cells wide runs from each door to a hub
+  (straight or with one bend); a door on a shared edge takes the same cells in both rooms (rows 3-5 on a side wall, columns
+  5-10 top and bottom, clear of the HUD and minimap). Up to two 3x3 squares open beside the roads for objects
+  (`TILE_WORLD_DATA.chronospire.plazas`, now a getter); boss rooms get an arena, dead ends a court, and the rooms the game
+  drops you into at their middle (first room, waypoint rooms) have their hub there. Up to two sand drifts lie on the open
+  ground. The 8px walk mask (`tileWorldBits.chronospire`) is filled from the grids, so doors, patrols, item placement and the
+  vector map all work as on a painted world.
+- **Drawing (`paintChronoRoom`)**: three seamless textures (floor, machinery ground, time-sand) and sixteen keyed props
+  (twelve buildings, four small) from the owner's Gemini drafts, in `assets/environment/chronospire/gen/`
+  (`tools/prepare_chrono_gen.py`: cross-fades the texture edges so they repeat, cuts and keys the 2x2 prop sheets, turns
+  leftover green glows amber). Shapes are drawn the dual-grid way in code (each corner rounded by its neighbours) with a
+  brass kerb and a drop shadow; textures run on from room to room. Buildings stand only where their whole picture is clear
+  of roads and squares.
+- **Seed changes:** the world is built on first use and rebuilt whenever the seed changes (new journey, loaded or imported
+  save). `chronoFlushCaches()` drops the Chronospire entries of every cache that does not carry the seed. A save from an
+  older layout resumes at its room's hub (`state.chronoGen`), and any fall-back position off the roads moves to the hub.
+- `tests/chrono-gen.test.cjs`: three seeds, every room (doors on every exit and matching across the edge, one connected
+  patch, a square, patrols and hub on the floor, no road at an edge without an exit, props clear of the floor), determinism,
+  the save migration, and that a seed change in one session gives exactly the doors, patrols and objects of a fresh start.
+  `tests/playtest-walk.cjs chronospire` (now tapping each door where it is): 54 rooms, 387 crossings, 63 item routes, no problems.
+- Not done yet (owner's follow-up): a richer background, and boss rooms locked behind breakers and mini-boss loot, planned
+  at generation.
+
 ## Round 376: Thunderhead level 3 art
 
 The owner's Thunderhead level 3 painting (the spiralling storm eye pouring lightning into the white-hot rod inside a full shield dome) goes in at `assets/cards/level3/thunderhead.webp`; Thunderhead is now `[0,1,2,3]`. `cards.js?v=round376`.
