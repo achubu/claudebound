@@ -26,6 +26,15 @@ function chronoToken(t) {
   return t === 'breaker1' ? chronoBreakerOn(0) : t === 'breaker2' ? chronoBreakerOn(1) : t === 'breaker3' ? chronoBreakerOn(2)
     : t === 'loot1' ? ownsGear(gear[0]) : t === 'loot2' ? ownsGear(gear[1]) : false;
 }
+// What a lock is called on the Map screen and wherever a requirement is named.
+if (typeof relicName === 'function') {
+  const relicNameBeforeChronoLocks = relicName;
+  relicName = function (id) {
+    if (typeof id !== 'string' || !id.startsWith('chrono:')) return relicNameBeforeChronoLocks.apply(this, arguments);
+    const t = id.slice(7), gear = gearOf('chronospire');
+    return t === 'loot1' ? GEAR[gear[0]].name : t === 'loot2' ? GEAR[gear[1]].name : 'Breaker ' + t.slice(-1);
+  };
+}
 const hasRelicBeforeChronoLocks = hasRelic;
 hasRelic = function (id) { return typeof id === 'string' && id.startsWith('chrono:') ? chronoToken(id.slice(7)) : hasRelicBeforeChronoLocks.apply(this, arguments); };
 

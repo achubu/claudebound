@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 382) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 383) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -69,6 +69,10 @@ change set.
     `chronoApplyGraph` rewrites the world's tables in place, so **read `TILE_WORLD_DATA.chronospire.roles` only after
     `configureRegion('chronospire')`**. `assets/chrono-locks.js` (after `spot-fixes`) puts `requires: 'chrono:<token>'` on
     the five doors, makes the relay switches the breakers, and writes the objective.
+  - Round 383: the Chronospire's 54 rooms grow on an **8x11 grid** (an irregular shape; room keys run past `5,8`), and a
+    room's floor is **shapes on a 25px grid** (`FG_COLS` x `FG_ROWS` = 32x20; `plan.shapes` for the painter, `plan.floor`
+    for the mask): door stubs, roads in straight and 45-degree legs, eight-sided hubs and squares, loops and spurs.
+    The owner rejected curved roads and round squares: keep the straight-edged look.
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.

@@ -9,7 +9,7 @@ const SIG = `(seed => { state.seed = seed; state.region = 'chronospire'; configu
   return JSON.stringify(o); })`;
 if (process.argv[2] === 'sig') { run('newGame()'); console.log('SIG' + run(SIG + '(' + Number(process.argv[3]) + ')')); process.exit(0); }
 
-const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, inlays: 0, kinds: {} }; newGame();
+const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, inlays: 0, kinds: {}, legs: 0 }; newGame();
   for (const seed of [11, 4242, 987654321]) { state.seed = seed; state.region = 'chronospire'; configureRegion('chronospire');
     for (const key of Object.keys(rooms)) { out.rooms++; const p = chronoPlan(key), e = [];
       for (const d of Object.keys(rooms[key].exits)) { if (!organicDoor(key, d)) e.push('no door ' + d);
@@ -20,13 +20,16 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
       for (const s of roomSpawns(key)) if (!walkable(key, s.x, s.y)) e.push('patrol off the floor');
       if (!walkable(key, p.hub[0], p.hub[1])) e.push('hub off the floor');
       if (chronoLandingRooms().includes(key) && !walkable(key, 400, 300)) e.push('landing room closed at its middle');
-      for (let x = 1; x < 15; x++) if (p.floor[x] && !rooms[key].exits.n || p.floor[9 * 16 + x] && !rooms[key].exits.s) e.push('road at an edge without an exit');
-      for (let y = 1; y < 9; y++) if (p.floor[y * 16] && !rooms[key].exits.w || p.floor[y * 16 + 15] && !rooms[key].exits.e) e.push('road at an edge without an exit');
+      // Round 383: the floor is on the 25px grid (32x20).
+      for (let x = 0; x < 32; x++) if (p.floor[x] && !rooms[key].exits.n || p.floor[19 * 32 + x] && !rooms[key].exits.s) e.push('road at an edge without an exit');
+      for (let y = 0; y < 20; y++) if (p.floor[y * 32] && !rooms[key].exits.w || p.floor[y * 32 + 31] && !rooms[key].exits.e) e.push('road at an edge without an exit');
+      out.legs += p.shapes.filter(s => s.t === 'road').reduce((n, s) => n + s.pts.slice(1).filter((q, i) => Math.abs(q[0] - s.pts[i][0]) > 1 && Math.abs(q[1] - s.pts[i][1]) > 1 && Math.abs(Math.abs(q[0] - s.pts[i][0]) - Math.abs(q[1] - s.pts[i][1])) < 0.01).length, 0);
+      if (p.shapes.some(s => s.t === 'road' && s.pts.slice(1).some((q, i) => { const dx = Math.abs(q[0] - s.pts[i][0]), dy = Math.abs(q[1] - s.pts[i][1]); return dx > 0.01 && dy > 0.01 && Math.abs(dx - dy) > 0.01; }))) e.push('a road leg that is neither straight nor at 45 degrees');
       for (const q of chronoRoomProps(String(seed), p)) { if (q.box[0] < 0 || q.box[1] < 0 || q.box[2] > 800 || q.box[3] > 500) e.push('prop outside');
-        for (let cy = Math.floor(q.box[1] / 50); cy <= Math.floor(q.box[3] / 50); cy++) for (let cx = Math.floor(q.box[0] / 50); cx <= Math.floor(q.box[2] / 50); cx++) if (p.floor[cy * 16 + cx]) e.push('prop on the floor'); }
+        for (let cy = Math.floor(q.box[1] / 25); cy <= Math.floor(q.box[3] / 25); cy++) for (let cx = Math.floor(q.box[0] / 25); cx <= Math.floor(q.box[2] / 25); cx++) if (p.floor[cy * 32 + cx]) e.push('prop on the floor'); }
       const t = chronoTerrain(String(seed), key);
       for (const q of chronoRoomProps(String(seed), p)) if (t.chasm(Math.floor(q.x / 50), Math.floor((q.y - 4) / 50))) e.push('prop standing in a chasm');
-      for (const i of p.inlays) { if (!p.floor[Math.floor(i.y / 50) * 16 + Math.floor(i.x / 50)]) e.push('inlay off the floor'); out.inlays++; }
+      for (const i of p.inlays) { if (!p.floor[Math.floor(i.y / 25) * 32 + Math.floor(i.x / 25)]) e.push('inlay off the floor'); out.inlays++; }
       for (let y = 0; y < 10; y++) for (let x = 0; x < 16; x++) { out.kinds[t.kind(x, y)] = (out.kinds[t.kind(x, y)] || 0) + 1; if (p.sand[y * 16 + x] && t.chasm(x, y)) e.push('sand in a chasm'); }
       for (let y = 0; y < 10; y++) if (key.split(',')[0] < 5 && t.kind(16, y) !== chronoTerrain(String(seed), (Number(key.split(',')[0]) + 1) + ',' + key.split(',')[1]).kind(0, y)) e.push('terrain breaks at the seam');
       if (e.length) out.bad.push(seed + ' ' + key + ': ' + [...new Set(e)].join(', ')); } }
@@ -39,16 +42,16 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
   restoreGame(s); out.resumed = walkable(state.room, state.pos.x, state.pos.y) && state.chronoGen === CHRONO_GEN_VERSION && state.room === regionStartRoom() && state.visited.length === 1 && !state.worldRelays.chronospire;
   return JSON.stringify(out); })()`));
 assert.deepStrictEqual(r.bad, [], 'every room of three seeds is sound');
-assert.strictEqual(r.rooms, 162); assert(r.plazas >= 162 * 1.7, 'nearly every room has two squares: ' + r.plazas);
+assert.strictEqual(r.rooms, 162); assert(r.plazas >= 162 * 1.6, 'most rooms have two squares: ' + r.plazas); assert(r.legs > 162, 'Round 383: roads take 45-degree legs: ' + r.legs);
 assert(r.inlays > 60 && r.kinds.pipes > 162 * 160 * 0.08 && r.kinds.chasm > 162 * 160 * 0.04 && r.kinds.gears > r.kinds.pipes, 'Round 378: inlays, pipe beds and chasms across the world: ' + JSON.stringify(r.kinds));
 assert(r.same && r.differs, 'the same seed gives the same room; another seed another');
 assert(r.landing.length >= 2, 'the first room and the waypoint rooms are landing rooms: ' + r.landing);
 assert(r.resumed, 'Round 379: a save from an older map restarts the Chronospire at its gate, breakers off');
 for (const n of ['floor', 'ground', 'sand', ...r.props]) assert(fs.existsSync(path.join(__dirname, '..', 'assets/environment/chronospire/gen', n + '.webp')), n + '.webp');
 // Round 379: the room map and its locks.
-const L = JSON.parse(run(`(() => { const out = { bad: [], sizes: [], starts: new Set(), steps: [] };
+const L = JSON.parse(run(`(() => { const out = { bad: [], sizes: [], starts: new Set(), steps: [], area: 0 };
   for (let i = 0; i < 150; i++) { const g = chronoGraph('s' + i), R = g.roles, e = [];
-    if (Object.keys(g.layout).length !== 54) e.push('rooms'); if (!chronoGraphSolvable(g)) e.push('not solvable in order');
+    if (Object.keys(g.layout).length !== 54) e.push('rooms'); { const xs = Object.values(g.layout).map(r => r.world[0]), ys = Object.values(g.layout).map(r => r.world[1]); if (Math.min(...xs) < 0 || Math.max(...xs) > 7 || Math.min(...ys) < 0 || Math.max(...ys) > 10) e.push('outside the 8x11 grid'); out.area += (Math.max(...xs) - Math.min(...xs) + 1) * (Math.max(...ys) - Math.min(...ys) + 1); } if (!chronoGraphSolvable(g)) e.push('not solvable in order');
     if (new Set(Object.values(R)).size !== 9) e.push('roles share a room');
     const w = k => g.layout[k].wing; if (w(R.start) !== 'G' || w(R.breaker1) !== 'G' || w(R.boss1) !== 'G' || w(R.boss) !== 'G' || w(R.mini1) !== 'A' || w(R.breaker2) !== 'A' || w(R.boss2) !== 'A' || w(R.mini2) !== 'B' || w(R.breaker3) !== 'B') e.push('a role in the wrong wing');
     for (const k of [R.boss, R.boss1, R.boss2]) if (Object.keys(g.layout[k].exits).length !== 1) e.push('boss room is not a dead end');
@@ -69,14 +72,17 @@ const L = JSON.parse(run(`(() => { const out = { bad: [], sizes: [], starts: new
   const relay = worldRelayState('chronospire', true); log();
   relay.on.push(0); log(); state.relics.push(gear[0]); log(); state.bosses.push('mainspringColossus'); log(); relay.on.push(1); log();
   state.relics.push(gear[1]); log(); state.bosses.push('hollowHour'); log(); relay.on.push(2); log();
+  out.lockNames = ['chrono:breaker2', 'chrono:loot1'].map(relicName).join('|') === 'Breaker 2|' + GEAR[gear[0]].name;
   out.objective = objective(); out.wingNames = [rooms[R.boss1].name, rooms[R.boss2].name, rooms[R.boss].name, rooms[R.start].name];
   return JSON.stringify(out); })()`));
 assert.deepStrictEqual(L.bad, [], '150 room maps: 54 rooms, three wings joined by two doors, roles in their wings, boss rooms are dead ends, solvable in order');
+assert(L.area / 150 > 62, 'Round 383: the world is an irregular shape, not a full block: its 54 rooms span ' + Math.round(L.area / 150) + ' cells on average');
 assert(L.starts > 25, 'the gate stands in a different room from seed to seed: ' + L.starts);
 assert.strictEqual(L.enemies, 'clockwarden,paradoxTwin,mainspringColossus,hollowHour,chronarch'); assert(L.gearRooms && L.breakers && L.breakerItems, 'gear with the mini-bosses, a breaker alone in each breaker room');
 assert.deepStrictEqual(L.steps.map(s => s.split(':')[0]), ['breaker1', 'mini1', 'boss1', 'breaker2', 'mini2', 'boss2', 'breaker3', 'boss'], 'the objective walks the chain in order');
 assert.deepStrictEqual(L.steps.map(s => s.split(':')[1]), ['LLLLL', 'oLLLL', 'oLoLL', 'oLoLL', 'oooLL', 'ooooL', 'ooooL', 'ooooo'], 'each step opens its door (wing A, wing B, boss room 1, boss room 2, the last door)');
 assert.deepStrictEqual(L.steps.map(s => s.split(':')[3]), ['10000000', '11010000', '11110000', '11110000', '11111010', '11111110', '11111110', '11111111'], 'each step\'s room is in reach exactly when its turn comes');
+assert(L.lockNames, 'Round 383: the Map screen names a lock (Breaker 2, the gear piece), not its token');
 assert(/Face The Chronarch/.test(L.objective) && L.wingNames.join('|') === 'Mainspring Foundry|The Hollow Hour|The Last Second|Chronospire Gate');
 // A change of seed in one session gives exactly what a fresh page with that seed gives (no stale caches).
 run('newGame()'); run(SIG + '(31337)');

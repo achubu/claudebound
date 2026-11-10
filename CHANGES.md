@@ -3496,6 +3496,28 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 383: an irregular Chronospire, and roads with diagonals, loops and spurs
+
+Owner: "we want to keep the roads the same but maybe add complexity to them, maybe add diagonals, the map is what's most
+stale, it's just a rectangle full of rectangular rooms". (A first try with curved roads and round squares was shown and
+rejected: "roll that back". This round keeps the straight-edged road look.)
+
+- **World shape:** the 54 rooms now grow, a room at a time, on an 8x11 grid (`CHRONO_W/H/ROOMS`); a free cell touching few
+  rooms is likelier, so the world has arms, bays and gaps where it used to fill a 6x9 block. The walk mask is sized for
+  the larger grid, and every generated room is listed in `plan` (the painter, loose crossings and preloader ask for it).
+- **Roads (`chronoRoomPlan`)**: the floor is drawn from shapes on a 32x20 grid of 25px cells (`plan.shapes`; `plan.floor`
+  is the same shapes on the grid and fills the walk mask). A 100px stub runs in from each door, then the road reaches the
+  hub in three legs: straight, a 45-degree diagonal, straight (how far it runs before turning differs per road). Hubs,
+  courts, arenas and the squares for objects are eight-sided. Six rooms in ten get a narrower second road that by-passes
+  the hub and leaves an island; about half get a dead-end spur with a small yard. Kerb, shadow and floor texture are as
+  before; corners are mitred, not rounded.
+- **Map screen:** a locked door is named (Breaker 2, the gear piece) where it showed its token (`chrono:breaker2`).
+- The terrain noise hashes its lattice with integer mixing (the string hash banded on the larger grid).
+- `CHRONO_GEN_VERSION` 3 (Round 379's version 2 was live for a short while: those saves restart the Chronospire at its
+  gate once more).
+- Tests: `chrono-gen` checks the 25px floor (no road at an edge without an exit, props and inlays, every road leg straight
+  or at 45 degrees and that diagonals are used), the 8x11 bounds and that the world is not a full block, and the lock
+  names; `tile-worlds` checks the shape. `playtest-walk chronospire`: 54 rooms, 292 crossings, 54 item routes, no problems.
 ## Round 382: card art for Bloom Mend, Tidal Decision and Zero Day; new Updraft and Thunderhead; the Cardsmith keeps out of breaker rooms
 
 - The owner's four-level paintings for Bloom Mend, Tidal Decision and Zero Day replace the old PNGs (512px WebP, listed in

@@ -35,7 +35,7 @@ assert.deepStrictEqual(r.hops, ['elaris>sky', 'sky>wilds', 'wilds>vespera', 'sky
 // Round 179: Vespera and Chronospire are tile-built too; Chronospire is a tall 6x9 spire.
 assert.deepStrictEqual([Math.min(...r.worlds.vespera.levels), Math.max(...r.worlds.vespera.levels)], [37, 45]);
 assert.deepStrictEqual([Math.min(...r.worlds.chronospire.levels), Math.max(...r.worlds.chronospire.levels)], [46, 54]);
-assert.deepStrictEqual(r.spire, [6, 9], 'Chronospire is 6 rooms wide and 9 tall');
+assert(r.spire[0] <= 8 && r.spire[1] <= 11 && r.spire[0] * r.spire[1] > 54, 'Round 383: the Chronospire is an irregular shape on an 8x11 grid: ' + r.spire);
 assert.deepStrictEqual(r.names, ['The Zenith Roc', 'The Bloom Tyrant', 'Cinder Fox']);
 assert(r.art.includes('cinder-fox.png') && !r.art.includes('filter:hue'), 'Elaris shows the forest sprites untinted');
 // Round 196: the Sky Isles creatures have their own untinted sheets in assets/monsters/sky/.
