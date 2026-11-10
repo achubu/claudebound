@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 382: card art for Bloom Mend, Tidal Decision and Zero Day; new Updraft and Thunderhead; the Cardsmith keeps out of breaker rooms
+
+- The owner's four-level paintings for Bloom Mend, Tidal Decision and Zero Day replace the old PNGs (512px WebP, listed in
+  `refreshedCardArt` and the card-art test), and new sets replace the Updraft and Thunderhead paintings.
+  `cards.js?v=round382` in `index.html` and `compendium.html`.
+- Fix (Round 379): on some seeds the Chronospire's Cardsmith shared a room with a breaker. `cardsmithRoom()` now skips
+  every room the generated map gave a role (`tests/one-object.test.cjs` caught it).
+
 ## Round 381: six quests and four or more hidden chests in every world
 
 Owner: "add more quests and chests if you can, kill x number of enemies, kill the mini boss, kill x number of elites, etc";
