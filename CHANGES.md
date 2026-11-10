@@ -3524,6 +3524,8 @@ rejected: "roll that back". This round keeps the straight-edged road look.)
   (were 55px). `ITEM_BOX` in `assets/organic-paths.js` grew to match, so placement keeps the larger picture off the road.
 - **A faint glow on every unused object** (owner: "add a faint glow to interactable objects as well"): steady, in the world's
   colour, about half as strong as the pulsing glow waypoints and chests keep; used objects have none.
+- Rooms are planned when first asked for (`chronoRoomOf`), and the walk mask is read from them a cell at a time
+  (`chronoWalk`); a new game no longer plans all 54 rooms (it made `tests/rebalance.test.cjs` run out of time).
 - The first Nexus Waypoint stands exactly three rooms' walk from the gate (loops counted); a map without such a room is
   rejected. (`tests/waypoints.test.cjs` failed on some seeds.)
 - `CHRONO_GEN_VERSION` 3 (Round 379's version 2 was live for a short while: those saves restart the Chronospire at its

@@ -7,7 +7,7 @@
 //   - Each 800x500 room is a 16x10 grid of 50px cells. A road two cells wide runs from each door to a hub; the door on a
 //     shared edge sits at the same cells in both rooms. Two 3x3 squares open beside the roads (TILE_WORLD_DATA
 //     .chronospire.plazas, where objects stand); boss rooms get an arena and dead ends a court.
-//   - The walk mask (tileWorldBits.chronospire, 8px cells) is filled from the grids, so the organic engine, doors,
+//   - The walk mask (chronoWalk, 8px cells) is read from the grids, so the organic engine, doors,
 //     patrols, item placement and the map all work on it as on a painted world.
 //   - paintChronoRoom() draws the room: three seamless textures (floor, ground, sand) and sixteen keyed props
 //     (assets/environment/chronospire/gen/, made by tools/prepare_chrono_gen.py). The shapes are drawn the dual-grid
@@ -311,7 +311,22 @@ function chronoRoomProps(seed, plan) {
 }
 
 // --- The world for the current seed ---
-let chronoSeedNow = null, chronoPlans = {}, chronoPlazaTable = {};
+let chronoSeedNow = null, chronoPlans = {}, chronoBuiltSeed = null;
+// The squares table, read like the other worlds' (plazas[key]); each room's entry is planned on first use.
+const chronoPlazaTable = typeof Proxy === 'function' ? new Proxy({}, {
+  get(_, key) { if (typeof key !== 'string') return undefined; const p = chronoRoomOf(key); return p && p.plazas.length ? p.plazas : undefined; },
+  has(_, key) { return typeof key === 'string' && !!chronoRoomOf(key); },
+  ownKeys() { return Object.keys(TILE_WORLD_DATA.chronospire.layout); },
+  getOwnPropertyDescriptor(_, key) { const p = typeof key === 'string' && chronoRoomOf(key); return p ? { value: p.plazas, enumerable: true, configurable: true } : undefined; }
+}) : {};
+function chronoRoomOf(key) { if (chronoPlans[key]) return chronoPlans[key]; return TILE_WORLD_DATA.chronospire.layout[key] ? (chronoPlans[key] = chronoRoomPlan(chronoBuiltSeed, key)) : null; }
+// The walk mask, asked a cell at a time: the same 8px cells as the other tile worlds (a cell is judged at its centre).
+function chronoWalk(wx, wy) {
+  const cell = TILE_WORLD_DATA.chronospire.world.cell, x = Math.floor(wx / cell) * cell + cell / 2, y = Math.floor(wy / cell) * cell + cell / 2;
+  if (x < 0 || y < 0) return false;
+  const cx = Math.floor(x / 800), cy = Math.floor(y / 500), p = chronoRoomOf(cx + ',' + cy);
+  return !!p && p.floor[Math.floor((y - cy * 500) / FG_CELL) * FG_COLS + Math.floor((x - cx * 800) / FG_CELL)] === 1;
+}
 function chronoFlushCaches() {
   const mine = k => typeof k === 'string' && k.indexOf('chronospire') >= 0;
   const drop = o => { if (o && typeof o === 'object') for (const k of Object.keys(o)) if (mine(k)) delete o[k]; };
@@ -333,30 +348,21 @@ function chronoBuild(seed) {
   const d = TILE_WORLD_DATA.chronospire, w = d.world;
   w.maskW = CHRONO_W * 100; w.maskH = Math.ceil(CHRONO_H * 500 / w.cell); // Round 383: the grid is 8x11 rooms
   chronoApplyGraph(chronoGraph(seed));
-  chronoPlans = {}; chronoPlazaTable = {};
-  for (const key of Object.keys(d.layout)) { const p = chronoPlans[key] = chronoRoomPlan(seed, key); if (p.plazas.length) chronoPlazaTable[key] = p.plazas; }
-  const bits = new Uint8Array(w.maskW * w.maskH);
-  for (let my = 0; my < w.maskH; my++) {
-    const wy = my * w.cell + w.cell / 2, cy = Math.floor(wy / 500), gy = Math.floor((wy - cy * 500) / FG_CELL);
-    for (let mx = 0; mx < w.maskW; mx++) {
-      const wx = mx * w.cell + w.cell / 2, cx = Math.floor(wx / 800), p = chronoPlans[cx + ',' + cy];
-      if (p && p.floor[gy * FG_COLS + Math.floor((wx - cx * 800) / FG_CELL)]) bits[my * w.maskW + mx] = 1;
-    }
-  }
-  tileWorldBits.chronospire = bits; chronoSeedNow = seed + '|' + (typeof FIRST_WAYPOINT_ROOMS !== 'undefined');
+  chronoPlans = {}; chronoBuiltSeed = seed; // rooms are planned when first asked for (chronoPlan), not all 54 on every new game
+  chronoSeedNow = seed + '|' + (typeof FIRST_WAYPOINT_ROOMS !== 'undefined');
   chronoFlushCaches();
   // The live room table is a copy made by configureRegion: make it again when the map changed under it.
   if (activeRegion === 'chronospire' && !chronoApplying) { chronoApplying = true; try { configureRegion('chronospire'); } finally { chronoApplying = false; } }
 }
 // Built on first use and again whenever the seed changes (or once waypoints.js has loaded, which moves the first waypoint).
 function chronoEnsure() { const s = chronoSeed(); if (s + '|' + (typeof FIRST_WAYPOINT_ROOMS !== 'undefined') !== chronoSeedNow) chronoBuild(s); }
-function chronoPlan(key) { chronoEnsure(); return chronoPlans[key] || null; }
+function chronoPlan(key) { chronoEnsure(); return chronoRoomOf(key); }
 
 Object.defineProperty(TILE_WORLD_DATA.chronospire, 'plazas', { get() { chronoEnsure(); return chronoPlazaTable; }, enumerable: true, configurable: true });
 // Everything that reads the Chronospire's ground goes through one of these; each checks the seed first.
 {
   const walkBefore = tileWorldWalk;
-  tileWorldWalk = function (id) { if (id === 'chronospire') chronoEnsure(); return walkBefore.apply(this, arguments); };
+  tileWorldWalk = function (id, wx, wy) { if (id === 'chronospire') { chronoEnsure(); return chronoWalk(wx, wy); } return walkBefore.apply(this, arguments); };
   if (typeof organicDef === 'function') { const defBefore = organicDef; organicDef = function () { if (activeRegion === 'chronospire') chronoEnsure(); return defBefore.apply(this, arguments); }; }
   const configureBefore = configureRegion;
   configureRegion = function () { const was = chronoApplying; chronoApplying = true; try { chronoEnsure(); } finally { chronoApplying = was; } return configureBefore.apply(this, arguments); };
