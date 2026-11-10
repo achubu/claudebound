@@ -516,9 +516,14 @@ function chronoMapTile(key, onReady) {
   const ck = 'chrono:' + chronoSeedNow + ':' + key + ':' + sig; if (typeof mapTileCache !== 'undefined' && mapTileCache[ck]) return mapTileCache[ck];
   const W = 800, H = 500, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;
-  const ground = typeof MAP_PATH_STYLE !== 'undefined' ? MAP_PATH_STYLE : { ground: '#0e1620', block: '#152231' };
-  ctx.fillStyle = ground.ground; ctx.fillRect(0, 0, W, H); ctx.fillStyle = ground.block;
-  for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28);
+  // Owner: "make the map for chronospire look similar to the rooms, use similar colors": the room's own textures at
+  // map scale (the machinery ground set back, the brass-and-slate floor, a brass kerb and a shadow), flat colours until
+  // the textures have loaded.
+  const tex = n => { const im = chronoArtImage(n); if (im.complete && im.naturalWidth) return im; if (onReady && im.addEventListener) im.addEventListener('load', onReady, { once: true }); return null; };
+  const groundImg = tex('ground'), floorImg = tex('floor'); let complete = !!(groundImg && floorImg);
+  const [mx, my] = key.split(',').map(Number), offX = (mx * 800) % 400, offY = (my * 500) % 400;
+  const paint = (g, img, flat) => { g.save(); if (img) { g.translate(-offX, -offY); g.scale(0.5, 0.5); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(0, 0, (W + offX) * 2, (H + offY) * 2); } else { g.fillStyle = flat; g.fillRect(0, 0, W, H); } g.restore(); };
+  paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H);
   const shape = document.createElement('canvas'); shape.width = W; shape.height = H;
   { const g = shape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
     for (const sh of plan.shapes) {
@@ -526,11 +531,13 @@ function chronoMapTile(key, onReady) {
       else if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); }
       else { g.lineWidth = sh.w; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); }
     } }
-  const style = typeof MAP_ROAD_STYLE !== 'undefined' ? MAP_ROAD_STYLE : { shadow: 'rgba(0,0,0,.35)', kerb: '#cfe6ee', asphalt: '#36424f' };
   const ring = (pic, r) => { for (let a = 0; a < 12; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 6) * r), Math.round(Math.sin(a * Math.PI / 6) * r)); };
-  ring(chronoTint(shape, style.shadow), 13); ring(chronoTint(shape, style.kerb), 7); ctx.drawImage(chronoTint(shape, style.asphalt), 0, 0);
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(shape, '#0a0714'), 0, 0); ctx.restore();
+  ring(chronoTint(shape, '#1c1206'), 9); ring(chronoTint(shape, '#d0a04a'), 6);
+  { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, floorImg, '#b8923f'); ctx.drawImage(art, 0, 0); }
+  const style = { kerb: '#d0a04a' };
   // The room's objects where they stand (dimmed once used).
-  let complete = true; const ICON = 104;
+  const ICON = 104;
   for (const o of objs) {
     const x = Math.max(ICON / 2, Math.min(W - ICON / 2, o.x)), y = Math.max(ICON / 2, Math.min(H - ICON / 2, o.y + 6));
     ctx.globalAlpha = o.used ? 0.45 : 1;

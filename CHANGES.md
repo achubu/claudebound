@@ -3515,7 +3515,9 @@ rejected: "roll that back". This round keeps the straight-edged road look.)
 - The terrain noise hashes its lattice with integer mixing (the string hash banded on the larger grid).
 - **The Map screen and minimap show the real rooms** (owner: "since you are now creating the world procedurally, you should
   be able to make the map look similar to the world"): `chronoMapTile` draws a Chronospire room's tile from the same
-  `plan.shapes` in the map's road style (pale kerb, dark asphalt), with the room's objects where they stand. `mapRoadTile`
+  `plan.shapes` in the rooms' own look (owner: "make the map for chronospire look similar to the rooms, use similar colors"):
+  the machinery ground and the brass-and-slate floor textures at map scale, a brass kerb and a shadow, with the room's
+  objects where they stand. `mapRoadTile`
   hands the Chronospire to it; the other worlds keep their schematic roads.
 - **Bigger objects in every world** (owner: "increase the size of interactable objects, they are kind of hard to identify"):
   56px for points of interest, chests, relics, switches and vaults (were 40px), 76px for the merchant and the Cardsmith
