@@ -3520,6 +3520,8 @@ rejected: "roll that back". This round keeps the straight-edged road look.)
 - **Bigger objects in every world** (owner: "increase the size of interactable objects, they are kind of hard to identify"):
   56px for points of interest, chests, relics, switches and vaults (were 40px), 76px for the merchant and the Cardsmith
   (were 55px). `ITEM_BOX` in `assets/organic-paths.js` grew to match, so placement keeps the larger picture off the road.
+- **A faint glow on every unused object** (owner: "add a faint glow to interactable objects as well"): steady, in the world's
+  colour, about half as strong as the pulsing glow waypoints and chests keep; used objects have none.
 - The first Nexus Waypoint stands exactly three rooms' walk from the gate (loops counted); a map without such a room is
   rejected. (`tests/waypoints.test.cjs` failed on some seeds.)
 - `CHRONO_GEN_VERSION` 3 (Round 379's version 2 was live for a short while: those saves restart the Chronospire at its

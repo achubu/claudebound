@@ -354,3 +354,7 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 #world#world .poi-node:not(.poi-art) .poi-glyph{font-size:30px!important}
 #world#world .map-chest.crystal-chest::after{right:-7px!important;top:-11px!important;font-size:22px!important}
 #world#world .poi-node .quest-mark{font-size:18px}
+/* Same round (owner: "add a faint glow to interactable objects as well"). Every object that has not been used gets a
+   faint, steady glow in its world's colour (about half as strong as the pulsing glow of waypoints and chests, which keep
+   theirs); used objects stay dim with none. */
+#world#world#world .poi-node:not(.used):not(.poi-nexus),#world#world#world .relic{animation:none!important;filter:drop-shadow(0 0 1px #000c) drop-shadow(0 0 5px color-mix(in srgb,var(--wp-glow,#9fdcff) 45%,transparent))!important}
