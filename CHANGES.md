@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 384: Briar Wall card art
+
+The owner's four Briar Wall paintings (a briar barrier across a ravine path, thickening from a few stems to a wall, and at
+level 3 a thorned guardian risen from the briars) replace the old PNGs as 512px WebP, listed as `briarWall:[0,1,2,3]`.
+`cards.js?v=round384`. Elder Root's level 2 is still to come.
+
 ## Round 383: an irregular Chronospire, and roads with diagonals, loops and spurs
 
 Owner: "we want to keep the roads the same but maybe add complexity to them, maybe add diagonals, the map is what's most
