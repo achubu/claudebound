@@ -7,7 +7,7 @@
 //   - Each 800x500 room is a 16x10 grid of 50px cells. A road two cells wide runs from each door to a hub; the door on a
 //     shared edge sits at the same cells in both rooms. Two 3x3 squares open beside the roads (TILE_WORLD_DATA
 //     .chronospire.plazas, where objects stand); boss rooms get an arena and dead ends a court.
-//   - The walk mask (tileWorldBits.chronospire, 8px cells) is filled from the grids, so the organic engine, doors,
+//   - The walk mask (chronoWalk, 8px cells) is read from the grids, so the organic engine, doors,
 //     patrols, item placement and the map all work on it as on a painted world.
 //   - paintChronoRoom() draws the room: three seamless textures (floor, ground, sand) and sixteen keyed props
 //     (assets/environment/chronospire/gen/, made by tools/prepare_chrono_gen.py). The shapes are drawn the dual-grid
@@ -15,7 +15,7 @@
 // A change of seed (a new journey, a loaded or imported save) rebuilds everything and drops the Chronospire entries of
 // the caches that do not carry the seed (chronoFlushCaches).
 // =====================================================================
-const CHRONO_GEN_VERSION = 2, CHRONO_ART_VERSION = '378';
+const CHRONO_GEN_VERSION = 3, CHRONO_ART_VERSION = '378';
 const CG_COLS = 16, CG_ROWS = 10, CG_CELL = 50;
 // name: [width, height] of the keyed picture (px), drawn at CHRONO_PROP_SCALE of that in room pixels.
 const CHRONO_BUILDINGS = { 'clock-tower': [176, 420], observatory: [341, 420], 'bell-tower': [221, 420], spire: [135, 420], workshop: [383, 420], townhouse: [299, 420], foundry: [368, 420], ruin: [390, 420], hourglass: [343, 420], arch: [304, 420], engine: [420, 368], pavilion: [294, 420] };
@@ -27,7 +27,8 @@ const CHRONO_INLAYS = ['inlay-clock', 'inlay-sun', 'inlay-gears', 'inlay-hourgla
 // Round 378: two more grounds, laid by smooth noise over the whole world's cells so they run on from room to room:
 // beds of steam pipes, and chasms the roads cross like bridges (nothing stands on a chasm).
 function chronoNoise(seed, tag, gx, gy, period) {
-  const v = (ix, iy) => chronoHash(seed + ':' + tag + ':' + ix + ',' + iy) / 4294967296;
+  const base = chronoHash(seed + ':' + tag);
+  const v = (ix, iy) => { let h = base ^ Math.imul(ix, 374761393) ^ Math.imul(iy, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
   const fx = gx / period, fy = gy / period, x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0, sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
   return (v(x0, y0) * (1 - sx) + v(x0 + 1, y0) * sx) * (1 - sy) + (v(x0, y0 + 1) * (1 - sx) + v(x0 + 1, y0 + 1) * sx) * sy;
 }
@@ -54,15 +55,26 @@ function chronoSeed() { return typeof state !== 'undefined' && state && state.se
 //     which opens The Last Second, a dead end by the gate. Every lock's key lies in rooms open before it (checked).
 // The locks themselves are applied by assets/chrono-locks.js.
 // =====================================================================
-const CHRONO_W = 6, CHRONO_H = 9, CHRONO_LEVELS = [46, 54];
+// Round 383 (owner: "the map is what's most stale, it's just a rectangle full of rectangular rooms"): 54 rooms on an
+// 8x11 grid, so the world is an irregular shape with arms and gaps, not a full block.
+const CHRONO_W = 8, CHRONO_H = 11, CHRONO_ROOMS = 54, CHRONO_LEVELS = [46, 54];
 const CHRONO_NAME_A = ['Brass', 'Hourglass', 'Pendulum', 'Gear', 'Cog', 'Tick', 'Escapement', 'Sundial', 'Clockwork', 'Mainspring', 'Chime', 'Copper', 'Second', 'Minute', 'Ratchet', 'Balance', 'Bronze', 'Orrery'];
 const CHRONO_NAME_B = ['Stair', 'Gallery', 'Landing', 'Walk', 'Hall', 'Works', 'Loft', 'Bridge', 'Vault', 'Ring', 'Shaft', 'Spiral', 'Arcade', 'Court', 'Lift', 'Ledge', 'Chamber', 'Steps'];
 const CHRONO_ROLE_NAMES = { start: 'Chronospire Gate', boss: 'The Last Second', mini1: 'Clockwarden\'s Loft', mini2: 'Paradox Stair', boss1: 'Mainspring Foundry', boss2: 'The Hollow Hour',
   breaker1: 'Gatehouse Breaker', breaker2: 'Foundry Breaker', breaker3: 'Paradox Breaker' };
 function chronoGraphTry(seed) {
   const rnd = chronoRng(seed), K = (x, y) => x + ',' + y, xy = k => k.split(',').map(Number);
-  const near = k => { const [x, y] = xy(k); return [[1, 0, 'e'], [-1, 0, 'w'], [0, 1, 's'], [0, -1, 'n']].filter(([dx, dy]) => x + dx >= 0 && y + dy >= 0 && x + dx < CHRONO_W && y + dy < CHRONO_H).map(([dx, dy, d]) => [K(x + dx, y + dy), d]); };
-  const start = K(Math.floor(rnd() * CHRONO_W), Math.floor(rnd() * CHRONO_H)), parent = { [start]: null }, order = [start], active = [start];
+  // The world's shape: grown a room at a time from near the middle; a free cell touching few rooms is likelier, which makes arms and bays.
+  const cells = new Set([K(2 + Math.floor(rnd() * (CHRONO_W - 4)), 3 + Math.floor(rnd() * (CHRONO_H - 6)))]);
+  const around = k => { const [x, y] = xy(k); return [[1, 0, 'e'], [-1, 0, 'w'], [0, 1, 's'], [0, -1, 'n']].filter(([dx, dy]) => x + dx >= 0 && y + dy >= 0 && x + dx < CHRONO_W && y + dy < CHRONO_H).map(([dx, dy, d]) => [K(x + dx, y + dy), d]); };
+  while (cells.size < CHRONO_ROOMS) {
+    const edge = {}; for (const k of cells) for (const [t] of around(k)) if (!cells.has(t)) edge[t] = (edge[t] || 0) + 1;
+    const list = Object.keys(edge).sort(), weight = list.map(t => edge[t] === 1 ? 3 : edge[t] === 2 ? 1.2 : 0.35); let r = rnd() * weight.reduce((a, b) => a + b, 0), i = 0;
+    while (i < list.length - 1 && (r -= weight[i]) > 0) i++;
+    cells.add(list[i]);
+  }
+  const near = k => around(k).filter(([t]) => cells.has(t)), all = [...cells].sort();
+  const start = all[Math.floor(rnd() * all.length)], parent = { [start]: null }, order = [start], active = [start];
   while (active.length) { // a growing tree: mostly the newest room (corridors), sometimes any (branches)
     const i = rnd() < 0.62 ? active.length - 1 : Math.floor(rnd() * active.length), k = active[i], open = near(k).filter(([t]) => !(t in parent));
     if (!open.length) { active.splice(i, 1); continue; }
@@ -102,8 +114,9 @@ function chronoGraphTry(seed) {
     layout[k] = { name, exits: {}, world: xy(k), wing: wing[k], ...(k === start ? {} : { level: level[k], zone: Math.min(8, level[k] - lo + 1) }) };
   }
   for (const [a, b] of edges) { const d = near(a).find(([t]) => t === b)[1]; layout[a].exits[d] = b; layout[b].exits[{ n: 's', s: 'n', e: 'w', w: 'e' }[d]] = a; }
-  // The first Nexus Waypoint: an ordinary Gate-wing room about three steps in.
-  const way = order.filter(k => wing[k] === 'G' && !taken.has(k) && Object.keys(layout[k].exits).length > 1).sort((a, b) => Math.abs(depth[a] - 3) - Math.abs(depth[b] - 3) || (a < b ? -1 : 1))[0];
+  // The first Nexus Waypoint: an ordinary Gate-wing room exactly three rooms' walk from the gate (loops counted).
+  const walk = { [start]: 0 }, wq = [start]; while (wq.length) { const k = wq.shift(); for (const t of Object.values(layout[k].exits)) if (!(t in walk) && wing[t] === 'G') { walk[t] = walk[k] + 1; wq.push(t); } }
+  const way = order.filter(k => wing[k] === 'G' && !taken.has(k) && walk[k] === 3).sort((a, b) => Object.keys(layout[b].exits).length - Object.keys(layout[a].exits).length || (a < b ? -1 : 1))[0];
   if (!way) return null;
   return { layout, roles, wing, waypoint: way, doors: { A: [parent[doorA], doorA], B: [parent[doorB], doorB] } };
 }
@@ -147,6 +160,8 @@ let chronoMap = null, chronoApplying = false;
 function chronoApplyGraph(g) {
   const d = TILE_WORLD_DATA.chronospire, swap = (target, src) => { for (const k of Object.keys(target)) delete target[k]; Object.assign(target, src); };
   swap(d.layout, g.layout); swap(d.roles, g.roles); chronoMap = g;
+  // Every room is 'planned' (the painter, the loose crossings and the preloader ask), though none uses a tile painting.
+  swap(d.plan, Object.fromEntries(Object.keys(g.layout).map(k => [k, ['gen/floor', 0, 0]])));
   swap(CHRONO_ROOM_DATA, tileWorldRooms('chronospire', TILE_WORLD_ROLES.chronospire));
   const stops = tileWorldStops('chronospire'), T = TILE_REGIONS.chronospire;
   T.rooms = CHRONO_ROOM_DATA; T.start = d.roles.start; T.stops = stops; T.chests = tileWorldChests('chronospire', stops);
@@ -163,93 +178,126 @@ function chronoApplyGraph(g) {
   if (typeof merchantCache !== 'undefined') drop(merchantCache);
   if (typeof extraChestCache !== 'undefined') drop(extraChestCache);
 }
-// One room's grids: floor (walkable), sand, its hub and squares. Props are added when the room is first painted.
+// =====================================================================
+// Round 383 (owner: "keep the roads the same but maybe add complexity to them, maybe add diagonals"). A room's floor is
+// still straight-edged road, now drawn from shapes on a 32x20 grid of 25px cells:
+//   - a stub 100px wide in from each door, then a road to the hub in three legs: straight on, a 45-degree diagonal, and
+//     straight again (how far it runs before turning differs from road to road);
+//   - an eight-sided hub (an arena in boss rooms, a court where the game drops you in or at a dead end);
+//   - sometimes a narrower second road between two door roads that by-passes the hub and leaves an island, and a
+//     dead-end spur with a small yard;
+//   - eight-sided squares for objects, joined to the nearest road.
+// plan.shapes lists them in room pixels for the painter; plan.floor is the same shapes on the grid (a cell is floor when
+// its centre lies inside one), which fills the walk mask.
+// =====================================================================
+const FG_COLS = 32, FG_ROWS = 20, FG_CELL = 25;
 function chronoRoomPlan(seed, key) {
   const lay = TILE_WORLD_DATA.chronospire.layout[key], roles = TILE_WORLD_DATA.chronospire.roles, rnd = chronoRng(seed + ':room:' + key);
-  const floor = new Uint8Array(CG_COLS * CG_ROWS), sand = new Uint8Array(CG_COLS * CG_ROWS);
-  const carve = (x0, y0, x1, y1) => { for (let y = Math.max(0, Math.min(y0, y1)); y <= Math.min(CG_ROWS - 1, Math.max(y0, y1)); y++) for (let x = Math.max(0, Math.min(x0, x1)); x <= Math.min(CG_COLS - 1, Math.max(x0, x1)); x++) floor[y * CG_COLS + x] = 1; };
-  const at = (x, y) => x >= 0 && y >= 0 && x < CG_COLS && y < CG_ROWS && floor[y * CG_COLS + x] === 1;
-  // The hub's top-left cell (2x2). Rooms the game drops you into at the room's middle (the world's first room and the
-  // Nexus Waypoint rooms) have their hub there, with a court around it.
-  const landing = chronoLandingRooms().includes(key);
-  const hx = landing ? 7 : 5 + Math.floor(rnd() * 5), hy = landing ? 5 : 3 + Math.floor(rnd() * 3);
-  carve(hx, hy, hx + 1, hy + 1); if (landing) carve(hx - 1, hy - 1, hx + 2, hy + 2);
+  const floor = new Uint8Array(FG_COLS * FG_ROWS), sand = new Uint8Array(CG_COLS * CG_ROWS), shapes = [];
+  const at = (x, y) => x >= 0 && y >= 0 && x < FG_COLS && y < FG_ROWS && floor[y * FG_COLS + x] === 1;
+  // Shapes are in fine-cell units; every shape but a door stub keeps two cells from the room's edge.
+  const clampX = (x, r) => Math.max(2 + r, Math.min(FG_COLS - 2 - r, x)), clampY = (y, r) => Math.max(2 + r, Math.min(FG_ROWS - 2 - r, y));
+  const each = (x0, y0, x1, y1, f) => { for (let y = Math.max(0, Math.floor(y0)); y <= Math.min(FG_ROWS - 1, Math.ceil(y1)); y++) for (let x = Math.max(0, Math.floor(x0)); x <= Math.min(FG_COLS - 1, Math.ceil(x1)); x++) if (f(x + 0.5, y + 0.5)) floor[y * FG_COLS + x] = 1; };
+  const octagon = (cx, cy, rx, ry = rx) => { // a rectangle with its corners cut at 45 degrees
+    cx = Math.round(clampX(cx, rx)); cy = Math.round(clampY(cy, ry)); const cut = Math.min(rx, ry) * 0.6;
+    each(cx - rx, cy - ry, cx + rx, cy + ry, (x, y) => Math.abs(x - cx) <= rx && Math.abs(y - cy) <= ry && Math.abs(x - cx) + Math.abs(y - cy) <= rx + ry - cut);
+    const P = [[-rx + cut, -ry], [rx - cut, -ry], [rx, -ry + cut], [rx, ry - cut], [rx - cut, ry], [-rx + cut, ry], [-rx, ry - cut], [-rx, -ry + cut]];
+    shapes.push({ t: 'poly', pts: P.map(([x, y]) => [(cx + x) * FG_CELL, (cy + y) * FG_CELL]) });
+    return [cx, cy];
+  };
+  const seg = (a, b, r) => each(Math.min(a[0], b[0]) - r, Math.min(a[1], b[1]) - r, Math.max(a[0], b[0]) + r, Math.max(a[1], b[1]) + r, (x, y) => {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / L)) : 0;
+    return Math.hypot(x - a[0] - dx * t, y - a[1] - dy * t) <= r; });
+  // From a to b in three legs: `run` cells straight along `axis` ('x' or 'y'), a 45-degree diagonal, then straight to b.
+  const road = (a, b, axis, run, w) => {
+    const r = w / 2, pts = [a], sx = Math.sign(b[0] - a[0]) || 1, sy = Math.sign(b[1] - a[1]) || 1;
+    const p1 = axis === 'x' ? [clampX(a[0] + sx * Math.min(run, Math.abs(b[0] - a[0])), r), a[1]] : [a[0], clampY(a[1] + sy * Math.min(run, Math.abs(b[1] - a[1])), r)];
+    const m = Math.min(Math.abs(b[0] - p1[0]), Math.abs(b[1] - p1[1])), p2 = [p1[0] + Math.sign(b[0] - p1[0]) * m, p1[1] + Math.sign(b[1] - p1[1]) * m];
+    for (const p of [p1, p2, b]) { const q = pts[pts.length - 1]; if (Math.hypot(p[0] - q[0], p[1] - q[1]) > 0.01) pts.push(p); }
+    for (let i = 1; i < pts.length; i++) seg(pts[i - 1], pts[i], r);
+    shapes.push({ t: 'road', w: w * FG_CELL, pts: pts.map(([x, y]) => [x * FG_CELL, y * FG_CELL]) });
+    return pts;
+  };
+  const rect = (x0, y0, x1, y1) => { for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) floor[y * FG_COLS + x] = 1; shapes.push({ t: 'rect', x: x0 * FG_CELL, y: y0 * FG_CELL, w: (x1 - x0) * FG_CELL, h: (y1 - y0) * FG_CELL }); };
+  const along = (pts, f) => { // the point a fraction f of the way along a road
+    const len = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1])); let d = f * len.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < len.length; i++) { if (d <= len[i] || i === len.length - 1) { const t = len[i] ? Math.min(1, d / len[i]) : 0; return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t]; } d -= len[i]; }
+    return pts[0];
+  };
+  // The hub. Rooms the game drops you into at the room's middle (the first room, the waypoint rooms, boss and mini-boss
+  // rooms) have it there.
+  const landing = chronoLandingRooms().includes(key), boss = [roles.boss, roles.boss1, roles.boss2, roles.mini1, roles.mini2].includes(key);
   const dirs = Object.keys(lay.exits).filter(d => d.length === 1).sort();
+  const hub = boss ? octagon(16, 12, 7, 4.5) : landing ? octagon(16, 12, 4) : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
+  const roads = [];
   for (const d of dirs) {
-    const c = chronoDoorCell(seed, key, d), bend = rnd() < 0.45;
-    if (d === 'w' || d === 'e') {
-      const edge = d === 'w' ? 0 : CG_COLS - 1;
-      // Straight in to the hub's columns then along them, or with a bend at a column in between.
-      const mx = bend ? (d === 'w' ? 2 + Math.floor(rnd() * Math.max(1, hx - 3)) : hx + 3 + Math.floor(rnd() * Math.max(1, CG_COLS - 4 - (hx + 3)))) : hx;
-      const col = Math.max(1, Math.min(CG_COLS - 3, mx));
-      carve(edge, c, col + (d === 'w' ? 1 : 0), c + 1); carve(col, c, col + 1, hy + 1); carve(col, c < hy ? hy : hy, col + 1, hy + 1); carve(col, hy, hx + 1, hy + 1);
-    } else {
-      const edge = d === 'n' ? 0 : CG_ROWS - 1;
-      const my = bend ? (d === 'n' ? 1 + Math.floor(rnd() * Math.max(1, hy - 1)) : hy + 2 + Math.floor(rnd() * Math.max(1, CG_ROWS - 3 - (hy + 2)))) : hy;
-      const row = Math.max(1, Math.min(CG_ROWS - 3, my));
-      carve(c, edge, c + 1, row + (d === 'n' ? 1 : 0)); carve(c, row, hx + 1, row + 1); carve(hx, row, hx + 1, hy + 1);
-    }
+    const c = chronoDoorCell(seed, key, d) * 2; let from, axis;
+    if (d === 'w') { rect(0, c, 4, c + 4); from = [4, c + 2]; axis = 'x'; } else if (d === 'e') { rect(FG_COLS - 4, c, FG_COLS, c + 4); from = [FG_COLS - 4, c + 2]; axis = 'x'; }
+    else if (d === 'n') { rect(c, 0, c + 4, 4); from = [c + 2, 4]; axis = 'y'; } else { rect(c, FG_ROWS - 4, c + 4, FG_ROWS); from = [c + 2, FG_ROWS - 4]; axis = 'y'; }
+    const span = Math.abs(axis === 'x' ? hub[0] - from[0] : hub[1] - from[1]);
+    roads.push(road(from, hub, axis, Math.max(1, Math.floor(rnd() * Math.max(1, span - 2))), 4));
   }
-  const boss = [roles.boss, roles.boss1, roles.boss2, roles.mini1, roles.mini2].includes(key);
-  if (boss) carve(Math.max(1, hx - 2), Math.max(1, hy - 1), Math.min(CG_COLS - 2, hx + 3), Math.min(CG_ROWS - 2, hy + 2)); // an arena
-  else if (dirs.length === 1) carve(hx - 1, hy - 1, hx + 2, hy + 2); // a dead end's court
-  // Squares: 3x3 blocks of open ground with one side on a road, one cell in from the room's edge.
-  const plazas = [];
-  // Strict first (exactly one side on a road), then any block that touches a road, so every room has somewhere to stand an object.
-  for (const loose of [false, true, 'any']) { // 'any': a crowded room widens a road into its square
-    if (plazas.length >= (loose === 'any' ? 1 : 2)) break;
+  // A narrower second road between two of the door roads, by-passing the hub: an island between them.
+  if (roads.length >= 2 && rnd() < 0.6) {
+    const i = Math.floor(rnd() * roads.length), k = (i + 1 + Math.floor(rnd() * (roads.length - 1))) % roads.length;
+    const a = along(roads[i], 0.25 + rnd() * 0.2).map(Math.round), b = along(roads[k], 0.25 + rnd() * 0.2).map(Math.round);
+    if (Math.hypot(a[0] - b[0], a[1] - b[1]) > 7) road(a, b, rnd() < 0.5 ? 'x' : 'y', 1 + Math.floor(rnd() * 4), 3);
+  }
+  // A dead-end spur with a small yard.
+  if (!boss && rnd() < 0.55) { const end = [Math.round(clampX(4 + rnd() * (FG_COLS - 8), 3)), Math.round(clampY(4 + rnd() * (FG_ROWS - 8), 3))];
+    if (Math.hypot(end[0] - hub[0], end[1] - hub[1]) > 7) { road(hub, end, rnd() < 0.5 ? 'x' : 'y', 2 + Math.floor(rnd() * 4), 3); octagon(end[0], end[1], 2.5); } }
+  // Squares for objects: eight-sided, 125px across, a cell clear of every road and joined to the nearest one; never
+  // under the HUD panel or the minimap. A crowded room uses its hub.
+  const plazas = [], PR = 2.5;
+  for (let n = 0; n < 2; n++) {
+    const fl = []; for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) if (floor[y * FG_COLS + x]) fl.push([x + 0.5, y + 0.5]);
     const cand = [];
-    for (let py = 1; py + 2 <= CG_ROWS - 2; py++) for (let px = 1; px + 2 <= CG_COLS - 2; px++) {
-      let clear = true; for (let y = py; y <= py + 2 && clear; y++) for (let x = px; x <= px + 2; x++) if (at(x, y)) { clear = false; break; }
-      let over = 0; if (loose === 'any') { for (let y = py; y <= py + 2; y++) for (let x = px; x <= px + 2; x++) if (at(x, y)) over++; if (over > 4) continue; } else if (!clear) continue;
-      const sides = [[0, -1], [0, 3], [-1, 0], [3, 0]].map(([dx, dy], i) => { let n = 0; for (let k = 0; k < 3; k++) if (i < 2 ? at(px + k, py + dy) : at(px + dx, py + k)) n++; return n; });
-      const total = sides.reduce((a, b) => a + b, 0);
-      if (loose === 'any' ? total + over < 1 : loose ? total < 1 : (sides.filter(n => n >= 2).length !== 1 || total > 4)) continue;
-      const x = (px + 1.5) * CG_CELL, y = (py + 1.5) * CG_CELL - 22; // the spot whose foot point is the square's centre
-      // Never under the HUD panel or the minimap (an object may be nudged up to 32px within its square).
-      const covered = typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(x + dx, y + dy));
-      if (covered && loose !== 'any') continue;
-      cand.push({ px, py, x, y, s: rnd() + over * 3 + (covered ? 2 : 0) });
+    for (let py = 2 + PR; py <= FG_ROWS - 2 - PR; py++) for (let px = 2 + PR; px <= FG_COLS - 2 - PR; px++) {
+      const x = px * FG_CELL, y = py * FG_CELL - 22;
+      if (typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(x + dx, y + dy))) continue;
+      if (plazas.some(p => Math.hypot(p.px - px, p.py - py) < 8)) continue;
+      let best = Infinity, near = null; for (const c of fl) { const dd = Math.max(Math.abs(c[0] - px), Math.abs(c[1] - py)); if (dd < best) { best = dd; near = c; } }
+      if (best < PR + 1.2 || best > PR + 6) continue;
+      cand.push({ px, py, x, y, near, s: rnd() });
     }
-    cand.sort((a, b) => a.s - b.s);
-    for (const gap of [5, 4]) for (const c of cand) { // well apart first, then a cell's gap between them
-      if (plazas.length >= 2) break;
-      if (plazas.some(p => Math.abs(p.px - c.px) < gap && Math.abs(p.py - c.py) < gap)) continue;
-      plazas.push(c);
-    }
+    if (!cand.length) break;
+    const c = cand.sort((a, b) => a.s - b.s)[0]; plazas.push(c);
+    road([c.px, c.py], [Math.floor(c.near[0]) + 0.5, Math.floor(c.near[1]) + 0.5], Math.abs(c.near[0] - c.px) > Math.abs(c.near[1] - c.py) ? 'x' : 'y', 99, 3); octagon(c.px, c.py, PR);
   }
-  for (const p of plazas) carve(p.px, p.py, p.px + 2, p.py + 2);
-  // Sand drifts: up to two blobs of open ground, a cell clear of every road and of the room's edge.
-  const free = (x, y) => { if (x < 1 || y < 1 || x > CG_COLS - 2 || y > CG_ROWS - 2) return false; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (at(x + dx, y + dy)) return false; return true; };
+  if (!plazas.length) plazas.push({ px: hub[0], py: hub[1], x: hub[0] * FG_CELL, y: hub[1] * FG_CELL - 22 });
+  // Sand drifts: up to two blobs of open ground on the 50px grid, a cell clear of every road and of the room's edge.
+  const atC = (x, y) => at(x * 2, y * 2) || at(x * 2 + 1, y * 2) || at(x * 2, y * 2 + 1) || at(x * 2 + 1, y * 2 + 1);
+  const free = (x, y) => { if (x < 1 || y < 1 || x > CG_COLS - 2 || y > CG_ROWS - 2) return false; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (atC(x + dx, y + dy)) return false; return true; };
   for (let b = 0, blobs = Math.floor(rnd() * 3); b < blobs; b++) {
     const open = []; for (let y = 1; y < CG_ROWS - 1; y++) for (let x = 1; x < CG_COLS - 1; x++) if (free(x, y) && !sand[y * CG_COLS + x]) open.push([x, y]);
     if (!open.length) break;
-    const cells = [open[Math.floor(rnd() * open.length)]], want = 4 + Math.floor(rnd() * 9);
-    sand[cells[0][1] * CG_COLS + cells[0][0]] = 1;
-    for (let tries = 0; cells.length < want && tries < 80; tries++) {
-      const [x, y] = cells[Math.floor(rnd() * cells.length)], [dx, dy] = [[1, 0], [-1, 0], [0, 1], [0, -1]][Math.floor(rnd() * 4)];
-      if (free(x + dx, y + dy) && !sand[(y + dy) * CG_COLS + x + dx]) { sand[(y + dy) * CG_COLS + x + dx] = 1; cells.push([x + dx, y + dy]); }
+    const blob = [open[Math.floor(rnd() * open.length)]], want = 4 + Math.floor(rnd() * 9);
+    sand[blob[0][1] * CG_COLS + blob[0][0]] = 1;
+    for (let tries = 0; blob.length < want && tries < 80; tries++) {
+      const [x, y] = blob[Math.floor(rnd() * blob.length)], [dx, dy] = [[1, 0], [-1, 0], [0, 1], [0, -1]][Math.floor(rnd() * 4)];
+      if (free(x + dx, y + dy) && !sand[(y + dy) * CG_COLS + x + dx]) { sand[(y + dy) * CG_COLS + x + dx] = 1; blob.push([x + dx, y + dy]); }
     }
   }
   // Sand never lies in a chasm.
   { const t = chronoTerrain(seed, key); for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (sand[y * CG_COLS + x] && t.chasm(x, y)) sand[y * CG_COLS + x] = 0; }
-  const courts = []; if (boss || landing || dirs.length === 1) courts.push([(hx + 1) * CG_CELL, (hy + 1) * CG_CELL, boss ? 170 : 150]);
-  for (const p of plazas) if (rnd() < 0.25) courts.push([(p.px + 1.5) * CG_CELL, (p.py + 1.5) * CG_CELL, 120]);
-  return { key, floor, sand, inlays: courts.map(([x, y, size], i) => ({ name: CHRONO_INLAYS[(chronoHash(seed + ':inlay:' + key) + i) % CHRONO_INLAYS.length], x, y, size })), hub: [(hx + 1) * CG_CELL, (hy + 1) * CG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null };
+  const courts = []; if (boss || landing || dirs.length === 1) courts.push([hub[0] * FG_CELL, hub[1] * FG_CELL, boss ? 170 : 150]);
+  for (const p of plazas) if (rnd() < 0.3 && !(p.px === hub[0] && p.py === hub[1])) courts.push([p.px * FG_CELL, p.py * FG_CELL, 120]);
+  return { key, floor, sand, shapes, inlays: courts.map(([x, y, size], i) => ({ name: CHRONO_INLAYS[(chronoHash(seed + ':inlay:' + key) + i) % CHRONO_INLAYS.length], x, y, size })),
+    hub: [hub[0] * FG_CELL, hub[1] * FG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null };
 }
 // Buildings and small props on the open ground: the whole picture clear of roads, squares and each other.
 function chronoRoomProps(seed, plan) {
   if (plan.props) return plan.props;
   const rnd = chronoRng(seed + ':props:' + plan.key), out = [], terrain = chronoTerrain(seed, plan.key);
   const chasm = new Uint8Array(CG_COLS * CG_ROWS); for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (terrain.chasm(x, y)) chasm[y * CG_COLS + x] = 1;
-  const blocked = (x0, y0, x1, y1, grid) => { for (let cy = Math.max(0, Math.floor(y0 / CG_CELL)); cy <= Math.min(CG_ROWS - 1, Math.floor(y1 / CG_CELL)); cy++) for (let cx = Math.max(0, Math.floor(x0 / CG_CELL)); cx <= Math.min(CG_COLS - 1, Math.floor(x1 / CG_CELL)); cx++) if (grid[cy * CG_COLS + cx]) return true; return false; };
+  const blocked = (x0, y0, x1, y1, grid, cols = CG_COLS, rows = CG_ROWS, cell = CG_CELL) => { for (let cy = Math.max(0, Math.floor(y0 / cell)); cy <= Math.min(rows - 1, Math.floor(y1 / cell)); cy++) for (let cx = Math.max(0, Math.floor(x0 / cell)); cx <= Math.min(cols - 1, Math.floor(x1 / cell)); cx++) if (grid[cy * cols + cx]) return true; return false; };
   const place = (table, kind, want, tries) => {
     const names = Object.keys(table); let made = 0;
     for (let t = 0; t < tries && made < want; t++) {
       const name = names[Math.floor(rnd() * names.length)], [iw, ih] = table[name], w = iw * CHRONO_PROP_SCALE[kind], h = ih * CHRONO_PROP_SCALE[kind];
       const x = w / 2 + 6 + rnd() * (800 - w - 12), y = h + 6 + rnd() * (500 - h - 12);
       const box = [x - w / 2 + 6, y - h + 8, x + w / 2 - 6, y - 2];
-      if (blocked(box[0], box[1], box[2], box[3], plan.floor)) continue;
+      if (blocked(box[0] - 10, box[1] - 10, box[2] + 10, box[3] + 10, plan.floor, FG_COLS, FG_ROWS, FG_CELL)) continue; // (a drawn diagonal reaches a few px past its cells)
       if (blocked(box[0], y - h * 0.45, box[2], y - 2, chasm)) continue; // nothing stands over a chasm
       if (kind === 'small' && blocked(box[0], box[1], box[2], box[3], plan.sand) && rnd() < 0.6) continue; // few things lie on the sand
       if (out.some(p => name === p.name && Math.hypot(p.x - x, p.y - y) < (kind === 'small' ? 380 : 300))) continue; // the same building twice only far apart
@@ -263,7 +311,22 @@ function chronoRoomProps(seed, plan) {
 }
 
 // --- The world for the current seed ---
-let chronoSeedNow = null, chronoPlans = {}, chronoPlazaTable = {};
+let chronoSeedNow = null, chronoPlans = {}, chronoBuiltSeed = null;
+// The squares table, read like the other worlds' (plazas[key]); each room's entry is planned on first use.
+const chronoPlazaTable = typeof Proxy === 'function' ? new Proxy({}, {
+  get(_, key) { if (typeof key !== 'string') return undefined; const p = chronoRoomOf(key); return p && p.plazas.length ? p.plazas : undefined; },
+  has(_, key) { return typeof key === 'string' && !!chronoRoomOf(key); },
+  ownKeys() { return Object.keys(TILE_WORLD_DATA.chronospire.layout); },
+  getOwnPropertyDescriptor(_, key) { const p = typeof key === 'string' && chronoRoomOf(key); return p ? { value: p.plazas, enumerable: true, configurable: true } : undefined; }
+}) : {};
+function chronoRoomOf(key) { if (chronoPlans[key]) return chronoPlans[key]; return TILE_WORLD_DATA.chronospire.layout[key] ? (chronoPlans[key] = chronoRoomPlan(chronoBuiltSeed, key)) : null; }
+// The walk mask, asked a cell at a time: the same 8px cells as the other tile worlds (a cell is judged at its centre).
+function chronoWalk(wx, wy) {
+  const cell = TILE_WORLD_DATA.chronospire.world.cell, x = Math.floor(wx / cell) * cell + cell / 2, y = Math.floor(wy / cell) * cell + cell / 2;
+  if (x < 0 || y < 0) return false;
+  const cx = Math.floor(x / 800), cy = Math.floor(y / 500), p = chronoRoomOf(cx + ',' + cy);
+  return !!p && p.floor[Math.floor((y - cy * 500) / FG_CELL) * FG_COLS + Math.floor((x - cx * 800) / FG_CELL)] === 1;
+}
 function chronoFlushCaches() {
   const mine = k => typeof k === 'string' && k.indexOf('chronospire') >= 0;
   const drop = o => { if (o && typeof o === 'object') for (const k of Object.keys(o)) if (mine(k)) delete o[k]; };
@@ -283,31 +346,23 @@ function chronoFlushCaches() {
 }
 function chronoBuild(seed) {
   const d = TILE_WORLD_DATA.chronospire, w = d.world;
+  w.maskW = CHRONO_W * 100; w.maskH = Math.ceil(CHRONO_H * 500 / w.cell); // Round 383: the grid is 8x11 rooms
   chronoApplyGraph(chronoGraph(seed));
-  chronoPlans = {}; chronoPlazaTable = {};
-  for (const key of Object.keys(d.layout)) { const p = chronoPlans[key] = chronoRoomPlan(seed, key); if (p.plazas.length) chronoPlazaTable[key] = p.plazas; }
-  const bits = new Uint8Array(w.maskW * w.maskH);
-  for (let my = 0; my < w.maskH; my++) {
-    const wy = my * w.cell + w.cell / 2, cy = Math.floor(wy / 500), gy = Math.floor((wy - cy * 500) / CG_CELL);
-    for (let mx = 0; mx < w.maskW; mx++) {
-      const wx = mx * w.cell + w.cell / 2, cx = Math.floor(wx / 800), p = chronoPlans[cx + ',' + cy];
-      if (p && p.floor[gy * CG_COLS + Math.floor((wx - cx * 800) / CG_CELL)]) bits[my * w.maskW + mx] = 1;
-    }
-  }
-  tileWorldBits.chronospire = bits; chronoSeedNow = seed + '|' + (typeof FIRST_WAYPOINT_ROOMS !== 'undefined');
+  chronoPlans = {}; chronoBuiltSeed = seed; // rooms are planned when first asked for (chronoPlan), not all 54 on every new game
+  chronoSeedNow = seed + '|' + (typeof FIRST_WAYPOINT_ROOMS !== 'undefined');
   chronoFlushCaches();
   // The live room table is a copy made by configureRegion: make it again when the map changed under it.
   if (activeRegion === 'chronospire' && !chronoApplying) { chronoApplying = true; try { configureRegion('chronospire'); } finally { chronoApplying = false; } }
 }
 // Built on first use and again whenever the seed changes (or once waypoints.js has loaded, which moves the first waypoint).
 function chronoEnsure() { const s = chronoSeed(); if (s + '|' + (typeof FIRST_WAYPOINT_ROOMS !== 'undefined') !== chronoSeedNow) chronoBuild(s); }
-function chronoPlan(key) { chronoEnsure(); return chronoPlans[key] || null; }
+function chronoPlan(key) { chronoEnsure(); return chronoRoomOf(key); }
 
 Object.defineProperty(TILE_WORLD_DATA.chronospire, 'plazas', { get() { chronoEnsure(); return chronoPlazaTable; }, enumerable: true, configurable: true });
 // Everything that reads the Chronospire's ground goes through one of these; each checks the seed first.
 {
   const walkBefore = tileWorldWalk;
-  tileWorldWalk = function (id) { if (id === 'chronospire') chronoEnsure(); return walkBefore.apply(this, arguments); };
+  tileWorldWalk = function (id, wx, wy) { if (id === 'chronospire') { chronoEnsure(); return chronoWalk(wx, wy); } return walkBefore.apply(this, arguments); };
   if (typeof organicDef === 'function') { const defBefore = organicDef; organicDef = function () { if (activeRegion === 'chronospire') chronoEnsure(); return defBefore.apply(this, arguments); }; }
   const configureBefore = configureRegion;
   configureRegion = function () { const was = chronoApplying; chronoApplying = true; try { chronoEnsure(); } finally { chronoApplying = was; } return configureBefore.apply(this, arguments); };
@@ -427,7 +482,19 @@ function paintChronoRoom(canvas, key) {
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 18; ctx.drawImage(chronoTint(s.shape, '#3a2c52'), 0, 0); ctx.restore();
     ring(chronoTint(s.shape, '#6b5a86'), 3); ctx.drawImage(s.art, 0, 0);
   }
-  const f = layer(plan.floor, imgs.floor, 18);
+  // The floor is drawn from the room's shapes: straight-edged roads with mitred corners and 45-degree legs, eight-sided hubs and squares.
+  const floorShape = document.createElement('canvas'); floorShape.width = W; floorShape.height = H;
+  { const g = floorShape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
+    for (const sh of plan.shapes) {
+      if (sh.t === 'rect') g.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
+      else if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); }
+      else { g.lineWidth = sh.w * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); }
+    } }
+  { // close hairline gaps where two shapes pass within a few pixels of each other
+    const copy = document.createElement('canvas'); copy.width = W; copy.height = H; copy.getContext('2d').drawImage(floorShape, 0, 0);
+    const g = floorShape.getContext('2d'); for (let a = 0; a < 8; a++) g.drawImage(copy, Math.round(Math.cos(a * Math.PI / 4) * 5), Math.round(Math.sin(a * Math.PI / 4) * 5)); }
+  const f = { shape: floorShape, art: document.createElement('canvas') }; f.art.width = W; f.art.height = H;
+  { const g = f.art.getContext('2d'); g.drawImage(floorShape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); }
   ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore();
   ring(chronoTint(f.shape, '#1c1206'), 9); ring(chronoTint(f.shape, '#b88a3c'), 6); ring(chronoTint(f.shape, '#5a3f18'), 2);
   ctx.drawImage(f.art, 0, 0);
@@ -444,4 +511,49 @@ function paintChronoRoom(canvas, key) {
   chronoPainted.set(chronoSeedNow + '#' + key, keep); while (chronoPainted.size > 6) chronoPainted.delete(chronoPainted.keys().next().value);
   if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null;
   return true;
+}
+
+// Round 383 (owner: "since you are now creating the world procedurally, you should be able to make the map look similar
+// to the world"). A room's tile for the Map screen and the minimap: its own roads, hub, squares, loops and spurs drawn
+// from plan.shapes in the map's road style (pale kerb, dark asphalt), with the room's objects at the spots where they stand.
+function chronoMapTile(key, onReady) {
+  const plan = chronoPlan(key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
+  const objs = typeof mapRoomObjects === 'function' ? mapRoomObjects(key) : [], sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
+  const ck = 'chrono:' + chronoSeedNow + ':' + key + ':' + sig; if (typeof mapTileCache !== 'undefined' && mapTileCache[ck]) return mapTileCache[ck];
+  const W = 800, H = 500, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
+  const ctx = tile.getContext('2d'); if (!ctx) return null;
+  // Owner: "make the map for chronospire look similar to the rooms, use similar colors": the room's own textures at
+  // map scale (the machinery ground set back, the brass-and-slate floor, a brass kerb and a shadow), flat colours until
+  // the textures have loaded.
+  const tex = n => { const im = chronoArtImage(n); if (im.complete && im.naturalWidth) return im; if (onReady && im.addEventListener) im.addEventListener('load', onReady, { once: true }); return null; };
+  const groundImg = tex('ground'), floorImg = tex('floor'); let complete = !!(groundImg && floorImg);
+  const [mx, my] = key.split(',').map(Number), offX = (mx * 800) % 400, offY = (my * 500) % 400;
+  const paint = (g, img, flat) => { g.save(); if (img) { g.translate(-offX, -offY); g.scale(0.5, 0.5); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(0, 0, (W + offX) * 2, (H + offY) * 2); } else { g.fillStyle = flat; g.fillRect(0, 0, W, H); } g.restore(); };
+  paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H);
+  const shape = document.createElement('canvas'); shape.width = W; shape.height = H;
+  { const g = shape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
+    for (const sh of plan.shapes) {
+      if (sh.t === 'rect') g.fillRect(sh.x, sh.y, sh.w, sh.h);
+      else if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); }
+      else { g.lineWidth = sh.w; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); }
+    } }
+  const ring = (pic, r) => { for (let a = 0; a < 12; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 6) * r), Math.round(Math.sin(a * Math.PI / 6) * r)); };
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(shape, '#0a0714'), 0, 0); ctx.restore();
+  ring(chronoTint(shape, '#1c1206'), 9); ring(chronoTint(shape, '#d0a04a'), 6);
+  { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, floorImg, '#b8923f'); ctx.drawImage(art, 0, 0); }
+  const style = { kerb: '#d0a04a' };
+  // The room's objects where they stand (dimmed once used).
+  const ICON = 104;
+  for (const o of objs) {
+    const x = Math.max(ICON / 2, Math.min(W - ICON / 2, o.x)), y = Math.max(ICON / 2, Math.min(H - ICON / 2, o.y + 6));
+    ctx.globalAlpha = o.used ? 0.45 : 1;
+    const img = o.src && typeof Image !== 'undefined' && typeof mapImage === 'function' ? mapImage(o.src, onReady) : null;
+    if (img && img.complete && img.naturalWidth) { const k = ICON / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k; ctx.drawImage(img, x - w / 2, y - h / 2, w, h); }
+    else { if (img) complete = false;
+      ctx.fillStyle = '#16222e'; ctx.strokeStyle = style.kerb; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, ICON / 2 - 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      if (o.glyph) { ctx.fillStyle = '#eaf6ff'; ctx.font = '700 30px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.glyph, x, y + 1); } }
+    ctx.globalAlpha = 1;
+  }
+  if (complete && typeof mapTileCache !== 'undefined') mapTileCache[ck] = tile;
+  return tile;
 }

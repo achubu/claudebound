@@ -255,6 +255,8 @@ function mapObjectSpot(net, o) {
 }
 const MAP_ROAD_STYLE = { shadow: 'rgba(0,0,0,.35)', kerb: '#cfe6ee', asphalt: '#36424f', dash: 'rgba(255,255,255,.9)' };
 function mapRoadTile(key, onReady) {
+  // Round 383: the generated Chronospire's map shows each room's real roads.
+  if (activeRegion === 'chronospire' && typeof chronoMapTile === 'function') { const t = chronoMapTile(key, onReady); if (t) return t; }
   const r = rooms[key], net = mapRoadNet(key); if (!net) return null;
   const objs = mapRoomObjects(key), sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
   const ck = 'roads:' + activeRegion + ':' + key + ':' + sig; if (mapTileCache[ck]) return mapTileCache[ck];

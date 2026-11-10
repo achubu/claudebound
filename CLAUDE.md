@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 382) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 383) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -57,7 +57,7 @@ change set.
     `tile-worlds.js` swaps their room tables in place.
   - Round 377: **the Chronospire is generated, not painted** (`assets/chrono-gen.js`). The room graph, names, levels and roles
     stay as built; each room's roads, squares, sand and buildings come from the journey's seed on a 16x10 grid of 50px
-    cells, filling the walk mask (`tileWorldBits.chronospire`) and `plazas`. `paintChronoRoom()` draws it from three
+    cells, read by the walk mask (`chronoWalk`) and `plazas`; rooms are planned on first use. `paintChronoRoom()` draws it from three
     seamless textures and sixteen props (`assets/environment/chronospire/gen/`, `tools/prepare_chrono_gen.py`; bump
     `CHRONO_ART_VERSION` when they change). A seed change rebuilds it and `chronoFlushCaches()` clears the caches that
     don't carry the seed: add any new world-and-room cache there. Bump `CHRONO_GEN_VERSION` when the generator changes
@@ -69,6 +69,12 @@ change set.
     `chronoApplyGraph` rewrites the world's tables in place, so **read `TILE_WORLD_DATA.chronospire.roles` only after
     `configureRegion('chronospire')`**. `assets/chrono-locks.js` (after `spot-fixes`) puts `requires: 'chrono:<token>'` on
     the five doors, makes the relay switches the breakers, and writes the objective.
+  - Round 383: the Chronospire's 54 rooms grow on an **8x11 grid** (an irregular shape; room keys run past `5,8`), and a
+    room's floor is **shapes on a 25px grid** (`FG_COLS` x `FG_ROWS` = 32x20; `plan.shapes` for the painter, `plan.floor`
+    for the mask): door stubs, roads in straight and 45-degree legs, eight-sided hubs and squares, loops and spurs.
+    The owner rejected curved roads and round squares: keep the straight-edged look. `chronoMapTile` draws the Map screen's
+    tile for a room from the same shapes. **Owner's plan: every world will eventually be built this way**; the Chronospire
+    is where it is being ironed out.
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.
@@ -115,7 +121,7 @@ change set.
   `assets/plazas.js`). When adding tile paintings, pick 2-3 such spots for each in `PLAZAS` and rebuild. Enemies and bosses stand on paths. On a tap route only
   the tapped item opens (Round 184). Map-object paintings (Cardsmiths, lore stones, waypoints, events, merchants, chests, portals: `WORLD_POI_ART`, `EVENT_ART`, `WORLD_CHEST_ART` and `WORLD_PORTAL_ART` in `assets/cardsmith.js`, Rounds 307–342) are keyed off green with `tools/key_object.py` (`--keep-green` for art with real greens,
   `--clear-enclosed` when glow-tinted background is trapped inside the art, `--warm-olive` for see-through parts that
-  key to olive). Round 358: objects draw at real size, centred on their spot (no half `scale`); beside a street they reach
+  key to olive). Round 383: objects are 56px (the merchant and the Cardsmith 76px; `ITEM_BOX` matches). Round 358: objects draw at real size, centred on their spot (no half `scale`); beside a street they reach
   onto it by at most 10% of its width (`ITEM_ROAD_SHARE`, `roadWidthAt`); on open ground (Solaris, Sky Isles, plaza squares)
   the whole picture stands on it (`itemGroundCover`); only waypoints and chests glow. In Neon Aftermath every room's object
   stands at its owner-reviewed spot (`assets/spot-fixes.js`, `ROOM_SPOT_FIXES`; loads after `world-relays`). **Open owner note:**
