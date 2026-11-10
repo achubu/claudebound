@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 380: every enemy drops its own cards
+
+Owner: "now enemies drop a card choice, spread the cards around so that each enemy drops a unique card, relevant to the
+world if possible but not required".
+
+- A card chest used to offer three cards from the whole world's pool. Now each regular enemy has its own cards
+  (`assets/enemy-drops.js`, loads after `cycle-card`): every world's reward pool is dealt round that world's enemies in
+  turn, and no card is on two enemies anywhere in the game (a card listed in two worlds' pools belongs to an enemy of the
+  earlier world). All 40 regular enemies carry one to four cards; every card of every pool is carried by someone.
+- A chest holds the defeated enemy's cards: one card, or a choice of up to three of its own, the ones you don't own yet
+  first. The chest names the enemy. The chance of a card chest is unchanged.
+- Bosses and mini-bosses keep their own rewards. The pools still feed quests, vaults and the chests found in the world.
+- Tests: `card-variety` checks the table (every enemy one to four cards, none shared, each from its own or an earlier
+  world, every pool card carried, unowned first); `expansion` checks a chest holds the enemy's cards.
+
 ## Round 379: the Chronospire's room map, locks, breakers and two bosses come from the seed
 
 Owner: "per journey room map"; "create boss rooms, at least 2 in the world, these should be unlocked using a system of
@@ -3525,8 +3540,10 @@ backtracking and moving throughout the world. This should all be planned for in 
   the next step.
 - **Two bosses** (the owner's sheets, cut with `strip_to_sheet.py --grid 2`): The Mainspring Colossus (earth; Crush and
   Barrier; winds up then unloads; twist Wind-up) and The Hollow Hour (air; Rewind and Fog; twist Stolen Hour). Each has
-  its own trait, move pattern and status afflictions. **Not tuned yet beyond a first pass**: see the Difficulty lab numbers
-  in the pull request.
+  its own trait, move pattern and status afflictions. Tuned in the Difficulty lab toward the 33% boss target (health factors 0.78 and 0.58 in
+  `BOSS_TWIST_HP`: 512 fights each gave 42% at 0.74 and 33% at 0.58; the world's other bosses measured 25-41%).
+- The Difficulty lab fights each Chronospire encounter on the map of the journey it was listed from (a new game has a
+  new map), and the Colossus is met wearing the first gear piece only.
 - **Saves:** `CHRONO_GEN_VERSION` 2. A save from an older map restarts its Chronospire exploration at the new gate with the
   breakers off (character, deck, gear and boss kills stay), like the Round 179 rebuild.
 - Tests: `chrono-gen` adds 150 maps (wings, doors, roles, dead-end boss rooms, levels, solvable in order) and plays the

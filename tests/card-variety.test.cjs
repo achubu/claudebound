@@ -46,9 +46,19 @@ b = setup(['prismLance'], { enemy: { armor: 5 } }); b.enemy.barrier = 10; assert
 
 // Card rewards: choose 1 of 3, or leave them.
 b = setup([]); b.enemy.hp = 0; Math.random = () => 0.9; winBattle(); Math.random = () => 0.99;
-assert.equal(b.lootType, 'choice'); assert.equal(b.offers.length, 3); assert.equal(new Set(b.offers.map(c => c.id)).size, 3, 'three different cards');
+// Round 380: the chest holds the defeated enemy's own cards (one to three), not three from the whole world's pool.
+assert.equal(b.lootType, 'choice'); assert.deepStrictEqual(b.offers.map(c => c.id).sort(), [...enemyDropFor(b.id)].sort(), 'the cards of the enemy'); assert.equal(new Set(b.offers.map(c => c.id)).size, b.offers.length, 'all different');
 assert(b.offers.every(c => VARIETY_POOLS.city.includes(c.id)), 'from the current world');
-const n = state.pool.length, pick = b.offers[2]; chooseCardReward(2); assert.equal(state.pool.length, n + 1); assert(state.pool.includes(pick)); assert.equal(b.lootType, 'card');
+{ const drops = enemyDrops(), seen = {}, all = Object.values(drops).flat();
+  for (const w of WORLD_ORDER) { const sp = enemyDropSpecies(w); assert(sp.length >= 4, w + ' has its enemies');
+    for (const e of sp) { assert(drops[e].length >= 1 && drops[e].length <= 4, enemies[e].name + ' drops one to four cards: ' + drops[e]);
+      for (const c of drops[e]) { assert(!seen[c], defs[c].name + ' is on two enemies: ' + seen[c] + ', ' + e); seen[c] = e; assert(WORLD_ORDER.slice(0, WORLD_ORDER.indexOf(w) + 1).some(x => VARIETY_POOLS[x].includes(c)), defs[c].name + ' is from this world or an earlier one'); } }
+    for (const c of VARIETY_POOLS[w]) assert(seen[c], defs[c].name + ' (' + w + ') is carried by some enemy'); }
+  assert(all.length >= 70, 'the reward cards are spread over the enemies: ' + all.length);
+  // Cards you don't own come first, and an enemy with more than three offers three.
+  const many = Object.keys(drops).find(e => drops[e].length >= 3), own = drops[many][0]; state.pool.push(make(own));
+  const offer = enemyCardOffers(many).map(c => c.id); assert(offer.length === 3 && (drops[many].length === 3 ? offer[2] === own : !offer.includes(own) || offer[2] === own), 'owned cards are offered last'); state.pool = state.pool.filter(c => c.id !== own); }
+const n = state.pool.length, pick = b.offers[b.offers.length - 1]; chooseCardReward(b.offers.length - 1); assert.equal(state.pool.length, n + 1); assert(state.pool.includes(pick)); assert.equal(b.lootType, 'card');
 b = setup([]); b.enemy.hp = 0; Math.random = () => 0.9; winBattle(); Math.random = () => 0.99; const n2 = state.pool.length; chooseCardReward(null);
 assert.equal(state.pool.length, n2, 'leaving them adds nothing'); assert.equal(b.lootType, 'skipped');
 // Elaris: first arrival offers one Elaris card; entry levels ease in.
