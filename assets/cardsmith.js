@@ -31,7 +31,9 @@ function cardsmithRoom() {
   const nx = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS[activeRegion] ? NEXUS_POINTS[activeRegion].mid : null;
   const nearNexus = k => k === nx || (nx && rooms[nx] && Object.values(rooms[nx].exits).some(v => (typeof v === 'string' ? v : v.to) === k));
   const frac = k => typeof regionDistanceFrac === 'function' ? regionDistanceFrac(k) : .5;
-  const keys = Object.keys(rooms).filter(k => poiEligibleBeforeCardsmith(k) && !nearNexus(k)).sort((a, b) => Math.abs(frac(a) - .5) - Math.abs(frac(b) - .5) || (a < b ? -1 : 1));
+  // Round 382: never a room the Chronospire's map gave a role (its breakers stand alone in theirs).
+  const role = k => activeRegion === 'chronospire' && typeof TILE_WORLD_DATA !== 'undefined' && Object.values(TILE_WORLD_DATA.chronospire.roles).includes(k);
+  const keys = Object.keys(rooms).filter(k => poiEligibleBeforeCardsmith(k) && !nearNexus(k) && !role(k)).sort((a, b) => Math.abs(frac(a) - .5) - Math.abs(frac(b) - .5) || (a < b ? -1 : 1));
   return cardsmithRoomCache[activeRegion] = keys[0] || nx || Object.keys(rooms).find(isStartRoom);
 }
 poiEligible = function (key) { return poiEligibleBeforeCardsmith(key) && key !== cardsmithRoom(); };
