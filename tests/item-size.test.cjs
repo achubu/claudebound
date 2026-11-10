@@ -14,4 +14,7 @@ assert(/animation:none!important;filter:drop-shadow\(0 0 1px #000c\)!important;b
 assert(/\.poi-node\.poi-nexus:not\(\.used\)\{animation:waypointGlow/.test(tail), 'waypoints glow');
 assert(/#world#world \.map-chest\{animation:waypointGlow/.test(tail) && /crystal-chest\{--wp-glow:#5ff2ff\}/.test(tail), 'chests glow too (owner), crystal chests cyan');
 for (const env of ['neon', 'solaris', 'sky', 'wilds', 'vespera', 'chronospire']) assert(tail.includes('[data-environment="' + env + '"]{--wp-glow:'), 'a waypoint colour for ' + env);
+// Round 383: 40% bigger (56px, and 76px for the merchant and the Cardsmith).
+const j = css.lastIndexOf('Round 383'); assert(j > i, 'the Round 383 block comes last');
+assert(/\.relic:not\(\.hidden-crystal\)\{width:56px!important;height:56px!important\}/.test(css.slice(j)) && /poi-cardsmith\{width:76px!important;height:76px!important\}/.test(css.slice(j)), 'Round 383 sizes');
 console.log('item-size ok');

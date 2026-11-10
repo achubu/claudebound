@@ -114,8 +114,9 @@ function chronoGraphTry(seed) {
     layout[k] = { name, exits: {}, world: xy(k), wing: wing[k], ...(k === start ? {} : { level: level[k], zone: Math.min(8, level[k] - lo + 1) }) };
   }
   for (const [a, b] of edges) { const d = near(a).find(([t]) => t === b)[1]; layout[a].exits[d] = b; layout[b].exits[{ n: 's', s: 'n', e: 'w', w: 'e' }[d]] = a; }
-  // The first Nexus Waypoint: an ordinary Gate-wing room about three steps in.
-  const way = order.filter(k => wing[k] === 'G' && !taken.has(k) && Object.keys(layout[k].exits).length > 1).sort((a, b) => Math.abs(depth[a] - 3) - Math.abs(depth[b] - 3) || (a < b ? -1 : 1))[0];
+  // The first Nexus Waypoint: an ordinary Gate-wing room exactly three rooms' walk from the gate (loops counted).
+  const walk = { [start]: 0 }, wq = [start]; while (wq.length) { const k = wq.shift(); for (const t of Object.values(layout[k].exits)) if (!(t in walk) && wing[t] === 'G') { walk[t] = walk[k] + 1; wq.push(t); } }
+  const way = order.filter(k => wing[k] === 'G' && !taken.has(k) && walk[k] === 3).sort((a, b) => Object.keys(layout[b].exits).length - Object.keys(layout[a].exits).length || (a < b ? -1 : 1))[0];
   if (!way) return null;
   return { layout, roles, wing, waypoint: way, doors: { A: [parent[doorA], doorA], B: [parent[doorB], doorB] } };
 }
@@ -504,4 +505,42 @@ function paintChronoRoom(canvas, key) {
   chronoPainted.set(chronoSeedNow + '#' + key, keep); while (chronoPainted.size > 6) chronoPainted.delete(chronoPainted.keys().next().value);
   if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null;
   return true;
+}
+
+// Round 383 (owner: "since you are now creating the world procedurally, you should be able to make the map look similar
+// to the world"). A room's tile for the Map screen and the minimap: its own roads, hub, squares, loops and spurs drawn
+// from plan.shapes in the map's road style (pale kerb, dark asphalt), with the room's objects at the spots where they stand.
+function chronoMapTile(key, onReady) {
+  const plan = chronoPlan(key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
+  const objs = typeof mapRoomObjects === 'function' ? mapRoomObjects(key) : [], sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
+  const ck = 'chrono:' + chronoSeedNow + ':' + key + ':' + sig; if (typeof mapTileCache !== 'undefined' && mapTileCache[ck]) return mapTileCache[ck];
+  const W = 800, H = 500, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
+  const ctx = tile.getContext('2d'); if (!ctx) return null;
+  const ground = typeof MAP_PATH_STYLE !== 'undefined' ? MAP_PATH_STYLE : { ground: '#0e1620', block: '#152231' };
+  ctx.fillStyle = ground.ground; ctx.fillRect(0, 0, W, H); ctx.fillStyle = ground.block;
+  for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28);
+  const shape = document.createElement('canvas'); shape.width = W; shape.height = H;
+  { const g = shape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
+    for (const sh of plan.shapes) {
+      if (sh.t === 'rect') g.fillRect(sh.x, sh.y, sh.w, sh.h);
+      else if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); }
+      else { g.lineWidth = sh.w; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); }
+    } }
+  const style = typeof MAP_ROAD_STYLE !== 'undefined' ? MAP_ROAD_STYLE : { shadow: 'rgba(0,0,0,.35)', kerb: '#cfe6ee', asphalt: '#36424f' };
+  const ring = (pic, r) => { for (let a = 0; a < 12; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 6) * r), Math.round(Math.sin(a * Math.PI / 6) * r)); };
+  ring(chronoTint(shape, style.shadow), 13); ring(chronoTint(shape, style.kerb), 7); ctx.drawImage(chronoTint(shape, style.asphalt), 0, 0);
+  // The room's objects where they stand (dimmed once used).
+  let complete = true; const ICON = 104;
+  for (const o of objs) {
+    const x = Math.max(ICON / 2, Math.min(W - ICON / 2, o.x)), y = Math.max(ICON / 2, Math.min(H - ICON / 2, o.y + 6));
+    ctx.globalAlpha = o.used ? 0.45 : 1;
+    const img = o.src && typeof Image !== 'undefined' && typeof mapImage === 'function' ? mapImage(o.src, onReady) : null;
+    if (img && img.complete && img.naturalWidth) { const k = ICON / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k; ctx.drawImage(img, x - w / 2, y - h / 2, w, h); }
+    else { if (img) complete = false;
+      ctx.fillStyle = '#16222e'; ctx.strokeStyle = style.kerb; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, ICON / 2 - 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      if (o.glyph) { ctx.fillStyle = '#eaf6ff'; ctx.font = '700 30px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(o.glyph, x, y + 1); } }
+    ctx.globalAlpha = 1;
+  }
+  if (complete && typeof mapTileCache !== 'undefined') mapTileCache[ck] = tile;
+  return tile;
 }

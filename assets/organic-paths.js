@@ -312,7 +312,7 @@ function roadWidthAt(key, x, y) {
   return Math.max(24, Math.min(run(1, 0) + run(-1, 0), run(0, 1) + run(0, -1)) + 4);
 }
 // The picture an item draws, in room pixels around its foot point (Round 358: 40px wide), plus a margin.
-const ITEM_BOX = { w: 22, up: 33, down: 22 }; // the drawn picture (40px wide; paintings rise ~31px above the spot, chests are centred on it) plus 2px, so an object's side can touch the kerb
+const ITEM_BOX = { w: 30, up: 46, down: 30 }; // the drawn picture (Round 383: 56px wide; paintings rise ~31px above the spot, chests are centred on it) plus 2px, so an object's side can touch the kerb
 // The share of an item's picture that lies over walkable ground (0-1). An item only stands where this is ITEM_COVER or
 // more, so no part of it covers a building, a prop or another painted object.
 const ITEM_COVER = 0.9;

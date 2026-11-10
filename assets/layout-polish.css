@@ -346,3 +346,11 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 #world#world .map-chest.crystal-chest{--wp-glow:#5ff2ff}
 @keyframes waypointGlow{0%,100%{filter:drop-shadow(0 0 1px #000c) drop-shadow(0 0 4px color-mix(in srgb,var(--wp-glow) 70%,transparent))}50%{filter:drop-shadow(0 0 1px #000c) drop-shadow(0 0 9px color-mix(in srgb,var(--wp-glow) 85%,transparent))}}
 @media(prefers-reduced-motion:reduce){#world#world .poi-node.poi-nexus:not(.used),#world#world .map-chest{animation:none!important;filter:drop-shadow(0 0 1px #000c) drop-shadow(0 0 6px color-mix(in srgb,var(--wp-glow) 75%,transparent))!important}}
+/* Round 383 (owner: "increase the size of interactable objects, they are kind of hard to identify"). 40% bigger in every
+   world: 56px for points of interest, chests, relics, switches and vaults, 76px for the merchant and the Cardsmith. */
+#world#world .poi-node,#world#world .poi-node.poi-art,#world#world .map-chest,#world#world .relic:not(.hidden-crystal){width:56px!important;height:56px!important}
+#world#world .poi-node.poi-merchant,#world#world .poi-node.poi-art.poi-merchant,#world#world .poi-node.poi-cardsmith,#world#world .poi-node.poi-art.poi-cardsmith{width:76px!important;height:76px!important}
+#world#world .relic.gear-relic img{width:48px;height:48px}
+#world#world .poi-node:not(.poi-art) .poi-glyph{font-size:30px!important}
+#world#world .map-chest.crystal-chest::after{right:-7px!important;top:-11px!important;font-size:22px!important}
+#world#world .poi-node .quest-mark{font-size:18px}

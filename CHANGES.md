@@ -3513,6 +3513,15 @@ rejected: "roll that back". This round keeps the straight-edged road look.)
   before; corners are mitred, not rounded.
 - **Map screen:** a locked door is named (Breaker 2, the gear piece) where it showed its token (`chrono:breaker2`).
 - The terrain noise hashes its lattice with integer mixing (the string hash banded on the larger grid).
+- **The Map screen and minimap show the real rooms** (owner: "since you are now creating the world procedurally, you should
+  be able to make the map look similar to the world"): `chronoMapTile` draws a Chronospire room's tile from the same
+  `plan.shapes` in the map's road style (pale kerb, dark asphalt), with the room's objects where they stand. `mapRoadTile`
+  hands the Chronospire to it; the other worlds keep their schematic roads.
+- **Bigger objects in every world** (owner: "increase the size of interactable objects, they are kind of hard to identify"):
+  56px for points of interest, chests, relics, switches and vaults (were 40px), 76px for the merchant and the Cardsmith
+  (were 55px). `ITEM_BOX` in `assets/organic-paths.js` grew to match, so placement keeps the larger picture off the road.
+- The first Nexus Waypoint stands exactly three rooms' walk from the gate (loops counted); a map without such a room is
+  rejected. (`tests/waypoints.test.cjs` failed on some seeds.)
 - `CHRONO_GEN_VERSION` 3 (Round 379's version 2 was live for a short while: those saves restart the Chronospire at its
   gate once more).
 - Tests: `chrono-gen` checks the 25px floor (no road at an edge without an exit, props and inlays, every road leg straight
