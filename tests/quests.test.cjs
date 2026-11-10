@@ -32,7 +32,7 @@ const r = JSON.parse(run(`(() => { const o = {};
   save(); state = null; load(); o.kept = state.quests.done.length;
   const bad = JSON.parse(JSON.stringify(state)); bad.quests = 'x'; try { validateImport(bad); o.junk = 'accepted'; } catch (e) { o.junk = 'rejected'; }
   return JSON.stringify(o); })()`));
-assert.deepStrictEqual(r.kinds, ['boss', 'hunt', 'mini'], 'three quest givers per world');
+assert.deepStrictEqual(r.kinds, ['boss', 'elite', 'hunt', 'mini', 'mini2', 'species'], 'Round 381: six quest givers per world');
 assert(!r.loreGiver, 'only shrines, campfires and caches give quests');
 assert(/Take quest/.test(r.menu) && /Defeat 10 enemies/.test(r.menu), 'the point of interest offers its quest');
 assert.deepStrictEqual(r.taken, ['city:hunt']); assert.strictEqual(r.offerAfter, null, 'a taken quest is not offered again');

@@ -8,6 +8,7 @@ const shown = () => !document.getElementById('menuOverlay').classList.contains('
 const toasts = []; const realToast = toast; toast = m => toasts.push(m);
 newGame(); state.seed = 12345; spawnCatalog = {}; state.region = 'sky'; configureRegion('sky'); ensureExplore();
 const key = Object.keys(rooms).find(k => { const p = poiAt(k); return p && p.type === 'shrine'; }), p = poiAt(key);
+if (p && questOffer(p)) { ensureQuests(); state.quests.done.push(activeRegion + ':' + questGivers()[p.id]); } // Round 381: most shrines hand out a quest now; this one's is already finished
 assert(key, 'a shrine to test with');
 for (const k in poiCache) delete poiCache[k];
 const reset = () => { closeMenu(); document.getElementById('menuOverlay').classList.add('hidden'); cancelTouchRoute(); poiArmed = null; state.room = key; state.pos = { x: p.x, y: p.y + 30 }; };

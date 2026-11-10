@@ -3496,20 +3496,51 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
-## Round 380: every enemy drops its own cards
+## Round 381: six quests and four or more hidden chests in every world
+
+Owner: "add more quests and chests if you can, kill x number of enemies, kill the mini boss, kill x number of elites, etc";
+"chests can also randomly draw from a pool of cards when opened".
+
+- **Six quests per world** (`QUEST_ORDER` in `assets/quests.js`), each from its own shrine, campfire or cache (every world
+  has eight or nine such points of interest): hunt 10 enemies, defeat 3 elites (★), defeat 5 of one kind of enemy (picked
+  with the journey's seed), defeat the first mini-boss, defeat the second mini-boss, defeat the world's final boss. The
+  boss quest now names the final boss by `WORLD_BOSS_ROOMS` (the Chronospire has other bosses too).
+- **Every quest pays a card**: one of its world's loot cards (Round 380), slots 0-5 of `worldLootCard`; the vault is slot 6.
+  So a world's six quests and its vault give seven different loot cards.
+- **Two more hidden chests per world** (`extraChestRooms` in `assets/expansion.js`): in the dead ends farthest from the
+  start that hold nothing else (not a boss, gear, waypoint, quiet or role room), each with a potion. Neon Aftermath now has
+  five chests, the other worlds four.
+- **Chests draw a card at random** from the world's loot when opened (`worldChestCard`), one you don't own yet if any.
+- With seven fixed cards and four or five random chest draws, every world's loot (at most 11 cards) can be found in one
+  journey.
+- Tests: new `more-quests` (all six worlds: six givers, six offers, loot cards, different mini-bosses, the final boss, the
+  chests standing alone and reachable; elite and target quests count only their kills). `quests`, `walk-past`,
+  `card-variety` updated. Round 379 follow-ups found by the full suite: `relic-quest` keeps the journey's seed across its
+  new games and counts the Chronospire's breakers as thrown; `world-deck` counts 20 bosses (the two new ones give two more
+  deck slots at the end of the game).
+
+## Round 380: every enemy drops its own card; the rest are loot in their world
 
 Owner: "now enemies drop a card choice, spread the cards around so that each enemy drops a unique card, relevant to the
-world if possible but not required".
+world if possible but not required"; then, for the cards left over, "lets move them to chests and quests. try to put them
+in worlds where they make sense".
 
-- A card chest used to offer three cards from the whole world's pool. Now each regular enemy has its own cards
-  (`assets/enemy-drops.js`, loads after `cycle-card`): every world's reward pool is dealt round that world's enemies in
-  turn, and no card is on two enemies anywhere in the game (a card listed in two worlds' pools belongs to an enemy of the
-  earlier world). All 40 regular enemies carry one to four cards; every card of every pool is carried by someone.
-- A chest holds the defeated enemy's cards: one card, or a choice of up to three of its own, the ones you don't own yet
-  first. The chest names the enemy. The chance of a card chest is unchanged.
-- Bosses and mini-bosses keep their own rewards. The pools still feed quests, vaults and the chests found in the world.
-- Tests: `card-variety` checks the table (every enemy one to four cards, none shared, each from its own or an earlier
-  world, every pool card carried, unowned first); `expansion` checks a chest holds the enemy's cards.
+- **One card per enemy** (`ENEMY_CARD` in `assets/enemy-drops.js`, loads after `cycle-card`): each of the 37 regular
+  enemies carries exactly one card from its own world's pool, picked to suit it (the Solar Scarab drops Scarab Swarm, the
+  Thunderhorn Ram Thunderclap, the Brass Sentry Delayed Bulwark...). No card is on two enemies. A card chest won from that
+  enemy holds that card: take it or leave it; the chest names the enemy. The chance of a card chest is unchanged. Arrival
+  gift cards were kept off enemies where the pool allowed (only the Pendulum Stag's Chrono Spike is also a gift).
+- **The rest is each world's loot** (`worldLootPool`): the cards of a world's pool that no enemy carries stay in that world
+  and come from its two card quests, its vault, and now its hidden loot chests, which each hold one loot card beside their
+  crystal or potion. Within a journey they are handed out in turn (`worldLootCard`: quests take slots 0 and 1, the vault 2,
+  chests 3 and up), so nothing repeats until the world's loot has all been found. Boss and mini-boss chests still offer
+  three cards, now from the world's loot.
+- Loot sizes: Neon Aftermath 9, Solaris 11, Sky Isles 10, Elaris 10, Vespera 6, Chronospire 3. A journey's fixed sources
+  give five per world (two quests, the vault, two or three chests), so the larger worlds' loot is not all found in one
+  journey; boss chests offer more of it.
+- Tests: `card-variety` checks the table (all 37 enemies, one card each from its own world, none shared), the loot pools
+  (own-world cards no enemy carries; every pool card is on an enemy or in the loot; quests, vault and chests get different
+  cards) and a hidden chest giving its card once; `expansion` checks a chest holds the enemy's card.
 
 ## Round 379: the Chronospire's room map, locks, breakers and two bosses come from the seed
 

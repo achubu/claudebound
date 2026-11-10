@@ -161,6 +161,7 @@ function chronoApplyGraph(g) {
   if (typeof quietItemRoomCache !== 'undefined') drop(quietItemRoomCache);
   if (typeof relayRoomCache !== 'undefined') drop(relayRoomCache);
   if (typeof merchantCache !== 'undefined') drop(merchantCache);
+  if (typeof extraChestCache !== 'undefined') drop(extraChestCache);
 }
 // One room's grids: floor (walkable), sand, its hub and squares. Props are added when the room is first painted.
 function chronoRoomPlan(seed, key) {

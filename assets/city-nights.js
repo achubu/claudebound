@@ -196,7 +196,7 @@ function openVault() {
   const n = cityNights();
   if (n.vault) return cnMenu('🔓 Afterlight Vault', '<p>The vault stands open and empty. You took what was left.</p>', []);
   if (n.breakers.length < 3) return cnMenu('🔒 Afterlight Vault', '<p>A sealed vault door, dead without power.</p><p class="notice">Grid: <b>' + n.breakers.length + '/3</b> breakers on. The breaker boxes (⚡) stand somewhere in the city.</p>', []);
-  const pool = (typeof VARIETY_POOLS !== 'undefined' && VARIETY_POOLS.city) || [], cardId = pool.length ? pool[hashSeed(state.seed + 'vault') % pool.length] : null;
+  const pool = (typeof VARIETY_POOLS !== 'undefined' && VARIETY_POOLS.city) || [], cardId = typeof worldLootCard === 'function' ? worldLootCard('city', 6) : pool.length ? pool[hashSeed(state.seed + 'vault') % pool.length] : null; // Round 380
   cnMenu('🔓 Afterlight Vault', '<p>The door groans open. Inside: emergency stores the Refuge sealed when the grid failed.</p><p class="notice">◇' + CITY_VAULT_SHARDS + ' Shards · an Upgrade Crystal' + (cardId && defs[cardId] ? ' · ' + defs[cardId].name : '') + '</p>',
     [{ id: 'cnLoot', label: 'Take it all', primary: true, onclick: () => {
       if (n.vault) return; n.vault = true; state.shards += CITY_VAULT_SHARDS; if (typeof setMaterials === 'function') setMaterials(materials() + 1);
