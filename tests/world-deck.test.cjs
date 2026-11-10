@@ -22,7 +22,7 @@ const r = JSON.parse(run(`(()=>{newGame();state.talents={};const base=maxDeckSiz
  return JSON.stringify({base,vesperaNoBoss,steps,count:bosses.length,dup,trimmed,limit,issue,scale:typeof talentScale,
    deckSame:JSON.stringify(state.deck)===JSON.stringify(deck0),sideSame:JSON.stringify(state.side.deck)===JSON.stringify(side0),fresh,badge,afterOpen})})()`));
 assert.strictEqual(r.vesperaNoBoss, r.base, 'no flat bonus for the world you stand in');
-assert.strictEqual(r.count, 18, 'three bosses in each of the six worlds');
+assert.strictEqual(r.count, 20, 'three bosses in each of the six worlds, and the Chronospire\'s two more (Round 379)');
 assert.deepStrictEqual(r.steps, r.steps.map((_, i) => r.base + i + 1), '+1 for every boss beaten, mini-bosses included');
 assert.strictEqual(r.dup, r.base + r.count, 'a boss counts once');
 assert.strictEqual(r.trimmed, r.limit, 'over-limit deck trimmed to the limit');

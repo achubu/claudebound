@@ -31,6 +31,7 @@ const WILDLIFE_ART={
  tempestColossus:{name:'The Tempest Colossus',sheet:'vespera/tempest-colossus',cycle:'.8s',big:true},
  gearhound:{name:'Gearhound',sheet:'chronospire/gearhound',cycle:'.8s'},
  tickMoth:{name:'Tick Moth',sheet:'chronospire/tick-moth',cycle:'.8s'},
+ mainspringColossusArt:{name:'The Mainspring Colossus',sheet:'chronospire/mainspring-colossus',cycle:'.9s',big:true}, hollowHourArt:{name:'The Hollow Hour',sheet:'chronospire/hollow-hour',cycle:'.9s',big:true}, // Round 379: the owner's sheets
  clockwardenArt:{name:'The Clockwarden',sheet:'chronospire/clockwarden',cycle:'.8s'}, // Round 353: Chronospire's mini-boss hovers on its own sheet (drawn from the Crown Observer)
  chronarchArt:{name:'The Chronarch',sheet:'chronospire/chronarch',cycle:'.8s',big:true}, // Round 353: Chronospire's boss walks on its own sheet (drawn from the Bloom Tyrant)
  rustWispArt:{name:'Rust Wisp',sheet:'chronospire/rust-wisp',cycle:'.8s'}, // Round 365: Chronospire's own wisp of rusted clockwork (the owner's detailed 2x2 grid)
@@ -88,7 +89,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='365';
+const SPRITE_VERSION='379';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which

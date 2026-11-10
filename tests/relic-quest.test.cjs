@@ -5,8 +5,8 @@ const assert=require('node:assert');
 const {run}=require('./expansion.test.cjs');
 const r=JSON.parse(run(`(()=>{const out={};
  for(const w of WORLD_ORDER){newGame();state.region=w;configureRegion(w);const W=out[w]={rooms:{}};
-  const gearRoomKeys=Object.keys(rooms).filter(k=>rooms[k].relic&&GEAR[rooms[k].relic[0]]);W.count=gearRoomKeys.length;
-  for(const k of gearRoomKeys){newGame();state.region=w;configureRegion(w);state.playerLevel=60;state.room=k;const q=rooms[k].relic;
+  const gearRoomKeys=Object.keys(rooms).filter(k=>rooms[k].relic&&GEAR[rooms[k].relic[0]]);W.count=gearRoomKeys.length;const SEED=state.seed; // Round 379: the Chronospire's rooms belong to the journey's seed
+  for(const k of gearRoomKeys){newGame();state.seed=SEED;state.region=w;configureRegion(w);state.playerLevel=60;state.room=k;const q=rooms[k].relic;
    const o=W.rooms[k]={guarded:relicGuarded(k),guards:relicGuards(k),mini:!!(rooms[k].enemy&&enemies[rooms[k].enemy[0]].miniBoss)};
    let stand=null;for(let y=10;y<495&&!stand;y+=4)for(let x=10;x<795;x+=4){if(Math.hypot(x-q[3],y-q[4])<40&&walkable(k,x,y)&&(typeof organicReachableAt!=='function'||organicReachableAt(k,{x,y}))){stand={x,y};break}}
    o.stand=!!stand;state.pos=stand||{x:q[3],y:q[4]};state.battle=null;checkWorldInteractions();o.tooEarly=state.relics.includes(q[0]);
@@ -14,7 +14,9 @@ const r=JSON.parse(run(`(()=>{const out={};
    o.afterGuarded=relicGuarded(k);state.pos=stand||{x:q[3],y:q[4]};state.battle=null;checkWorldInteractions();o.got=state.relics.includes(q[0]);o.worn=wornGear().includes(q[0])}
   const start=regionStartRoom(w),boss=WORLD_BOSS_ROOMS[w][0];
   const reach=have=>{const seen=new Set([start]),q=[start];while(q.length){const k=q.shift();for(const raw of Object.values(rooms[k].exits)){const to=typeof raw==='string'?raw:raw.to;if(!rooms[to]||seen.has(to))continue;if(typeof raw==='object'&&raw.requires&&!have.includes(raw.requires))continue;seen.add(to);q.push(to)}}return seen};
-  const r0=reach([]);W.startReach=gearRoomKeys.every(k=>r0.has(k));W.bossSealed=!r0.has(boss);W.allReach=reach(['gate:'+w]).size===Object.keys(rooms).length}
+  // Round 379: the Chronospire's gear rooms lie behind its breaker doors (chrono-gen.test.cjs plays that chain); here its breakers count as thrown.
+  const open=w==='chronospire'?['chrono:breaker1','chrono:breaker2']:[],all=w==='chronospire'?['chrono:breaker1','chrono:breaker2','chrono:breaker3','chrono:loot1','chrono:loot2']:['gate:'+w];
+  const r0=reach(open);W.startReach=gearRoomKeys.every(k=>r0.has(k));W.bossSealed=!r0.has(boss);W.allReach=reach(all).size===Object.keys(rooms).length}
  return JSON.stringify(out)})()`));
 for(const [w,W] of Object.entries(r)){
  assert.equal(W.count,2,w+' has two gear pieces');

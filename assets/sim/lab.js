@@ -75,13 +75,13 @@ function simEncounters(region) {
   for (const k of Object.keys(rooms)) for (const s of roomSpawns(k)) {
     if (s.elite) continue;
     const L = enemyLevel(k), e = enemies[s.type], kind = s.boss ? (e.miniBoss ? 'mini' : 'boss') : 'zone', key = kind + ':' + s.type + (kind === 'zone' ? ':' + L : '');
-    (g[key] = g[key] || { key, kind, type: s.type, level: L, pool: [] }).pool.push([k, s.uid, L]);
+    (g[key] = g[key] || { key, kind, type: s.type, level: L, pool: [], seed: state.seed }).pool.push([k, s.uid, L]); // Round 379: the Chronospire's rooms belong to this journey's seed
   }
   const list = Object.values(g).sort((a, b) => a.level - b.level || (a.kind === b.kind ? a.type.localeCompare(b.type) : a.kind === 'zone' ? -1 : 1));
   const minis = list.filter(x => x.kind === 'mini').sort((a, b) => a.level - b.level);
   const order = WORLD_ORDER.slice(0, WORLD_ORDER.indexOf(region)), here = typeof gearOf === 'function' ? gearOf(region) : [];
   const prior = typeof gearOf === 'function' ? order.flatMap(w => gearOf(w)) : [];
-  for (const x of list) x.gear = [...prior, ...(x.kind === 'boss' ? here : x.kind === 'mini' && minis.indexOf(x) === 1 ? here.slice(0, 1) : [])];
+  for (const x of list) x.gear = [...prior, ...(x.type === 'mainspringColossus' ? here.slice(0, 1) : x.kind === 'boss' ? here : x.kind === 'mini' && minis.indexOf(x) === 1 ? here.slice(0, 1) : [])]; // Round 379: the Colossus is met with the first piece only
   return list;
 }
 // One fight. Seeded like tests/balance-sim.cjs so Node and the browser agree.
@@ -89,7 +89,7 @@ function simFight(region, enc, plan, policy, i, opts = {}) {
   const [room, uid, lv] = enc.pool[i % enc.pool.length], level = Math.max(1, lv + (opts.levelDelta || 0));
   globalThis.POLICY = policy;
   let seed = (i + 1 + (opts.seed || 0) * 1000) * 48271 + lv; Math.random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
-  newGame(); configureRegion(region); state.region = region; state.playerLevel = level; allocate(plan); syncTalentVitals(false); state.hp = state.maxHp;
+  newGame(); if (region === 'chronospire' && enc.seed != null) state.seed = enc.seed; configureRegion(region); state.region = region; state.playerLevel = level; allocate(plan); syncTalentVitals(false); state.hp = state.maxHp;
   state.bosses = [...(SIM_PRIOR_BOSSES[region] || [])]; // before the deck: bosses beaten open deck slots (Round 163/233)
   state.pool = simDeckFor(region, enc.level, opts.basicDecks).slice(0, maxDeckSize()).map(id => { const c = make(id); c.level = simCardLevelFor(level); return c; });
   state.deck = state.pool.map(c => c.uid); state.cooldowns = {};

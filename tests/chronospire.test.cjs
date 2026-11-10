@@ -13,8 +13,9 @@ function setup(hand, opts = {}) {
 }
 // --- The world ---
 // Round 179: Chronospire is a tile world, Neon Aftermath's layout turned on its side (6 wide, 9 tall).
+newGame(); configureRegion('chronospire'); // Round 379: the room map comes from the journey's seed, so read its roles after it is built
 const CR = TILE_WORLD_DATA.chronospire.roles, GATE = CR.start;
-newGame(); configureRegion('chronospire'); state.region = 'chronospire'; state.room = GATE; state.visited = [GATE];
+ state.region = 'chronospire'; state.room = GATE; state.visited = [GATE];
 const keys = Object.keys(rooms); assert.equal(keys.length, 54, '54 rooms');
 const d = regionRoomDistances('chronospire'); assert(keys.every(k => d[k] != null), 'every room is reachable from the gate');
 const exitTo = e => typeof e === 'string' ? e : e.to; // Round 176: doors into the boss room are { to, requires }

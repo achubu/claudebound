@@ -10,12 +10,16 @@ from PIL import Image
 from scipy import ndimage
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets/environment/chronospire/gen')
-TEXTURES = {'floor': '9if3dz', 'ground': '5vt56p', 'sand': 'dn7r7g'}
+TEXTURES = {'floor': '9if3dz', 'ground': '5vt56p', 'sand': 'dn7r7g', 'pipes': 'ixfrek', 'chasm': '40bq5k'}  # Round 378: pipes, chasm
 SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
     '1ffxk9': (['gears', 'pendulum', 'crystals', 'bell'], 220),
     'n8xy1q': (['clock-tower', 'observatory', 'bell-tower', 'spire'], 420),
     '9zmye9': (['workshop', 'townhouse', 'foundry', 'ruin'], 420),
     'rj3mbs': (['hourglass', 'arch', 'engine', 'pavilion'], 420),
+    # Round 378: large set pieces, flat floor inlays, and the lock objects (breaker off/on, gate sealed/open)
+    'e8zup5': (['aqueduct', 'cogwheel', 'boilers', 'fallen-tower'], 460),
+    'ajn1a6': (['inlay-clock', 'inlay-sun', 'inlay-gears', 'inlay-hourglass'], 320),
+    'y5dvms': (['breaker-off', 'breaker-on', 'gate-sealed', 'gate-open'], 256),
 }
 
 def find(folder, tag):
@@ -32,12 +36,14 @@ def seamless(a, band):
 
 def textures(folder):
     for name, tag in TEXTURES.items():
+        if not any(tag in f for f in os.listdir(folder)): continue
         a = np.asarray(Image.open(find(folder, tag)).convert('RGB')).astype(np.float32)
         o = Image.fromarray(seamless(a, 200).clip(0, 255).astype(np.uint8)).resize((800, 800), Image.LANCZOS)
         o.save(os.path.join(OUT, name + '.webp'), quality=84, method=6); print(name, o.size)
 
 def props(folder):
     for tag, (names, size) in SHEETS.items():
+        if not any(tag in f for f in os.listdir(folder)): continue  # each upload holds only some of the drafts
         a = np.asarray(Image.open(find(folder, tag)).convert('RGB')).astype(np.float32)
         r, g, b = a[..., 0], a[..., 1], a[..., 2]; gx = g - np.maximum(r, b)
         alpha = np.clip((120 - gx) / 80, 0, 1)

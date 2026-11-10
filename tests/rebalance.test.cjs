@@ -25,7 +25,7 @@ state.battle=null;
 // --- Elaris reward pool now includes a block and a heal card ---
 const seen=new Set();
 for(let i=0;i<8000;i++){
- state.battle={phase:'fight',enemy:{hp:0,boss:false,elite:false},logs:[]};
+ state.battle={phase:'fight',id:enemyDropSpecies('elaris')[i%5],enemy:{hp:0,boss:false,elite:false},logs:[]}; // Round 380: each enemy drops its own card (Sand Veil is the Dust Devil's)
  activeRegion='elaris';
  winBattle();
  if(state.battle.reward)seen.add(state.battle.reward.id);if(state.battle.offers)state.battle.offers.forEach(c=>seen.add(c.id));
@@ -392,8 +392,8 @@ run(`
 // at all). Scarcer too: city went 6->2, Elaris 3->2.
 newGame();configureRegion('city');
 const cityChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
-assert.equal(cityChests.length,3,'city has 3 hidden chests: two moved from mini-boss rooms and the hidden crystal (Round 176)');
-assert(cityChests.every(c=>c.reward==='crystal'),'both city chests grant an Upgrade Crystal');
+assert.equal(cityChests.length,5,'city has 5 hidden chests: two moved from mini-boss rooms, the hidden crystal (Round 176), and two more in far dead ends (Round 381)');
+assert.equal(cityChests.filter(c=>c.reward==='crystal').length,3,'the three older city chests grant an Upgrade Crystal');assert.equal(cityChests.filter(c=>c.reward==='potion').length,2,'the two new ones a potion');
 // Round 29: the user's hand-designed maze has real loops, not a single
 // spine, so "off the path" is checked structurally here instead of
 // against a hardcoded room list — a chest room is only genuinely optional
@@ -406,7 +406,7 @@ assert(cityChestKeys.every(k=>(rooms[k].enemy&&enemies[rooms[k].enemy[0]]&&enemi
 assert(!chestFor('0,5'),'no chest sits in the start room');
 configureRegion('elaris');
 const elarisChests=Object.keys(rooms).map(k=>chestFor(k)).filter(Boolean);
-assert.equal(elarisChests.length,2,'Elaris has exactly 2 hidden chests, both in mini-boss branches');
+assert.equal(elarisChests.length,4,'Solaris has 4 hidden chests: two in mini-boss branches and two more in far rooms (Round 381)');
 assert(elarisChests.every(c=>c.reward==='potion'),'both Elaris chests grant a potion');
 // Round 149: the Solaris spine is the shortest route from Dawnfire Gate to the Solar Crown.
 const elarisSpineRooms=(()=>{const prev={'0,0':null},q=['0,0'];while(q.length){const k=q.shift();for(const raw of Object.values(rooms[k].exits)){const t=typeof raw==='string'?raw:raw.to;if(!(t in prev)){prev[t]=k;q.push(t)}}}const out=[];for(let k=prev[SOLARIS_BOSS_ROOM];k;k=prev[k])out.push(k);return out})();

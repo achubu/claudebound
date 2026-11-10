@@ -10,6 +10,11 @@ const QUEST_KINDS = {
   hunt: { icon: '⚔', xp: 60, need: 10 },
   mini: { icon: '⚑', xp: 80, card: 1 },
   boss: { icon: '♛', xp: 120, card: 1 },
+  // Round 381 (owner: "add more quests ... kill x number of enemies, kill the mini boss, kill x number of elites, etc"):
+  // three more per world, and every quest now pays one of its world's loot cards (enemy-drops.js).
+  elite: { icon: '★', xp: 90, need: 3 },
+  species: { icon: '🎯', xp: 70, need: 5 },
+  mini2: { icon: '⚑', xp: 80, card: 1 },
   wanted: { icon: '☠', xp: 0 } // Round 347: Wanted Board contracts (city-nights.js pays them)
 };
 function ensureQuests(s = state) {
@@ -29,11 +34,12 @@ function questBosses() {
   return out;
 }
 // Which points of interest give which quest: three shrines, campfires or caches, picked with the journey's seed.
+const QUEST_ORDER = ['hunt', 'mini', 'boss', 'elite', 'species', 'mini2']; // the first three keep their givers from before Round 381
 const QUEST_GIVER_TYPES = ['shrine', 'campfire', 'cache', 'sealed'];
 function questGivers(region = activeRegion) {
   const pois = Object.values(worldPOIs(region)).filter(p => QUEST_GIVER_TYPES.includes(p.type)).sort((a, b) => a.key < b.key ? -1 : 1);
   const rand = seeded(hashSeed(state.seed + region + 'quests')), order = pois.map(p => [rand(), p]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
-  const out = {}; ['hunt', 'mini', 'boss'].forEach((kind, i) => { if (order[i]) out[order[i].id] = kind; });
+  const out = {}; QUEST_ORDER.forEach((kind, i) => { if (order[i]) out[order[i].id] = kind; });
   return out;
 }
 // The quest this giver would hand out now, or null (already taken, or nothing left to defeat).
@@ -42,10 +48,23 @@ function questOffer(p) {
   const kind = questGivers()[p.id]; if (!kind) return null;
   const id = activeRegion + ':' + kind, q = state.quests; if (q.taken[id] || q.done.includes(id)) return null;
   const K = QUEST_KINDS[kind], world = activeRegion;
-  if (kind === 'hunt') return { id, kind, world, need: K.need, have: 0, xp: K.xp, text: 'Defeat ' + K.need + ' enemies in ' + questWorldName(world) };
-  const target = questBosses()[kind].find(t => !state.bosses.includes(t)); if (!target) return null;
+  const loot = typeof worldLootCard === 'function' ? worldLootCard(world, QUEST_ORDER.indexOf(kind)) : null;
+  if (kind === 'hunt') return { id, kind, world, need: K.need, have: 0, xp: K.xp, card: loot, text: 'Defeat ' + K.need + ' enemies in ' + questWorldName(world) };
+  if (kind === 'elite') return { id, kind, world, need: K.need, have: 0, xp: K.xp, card: loot, text: 'Defeat ' + K.need + ' elite enemies (★) in ' + questWorldName(world) };
+  if (kind === 'species') {
+    const sp = typeof enemyDropSpecies === 'function' ? enemyDropSpecies(world) : []; if (!sp.length) return null;
+    const target = sp[hashSeed(state.seed + id) % sp.length];
+    return { id, kind, world, target, need: K.need, have: 0, xp: K.xp, card: loot, text: 'Defeat ' + K.need + ' ' + enemies[target].name + (/s$/.test(enemies[target].name) ? '' : 's') };
+  }
+  // The first mini-boss, the second, and the world's final boss (a world may hold other bosses: the Chronospire's two).
+  const B = questBosses(), last = typeof WORLD_BOSS_ROOMS !== 'undefined' && WORLD_BOSS_ROOMS[world] && WORLD_BOSS_ROOMS[world][1];
+  const target = kind === 'mini2' ? (B.mini.length > 1 && !state.bosses.includes(B.mini[1]) && (state.quests.taken[world + ':mini'] || {}).target !== B.mini[1] ? B.mini.slice().reverse().find(t => !state.bosses.includes(t) && (state.quests.taken[world + ':mini'] || {}).target !== t) : null)
+    : kind === 'boss' ? (last && B.boss.includes(last) ? (state.bosses.includes(last) ? null : last) : B.boss.find(t => !state.bosses.includes(t)))
+    : B.mini.find(t => !state.bosses.includes(t) && (state.quests.taken[world + ':mini2'] || {}).target !== t);
+  if (!target) return null;
   const pool = (typeof VARIETY_POOLS !== 'undefined' && (VARIETY_POOLS[world] || VARIETY_POOLS.city)) || [];
-  const card = pool.length ? pool[hashSeed(state.seed + id) % pool.length] : null;
+  // Round 380: the world's loot cards (those no enemy carries), a different one for each quest.
+  const card = loot || (pool.length ? pool[hashSeed(state.seed + id) % pool.length] : null);
   return { id, kind, world, target, need: 1, have: 0, xp: K.xp, card, text: 'Defeat ' + enemies[target].name };
 }
 function questReward(q) { if (q.rewardText) return q.rewardText; return '+' + q.xp + ' XP' + (q.card && defs[q.card] ? ' and ' + defs[q.card].name + (QUEST_KINDS[q.kind].card ? ' +' + QUEST_KINDS[q.kind].card : '') : ''); }
@@ -65,7 +84,7 @@ winBattle = function () {
   if (b.phase !== 'reward') return r;
   ensureQuests();
   for (const q of Object.values(state.quests.taken)) {
-    if (q.kind === 'hunt' ? q.world === activeRegion : q.target === b.id) q.have = Math.min(q.need, (q.have || 0) + 1);
+    if (q.kind === 'hunt' ? q.world === activeRegion : q.kind === 'elite' ? q.world === activeRegion && b.enemy && b.enemy.elite && !b.enemy.boss : q.target === b.id) q.have = Math.min(q.need, (q.have || 0) + 1);
     if (q.have >= q.need) finishQuest(q, b);
   }
   save(); return r;
@@ -114,10 +133,10 @@ function showQuests(world = activeRegion) {
     + '<div class="quest-bar"><i style="width:' + Math.round((q.have || 0) / q.need * 100) + '%"></i></div></div><span class="quest-count">' + (q.have || 0) + '/' + q.need + '</span></article>';
   const tabs = questWorlds().map(w => { const n = Object.values(state.quests.taken).filter(q => q.world === w).length;
     return '<button class="quest-tab' + (w === world ? ' active' : '') + '" data-quest-world="' + w + '">' + questWorldName(w) + (w === activeRegion ? ' ◉' : '') + (n ? ' <span>' + n + '</span>' : '') + '</button>'; }).join('');
-  const kindName = { hunt: '⚔ Hunt', mini: '⚑ Mini-boss', boss: '♛ Boss', wanted: '☠ Wanted' };
+  const kindName = { hunt: '⚔ Hunt', mini: '⚑ Mini-boss', mini2: '⚑ Second mini-boss', elite: '★ Elites', species: '🎯 Target', boss: '♛ Boss', wanted: '☠ Wanted' };
   const finished = done.length ? '<p class="muted quest-done">Finished: ' + done.map(id => kindName[id.split(':')[1]] || id).join(' · ') + '</p>' : '';
   const note = here ? '<p class="notice">' + (open.length ? open.length + ' quest' + (open.length > 1 ? 's' : '') + ' still to pick up here' + (open.some(p => areaSeen(p.key)) ? '.' : ' (explore to find the givers).') : 'No more quests to pick up here.') + '</p>' : '';
-  openMenu('<div class="eyebrow">JOURNEY · QUESTS</div><h1>Quests</h1><p>Points of interest marked ❗ hand out quests: hunt enemies, defeat a mini-boss, defeat the world\'s boss. Each pays XP; the boss quests also give a card. In Neon Aftermath the Wanted Board posts bounty contracts too.</p>'
+  openMenu('<div class="eyebrow">JOURNEY · QUESTS</div><h1>Quests</h1><p>Points of interest marked ❗ hand out six quests in each world: hunt enemies, hunt elites (★), hunt one kind of enemy, defeat each mini-boss, defeat the world\'s boss. Each pays XP and one of that world\'s cards. In Neon Aftermath the Wanted Board posts bounty contracts too.</p>'
     + '<div class="quest-tabs">' + tabs + '</div>'
     + '<h2>' + questWorldName(world) + '</h2>' + (taken.length ? taken.map(row).join('') : '<p class="muted">No active quests in ' + questWorldName(world) + '.</p>')
     + finished + note

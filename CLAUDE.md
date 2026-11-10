@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 377) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 381) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -18,10 +18,10 @@ change set.
     `aether-deck`, `card-variety`, `battle-hud`, `sun-revenant`.
   - Then `combined-rooms`, `diagonals`, `city-paintings`, `organic-paths`, `plazas` (Round 232),
     `organic-areas`, `exploration`, `neon-world`, `solaris`, `chronospire`,
-    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `chrono-gen` (Round 377: the Chronospire's rooms are generated from `state.seed`), `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `chain` (Round 261: ⛓ Chain N bonuses after N cards played this turn), `pressure`, `pickups`, `cardsmith`, `gear`, `armor-scale` (Round 262: your Armor grows with the world), `gear-rules` (Round 284: each gear piece also changes a rule; bosses a little tougher while you wear gear), `waypoints` (Round 229: each world's first Nexus Waypoint stands three rooms in, alone in its room), `deck-choice` (Round 233: new cards wait in the collection; +1 deck slot per boss), `deck-presets` (Round 256: three favorite decks), `room-preload`, `item-reach` (Round 275: walkable pads around every item, for player movement only), `npc-greetings` (Round 281: the merchant and Cardsmith greet you once), `bounty-plan` (Round 286: each patrol's bounty is fixed before the fight and shown on its map label; bounties pay XP), `quests` (Round 287: three quests per world from shrines, campfires and caches; the Quests screen, one log per world since Round 289), `city-nights` (Round 298: Neon Aftermath only: the Wanted Board and three rogues, the Blackout breakers and the Afterlight Vault, four more city events), `world-relays` (Round 345: the Blackout puzzle themed for every other world: three switches open a vault; Round 350: each start-room object moved to its own room near the start, `quietItemRooms`, so no room holds more than one object and no first room any). (`solaris-data.js` loads just before `expansion.js`.)
+    `sky-data`, `wilds-data`, `vespera-data`, `chronospire-data`, `tile-worlds`, `chrono-gen` (Round 377: the Chronospire's rooms are generated from `state.seed`), `world-cards`, `world-mechanics`, `stagger`, `card-mechanics`, `chain` (Round 261: ⛓ Chain N bonuses after N cards played this turn), `pressure`, `pickups`, `cardsmith`, `gear`, `armor-scale` (Round 262: your Armor grows with the world), `gear-rules` (Round 284: each gear piece also changes a rule; bosses a little tougher while you wear gear), `waypoints` (Round 229: each world's first Nexus Waypoint stands three rooms in, alone in its room), `deck-choice` (Round 233: new cards wait in the collection; +1 deck slot per boss), `deck-presets` (Round 256: three favorite decks), `room-preload`, `item-reach` (Round 275: walkable pads around every item, for player movement only), `npc-greetings` (Round 281: the merchant and Cardsmith greet you once), `bounty-plan` (Round 286: each patrol's bounty is fixed before the fight and shown on its map label; bounties pay XP), `quests` (Round 287: quests from shrines, campfires and caches; the Quests screen, one log per world since Round 289; Round 381: six per world, each paying a loot card), `city-nights` (Round 298: Neon Aftermath only: the Wanted Board and three rogues, the Blackout breakers and the Afterlight Vault, four more city events), `world-relays` (Round 345: the Blackout puzzle themed for every other world: three switches open a vault; Round 350: each start-room object moved to its own room near the start, `quietItemRooms`, so no room holds more than one object and no first room any), `spot-fixes`, `chrono-locks` (Round 379). (`solaris-data.js` loads just before `expansion.js`.)
   - Then `touch-controls`, `map-terrain`, `enemy-labels`, `layout-polish` (Round 187: room camera/placement
     on desktop and phones, phone battle layout; styles in `layout-polish.css`, loaded last), `cycle-card` (Round 236: Sift and
-    its discard choice), `sky-storm` and `status-dots` (Round 237), `attack-boost` (Round 240), `charge-swipe` (Round 242),
+    its discard choice), `enemy-drops` (Round 380: each regular enemy drops its one card, `ENEMY_CARD`; the rest of a world's pool is its loot, `worldLootPool`, given by its quests, vault and hidden chests in turn; give a new enemy a card there and keep new loot sources on `worldLootCard`), `sky-storm` and `status-dots` (Round 237), `attack-boost` (Round 240), `charge-swipe` (Round 242),
     `enemy-pairs` (Round 243: two enemies at once from the Sky Isles on), `enemy-armor` (Round 244; doubled in Round 262; Vespera +10% in Round 266), `armor-hud` (Round 262: enemy Armor beside its health, 🛡 −N popups), `enemy-traits` (Round 265: every enemy has its own move pattern and trait; none repeat within a world), `boss-twists` (Round 283: each boss's signature twist, Phase 2 at half health, Overdrive; off in the harness unless `BOSS_TWISTS=1`), `enemy-temper` (Round 253: 🔥 Fierce / 🛡 Hardy tempers and ±15% attack rolls), `battle-recap`
     (Round 211: the final turn on the victory screens), `tutorial` (Round 226: a new journey's guide and
     starting-deck pick; it hangs off the New journey buttons, not `newGame()`), `battle-chips` (Round 254: every
@@ -61,8 +61,14 @@ change set.
     seamless textures and sixteen props (`assets/environment/chronospire/gen/`, `tools/prepare_chrono_gen.py`; bump
     `CHRONO_ART_VERSION` when they change). A seed change rebuilds it and `chronoFlushCaches()` clears the caches that
     don't carry the seed: add any new world-and-room cache there. Bump `CHRONO_GEN_VERSION` when the generator changes
-    layouts, so saves resume at a hub. **Open owner note:** richer background; boss rooms locked behind breakers and
-    mini-boss loot with backtracking, planned at generation.
+    layouts (saves then restart the Chronospire at its gate). Round 378: pipe beds and chasms from world-wide noise
+    (`chronoTerrain`), floor inlays, large set pieces.
+  - Round 379: **the Chronospire's room map is generated too** (`chronoGraph`): three wings joined by two sealed doors,
+    with the roles placed for a fixed order of play (Breaker 1 → Clockwarden's gear → Boss room 1, the Mainspring
+    Colossus → Breaker 2 → Paradox Twin's gear → Boss room 2, the Hollow Hour → Breaker 3 → The Last Second).
+    `chronoApplyGraph` rewrites the world's tables in place, so **read `TILE_WORLD_DATA.chronospire.roles` only after
+    `configureRegion('chronospire')`**. `assets/chrono-locks.js` (after `spot-fixes`) puts `requires: 'chrono:<token>'` on
+    the five doors, makes the relay switches the breakers, and writes the objective.
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.

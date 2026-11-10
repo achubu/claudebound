@@ -46,9 +46,26 @@ b = setup(['prismLance'], { enemy: { armor: 5 } }); b.enemy.barrier = 10; assert
 
 // Card rewards: choose 1 of 3, or leave them.
 b = setup([]); b.enemy.hp = 0; Math.random = () => 0.9; winBattle(); Math.random = () => 0.99;
-assert.equal(b.lootType, 'choice'); assert.equal(b.offers.length, 3); assert.equal(new Set(b.offers.map(c => c.id)).size, 3, 'three different cards');
-assert(b.offers.every(c => VARIETY_POOLS.city.includes(c.id)), 'from the current world');
-const n = state.pool.length, pick = b.offers[2]; chooseCardReward(2); assert.equal(state.pool.length, n + 1); assert(state.pool.includes(pick)); assert.equal(b.lootType, 'card');
+// Round 380: the chest holds the defeated enemy's one card, not three from the whole world's pool.
+assert.equal(b.lootType, 'choice'); assert.deepStrictEqual(b.offers.map(c => c.id), [enemyDropFor(b.id)], 'the one card of the enemy');
+assert(VARIETY_POOLS.city.includes(b.offers[0].id), 'from the current world');
+{ const seen = {}, carried = new Set(Object.values(ENEMY_CARD)); let n = 0;
+  for (const w of WORLD_ORDER) { const sp = enemyDropSpecies(w); assert(sp.length >= 4, w + ' has its enemies');
+    for (const e of sp) { const c = enemyDropFor(e); n++; assert(c, enemies[e].name + ' carries a card'); assert(!seen[c], defs[c].name + ' is on two enemies'); seen[c] = e;
+      assert(VARIETY_POOLS[w].includes(c), defs[c].name + ' belongs to the world of ' + enemies[e].name); }
+    const loot = worldLootPool(w); assert(loot.length >= 3 && loot.every(c => !carried.has(c) && VARIETY_POOLS[w].includes(c)), w + ' loot: its own cards that no enemy carries (' + loot.length + ')');
+    for (const c of VARIETY_POOLS[w]) assert(carried.has(c) || loot.includes(c), defs[c].name + ' (' + w + ') is on an enemy or in the loot');
+    // Quests (slots 0, 1), the vault (2) and the first hidden chests (3, 4) hand out different cards.
+    assert.equal(new Set([0, 1, 2, 3, 4].map(i => worldLootCard(w, i))).size, Math.min(5, loot.length), w + ' loot is handed out in turn'); }
+  assert.equal(n, 37, 'all 37 regular enemies'); assert.equal(Object.keys(ENEMY_CARD).length, 37);
+  // A hidden loot chest also holds one of its world's loot cards.
+  { const before = { room: state.room, pos: state.pos, battle: state.battle }; state.battle = null; configureRegion('city'); state.region = 'city';
+    const key = Object.keys(rooms).filter(k => chestFor(k)).sort()[0], ch = chestFor(key); state.room = key; state.pos = { x: ch.x, y: ch.y }; state.bosses.push(...Object.keys(enemies).filter(e => enemies[e].boss));
+    const had = state.pool.length; checkWorldInteractions(); const got = state.pool[state.pool.length - 1];
+    assert(state.chests.includes(ch.id) && state.pool.length === had + 1 && worldLootPool('city').includes(got.id) && state.pool.filter(c => c.id === got.id).length === 1, 'the chest draws a loot card you did not own');
+    checkWorldInteractions(); assert.equal(state.pool.length, had + 1, 'once'); state.pool.pop(); Object.assign(state, before); }
+  assert(cardOffers('sky').every(c => worldLootPool('sky').includes(c.id)), 'boss chests offer three of the loot of the world'); }
+const n = state.pool.length, pick = b.offers[b.offers.length - 1]; chooseCardReward(b.offers.length - 1); assert.equal(state.pool.length, n + 1); assert(state.pool.includes(pick)); assert.equal(b.lootType, 'card');
 b = setup([]); b.enemy.hp = 0; Math.random = () => 0.9; winBattle(); Math.random = () => 0.99; const n2 = state.pool.length; chooseCardReward(null);
 assert.equal(state.pool.length, n2, 'leaving them adds nothing'); assert.equal(b.lootType, 'skipped');
 // Elaris: first arrival offers one Elaris card; entry levels ease in.

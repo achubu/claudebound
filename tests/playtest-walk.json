@@ -1,10 +1,186 @@
 {
- "chronospire": {
+ "city": {
   "rooms": 54,
   "fights": 0,
   "crossings": 387,
   "arrivals": 137,
-  "itemRoutes": 63,
+  "itemRoutes": 78,
+  "problems": [
+   {
+    "kind": "item on the path",
+    "room": "0,6",
+    "what": "vault"
+   },
+   {
+    "kind": "item on the path",
+    "room": "1,4",
+    "what": "breaker"
+   },
+   {
+    "kind": "item on the path",
+    "room": "1,6",
+    "what": "event"
+   },
+   {
+    "kind": "item on the path",
+    "room": "2,4",
+    "what": "cache"
+   },
+   {
+    "kind": "item on the path",
+    "room": "1,7",
+    "what": "nexus"
+   },
+   {
+    "kind": "item on the path",
+    "room": "0,7",
+    "what": "sealed"
+   },
+   {
+    "kind": "item on the path",
+    "room": "3,5",
+    "what": "lore"
+   },
+   {
+    "kind": "item on the path",
+    "room": "4,4",
+    "what": "chest"
+   },
+   {
+    "kind": "item on the path",
+    "room": "0,8",
+    "what": "shrine"
+   },
+   {
+    "kind": "item on the path",
+    "room": "3,6",
+    "what": "lore"
+   },
+   {
+    "kind": "item on the path",
+    "room": "4,5",
+    "what": "nexus"
+   },
+   {
+    "kind": "item on the path",
+    "room": "2,8",
+    "what": "campfire"
+   },
+   {
+    "kind": "item on the path",
+    "room": "4,7",
+    "what": "breaker"
+   },
+   {
+    "kind": "item on the path",
+    "room": "5,4",
+    "what": "chest"
+   },
+   {
+    "kind": "item on the path",
+    "room": "2,7",
+    "what": "cardsmith"
+   },
+   {
+    "kind": "item on the path",
+    "room": "4,8",
+    "what": "lore"
+   },
+   {
+    "kind": "item on the path",
+    "room": "5,7",
+    "what": "relic ember"
+   },
+   {
+    "kind": "item on the path",
+    "room": "3,7",
+    "what": "chest"
+   },
+   {
+    "kind": "item on the path",
+    "room": "4,9",
+    "what": "shrine"
+   },
+   {
+    "kind": "item on the path",
+    "room": "7,6",
+    "what": "merchant"
+   },
+   {
+    "kind": "item on the path",
+    "room": "7,9",
+    "what": "event"
+   },
+   {
+    "kind": "item on the path",
+    "room": "7,8",
+    "what": "cache"
+   },
+   {
+    "kind": "item on the path",
+    "room": "8,9",
+    "what": "relic boots"
+   },
+   {
+    "kind": "item on the path",
+    "room": "8,8",
+    "what": "breaker"
+   }
+  ],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "elaris": {
+  "rooms": 51,
+  "fights": 0,
+  "crossings": 374,
+  "arrivals": 131,
+  "itemRoutes": 56,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "sky": {
+  "rooms": 51,
+  "fights": 0,
+  "crossings": 375,
+  "arrivals": 131,
+  "itemRoutes": 55,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "wilds": {
+  "rooms": 51,
+  "fights": 0,
+  "crossings": 375,
+  "arrivals": 131,
+  "itemRoutes": 62,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "vespera": {
+  "rooms": 51,
+  "fights": 0,
+  "crossings": 375,
+  "arrivals": 131,
+  "itemRoutes": 57,
+  "problems": [],
+  "interruptions": {},
+  "unvisited": [],
+  "menuErrors": []
+ },
+ "chronospire": {
+  "rooms": 54,
+  "fights": 0,
+  "crossings": 306,
+  "arrivals": 121,
+  "itemRoutes": 58,
   "problems": [],
   "interruptions": {},
   "unvisited": [],

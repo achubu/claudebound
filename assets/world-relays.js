@@ -124,6 +124,7 @@ function openRelay(p) {
 }
 function relayVaultCard(world = activeRegion) {
   const pool = (typeof VARIETY_POOLS !== 'undefined' && VARIETY_POOLS[world]) || [];
+  if (typeof worldLootCard === 'function') return worldLootCard(world, 6); // Round 380: one of the world's loot cards
   return pool.length ? pool[hashSeed(state.seed + 'relayVault' + world) % pool.length] : null;
 }
 function openRelayVault() {

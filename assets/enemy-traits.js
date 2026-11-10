@@ -45,7 +45,7 @@ const SPECIES_TRAIT = {
   vespWisp: 'aetherDrain', stormTyrant: 'overcharged', arcSentinel: 'brittle', resonantPhantom: 'staticField',
   // Chronospire
   chronoHound: 'rally', chronoSentry: 'hardened', chronoHeron: 'bloodthirst', chronoWisp: 'menacing', chronoWraith: 'phasing', chronoStag: 'punisher',
-  chronoMoth: 'aetherDrain', chronoMauler: 'wrath', chronarch: 'undying', clockwarden: 'stoneskin', paradoxTwin: 'twinStrike'
+  chronoMoth: 'aetherDrain', chronoMauler: 'wrath', chronarch: 'undying', clockwarden: 'stoneskin', paradoxTwin: 'twinStrike', mainspringColossus: 'overcharged', hollowHour: 'regen'
 };
 // Move patterns, one per species (bosses keep theirs from encounter-depth.js and chronospire.js).
 // Neon Aftermath's patrols have no element, so no charged strike; the others keep charge → strike together.
@@ -68,7 +68,10 @@ const SPECIES_PATTERN = {
   // Chronospire's bosses used the default pattern.
   chronarch: ['guard', 'charge', 'elemental', 'attack', 'heavy', 'charge', 'elemental', 'attack'],
   clockwarden: ['guard', 'attack', 'guard', 'charge', 'elemental', 'heavy'],
-  paradoxTwin: ['attack', 'charge', 'elemental', 'attack', 'charge', 'elemental', 'heavy']
+  paradoxTwin: ['attack', 'charge', 'elemental', 'attack', 'charge', 'elemental', 'heavy'],
+  // Round 379: the Colossus winds up, then unloads; the Hollow Hour strikes in flurries between its hexes.
+  mainspringColossus: ['guard', 'charge', 'heavy', 'guard', 'charge', 'elemental', 'heavy'],
+  hollowHour: ['attack', 'attack', 'charge', 'elemental', 'guard', 'attack', 'charge', 'elemental']
 };
 // Chronospire's patrols all brought Rewind; two get other afflictions.
 const SPECIES_AFFLICTION = { chronoWisp: ['static'], chronoWraith: ['shackle'] };
@@ -76,7 +79,7 @@ const SPECIES_AFFLICTION = { chronoWisp: ['static'], chronoWraith: ['shackle'] }
 const TRAITS_PLAIN = { patterns: {}, afflictions: {} };
 function useEnemyTraits(on) {
   for (const [id, p] of Object.entries(SPECIES_PATTERN)) {
-    if (!enemies[id] || (BOSS_PATTERNS[id] && !(id in TRAITS_PLAIN.patterns) && !['chronarch', 'clockwarden', 'paradoxTwin'].includes(id))) continue;
+    if (!enemies[id] || (BOSS_PATTERNS[id] && !(id in TRAITS_PLAIN.patterns) && !['chronarch', 'clockwarden', 'paradoxTwin', 'mainspringColossus', 'hollowHour'].includes(id))) continue;
     if (!(id in TRAITS_PLAIN.patterns)) TRAITS_PLAIN.patterns[id] = BOSS_PATTERNS[id];
     if (on) BOSS_PATTERNS[id] = p; else if (TRAITS_PLAIN.patterns[id]) BOSS_PATTERNS[id] = TRAITS_PLAIN.patterns[id]; else delete BOSS_PATTERNS[id];
   }

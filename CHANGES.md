@@ -3496,6 +3496,104 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 381: six quests and four or more hidden chests in every world
+
+Owner: "add more quests and chests if you can, kill x number of enemies, kill the mini boss, kill x number of elites, etc";
+"chests can also randomly draw from a pool of cards when opened".
+
+- **Six quests per world** (`QUEST_ORDER` in `assets/quests.js`), each from its own shrine, campfire or cache (every world
+  has eight or nine such points of interest): hunt 10 enemies, defeat 3 elites (★), defeat 5 of one kind of enemy (picked
+  with the journey's seed), defeat the first mini-boss, defeat the second mini-boss, defeat the world's final boss. The
+  boss quest now names the final boss by `WORLD_BOSS_ROOMS` (the Chronospire has other bosses too).
+- **Every quest pays a card**: one of its world's loot cards (Round 380), slots 0-5 of `worldLootCard`; the vault is slot 6.
+  So a world's six quests and its vault give seven different loot cards.
+- **Two more hidden chests per world** (`extraChestRooms` in `assets/expansion.js`): in the dead ends farthest from the
+  start that hold nothing else (not a boss, gear, waypoint, quiet or role room), each with a potion. Neon Aftermath now has
+  five chests, the other worlds four.
+- **Chests draw a card at random** from the world's loot when opened (`worldChestCard`), one you don't own yet if any.
+- With seven fixed cards and four or five random chest draws, every world's loot (at most 11 cards) can be found in one
+  journey.
+- Tests: new `more-quests` (all six worlds: six givers, six offers, loot cards, different mini-bosses, the final boss, the
+  chests standing alone and reachable; elite and target quests count only their kills). `quests`, `walk-past`,
+  `card-variety` updated. Round 379 follow-ups found by the full suite: `relic-quest` keeps the journey's seed across its
+  new games and counts the Chronospire's breakers as thrown; `world-deck` counts 20 bosses (the two new ones give two more
+  deck slots at the end of the game).
+
+## Round 380: every enemy drops its own card; the rest are loot in their world
+
+Owner: "now enemies drop a card choice, spread the cards around so that each enemy drops a unique card, relevant to the
+world if possible but not required"; then, for the cards left over, "lets move them to chests and quests. try to put them
+in worlds where they make sense".
+
+- **One card per enemy** (`ENEMY_CARD` in `assets/enemy-drops.js`, loads after `cycle-card`): each of the 37 regular
+  enemies carries exactly one card from its own world's pool, picked to suit it (the Solar Scarab drops Scarab Swarm, the
+  Thunderhorn Ram Thunderclap, the Brass Sentry Delayed Bulwark...). No card is on two enemies. A card chest won from that
+  enemy holds that card: take it or leave it; the chest names the enemy. The chance of a card chest is unchanged. Arrival
+  gift cards were kept off enemies where the pool allowed (only the Pendulum Stag's Chrono Spike is also a gift).
+- **The rest is each world's loot** (`worldLootPool`): the cards of a world's pool that no enemy carries stay in that world
+  and come from its two card quests, its vault, and now its hidden loot chests, which each hold one loot card beside their
+  crystal or potion. Within a journey they are handed out in turn (`worldLootCard`: quests take slots 0 and 1, the vault 2,
+  chests 3 and up), so nothing repeats until the world's loot has all been found. Boss and mini-boss chests still offer
+  three cards, now from the world's loot.
+- Loot sizes: Neon Aftermath 9, Solaris 11, Sky Isles 10, Elaris 10, Vespera 6, Chronospire 3. A journey's fixed sources
+  give five per world (two quests, the vault, two or three chests), so the larger worlds' loot is not all found in one
+  journey; boss chests offer more of it.
+- Tests: `card-variety` checks the table (all 37 enemies, one card each from its own world, none shared), the loot pools
+  (own-world cards no enemy carries; every pool card is on an enemy or in the loot; quests, vault and chests get different
+  cards) and a hidden chest giving its card once; `expansion` checks a chest holds the enemy's card.
+
+## Round 379: the Chronospire's room map, locks, breakers and two bosses come from the seed
+
+Owner: "per journey room map"; "create boss rooms, at least 2 in the world, these should be unlocked using a system of
+breakers in the world and require mini boss wins acquiring loot that unlocks rooms with bosses. These should require
+backtracking and moving throughout the world. This should all be planned for in the environment initial generation";
+"2 new bosses, I'll get the sheets to you".
+
+- **Room map (`chronoGraph` in `assets/chrono-gen.js`)**: a spanning tree over the 6x9 grid (mostly corridors, some
+  branches), cut at two edges into three wings: the Gate wing, wing A behind it, wing B behind A. Those two edges are the
+  only doors between wings. Up to seven extra doors make loops inside a wing. Levels 46-54 climb in the order of play.
+  `chronoApplyGraph` writes it into the game's tables in place (`TILE_WORLD_DATA.chronospire.layout/roles`,
+  `CHRONO_ROOM_DATA`, start, stops, chests, `WORLD_BOSS_ROOMS`, `NEXUS_POINTS`, `FIRST_WAYPOINT_ROOMS`, `QUIET_ROOMS`)
+  and drops the room-graph caches; the live room table is configured again when the map changes under it.
+- **The chain, planned at generation** (`chronoGraphSolvable` plays it from the gate and rejects any map where a key lies
+  behind its own lock or the order differs):
+  1. Breaker 1 (Gate wing) opens the door to wing A.
+  2. The Clockwarden, deep in A, guards the first gear piece; holding it opens **Mainspring Foundry**, a dead end back in
+     the Gate wing.
+  3. **The Mainspring Colossus** there carries the mainspring Breaker 2 (in A) needs; Breaker 2 opens wing B.
+  4. The Paradox Twin, deep in B, guards the second gear piece; holding it opens **The Hollow Hour**, a dead end back in A.
+  5. **The Hollow Hour** there frees Breaker 3 (in B), which opens The Last Second, a dead end near the gate.
+- **Locks (`assets/chrono-locks.js`, loads after `spot-fixes`)**: the five doors carry `requires: 'chrono:<token>'`
+  (breaker1-3, loot1-2) on the live room table, answered by `hasRelic()`; each locked door says what it needs and where.
+  The breakers are this world's three relay switches (Round 345), renamed Spire Breaker with the owner's off/on art and
+  standing where the map planned them, so all three still open the Chrono Vault; breakers 2 and 3 are dead until the boss
+  before each is beaten. A sealed or open gate (the owner's art) stands in each locked doorway. The objective line names
+  the next step.
+- **Two bosses** (the owner's sheets, cut with `strip_to_sheet.py --grid 2`): The Mainspring Colossus (earth; Crush and
+  Barrier; winds up then unloads; twist Wind-up) and The Hollow Hour (air; Rewind and Fog; twist Stolen Hour). Each has
+  its own trait, move pattern and status afflictions. Tuned in the Difficulty lab toward the 33% boss target (health factors 0.78 and 0.58 in
+  `BOSS_TWIST_HP`: 512 fights each gave 42% at 0.74 and 33% at 0.58; the world's other bosses measured 25-41%).
+- The Difficulty lab fights each Chronospire encounter on the map of the journey it was listed from (a new game has a
+  new map), and the Colossus is met wearing the first gear piece only.
+- **Saves:** `CHRONO_GEN_VERSION` 2. A save from an older map restarts its Chronospire exploration at the new gate with the
+  breakers off (character, deck, gear and boss kills stay), like the Round 179 rebuild.
+- Tests: `chrono-gen` adds 150 maps (wings, doors, roles, dead-end boss rooms, levels, solvable in order) and plays the
+  chain in the game (each step opens exactly its door and brings the next room into reach). `chronospire`, `tile-worlds`,
+  `world-relays` and `rebuilt-worlds-migrate` read the generated roles. `playtest-walk chronospire` (breakers thrown,
+  bosses down): 54 rooms, 301 crossings, 54 item routes, no problems.
+
+## Round 378: a richer Chronospire
+
+Owner: "we need better background and more complexity in the environment, I like the road path".
+
+- Two more grounds, laid by smooth noise over the whole world's cells so they run on from room to room
+  (`chronoTerrain`): beds of steam pipes, and chasms the roads cross like bridges (a lit rim, darkness below, a shadow
+  falling in; nothing stands in one, and sand never lies in one).
+- Flat inlays (clock dial, sun and moon, gear spiral, hourglass) set into courts, arenas and a quarter of the squares.
+- Four large set pieces (aqueduct, half-buried cogwheel, boilers, fallen tower top) join the buildings.
+- The room's corners darken a little, and the last six painted rooms are kept so redrawing the world is one copy.
+- `tools/prepare_chrono_gen.py` takes the new drafts (it skips drafts a folder does not hold).
+
 ## Round 377: the Chronospire is generated from the journey's seed
 
 Owner: "procedurally generate the Chronospire (last world) on the fly with the bare minimum of assets", a new layout once per

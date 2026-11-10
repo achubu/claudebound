@@ -81,7 +81,7 @@ for (const [table, sky, wilds] of [['hpPerLevel', .05, .05], ['attackPerLevel', 
 // --- Rooms ------------------------------------------------------------
 function tileWorldRooms(id, roleEnemy) {
   const d = TILE_WORLD_DATA[id], byRoom = {};
-  for (const [role, enemy] of Object.entries(roleEnemy)) byRoom[d.roles[role]] = enemy;
+  for (const [role, enemy] of Object.entries(roleEnemy)) if (d.roles[role]) byRoom[d.roles[role]] = enemy;
   return Object.fromEntries(Object.entries(d.layout).map(([k, r], i) => [k, {
     name: r.name, exits: { ...r.exits }, district: 0, landmark: WORLD_NAMES[id].toUpperCase(), cityIndex: i, world: [...r.world],
     ...(r.zone ? { zone: r.zone } : {}), ...(r.level ? { level: r.level } : {}), ...(byRoom[k] ? { enemy: [byRoom[k], 400, 250] } : {})
@@ -102,7 +102,7 @@ const TILE_WORLD_ROLES = {
   sky: { boss: 'zenithRoc', mini1: 'stormbellWarden', mini2: 'featherMatriarch' },
   wilds: { boss: 'elarisTyrant', mini1: 'tideboundWarden', mini2: 'galeSovereignElaris' },
   vespera: { boss: 'stormTyrant', mini1: 'arcSentinel', mini2: 'resonantPhantom' },
-  chronospire: { boss: 'chronarch', mini1: 'clockwarden', mini2: 'paradoxTwin' }
+  chronospire: { boss: 'chronarch', mini1: 'clockwarden', mini2: 'paradoxTwin', boss1: 'mainspringColossus', boss2: 'hollowHour' } // Round 379: boss1/boss2 rooms come from the generated map
 };
 // A crystal chest in the dead end nearest each mini-boss room (those rooms hold gear).
 function tileWorldChests(id, stops) {
