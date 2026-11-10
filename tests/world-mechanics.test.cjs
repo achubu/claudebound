@@ -75,6 +75,7 @@ Math.random = realRandom;
 }`);
 const missing = [];
 const ids = ['packetSniff', 'logicBomb', 'ghostProtocol', 'zeroDay', 'sunstoke', 'scorchingSands', 'heatwave', 'noonBlaze', 'gustChain', 'slipstream', 'windWall', 'skydive', 'saplingStrike', 'barkskin', 'bloomMend', 'ancientOak', 'staticCoil', 'capacitorSpark', 'thunderhead', 'lightningRod'];
-for (const id of ids) for (let l = 0; l < 4; l++) if (!fs.existsSync(path.join(__dirname, '../assets/cards/level' + l, id + '.png'))) missing.push(id + ' ' + l);
+// Round 377: the path the game loads (refreshed cards are WebP, and a missing level reuses the earlier painting).
+for (const id of ids) for (let l = 0; l < 4; l++) { const p = run('cardArtPath(' + JSON.stringify(id) + ', ' + l + ')'); if (!fs.existsSync(path.join(__dirname, '..', p))) missing.push(id + ' ' + l + ' (' + p + ')'); }
 require('assert').deepStrictEqual(missing, [], 'mechanic cards have art at every level');
 console.log('PASS: a card mechanic for every world (Hack, Heat, Tailwind, Growth, Stormcharge, Suspend), with its afflictions, arrival gifts and battle tray.');

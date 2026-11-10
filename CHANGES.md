@@ -3524,6 +3524,8 @@ every room from `state.seed`.
   patch, a square, patrols and hub on the floor, no road at an edge without an exit, props clear of the floor), determinism,
   the save migration, and that a seed change in one session gives exactly the doors, patrols and objects of a fresh start.
   `tests/playtest-walk.cjs chronospire` (now tapping each door where it is): 54 rooms, 387 crossings, 63 item routes, no problems.
+- Squares never open under the HUD panel or the minimap. `tests/world-mechanics.test.cjs` now checks the art path the game loads
+  (it still looked for the PNGs replaced in Rounds 373-375).
 - Not done yet (owner's follow-up): a richer background, and boss rooms locked behind breakers and mini-boss loot, planned
   at generation.
 

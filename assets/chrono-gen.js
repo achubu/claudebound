@@ -81,7 +81,10 @@ function chronoRoomPlan(seed, key) {
       const total = sides.reduce((a, b) => a + b, 0);
       if (loose === 'any' ? total + over < 1 : loose ? total < 1 : (sides.filter(n => n >= 2).length !== 1 || total > 4)) continue;
       const x = (px + 1.5) * CG_CELL, y = (py + 1.5) * CG_CELL - 22; // the spot whose foot point is the square's centre
-      cand.push({ px, py, x, y, s: rnd() + over * 3 + (typeof screenCovered === 'function' && screenCovered(x, y) ? 2 : 0) });
+      // Never under the HUD panel or the minimap (an object may be nudged up to 32px within its square).
+      const covered = typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(x + dx, y + dy));
+      if (covered && loose !== 'any') continue;
+      cand.push({ px, py, x, y, s: rnd() + over * 3 + (covered ? 2 : 0) });
     }
     cand.sort((a, b) => a.s - b.s);
     for (const gap of [5, 4]) for (const c of cand) { // well apart first, then a cell's gap between them
