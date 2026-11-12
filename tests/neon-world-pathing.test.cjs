@@ -30,7 +30,7 @@ console.log('crossings tried',tried);
 console.log('street reaches the edge but no crossing ('+noCross.length+'):',noCross.join(', '));
 console.log('crossed but cannot walk straight back ('+noBack.length+'):',noBack.join(', '));
 console.log('landed inside scenery:',stuckInWall.join(', '));
-console.log('bounced back:',bounce.join(', '));;assert.equal(noBack.length,0,'every crossing can be walked straight back: '+noBack.join(', '));assert.equal(stuckInWall.length,0,'never land inside scenery');assert.equal(bounce.length,0,'no bounce-backs');assert(tried>600,'sampled '+tried+' crossings')}`);
+console.log('bounced back:',bounce.join(', '));;assert.equal(noBack.length,0,'every crossing can be walked straight back: '+noBack.join(', '));assert.equal(stuckInWall.length,0,'never land inside scenery');assert.equal(bounce.length,0,'no bounce-backs');assert(tried>350,'sampled '+tried+' crossings (Round 396: alleys are half as wide, so fewer edge samples)')}`);
 // 2) Tap-to-move from every exit to every other exit, enemy, point of interest, relic and chest in the same patch of street.
 run(`{newGame();configureRegion('city');state.relics=['ember','boots','lens'];for(const k of Object.keys(rooms))for(const s of roomSpawns(k))state.cooldowns[s.uid]=999;state.bosses=['thornWarden','crownSentinel','moonKnight'];checkWorldInteractions=()=>{};
 const fails=[],noRoute=[],slow=[];let n=0;

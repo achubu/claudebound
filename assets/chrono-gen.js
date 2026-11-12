@@ -196,16 +196,17 @@ function chronoApplyGraph(g) {
 const FG_COLS = 32, FG_ROWS = 20, FG_CELL = 25;
 function chronoRoomPlan(seed, key) {
   const lay = { exits: GEN.exits(key) }, rnd = chronoRng(seed + ':room:' + key);
-  const floor = new Uint8Array(FG_COLS * FG_ROWS), shapes = [];
+  // Round 396: `main` marks the cells of main roads (and their squares); a theme's alleys are floor but not main.
+  const floor = new Uint8Array(FG_COLS * FG_ROWS), main = new Uint8Array(FG_COLS * FG_ROWS), shapes = []; let MAIN = 1;
   const at = (x, y) => x >= 0 && y >= 0 && x < FG_COLS && y < FG_ROWS && floor[y * FG_COLS + x] === 1;
   // Shapes are in fine-cell units; every shape but a door stub keeps two cells from the room's edge.
   const clampX = (x, r) => Math.max(2 + r, Math.min(FG_COLS - 2 - r, x)), clampY = (y, r) => Math.max(2 + r, Math.min(FG_ROWS - 2 - r, y));
-  const each = (x0, y0, x1, y1, f) => { for (let y = Math.max(0, Math.floor(y0)); y <= Math.min(FG_ROWS - 1, Math.ceil(y1)); y++) for (let x = Math.max(0, Math.floor(x0)); x <= Math.min(FG_COLS - 1, Math.ceil(x1)); x++) if (f(x + 0.5, y + 0.5)) floor[y * FG_COLS + x] = 1; };
+  const each = (x0, y0, x1, y1, f) => { for (let y = Math.max(0, Math.floor(y0)); y <= Math.min(FG_ROWS - 1, Math.ceil(y1)); y++) for (let x = Math.max(0, Math.floor(x0)); x <= Math.min(FG_COLS - 1, Math.ceil(x1)); x++) if (f(x + 0.5, y + 0.5)) { floor[y * FG_COLS + x] = 1; if (MAIN) main[y * FG_COLS + x] = 1; }; };
   const octagon = (cx, cy, rx, ry = rx) => { // a rectangle with its corners cut at 45 degrees
     cx = Math.round(clampX(cx, rx)); cy = Math.round(clampY(cy, ry)); const cut = GEN.square ? 0 : Math.min(rx, ry) * 0.6; // a square theme's hubs are plain boxes
     each(cx - rx, cy - ry, cx + rx, cy + ry, (x, y) => Math.abs(x - cx) <= rx && Math.abs(y - cy) <= ry && Math.abs(x - cx) + Math.abs(y - cy) <= rx + ry - cut);
     const P = [[-rx + cut, -ry], [rx - cut, -ry], [rx, -ry + cut], [rx, ry - cut], [rx - cut, ry], [-rx + cut, ry], [-rx, ry - cut], [-rx, -ry + cut]];
-    shapes.push({ t: 'poly', pts: P.map(([x, y]) => [(cx + x) * FG_CELL, (cy + y) * FG_CELL]) });
+    shapes.push({ t: 'poly', main: !!MAIN, pts: P.map(([x, y]) => [(cx + x) * FG_CELL, (cy + y) * FG_CELL]) });
     return [cx, cy];
   };
   const seg = (a, b, r) => each(Math.min(a[0], b[0]) - r, Math.min(a[1], b[1]) - r, Math.max(a[0], b[0]) + r, Math.max(a[1], b[1]) + r, (x, y) => {
@@ -218,10 +219,10 @@ function chronoRoomPlan(seed, key) {
     const m = Math.min(Math.abs(b[0] - p1[0]), Math.abs(b[1] - p1[1])), p2 = [p1[0] + Math.sign(b[0] - p1[0]) * m, p1[1] + Math.sign(b[1] - p1[1]) * m];
     for (const p of [p1, p2, b]) { const q = pts[pts.length - 1]; if (Math.hypot(p[0] - q[0], p[1] - q[1]) > 0.01) pts.push(p); }
     for (let i = 1; i < pts.length; i++) seg(pts[i - 1], pts[i], r);
-    shapes.push({ t: 'road', w: w * FG_CELL, pts: pts.map(([x, y]) => [x * FG_CELL, y * FG_CELL]) });
+    shapes.push({ t: 'road', main: !!MAIN, w: w * FG_CELL, pts: pts.map(([x, y]) => [x * FG_CELL, y * FG_CELL]) });
     return pts;
   };
-  const rect = (x0, y0, x1, y1) => { for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) floor[y * FG_COLS + x] = 1; shapes.push({ t: 'rect', x: x0 * FG_CELL, y: y0 * FG_CELL, w: (x1 - x0) * FG_CELL, h: (y1 - y0) * FG_CELL }); };
+  const rect = (x0, y0, x1, y1) => { for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { floor[y * FG_COLS + x] = 1; if (MAIN) main[y * FG_COLS + x] = 1; } shapes.push({ t: 'rect', main: !!MAIN, x: x0 * FG_CELL, y: y0 * FG_CELL, w: (x1 - x0) * FG_CELL, h: (y1 - y0) * FG_CELL }); };
   const along = (pts, f) => { // the point a fraction f of the way along a road
     const len = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1])); let d = f * len.reduce((a, b) => a + b, 0);
     for (let i = 0; i < len.length; i++) { if (d <= len[i] || i === len.length - 1) { const t = len[i] ? Math.min(1, d / len[i]) : 0; return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t]; } d -= len[i]; }
@@ -245,16 +246,20 @@ function chronoRoomPlan(seed, key) {
   const hub = GEN.grid && boss ? octagon(lineX, lineY, Math.min(7, lineX - 4, FG_COLS - 4 - lineX), Math.min(4.5, lineY - 4, FG_ROWS - 4 - lineY))
     : GEN.grid && landing ? octagon(lineX, lineY, reach(Math.abs(lineX - 16), Math.min(lineX - 4, FG_COLS - 4 - lineX)), reach(Math.abs(lineY - 12), Math.min(lineY - 4, FG_ROWS - 4 - lineY)))
     : boss ? octagon(16, 12, 7, 4.5) : landing && !GEN.grid ? octagon(16, 12, 4)
-    : GEN.grid ? octagon(gx.length ? Math.round(mean(gx)) : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 2)
+    : GEN.grid ? ((MAIN = dirs.length === 1 || dirs.some(d => !GEN.alley || !GEN.alley(key, d)) ? 1 : 0), octagon(gx.length ? Math.round(mean(gx)) : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : MAIN ? 2 : 1))
     : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
   const roads = [];
+  // Round 396 (owner: "lets preview that" / "you can begin"): a theme with `alley` has a hierarchy of streets: main roads
+  // on a few row and column lines across the whole city, and every other door a narrow alley (2 cells, 50px), so the
+  // blocks between main roads are big enough for big buildings.
   for (const d of dirs) {
-    const c = chronoDoorCell(seed, key, d) * 2; let from, axis;
-    if (d === 'w') { rect(0, c, 4, c + 4); from = [4, c + 2]; axis = 'x'; } else if (d === 'e') { rect(FG_COLS - 4, c, FG_COLS, c + 4); from = [FG_COLS - 4, c + 2]; axis = 'x'; }
-    else if (d === 'n') { rect(c, 0, c + 4, 4); from = [c + 2, 4]; axis = 'y'; } else { rect(c, FG_ROWS - 4, c + 4, FG_ROWS); from = [c + 2, FG_ROWS - 4]; axis = 'y'; }
+    const c = chronoDoorCell(seed, key, d) * 2, al = GEN.alley && GEN.alley(key, d), o = al ? 1 : 0; let from, axis; MAIN = al ? 0 : 1;
+    if (d === 'w') { rect(0, c + o, 4, c + 4 - o); from = [4, c + 2]; axis = 'x'; } else if (d === 'e') { rect(FG_COLS - 4, c + o, FG_COLS, c + 4 - o); from = [FG_COLS - 4, c + 2]; axis = 'x'; }
+    else if (d === 'n') { rect(c + o, 0, c + 4 - o, 4); from = [c + 2, 4]; axis = 'y'; } else { rect(c + o, FG_ROWS - 4, c + 4 - o, FG_ROWS); from = [c + 2, FG_ROWS - 4]; axis = 'y'; }
     const span = Math.abs(axis === 'x' ? hub[0] - from[0] : hub[1] - from[1]);
-    roads.push(road(from, hub, axis, GEN.grid ? span : Math.max(1, Math.floor(rnd() * Math.max(1, span - 2))), 4));
+    roads.push(road(from, hub, axis, GEN.grid ? span : Math.max(1, Math.floor(rnd() * Math.max(1, span - 2))), al ? 2 : 4));
   }
+  MAIN = 0;
   // A narrower second road between two of the door roads, by-passing the hub: an island between them.
   if (!GEN.grid && roads.length >= 2 && rnd() < 0.6) {
     const i = Math.floor(rnd() * roads.length), k = (i + 1 + Math.floor(rnd() * (roads.length - 1))) % roads.length;
@@ -292,7 +297,7 @@ function chronoRoomPlan(seed, key) {
   // dead end's hub, sized to sit well inside that eight-sided shape (its flat sides are 100px from the middle; an arena's 112px).
   const courts = []; if (GEN.inlays.length && (boss || landing || dirs.length === 1)) courts.push([hub[0] * FG_CELL, hub[1] * FG_CELL, boss ? 150 : 130]);
   return { key, floor, shapes, inlays: courts.map(([x, y, size], i) => ({ name: GEN.inlays[(chronoHash(seed + ':inlay:' + key) + i) % GEN.inlays.length], x, y, size })),
-    hub: [hub[0] * FG_CELL, hub[1] * FG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null };
+    hub: [hub[0] * FG_CELL, hub[1] * FG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null, main: GEN.alley ? main : null };
 }
 // =====================================================================
 // Round 385 (owner: "the roads look great but the scenery looks like randomly dropped graphics ... any procedural
@@ -347,15 +352,17 @@ const GEN_THEMES = {
     landmarks: { market: { arcade: [369, 420], 'neon-tower': [324, 420] }, homes: { tenement: [350, 420], apartment: [330, 420] }, tech: { 'relay-hut': [253, 420], 'server-block': [420, 388] }, garden: { pagoda: [344, 420], 'lantern-court': [420, 354] } },
     furniture: { lamp: [89, 200], bench: [173, 200], bollard: [156, 200] }, rename: { bollard: 'vending' },
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
-    scale: { building: 0.55, landmark: 0.55, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
+    scale: { building: 0.9, landmark: 0.9, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
     tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, 'rubble-big': 0.8 },
     mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], plazaTex: 'overgrowth', plazaShade: 'rgba(6,12,20,.18)', bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
     hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
     // Round 394: one storey of each building to the same height on screen (measured from each painting's floors, doors and windows).
+    // Round 396: main roads on every third column line and on two row lines; the other streets are alleys.
+    alley: (key, d) => { const [wx, wy] = GEN_THEMES.city.world(key); return d === 'e' || d === 'w' ? !(wy === 1 || wy === 4) : wx % 3 !== 1; }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
-    maxH: 250, // Round 394 (owner: "buildings should probably be around 3 times bigger")
+    maxH: 340, // Round 394 (owner: "buildings should probably be around 3 times bigger")
     storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 },
     lamp: '120,230,255', vignette: '2,6,14' }
 };
@@ -392,9 +399,15 @@ function chronoRoomProps(seed, plan) {
       if (box[2] > 0 && box[0] < 800 && box[3] > 0 && box[1] < 500) out.push({ ...p, x: p.x + dx * 800, y: p.y + dy * 500, box, foreign: true }); } }
   // and no building one of the eight rooms around it uses: rooms are made in order (south rows first, west to east), so
   // each room checks the four neighbours made before it (west, south-west, south, south-east), which covers every pair.
-  const banned = new Set(); if (GEN.span) for (const [dx, dy] of [[-1, 0], [-1, 1], [0, 1], [1, 1]]) { const np = nb(dx, dy); if (np) for (const p of chronoRoomProps(seed, np)) if (!p.foreign) banned.add(p.name); }
-  const floorAt = (cx, cy) => { if (cx >= 0 && cy >= 0 && cx < FG_COLS && cy < FG_ROWS) return F[cy * FG_COLS + cx];
-    const dx = Math.floor(cx / FG_COLS), dy = Math.floor(cy / FG_ROWS), np = nb(dx, dy); return np ? np.floor[(cy - dy * FG_ROWS) * FG_COLS + (cx - dx * FG_COLS)] : 1; };
+  // Round 396: with big buildings that is too few names, so it is by distance instead: no building within REPEAT_GAP px of
+  // the same one in those four rooms (measured across the seam), as well as never twice in a room.
+  const nearUse = []; if (GEN.span) for (const [dx, dy] of [[-1, 0], [-1, 1], [0, 1], [1, 1]]) { const np = nb(dx, dy); if (np) for (const p of chronoRoomProps(seed, np)) if (!p.foreign && (p.kind === 'building' || p.kind === 'landmark')) nearUse.push([p.name, p.x + dx * 800, p.y + dy * 500]); }
+  const REPEAT_GAP = 1000, banned = { has: () => false }, tooNear = (name, x, y) => nearUse.some(([n, ux, uy]) => n === name && Math.hypot(ux - x, uy - y) < REPEAT_GAP);
+  const cellOf = (which, cx, cy) => { if (cx >= 0 && cy >= 0 && cx < FG_COLS && cy < FG_ROWS) return (which ? plan.main : F)[cy * FG_COLS + cx];
+    const dx = Math.floor(cx / FG_COLS), dy = Math.floor(cy / FG_ROWS), np = nb(dx, dy); return np ? (which ? np.main || np.floor : np.floor)[(cy - dy * FG_ROWS) * FG_COLS + (cx - dx * FG_COLS)] : 1; };
+  const floorAt = (cx, cy) => cellOf(0, cx, cy);
+  // Round 396: main roads (with their pavement) keep big pieces BIG_CLEAR away; an alley only ALLEY_CLEAR.
+  const mainIn = (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / C); cy <= Math.floor(y1 / C); cy++) for (let cx = Math.floor(x0 / C); cx <= Math.floor(x1 / C); cx++) if (cellOf(1, cx, cy)) return true; return false; };
   const floorIn = GEN.span ? (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / C); cy <= Math.floor(y1 / C); cy++) for (let cx = Math.floor(x0 / C); cx <= Math.floor(x1 / C); cx++) if (floorAt(cx, cy)) return true; return false; }
     : (x0, y0, x1, y1) => { for (let cy = Math.max(0, Math.floor(y0 / C)); cy <= Math.min(FG_ROWS - 1, Math.floor(y1 / C)); cy++) for (let cx = Math.max(0, Math.floor(x0 / C)); cx <= Math.min(FG_COLS - 1, Math.floor(x1 / C)); cx++) if (F[cy * FG_COLS + cx]) return true; return false; };
   const chasmIn = (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / CG_CELL); cy <= Math.floor(y1 / CG_CELL); cy++) for (let cx = Math.floor(x0 / CG_CELL); cx <= Math.floor(x1 / CG_CELL); cx++) if (terrain.chasm(cx, cy)) return true; return false; };
@@ -407,11 +420,12 @@ function chronoRoomProps(seed, plan) {
   //   - open ground beyond the pavement: buildings, landmarks and clutter; never a chasm or water hole.
   // `clear` is how far a piece's whole picture keeps from roads and squares: past the pavement for big pieces.
   // Owner: "no buildings should overlap a curb": big pieces keep past the pavement and its 9px kerb border, with a margin.
-  const PAVE = GEN.pavement || 0, BIG_CLEAR = PAVE ? PAVE + 18 : 9;
+  const PAVE = GEN.pavement || 0, BIG_CLEAR = PAVE ? PAVE + 18 : 9, ALLEY_CLEAR = (GEN.alleyPave || 0) + 14;
   const fits = (x, y, w, h, gap, clear = BIG_CLEAR) => {
     const box = [x - w / 2 + 4, y - h + 6, x + w / 2 - 4, y - 1];
     if (GEN.span ? (box[0] < 4 || box[3] > 496 || x >= 796 || box[2] > 1590 || box[1] < -490) : (box[0] < 4 || box[1] < 4 || box[2] > 796 || box[3] > 496)) return null;
-    if (floorIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear) || chasmIn(box[0], y - h * 0.4, box[2], y - 1)) return null;
+    const ac = Math.min(clear, ALLEY_CLEAR);
+    if ((plan.main && GEN.span ? floorIn(box[0] - ac, box[1] - ac, box[2] + ac, box[3] + ac) || mainIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear) : floorIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear)) || chasmIn(box[0], y - h * 0.4, box[2], y - 1)) return null;
     if (out.some(p => box[0] < p.box[2] + gap && box[2] > p.box[0] - gap && box[1] < p.box[3] + gap && box[3] > p.box[1] - gap)) return null;
     return box;
   };
@@ -424,7 +438,7 @@ function chronoRoomProps(seed, plan) {
   // only buildings whose side differs from the room's column parity may stand (the room beyond needs the other side),
   // and the same along the north and south edges by row. So the two buildings either side of a seam always differ.
   const [WX, WY] = GEN.world(plan.key), EDGE = 130, side = (name, axis) => chronoHash(seed + ':side:' + axis + ':' + name) & 1;
-  const seamOk = (name, box) => ((box[0] > EDGE && box[2] < 800 - EDGE) || side(name, 'x') !== (WX & 1)) && ((box[1] > EDGE && box[3] < 500 - EDGE) || side(name, 'y') !== (WY & 1));
+  const seamOk = (name, box) => GEN.span ? !tooNear(name, (box[0] + box[2]) / 2, box[3]) :  ((box[0] > EDGE && box[2] < 800 - EDGE) || side(name, 'x') !== (WX & 1)) && ((box[1] > EDGE && box[3] < 500 - EDGE) || side(name, 'y') !== (WY & 1));
   const lonely = (x, y) => !out.some(p => SMALL[p.kind] && Math.hypot(p.x - x, p.y - y) < SMALL_GAP);
   const put = (name, kind, x, y, w, h, box) => { const p = { name, kind, x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), box }; out.push(p); return p; };
   // Round 394 (owner: "adjust buildings to be similar in scale? All doors and windows should be similar in size"): a theme
@@ -754,8 +768,8 @@ function paintChronoRoom(canvas, key) {
   }
   // The floor is drawn from the room's shapes: straight-edged roads with mitred corners and 45-degree legs, eight-sided hubs and squares.
   // `grow` px wider on every side gives the pavement's outline from the same shapes, drawn as clean vectors (Round 393).
-  const drawFloor = (grow) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-    g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4; const G = grow * K;
+  const drawFloor = (grow0) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4; let grow = grow0, G = grow * K;
     // A theme with `round` (the city: "make the roads look more like roads, they are too sharp") turns every corner on an
     // arc: road bends, and the corners of hubs and squares.
     const R = (GEN.round || 0) * K, turn = (pts, close) => { g.beginPath(); const n = pts.length, P = i => pts[((i % n) + n) % n];
@@ -767,6 +781,7 @@ function paintChronoRoom(canvas, key) {
       g.arcTo(c2, b, c2, d, rr); g.arcTo(c2, d, a, d, rr); g.arcTo(a, d, a, b, rr); g.arcTo(a, b, c2, b, rr); g.closePath(); g.fill(); };
     for (const sh of plan.shapes) {
       if (sh.pave) continue;
+      grow = grow0 && GEN.alley && sh.main === false ? Math.min(grow0, GEN.alleyPave || 0) : grow0; G = grow * K; // an alley has a narrow kerb, not a pavement
       if (sh.t === 'rect' && GEN.square) { // a door's stub: run on past the room's edge, so its rounded ends fall outside the room
         const e = 3 * grow + 60, x0 = sh.x <= 0 ? -e : sh.x, y0 = sh.y <= 0 ? -e : sh.y, x1 = sh.x + sh.w >= 800 ? 800 + e : sh.x + sh.w, y1 = sh.y + sh.h >= 500 ? 500 + e : sh.y + sh.h; box(x0, y0, x1, y1, 0); }
       else if (sh.t === 'rect') g.fillRect(sh.x * K - G, sh.y * K - G, sh.w * K + 2 * G, sh.h * K + 2 * G);

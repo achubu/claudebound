@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 396: a street hierarchy for Neon Aftermath (main roads and alleys), bigger buildings
+
+Owner, after the whole-city preview: "it looks better but not perfect, will need work but you can begin"; "standardize curb
+size please". First step of building the city as one plan rather than room by room.
+
+- **Main roads and alleys** (`assets/chrono-gen.js`, city `alley`): main roads run on every third column line and on two
+  row lines across the whole city; every other door is an alley, 2 cells (50px) wide. Every street keeps the same curb
+  and pavement (`alleyPave: 34`). Rooms keep their doors and their crossing; a crossing of alleys only is alley-sized.
+  The plan marks main-road cells (`plan.main`); shapes carry `main`.
+- **Buildings**: 0.9 of their painting (storey factors kept, tallest capped at 340px). Big pieces keep 52px from main
+  roads and 48px from alleys. No building within 1000px of the same one in the four rooms made before (measured across
+  seams), and never twice in a room; this replaces the eight-room ban, which ran out of names with big buildings.
+- Tests: `neon-world-pathing` samples fewer crossings now that alleys are half as wide (threshold 350, was 600).
+  `rebalance` still prints only the harness's PASS line and runs past its timeout, as it does on `main`.
+
 ## Round 395: Wardbreaker Step card art
 
 The owner's Wardbreaker Step paintings, levels 0-3, at `assets/cards/level*/wardbreakerStep.webp` (`refreshedCardArt` and the
