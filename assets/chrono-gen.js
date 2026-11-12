@@ -237,6 +237,9 @@ function chronoRoomPlan(seed, key) {
     : GEN.grid ? octagon(gx.length ? Math.round(mean(gx)) : landing ? 16 : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : landing ? 12 : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 2)
     : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
   const roads = [];
+  // A room the game drops you into at its middle keeps a court there, joined to the crossing (the grid's crossing lines
+  // up with the doors instead).
+  if (GEN.grid && landing && !boss && Math.hypot(hub[0] - 16, hub[1] - 12) > 1) { octagon(16, 12, 3); road([16, 12], hub, Math.abs(hub[0] - 16) > Math.abs(hub[1] - 12) ? 'x' : 'y', 99, 4); }
   for (const d of dirs) {
     const c = chronoDoorCell(seed, key, d) * 2; let from, axis;
     if (d === 'w') { rect(0, c, 4, c + 4); from = [4, c + 2]; axis = 'x'; } else if (d === 'e') { rect(FG_COLS - 4, c, FG_COLS, c + 4); from = [FG_COLS - 4, c + 2]; axis = 'x'; }
