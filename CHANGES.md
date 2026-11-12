@@ -3496,6 +3496,36 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 393: straight city streets, beaches, ragged grass, no matching buildings across a seam
+
+Owner, in a run of messages on the generated Neon Aftermath: "curb corners need to be a bit more rounded, transitions
+between tiles are not great, perhaps we could use a building as a transition point between tiles"; "use the grass tile
+more sparingly and use the destroyed city tile more"; "don't use the curb tiles for the off road interactable object
+paths, try using the grass"; "lets not have the curb overlap with the off path grass"; "never use that strange double half
+circle look"; "just go to straight roads, 90 degree angle corners ... don't have any odd shapes please"; "this needs to be
+the same width curb"; "i'm seeing buildings of the same type side by side"; "the water edge ... should look more like a
+beachfront edge"; "grass edges should also not be straight".
+
+- **Straight streets** (`assets/chrono-gen.js`, city theme `square: true`): every road, crossing and square is drawn as
+  axis-aligned boxes with 90-degree corners; the pavement is the same shapes drawn wider, so the curb is one width all
+  the way round. In a grid theme every east-west street in a row of rooms runs at one height and every north-south street
+  in a column at one place (`chronoDoorCell`), so streets cross rooms in straight lines with no jogs. Boss squares and
+  landing courts are centred on the crossing and either match the road or stand out from it by two cells or more, four
+  cells clear of the room's edges: no small steps.
+- **Less grass, more rubble**: overgrowth beds are rarer (`bedCut: 0.78`) and the rubble mix covers more ground (`cut: 0.4`).
+- **Grass paths to objects**: the squares and paths where objects stand are grass (`plazaTex: 'overgrowth'`), laid under the
+  pavement so the grass meets the curb's outer edge.
+- **Ragged edges** (`ragged()`): grass beds, lawns and shores get edges broken up by noise laid over the whole world (20px
+  cells), drawn with the neighbouring rooms' terrain round them, so an edge on a room seam is ragged on both sides.
+- **Beaches** (`beach`): water has a sand strip, a darker wet band and a foam line at its edge instead of a hard rim.
+- **Buildings over seams**: where the ground changes kind and nothing stands, a building may stand across the seam (it
+  still obeys every other placement rule; the rest is left to the ragged edge).
+- **No matching buildings across a seam** (both generated worlds): besides never repeating a building in a room, each
+  building gets a side of every seam from the seed, and near a room's edge only buildings from that room's side may
+  stand, so the two buildings facing each other across a seam always differ.
+- Tests: `chrono-gen` building count threshold lowered to 3.3 per room (the seam rule leaves some lots empty, as the
+  owner asked for in Round 388).
+
 ## Round 392: small objects are never grouped
 
 Owner: "non building objects such as lamps benches barriers should never be grouped, keep them far apart, never 2 or 3 next
