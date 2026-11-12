@@ -330,7 +330,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '390',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '392',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -340,8 +340,8 @@ const GEN_THEMES = {
     furniture: { lamp: [89, 200], bench: [173, 200], bollard: [156, 200] }, rename: { bollard: 'vending' },
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.3, landmark: 0.4, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
-    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, 'rubble-big': 0.8 },
-    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.55 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }, { on: 'pavement', tex: 'pavement-old', tag: 'worn', period: 5, cut: 0.6 }],
+    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, 'rubble-big': 0.8 },
+    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.55 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], plazaTex: 'pavement-old',
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
     hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
@@ -374,7 +374,15 @@ function chronoRoomProps(seed, plan) {
   const chasmIn = (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / CG_CELL); cy <= Math.floor(y1 / CG_CELL); cy++) for (let cx = Math.floor(x0 / CG_CELL); cx <= Math.floor(x1 / CG_CELL); cx++) if (terrain.chasm(cx, cy)) return true; return false; };
   const isFloor = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && F[Math.floor(y / C) * FG_COLS + Math.floor(x / C)] === 1;
   // A picture with its foot at (x, y): its whole box clear of roads (the hero walks there), its base clear of chasms, inside the room, and clear of the others.
-  const fits = (x, y, w, h, gap, clear = 9) => {
+  // Round 391 (owner: "set up clear rules that position buildings only on certain terrain, curb tiles should only hold
+  // small objects like street lamps and benches"). Placement rules by kind:
+  //   - roads and squares: nothing (the hero walks there);
+  //   - pavement (a theme's strip along the roads, GEN.pavement px wide): street furniture only (lamps, benches, bollards);
+  //   - open ground beyond the pavement: buildings, landmarks and clutter; never a chasm or water hole.
+  // `clear` is how far a piece's whole picture keeps from roads and squares: past the pavement for big pieces.
+  // Owner: "no buildings should overlap a curb": big pieces keep past the pavement and its 9px kerb border, with a margin.
+  const PAVE = GEN.pavement || 0, BIG_CLEAR = PAVE ? PAVE + 18 : 9;
+  const fits = (x, y, w, h, gap, clear = BIG_CLEAR) => {
     const box = [x - w / 2 + 4, y - h + 6, x + w / 2 - 4, y - 1];
     if (box[0] < 4 || box[1] < 4 || box[2] > 796 || box[3] > 496) return null;
     if (floorIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear) || chasmIn(box[0], y - h * 0.4, box[2], y - 1)) return null;
@@ -396,29 +404,29 @@ function chronoRoomProps(seed, plan) {
   let built = 0;
   for (const pass of [0, 1]) for (let y = 40; y < 498 && built < 16; y += 6) {
     for (let x = 16; x < 790 && built < 16;) {
-      const below = roadBelow(x, y, 26), near = dist[Math.min(FG_ROWS - 1, Math.floor((y - 12) / C)) * FG_COLS + Math.floor(x / C)];
-      if (pass === 0 ? !(below >= 8) : !(near >= 1 && near <= 3)) { x += 6; continue; }
+      const below = roadBelow(x, y, 26 + PAVE), near = dist[Math.min(FG_ROWS - 1, Math.floor((y - 12) / C)) * FG_COLS + Math.floor(x / C)];
+      const n0 = Math.ceil((BIG_CLEAR + 4) / C); if (pass === 0 ? !(below >= BIG_CLEAR - 1) : !(near >= n0 && near <= n0 + 2)) { x += 6; continue; }
       let placed = null;
       for (let t = 0; t < 9 && !placed; t++) { const [name, table] = pick(), [w, h] = size(table, name, 'building'), cx = x + w / 2;
         if (out.some(p => p.name === name)) continue; // Round 388 (owner): never the same building twice in a room; leave the lot empty instead
-        if (pass === 0 && !(roadBelow(cx - w * 0.3, y, 30) && roadBelow(cx + w * 0.3, y, 30))) continue; // the whole front on the street
+        if (pass === 0 && !(roadBelow(cx - w * 0.3, y, 30 + PAVE) && roadBelow(cx + w * 0.3, y, 30 + PAVE))) continue; // the whole front on the street
         const box = fits(cx, y, w, h, 5); if (box) placed = put(name, 'building', cx, y, w, h, box); }
       if (!placed) { x += 10; continue; }
-      built++; const run = roadBelow(placed.x, y, 30);
+      built++; const run = roadBelow(placed.x, y, 30 + PAVE);
       if (!GEN.pavement) yards.push({ t: 'rect', x0: placed.box[0] - 7, y0: y - placed.h * 0.42, x1: placed.box[2] + 7, y1: y + (run ? run + 6 : 9) });
       x = placed.box[2] + 6 + Math.floor(rnd() * 8);
     }
   }
   // 5. Street furniture: lamps on the far kerb every 150px or so; a bench or two bollards beside each square.
   const lamps = [];
-  for (let y = 20; y < 496; y += 5) for (let x = 20; x < 782; x += 5) { const b = roadBelow(x, y, 14); if (!(b >= 6) || lamps.some(l => Math.hypot(l[0] - x, l[1] - y) < 150)) continue;
+  for (let y = 20; y < 496; y += 5) for (let x = 20; x < 782; x += 5) { const b = roadBelow(x, y, 14); if (!(b >= 6) || lamps.some(l => Math.hypot(l[0] - x, l[1] - y) < (GEN.lampGap || 150))) continue;
     const [w, h] = size(GEN.furniture, 'lamp', 'lamp'), box = fits(x, y, w, h, 3, 3); if (box) { put('lamp', 'lamp', x, y, w, h, box); lamps.push([x, y]); } }
   for (const [px, py] of plan.plazas) { const kind = rnd() < 0.5 ? 'bench' : 'bollard', [w, h] = size(GEN.furniture, kind, kind);
     for (const [dx, dy] of [[0, -78], [-92, 0], [92, 0], [-70, -60], [70, -60]]) { const x = px + dx, y = py + 22 + dy, box = fits(x, y, w, h, 3, 3); if (box && !isFloor(x, y)) { put((GEN.rename && GEN.rename[kind]) || kind, kind, x, y, w, h, box); if (kind === 'bench') break; } } }
   // 6. Back lots: clutter behind the rows, likelier near the road and beside a building.
   const clutter = Object.keys(GEN.clutter);
   for (let t = 0, made = 0; t < 160 && made < 9; t++) { const name = clutter[Math.floor(rnd() * clutter.length)], [w, h] = size(GEN.clutter, name, 'clutter'), x = 20 + rnd() * 760, y = 30 + rnd() * 465;
-    const d = dist[Math.min(FG_ROWS - 1, Math.floor(y / C)) * FG_COLS + Math.floor(x / C)]; if (d < 1 || rnd() > Math.exp(-(d - 1) / 3.5)) continue;
+    const d = dist[Math.min(FG_ROWS - 1, Math.floor(y / C)) * FG_COLS + Math.floor(x / C)]; if (d * C < BIG_CLEAR || rnd() > Math.exp(-(d - 1) / 3.5)) continue;
     if (!out.some(p => (p.kind === 'building' || p.kind === 'landmark') && Math.abs(p.x - x) < p.w / 2 + 46 && y > p.y - p.h * 0.5 && y < p.y + 40) && rnd() < 0.7) continue;
     if (out.some(p => p.name === name && Math.hypot(p.x - x, p.y - y) < 150)) continue;
     const box = fits(x, y, w, h, 2); if (box) { put(name, 'clutter', x, y, w, h, box); made++; } }
@@ -559,7 +567,7 @@ function paintChronoRoom(canvas, key) {
     if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null; return true;
   }
   const props = chronoRoomProps(theme === 'chronospire' ? chronoSeed() : seed, plan);
-  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.mix || []).map(m => m.tex), ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
+  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
   for (const n of names) imgs[n] = chronoArtImage(n);
   const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth));
   if (waiting) {
@@ -646,16 +654,24 @@ function paintChronoRoom(canvas, key) {
   { const g = f.art.getContext('2d'); g.drawImage(floorShape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); g.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(g, floorShape, mix); }
   if (GEN.pavement) { // a strip of pavement down both sides of every road
     const wide = document.createElement('canvas'); wide.width = W; wide.height = H; const wg = wide.getContext('2d'); for (let a = 0; a < 16; a++) wg.drawImage(f.shape, Math.round(Math.cos(a * Math.PI / 8) * GEN.pavement * K), Math.round(Math.sin(a * Math.PI / 8) * GEN.pavement * K));
-    { const pv = document.createElement('canvas'); pv.width = W; pv.height = H; const g = pv.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = g.lineJoin = 'round'; // the paved squares, a little wider than their walkable floor
-      for (const sh of plan.shapes) if (sh.pave) { if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); g.lineWidth = 16 * K; g.stroke(); } else if (sh.t === 'road') { g.lineWidth = (sh.w + 16) * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); } }
-      wg.drawImage(pv, 0, 0); }
+    // Owner: "find a different tile to use for off path traversal to objects, do not use the curb tile for those areas":
+    // the paved squares and their paths are drawn below in their own tile (GEN.plazaTex), not as pavement.
+    const pv = document.createElement('canvas'); pv.width = W; pv.height = H;
+    { const g = pv.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = g.lineJoin = 'round';
+      for (const sh of plan.shapes) if (sh.pave) { if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); } else if (sh.t === 'road') { g.lineWidth = sh.w * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); } } }
+    plan._plazaShape = pv;
     const pa = document.createElement('canvas'); pa.width = W; pa.height = H; const pg = pa.getContext('2d'); pg.drawImage(wide, 0, 0); pg.globalCompositeOperation = 'source-in'; fill(pg, imgs.yard);
     pg.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'pavement')) mixInto(pg, wide, mix);
     pg.globalCompositeOperation = 'source-atop'; pg.fillStyle = GEN.yardShade || 'rgba(10,8,26,.22)'; pg.fillRect(0, 0, W, H);
-    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(wide, '#05080c'), 0, 0); ctx.restore();
-    ring(chronoTint(wide, GEN.yardRim[0]), 3); ctx.drawImage(pa, 0, 0);
+    // Round 391 (owner: "make all curbs drawn at a similar width, use the same border on both sides of the curb"): the
+    // pavement's outer edge gets the same kerb border as its road edge (three bands), and neither casts a shadow.
+    ring(chronoTint(wide, GEN.kerb[0]), 9); ring(chronoTint(wide, GEN.kerb[1]), 6); ring(chronoTint(wide, GEN.kerb[2]), 2); ctx.drawImage(pa, 0, 0);
+    if (GEN.plazaTex && imgs[GEN.plazaTex]) { // the squares: their own tile, a thin dark edge, laid over the pavement they join
+      const pl = document.createElement('canvas'); pl.width = W; pl.height = H; const lg = pl.getContext('2d'); lg.drawImage(pv, 0, 0); lg.globalCompositeOperation = 'source-in'; fill(lg, imgs[GEN.plazaTex]);
+      lg.globalCompositeOperation = 'source-atop'; lg.fillStyle = 'rgba(10,14,24,.42)'; lg.fillRect(0, 0, W, H);
+      ring(chronoTint(pv, GEN.kerb[0]), 4); ctx.drawImage(pl, 0, 0); }
   }
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = GEN.pavement ? 8 : 26; ctx.shadowOffsetY = GEN.pavement ? 2 : 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore();
+  if (!GEN.pavement) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore(); }
   ring(chronoTint(f.shape, GEN.kerb[0]), 9); ring(chronoTint(f.shape, GEN.kerb[1]), 6); ring(chronoTint(f.shape, GEN.kerb[2]), 2);
   ctx.drawImage(f.art, 0, 0);
   if (GEN.laneLine) { // a dashed centre line along each road
@@ -667,7 +683,7 @@ function paintChronoRoom(canvas, key) {
   for (const i of plan.inlays) { ctx.save(); ctx.globalAlpha = 0.94; ctx.drawImage(imgs[i.name], (i.x - i.size / 2) * K, (i.y - i.size / 2) * K, i.size * K, i.size * K); ctx.restore(); }
   for (const p of props) {
     const img = imgs[p.name];
-    ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(p.x * K, (p.y - p.h * 0.07) * K, p.w * 0.46 * K, p.w * 0.16 * K, 0, 0, Math.PI * 2); ctx.fill();
+    // Round 391 (owner: "remove shadows from images used in procedural room generation, they look wrong"): no drawn shadow under scenery.
     if (p.kind === 'lamp') { const lg = ctx.createRadialGradient(p.x * K, (p.y - p.h * 0.78) * K, 2, p.x * K, (p.y - p.h * 0.78) * K, 70 * K); lg.addColorStop(0, 'rgba(' + GEN.lamp + ',.38)'); lg.addColorStop(1, 'rgba(' + GEN.lamp + ',0)'); ctx.fillStyle = lg; ctx.fillRect((p.x - 70) * K, (p.y - p.h * 0.78 - 70) * K, 140 * K, 140 * K); }
     ctx.drawImage(img, (p.x - p.w / 2) * K, (p.y - p.h) * K, p.w * K, p.h * K);
   }

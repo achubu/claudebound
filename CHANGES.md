@@ -3496,6 +3496,27 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 391: the old city paintings are out; placement rules, matching curbs, no scenery shadows
+
+Owner: "im seeing old room images, you can remove them from the game or cache?". The generated city (Rounds 387-389)
+loads none of them (checked in a fresh browser on the live site); a browser holding the old page could still show them.
+The 54 painted rooms (`assets/environment/rooms/`) and the six district paintings (`assets/environment/world/`) moved to
+`unused assets/` (about 37MB), so nothing can load them any more. Hard refresh (Ctrl+Shift+R) to drop the cached page.
+
+Owner: "remove shadows from images used in procedural room generation, they look wrong"; "set up clear rules that position
+buildings only on certain terrain, curb tiles should only hold small objects like street lamps and benches"; "make all
+curbs drawn at a similar width, use the same border on both sides of the curb"; "no buildings should overlap a curb"; "find
+a different tile to use for off path traversal to objects, do not use the curb tile for those areas".
+
+- **Placement rules** (`chronoRoomProps`, both worlds): roads and squares hold nothing; the pavement holds street
+  furniture only (lamps, benches, bollards and vending machines); buildings, landmarks and clutter stand on open ground
+  past the pavement and its kerb (`BIG_CLEAR` = pavement + 18px), never in a chasm or water. Checked on four seeds: none of
+  863 big pieces touches a curb, all 1,377 pieces of furniture stand on the pavement.
+- **No drawn shadow** under scenery pictures.
+- **Curbs:** the pavement's outer edge has the same three-band kerb border as its road edge, and neither casts a shadow.
+- **Object squares and their paths** have their own tile in the city (`plazaTex`: the large worn slabs, darkened, with a
+  thin dark edge), no longer the curb's pavement. Lamps stand about every 240px (were 150).
+
 ## Round 390: new Briar Wall card art
 
 The owner's new Briar Wall set (a briar barrier filling a ruined stone archway by a stream, from a few stems to a woven
