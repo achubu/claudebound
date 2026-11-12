@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 394: buildings to one scale and bigger, across room seams; rounded curbs; beach sand; Barkskin and Afterimage Ward art
+
+Owner: "adjust buildings to be similar in scale? All doors and windows should be similar in size"; "buildings should
+probably be around 3 times bigger"; "i'm seeing buildings of the same type side by side"; "round the curb corners more and
+make the edges more opaque"; the beach-sand tile; Barkskin and Afterimage Ward paintings.
+
+- **One storey, one height** (`assets/chrono-gen.js`, city `storey`): each building has a factor, measured from its
+  painting's floors, doors and windows, that brings one storey to the same height on screen (shops and stalls shrink,
+  tower blocks grow). The tallest are capped at 250px (`maxH`) so they fit a block.
+- **Bigger**: buildings and landmarks draw at 0.55 of their painting (was 0.3 and 0.4), about twice the old size. Three
+  times was tried: with one street crossing every room, the blocks between streets are only 230-330px tall once the curb
+  clearance is taken off, so nothing fit. To make room, a building's picture may now run past its room's east and north
+  edges (`span`): the next room keeps clear of it and draws its part (a room takes in its west, south and south-west
+  neighbours' buildings). Open ground away from the streets is filled too.
+- **No repeats next door**: a room never uses a building any of the eight rooms around it uses (rooms are made south rows
+  first, west to east, and each checks the four made before it).
+- **Rounded curbs**: road corners turn on arcs, and the pavement's on the same centres, so the curb keeps one width round
+  every corner, inside and out (inside corners are rounded from exact distance fields, `closed()`).
+- **Crisper edges**: grass, lawns and sand have sharper (still ragged) edges.
+- **Beach sand**: the owner's sand tile (`assets/environment/city-gen/sand.webp`, via `tools/prepare_chrono_gen.py ... city`)
+  replaces the drawn sand colour.
+- **Card art**: Barkskin and Afterimage Ward, levels 0-3 (`refreshedCardArt`, `cards.js?v=round394`).
+
 ## Round 393: straight city streets, beaches, ragged grass, no matching buildings across a seam
 
 Owner, in a run of messages on the generated Neon Aftermath: "curb corners need to be a bit more rounded, transitions
