@@ -32,8 +32,12 @@ SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
 # Round 387: Neon Aftermath's set, for the same generator (python3 tools/prepare_chrono_gen.py <folder> city).
 WORLDS = {'city': {
     'out': 'assets/environment/city-gen',
-    'textures': {'floor': '5uo2m3', 'overgrowth': '549k97', 'yard': 'k7s1hd', 'ground': 'wd498u', 'water': 'vkvpou', 'road-wet': '1pi1qk', 'pavement-old': 'ijwi57', 'rubble-big': 'pch07g', 'sand': 'nsyypy'},  # Round 394: beach sand; Round 389: finer road, pavement and rubble
+    'textures': {'floor': '5uo2m3', 'overgrowth': '549k97', 'yard': 'k7s1hd', 'ground': 'wd498u', 'water': 'vkvpou', 'road-wet': '1pi1qk', 'pavement-old': 'ijwi57', 'rubble-big': 'pch07g', 'sand': 'nsyypy', 'plaza': '9ssefs'},  # Round 394: beach sand; Round 389: finer road, pavement and rubble
     'sheets': {
+        # Round 397: single buildings, one per image (the whole picture is the building)
+        'nfrfik': (['laundromat'], 420), 'dgth72': (['pharmacy'], 420), 'px41tz': (['karaoke-bar'], 420), 'ttx0vi': (['food-court'], 420),
+        'wccq4y': (['walkup-flats'], 420), 'f2cvd9': (['boarding-house'], 420), 'n0n3ei': (['shanty-block'], 420),
+        '79npzi': (['robotics-workshop'], 420), 'h4rveg': (['data-relay'], 420), 'nbriq1': (['bathhouse'], 420), 'yarkcd': (['temple-hall'], 420),
         '4m9l9k': (['lamp', 'vending', 'barrier', 'bench'], 200),
         'op0e6t': (['car', 'dumpsters', 'crates', 'traffic-light'], 220),
         '9qvkln': (['server-block', 'substation', 'parking-garage', 'relay-hut'], 420),
@@ -77,20 +81,22 @@ def props(folder):
         lab, n = ndimage.label(alpha < 0.5)
         edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
         bg = np.median(a[np.isin(lab, list(edge))], axis=0)
-        keep = [i for i in range(1, n + 1) if i not in edge and (lab == i).sum() >= 200 and np.linalg.norm(np.median(a[lab == i], 0) - bg) > 60]
+        keep = [] if len(names) == 1 else [i for i in range(1, n + 1) if i not in edge and (lab == i).sum() >= 200 and np.linalg.norm(np.median(a[lab == i], 0) - bg) > 60]  # a single building keeps no enclosed green (haze)
         glow = ndimage.binary_dilation(np.isin(lab, keep), iterations=3) & (alpha < 1)
         alpha = np.where(glow, 1, alpha)
         g2 = np.minimum(g, np.maximum(r, b))
         # Any green left (kept glows, green-tinted smoke and light) turns amber at the same brightness.
         k = np.clip((gx - 8) / 40, 0, 1) * (alpha > 0.5)
         r2 = r * (1 - k) + np.clip(g * 1.05, 0, 255) * k; g3 = np.where(glow, g * 0.78, g2) * k + g2 * (1 - k); b2 = b * (1 - k) + b * 0.45 * k
+        if len(names) == 1:  # Round 397: on a single building, green-tinted smoke and haze turn grey, not amber
+            grey = (r + g2 + b) / 3; r2 = r * (1 - k) + grey * k; g3 = g2 * (1 - k) + grey * k; b2 = b * (1 - k) + grey * k
         rgba = np.dstack([r2, g3, b2, alpha * 255]).clip(0, 255).astype(np.uint8)
         A = rgba[..., 3].copy(); A[A < 40] = 0
         lab, n = ndimage.label(A > 0, structure=np.ones((3, 3)))
         cm = ndimage.center_of_mass(np.ones_like(A), lab, range(1, n + 1)); sz = ndimage.sum(np.ones_like(A), lab, range(1, n + 1))
         H, W = A.shape
         for i, name in enumerate(names):
-            ids = [j for j in range(1, n + 1) if sz[j - 1] >= 60 and int(cm[j - 1][0] // (H / 2)) * 2 + int(cm[j - 1][1] // (W / 2)) == i]
+            ids = [j for j in range(1, n + 1) if sz[j - 1] >= 60 and (len(names) == 1 or int(cm[j - 1][0] // (H / 2)) * 2 + int(cm[j - 1][1] // (W / 2)) == i)]
             m = np.isin(lab, ids); ys, xs = np.nonzero(m)
             part = rgba[ys.min():ys.max() + 1, xs.min():xs.max() + 1].copy(); part[..., 3] = np.where(m[ys.min():ys.max() + 1, xs.min():xs.max() + 1], part[..., 3], 0)
             o = Image.fromarray(part, 'RGBA'); s = size / max(o.size); o = o.resize((round(o.width * s), round(o.height * s)), Image.LANCZOS)
