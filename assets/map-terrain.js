@@ -257,6 +257,7 @@ const MAP_ROAD_STYLE = { shadow: 'rgba(0,0,0,.35)', kerb: '#cfe6ee', asphalt: '#
 function mapRoadTile(key, onReady) {
   // Round 383: the generated Chronospire's map shows each room's real roads.
   if (activeRegion === 'chronospire' && typeof chronoMapTile === 'function') { const t = chronoMapTile(key, onReady); if (t) return t; }
+  if (activeRegion === 'city' && typeof cityGenPlan === 'function') { cityGenEnsure(); const t = genWith('city', () => chronoMapTile(key, onReady)); if (t) return t; } // Round 387
   const r = rooms[key], net = mapRoadNet(key); if (!net) return null;
   const objs = mapRoomObjects(key), sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
   const ck = 'roads:' + activeRegion + ':' + key + ':' + sig; if (mapTileCache[ck]) return mapTileCache[ck];

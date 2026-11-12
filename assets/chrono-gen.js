@@ -36,7 +36,7 @@ function chronoTerrain(seed, key) {
   const [cx, cy] = GEN.world(key), memo = {};
   // (x, y) are this room's cells; one beyond each edge is the neighbour's, so shapes meet across the seam.
   const kind = (x, y) => { const k = x + ',' + y; if (k in memo) return memo[k]; const gx = cx * CG_COLS + x, gy = cy * CG_ROWS + y;
-    return memo[k] = chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66 ? 'chasm' : chronoNoise(seed, 'pipes', gx, gy, 7) > 0.56 ? 'pipes' : 'gears'; };
+    return memo[k] = (GEN.hole ? GEN.hole(seed, gx, gy) : chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66) ? 'chasm' : chronoNoise(seed, 'pipes', gx, gy, 7) > 0.56 ? 'pipes' : 'gears'; };
   return { kind, chasm: (x, y) => kind(x, y) === 'chasm', pipes: (x, y) => kind(x, y) === 'pipes' };
 }
 
@@ -325,7 +325,11 @@ const GEN_THEMES = {
     furniture: { lamp: [89, 200], bench: [173, 200], bollard: [156, 200] }, rename: { bollard: 'vending' },
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.3, landmark: 0.4, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
-    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', lamp: '120,230,255', vignette: '2,6,14' }
+    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 22, pavement: 13,
+    // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
+    // 9x6 rooms, and a rare pond inland.
+    hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
+    lamp: '120,230,255', vignette: '2,6,14' }
 };
 let GEN = GEN_THEMES.chronospire;
 function genWith(id, fn) { const was = GEN; GEN = GEN_THEMES[id]; try { return fn(); } finally { GEN = was; } }
@@ -423,8 +427,8 @@ function chronoWalk(wx, wy) {
   const cx = Math.floor(x / 800), cy = Math.floor(y / 500), p = chronoRoomOf(cx + ',' + cy);
   return !!p && p.floor[Math.floor((y - cy * 500) / FG_CELL) * FG_COLS + Math.floor((x - cx * 800) / FG_CELL)] === 1;
 }
-function chronoFlushCaches() {
-  const mine = k => typeof k === 'string' && k.indexOf('chronospire') >= 0;
+function chronoFlushCaches(id = 'chronospire') {
+  const mine = k => typeof k === 'string' && k.indexOf(id) >= 0;
   const drop = o => { if (o && typeof o === 'object') for (const k of Object.keys(o)) if (mine(k)) delete o[k]; };
   // Every cache keyed by world and room that does not also carry the journey's seed, and the seeded ones for good measure.
   if (typeof organicDoorCache !== 'undefined') { drop(organicDoorCache); drop(organicDoorsCache); }
@@ -590,19 +594,40 @@ function paintChronoRoom(canvas, key) {
   // The floor is drawn from the room's shapes: straight-edged roads with mitred corners and 45-degree legs, eight-sided hubs and squares.
   const floorShape = document.createElement('canvas'); floorShape.width = W; floorShape.height = H;
   { const g = floorShape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
+    // A theme with `round` (the city: "make the roads look more like roads, they are too sharp") turns every corner on an
+    // arc: road bends, and the corners of hubs and squares.
+    const R = (GEN.round || 0) * K, turn = (pts, close) => { g.beginPath(); const n = pts.length, P = i => pts[((i % n) + n) % n];
+      if (!R) { pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); if (close) g.closePath(); return; }
+      if (close) { const a = P(-1), b = P(0); g.moveTo((a[0] + b[0]) / 2 * K, (a[1] + b[1]) / 2 * K); for (let i = 0; i < n; i++) { const c = P(i), d = P(i + 1); g.arcTo(c[0] * K, c[1] * K, (c[0] + d[0]) / 2 * K, (c[1] + d[1]) / 2 * K, Math.min(R, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.closePath(); }
+      else { g.moveTo(pts[0][0] * K, pts[0][1] * K); for (let i = 1; i < n - 1; i++) { const a = pts[i - 1], c = pts[i], d = pts[i + 1]; g.arcTo(c[0] * K, c[1] * K, d[0] * K, d[1] * K, Math.min(R * 1.6, Math.hypot(c[0] - a[0], c[1] - a[1]) * K / 2, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.lineTo(pts[n - 1][0] * K, pts[n - 1][1] * K); } };
+    if (R) { g.lineCap = 'round'; g.lineJoin = 'round'; }
     for (const sh of plan.shapes) {
       if (sh.t === 'rect') g.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
-      else if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); }
-      else { g.lineWidth = sh.w * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); }
-    } }
+      else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); }
+      else { g.lineWidth = sh.w * K; turn(sh.pts, false); g.stroke(); }
+    }
+    plan.turn = turn; }
   { // close hairline gaps where two shapes pass within a few pixels of each other
     const copy = document.createElement('canvas'); copy.width = W; copy.height = H; copy.getContext('2d').drawImage(floorShape, 0, 0);
     const g = floorShape.getContext('2d'); for (let a = 0; a < 8; a++) g.drawImage(copy, Math.round(Math.cos(a * Math.PI / 4) * 5), Math.round(Math.sin(a * Math.PI / 4) * 5)); }
   const f = { shape: floorShape, art: document.createElement('canvas') }; f.art.width = W; f.art.height = H;
   { const g = f.art.getContext('2d'); g.drawImage(floorShape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); }
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore();
+  if (GEN.pavement) { // a strip of pavement down both sides of every road
+    const wide = document.createElement('canvas'); wide.width = W; wide.height = H; const wg = wide.getContext('2d'); for (let a = 0; a < 16; a++) wg.drawImage(f.shape, Math.round(Math.cos(a * Math.PI / 8) * GEN.pavement * K), Math.round(Math.sin(a * Math.PI / 8) * GEN.pavement * K));
+    const pa = document.createElement('canvas'); pa.width = W; pa.height = H; const pg = pa.getContext('2d'); pg.drawImage(wide, 0, 0); pg.globalCompositeOperation = 'source-in'; fill(pg, imgs.yard);
+    pg.globalCompositeOperation = 'source-atop'; pg.fillStyle = GEN.yardShade || 'rgba(10,8,26,.22)'; pg.fillRect(0, 0, W, H);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(wide, '#05080c'), 0, 0); ctx.restore();
+    ring(chronoTint(wide, GEN.yardRim[0]), 3); ctx.drawImage(pa, 0, 0);
+  }
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = GEN.pavement ? 8 : 26; ctx.shadowOffsetY = GEN.pavement ? 2 : 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore();
   ring(chronoTint(f.shape, GEN.kerb[0]), 9); ring(chronoTint(f.shape, GEN.kerb[1]), 6); ring(chronoTint(f.shape, GEN.kerb[2]), 2);
   ctx.drawImage(f.art, 0, 0);
+  if (GEN.laneLine) { // a dashed centre line along each road
+    ctx.save(); ctx.strokeStyle = GEN.laneLine; ctx.lineWidth = 3 * K; ctx.lineCap = 'butt'; ctx.setLineDash([14 * K, 14 * K]);
+    const g = ctx; for (const sh of plan.shapes) if (sh.t === 'road' && sh.w >= 90 && sh.pts.length > 1) { const pts = sh.pts, n = pts.length, Rr = (GEN.round || 0) * K * 1.6; g.beginPath(); g.moveTo(pts[0][0] * K, pts[0][1] * K);
+      for (let i = 1; i < n - 1; i++) { const a = pts[i - 1], c = pts[i], d = pts[i + 1]; g.arcTo(c[0] * K, c[1] * K, d[0] * K, d[1] * K, Math.min(Rr, Math.hypot(c[0] - a[0], c[1] - a[1]) * K / 2, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); }
+      g.lineTo(pts[n - 1][0] * K, pts[n - 1][1] * K); g.stroke(); }
+    ctx.restore(); }
   for (const i of plan.inlays) { ctx.save(); ctx.globalAlpha = 0.94; ctx.drawImage(imgs[i.name], (i.x - i.size / 2) * K, (i.y - i.size / 2) * K, i.size * K, i.size * K); ctx.restore(); }
   for (const p of props) {
     const img = imgs[p.name];
@@ -623,9 +648,9 @@ function paintChronoRoom(canvas, key) {
 // to the world"). A room's tile for the Map screen and the minimap: its own roads, hub, squares, loops and spurs drawn
 // from plan.shapes in the map's road style (pale kerb, dark asphalt), with the room's objects at the spots where they stand.
 function chronoMapTile(key, onReady) {
-  const plan = chronoPlan(key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
+  const plan = GEN.id === 'chronospire' ? chronoPlan(key) : genPlan(GEN.id, key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
   const objs = typeof mapRoomObjects === 'function' ? mapRoomObjects(key) : [], sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
-  const ck = 'chrono:' + chronoSeedNow + ':' + key + ':' + sig; if (typeof mapTileCache !== 'undefined' && mapTileCache[ck]) return mapTileCache[ck];
+  const ck = 'gen:' + GEN.id + ':' + (GEN.id === 'chronospire' ? chronoSeedNow : chronoSeed()) + ':' + key + ':' + sig; if (typeof mapTileCache !== 'undefined' && mapTileCache[ck]) return mapTileCache[ck];
   const W = 800, H = 500, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;
   // Owner: "make the map for chronospire look similar to the rooms, use similar colors": the room's own textures at
@@ -633,7 +658,7 @@ function chronoMapTile(key, onReady) {
   // the textures have loaded.
   const tex = n => { const im = chronoArtImage(n); if (im.complete && im.naturalWidth) return im; if (onReady && im.addEventListener) im.addEventListener('load', onReady, { once: true }); return null; };
   const groundImg = tex('ground'), floorImg = tex('floor'); let complete = !!(groundImg && floorImg);
-  const [mx, my] = key.split(',').map(Number), offX = (mx * 800) % 400, offY = (my * 500) % 400;
+  const [mx, my] = GEN.world(key), offX = (((mx * 800) % 400) + 400) % 400, offY = (((my * 500) % 400) + 400) % 400;
   const paint = (g, img, flat) => { g.save(); if (img) { g.translate(-offX, -offY); g.scale(0.5, 0.5); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(0, 0, (W + offX) * 2, (H + offY) * 2); } else { g.fillStyle = flat; g.fillRect(0, 0, W, H); } g.restore(); };
   paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H);
   const shape = document.createElement('canvas'); shape.width = W; shape.height = H;
@@ -645,9 +670,9 @@ function chronoMapTile(key, onReady) {
     } }
   const ring = (pic, r) => { for (let a = 0; a < 12; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 6) * r), Math.round(Math.sin(a * Math.PI / 6) * r)); };
   ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(shape, '#0a0714'), 0, 0); ctx.restore();
-  ring(chronoTint(shape, '#1c1206'), 9); ring(chronoTint(shape, '#d0a04a'), 6);
+  ring(chronoTint(shape, GEN.kerb[0]), 9); ring(chronoTint(shape, GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1]), 6);
   { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, floorImg, '#b8923f'); ctx.drawImage(art, 0, 0); }
-  const style = { kerb: '#d0a04a' };
+  const style = { kerb: GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1] };
   // The room's objects where they stand (dimmed once used).
   const ICON = 104;
   for (const o of objs) {

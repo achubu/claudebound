@@ -29,7 +29,8 @@ function roomPaintingImage(key) {
   try {
     if (activeRegion === 'elaris' && typeof SOLARIS_PLAN === 'object' && SOLARIS_PLAN[key]) return solarisTile(SOLARIS_PLAN[key][0]);
     const d = typeof TILE_WORLD_DATA === 'object' && TILE_REGIONS[activeRegion] && TILE_WORLD_DATA[activeRegion];
-    if (activeRegion === 'chronospire' && typeof chronoArtImage === 'function') return chronoArtImage('floor'); // Round 377: the generated world's textures
+    if (activeRegion === 'chronospire' && typeof chronoArtImage === 'function') return chronoArtImage('floor');
+    if (activeRegion === 'city' && typeof cityGenPlan === 'function') return genWith('city', () => chronoArtImage('floor')); // Round 387 // Round 377: the generated world's textures
     if (d && d.plan[key]) {
       const src = tileWorldArtSrc(activeRegion, d.plan[key][0]);
       if (!tileWorldImages[src]) { const img = new Image(); img.src = src; tileWorldImages[src] = img; }
