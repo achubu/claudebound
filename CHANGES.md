@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 397: eleven new city buildings, a paved tile under objects, fuller blocks
+
+The owner's Archive_16 (two uploads): the hex-paver plaza tile and eleven buildings from the prompts given one at a time.
+
+- **Buildings** (`assets/environment/city-gen/`, keyed by `tools/prepare_chrono_gen.py <folder> city`, which now takes a
+  single building per image and, for those, drops enclosed green haze and turns green-tinted smoke grey): market gains
+  laundromat, pharmacy, karaoke-bar, food-court; homes gains walkup-flats, boarding-house, shanty-block; tech gains
+  data-relay (keyed by hand with a stricter cut: its painting had ghost buildings in the fog) and robotics-workshop;
+  garden gains bathhouse and temple-hall. Each has a storey factor; the tallest cap is now 300px.
+- **Paved squares**: the squares and paths where objects stand use the owner's hex-paver tile (`plaza`, drawn at 0.32,
+  darkened) with rounded, crisp edges and a thin dark rim, instead of grass.
+- **Fuller blocks**: buildings may stand 6px from an object's square (the streets themselves keep their clearances;
+  the plan keeps `street`, the floor before the squares), and the building picker skips names used within 1000px, so it
+  no longer wastes its tries.
+
 ## Round 396: a street hierarchy for Neon Aftermath (main roads and alleys), bigger buildings
 
 Owner, after the whole-city preview: "it looks better but not perfect, will need work but you can begin"; "standardize curb

@@ -271,6 +271,7 @@ function chronoRoomPlan(seed, key) {
     if (Math.hypot(end[0] - hub[0], end[1] - hub[1]) > 7) { road(hub, end, rnd() < 0.5 ? 'x' : 'y', 2 + Math.floor(rnd() * 4), 3); octagon(end[0], end[1], 2.5); } }
   // Squares for objects: eight-sided, 125px across, a cell clear of every road and joined to the nearest one; never
   // under the HUD panel or the minimap. A crowded room uses its hub.
+  const street = floor.slice(); // Round 397: the streets alone, before the squares for objects (buildings may stand closer to a square)
   const plazas = [], PR = 2.5;
   for (let n = 0; n < 2; n++) {
     // Chebyshev distance from every cell to the nearest floor cell, and which floor cell that is (one sweep, not a search per candidate).
@@ -297,7 +298,7 @@ function chronoRoomPlan(seed, key) {
   // dead end's hub, sized to sit well inside that eight-sided shape (its flat sides are 100px from the middle; an arena's 112px).
   const courts = []; if (GEN.inlays.length && (boss || landing || dirs.length === 1)) courts.push([hub[0] * FG_CELL, hub[1] * FG_CELL, boss ? 150 : 130]);
   return { key, floor, shapes, inlays: courts.map(([x, y, size], i) => ({ name: GEN.inlays[(chronoHash(seed + ':inlay:' + key) + i) % GEN.inlays.length], x, y, size })),
-    hub: [hub[0] * FG_CELL, hub[1] * FG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null, main: GEN.alley ? main : null };
+    hub: [hub[0] * FG_CELL, hub[1] * FG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null, main: GEN.alley ? main : null, street: GEN.alley ? street : null };
 }
 // =====================================================================
 // Round 385 (owner: "the roads look great but the scenery looks like randomly dropped graphics ... any procedural
@@ -332,10 +333,10 @@ const CHRONO_SCENERY_SCALE = { building: 0.3, landmark: 0.42, lamp: 0.32, bench:
 // (the Chronospire's unless genWith() says otherwise).
 // =====================================================================
 const CITY_DISTRICTS = {
-  market: { 'noodle-bar': [420, 373], arcade: [369, 420], 'pawn-shop': [400, 420], 'capsule-hotel': [339, 420], 'neon-tower': [324, 420], 'corner-store': [381, 420], 'ramen-stall': [420, 408], 'repair-shop': [372, 420], 'tattoo-parlour': [350, 420], cinema: [408, 420] },
-  homes: { tenement: [350, 420], 'garden-block': [405, 420], 'container-home': [290, 420], 'clinic-block': [321, 420], apartment: [330, 420], 'scrap-shop': [420, 387], 'ac-tower': [241, 420], 'scrap-shack': [413, 420], 'courtyard-block': [420, 350], 'collapsed-block': [393, 420] },
-  tech: { 'server-block': [420, 388], substation: [420, 279], 'parking-garage': [420, 361], 'relay-hut': [253, 420], 'coolant-tower': [271, 420], 'drone-hangar': [420, 382], 'battery-depot': [420, 328], 'conveyor-factory': [400, 420] },
-  garden: { pagoda: [344, 420], 'shrine-gate': [383, 420], 'tea-house': [420, 342], 'lantern-court': [420, 354], 'bell-pavilion': [420, 389], greenhouse: [420, 409], 'bridge-house': [420, 409], 'tea-terrace': [420, 329] }
+  market: { 'noodle-bar': [420, 373], arcade: [369, 420], 'pawn-shop': [400, 420], 'capsule-hotel': [339, 420], 'neon-tower': [324, 420], 'corner-store': [381, 420], 'ramen-stall': [420, 408], 'repair-shop': [372, 420], 'tattoo-parlour': [350, 420], cinema: [408, 420] , 'laundromat': [345, 420], 'pharmacy': [345, 420], 'karaoke-bar': [340, 420], 'food-court': [406, 420]},
+  homes: { tenement: [350, 420], 'garden-block': [405, 420], 'container-home': [290, 420], 'clinic-block': [321, 420], apartment: [330, 420], 'scrap-shop': [420, 387], 'ac-tower': [241, 420], 'scrap-shack': [413, 420], 'courtyard-block': [420, 350], 'collapsed-block': [393, 420], 'walkup-flats': [361, 420], 'boarding-house': [347, 420], 'shanty-block': [341, 420] },
+  tech: { 'server-block': [420, 388], substation: [420, 279], 'parking-garage': [420, 361], 'relay-hut': [253, 420], 'coolant-tower': [271, 420], 'drone-hangar': [420, 382], 'battery-depot': [420, 328], 'conveyor-factory': [400, 420] , 'data-relay': [304, 420], 'robotics-workshop': [366, 420]},
+  garden: { pagoda: [344, 420], 'shrine-gate': [383, 420], 'tea-house': [420, 342], 'lantern-court': [420, 354], 'bell-pavilion': [420, 389], greenhouse: [420, 409], 'bridge-house': [420, 409], 'tea-terrace': [420, 329] , 'bathhouse': [420, 318], 'temple-hall': [420, 314]}
 };
 const GEN_THEMES = {
   chronospire: { id: 'chronospire', art: 'assets/environment/chronospire/gen/', version: () => CHRONO_ART_VERSION,
@@ -343,7 +344,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '394',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '397',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -353,8 +354,9 @@ const GEN_THEMES = {
     furniture: { lamp: [89, 200], bench: [173, 200], bollard: [156, 200] }, rename: { bollard: 'vending' },
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.9, landmark: 0.9, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
-    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, 'rubble-big': 0.8 },
-    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], plazaTex: 'overgrowth', plazaShade: 'rgba(6,12,20,.18)', bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
+    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, plaza: 0.32, 'rubble-big': 0.8 },
+    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], plazaTex: 'plaza', plazaShade: 'rgba(6,12,20,.5)', // Round 397: the owner's hex-paver plaza tile under objects
+    bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
     hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
@@ -362,8 +364,8 @@ const GEN_THEMES = {
     // Round 396: main roads on every third column line and on two row lines; the other streets are alleys.
     alley: (key, d) => { const [wx, wy] = GEN_THEMES.city.world(key); return d === 'e' || d === 'w' ? !(wy === 1 || wy === 4) : wx % 3 !== 1; }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
-    maxH: 340, // Round 394 (owner: "buildings should probably be around 3 times bigger")
-    storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 },
+    maxH: 300, // Round 394 (owner: "buildings should probably be around 3 times bigger")
+    storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 , 'laundromat': 1.6, 'pharmacy': 1.6, 'karaoke-bar': 1.6, 'food-court': 1.44, 'walkup-flats': 1.6, 'boarding-house': 1.6, 'shanty-block': 1.6, 'data-relay': 1.44, 'robotics-workshop': 0.83, 'bathhouse': 1.25, 'temple-hall': 1.39},
     lamp: '120,230,255', vignette: '2,6,14' }
 };
 let GEN = GEN_THEMES.chronospire;
@@ -403,9 +405,11 @@ function chronoRoomProps(seed, plan) {
   // the same one in those four rooms (measured across the seam), as well as never twice in a room.
   const nearUse = []; if (GEN.span) for (const [dx, dy] of [[-1, 0], [-1, 1], [0, 1], [1, 1]]) { const np = nb(dx, dy); if (np) for (const p of chronoRoomProps(seed, np)) if (!p.foreign && (p.kind === 'building' || p.kind === 'landmark')) nearUse.push([p.name, p.x + dx * 800, p.y + dy * 500]); }
   const REPEAT_GAP = 1000, banned = { has: () => false }, tooNear = (name, x, y) => nearUse.some(([n, ux, uy]) => n === name && Math.hypot(ux - x, uy - y) < REPEAT_GAP);
-  const cellOf = (which, cx, cy) => { if (cx >= 0 && cy >= 0 && cx < FG_COLS && cy < FG_ROWS) return (which ? plan.main : F)[cy * FG_COLS + cx];
-    const dx = Math.floor(cx / FG_COLS), dy = Math.floor(cy / FG_ROWS), np = nb(dx, dy); return np ? (which ? np.main || np.floor : np.floor)[(cy - dy * FG_ROWS) * FG_COLS + (cx - dx * FG_COLS)] : 1; };
+  const cellOf = (which, cx, cy) => { const arr = q => which === 1 ? q.main || q.floor : which === 2 ? q.street || q.floor : q.floor;
+    if (cx >= 0 && cy >= 0 && cx < FG_COLS && cy < FG_ROWS) return arr(plan)[cy * FG_COLS + cx];
+    const dx = Math.floor(cx / FG_COLS), dy = Math.floor(cy / FG_ROWS), np = nb(dx, dy); return np ? arr(np)[(cy - dy * FG_ROWS) * FG_COLS + (cx - dx * FG_COLS)] : 1; };
   const floorAt = (cx, cy) => cellOf(0, cx, cy);
+  const streetIn = (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / C); cy <= Math.floor(y1 / C); cy++) for (let cx = Math.floor(x0 / C); cx <= Math.floor(x1 / C); cx++) if (cellOf(2, cx, cy)) return true; return false; };
   // Round 396: main roads (with their pavement) keep big pieces BIG_CLEAR away; an alley only ALLEY_CLEAR.
   const mainIn = (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / C); cy <= Math.floor(y1 / C); cy++) for (let cx = Math.floor(x0 / C); cx <= Math.floor(x1 / C); cx++) if (cellOf(1, cx, cy)) return true; return false; };
   const floorIn = GEN.span ? (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / C); cy <= Math.floor(y1 / C); cy++) for (let cx = Math.floor(x0 / C); cx <= Math.floor(x1 / C); cx++) if (floorAt(cx, cy)) return true; return false; }
@@ -425,7 +429,7 @@ function chronoRoomProps(seed, plan) {
     const box = [x - w / 2 + 4, y - h + 6, x + w / 2 - 4, y - 1];
     if (GEN.span ? (box[0] < 4 || box[3] > 496 || x >= 796 || box[2] > 1590 || box[1] < -490) : (box[0] < 4 || box[1] < 4 || box[2] > 796 || box[3] > 496)) return null;
     const ac = Math.min(clear, ALLEY_CLEAR);
-    if ((plan.main && GEN.span ? floorIn(box[0] - ac, box[1] - ac, box[2] + ac, box[3] + ac) || mainIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear) : floorIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear)) || chasmIn(box[0], y - h * 0.4, box[2], y - 1)) return null;
+    if ((plan.main && GEN.span ? floorIn(box[0] - 6, box[1] - 6, box[2] + 6, box[3] + 6) || streetIn(box[0] - ac, box[1] - ac, box[2] + ac, box[3] + ac) || mainIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear) : floorIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear)) || chasmIn(box[0], y - h * 0.4, box[2], y - 1)) return null;
     if (out.some(p => box[0] < p.box[2] + gap && box[2] > p.box[0] - gap && box[1] < p.box[3] + gap && box[3] > p.box[1] - gap)) return null;
     return box;
   };
@@ -456,14 +460,14 @@ function chronoRoomProps(seed, plan) {
     if (best) { put(name, 'landmark', best.x, best.y, w, h, best.box); if (!GEN.pavement) yards.push({ t: 'oct', x: best.x, y: best.y - h * 0.16, rx: w * 0.62, ry: h * 0.3 }); } }
   // 3 and 4. Street-front lots and their yards. Pass 0: the far side of a street (a road just below the foot); pass 1: beside or above a road.
   const own = Object.keys(GEN.districts[district]), others = Object.keys(GEN.districts).filter(d => d !== district);
-  const pick = () => { const free = own.filter(n => !out.some(p => p.name === n) && !banned.has(n)); if (free.length && rnd() < 0.85) { const n = free[Math.floor(rnd() * free.length)]; return [n, GEN.districts[district]]; } const d = others[Math.floor(rnd() * others.length)], t = Object.keys(GEN.districts[d]); return [t[Math.floor(rnd() * t.length)], GEN.districts[d]]; };
+  const pick = (x, y) => { const ok = n => !out.some(p => p.name === n) && !(x != null && GEN.span && tooNear(n, x, y)), free = own.filter(ok); if (free.length && rnd() < 0.85) { const n = free[Math.floor(rnd() * free.length)]; return [n, GEN.districts[district]]; } const d = others[Math.floor(rnd() * others.length)], t = Object.keys(GEN.districts[d]), tf = t.filter(ok), tt = tf.length ? tf : t; return [tt[Math.floor(rnd() * tt.length)], GEN.districts[d]]; };
   let built = 0;
   for (const pass of [0, 1]) for (let y = 40; y < 498 && built < 16; y += 6) {
     for (let x = 16; x < 790 && built < 16;) {
       const below = roadBelow(x, y, 26 + PAVE), near = dist[Math.min(FG_ROWS - 1, Math.floor((y - 12) / C)) * FG_COLS + Math.floor(x / C)];
       const n0 = Math.ceil((BIG_CLEAR + 4) / C); if (pass === 0 ? !(below >= BIG_CLEAR - 1) : !(near >= n0 && near <= n0 + 2)) { x += 6; continue; }
       let placed = null;
-      for (let t = 0; t < 9 && !placed; t++) { const [name, table] = pick(), [w, h] = size(table, name, 'building'), cx = x + w / 2;
+      for (let t = 0; t < 9 && !placed; t++) { const [name, table] = pick(x, y), [w, h] = size(table, name, 'building'), cx = x + w / 2;
         if (out.some(p => p.name === name) || banned.has(name)) continue; // Round 388 (owner): never the same building twice in a room; leave the lot empty instead
         if (pass === 0 && !(roadBelow(cx - w * 0.3, y, 30 + PAVE) && roadBelow(cx + w * 0.3, y, 30 + PAVE))) continue; // the whole front on the street
         const box = fits(cx, y, w, h, 5); if (box && seamOk(name, box)) placed = put(name, 'building', cx, y, w, h, box); }
@@ -485,12 +489,12 @@ function chronoRoomProps(seed, plan) {
     const covered = (sx, sy) => out.some(p => sx > p.box[0] && sx < p.box[2] && sy > p.box[1] && sy < p.box[3]);
     for (let i = seams.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [seams[i], seams[j]] = [seams[j], seams[i]]; }
     for (const [sx, sy] of seams) { if (built >= 20) break; if (covered(sx, sy)) continue;
-      for (let t = 0; t < 6; t++) { const [name, table] = pick(); if (out.some(p => p.name === name) || banned.has(name)) continue; const [w, h] = size(table, name, 'building');
+      for (let t = 0; t < 6; t++) { const [name, table] = pick(sx, sy); if (out.some(p => p.name === name) || banned.has(name)) continue; const [w, h] = size(table, name, 'building');
         const box = fits(sx, sy + h * 0.25, w, h, 5); if (box && seamOk(name, box)) { put(name, 'building', sx, sy + h * 0.25, w, h, box); built++; break; } } }
   }
   // 4c. Round 394: with bigger buildings, open ground away from the streets is filled too (still never a repeat).
   if (GEN.span) for (let y = 60; y < 496 && built < 16; y += 14) for (let x = 30; x < 780 && built < 16; x += 18) {
-    const [name, table] = pick(); if (out.some(p => p.name === name) || banned.has(name)) continue; const [w, h] = size(table, name, 'building');
+    const [name, table] = pick(x, y); if (out.some(p => p.name === name) || banned.has(name)) continue; const [w, h] = size(table, name, 'building');
     const box = fits(x, y, w, h, 6); if (box && seamOk(name, box)) { put(name, 'building', x, y, w, h, box); built++; x += w * 0.6; } }
   // 5. Street furniture: lamps on the far kerb every 150px or so; a bench or two bollards beside each square.
   const lamps = [];
@@ -822,7 +826,7 @@ function paintChronoRoom(canvas, key) {
     if (GEN.plazaTex && imgs[GEN.plazaTex]) { // the squares: their own tile, a thin dark edge, laid over the pavement they join
       const pl = document.createElement('canvas'); pl.width = W; pl.height = H; const lg = pl.getContext('2d'); lg.drawImage(pv, 0, 0); lg.globalCompositeOperation = 'source-in'; fill(lg, imgs[GEN.plazaTex]);
       lg.globalCompositeOperation = 'source-atop'; lg.fillStyle = GEN.plazaShade || 'rgba(10,14,24,.42)'; lg.fillRect(0, 0, W, H);
-      if (GEN.feather) { const m = ragged(pv, 'lawn', { blur: 22, amp: 0.8, sharp: 9, grow: 10, stretch: false }) /* a lawn path ends before the room's edge, not in a straight cut along it */, g = m.getContext('2d'); g.globalCompositeOperation = 'source-in'; fill(g, imgs[GEN.plazaTex]); g.globalCompositeOperation = 'source-atop'; g.fillStyle = GEN.plazaShade; g.fillRect(0, 0, W, H); ctx.drawImage(m, 0, 0); }
+      if (GEN.feather) { const m = smoothed(pv, 10 * K), g = m.getContext('2d'); ring(chronoTint(m, GEN.kerb[0]), 3); g.globalCompositeOperation = 'source-in'; fill(g, imgs[GEN.plazaTex]); g.globalCompositeOperation = 'source-atop'; g.fillStyle = GEN.plazaShade; g.fillRect(0, 0, W, H); ctx.drawImage(m, 0, 0); }
       else { ring(chronoTint(pv, GEN.kerb[0]), 4); ctx.drawImage(pl, 0, 0); } }
     ring(chronoTint(wide, GEN.kerb[0]), 9); ring(chronoTint(wide, GEN.kerb[1]), 6); ring(chronoTint(wide, GEN.kerb[2]), 2); ctx.drawImage(pa, 0, 0);
   }
