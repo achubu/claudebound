@@ -15,7 +15,7 @@
 // A change of seed (a new journey, a loaded or imported save) rebuilds everything and drops the Chronospire entries of
 // the caches that do not carry the seed (chronoFlushCaches).
 // =====================================================================
-const CHRONO_GEN_VERSION = 3, CHRONO_ART_VERSION = '378';
+const CHRONO_GEN_VERSION = 3, CHRONO_ART_VERSION = '385';
 const CG_COLS = 16, CG_ROWS = 10, CG_CELL = 50;
 // name: [width, height] of the keyed picture (px), drawn at CHRONO_PROP_SCALE of that in room pixels.
 const CHRONO_BUILDINGS = { 'clock-tower': [176, 420], observatory: [341, 420], 'bell-tower': [221, 420], spire: [135, 420], workshop: [383, 420], townhouse: [299, 420], foundry: [368, 420], ruin: [390, 420], hourglass: [343, 420], arch: [304, 420], engine: [420, 368], pavilion: [294, 420] };
@@ -285,31 +285,101 @@ function chronoRoomPlan(seed, key) {
   return { key, floor, sand, shapes, inlays: courts.map(([x, y, size], i) => ({ name: CHRONO_INLAYS[(chronoHash(seed + ':inlay:' + key) + i) % CHRONO_INLAYS.length], x, y, size })),
     hub: [hub[0] * FG_CELL, hub[1] * FG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null };
 }
-// Buildings and small props on the open ground: the whole picture clear of roads, squares and each other.
+// =====================================================================
+// Round 385 (owner: "the roads look great but the scenery looks like randomly dropped graphics ... any procedural
+// technique we can use to create a better looking cityscape?"; "lets use all the techniques"). Scenery follows the
+// streets now:
+//   1. Districts: smooth noise over the world's rooms zones them into a clock-tower quarter, a foundry quarter, a
+//      residential quarter and ruins; a room builds from its own quarter's buildings (a few strays from elsewhere).
+//   2. One landmark: the room's largest piece stands in the middle of its biggest stretch of open ground.
+//   3. Street-front lots: buildings stand in rows along the roads, each a short setback from the kerb with an even
+//      gap to the next, the far side of a street first (their fronts face it), then the other sides.
+//   4. Yards: each building stands on cobbled paving that runs to the road, so neighbours' yards join into pavement.
+//   5. Street furniture: lamps along the kerbs at regular spacing, a bench or bollards by the squares.
+//   6. Back lots: crates, scrap, pipes and barrels behind the rows, thinning with distance from the road.
+// Nothing is drawn over a road or a square (the hero walks there), and nothing stands in a chasm.
+// =====================================================================
+const CHRONO_DISTRICTS = {
+  clock: { 'clock-tower': [176, 420], observatory: [341, 420], 'bell-tower': [221, 420], spire: [135, 420], hourglass: [343, 420], pavilion: [294, 420], arch: [304, 420] },
+  foundry: { foundry: [368, 420], engine: [420, 368], workshop: [383, 420], smelter: [420, 292], 'pump-house': [420, 321], chimney: [162, 420], 'gear-mill': [420, 407] },
+  homes: { townhouse: [299, 420], 'row-house': [262, 420], cottage: [420, 378], 'turret-house': [363, 420], terrace: [418, 420], watchmaker: [379, 420], inn: [420, 394], bakery: [410, 420], bookshop: [331, 420] },
+  ruins: { ruin: [390, 420], 'ruined-hall': [420, 414], columns: [420, 346], 'broken-dome': [420, 349], 'broken-stair': [394, 420], arch: [304, 420] }
+};
+const CHRONO_LANDMARKS = { clock: { 'clock-tower': [176, 420], observatory: [341, 420], hourglass: [343, 420], 'bell-tower': [221, 420] }, foundry: { boilers: [429, 460], aqueduct: [460, 439], 'gear-mill': [420, 407], smelter: [420, 292] },
+  homes: { inn: [420, 394], pavilion: [294, 420], 'turret-house': [363, 420], watchmaker: [379, 420] }, ruins: { 'fallen-tower': [432, 460], cogwheel: [460, 417], 'ruined-hall': [420, 414], 'broken-dome': [420, 349] } };
+const CHRONO_FURNITURE = { lamp: [44, 200], bollard: [97, 200], railing: [200, 196], bench: [200, 195] };
+const CHRONO_CLUTTER = { crates: [200, 184], scrap: [200, 115], 'pipe-stack': [131, 200], barrels: [200, 159], gears: [220, 187], pendulum: [168, 220], crystals: [181, 220], bell: [220, 186] };
+const CHRONO_SCENERY_SCALE = { building: 0.3, landmark: 0.42, lamp: 0.32, bench: 0.2, bollard: 0.13, clutter: 0.2 };
+function chronoDistrict(seed, key) {
+  const [cx, cy] = key.split(',').map(Number), a = chronoNoise(seed, 'district', cx, cy, 1.9), b = chronoNoise(seed, 'district2', cx, cy, 1.9);
+  return a > 0.5 ? (b > 0.5 ? 'clock' : 'foundry') : (b > 0.5 ? 'homes' : 'ruins');
+}
+function chronoSceneryNames() { const out = new Set(); for (const t of [...Object.values(CHRONO_DISTRICTS), ...Object.values(CHRONO_LANDMARKS), CHRONO_FURNITURE, CHRONO_CLUTTER, CHRONO_BUILDINGS, CHRONO_SMALL, CHRONO_LARGE]) for (const n of Object.keys(t)) out.add(n); return [...out]; }
 function chronoRoomProps(seed, plan) {
   if (plan.props) return plan.props;
-  const rnd = chronoRng(seed + ':props:' + plan.key), out = [], terrain = chronoTerrain(seed, plan.key);
-  const chasm = new Uint8Array(CG_COLS * CG_ROWS); for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (terrain.chasm(x, y)) chasm[y * CG_COLS + x] = 1;
-  const blocked = (x0, y0, x1, y1, grid, cols = CG_COLS, rows = CG_ROWS, cell = CG_CELL) => { for (let cy = Math.max(0, Math.floor(y0 / cell)); cy <= Math.min(rows - 1, Math.floor(y1 / cell)); cy++) for (let cx = Math.max(0, Math.floor(x0 / cell)); cx <= Math.min(cols - 1, Math.floor(x1 / cell)); cx++) if (grid[cy * cols + cx]) return true; return false; };
-  const place = (table, kind, want, tries) => {
-    const names = Object.keys(table); let made = 0;
-    for (let t = 0; t < tries && made < want; t++) {
-      const name = names[Math.floor(rnd() * names.length)], [iw, ih] = table[name], w = iw * CHRONO_PROP_SCALE[kind], h = ih * CHRONO_PROP_SCALE[kind];
-      const x = w / 2 + 6 + rnd() * (800 - w - 12), y = h + 6 + rnd() * (500 - h - 12);
-      const box = [x - w / 2 + 6, y - h + 8, x + w / 2 - 6, y - 2];
-      if (blocked(box[0] - 10, box[1] - 10, box[2] + 10, box[3] + 10, plan.floor, FG_COLS, FG_ROWS, FG_CELL)) continue; // (a drawn diagonal reaches a few px past its cells)
-      if (blocked(box[0], y - h * 0.45, box[2], y - 2, chasm)) continue; // nothing stands over a chasm
-      if (kind === 'small' && blocked(box[0], box[1], box[2], box[3], plan.sand) && rnd() < 0.6) continue; // few things lie on the sand
-      if (out.some(p => name === p.name && Math.hypot(p.x - x, p.y - y) < (kind === 'small' ? 380 : 300))) continue; // the same building twice only far apart
-      if (out.some(p => box[0] < p.box[2] - 8 && box[2] > p.box[0] + 8 && box[1] < p.box[3] - 8 && box[3] > p.box[1] + 8)) continue;
-      out.push({ name, kind, x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), box }); made++;
-    }
+  const rnd = chronoRng(seed + ':props:' + plan.key), out = [], yards = [], terrain = chronoTerrain(seed, plan.key), district = chronoDistrict(seed, plan.key);
+  const F = plan.floor, C = FG_CELL;
+  // How far each 25px cell is from the nearest road or square, in cells (a breadth-first sweep).
+  const dist = new Int16Array(FG_COLS * FG_ROWS).fill(-1), q = [];
+  for (let i = 0; i < F.length; i++) if (F[i]) { dist[i] = 0; q.push(i); }
+  for (let h = 0; h < q.length; h++) { const i = q[h], x = i % FG_COLS, y = (i - x) / FG_COLS;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= FG_COLS || ny >= FG_ROWS) continue; const n = ny * FG_COLS + nx; if (dist[n] < 0) { dist[n] = dist[i] + 1; q.push(n); } } }
+  const floorIn = (x0, y0, x1, y1) => { for (let cy = Math.max(0, Math.floor(y0 / C)); cy <= Math.min(FG_ROWS - 1, Math.floor(y1 / C)); cy++) for (let cx = Math.max(0, Math.floor(x0 / C)); cx <= Math.min(FG_COLS - 1, Math.floor(x1 / C)); cx++) if (F[cy * FG_COLS + cx]) return true; return false; };
+  const chasmIn = (x0, y0, x1, y1) => { for (let cy = Math.floor(y0 / CG_CELL); cy <= Math.floor(y1 / CG_CELL); cy++) for (let cx = Math.floor(x0 / CG_CELL); cx <= Math.floor(x1 / CG_CELL); cx++) if (terrain.chasm(cx, cy)) return true; return false; };
+  const isFloor = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && F[Math.floor(y / C) * FG_COLS + Math.floor(x / C)] === 1;
+  // A picture with its foot at (x, y): its whole box clear of roads (the hero walks there), its base clear of chasms, inside the room, and clear of the others.
+  const fits = (x, y, w, h, gap, clear = 9) => {
+    const box = [x - w / 2 + 4, y - h + 6, x + w / 2 - 4, y - 1];
+    if (box[0] < 4 || box[1] < 4 || box[2] > 796 || box[3] > 496) return null;
+    if (floorIn(box[0] - clear, box[1] - clear, box[2] + clear, box[3] + clear) || chasmIn(box[0], y - h * 0.4, box[2], y - 1)) return null;
+    if (out.some(p => box[0] < p.box[2] + gap && box[2] > p.box[0] - gap && box[1] < p.box[3] + gap && box[3] > p.box[1] - gap)) return null;
+    return box;
   };
-  place(CHRONO_LARGE, 'large', 2, 60); place(CHRONO_BUILDINGS, 'building', 9, 400); place(CHRONO_SMALL, 'small', 4, 40);
+  const put = (name, kind, x, y, w, h, box) => { const p = { name, kind, x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), box }; out.push(p); return p; };
+  const size = (table, name, kind) => { const [iw, ih] = table[name], k = CHRONO_SCENERY_SCALE[kind]; return [iw * k, ih * k]; };
+  // The road nearest below a foot point (within `reach` px), else to its left or right: where a yard runs to.
+  const roadBelow = (x, y, reach) => { for (let d = 2; d <= reach; d += 4) if (isFloor(x, y + d)) return d; return 0; };
+  // 2. The landmark: where the open ground is widest.
+  { const names = Object.keys(CHRONO_LANDMARKS[district]), name = names[Math.floor(rnd() * names.length)], [w, h] = size(CHRONO_LANDMARKS[district], name, 'landmark'); let best = null;
+    for (let y = h + 8; y < 496; y += 12) for (let x = w / 2 + 8; x < 792 - w / 2; x += 12) { const box = fits(x, y, w, h, 0); if (!box) continue;
+      const d = dist[Math.min(FG_ROWS - 1, Math.floor((y - h * 0.3) / C)) * FG_COLS + Math.floor(x / C)]; if (!best || d > best.d) best = { x, y, box, d }; }
+    if (best) { put(name, 'landmark', best.x, best.y, w, h, best.box); yards.push({ t: 'oct', x: best.x, y: best.y - h * 0.16, rx: w * 0.62, ry: h * 0.3 }); } }
+  // 3 and 4. Street-front lots and their yards. Pass 0: the far side of a street (a road just below the foot); pass 1: beside or above a road.
+  const own = Object.keys(CHRONO_DISTRICTS[district]), others = Object.keys(CHRONO_DISTRICTS).filter(d => d !== district);
+  const pick = () => { if (rnd() < 0.85) { const n = own[Math.floor(rnd() * own.length)]; return [n, CHRONO_DISTRICTS[district]]; } const d = others[Math.floor(rnd() * others.length)], t = Object.keys(CHRONO_DISTRICTS[d]); return [t[Math.floor(rnd() * t.length)], CHRONO_DISTRICTS[d]]; };
+  let built = 0;
+  for (const pass of [0, 1]) for (let y = 40; y < 498 && built < 16; y += 6) {
+    for (let x = 16; x < 790 && built < 16;) {
+      const below = roadBelow(x, y, 26), near = dist[Math.min(FG_ROWS - 1, Math.floor((y - 12) / C)) * FG_COLS + Math.floor(x / C)];
+      if (pass === 0 ? !(below >= 8) : !(near >= 1 && near <= 3)) { x += 6; continue; }
+      let placed = null;
+      for (let t = 0; t < 9 && !placed; t++) { const [name, table] = pick(), [w, h] = size(table, name, 'building'), cx = x + w / 2;
+        if (out.some(p => p.name === name && Math.hypot(p.x - cx, p.y - y) < 170)) continue;
+        if (pass === 0 && !(roadBelow(cx - w * 0.3, y, 30) && roadBelow(cx + w * 0.3, y, 30))) continue; // the whole front on the street
+        const box = fits(cx, y, w, h, 5); if (box) placed = put(name, 'building', cx, y, w, h, box); }
+      if (!placed) { x += 10; continue; }
+      built++; const run = roadBelow(placed.x, y, 30);
+      yards.push({ t: 'rect', x0: placed.box[0] - 7, y0: y - placed.h * 0.42, x1: placed.box[2] + 7, y1: y + (run ? run + 6 : 9) });
+      x = placed.box[2] + 6 + Math.floor(rnd() * 8);
+    }
+  }
+  // 5. Street furniture: lamps on the far kerb every 150px or so; a bench or two bollards beside each square.
+  const lamps = [];
+  for (let y = 20; y < 496; y += 5) for (let x = 20; x < 782; x += 5) { const b = roadBelow(x, y, 14); if (!(b >= 6) || lamps.some(l => Math.hypot(l[0] - x, l[1] - y) < 150)) continue;
+    const [w, h] = size(CHRONO_FURNITURE, 'lamp', 'lamp'), box = fits(x, y, w, h, 3, 3); if (box) { put('lamp', 'lamp', x, y, w, h, box); lamps.push([x, y]); } }
+  for (const [px, py] of plan.plazas) { const kind = rnd() < 0.5 ? 'bench' : 'bollard', [w, h] = size(CHRONO_FURNITURE, kind, kind);
+    for (const [dx, dy] of [[0, -78], [-92, 0], [92, 0], [-70, -60], [70, -60]]) { const x = px + dx, y = py + 22 + dy, box = fits(x, y, w, h, 3, 3); if (box && !isFloor(x, y)) { put(kind, kind, x, y, w, h, box); if (kind === 'bench') break; } } }
+  // 6. Back lots: clutter behind the rows, likelier near the road and beside a building.
+  const clutter = Object.keys(CHRONO_CLUTTER);
+  for (let t = 0, made = 0; t < 160 && made < 9; t++) { const name = clutter[Math.floor(rnd() * clutter.length)], [w, h] = size(CHRONO_CLUTTER, name, 'clutter'), x = 20 + rnd() * 760, y = 30 + rnd() * 465;
+    const d = dist[Math.min(FG_ROWS - 1, Math.floor(y / C)) * FG_COLS + Math.floor(x / C)]; if (d < 1 || rnd() > Math.exp(-(d - 1) / 3.5)) continue;
+    if (!out.some(p => (p.kind === 'building' || p.kind === 'landmark') && Math.abs(p.x - x) < p.w / 2 + 46 && y > p.y - p.h * 0.5 && y < p.y + 40) && rnd() < 0.7) continue;
+    if (out.some(p => p.name === name && Math.hypot(p.x - x, p.y - y) < 150)) continue;
+    const box = fits(x, y, w, h, 2); if (box) { put(name, 'clutter', x, y, w, h, box); made++; } }
   out.sort((a, b) => a.y - b.y);
+  plan.yards = yards; plan.district = district;
   return plan.props = out;
 }
-
 // --- The world for the current seed ---
 let chronoSeedNow = null, chronoPlans = {}, chronoBuiltSeed = null;
 // The squares table, read like the other worlds' (plazas[key]); each room's entry is planned on first use.
@@ -441,7 +511,7 @@ function paintChronoRoom(canvas, key) {
     if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null; return true;
   }
   const props = chronoRoomProps(chronoSeed(), plan);
-  const names = ['ground', 'floor', 'sand', 'pipes', 'chasm', ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
+  const names = ['ground', 'floor', 'sand', 'pipes', 'chasm', 'yard', ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
   for (const n of names) imgs[n] = chronoArtImage(n);
   const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth));
   if (waiting) {
@@ -482,6 +552,19 @@ function paintChronoRoom(canvas, key) {
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 18; ctx.drawImage(chronoTint(s.shape, '#3a2c52'), 0, 0); ctx.restore();
     ring(chronoTint(s.shape, '#6b5a86'), 3); ctx.drawImage(s.art, 0, 0);
   }
+  // Round 385: cobbled yards under the buildings, running to the road (drawn before it, so the kerb overlaps them).
+  if (plan.yards && plan.yards.length) {
+    const yc = document.createElement('canvas'); yc.width = W; yc.height = H; const g = yc.getContext('2d'); g.fillStyle = '#fff';
+    for (const yd of plan.yards) {
+      if (yd.t === 'rect') g.fillRect(yd.x0 * K, yd.y0 * K, (yd.x1 - yd.x0) * K, (yd.y1 - yd.y0) * K);
+      else { const cut = Math.min(yd.rx, yd.ry) * 0.6, P = [[-yd.rx + cut, -yd.ry], [yd.rx - cut, -yd.ry], [yd.rx, -yd.ry + cut], [yd.rx, yd.ry - cut], [yd.rx - cut, yd.ry], [-yd.rx + cut, yd.ry], [-yd.rx, yd.ry - cut], [-yd.rx, -yd.ry + cut]];
+        g.beginPath(); P.forEach(([x, y], i) => i ? g.lineTo((yd.x + x) * K, (yd.y + y) * K) : g.moveTo((yd.x + x) * K, (yd.y + y) * K)); g.closePath(); g.fill(); }
+    }
+    const art = document.createElement('canvas'); art.width = W; art.height = H; const ag = art.getContext('2d'); ag.drawImage(yc, 0, 0); ag.globalCompositeOperation = 'source-in'; fill(ag, imgs.yard);
+    ag.globalCompositeOperation = 'source-atop'; ag.fillStyle = 'rgba(10,8,26,.22)'; ag.fillRect(0, 0, W, H);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 5; ctx.drawImage(chronoTint(yc, '#0a0714'), 0, 0); ctx.restore();
+    ring(chronoTint(yc, '#14101f'), 4); ring(chronoTint(yc, '#6f6a86'), 2); ctx.drawImage(art, 0, 0);
+  }
   // The floor is drawn from the room's shapes: straight-edged roads with mitred corners and 45-degree legs, eight-sided hubs and squares.
   const floorShape = document.createElement('canvas'); floorShape.width = W; floorShape.height = H;
   { const g = floorShape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
@@ -502,6 +585,7 @@ function paintChronoRoom(canvas, key) {
   for (const p of props) {
     const img = imgs[p.name];
     ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(p.x * K, (p.y - p.h * 0.07) * K, p.w * 0.46 * K, p.w * 0.16 * K, 0, 0, Math.PI * 2); ctx.fill();
+    if (p.kind === 'lamp') { const lg = ctx.createRadialGradient(p.x * K, (p.y - p.h * 0.78) * K, 2, p.x * K, (p.y - p.h * 0.78) * K, 70 * K); lg.addColorStop(0, 'rgba(255,196,96,.38)'); lg.addColorStop(1, 'rgba(255,196,96,0)'); ctx.fillStyle = lg; ctx.fillRect((p.x - 70) * K, (p.y - p.h * 0.78 - 70) * K, 140 * K, 140 * K); }
     ctx.drawImage(img, (p.x - p.w / 2) * K, (p.y - p.h) * K, p.w * K, p.h * K);
   }
   // The room's corners fall away into the dark.
