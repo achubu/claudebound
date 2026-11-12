@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 386: no sand, and smaller, fewer floor inlays
+
+Owner: "the circular images you are placing on the path are too large or placed incorrectly, they look strange"; "this pink
+texture looks terrible, just remove it and delete it, we dont need it".
+
+- The time-sand drifts are gone: no sand blobs are generated or drawn, and `gen/sand.webp` is deleted (the tool no longer
+  makes it).
+- Floor inlays: only one, in a court, an arena or a dead end's hub (not on the small squares where objects stand, where a
+  120px disc overflowed a 125px square and its road), and sized to sit well inside that shape (130px; 150px in an arena).
+- `CHRONO_ART_VERSION` 386. The walk mask is unchanged.
+
 ## Round 385: a Chronospire cityscape (scenery that follows the streets)
 
 Owner: "the roads look great but the scenery looks like randomly dropped graphics ... is there any procedural technique we

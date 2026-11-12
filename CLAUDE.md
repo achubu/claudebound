@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 385) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 386) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -56,7 +56,7 @@ change set.
     Round 179 (Chronospire is the layout turned on its side: 6 wide, 9 tall).
     `tile-worlds.js` swaps their room tables in place.
   - Round 377: **the Chronospire is generated, not painted** (`assets/chrono-gen.js`). The room graph, names, levels and roles
-    stay as built; each room's roads, squares, sand and buildings come from the journey's seed on a 16x10 grid of 50px
+    stay as built; each room's roads, squares and buildings come from the journey's seed on a 16x10 grid of 50px
     cells, read by the walk mask (`chronoWalk`) and `plazas`; rooms are planned on first use. `paintChronoRoom()` draws it from three
     seamless textures and sixteen props (`assets/environment/chronospire/gen/`, `tools/prepare_chrono_gen.py`; bump
     `CHRONO_ART_VERSION` when they change). A seed change rebuilds it and `chronoFlushCaches()` clears the caches that

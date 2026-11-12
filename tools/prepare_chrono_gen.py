@@ -1,6 +1,6 @@
 # Round 377: art for the generated Chronospire (assets/chrono-gen.js).
 #   python3 tools/prepare_chrono_gen.py <folder with the owner's drafts>
-# Textures (floor, ground, sand): the right and bottom edges are cross-faded into the left and top so each one
+# Textures (floor, ground, pipes, chasm, yard; Round 386 dropped the sand): the right and bottom edges are cross-faded into the left and top so each one
 # repeats without a seam, then scaled to 800px (drawn 400 room px wide). Prop sheets (2x2 objects on green): keyed like
 # tools/strip_to_sheet.py --grid 2, each object trimmed and scaled (buildings 420px, small props 220px on the long
 # side). Green glows inside an object are kept and turned amber. Writes assets/environment/chronospire/gen/*.webp.
@@ -10,7 +10,7 @@ from PIL import Image
 from scipy import ndimage
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets/environment/chronospire/gen')
-TEXTURES = {'floor': '9if3dz', 'ground': '5vt56p', 'sand': 'dn7r7g', 'pipes': 'ixfrek', 'chasm': '40bq5k', 'yard': 'hkktj4'}  # Round 385: yard paving  # Round 378: pipes, chasm
+TEXTURES = {'floor': '9if3dz', 'ground': '5vt56p', 'pipes': 'ixfrek', 'chasm': '40bq5k', 'yard': 'hkktj4'}  # Round 385: yard paving  # Round 378: pipes, chasm
 SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
     '1ffxk9': (['gears', 'pendulum', 'crystals', 'bell'], 220),
     'n8xy1q': (['clock-tower', 'observatory', 'bell-tower', 'spire'], 420),
