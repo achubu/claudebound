@@ -82,3 +82,25 @@ function cityRoomWalk(key, x, y) {
   const saveBefore = save;
   save = function () { if (state) state.cityGen = CITY_GEN_VERSION; return saveBefore.apply(this, arguments); };
 }
+// Patrols keep 120px from every door's landing spot in the generated city (walking in never starts a fight); a patrol that
+// cannot is moved to the farthest spot on the road from the doors.
+{
+  const roomSpawnsBeforeCity = roomSpawns;
+  roomSpawns = function (key) {
+    const list = roomSpawnsBeforeCity.apply(this, arguments);
+    if (activeRegion !== 'city' || !Array.isArray(list) || list.cityDoorsChecked || !rooms[key]) return list;
+    const doors = ['n', 's', 'e', 'w'].map(d => rooms[key].exits[d] && organicDoor(key, d)).filter(Boolean).map(d => d.inward);
+    const far = (x, y) => Math.min(Infinity, ...doors.map(d => Math.hypot(x - d.x, y - d.y)));
+    for (const s of list) {
+      if (s.boss || far(s.x, s.y) >= 120) continue;
+      const others = list.filter(o => o !== s);
+      const q = typeof organicSpot === 'function' && (organicSpot(key, s.x, s.y, doors.concat(others), 125) || organicSpot(key, s.x, s.y, doors, 125));
+      if (q && far(q.x, q.y) >= 120) { s.x = q.x; s.y = q.y; continue; }
+      let best = null; const pts = organicGrid(key);
+      for (let i = 0; i < pts.length; i += 2) { const d = far(pts[i], pts[i + 1]); if (others.every(o => Math.hypot(o.x - pts[i], o.y - pts[i + 1]) > 90) && (!best || d > best.d)) best = { x: pts[i], y: pts[i + 1], d }; }
+      if (best && best.d > far(s.x, s.y)) { s.x = best.x; s.y = best.y; }
+    }
+    if (Object.isExtensible(list)) Object.defineProperty(list, 'cityDoorsChecked', { value: true });
+    return list;
+  };
+}
