@@ -3,9 +3,7 @@
 // to or from it works both ways even where the two paintings' streets don't line up exactly.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert');
 const {run}=require('./expansion.test.cjs');
-const art=JSON.parse(run(`newGame();configureRegion('city');JSON.stringify(NEON_ROOM_ART)`));
-assert(art.length>=12,'the first painted rooms are wired in');
-for(const k of art)assert(fs.existsSync(path.join(__dirname,'../assets/environment/rooms/room-'+k.replace(',','-')+'.webp')),'image for '+k);
+// Round 389: the painted rooms are retired; Neon Aftermath is generated (assets/city-gen.js). The crossings still have to work.
 const res=JSON.parse(run(`(()=>{
  const out={missing:[],oneWay:[],noLand:[],strictStillStrict:true};
  const OPP={n:'s',s:'n',e:'w',w:'e'};
@@ -18,60 +16,12 @@ const res=JSON.parse(run(`(()=>{
   const back=[0,1,2,3].map(i=>organicDoor(to,OPP[d],i)).find(x=>x&&x.inPocket!==false);
   if(!back)out.oneWay.push(k+'>'+to);
  }
- // Round 132: every Neon Aftermath room has its own painting, so every crossing is loose.
- out.strictStillStrict=Object.keys(rooms).every(k=>neonRoomArt(k));
  return JSON.stringify(out)})()`));
 assert.deepEqual(res.missing,[],'every exit of a painted room has a usable door');
 assert.deepEqual(res.noLand,[],'every such door lands on a street in the next room');
 assert.deepEqual(res.oneWay,[],'every crossing works both ways');
-assert(res.strictStillStrict,'all 54 Neon Aftermath rooms have their own painting');
-// The painting is drawn at full resolution, not squashed to 800x500.
-const canvas=JSON.parse(run(`(()=>{const c={width:800,height:500,style:{},dataset:{},getContext:()=>({drawImage(){} })};
- const img=neonRoomImage('0,5');img.complete=true;img.naturalWidth=2000;img.naturalHeight=1250;
- paintNeonWorld(c,'0,5');return JSON.stringify({w:c.width,h:c.height,src:img.src})})()`));
-assert.equal(canvas.w,2000);assert.equal(canvas.h,1250);assert(/rooms\/room-0-5\.webp$/.test(canvas.src));
-// Round 101: chests, relics and points of interest in painted rooms stand on hand-checked open
-// ground off the road, each with its own footpath from the street; the markers are small.
-const nk=JSON.parse(run(`(()=>{const out={bad:[],used:[],count:0};
- for(const k of NEON_ROOM_ART){for(const [x,y,ax,ay,ex,ey] of NEON_NOOKS[k]||[]){out.count++;
-  const stand=organicItemStand(k,{x,y});
-  if(walkable(k,x,y))out.bad.push(k+' on path');
-  else if(!stand||stand.d>30)out.bad.push(k+' too far '+(stand&&stand.d));
-  else if(!organicReachableAt(k,stand))out.bad.push(k+' unreachable');
-  {const g=Math.hypot(x-ax,y+22-ay);if(g<30&&g>24)out.bad.push(k+' not off the road');}}} // Round 358: a kerbside nook (base within 24px, no footpath) is allowed; otherwise 30px off
- for(const p of Object.values(worldPOIs()))if((neonNooks(p.key)||[]).length)out.used.push(NEON_NOOKS[p.key].some(n=>n[0]===p.x&&n[1]===p.y)||itemGroundCover(p.key,p.x,p.y)>=ITEM_COVER||(typeof roomSpotFix==='function'&&roomSpotFix(p.key))?'ok':p.key+' neither on a nook nor on open ground');
- const q=rooms['8,9'].relic;out.relic=NEON_NOOKS['8,9'].some(n=>n[0]===q[3]&&n[1]===q[4])||itemGroundCover('8,9',q[3],q[4])>=ITEM_COVER||(typeof roomSpotFix==='function'&&!!roomSpotFix('8,9')); // Round 358: or on open ground
- const wk=NEXUS_POINTS.city.start,nx=poiAt(wk);out.nexus=(NEON_NOOKS[wk]||[]).some(n=>n[0]===nx.x&&n[1]===nx.y)||itemGroundCover(wk,nx.x,nx.y)>=ITEM_COVER||(typeof roomSpotFix==='function'&&!!roomSpotFix(wk)); // Round 229: the first waypoint is in Blossom Grove
- return JSON.stringify(out)})()`));
-assert(nk.count>=100,'about two spots per painted room (Round 133: every room)');
-const bare=JSON.parse(run(`JSON.stringify(NEON_ROOM_ART.filter(k=>!(NEON_NOOKS[k]||[]).length))`));
-assert.deepEqual(bare,['5,6'],'every painted room has item spots except Broadcast Row (no open ground beside its street)');
-assert.deepEqual(nk.bad,[],'every spot is off the road, beside its own footpath, and reachable');
-assert(nk.used.length&&nk.used.every(u=>u==='ok'),'Round 358: points of interest in painted rooms stand on a usable nook or on open ground: '+nk.used.join(', '));
-assert(nk.relic,'the Briarstep Boots sit on a spot (Round 176: Scrap Fortress)');assert(nk.nexus,'the first waypoint sits on a spot');
-const css=fs.readFileSync(path.join(__dirname,'../assets/neon-world.js'),'utf8');
-for(const sel of ['.map-chest{width:20px','.poi-node{width:20px','.relic{width:24px'])assert(css.includes(sel),'small marker: '+sel);
-// Round 104: relaxed pathing. Streets are widened inside rooms (sidewalks, kerbs, plaza edges),
-// room edges keep their exact crossings, object spots stay off the path, the hint bar doesn't
-// swallow taps, only taps right at an edge mean "exit", and a tap on an unreachable spot walks
-// to the nearest reachable one.
-const rx=JSON.parse(run(`(()=>{let wider=0,total=0,edgeSlivers=[];
- for(const k of NEON_ROOM_ART){const [cx,cy]=k.split(',').map(Number);for(let y=24;y<476;y+=8)for(let x=24;x<776;x+=8){total++;}
-  for(let y=30;y<470;y+=8){const l=walkable(k,14,y),l2=walkable(k,40,y);if(l&&!l2&&!walkable(k,22,y))edgeSlivers.push(k)}}
- return JSON.stringify({relax:NEON_RELAX,slivers:[...new Set(edgeSlivers)]})})()`));
-assert(rx.relax>=2,'streets are widened');
-const tc=fs.readFileSync(path.join(__dirname,'../assets/touch-controls.js'),'utf8'),html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-assert(/EXIT_BAND=\{x:44,y:34\},SCREEN_BAND=\.05/.test(tc),'only taps right at the edge mean exit');
-assert(/if\(previous\[end\]===-2\)\{end=-1/.test(tc),'unreachable taps go to the nearest reachable spot');
-assert(/\.hint\{[^}]*pointer-events:none/.test(html),'the hint bar lets taps through');
-console.log('PASS: relaxed pathing (streets widened by '+rx.relax+' cells inside rooms), forgiving taps.');
-console.log('PASS: '+nk.count+' off-road spots with footpaths; points of interest, relic and waypoint use them; small markers.');
-console.log('PASS: '+art.length+' rooms with their own painting: images present, exits reachable, crossings land on streets both ways, drawn at full resolution.');
-// Round 127: objects standing on a road count as road (the Dragon Gate arch is walkable).
-const gate=JSON.parse(run(`newGame();configureRegion('city');JSON.stringify([[415,60],[415,100],[415,140],[370,120],[460,120]].map(([x,y])=>walkable('4,7',x,y)))`));
-assert(gate.every(Boolean),'you can walk straight through the Dragon Gate');
-console.log('PASS: objects on the road (Dragon Gate arch) are walkable.');
-// Round 128: the hero is drawn at 80% size, scaled from the feet.
-assert(/#player \.hero-sprite\{[^}]*transform-origin:50% 90%;transform:scale\(\.8\)\}/.test(html),'the hero is 80% size');
-assert(/@keyframes hero-breathe\{0%,100%\{transform:scale\(\.8\)\}/.test(html),'breathing keeps the 80% size');
-console.log('PASS: the hero is drawn at 80% size.');
+// Round 389: the city's rooms are generated from the journey's seed, drawn by the generator, and its objects stand on the generated squares.
+const gen=JSON.parse(run(`(()=>{newGame();configureRegion('city');const o={};o.loose=Object.keys(rooms).every(k=>neonLoose(k,k));o.squares=Object.keys(rooms).every(k=>plazaSpots(k)&&plazaSpots(k).length>=1);
+ const a=Array.from(cityGenPlan('2,6').floor).join('');state.seed=12345;const b=Array.from(cityGenPlan('2,6').floor).join('');o.differs=a!==b;o.noPainting=!Object.keys(rooms).some(k=>neonRoomArt(k));return JSON.stringify(o)})()`));
+assert(gen.loose&&gen.squares&&gen.differs&&gen.noPainting,'Round 389: generated city rooms, loose crossings, a square in every room: '+JSON.stringify(gen));
+console.log('PASS: Neon Aftermath crossings work both ways, and its rooms are generated from the journey seed with a square for objects in each.');

@@ -3500,6 +3500,40 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 
 The owner's new Briar Wall set (a briar barrier filling a ruined stone archway by a stream, from a few stems to a woven
 wall of thorns and roses) replaces the Round 384 paintings at all four levels. `cards.js?v=round390`.
+## Rounds 387-389: Neon Aftermath is generated like the Chronospire
+
+Owner: "can we begin making neon aftermath more like chronospire? i want the city to look nearly the same but be
+procedurally generated"; then "when designing the roads add areas of interactable objects", "make the roads look more like
+roads, they are too sharp, water should be only on the edges with an occasional pond", "your road markings don't look
+great", "try to improve neon aftermath layout ... unnatural looking road paths and unnatural tile choices underneath
+objects", "never repeat buildings as a rule and leave empty space instead", "the road tile is too big", "use all the
+assets for neon aftermath, the rubble the puddles, the grass, everything should be mixed".
+
+- **One generator, two themes** (`GEN_THEMES` in `assets/chrono-gen.js`; `GEN` is the theme in use, `genWith(id, fn)`
+  switches it). A theme gives a room's exits and roles, its place in the world, its art folder and textures, its
+  districts and buildings, its kerb, rim, lamp and shade colours, and options: `grid` (straight streets meeting square,
+  the crossing lined up with the doors, no loops or spurs), `round` (rounded corners), `pavement` (a pavement strip along
+  every road, under the buildings, instead of a yard per building; object squares paved too), `hole` (the city: water in a
+  ragged band round its edge and the odd pond), `texScale` and `mix` (second textures laid in soft patches from world-wide
+  noise: big rubble on the ground, puddled asphalt on the roads, worn slabs on the pavement).
+- **`assets/city-gen.js`** (after `chrono-locks`) puts the city on it: the walk mask is read from the generated rooms, every
+  crossing is loose, objects stand on the generated squares, rooms are drawn and mapped by the generator. Kept: the
+  room map, names, levels, bosses, gear, events and locks. Retired from the city: the painted rooms, their traced mask,
+  the hand-listed nooks and the owner-reviewed spots (`ROOM_SPOT_FIXES.city`). A position off the new roads moves to the
+  room's hub. Rooms the game drops you into at their middle keep a court there.
+- **Art** (`tools/prepare_chrono_gen.py <folder> city`, `assets/environment/city-gen/`): eight textures (fine and puddled
+  asphalt, small and large pavement, fine and big rubble, overgrowth, flood water), street furniture, clutter, and 40
+  buildings in four quarters (market, homes, tech, gardens).
+- **Never the same building twice in a room** (both worlds): a lot with nothing unused that fits stays empty.
+- **Fix:** the tap-to-move grid was cached by room, so after a new journey taps could route over the old journey's streets
+  (`touch-controls.js` keys it by the seed for generated worlds).
+- **Speed:** a new journey re-plans the city, and placement asks hundreds of thousands of walk checks; each room's floor
+  is now kept as an 8px grid per seed (`cityRoomMask`, `cityRoomWalk`, the same answers as the organic engine), and a
+  room's squares are found in one distance sweep. A new game in the city went from 5.7s to 1.6s.
+- **Patrols keep 120px from every door** in the city, so walking in never starts a fight (`rebalance` caught one).
+- Tests: `room-art` now checks the generated city (crossings both ways, a square in every room, a new layout per seed);
+  `neon-world-pathing` 54/54 rooms by tapping exits; `chrono-gen` checks no repeated building in a room.
+  `rebalance` passes; `playtest-walk city`: 54 rooms, 387 crossings, 78 item routes, no problems.
 
 ## Round 386: no sand, and smaller, fewer floor inlays
 

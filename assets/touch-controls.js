@@ -7,7 +7,7 @@ function syncTouchMode(){document.body.classList.toggle('touch-mode',touchMode()
 function cancelTouchRoute(){touchRoute=null;touchFacing=null;document.querySelector('.move-marker')?.remove()}
 function touchWorldPoint(){const area=joinedArea(),offset=cellOffset(state.room,area);return{x:offset.x+state.pos.x,y:offset.y+state.pos.y}}
 function touchGrid(area){
- const cacheKey=activeRegion+':'+area.cells.join('|');if(touchGridCache.has(cacheKey))return touchGridCache.get(cacheKey);
+ const cacheKey=activeRegion+':'+area.cells.join('|')+(typeof state!=='undefined'&&state&&(activeRegion==='city'||activeRegion==='chronospire')?':'+state.seed:''); // Round 389: generated worlds' streets belong to the journey's seedif(touchGridCache.has(cacheKey))return touchGridCache.get(cacheKey);
  // Painted/organic rooms have narrow winding streets, so they get a finer 10px grid (Round 92).
  const step=typeof organicDef==='function'&&area.cells.some(c=>organicDef(c))?8:20,cols=area.width/step,rows=area.height/step,valid=new Uint8Array(cols*rows);
  for(let iy=0;iy<rows;iy++)for(let ix=0;ix<cols;ix++){

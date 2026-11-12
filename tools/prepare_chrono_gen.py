@@ -29,6 +29,25 @@ SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
     'exoyse': (['ruined-hall', 'columns', 'broken-dome', 'broken-stair'], 420),
 }
 
+# Round 387: Neon Aftermath's set, for the same generator (python3 tools/prepare_chrono_gen.py <folder> city).
+WORLDS = {'city': {
+    'out': 'assets/environment/city-gen',
+    'textures': {'floor': '5uo2m3', 'overgrowth': '549k97', 'yard': 'k7s1hd', 'ground': 'wd498u', 'water': 'vkvpou', 'road-wet': '1pi1qk', 'pavement-old': 'ijwi57', 'rubble-big': 'pch07g'},  # Round 389: finer road, pavement and rubble
+    'sheets': {
+        '4m9l9k': (['lamp', 'vending', 'barrier', 'bench'], 200),
+        'op0e6t': (['car', 'dumpsters', 'crates', 'traffic-light'], 220),
+        '9qvkln': (['server-block', 'substation', 'parking-garage', 'relay-hut'], 420),
+        'cy2zb8': (['pagoda', 'shrine-gate', 'tea-house', 'lantern-court'], 420),
+        'hc4y4t': (['neon-tower', 'corner-store', 'apartment', 'scrap-shop'], 420),
+        'mpp0pm': (['tenement', 'garden-block', 'container-home', 'clinic-block'], 420),
+        'u7bx2o': (['noodle-bar', 'arcade', 'pawn-shop', 'capsule-hotel'], 420),
+        # Round 388: the second set of district sheets
+        '15gkwv': (['coolant-tower', 'drone-hangar', 'battery-depot', 'conveyor-factory'], 420),
+        '89mvgk': (['ac-tower', 'scrap-shack', 'courtyard-block', 'collapsed-block'], 420),
+        'm7qkdn': (['bell-pavilion', 'greenhouse', 'bridge-house', 'tea-terrace'], 420),
+        'qy8wma': (['ramen-stall', 'repair-shop', 'tattoo-parlour', 'cinema'], 420),
+    }}}
+
 def find(folder, tag):
     for f in sorted(os.listdir(folder)):
         if tag in f and not f.startswith('.'): return os.path.join(folder, f)
@@ -78,4 +97,6 @@ def props(folder):
             o.save(os.path.join(OUT, name + '.webp'), quality=90, method=6); print(name, o.size)
 
 if __name__ == '__main__':
+    if len(sys.argv) > 2:
+        w = WORLDS[sys.argv[2]]; OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', w['out']); TEXTURES = w['textures']; SHEETS = w['sheets']
     os.makedirs(OUT, exist_ok=True); textures(sys.argv[1]); props(sys.argv[1])

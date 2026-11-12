@@ -33,10 +33,10 @@ function chronoNoise(seed, tag, gx, gy, period) {
   return (v(x0, y0) * (1 - sx) + v(x0 + 1, y0) * sx) * (1 - sy) + (v(x0, y0 + 1) * (1 - sx) + v(x0 + 1, y0 + 1) * sx) * sy;
 }
 function chronoTerrain(seed, key) {
-  const [cx, cy] = key.split(',').map(Number), memo = {};
+  const [cx, cy] = GEN.world(key), memo = {};
   // (x, y) are this room's cells; one beyond each edge is the neighbour's, so shapes meet across the seam.
   const kind = (x, y) => { const k = x + ',' + y; if (k in memo) return memo[k]; const gx = cx * CG_COLS + x, gy = cy * CG_ROWS + y;
-    return memo[k] = chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66 ? 'chasm' : chronoNoise(seed, 'pipes', gx, gy, 7) > 0.56 ? 'pipes' : 'gears'; };
+    return memo[k] = (GEN.hole ? GEN.hole(seed, gx, gy) : chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66) ? 'chasm' : chronoNoise(seed, 'pipes', gx, gy, 7) > 0.56 ? 'pipes' : 'gears'; };
   return { kind, chasm: (x, y) => kind(x, y) === 'chasm', pipes: (x, y) => kind(x, y) === 'pipes' };
 }
 
@@ -146,11 +146,11 @@ function chronoGraphSolvable(g) {
 // The first of the two cells a door takes on its edge: rows 3-5 on a side wall, columns 5-10 on the top or bottom
 // (clear of the HUD panel in the top-left corner and the minimap in the bottom-right).
 function chronoDoorCell(seed, key, dir) {
-  const to = TILE_WORLD_DATA.chronospire.layout[key].exits[dir], pair = [key, to].sort().join('|');
+  const to = GEN.exits(key)[dir], pair = [key, to].sort().join('|');
   const r = chronoRng(seed + ':door:' + pair)();
   return dir === 'e' || dir === 'w' ? 3 + Math.floor(r * 3) : 5 + Math.floor(r * 6);
 }
-function chronoLandingRooms() { // the first room, the waypoint rooms, and every boss and mini-boss room (its enemy stands at the middle)
+function chronoLandingRooms() { if (GEN.landing) return GEN.landing(); // the first room, the waypoint rooms, and every boss and mini-boss room (its enemy stands at the middle)
   const R = TILE_WORLD_DATA.chronospire.roles, out = [R.start], nx = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS.chronospire;
   for (const k of [R.boss, R.boss1, R.boss2, R.mini1, R.mini2].concat(nx ? [nx.start, nx.mid, nx.arrival] : [])) if (k && !out.includes(k)) out.push(k);
   return out;
@@ -192,7 +192,7 @@ function chronoApplyGraph(g) {
 // =====================================================================
 const FG_COLS = 32, FG_ROWS = 20, FG_CELL = 25;
 function chronoRoomPlan(seed, key) {
-  const lay = TILE_WORLD_DATA.chronospire.layout[key], roles = TILE_WORLD_DATA.chronospire.roles, rnd = chronoRng(seed + ':room:' + key);
+  const lay = { exits: GEN.exits(key) }, rnd = chronoRng(seed + ':room:' + key);
   const floor = new Uint8Array(FG_COLS * FG_ROWS), shapes = [];
   const at = (x, y) => x >= 0 && y >= 0 && x < FG_COLS && y < FG_ROWS && floor[y * FG_COLS + x] === 1;
   // Shapes are in fine-cell units; every shape but a door stub keeps two cells from the room's edge.
@@ -226,49 +226,64 @@ function chronoRoomPlan(seed, key) {
   };
   // The hub. Rooms the game drops you into at the room's middle (the first room, the waypoint rooms, boss and mini-boss
   // rooms) have it there.
-  const landing = chronoLandingRooms().includes(key), boss = [roles.boss, roles.boss1, roles.boss2, roles.mini1, roles.mini2].includes(key);
+  const landing = chronoLandingRooms().includes(key), boss = GEN.bossRooms().includes(key);
   const dirs = Object.keys(lay.exits).filter(d => d.length === 1).sort();
-  const hub = boss ? octagon(16, 12, 7, 4.5) : landing ? octagon(16, 12, 4) : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
+  // A theme with `grid` (the city: owner, "unnatural looking road paths"): streets run straight from each door and meet at
+  // right angles; the crossing lines up with the doors (the north and south doors set its column, east and west its row),
+  // so a street through a room is one straight road. No by-pass loops or spurs.
+  const doorAt = d => chronoDoorCell(seed, key, d) * 2 + 2, mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const gx = dirs.filter(d => d === 'n' || d === 's').map(doorAt), gy = dirs.filter(d => d === 'e' || d === 'w').map(doorAt);
+  const hub = boss ? octagon(16, 12, 7, 4.5) : landing && !GEN.grid ? octagon(16, 12, 4)
+    : GEN.grid ? octagon(gx.length ? Math.round(mean(gx)) : landing ? 16 : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : landing ? 12 : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 2)
+    : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
   const roads = [];
+  // A room the game drops you into at its middle keeps a court there, joined to the crossing (the grid's crossing lines
+  // up with the doors instead).
+  if (GEN.grid && landing && !boss && Math.hypot(hub[0] - 16, hub[1] - 12) > 1) { octagon(16, 12, 3); road([16, 12], hub, Math.abs(hub[0] - 16) > Math.abs(hub[1] - 12) ? 'x' : 'y', 99, 4); }
   for (const d of dirs) {
     const c = chronoDoorCell(seed, key, d) * 2; let from, axis;
     if (d === 'w') { rect(0, c, 4, c + 4); from = [4, c + 2]; axis = 'x'; } else if (d === 'e') { rect(FG_COLS - 4, c, FG_COLS, c + 4); from = [FG_COLS - 4, c + 2]; axis = 'x'; }
     else if (d === 'n') { rect(c, 0, c + 4, 4); from = [c + 2, 4]; axis = 'y'; } else { rect(c, FG_ROWS - 4, c + 4, FG_ROWS); from = [c + 2, FG_ROWS - 4]; axis = 'y'; }
     const span = Math.abs(axis === 'x' ? hub[0] - from[0] : hub[1] - from[1]);
-    roads.push(road(from, hub, axis, Math.max(1, Math.floor(rnd() * Math.max(1, span - 2))), 4));
+    roads.push(road(from, hub, axis, GEN.grid ? span : Math.max(1, Math.floor(rnd() * Math.max(1, span - 2))), 4));
   }
   // A narrower second road between two of the door roads, by-passing the hub: an island between them.
-  if (roads.length >= 2 && rnd() < 0.6) {
+  if (!GEN.grid && roads.length >= 2 && rnd() < 0.6) {
     const i = Math.floor(rnd() * roads.length), k = (i + 1 + Math.floor(rnd() * (roads.length - 1))) % roads.length;
     const a = along(roads[i], 0.25 + rnd() * 0.2).map(Math.round), b = along(roads[k], 0.25 + rnd() * 0.2).map(Math.round);
     if (Math.hypot(a[0] - b[0], a[1] - b[1]) > 7) road(a, b, rnd() < 0.5 ? 'x' : 'y', 1 + Math.floor(rnd() * 4), 3);
   }
   // A dead-end spur with a small yard.
-  if (!boss && rnd() < 0.55) { const end = [Math.round(clampX(4 + rnd() * (FG_COLS - 8), 3)), Math.round(clampY(4 + rnd() * (FG_ROWS - 8), 3))];
+  if (!GEN.grid && !boss && rnd() < 0.55) { const end = [Math.round(clampX(4 + rnd() * (FG_COLS - 8), 3)), Math.round(clampY(4 + rnd() * (FG_ROWS - 8), 3))];
     if (Math.hypot(end[0] - hub[0], end[1] - hub[1]) > 7) { road(hub, end, rnd() < 0.5 ? 'x' : 'y', 2 + Math.floor(rnd() * 4), 3); octagon(end[0], end[1], 2.5); } }
   // Squares for objects: eight-sided, 125px across, a cell clear of every road and joined to the nearest one; never
   // under the HUD panel or the minimap. A crowded room uses its hub.
   const plazas = [], PR = 2.5;
   for (let n = 0; n < 2; n++) {
-    const fl = []; for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) if (floor[y * FG_COLS + x]) fl.push([x + 0.5, y + 0.5]);
+    // Chebyshev distance from every cell to the nearest floor cell, and which floor cell that is (one sweep, not a search per candidate).
+    const N = FG_COLS * FG_ROWS, dd = new Int16Array(N).fill(-1), nearOf = new Int32Array(N), bq = [];
+    for (let i = 0; i < N; i++) if (floor[i]) { dd[i] = 0; nearOf[i] = i; bq.push(i); }
+    for (let h = 0; h < bq.length; h++) { const i = bq[h], x = i % FG_COLS, y = (i - x) / FG_COLS;
+      for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) { const nx = x + ox, ny = y + oy; if (nx < 0 || ny < 0 || nx >= FG_COLS || ny >= FG_ROWS) continue; const j = ny * FG_COLS + nx; if (dd[j] < 0) { dd[j] = dd[i] + 1; nearOf[j] = nearOf[i]; bq.push(j); } } }
     const cand = [];
     for (let py = 2 + PR; py <= FG_ROWS - 2 - PR; py++) for (let px = 2 + PR; px <= FG_COLS - 2 - PR; px++) {
       const x = px * FG_CELL, y = py * FG_CELL - 22;
       if (typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(x + dx, y + dy))) continue;
       if (plazas.some(p => Math.hypot(p.px - px, p.py - py) < 8)) continue;
-      let best = Infinity, near = null; for (const c of fl) { const dd = Math.max(Math.abs(c[0] - px), Math.abs(c[1] - py)); if (dd < best) { best = dd; near = c; } }
+      const ci = Math.floor(py) * FG_COLS + Math.floor(px); if (dd[ci] < 0) continue; const ni = nearOf[ci], near = [ni % FG_COLS + 0.5, Math.floor(ni / FG_COLS) + 0.5], best = Math.max(Math.abs(near[0] - px), Math.abs(near[1] - py));
       if (best < PR + 1.2 || best > PR + 6) continue;
       cand.push({ px, py, x, y, near, s: rnd() });
     }
     if (!cand.length) break;
     const c = cand.sort((a, b) => a.s - b.s)[0]; plazas.push(c);
-    road([c.px, c.py], [Math.floor(c.near[0]) + 0.5, Math.floor(c.near[1]) + 0.5], Math.abs(c.near[0] - c.px) > Math.abs(c.near[1] - c.py) ? 'x' : 'y', 99, 3); octagon(c.px, c.py, PR);
+    const s0 = shapes.length; road([c.px, c.py], [Math.floor(c.near[0]) + 0.5, Math.floor(c.near[1]) + 0.5], Math.abs(c.near[0] - c.px) > Math.abs(c.near[1] - c.py) ? 'x' : 'y', 99, 3); octagon(c.px, c.py, PR);
+    if (GEN.pavement) for (let i = s0; i < shapes.length; i++) shapes[i].pave = true; // the city's squares are paved, not road
   }
   if (!plazas.length) plazas.push({ px: hub[0], py: hub[1], x: hub[0] * FG_CELL, y: hub[1] * FG_CELL - 22 });
   // Round 386 (owner: the round inlays "are too large or placed incorrectly"): an inlay only in a court, an arena or a
   // dead end's hub, sized to sit well inside that eight-sided shape (its flat sides are 100px from the middle; an arena's 112px).
-  const courts = []; if (boss || landing || dirs.length === 1) courts.push([hub[0] * FG_CELL, hub[1] * FG_CELL, boss ? 150 : 130]);
-  return { key, floor, shapes, inlays: courts.map(([x, y, size], i) => ({ name: CHRONO_INLAYS[(chronoHash(seed + ':inlay:' + key) + i) % CHRONO_INLAYS.length], x, y, size })),
+  const courts = []; if (GEN.inlays.length && (boss || landing || dirs.length === 1)) courts.push([hub[0] * FG_CELL, hub[1] * FG_CELL, boss ? 150 : 130]);
+  return { key, floor, shapes, inlays: courts.map(([x, y, size], i) => ({ name: GEN.inlays[(chronoHash(seed + ':inlay:' + key) + i) % GEN.inlays.length], x, y, size })),
     hub: [hub[0] * FG_CELL, hub[1] * FG_CELL - 22], plazas: plazas.map(p => [p.x, p.y]), props: null };
 }
 // =====================================================================
@@ -296,11 +311,56 @@ const CHRONO_LANDMARKS = { clock: { 'clock-tower': [176, 420], observatory: [341
 const CHRONO_FURNITURE = { lamp: [44, 200], bollard: [97, 200], railing: [200, 196], bench: [200, 195] };
 const CHRONO_CLUTTER = { crates: [200, 184], scrap: [200, 115], 'pipe-stack': [131, 200], barrels: [200, 159], gears: [220, 187], pendulum: [168, 220], crystals: [181, 220], bell: [220, 186] };
 const CHRONO_SCENERY_SCALE = { building: 0.3, landmark: 0.42, lamp: 0.32, bench: 0.2, bollard: 0.13, clutter: 0.2 };
-function chronoDistrict(seed, key) {
-  const [cx, cy] = key.split(',').map(Number), a = chronoNoise(seed, 'district', cx, cy, 1.9), b = chronoNoise(seed, 'district2', cx, cy, 1.9);
-  return a > 0.5 ? (b > 0.5 ? 'clock' : 'foundry') : (b > 0.5 ? 'homes' : 'ruins');
+// =====================================================================
+// Round 387 (owner: "can we begin making neon aftermath more like chronospire? i want the city to look nearly the same but
+// be procedurally generated like chronospire"). The generator is no longer the Chronospire's alone: everything that
+// differs between worlds is a theme (GEN_THEMES): where a room's exits and roles come from, where the room sits in the
+// world, its art folder and textures, its districts and their buildings, its kerb colours. GEN is the theme in use
+// (the Chronospire's unless genWith() says otherwise).
+// =====================================================================
+const CITY_DISTRICTS = {
+  market: { 'noodle-bar': [420, 373], arcade: [369, 420], 'pawn-shop': [400, 420], 'capsule-hotel': [339, 420], 'neon-tower': [324, 420], 'corner-store': [381, 420], 'ramen-stall': [420, 408], 'repair-shop': [372, 420], 'tattoo-parlour': [350, 420], cinema: [408, 420] },
+  homes: { tenement: [350, 420], 'garden-block': [405, 420], 'container-home': [290, 420], 'clinic-block': [321, 420], apartment: [330, 420], 'scrap-shop': [420, 387], 'ac-tower': [241, 420], 'scrap-shack': [413, 420], 'courtyard-block': [420, 350], 'collapsed-block': [393, 420] },
+  tech: { 'server-block': [420, 388], substation: [420, 279], 'parking-garage': [420, 361], 'relay-hut': [253, 420], 'coolant-tower': [271, 420], 'drone-hangar': [420, 382], 'battery-depot': [420, 328], 'conveyor-factory': [400, 420] },
+  garden: { pagoda: [344, 420], 'shrine-gate': [383, 420], 'tea-house': [420, 342], 'lantern-court': [420, 354], 'bell-pavilion': [420, 389], greenhouse: [420, 409], 'bridge-house': [420, 409], 'tea-terrace': [420, 329] }
+};
+const GEN_THEMES = {
+  chronospire: { id: 'chronospire', art: 'assets/environment/chronospire/gen/', version: () => CHRONO_ART_VERSION,
+    exits: key => { const r = TILE_WORLD_DATA.chronospire.layout[key]; return r ? r.exits : null; }, world: key => key.split(',').map(Number),
+    bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
+    districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
+    tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '390',
+    exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
+    world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
+    bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
+    landing: () => { const nx = typeof NEXUS_POINTS !== 'undefined' && NEXUS_POINTS.city, out = ['0,5', ...GEN_THEMES.city.bossRooms()]; for (const k of nx ? [nx.start, nx.mid, nx.arrival] : []) if (k && !out.includes(k)) out.push(k); return out; },
+    districtNames: ['market', 'homes', 'tech', 'garden'], districts: CITY_DISTRICTS,
+    landmarks: { market: { arcade: [369, 420], 'neon-tower': [324, 420] }, homes: { tenement: [350, 420], apartment: [330, 420] }, tech: { 'relay-hut': [253, 420], 'server-block': [420, 388] }, garden: { pagoda: [344, 420], 'lantern-court': [420, 354] } },
+    furniture: { lamp: [89, 200], bench: [173, 200], bollard: [156, 200] }, rename: { bollard: 'vending' },
+    clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
+    scale: { building: 0.3, landmark: 0.4, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
+    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, 'rubble-big': 0.8 },
+    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.55 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }, { on: 'pavement', tex: 'pavement-old', tag: 'worn', period: 5, cut: 0.6 }],
+    // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
+    // 9x6 rooms, and a rare pond inland.
+    hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
+    lamp: '120,230,255', vignette: '2,6,14' }
+};
+let GEN = GEN_THEMES.chronospire;
+function genWith(id, fn) { const was = GEN; GEN = GEN_THEMES[id]; try { return fn(); } finally { GEN = was; } }
+// A themed world's room plans, kept per seed (the Chronospire keeps its own, with its room map).
+const genPlanCache = {};
+function genPlan(id, key, seed = chronoSeed()) {
+  const ck = id + ':' + seed; if (!genPlanCache[ck]) { for (const k of Object.keys(genPlanCache)) if (k.startsWith(id + ':')) delete genPlanCache[k]; genPlanCache[ck] = {}; }
+  const c = genPlanCache[ck]; if (c[key]) return c[key];
+  return genWith(id, () => GEN.exits(key) ? (c[key] = chronoRoomPlan(seed, key)) : null);
 }
-function chronoSceneryNames() { const out = new Set(); for (const t of [...Object.values(CHRONO_DISTRICTS), ...Object.values(CHRONO_LANDMARKS), CHRONO_FURNITURE, CHRONO_CLUTTER, CHRONO_BUILDINGS, CHRONO_SMALL, CHRONO_LARGE]) for (const n of Object.keys(t)) out.add(n); return [...out]; }
+function chronoDistrict(seed, key) {
+  const [cx, cy] = GEN.world(key), a = chronoNoise(seed, 'district', cx, cy, 1.9), b = chronoNoise(seed, 'district2', cx, cy, 1.9), n = GEN.districtNames;
+  return a > 0.5 ? (b > 0.5 ? n[0] : n[1]) : (b > 0.5 ? n[2] : n[3]);
+}
+function chronoSceneryNames() { const out = new Set(), old = GEN.id === 'chronospire' ? [CHRONO_BUILDINGS, CHRONO_SMALL, CHRONO_LARGE] : []; for (const t of [...Object.values(GEN.districts), ...Object.values(GEN.landmarks), GEN.clutter, ...old]) for (const n of Object.keys(t)) out.add(n); for (const k of Object.keys(GEN.furniture)) out.add((GEN.rename && GEN.rename[k]) || k); return [...out]; }
 function chronoRoomProps(seed, plan) {
   if (plan.props) return plan.props;
   const rnd = chronoRng(seed + ':props:' + plan.key), out = [], yards = [], terrain = chronoTerrain(seed, plan.key), district = chronoDistrict(seed, plan.key);
@@ -322,17 +382,17 @@ function chronoRoomProps(seed, plan) {
     return box;
   };
   const put = (name, kind, x, y, w, h, box) => { const p = { name, kind, x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), box }; out.push(p); return p; };
-  const size = (table, name, kind) => { const [iw, ih] = table[name], k = CHRONO_SCENERY_SCALE[kind]; return [iw * k, ih * k]; };
+  const size = (table, name, kind) => { const [iw, ih] = table[name], k = GEN.scale[kind]; return [iw * k, ih * k]; };
   // The road nearest below a foot point (within `reach` px), else to its left or right: where a yard runs to.
   const roadBelow = (x, y, reach) => { for (let d = 2; d <= reach; d += 4) if (isFloor(x, y + d)) return d; return 0; };
   // 2. The landmark: where the open ground is widest.
-  { const names = Object.keys(CHRONO_LANDMARKS[district]), name = names[Math.floor(rnd() * names.length)], [w, h] = size(CHRONO_LANDMARKS[district], name, 'landmark'); let best = null;
+  { const names = Object.keys(GEN.landmarks[district]), name = names[Math.floor(rnd() * names.length)], [w, h] = size(GEN.landmarks[district], name, 'landmark'); let best = null;
     for (let y = h + 8; y < 496; y += 12) for (let x = w / 2 + 8; x < 792 - w / 2; x += 12) { const box = fits(x, y, w, h, 0); if (!box) continue;
       const d = dist[Math.min(FG_ROWS - 1, Math.floor((y - h * 0.3) / C)) * FG_COLS + Math.floor(x / C)]; if (!best || d > best.d) best = { x, y, box, d }; }
-    if (best) { put(name, 'landmark', best.x, best.y, w, h, best.box); yards.push({ t: 'oct', x: best.x, y: best.y - h * 0.16, rx: w * 0.62, ry: h * 0.3 }); } }
+    if (best) { put(name, 'landmark', best.x, best.y, w, h, best.box); if (!GEN.pavement) yards.push({ t: 'oct', x: best.x, y: best.y - h * 0.16, rx: w * 0.62, ry: h * 0.3 }); } }
   // 3 and 4. Street-front lots and their yards. Pass 0: the far side of a street (a road just below the foot); pass 1: beside or above a road.
-  const own = Object.keys(CHRONO_DISTRICTS[district]), others = Object.keys(CHRONO_DISTRICTS).filter(d => d !== district);
-  const pick = () => { if (rnd() < 0.85) { const n = own[Math.floor(rnd() * own.length)]; return [n, CHRONO_DISTRICTS[district]]; } const d = others[Math.floor(rnd() * others.length)], t = Object.keys(CHRONO_DISTRICTS[d]); return [t[Math.floor(rnd() * t.length)], CHRONO_DISTRICTS[d]]; };
+  const own = Object.keys(GEN.districts[district]), others = Object.keys(GEN.districts).filter(d => d !== district);
+  const pick = () => { const free = own.filter(n => !out.some(p => p.name === n)); if (free.length && rnd() < 0.85) { const n = free[Math.floor(rnd() * free.length)]; return [n, GEN.districts[district]]; } const d = others[Math.floor(rnd() * others.length)], t = Object.keys(GEN.districts[d]); return [t[Math.floor(rnd() * t.length)], GEN.districts[d]]; };
   let built = 0;
   for (const pass of [0, 1]) for (let y = 40; y < 498 && built < 16; y += 6) {
     for (let x = 16; x < 790 && built < 16;) {
@@ -340,24 +400,24 @@ function chronoRoomProps(seed, plan) {
       if (pass === 0 ? !(below >= 8) : !(near >= 1 && near <= 3)) { x += 6; continue; }
       let placed = null;
       for (let t = 0; t < 9 && !placed; t++) { const [name, table] = pick(), [w, h] = size(table, name, 'building'), cx = x + w / 2;
-        if (out.some(p => p.name === name && Math.hypot(p.x - cx, p.y - y) < 170)) continue;
+        if (out.some(p => p.name === name)) continue; // Round 388 (owner): never the same building twice in a room; leave the lot empty instead
         if (pass === 0 && !(roadBelow(cx - w * 0.3, y, 30) && roadBelow(cx + w * 0.3, y, 30))) continue; // the whole front on the street
         const box = fits(cx, y, w, h, 5); if (box) placed = put(name, 'building', cx, y, w, h, box); }
       if (!placed) { x += 10; continue; }
       built++; const run = roadBelow(placed.x, y, 30);
-      yards.push({ t: 'rect', x0: placed.box[0] - 7, y0: y - placed.h * 0.42, x1: placed.box[2] + 7, y1: y + (run ? run + 6 : 9) });
+      if (!GEN.pavement) yards.push({ t: 'rect', x0: placed.box[0] - 7, y0: y - placed.h * 0.42, x1: placed.box[2] + 7, y1: y + (run ? run + 6 : 9) });
       x = placed.box[2] + 6 + Math.floor(rnd() * 8);
     }
   }
   // 5. Street furniture: lamps on the far kerb every 150px or so; a bench or two bollards beside each square.
   const lamps = [];
   for (let y = 20; y < 496; y += 5) for (let x = 20; x < 782; x += 5) { const b = roadBelow(x, y, 14); if (!(b >= 6) || lamps.some(l => Math.hypot(l[0] - x, l[1] - y) < 150)) continue;
-    const [w, h] = size(CHRONO_FURNITURE, 'lamp', 'lamp'), box = fits(x, y, w, h, 3, 3); if (box) { put('lamp', 'lamp', x, y, w, h, box); lamps.push([x, y]); } }
-  for (const [px, py] of plan.plazas) { const kind = rnd() < 0.5 ? 'bench' : 'bollard', [w, h] = size(CHRONO_FURNITURE, kind, kind);
-    for (const [dx, dy] of [[0, -78], [-92, 0], [92, 0], [-70, -60], [70, -60]]) { const x = px + dx, y = py + 22 + dy, box = fits(x, y, w, h, 3, 3); if (box && !isFloor(x, y)) { put(kind, kind, x, y, w, h, box); if (kind === 'bench') break; } } }
+    const [w, h] = size(GEN.furniture, 'lamp', 'lamp'), box = fits(x, y, w, h, 3, 3); if (box) { put('lamp', 'lamp', x, y, w, h, box); lamps.push([x, y]); } }
+  for (const [px, py] of plan.plazas) { const kind = rnd() < 0.5 ? 'bench' : 'bollard', [w, h] = size(GEN.furniture, kind, kind);
+    for (const [dx, dy] of [[0, -78], [-92, 0], [92, 0], [-70, -60], [70, -60]]) { const x = px + dx, y = py + 22 + dy, box = fits(x, y, w, h, 3, 3); if (box && !isFloor(x, y)) { put((GEN.rename && GEN.rename[kind]) || kind, kind, x, y, w, h, box); if (kind === 'bench') break; } } }
   // 6. Back lots: clutter behind the rows, likelier near the road and beside a building.
-  const clutter = Object.keys(CHRONO_CLUTTER);
-  for (let t = 0, made = 0; t < 160 && made < 9; t++) { const name = clutter[Math.floor(rnd() * clutter.length)], [w, h] = size(CHRONO_CLUTTER, name, 'clutter'), x = 20 + rnd() * 760, y = 30 + rnd() * 465;
+  const clutter = Object.keys(GEN.clutter);
+  for (let t = 0, made = 0; t < 160 && made < 9; t++) { const name = clutter[Math.floor(rnd() * clutter.length)], [w, h] = size(GEN.clutter, name, 'clutter'), x = 20 + rnd() * 760, y = 30 + rnd() * 465;
     const d = dist[Math.min(FG_ROWS - 1, Math.floor(y / C)) * FG_COLS + Math.floor(x / C)]; if (d < 1 || rnd() > Math.exp(-(d - 1) / 3.5)) continue;
     if (!out.some(p => (p.kind === 'building' || p.kind === 'landmark') && Math.abs(p.x - x) < p.w / 2 + 46 && y > p.y - p.h * 0.5 && y < p.y + 40) && rnd() < 0.7) continue;
     if (out.some(p => p.name === name && Math.hypot(p.x - x, p.y - y) < 150)) continue;
@@ -383,8 +443,8 @@ function chronoWalk(wx, wy) {
   const cx = Math.floor(x / 800), cy = Math.floor(y / 500), p = chronoRoomOf(cx + ',' + cy);
   return !!p && p.floor[Math.floor((y - cy * 500) / FG_CELL) * FG_COLS + Math.floor((x - cx * 800) / FG_CELL)] === 1;
 }
-function chronoFlushCaches() {
-  const mine = k => typeof k === 'string' && k.indexOf('chronospire') >= 0;
+function chronoFlushCaches(id = 'chronospire') {
+  const mine = k => typeof k === 'string' && k.indexOf(id) >= 0;
   const drop = o => { if (o && typeof o === 'object') for (const k of Object.keys(o)) if (mine(k)) delete o[k]; };
   // Every cache keyed by world and room that does not also carry the journey's seed, and the seeded ones for good measure.
   if (typeof organicDoorCache !== 'undefined') { drop(organicDoorCache); drop(organicDoorsCache); }
@@ -455,7 +515,7 @@ Object.defineProperty(TILE_WORLD_DATA.chronospire, 'plazas', { get() { chronoEns
 // --- Painting ---
 const chronoImages = {};
 function chronoArtImage(name) {
-  const src = 'assets/environment/chronospire/gen/' + name + '.webp?v=' + CHRONO_ART_VERSION;
+  const src = GEN.art + ((GEN.tex && GEN.tex[name]) || name) + '.webp?v=' + GEN.version();
   let img = chronoImages[src]; if (!img) { img = new Image(); img.src = src; chronoImages[src] = img; }
   return img;
 }
@@ -488,21 +548,23 @@ function chronoTint(shape, fill) {
 }
 // The last few rooms painted are kept, so drawing the world again (it is redrawn on many events) is one copy.
 const chronoPainted = new Map();
+const chronoScaled = {};
 function paintChronoRoom(canvas, key) {
-  const plan = chronoPlan(key); if (!plan || typeof document === 'undefined') return false;
-  const done = chronoPainted.get(chronoSeedNow + '#' + key);
+  const theme = GEN.id, seed = theme === 'chronospire' ? null : chronoSeed(), plan = theme === 'chronospire' ? chronoPlan(key) : genPlan(theme, key, seed); if (!plan || typeof document === 'undefined') return false;
+  const paintKey = theme + ':' + (theme === 'chronospire' ? chronoSeedNow : seed) + '#' + key;
+  const done = chronoPainted.get(paintKey);
   if (done) {
     canvas.width = done.width; canvas.height = done.height; if (canvas.style) { canvas.style.imageRendering = 'auto'; canvas.style.filter = 'none'; }
     const c2 = canvas.getContext('2d'); if (c2) c2.drawImage(done, 0, 0);
     if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null; return true;
   }
-  const props = chronoRoomProps(chronoSeed(), plan);
-  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
+  const props = chronoRoomProps(theme === 'chronospire' ? chronoSeed() : seed, plan);
+  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.mix || []).map(m => m.tex), ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
   for (const n of names) imgs[n] = chronoArtImage(n);
   const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth));
   if (waiting) {
     if (canvas.dataset) canvas.dataset.pending = '1'; canvas.pendingImage = waiting;
-    if (waiting.addEventListener) waiting.addEventListener('load', () => { if (canvas.isConnected) paintChronoRoom(canvas, key); }, { once: true });
+    if (waiting.addEventListener) waiting.addEventListener('load', () => { if (canvas.isConnected) genWith(theme, () => paintChronoRoom(canvas, key)); }, { once: true });
     return false;
   }
   const K = 2, W = 800 * K, H = 500 * K; canvas.width = W; canvas.height = H;
@@ -510,10 +572,24 @@ function paintChronoRoom(canvas, key) {
   const ctx = canvas.getContext('2d'); if (!ctx) return false;
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   // The textures run on from room to room: the pattern starts at the world's corner, not the room's.
-  const [cx, cy] = key.split(',').map(Number), offY = (cy * H) % 800, offX = (cx * W) % 800;
-  const fill = (g, img) => { g.save(); g.translate(-offX, -offY); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(offX, offY, W, H); g.restore(); };
+  const [cx, cy] = GEN.world(key), offY = (((cy * H) % 800) + 800) % 800, offX = (((cx * W) % 800) + 800) % 800;
+  // Round 388 (owner: "the road tile is too big ... those puddles are huge"): a theme may draw a texture smaller (texScale).
+  const sized = img => { const k = GEN.texScale && GEN.texScale[Object.keys(imgs).find(n => imgs[n] === img)]; if (!k || k === 1) return img;
+    const ck = img.src + '@' + k; if (!chronoScaled[ck]) { const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k); const cg = c.getContext('2d'); cg.imageSmoothingQuality = 'high'; cg.drawImage(img, 0, 0, c.width, c.height); chronoScaled[ck] = c; } return chronoScaled[ck]; };
+  const fill = (g, img) => { g.save(); g.translate(-offX, -offY); g.fillStyle = g.createPattern(sized(img), 'repeat'); g.fillRect(offX, offY, W, H); g.restore(); };
   fill(ctx, imgs.ground);
-  ctx.fillStyle = 'rgba(8,6,24,.28)'; ctx.fillRect(0, 0, W, H); // the machinery sits back, so the roads read at a glance
+  // Round 389 (owner: "use all the assets for neon aftermath, the rubble the puddles, the grass, everything should be
+  // mixed"): a theme may lay a second texture over a first in soft patches from world-wide noise (GEN.mix: which
+  // texture, over what, how much). Applied to the ground here and to the road and pavement below.
+  const patches = (tag, period, cut) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.fillStyle = '#fff';
+    const [wx, wy] = GEN.world(key), sd = chronoSeed();
+    for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) { const v = chronoNoise(sd, tag, wx * FG_COLS + x, wy * FG_ROWS + y, period); if (v > cut) { g.globalAlpha = Math.min(1, (v - cut) * 9); g.beginPath(); g.arc((x + 0.5) * FG_CELL * K, (y + 0.5) * FG_CELL * K, FG_CELL * K * 1.05, 0, Math.PI * 2); g.fill(); } }
+    const b = document.createElement('canvas'); b.width = W; b.height = H; const bg = b.getContext('2d'); bg.filter = 'blur(' + (10 * K) + 'px)'; bg.drawImage(c, 0, 0); return b; };
+  const mixInto = (target, under, mix) => { const img = imgs[mix.tex]; if (!img) return; const m = patches(mix.tag, mix.period, mix.cut), layerC = document.createElement('canvas'); layerC.width = W; layerC.height = H;
+    const lg = layerC.getContext('2d'); lg.drawImage(m, 0, 0); lg.globalCompositeOperation = 'source-in'; fill(lg, img); if (under) { lg.globalCompositeOperation = 'destination-in'; lg.drawImage(under, 0, 0); }
+    target.drawImage(layerC, 0, 0); };
+  for (const mix of (GEN.mix || []).filter(m => m.on === 'ground')) mixInto(ctx, null, mix);
+  ctx.fillStyle = GEN.groundShade; ctx.fillRect(0, 0, W, H); // the machinery sits back, so the roads read at a glance
   const layer = (grid, img, radius) => {
     const shape = chronoShape(grid, K, radius), c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, img);
@@ -523,7 +599,7 @@ function paintChronoRoom(canvas, key) {
   const terrain = chronoTerrain(chronoSeed(), key), any = f => { for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (f(x, y)) return true; return false; };
   if (any(terrain.pipes)) { // a bed of pipes, sunk a little into the machinery
     const s = layer(terrain.pipes, imgs.pipes, 24);
-    ring(chronoTint(s.shape, '#07060f'), 5); ring(chronoTint(s.shape, '#4a3a2a'), 2); ctx.drawImage(s.art, 0, 0);
+    ring(chronoTint(s.shape, GEN.bedRim[0]), 5); ring(chronoTint(s.shape, GEN.bedRim[1]), 2); ctx.drawImage(s.art, 0, 0);
   }
   if (any(terrain.chasm)) { // a chasm: a lit rim, the dark below, and a shadow falling in from its edge
     const s = layer(terrain.chasm, imgs.chasm, 24), g = s.art.getContext('2d');
@@ -531,7 +607,7 @@ function paintChronoRoom(canvas, key) {
     const rim = document.createElement('canvas'); rim.width = W; rim.height = H; const rg = rim.getContext('2d');
     rg.fillStyle = '#000'; rg.fillRect(0, 0, W, H); rg.globalCompositeOperation = 'destination-out'; rg.drawImage(s.shape, 0, 0);
     g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = 50; g.shadowOffsetY = 16; g.drawImage(rim, 0, 0); g.shadowColor = 'transparent';
-    ring(chronoTint(s.shape, '#8a6c3a'), 5); ring(chronoTint(s.shape, '#17100a'), 2); ctx.drawImage(s.art, 0, 0);
+    ring(chronoTint(s.shape, GEN.holeRim[0]), 5); ring(chronoTint(s.shape, GEN.holeRim[1]), 2); ctx.drawImage(s.art, 0, 0);
   }
   // Round 385: cobbled yards under the buildings, running to the road (drawn before it, so the kerb overlaps them).
   if (plan.yards && plan.yards.length) {
@@ -542,38 +618,64 @@ function paintChronoRoom(canvas, key) {
         g.beginPath(); P.forEach(([x, y], i) => i ? g.lineTo((yd.x + x) * K, (yd.y + y) * K) : g.moveTo((yd.x + x) * K, (yd.y + y) * K)); g.closePath(); g.fill(); }
     }
     const art = document.createElement('canvas'); art.width = W; art.height = H; const ag = art.getContext('2d'); ag.drawImage(yc, 0, 0); ag.globalCompositeOperation = 'source-in'; fill(ag, imgs.yard);
-    ag.globalCompositeOperation = 'source-atop'; ag.fillStyle = 'rgba(10,8,26,.22)'; ag.fillRect(0, 0, W, H);
+    ag.globalCompositeOperation = 'source-atop'; ag.fillStyle = GEN.yardShade || 'rgba(10,8,26,.22)'; ag.fillRect(0, 0, W, H);
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 5; ctx.drawImage(chronoTint(yc, '#0a0714'), 0, 0); ctx.restore();
-    ring(chronoTint(yc, '#14101f'), 4); ring(chronoTint(yc, '#6f6a86'), 2); ctx.drawImage(art, 0, 0);
+    ring(chronoTint(yc, GEN.yardRim[0]), 4); ring(chronoTint(yc, GEN.yardRim[1]), 2); ctx.drawImage(art, 0, 0);
   }
   // The floor is drawn from the room's shapes: straight-edged roads with mitred corners and 45-degree legs, eight-sided hubs and squares.
   const floorShape = document.createElement('canvas'); floorShape.width = W; floorShape.height = H;
   { const g = floorShape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
+    // A theme with `round` (the city: "make the roads look more like roads, they are too sharp") turns every corner on an
+    // arc: road bends, and the corners of hubs and squares.
+    const R = (GEN.round || 0) * K, turn = (pts, close) => { g.beginPath(); const n = pts.length, P = i => pts[((i % n) + n) % n];
+      if (!R) { pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); if (close) g.closePath(); return; }
+      if (close) { const a = P(-1), b = P(0); g.moveTo((a[0] + b[0]) / 2 * K, (a[1] + b[1]) / 2 * K); for (let i = 0; i < n; i++) { const c = P(i), d = P(i + 1); g.arcTo(c[0] * K, c[1] * K, (c[0] + d[0]) / 2 * K, (c[1] + d[1]) / 2 * K, Math.min(R, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.closePath(); }
+      else { g.moveTo(pts[0][0] * K, pts[0][1] * K); for (let i = 1; i < n - 1; i++) { const a = pts[i - 1], c = pts[i], d = pts[i + 1]; g.arcTo(c[0] * K, c[1] * K, d[0] * K, d[1] * K, Math.min(R * 1.6, Math.hypot(c[0] - a[0], c[1] - a[1]) * K / 2, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.lineTo(pts[n - 1][0] * K, pts[n - 1][1] * K); } };
+    if (R) { g.lineCap = 'round'; g.lineJoin = 'round'; }
     for (const sh of plan.shapes) {
+      if (sh.pave) continue;
       if (sh.t === 'rect') g.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
-      else if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); }
-      else { g.lineWidth = sh.w * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); }
-    } }
+      else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); }
+      else { g.lineWidth = sh.w * K; turn(sh.pts, false); g.stroke(); }
+    }
+    plan.turn = turn; }
   { // close hairline gaps where two shapes pass within a few pixels of each other
     const copy = document.createElement('canvas'); copy.width = W; copy.height = H; copy.getContext('2d').drawImage(floorShape, 0, 0);
     const g = floorShape.getContext('2d'); for (let a = 0; a < 8; a++) g.drawImage(copy, Math.round(Math.cos(a * Math.PI / 4) * 5), Math.round(Math.sin(a * Math.PI / 4) * 5)); }
   const f = { shape: floorShape, art: document.createElement('canvas') }; f.art.width = W; f.art.height = H;
-  { const g = f.art.getContext('2d'); g.drawImage(floorShape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); }
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore();
-  ring(chronoTint(f.shape, '#1c1206'), 9); ring(chronoTint(f.shape, '#b88a3c'), 6); ring(chronoTint(f.shape, '#5a3f18'), 2);
+  { const g = f.art.getContext('2d'); g.drawImage(floorShape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); g.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(g, floorShape, mix); }
+  if (GEN.pavement) { // a strip of pavement down both sides of every road
+    const wide = document.createElement('canvas'); wide.width = W; wide.height = H; const wg = wide.getContext('2d'); for (let a = 0; a < 16; a++) wg.drawImage(f.shape, Math.round(Math.cos(a * Math.PI / 8) * GEN.pavement * K), Math.round(Math.sin(a * Math.PI / 8) * GEN.pavement * K));
+    { const pv = document.createElement('canvas'); pv.width = W; pv.height = H; const g = pv.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = g.lineJoin = 'round'; // the paved squares, a little wider than their walkable floor
+      for (const sh of plan.shapes) if (sh.pave) { if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); g.lineWidth = 16 * K; g.stroke(); } else if (sh.t === 'road') { g.lineWidth = (sh.w + 16) * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); } }
+      wg.drawImage(pv, 0, 0); }
+    const pa = document.createElement('canvas'); pa.width = W; pa.height = H; const pg = pa.getContext('2d'); pg.drawImage(wide, 0, 0); pg.globalCompositeOperation = 'source-in'; fill(pg, imgs.yard);
+    pg.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'pavement')) mixInto(pg, wide, mix);
+    pg.globalCompositeOperation = 'source-atop'; pg.fillStyle = GEN.yardShade || 'rgba(10,8,26,.22)'; pg.fillRect(0, 0, W, H);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(wide, '#05080c'), 0, 0); ctx.restore();
+    ring(chronoTint(wide, GEN.yardRim[0]), 3); ctx.drawImage(pa, 0, 0);
+  }
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = GEN.pavement ? 8 : 26; ctx.shadowOffsetY = GEN.pavement ? 2 : 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore();
+  ring(chronoTint(f.shape, GEN.kerb[0]), 9); ring(chronoTint(f.shape, GEN.kerb[1]), 6); ring(chronoTint(f.shape, GEN.kerb[2]), 2);
   ctx.drawImage(f.art, 0, 0);
+  if (GEN.laneLine) { // a dashed centre line along each road
+    ctx.save(); ctx.strokeStyle = GEN.laneLine; ctx.lineWidth = 3 * K; ctx.lineCap = 'butt'; ctx.setLineDash([14 * K, 14 * K]);
+    const g = ctx; for (const sh of plan.shapes) if (sh.t === 'road' && sh.w >= 90 && sh.pts.length > 1) { const pts = sh.pts, n = pts.length, Rr = (GEN.round || 0) * K * 1.6; g.beginPath(); g.moveTo(pts[0][0] * K, pts[0][1] * K);
+      for (let i = 1; i < n - 1; i++) { const a = pts[i - 1], c = pts[i], d = pts[i + 1]; g.arcTo(c[0] * K, c[1] * K, d[0] * K, d[1] * K, Math.min(Rr, Math.hypot(c[0] - a[0], c[1] - a[1]) * K / 2, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); }
+      g.lineTo(pts[n - 1][0] * K, pts[n - 1][1] * K); g.stroke(); }
+    ctx.restore(); }
   for (const i of plan.inlays) { ctx.save(); ctx.globalAlpha = 0.94; ctx.drawImage(imgs[i.name], (i.x - i.size / 2) * K, (i.y - i.size / 2) * K, i.size * K, i.size * K); ctx.restore(); }
   for (const p of props) {
     const img = imgs[p.name];
     ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(p.x * K, (p.y - p.h * 0.07) * K, p.w * 0.46 * K, p.w * 0.16 * K, 0, 0, Math.PI * 2); ctx.fill();
-    if (p.kind === 'lamp') { const lg = ctx.createRadialGradient(p.x * K, (p.y - p.h * 0.78) * K, 2, p.x * K, (p.y - p.h * 0.78) * K, 70 * K); lg.addColorStop(0, 'rgba(255,196,96,.38)'); lg.addColorStop(1, 'rgba(255,196,96,0)'); ctx.fillStyle = lg; ctx.fillRect((p.x - 70) * K, (p.y - p.h * 0.78 - 70) * K, 140 * K, 140 * K); }
+    if (p.kind === 'lamp') { const lg = ctx.createRadialGradient(p.x * K, (p.y - p.h * 0.78) * K, 2, p.x * K, (p.y - p.h * 0.78) * K, 70 * K); lg.addColorStop(0, 'rgba(' + GEN.lamp + ',.38)'); lg.addColorStop(1, 'rgba(' + GEN.lamp + ',0)'); ctx.fillStyle = lg; ctx.fillRect((p.x - 70) * K, (p.y - p.h * 0.78 - 70) * K, 140 * K, 140 * K); }
     ctx.drawImage(img, (p.x - p.w / 2) * K, (p.y - p.h) * K, p.w * K, p.h * K);
   }
   // The room's corners fall away into the dark.
-  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.62); v.addColorStop(0, 'rgba(6,4,18,0)'); v.addColorStop(1, 'rgba(6,4,18,.42)');
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.62); v.addColorStop(0, 'rgba(' + GEN.vignette + ',0)'); v.addColorStop(1, 'rgba(' + GEN.vignette + ',.42)');
   ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
   const keep = document.createElement('canvas'); keep.width = W; keep.height = H; keep.getContext('2d').drawImage(canvas, 0, 0);
-  chronoPainted.set(chronoSeedNow + '#' + key, keep); while (chronoPainted.size > 6) chronoPainted.delete(chronoPainted.keys().next().value);
+  chronoPainted.set(paintKey, keep); while (chronoPainted.size > 6) chronoPainted.delete(chronoPainted.keys().next().value);
   if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null;
   return true;
 }
@@ -582,9 +684,9 @@ function paintChronoRoom(canvas, key) {
 // to the world"). A room's tile for the Map screen and the minimap: its own roads, hub, squares, loops and spurs drawn
 // from plan.shapes in the map's road style (pale kerb, dark asphalt), with the room's objects at the spots where they stand.
 function chronoMapTile(key, onReady) {
-  const plan = chronoPlan(key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
+  const plan = GEN.id === 'chronospire' ? chronoPlan(key) : genPlan(GEN.id, key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
   const objs = typeof mapRoomObjects === 'function' ? mapRoomObjects(key) : [], sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
-  const ck = 'chrono:' + chronoSeedNow + ':' + key + ':' + sig; if (typeof mapTileCache !== 'undefined' && mapTileCache[ck]) return mapTileCache[ck];
+  const ck = 'gen:' + GEN.id + ':' + (GEN.id === 'chronospire' ? chronoSeedNow : chronoSeed()) + ':' + key + ':' + sig; if (typeof mapTileCache !== 'undefined' && mapTileCache[ck]) return mapTileCache[ck];
   const W = 800, H = 500, tile = document.createElement('canvas'); tile.width = W; tile.height = H;
   const ctx = tile.getContext('2d'); if (!ctx) return null;
   // Owner: "make the map for chronospire look similar to the rooms, use similar colors": the room's own textures at
@@ -592,7 +694,7 @@ function chronoMapTile(key, onReady) {
   // the textures have loaded.
   const tex = n => { const im = chronoArtImage(n); if (im.complete && im.naturalWidth) return im; if (onReady && im.addEventListener) im.addEventListener('load', onReady, { once: true }); return null; };
   const groundImg = tex('ground'), floorImg = tex('floor'); let complete = !!(groundImg && floorImg);
-  const [mx, my] = key.split(',').map(Number), offX = (mx * 800) % 400, offY = (my * 500) % 400;
+  const [mx, my] = GEN.world(key), offX = (((mx * 800) % 400) + 400) % 400, offY = (((my * 500) % 400) + 400) % 400;
   const paint = (g, img, flat) => { g.save(); if (img) { g.translate(-offX, -offY); g.scale(0.5, 0.5); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(0, 0, (W + offX) * 2, (H + offY) * 2); } else { g.fillStyle = flat; g.fillRect(0, 0, W, H); } g.restore(); };
   paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H);
   const shape = document.createElement('canvas'); shape.width = W; shape.height = H;
@@ -604,9 +706,9 @@ function chronoMapTile(key, onReady) {
     } }
   const ring = (pic, r) => { for (let a = 0; a < 12; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 6) * r), Math.round(Math.sin(a * Math.PI / 6) * r)); };
   ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(shape, '#0a0714'), 0, 0); ctx.restore();
-  ring(chronoTint(shape, '#1c1206'), 9); ring(chronoTint(shape, '#d0a04a'), 6);
+  ring(chronoTint(shape, GEN.kerb[0]), 9); ring(chronoTint(shape, GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1]), 6);
   { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, floorImg, '#b8923f'); ctx.drawImage(art, 0, 0); }
-  const style = { kerb: '#d0a04a' };
+  const style = { kerb: GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1] };
   // The room's objects where they stand (dimmed once used).
   const ICON = 104;
   for (const o of objs) {
