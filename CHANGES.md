@@ -3496,6 +3496,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 390: new Briar Wall card art
+
+The owner's new Briar Wall set (a briar barrier filling a ruined stone archway by a stream, from a few stems to a woven
+wall of thorns and roses) replaces the Round 384 paintings at all four levels. `cards.js?v=round390`.
 ## Rounds 387-389: Neon Aftermath is generated like the Chronospire
 
 Owner: "can we begin making neon aftermath more like chronospire? i want the city to look nearly the same but be
