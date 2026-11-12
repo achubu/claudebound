@@ -9,7 +9,7 @@ const SIG = `(seed => { state.seed = seed; state.region = 'chronospire'; configu
   return JSON.stringify(o); })`;
 if (process.argv[2] === 'sig') { run('newGame()'); console.log('SIG' + run(SIG + '(' + Number(process.argv[3]) + ')')); process.exit(0); }
 
-const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, inlays: 0, kinds: {}, legs: 0 }; newGame();
+const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, inlays: 0, kinds: {}, legs: 0, buildings: 0, onStreet: 0, lamps: 0, yards: 0, ownQuarter: 0, districts: {} }; newGame();
   for (const seed of [11, 4242, 987654321]) { state.seed = seed; state.region = 'chronospire'; configureRegion('chronospire');
     for (const key of Object.keys(rooms)) { out.rooms++; const p = chronoPlan(key), e = [];
       for (const d of Object.keys(rooms[key].exits)) { if (!organicDoor(key, d)) e.push('no door ' + d);
@@ -27,6 +27,12 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
       if (p.shapes.some(s => s.t === 'road' && s.pts.slice(1).some((q, i) => { const dx = Math.abs(q[0] - s.pts[i][0]), dy = Math.abs(q[1] - s.pts[i][1]); return dx > 0.01 && dy > 0.01 && Math.abs(dx - dy) > 0.01; }))) e.push('a road leg that is neither straight nor at 45 degrees');
       for (const q of chronoRoomProps(String(seed), p)) { if (q.box[0] < 0 || q.box[1] < 0 || q.box[2] > 800 || q.box[3] > 500) e.push('prop outside');
         for (let cy = Math.floor(q.box[1] / 25); cy <= Math.floor(q.box[3] / 25); cy++) for (let cx = Math.floor(q.box[0] / 25); cx <= Math.floor(q.box[2] / 25); cx++) if (p.floor[cy * 32 + cx]) e.push('prop on the floor'); }
+      // Round 385: scenery follows the streets.
+      { const ps = chronoRoomProps(String(seed), p), bs = ps.filter(q => q.kind === 'building'), isF = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && p.floor[Math.floor(y / 25) * 32 + Math.floor(x / 25)] === 1;
+        const nearRoad = q => { for (let d = 0; d <= 60; d += 4) for (const [dx, dy] of [[0, d], [-q.w / 2 - d, -q.h * 0.2], [q.w / 2 + d, -q.h * 0.2], [0, -q.h - d]]) if (isF(q.x + dx, q.y + dy)) return true; return false; };
+        out.buildings += bs.length; out.onStreet += bs.filter(nearRoad).length; out.lamps += ps.filter(q => q.kind === 'lamp').length; out.yards += (p.yards || []).length; out.districts[p.district] = (out.districts[p.district] || 0) + 1;
+        const table = CHRONO_DISTRICTS[p.district]; out.ownQuarter += bs.filter(q => table[q.name]).length;
+        for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) { const a = ps[i].box, b = ps[j].box; if (a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]) e.push('two pieces of scenery overlap'); } }
       const t = chronoTerrain(String(seed), key);
       for (const q of chronoRoomProps(String(seed), p)) if (t.chasm(Math.floor(q.x / 50), Math.floor((q.y - 4) / 50))) e.push('prop standing in a chasm');
       for (const i of p.inlays) { if (!p.floor[Math.floor(i.y / 25) * 32 + Math.floor(i.x / 25)]) e.push('inlay off the floor'); out.inlays++; }
@@ -35,7 +41,7 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
       if (e.length) out.bad.push(seed + ' ' + key + ': ' + [...new Set(e)].join(', ')); } }
   const grid = s => { state.seed = s; return Array.from(chronoPlan('2,3').floor).join(''); };
   out.same = grid(5) === (grid(6), grid(5)); out.differs = grid(5) !== grid(6);
-  out.landing = chronoLandingRooms(); out.props = Object.keys(CHRONO_BUILDINGS).concat(Object.keys(CHRONO_SMALL), Object.keys(CHRONO_LARGE), CHRONO_INLAYS, ['pipes', 'chasm']);
+  out.landing = chronoLandingRooms(); out.props = chronoSceneryNames().concat(CHRONO_INLAYS, ['pipes', 'chasm', 'yard']);
   // A save from the stand-in tiles resumes at its room's hub.
   newGame(); state.region = 'chronospire'; configureRegion('chronospire'); state.room = Object.keys(rooms).find(k => k !== regionStartRoom()); state.pos = { x: 5, y: 5 }; state.visited = Object.keys(rooms).slice(0, 9);
   state.worldRelays = { chronospire: { on: [0, 1], vault: false } }; const s = JSON.parse(JSON.stringify(state)); delete s.chronoGen;
@@ -44,6 +50,8 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
 assert.deepStrictEqual(r.bad, [], 'every room of three seeds is sound');
 assert.strictEqual(r.rooms, 162); assert(r.plazas >= 162 * 1.6, 'most rooms have two squares: ' + r.plazas); assert(r.legs > 162, 'Round 383: roads take 45-degree legs: ' + r.legs);
 assert(r.inlays > 60 && r.kinds.pipes > 162 * 160 * 0.08 && r.kinds.chasm > 162 * 160 * 0.04 && r.kinds.gears > r.kinds.pipes, 'Round 378: inlays, pipe beds and chasms across the world: ' + JSON.stringify(r.kinds));
+assert(r.buildings > 162 * 4.5 && r.onStreet / r.buildings > 0.9, 'Round 385: buildings stand along the streets: ' + r.onStreet + ' of ' + r.buildings);
+assert(r.yards >= r.buildings && r.lamps > 162 * 2 && r.ownQuarter / r.buildings > 0.6 && Object.keys(r.districts).length === 4, 'Round 385: yards, lamps and four districts: ' + JSON.stringify([r.yards, r.lamps, r.ownQuarter, r.districts]));
 assert(r.same && r.differs, 'the same seed gives the same room; another seed another');
 assert(r.landing.length >= 2, 'the first room and the waypoint rooms are landing rooms: ' + r.landing);
 assert(r.resumed, 'Round 379: a save from an older map restarts the Chronospire at its gate, breakers off');

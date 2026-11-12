@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 384) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 385) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -75,6 +75,9 @@ change set.
     The owner rejected curved roads and round squares: keep the straight-edged look. `chronoMapTile` draws the Map screen's
     tile for a room from the same shapes. **Owner's plan: every world will eventually be built this way**; the Chronospire
     is where it is being ironed out.
+  - Round 385: **scenery follows the streets** (`chronoRoomProps`): a district per room (`chronoDistrict`, four quarters
+    with their own buildings in `CHRONO_DISTRICTS`), one landmark, rows of buildings on street-front lots with cobbled
+    yards, lamps along the kerbs, clutter in the back lots. Add new building art to a district's table.
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.

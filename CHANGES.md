@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 385: a Chronospire cityscape (scenery that follows the streets)
+
+Owner: "the roads look great but the scenery looks like randomly dropped graphics ... is there any procedural technique we
+can use to create a better looking cityscape?"; "lets use all the techniques". `chronoRoomProps` is rewritten:
+
+1. **Districts** (`chronoDistrict`): smooth noise over the world's rooms zones them into a clock-tower quarter, a foundry
+   quarter, a residential quarter and ruins. A room builds mostly from its own quarter (`CHRONO_DISTRICTS`).
+2. **One landmark** per room, its largest piece, in the middle of the widest open ground, on an eight-sided yard.
+3. **Street-front lots:** buildings stand in rows along the roads, a short setback from the kerb with a small even gap to
+   the next: first the far side of a street (their fronts face it), then beside the roads. They are drawn smaller (0.3)
+   so rows fit.
+4. **Yards:** each building stands on cobbled paving that runs to the road; neighbours' yards join into pavement. Drawn
+   before the road, so the kerb overlaps them.
+5. **Street furniture:** lamps on the far kerb about every 150px, each with a small pool of light; a bench or bollards
+   beside the squares.
+6. **Back lots:** crates, scrap, pipes, barrels and the older small props behind the rows, likelier near the road and
+   beside a building.
+- Nothing is drawn over a road or square, and nothing stands in a chasm, as before.
+- Art (the owner's seven sheets, `tools/prepare_chrono_gen.py`): yard paving, street furniture, clutter, and twelve
+  buildings for the foundry, residential and ruins quarters. `CHRONO_ART_VERSION` 385. The walk mask is unchanged, so saves
+  are untouched.
+- Test (`chrono-gen`, three seeds): over 4.5 buildings a room, more than 90% of them along a road, a yard for each, lamps,
+  all four districts, most buildings from their own quarter, and no two pieces overlapping.
+
 ## Round 384: Briar Wall card art
 
 The owner's four Briar Wall paintings (a briar barrier across a ravine path, thickening from a few stems to a wall, and at

@@ -10,7 +10,7 @@ from PIL import Image
 from scipy import ndimage
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets/environment/chronospire/gen')
-TEXTURES = {'floor': '9if3dz', 'ground': '5vt56p', 'sand': 'dn7r7g', 'pipes': 'ixfrek', 'chasm': '40bq5k'}  # Round 378: pipes, chasm
+TEXTURES = {'floor': '9if3dz', 'ground': '5vt56p', 'sand': 'dn7r7g', 'pipes': 'ixfrek', 'chasm': '40bq5k', 'yard': 'hkktj4'}  # Round 385: yard paving  # Round 378: pipes, chasm
 SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
     '1ffxk9': (['gears', 'pendulum', 'crystals', 'bell'], 220),
     'n8xy1q': (['clock-tower', 'observatory', 'bell-tower', 'spire'], 420),
@@ -20,6 +20,13 @@ SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
     'e8zup5': (['aqueduct', 'cogwheel', 'boilers', 'fallen-tower'], 460),
     'ajn1a6': (['inlay-clock', 'inlay-sun', 'inlay-gears', 'inlay-hourglass'], 320),
     'y5dvms': (['breaker-off', 'breaker-on', 'gate-sealed', 'gate-open'], 256),
+    # Round 385: street furniture, back-lot clutter, and three districts' buildings
+    '8ty9hh': (['lamp', 'bollard', 'railing', 'bench'], 200),
+    'xt7th9': (['crates', 'scrap', 'pipe-stack', 'barrels'], 200),
+    'g4gvy6': (['smelter', 'pump-house', 'chimney', 'gear-mill'], 420),
+    'hk3ns9': (['row-house', 'cottage', 'turret-house', 'terrace'], 420),
+    'ark15i': (['watchmaker', 'inn', 'bakery', 'bookshop'], 420),
+    'exoyse': (['ruined-hall', 'columns', 'broken-dome', 'broken-stair'], 420),
 }
 
 def find(folder, tag):
