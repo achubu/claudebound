@@ -45,3 +45,8 @@ What's here (Round 96):
 - `assets/environment/solaris/src/` (Round 228): the first Solaris tile set and its six landmark
   paintings (boss and mini-boss yards, relic rooms). Solaris now uses the owner's top-down golden city
   (`tools/prepare_solaris_tiles.py`); its builder can bring the landmarks back with `USE_LANDMARKS`.
+
+Round 391 (owner: "im seeing old room images, you can remove them"): Neon Aftermath is generated since Round 389, so its
+painted rooms (`assets/environment/rooms/room-X-Y.webp`, 54 paintings) and the six district paintings they replaced
+(`assets/environment/world/`) moved here. `tools/build_room_masks.py`, `tools/nook_view.py` and `tools/kerb_spots.py`
+read them from their old paths; move them back with `git mv` to use those tools.
