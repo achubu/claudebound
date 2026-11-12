@@ -333,7 +333,7 @@ const GEN_THEMES = {
     furniture: { lamp: [89, 200], bench: [173, 200], bollard: [156, 200] }, rename: { bollard: 'vending' },
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.3, landmark: 0.4, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
-    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true,
+    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, texScale: { floor: 0.45, yard: 0.4 },
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
     hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
@@ -540,6 +540,7 @@ function chronoTint(shape, fill) {
 }
 // The last few rooms painted are kept, so drawing the world again (it is redrawn on many events) is one copy.
 const chronoPainted = new Map();
+const chronoScaled = {};
 function paintChronoRoom(canvas, key) {
   const theme = GEN.id, seed = theme === 'chronospire' ? null : chronoSeed(), plan = theme === 'chronospire' ? chronoPlan(key) : genPlan(theme, key, seed); if (!plan || typeof document === 'undefined') return false;
   const paintKey = theme + ':' + (theme === 'chronospire' ? chronoSeedNow : seed) + '#' + key;
@@ -564,7 +565,10 @@ function paintChronoRoom(canvas, key) {
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   // The textures run on from room to room: the pattern starts at the world's corner, not the room's.
   const [cx, cy] = GEN.world(key), offY = (((cy * H) % 800) + 800) % 800, offX = (((cx * W) % 800) + 800) % 800;
-  const fill = (g, img) => { g.save(); g.translate(-offX, -offY); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(offX, offY, W, H); g.restore(); };
+  // Round 388 (owner: "the road tile is too big ... those puddles are huge"): a theme may draw a texture smaller (texScale).
+  const sized = img => { const k = GEN.texScale && GEN.texScale[Object.keys(imgs).find(n => imgs[n] === img)]; if (!k || k === 1) return img;
+    const ck = img.src + '@' + k; if (!chronoScaled[ck]) { const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k); const cg = c.getContext('2d'); cg.imageSmoothingQuality = 'high'; cg.drawImage(img, 0, 0, c.width, c.height); chronoScaled[ck] = c; } return chronoScaled[ck]; };
+  const fill = (g, img) => { g.save(); g.translate(-offX, -offY); g.fillStyle = g.createPattern(sized(img), 'repeat'); g.fillRect(offX, offY, W, H); g.restore(); };
   fill(ctx, imgs.ground);
   ctx.fillStyle = GEN.groundShade; ctx.fillRect(0, 0, W, H); // the machinery sits back, so the roads read at a glance
   const layer = (grid, img, radius) => {
