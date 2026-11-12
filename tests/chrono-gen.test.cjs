@@ -36,7 +36,7 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
       const t = chronoTerrain(String(seed), key);
       for (const q of chronoRoomProps(String(seed), p)) if (t.chasm(Math.floor(q.x / 50), Math.floor((q.y - 4) / 50))) e.push('prop standing in a chasm');
       for (const i of p.inlays) { if (!p.floor[Math.floor(i.y / 25) * 32 + Math.floor(i.x / 25)]) e.push('inlay off the floor'); out.inlays++; }
-      for (let y = 0; y < 10; y++) for (let x = 0; x < 16; x++) { out.kinds[t.kind(x, y)] = (out.kinds[t.kind(x, y)] || 0) + 1; if (p.sand[y * 16 + x] && t.chasm(x, y)) e.push('sand in a chasm'); }
+      for (let y = 0; y < 10; y++) for (let x = 0; x < 16; x++) { out.kinds[t.kind(x, y)] = (out.kinds[t.kind(x, y)] || 0) + 1; }
       for (let y = 0; y < 10; y++) if (key.split(',')[0] < 5 && t.kind(16, y) !== chronoTerrain(String(seed), (Number(key.split(',')[0]) + 1) + ',' + key.split(',')[1]).kind(0, y)) e.push('terrain breaks at the seam');
       if (e.length) out.bad.push(seed + ' ' + key + ': ' + [...new Set(e)].join(', ')); } }
   const grid = s => { state.seed = s; return Array.from(chronoPlan('2,3').floor).join(''); };
@@ -49,13 +49,14 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
   return JSON.stringify(out); })()`));
 assert.deepStrictEqual(r.bad, [], 'every room of three seeds is sound');
 assert.strictEqual(r.rooms, 162); assert(r.plazas >= 162 * 1.6, 'most rooms have two squares: ' + r.plazas); assert(r.legs > 162, 'Round 383: roads take 45-degree legs: ' + r.legs);
-assert(r.inlays > 60 && r.kinds.pipes > 162 * 160 * 0.08 && r.kinds.chasm > 162 * 160 * 0.04 && r.kinds.gears > r.kinds.pipes, 'Round 378: inlays, pipe beds and chasms across the world: ' + JSON.stringify(r.kinds));
+assert(!fs.existsSync(path.join(__dirname, '..', 'assets/environment/chronospire/gen/sand.webp')), 'Round 386: the sand texture is gone');
+assert(r.inlays > 20 && r.kinds.pipes > 162 * 160 * 0.08 && r.kinds.chasm > 162 * 160 * 0.04 && r.kinds.gears > r.kinds.pipes, 'Round 378: inlays, pipe beds and chasms across the world: ' + JSON.stringify(r.kinds));
 assert(r.buildings > 162 * 4.5 && r.onStreet / r.buildings > 0.9, 'Round 385: buildings stand along the streets: ' + r.onStreet + ' of ' + r.buildings);
 assert(r.yards >= r.buildings && r.lamps > 162 * 2 && r.ownQuarter / r.buildings > 0.6 && Object.keys(r.districts).length === 4, 'Round 385: yards, lamps and four districts: ' + JSON.stringify([r.yards, r.lamps, r.ownQuarter, r.districts]));
 assert(r.same && r.differs, 'the same seed gives the same room; another seed another');
 assert(r.landing.length >= 2, 'the first room and the waypoint rooms are landing rooms: ' + r.landing);
 assert(r.resumed, 'Round 379: a save from an older map restarts the Chronospire at its gate, breakers off');
-for (const n of ['floor', 'ground', 'sand', ...r.props]) assert(fs.existsSync(path.join(__dirname, '..', 'assets/environment/chronospire/gen', n + '.webp')), n + '.webp');
+for (const n of ['floor', 'ground', ...r.props]) assert(fs.existsSync(path.join(__dirname, '..', 'assets/environment/chronospire/gen', n + '.webp')), n + '.webp');
 // Round 379: the room map and its locks.
 const L = JSON.parse(run(`(() => { const out = { bad: [], sizes: [], starts: new Set(), steps: [], area: 0 };
   for (let i = 0; i < 150; i++) { const g = chronoGraph('s' + i), R = g.roles, e = [];
