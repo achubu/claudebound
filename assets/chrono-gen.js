@@ -36,7 +36,7 @@ function chronoTerrain(seed, key) {
   const [cx, cy] = GEN.world(key), memo = {};
   // (x, y) are this room's cells; one beyond each edge is the neighbour's, so shapes meet across the seam.
   const kind = (x, y) => { const k = x + ',' + y; if (k in memo) return memo[k]; const gx = cx * CG_COLS + x, gy = cy * CG_ROWS + y;
-    return memo[k] = (GEN.hole ? GEN.hole(seed, gx, gy) : chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66) ? 'chasm' : chronoNoise(seed, 'pipes', gx, gy, 7) > 0.56 ? 'pipes' : 'gears'; };
+    return memo[k] = (GEN.hole ? GEN.hole(seed, gx, gy) : chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66) ? 'chasm' : chronoNoise(seed, 'pipes', gx, gy, 7) > (GEN.bedCut || 0.56) ? 'pipes' : 'gears'; };
   return { kind, chasm: (x, y) => kind(x, y) === 'chasm', pipes: (x, y) => kind(x, y) === 'pipes' };
 }
 
@@ -147,7 +147,10 @@ function chronoGraphSolvable(g) {
 // (clear of the HUD panel in the top-left corner and the minimap in the bottom-right).
 function chronoDoorCell(seed, key, dir) {
   const to = GEN.exits(key)[dir], pair = [key, to].sort().join('|');
-  const r = chronoRng(seed + ':door:' + pair)();
+  // Round 393 (owner: "just go to straight roads, 90 degree angle corners ... don't have any odd shapes"): in a grid theme
+  // every east-west street in a row of rooms runs at one height and every north-south street in a column at one place,
+  // so the streets cross each room in straight lines and meet at plain crossings, with no jogs.
+  const [wx, wy] = GEN.world(key), r = GEN.grid ? chronoRng(seed + ':line:' + (dir === 'e' || dir === 'w' ? 'row' + wy : 'col' + wx))() : chronoRng(seed + ':door:' + pair)();
   return dir === 'e' || dir === 'w' ? 3 + Math.floor(r * 3) : 5 + Math.floor(r * 6);
 }
 function chronoLandingRooms() { if (GEN.landing) return GEN.landing(); // the first room, the waypoint rooms, and every boss and mini-boss room (its enemy stands at the middle)
@@ -199,7 +202,7 @@ function chronoRoomPlan(seed, key) {
   const clampX = (x, r) => Math.max(2 + r, Math.min(FG_COLS - 2 - r, x)), clampY = (y, r) => Math.max(2 + r, Math.min(FG_ROWS - 2 - r, y));
   const each = (x0, y0, x1, y1, f) => { for (let y = Math.max(0, Math.floor(y0)); y <= Math.min(FG_ROWS - 1, Math.ceil(y1)); y++) for (let x = Math.max(0, Math.floor(x0)); x <= Math.min(FG_COLS - 1, Math.ceil(x1)); x++) if (f(x + 0.5, y + 0.5)) floor[y * FG_COLS + x] = 1; };
   const octagon = (cx, cy, rx, ry = rx) => { // a rectangle with its corners cut at 45 degrees
-    cx = Math.round(clampX(cx, rx)); cy = Math.round(clampY(cy, ry)); const cut = Math.min(rx, ry) * 0.6;
+    cx = Math.round(clampX(cx, rx)); cy = Math.round(clampY(cy, ry)); const cut = GEN.square ? 0 : Math.min(rx, ry) * 0.6; // a square theme's hubs are plain boxes
     each(cx - rx, cy - ry, cx + rx, cy + ry, (x, y) => Math.abs(x - cx) <= rx && Math.abs(y - cy) <= ry && Math.abs(x - cx) + Math.abs(y - cy) <= rx + ry - cut);
     const P = [[-rx + cut, -ry], [rx - cut, -ry], [rx, -ry + cut], [rx, ry - cut], [rx - cut, ry], [-rx + cut, ry], [-rx, ry - cut], [-rx, -ry + cut]];
     shapes.push({ t: 'poly', pts: P.map(([x, y]) => [(cx + x) * FG_CELL, (cy + y) * FG_CELL]) });
@@ -233,13 +236,18 @@ function chronoRoomPlan(seed, key) {
   // so a street through a room is one straight road. No by-pass loops or spurs.
   const doorAt = d => chronoDoorCell(seed, key, d) * 2 + 2, mean = a => a.reduce((x, y) => x + y, 0) / a.length;
   const gx = dirs.filter(d => d === 'n' || d === 's').map(doorAt), gy = dirs.filter(d => d === 'e' || d === 'w').map(doorAt);
-  const hub = boss ? octagon(16, 12, 7, 4.5) : landing && !GEN.grid ? octagon(16, 12, 4)
-    : GEN.grid ? octagon(gx.length ? Math.round(mean(gx)) : landing ? 16 : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : landing ? 12 : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 2)
+  // Round 393 (owner: "don't have any odd shapes"): in a grid theme a boss room's square and a landing room's court are
+  // centred on the crossing itself, wide enough to take in the room's middle (where the game sets you down and the boss
+  // stands), so every edge is a whole road-width or more from the road edges beside it: no small steps.
+  const lineX = gx.length ? Math.round(mean(gx)) : 16, lineY = gy.length ? Math.round(mean(gy)) : 12;
+  // A court either is the road (2 cells each way) or stands out from it by 2 cells or more, and keeps 4 cells from the room's edges.
+  const reach = (d, room) => { const v = Math.min(d ? Math.max(4, d + 2) : 2, room); return v < 4 ? 2 : v; };
+  const hub = GEN.grid && boss ? octagon(lineX, lineY, Math.min(7, lineX - 4, FG_COLS - 4 - lineX), Math.min(4.5, lineY - 4, FG_ROWS - 4 - lineY))
+    : GEN.grid && landing ? octagon(lineX, lineY, reach(Math.abs(lineX - 16), Math.min(lineX - 4, FG_COLS - 4 - lineX)), reach(Math.abs(lineY - 12), Math.min(lineY - 4, FG_ROWS - 4 - lineY)))
+    : boss ? octagon(16, 12, 7, 4.5) : landing && !GEN.grid ? octagon(16, 12, 4)
+    : GEN.grid ? octagon(gx.length ? Math.round(mean(gx)) : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 2)
     : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
   const roads = [];
-  // A room the game drops you into at its middle keeps a court there, joined to the crossing (the grid's crossing lines
-  // up with the doors instead).
-  if (GEN.grid && landing && !boss && Math.hypot(hub[0] - 16, hub[1] - 12) > 1) { octagon(16, 12, 3); road([16, 12], hub, Math.abs(hub[0] - 16) > Math.abs(hub[1] - 12) ? 'x' : 'y', 99, 4); }
   for (const d of dirs) {
     const c = chronoDoorCell(seed, key, d) * 2; let from, axis;
     if (d === 'w') { rect(0, c, 4, c + 4); from = [4, c + 2]; axis = 'x'; } else if (d === 'e') { rect(FG_COLS - 4, c, FG_COLS, c + 4); from = [FG_COLS - 4, c + 2]; axis = 'x'; }
@@ -341,7 +349,7 @@ const GEN_THEMES = {
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.3, landmark: 0.4, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
     tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, 'rubble-big': 0.8 },
-    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.55 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], plazaTex: 'pavement-old',
+    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], plazaTex: 'overgrowth', plazaShade: 'rgba(6,12,20,.18)', bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
     hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
@@ -392,6 +400,13 @@ function chronoRoomProps(seed, plan) {
   // Owner: "non building objects such as lamps benches barriers should never be grouped, keep them far apart, never 2 or 3
   // next to each other". Every small piece (furniture and clutter) stands SMALL_GAP px from every other small piece.
   const SMALL = { lamp: 1, bench: 1, bollard: 1, clutter: 1 }, SMALL_GAP = 165;
+  // Round 393 (owner: "i'm seeing buildings of the same type side by side ... shouldn't allow the same building more than
+  // once per room"): a room never repeats a building, and two rooms never put the same one face to face across their
+  // shared edge. Each building is given a side of every seam from the seed; within EDGE px of a room's east or west edge
+  // only buildings whose side differs from the room's column parity may stand (the room beyond needs the other side),
+  // and the same along the north and south edges by row. So the two buildings either side of a seam always differ.
+  const [WX, WY] = GEN.world(plan.key), EDGE = 130, side = (name, axis) => chronoHash(seed + ':side:' + axis + ':' + name) & 1;
+  const seamOk = (name, box) => ((box[0] > EDGE && box[2] < 800 - EDGE) || side(name, 'x') !== (WX & 1)) && ((box[1] > EDGE && box[3] < 500 - EDGE) || side(name, 'y') !== (WY & 1));
   const lonely = (x, y) => !out.some(p => SMALL[p.kind] && Math.hypot(p.x - x, p.y - y) < SMALL_GAP);
   const put = (name, kind, x, y, w, h, box) => { const p = { name, kind, x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), box }; out.push(p); return p; };
   const size = (table, name, kind) => { const [iw, ih] = table[name], k = GEN.scale[kind]; return [iw * k, ih * k]; };
@@ -399,7 +414,7 @@ function chronoRoomProps(seed, plan) {
   const roadBelow = (x, y, reach) => { for (let d = 2; d <= reach; d += 4) if (isFloor(x, y + d)) return d; return 0; };
   // 2. The landmark: where the open ground is widest.
   { const names = Object.keys(GEN.landmarks[district]), name = names[Math.floor(rnd() * names.length)], [w, h] = size(GEN.landmarks[district], name, 'landmark'); let best = null;
-    for (let y = h + 8; y < 496; y += 12) for (let x = w / 2 + 8; x < 792 - w / 2; x += 12) { const box = fits(x, y, w, h, 0); if (!box) continue;
+    for (let y = h + 8; y < 496; y += 12) for (let x = w / 2 + 8; x < 792 - w / 2; x += 12) { const box = fits(x, y, w, h, 0); if (!box || !seamOk(name, box)) continue;
       const d = dist[Math.min(FG_ROWS - 1, Math.floor((y - h * 0.3) / C)) * FG_COLS + Math.floor(x / C)]; if (!best || d > best.d) best = { x, y, box, d }; }
     if (best) { put(name, 'landmark', best.x, best.y, w, h, best.box); if (!GEN.pavement) yards.push({ t: 'oct', x: best.x, y: best.y - h * 0.16, rx: w * 0.62, ry: h * 0.3 }); } }
   // 3 and 4. Street-front lots and their yards. Pass 0: the far side of a street (a road just below the foot); pass 1: beside or above a road.
@@ -414,12 +429,27 @@ function chronoRoomProps(seed, plan) {
       for (let t = 0; t < 9 && !placed; t++) { const [name, table] = pick(), [w, h] = size(table, name, 'building'), cx = x + w / 2;
         if (out.some(p => p.name === name)) continue; // Round 388 (owner): never the same building twice in a room; leave the lot empty instead
         if (pass === 0 && !(roadBelow(cx - w * 0.3, y, 30 + PAVE) && roadBelow(cx + w * 0.3, y, 30 + PAVE))) continue; // the whole front on the street
-        const box = fits(cx, y, w, h, 5); if (box) placed = put(name, 'building', cx, y, w, h, box); }
+        const box = fits(cx, y, w, h, 5); if (box && seamOk(name, box)) placed = put(name, 'building', cx, y, w, h, box); }
       if (!placed) { x += 10; continue; }
       built++; const run = roadBelow(placed.x, y, 30 + PAVE);
       if (!GEN.pavement) yards.push({ t: 'rect', x0: placed.box[0] - 7, y0: y - placed.h * 0.42, x1: placed.box[2] + 7, y1: y + (run ? run + 6 : 9) });
       x = placed.box[2] + 6 + Math.floor(rnd() * 8);
     }
+  }
+  // 4b. Round 393 (owner: "use a building as a transition point between tiles so that seams are always hidden? could
+  // that be a rule?"): where the ground changes kind (rubble to overgrowth) and nothing stands yet, a building may stand
+  // over the seam, its base across it. It obeys every other rule (off the curb, out of the water, never repeated), so a
+  // seam it can't take is left to the soft edge the painter gives it.
+  if (GEN.feather) {
+    const seams = [], k = (x, y) => terrain.chasm(x, y) ? 'w' : terrain.pipes(x, y) ? 'p' : 'g';
+    for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) { const a = k(x, y); if (a === 'w') continue;
+      if (x + 1 < CG_COLS && k(x + 1, y) !== a && k(x + 1, y) !== 'w') seams.push([(x + 1) * CG_CELL, (y + 0.5) * CG_CELL]);
+      if (y + 1 < CG_ROWS && k(x, y + 1) !== a && k(x, y + 1) !== 'w') seams.push([(x + 0.5) * CG_CELL, (y + 1) * CG_CELL]); }
+    const covered = (sx, sy) => out.some(p => sx > p.box[0] && sx < p.box[2] && sy > p.box[1] && sy < p.box[3]);
+    for (let i = seams.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [seams[i], seams[j]] = [seams[j], seams[i]]; }
+    for (const [sx, sy] of seams) { if (built >= 20) break; if (covered(sx, sy)) continue;
+      for (let t = 0; t < 6; t++) { const [name, table] = pick(); if (out.some(p => p.name === name)) continue; const [w, h] = size(table, name, 'building');
+        const box = fits(sx, sy + h * 0.25, w, h, 5); if (box && seamOk(name, box)) { put(name, 'building', sx, sy + h * 0.25, w, h, box); built++; break; } } }
   }
   // 5. Street furniture: lamps on the far kerb every 150px or so; a bench or two bollards beside each square.
   const lamps = [];
@@ -607,13 +637,57 @@ function paintChronoRoom(canvas, key) {
     const g = c.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, img);
     return { shape, art: c };
   };
+  // Round 393 (owner: "curb corners need to be a bit more rounded"): blur a shape and cut it back at half strength, which
+  // rounds its corners, the inside ones (where two roads meet) as well as the outside ones.
+  // The shape's edge pixels are stretched outward first, so a road running off the room keeps its full width to the edge.
+  const blurred = (src, r) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    const P = Math.ceil(r * 3), e = document.createElement('canvas'); e.width = W + 2 * P; e.height = H + 2 * P; const eg = e.getContext('2d');
+    eg.drawImage(src, P, P); eg.drawImage(src, 0, 0, 1, H, 0, P, P, H); eg.drawImage(src, W - 1, 0, 1, H, W + P, P, P, H); eg.drawImage(src, 0, 0, W, 1, P, 0, W, P); eg.drawImage(src, 0, H - 1, W, 1, P, H + P, W, P);
+    g.filter = 'blur(' + r + 'px)'; g.drawImage(e, -P, -P); g.filter = 'none'; return c; };
+  const smoothed = (src, r) => { const c = blurred(src, r), g = c.getContext('2d'); if (!g || !g.getImageData) return src; const d = g.getImageData(0, 0, W, H), a = d.data;
+    for (let i = 3; i < a.length; i += 4) { a[i - 3] = a[i - 2] = a[i - 1] = 255; a[i] = Math.max(0, Math.min(255, (a[i] - 128) * 5 + 128)); }
+    g.putImageData(d, 0, 0); return c; };
+  // Round 393 (owner: "grass edges should also not be straight grass is more random"; "the water edge ... should look more
+  // like a beachfront edge"): a shape's edge broken up by noise laid over the whole world in 20px cells (so it runs on
+  // across rooms), then cut back sharply (`sharp`) or softly. `grow` pushes the edge outward in px (for a beach round water).
+  const raggedNoise = {}, noiseAt = tag => { if (raggedNoise[tag]) return raggedNoise[tag]; const [wx, wy] = GEN.world(key), sd = chronoSeed(), c = document.createElement('canvas'); c.width = 41; c.height = 26;
+      const g = c.getContext('2d'), d = g.createImageData(41, 26);
+      for (let y = 0; y < 26; y++) for (let x = 0; x < 41; x++) { const gx = wx * 40 + x, gy = wy * 25 + y, v = chronoNoise(sd, tag, gx, gy, 5) * 0.62 + chronoNoise(sd, tag + '2', gx, gy, 1.7) * 0.38, i = (y * 41 + x) * 4; d.data[i] = d.data[i + 1] = d.data[i + 2] = Math.round(v * 255); d.data[i + 3] = 255; }
+      g.putImageData(d, 0, 0); const big = document.createElement('canvas'); big.width = W; big.height = H; const bg = big.getContext('2d'); bg.imageSmoothingEnabled = true; bg.drawImage(c, 0, 0, 41 * 20 * K, 26 * 20 * K);
+      return raggedNoise[tag] = bg.getImageData ? bg.getImageData(0, 0, W, H).data : null; };
+  const ragged = (src, tag, { blur = 22, amp = 0.7, sharp = 6, grow = 0, stretch = true } = {}) => {
+    let base = src;
+    if (typeof src === 'function') { // a terrain grid: drawn with the neighbours' cells round it, so an edge on a seam is ragged on both sides
+      const P = Math.ceil(blur * K * 3 + grow * K), T = CG_CELL * K, n = Math.ceil(P / T), e = document.createElement('canvas'); e.width = W + 2 * P; e.height = H + 2 * P; const eg = e.getContext('2d'); eg.fillStyle = '#fff';
+      for (let y = -n; y < CG_ROWS + n; y++) for (let x = -n; x < CG_COLS + n; x++) if (src(x, y)) eg.fillRect(P + x * T - grow * K, P + y * T - grow * K, T + 2 * grow * K, T + 2 * grow * K);
+      const c = document.createElement('canvas'); c.width = W; c.height = H; const cg = c.getContext('2d'); cg.filter = 'blur(' + (blur * K) + 'px)'; cg.drawImage(e, -P, -P); cg.filter = 'none'; return cut(c, tag, amp, sharp, base);
+    }
+    if (grow) { base = document.createElement('canvas'); base.width = W; base.height = H; const bg = base.getContext('2d'); for (let a = 0; a < 16; a++) bg.drawImage(src, Math.round(Math.cos(a * Math.PI / 8) * grow * K), Math.round(Math.sin(a * Math.PI / 8) * grow * K)); }
+    const bl = stretch ? blurred(base, blur * K) : (() => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.filter = 'blur(' + (blur * K) + 'px)'; g.drawImage(base, 0, 0); g.filter = 'none'; return c; })();
+    return cut(bl, tag, amp, sharp, base); };
+  const cut = (c, tag, amp, sharp, base) => { const g = c.getContext('2d'), nz = noiseAt(tag); if (!g || !g.getImageData || !nz) return typeof base === 'function' ? c : base;
+    // the noise may move the edge, but never lift bare ground far from the shape above nothing
+    const d = g.getImageData(0, 0, W, H), a = d.data, A = Math.min(amp, 1 - 1.3 / sharp);
+    for (let i = 3; i < a.length; i += 4) { a[i - 3] = a[i - 2] = a[i - 1] = 255; a[i] = Math.max(0, Math.min(255, ((a[i] / 255 - 0.5) + (nz[i - 3] / 255 - 0.5) * A) * sharp * 255 + 128)); }
+    g.putImageData(d, 0, 0); return c; };
   const ring = (pic, r) => { for (let a = 0; a < 8; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 4) * r), Math.round(Math.sin(a * Math.PI / 4) * r)); };
-  const terrain = chronoTerrain(chronoSeed(), key), any = f => { for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (f(x, y)) return true; return false; };
+  const terrain = chronoTerrain(chronoSeed(), key), any = f => { for (let y = -1; y <= CG_ROWS; y++) for (let x = -1; x <= CG_COLS; x++) if (f(x, y)) return true; return false; };
   if (any(terrain.pipes)) { // a bed of pipes, sunk a little into the machinery
     const s = layer(terrain.pipes, imgs.pipes, 24);
-    ring(chronoTint(s.shape, GEN.bedRim[0]), 5); ring(chronoTint(s.shape, GEN.bedRim[1]), 2); ctx.drawImage(s.art, 0, 0);
+    // Round 393 (owner: "transitions between tiles are not great"): a theme with `feather` blends the bed into the ground
+    // over a soft edge instead of a hard rim.
+    if (GEN.feather) { const m = ragged(terrain.pipes, 'grass', { blur: 30, amp: 0.7, sharp: 4 }), g = m.getContext('2d'); g.globalCompositeOperation = 'source-in'; fill(g, imgs.pipes); ctx.drawImage(m, 0, 0); }
+    else { ring(chronoTint(s.shape, GEN.bedRim[0]), 5); ring(chronoTint(s.shape, GEN.bedRim[1]), 2); ctx.drawImage(s.art, 0, 0); }
   }
-  if (any(terrain.chasm)) { // a chasm: a lit rim, the dark below, and a shadow falling in from its edge
+  if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
+    const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 5, grow: 38 });
+    const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
+    ctx.drawImage(tintIn(sand, g => { g.fillStyle = GEN.beach[0]; g.fillRect(0, 0, W, H); g.globalAlpha = 0.35; g.globalCompositeOperation = 'soft-light'; fill(g, imgs.ground); }), 0, 0);
+    ctx.drawImage(tintIn(blurred(sand, 3 * K), g => { const w = blurred(shore, 14 * K); g.globalCompositeOperation = 'source-in'; g.drawImage(w, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = GEN.beach[1]; g.fillRect(0, 0, W, H); }), 0, 0);
+    const water = tintIn(shore, g => fill(g, imgs.chasm)); ctx.drawImage(water, 0, 0);
+    for (const [r, a] of [[3, 0.55], [9, 0.18]]) { ctx.save(); ctx.globalAlpha = a; const foam = document.createElement('canvas'); foam.width = W; foam.height = H; const fg = foam.getContext('2d');
+      fg.drawImage(blurred(shore, r * K), 0, 0); fg.globalCompositeOperation = 'destination-out'; fg.drawImage(shore, 0, 0); fg.globalCompositeOperation = 'source-in'; fg.fillStyle = GEN.beach[2]; fg.fillRect(0, 0, W, H); ctx.drawImage(foam, 0, 0); ctx.restore(); }
+  } else if (any(terrain.chasm)) { // a chasm: a lit rim, the dark below, and a shadow falling in from its edge
     const s = layer(terrain.chasm, imgs.chasm, 24), g = s.art.getContext('2d');
     g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(4,2,14,.45)'; g.fillRect(0, 0, W, H);
     const rim = document.createElement('canvas'); rim.width = W; rim.height = H; const rg = rim.getContext('2d');
@@ -635,8 +709,9 @@ function paintChronoRoom(canvas, key) {
     ring(chronoTint(yc, GEN.yardRim[0]), 4); ring(chronoTint(yc, GEN.yardRim[1]), 2); ctx.drawImage(art, 0, 0);
   }
   // The floor is drawn from the room's shapes: straight-edged roads with mitred corners and 45-degree legs, eight-sided hubs and squares.
-  const floorShape = document.createElement('canvas'); floorShape.width = W; floorShape.height = H;
-  { const g = floorShape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
+  // `grow` px wider on every side gives the pavement's outline from the same shapes, drawn as clean vectors (Round 393).
+  const drawFloor = (grow) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4; const G = grow * K;
     // A theme with `round` (the city: "make the roads look more like roads, they are too sharp") turns every corner on an
     // arc: road bends, and the corners of hubs and squares.
     const R = (GEN.round || 0) * K, turn = (pts, close) => { g.beginPath(); const n = pts.length, P = i => pts[((i % n) + n) % n];
@@ -646,18 +721,25 @@ function paintChronoRoom(canvas, key) {
     if (R) { g.lineCap = 'round'; g.lineJoin = 'round'; }
     for (const sh of plan.shapes) {
       if (sh.pave) continue;
-      if (sh.t === 'rect') g.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
-      else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); }
-      else { g.lineWidth = sh.w * K; turn(sh.pts, false); g.stroke(); }
+      if (sh.t === 'rect') g.fillRect(sh.x * K - G, sh.y * K - G, sh.w * K + 2 * G, sh.h * K + 2 * G);
+      else if (sh.t === 'poly' && GEN.square) { // Round 393 (owner: "just go to straight roads, 90 degree angle corners ... don't have any odd shapes"): a hub is its box
+        const xs = sh.pts.map(p => p[0]), ys = sh.pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys);
+        g.fillRect(x0 * K - G, y0 * K - G, (Math.max(...xs) - x0) * K + 2 * G, (Math.max(...ys) - y0) * K + 2 * G); }
+      else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); if (G) { g.lineWidth = 2 * G; g.stroke(); } }
+      else if (GEN.square) { g.save(); g.lineCap = 'square'; g.lineJoin = 'miter'; g.lineWidth = sh.w * K + 2 * G; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); g.restore(); }
+      else { g.lineWidth = sh.w * K + 2 * G; turn(sh.pts, false); g.stroke(); }
     }
-    plan.turn = turn; }
-  { // close hairline gaps where two shapes pass within a few pixels of each other
+    return c; };
+  const floorShape = drawFloor(0);
+  if (!GEN.square) { // close hairline gaps where two shapes pass within a few pixels of each other
     const copy = document.createElement('canvas'); copy.width = W; copy.height = H; copy.getContext('2d').drawImage(floorShape, 0, 0);
     const g = floorShape.getContext('2d'); for (let a = 0; a < 8; a++) g.drawImage(copy, Math.round(Math.cos(a * Math.PI / 4) * 5), Math.round(Math.sin(a * Math.PI / 4) * 5)); }
   const f = { shape: floorShape, art: document.createElement('canvas') }; f.art.width = W; f.art.height = H;
-  { const g = f.art.getContext('2d'); g.drawImage(floorShape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); g.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(g, floorShape, mix); }
+  { const g = f.art.getContext('2d'); g.drawImage(f.shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); g.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(g, f.shape, mix); }
   if (GEN.pavement) { // a strip of pavement down both sides of every road
-    const wide = document.createElement('canvas'); wide.width = W; wide.height = H; const wg = wide.getContext('2d'); for (let a = 0; a < 16; a++) wg.drawImage(f.shape, Math.round(Math.cos(a * Math.PI / 8) * GEN.pavement * K), Math.round(Math.sin(a * Math.PI / 8) * GEN.pavement * K));
+    // Owner (Round 393): "clean half circle edges ... and a corner cut at 90 degrees": the pavement is the same shapes drawn
+    // wider, so its outside corners are true arcs and its inside corners (where a road meets a hub) stay crisp.
+    const wide = drawFloor(GEN.pavement);
     // Owner: "find a different tile to use for off path traversal to objects, do not use the curb tile for those areas":
     // the paved squares and their paths are drawn below in their own tile (GEN.plazaTex), not as pavement.
     const pv = document.createElement('canvas'); pv.width = W; pv.height = H;
@@ -669,11 +751,14 @@ function paintChronoRoom(canvas, key) {
     pg.globalCompositeOperation = 'source-atop'; pg.fillStyle = GEN.yardShade || 'rgba(10,8,26,.22)'; pg.fillRect(0, 0, W, H);
     // Round 391 (owner: "make all curbs drawn at a similar width, use the same border on both sides of the curb"): the
     // pavement's outer edge gets the same kerb border as its road edge (three bands), and neither casts a shadow.
-    ring(chronoTint(wide, GEN.kerb[0]), 9); ring(chronoTint(wide, GEN.kerb[1]), 6); ring(chronoTint(wide, GEN.kerb[2]), 2); ctx.drawImage(pa, 0, 0);
+    // Round 393 (owner: "lets not have the curb overlap with the off path grass, have them touch at the edges"): the
+    // squares are laid first, so the pavement and its kerb sit over them and the grass meets the kerb's outer edge.
     if (GEN.plazaTex && imgs[GEN.plazaTex]) { // the squares: their own tile, a thin dark edge, laid over the pavement they join
       const pl = document.createElement('canvas'); pl.width = W; pl.height = H; const lg = pl.getContext('2d'); lg.drawImage(pv, 0, 0); lg.globalCompositeOperation = 'source-in'; fill(lg, imgs[GEN.plazaTex]);
-      lg.globalCompositeOperation = 'source-atop'; lg.fillStyle = 'rgba(10,14,24,.42)'; lg.fillRect(0, 0, W, H);
-      ring(chronoTint(pv, GEN.kerb[0]), 4); ctx.drawImage(pl, 0, 0); }
+      lg.globalCompositeOperation = 'source-atop'; lg.fillStyle = GEN.plazaShade || 'rgba(10,14,24,.42)'; lg.fillRect(0, 0, W, H);
+      if (GEN.feather) { const m = ragged(pv, 'lawn', { blur: 22, amp: 0.7, sharp: 4, grow: 10, stretch: false }) /* a lawn path ends before the room's edge, not in a straight cut along it */, g = m.getContext('2d'); g.globalCompositeOperation = 'source-in'; fill(g, imgs[GEN.plazaTex]); g.globalCompositeOperation = 'source-atop'; g.fillStyle = GEN.plazaShade; g.fillRect(0, 0, W, H); ctx.drawImage(m, 0, 0); }
+      else { ring(chronoTint(pv, GEN.kerb[0]), 4); ctx.drawImage(pl, 0, 0); } }
+    ring(chronoTint(wide, GEN.kerb[0]), 9); ring(chronoTint(wide, GEN.kerb[1]), 6); ring(chronoTint(wide, GEN.kerb[2]), 2); ctx.drawImage(pa, 0, 0);
   }
   if (!GEN.pavement) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore(); }
   ring(chronoTint(f.shape, GEN.kerb[0]), 9); ring(chronoTint(f.shape, GEN.kerb[1]), 6); ring(chronoTint(f.shape, GEN.kerb[2]), 2);

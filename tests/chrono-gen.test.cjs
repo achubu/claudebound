@@ -53,7 +53,7 @@ assert.deepStrictEqual(r.bad, [], 'every room of three seeds is sound');
 assert.strictEqual(r.rooms, 162); assert(r.plazas >= 162 * 1.6, 'most rooms have two squares: ' + r.plazas); assert(r.legs > 162, 'Round 383: roads take 45-degree legs: ' + r.legs);
 assert(!fs.existsSync(path.join(__dirname, '..', 'assets/environment/chronospire/gen/sand.webp')), 'Round 386: the sand texture is gone');
 assert(r.inlays > 20 && r.kinds.pipes > 162 * 160 * 0.08 && r.kinds.chasm > 162 * 160 * 0.04 && r.kinds.gears > r.kinds.pipes, 'Round 378: inlays, pipe beds and chasms across the world: ' + JSON.stringify(r.kinds));
-assert(r.buildings > 162 * 4 && r.onStreet / r.buildings > 0.9, 'Round 385: buildings stand along the streets: ' + r.onStreet + ' of ' + r.buildings);
+assert(r.buildings > 162 * 3.3 && r.onStreet / r.buildings > 0.9, 'Round 385: buildings stand along the streets: ' + r.onStreet + ' of ' + r.buildings);
 assert(r.yards >= r.buildings && r.lamps > 162 * 2 && r.ownQuarter / r.buildings > 0.4 && Object.keys(r.districts).length === 4, 'Round 385: yards, lamps and four districts: ' + JSON.stringify([r.yards, r.lamps, r.ownQuarter, r.districts]));
 assert(r.same && r.differs, 'the same seed gives the same room; another seed another');
 assert(r.landing.length >= 2, 'the first room and the waypoint rooms are landing rooms: ' + r.landing);
