@@ -17,9 +17,9 @@
     "what": "n from start (stopped at 400,300)"
    },
    {
-    "kind": "door unreachable",
+    "kind": "route ends without crossing",
     "room": "0,5",
-    "what": "s from start: no route"
+    "what": "s from start (stopped at 400,300)"
    },
    {
     "kind": "route ends without crossing",
