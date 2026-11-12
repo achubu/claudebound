@@ -3527,9 +3527,13 @@ assets for neon aftermath, the rubble the puddles, the grass, everything should 
 - **Never the same building twice in a room** (both worlds): a lot with nothing unused that fits stays empty.
 - **Fix:** the tap-to-move grid was cached by room, so after a new journey taps could route over the old journey's streets
   (`touch-controls.js` keys it by the seed for generated worlds).
+- **Speed:** a new journey re-plans the city, and placement asks hundreds of thousands of walk checks; each room's floor
+  is now kept as an 8px grid per seed (`cityRoomMask`, `cityRoomWalk`, the same answers as the organic engine), and a
+  room's squares are found in one distance sweep. A new game in the city went from 5.7s to 1.6s.
+- **Patrols keep 120px from every door** in the city, so walking in never starts a fight (`rebalance` caught one).
 - Tests: `room-art` now checks the generated city (crossings both ways, a square in every room, a new layout per seed);
   `neon-world-pathing` 54/54 rooms by tapping exits; `chrono-gen` checks no repeated building in a room.
-  `playtest-walk city`: 54 rooms, 387 crossings, 75 item routes, no problems.
+  `rebalance` passes; `playtest-walk city`: 54 rooms, 387 crossings, 78 item routes, no problems.
 
 ## Round 386: no sand, and smaller, fewer floor inlays
 
