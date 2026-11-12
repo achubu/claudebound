@@ -228,23 +228,30 @@ function chronoRoomPlan(seed, key) {
   // rooms) have it there.
   const landing = chronoLandingRooms().includes(key), boss = GEN.bossRooms().includes(key);
   const dirs = Object.keys(lay.exits).filter(d => d.length === 1).sort();
-  const hub = boss ? octagon(16, 12, 7, 4.5) : landing ? octagon(16, 12, 4) : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
+  // A theme with `grid` (the city: owner, "unnatural looking road paths"): streets run straight from each door and meet at
+  // right angles; the crossing lines up with the doors (the north and south doors set its column, east and west its row),
+  // so a street through a room is one straight road. No by-pass loops or spurs.
+  const doorAt = d => chronoDoorCell(seed, key, d) * 2 + 2, mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const gx = dirs.filter(d => d === 'n' || d === 's').map(doorAt), gy = dirs.filter(d => d === 'e' || d === 'w').map(doorAt);
+  const hub = boss ? octagon(16, 12, 7, 4.5) : landing && !GEN.grid ? octagon(16, 12, 4)
+    : GEN.grid ? octagon(gx.length ? Math.round(mean(gx)) : landing ? 16 : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : landing ? 12 : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 2)
+    : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
   const roads = [];
   for (const d of dirs) {
     const c = chronoDoorCell(seed, key, d) * 2; let from, axis;
     if (d === 'w') { rect(0, c, 4, c + 4); from = [4, c + 2]; axis = 'x'; } else if (d === 'e') { rect(FG_COLS - 4, c, FG_COLS, c + 4); from = [FG_COLS - 4, c + 2]; axis = 'x'; }
     else if (d === 'n') { rect(c, 0, c + 4, 4); from = [c + 2, 4]; axis = 'y'; } else { rect(c, FG_ROWS - 4, c + 4, FG_ROWS); from = [c + 2, FG_ROWS - 4]; axis = 'y'; }
     const span = Math.abs(axis === 'x' ? hub[0] - from[0] : hub[1] - from[1]);
-    roads.push(road(from, hub, axis, Math.max(1, Math.floor(rnd() * Math.max(1, span - 2))), 4));
+    roads.push(road(from, hub, axis, GEN.grid ? span : Math.max(1, Math.floor(rnd() * Math.max(1, span - 2))), 4));
   }
   // A narrower second road between two of the door roads, by-passing the hub: an island between them.
-  if (roads.length >= 2 && rnd() < 0.6) {
+  if (!GEN.grid && roads.length >= 2 && rnd() < 0.6) {
     const i = Math.floor(rnd() * roads.length), k = (i + 1 + Math.floor(rnd() * (roads.length - 1))) % roads.length;
     const a = along(roads[i], 0.25 + rnd() * 0.2).map(Math.round), b = along(roads[k], 0.25 + rnd() * 0.2).map(Math.round);
     if (Math.hypot(a[0] - b[0], a[1] - b[1]) > 7) road(a, b, rnd() < 0.5 ? 'x' : 'y', 1 + Math.floor(rnd() * 4), 3);
   }
   // A dead-end spur with a small yard.
-  if (!boss && rnd() < 0.55) { const end = [Math.round(clampX(4 + rnd() * (FG_COLS - 8), 3)), Math.round(clampY(4 + rnd() * (FG_ROWS - 8), 3))];
+  if (!GEN.grid && !boss && rnd() < 0.55) { const end = [Math.round(clampX(4 + rnd() * (FG_COLS - 8), 3)), Math.round(clampY(4 + rnd() * (FG_ROWS - 8), 3))];
     if (Math.hypot(end[0] - hub[0], end[1] - hub[1]) > 7) { road(hub, end, rnd() < 0.5 ? 'x' : 'y', 2 + Math.floor(rnd() * 4), 3); octagon(end[0], end[1], 2.5); } }
   // Squares for objects: eight-sided, 125px across, a cell clear of every road and joined to the nearest one; never
   // under the HUD panel or the minimap. A crowded room uses its hub.
@@ -262,7 +269,8 @@ function chronoRoomPlan(seed, key) {
     }
     if (!cand.length) break;
     const c = cand.sort((a, b) => a.s - b.s)[0]; plazas.push(c);
-    road([c.px, c.py], [Math.floor(c.near[0]) + 0.5, Math.floor(c.near[1]) + 0.5], Math.abs(c.near[0] - c.px) > Math.abs(c.near[1] - c.py) ? 'x' : 'y', 99, 3); octagon(c.px, c.py, PR);
+    const s0 = shapes.length; road([c.px, c.py], [Math.floor(c.near[0]) + 0.5, Math.floor(c.near[1]) + 0.5], Math.abs(c.near[0] - c.px) > Math.abs(c.near[1] - c.py) ? 'x' : 'y', 99, 3); octagon(c.px, c.py, PR);
+    if (GEN.pavement) for (let i = s0; i < shapes.length; i++) shapes[i].pave = true; // the city's squares are paved, not road
   }
   if (!plazas.length) plazas.push({ px: hub[0], py: hub[1], x: hub[0] * FG_CELL, y: hub[1] * FG_CELL - 22 });
   // Round 386 (owner: the round inlays "are too large or placed incorrectly"): an inlay only in a court, an arena or a
@@ -325,7 +333,7 @@ const GEN_THEMES = {
     furniture: { lamp: [89, 200], bench: [173, 200], bollard: [156, 200] }, rename: { bollard: 'vending' },
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.3, landmark: 0.4, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
-    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 22, pavement: 13,
+    tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true,
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
     hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
@@ -373,7 +381,7 @@ function chronoRoomProps(seed, plan) {
   { const names = Object.keys(GEN.landmarks[district]), name = names[Math.floor(rnd() * names.length)], [w, h] = size(GEN.landmarks[district], name, 'landmark'); let best = null;
     for (let y = h + 8; y < 496; y += 12) for (let x = w / 2 + 8; x < 792 - w / 2; x += 12) { const box = fits(x, y, w, h, 0); if (!box) continue;
       const d = dist[Math.min(FG_ROWS - 1, Math.floor((y - h * 0.3) / C)) * FG_COLS + Math.floor(x / C)]; if (!best || d > best.d) best = { x, y, box, d }; }
-    if (best) { put(name, 'landmark', best.x, best.y, w, h, best.box); yards.push({ t: 'oct', x: best.x, y: best.y - h * 0.16, rx: w * 0.62, ry: h * 0.3 }); } }
+    if (best) { put(name, 'landmark', best.x, best.y, w, h, best.box); if (!GEN.pavement) yards.push({ t: 'oct', x: best.x, y: best.y - h * 0.16, rx: w * 0.62, ry: h * 0.3 }); } }
   // 3 and 4. Street-front lots and their yards. Pass 0: the far side of a street (a road just below the foot); pass 1: beside or above a road.
   const own = Object.keys(GEN.districts[district]), others = Object.keys(GEN.districts).filter(d => d !== district);
   const pick = () => { if (rnd() < 0.85) { const n = own[Math.floor(rnd() * own.length)]; return [n, GEN.districts[district]]; } const d = others[Math.floor(rnd() * others.length)], t = Object.keys(GEN.districts[d]); return [t[Math.floor(rnd() * t.length)], GEN.districts[d]]; };
@@ -389,7 +397,7 @@ function chronoRoomProps(seed, plan) {
         const box = fits(cx, y, w, h, 5); if (box) placed = put(name, 'building', cx, y, w, h, box); }
       if (!placed) { x += 10; continue; }
       built++; const run = roadBelow(placed.x, y, 30);
-      yards.push({ t: 'rect', x0: placed.box[0] - 7, y0: y - placed.h * 0.42, x1: placed.box[2] + 7, y1: y + (run ? run + 6 : 9) });
+      if (!GEN.pavement) yards.push({ t: 'rect', x0: placed.box[0] - 7, y0: y - placed.h * 0.42, x1: placed.box[2] + 7, y1: y + (run ? run + 6 : 9) });
       x = placed.box[2] + 6 + Math.floor(rnd() * 8);
     }
   }
@@ -602,6 +610,7 @@ function paintChronoRoom(canvas, key) {
       else { g.moveTo(pts[0][0] * K, pts[0][1] * K); for (let i = 1; i < n - 1; i++) { const a = pts[i - 1], c = pts[i], d = pts[i + 1]; g.arcTo(c[0] * K, c[1] * K, d[0] * K, d[1] * K, Math.min(R * 1.6, Math.hypot(c[0] - a[0], c[1] - a[1]) * K / 2, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.lineTo(pts[n - 1][0] * K, pts[n - 1][1] * K); } };
     if (R) { g.lineCap = 'round'; g.lineJoin = 'round'; }
     for (const sh of plan.shapes) {
+      if (sh.pave) continue;
       if (sh.t === 'rect') g.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
       else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); }
       else { g.lineWidth = sh.w * K; turn(sh.pts, false); g.stroke(); }
@@ -614,6 +623,9 @@ function paintChronoRoom(canvas, key) {
   { const g = f.art.getContext('2d'); g.drawImage(floorShape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); }
   if (GEN.pavement) { // a strip of pavement down both sides of every road
     const wide = document.createElement('canvas'); wide.width = W; wide.height = H; const wg = wide.getContext('2d'); for (let a = 0; a < 16; a++) wg.drawImage(f.shape, Math.round(Math.cos(a * Math.PI / 8) * GEN.pavement * K), Math.round(Math.sin(a * Math.PI / 8) * GEN.pavement * K));
+    { const pv = document.createElement('canvas'); pv.width = W; pv.height = H; const g = pv.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = g.lineJoin = 'round'; // the paved squares, a little wider than their walkable floor
+      for (const sh of plan.shapes) if (sh.pave) { if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); g.lineWidth = 16 * K; g.stroke(); } else if (sh.t === 'road') { g.lineWidth = (sh.w + 16) * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); } }
+      wg.drawImage(pv, 0, 0); }
     const pa = document.createElement('canvas'); pa.width = W; pa.height = H; const pg = pa.getContext('2d'); pg.drawImage(wide, 0, 0); pg.globalCompositeOperation = 'source-in'; fill(pg, imgs.yard);
     pg.globalCompositeOperation = 'source-atop'; pg.fillStyle = GEN.yardShade || 'rgba(10,8,26,.22)'; pg.fillRect(0, 0, W, H);
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(wide, '#05080c'), 0, 0); ctx.restore();
