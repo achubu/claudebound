@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 395: Wardbreaker Step card art
+
+The owner's Wardbreaker Step paintings, levels 0-3, at `assets/cards/level*/wardbreakerStep.webp` (`refreshedCardArt` and the
+card-art test; `cards.js?v=round395`).
+
 ## Round 394: buildings to one scale and bigger, across room seams; rounded curbs; beach sand; Barkskin and Afterimage Ward art
 
 Owner: "adjust buildings to be similar in scale? All doors and windows should be similar in size"; "buildings should
