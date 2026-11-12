@@ -389,6 +389,10 @@ function chronoRoomProps(seed, plan) {
     if (out.some(p => box[0] < p.box[2] + gap && box[2] > p.box[0] - gap && box[1] < p.box[3] + gap && box[3] > p.box[1] - gap)) return null;
     return box;
   };
+  // Owner: "non building objects such as lamps benches barriers should never be grouped, keep them far apart, never 2 or 3
+  // next to each other". Every small piece (furniture and clutter) stands SMALL_GAP px from every other small piece.
+  const SMALL = { lamp: 1, bench: 1, bollard: 1, clutter: 1 }, SMALL_GAP = 165;
+  const lonely = (x, y) => !out.some(p => SMALL[p.kind] && Math.hypot(p.x - x, p.y - y) < SMALL_GAP);
   const put = (name, kind, x, y, w, h, box) => { const p = { name, kind, x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), box }; out.push(p); return p; };
   const size = (table, name, kind) => { const [iw, ih] = table[name], k = GEN.scale[kind]; return [iw * k, ih * k]; };
   // The road nearest below a foot point (within `reach` px), else to its left or right: where a yard runs to.
@@ -419,16 +423,16 @@ function chronoRoomProps(seed, plan) {
   }
   // 5. Street furniture: lamps on the far kerb every 150px or so; a bench or two bollards beside each square.
   const lamps = [];
-  for (let y = 20; y < 496; y += 5) for (let x = 20; x < 782; x += 5) { const b = roadBelow(x, y, 14); if (!(b >= 6) || lamps.some(l => Math.hypot(l[0] - x, l[1] - y) < (GEN.lampGap || 150))) continue;
+  for (let y = 20; y < 496; y += 5) for (let x = 20; x < 782; x += 5) { const b = roadBelow(x, y, 14); if (!(b >= 6) || !lonely(x, y) || lamps.some(l => Math.hypot(l[0] - x, l[1] - y) < (GEN.lampGap || 150))) continue;
     const [w, h] = size(GEN.furniture, 'lamp', 'lamp'), box = fits(x, y, w, h, 3, 3); if (box) { put('lamp', 'lamp', x, y, w, h, box); lamps.push([x, y]); } }
   for (const [px, py] of plan.plazas) { const kind = rnd() < 0.5 ? 'bench' : 'bollard', [w, h] = size(GEN.furniture, kind, kind);
-    for (const [dx, dy] of [[0, -78], [-92, 0], [92, 0], [-70, -60], [70, -60]]) { const x = px + dx, y = py + 22 + dy, box = fits(x, y, w, h, 3, 3); if (box && !isFloor(x, y)) { put((GEN.rename && GEN.rename[kind]) || kind, kind, x, y, w, h, box); if (kind === 'bench') break; } } }
+    for (const [dx, dy] of [[0, -78], [-92, 0], [92, 0], [-70, -60], [70, -60]]) { const x = px + dx, y = py + 22 + dy; if (!lonely(x, y)) continue; const box = fits(x, y, w, h, 3, 3); if (box && !isFloor(x, y)) { put((GEN.rename && GEN.rename[kind]) || kind, kind, x, y, w, h, box); break; } } } // one piece per square
   // 6. Back lots: clutter behind the rows, likelier near the road and beside a building.
   const clutter = Object.keys(GEN.clutter);
   for (let t = 0, made = 0; t < 160 && made < 9; t++) { const name = clutter[Math.floor(rnd() * clutter.length)], [w, h] = size(GEN.clutter, name, 'clutter'), x = 20 + rnd() * 760, y = 30 + rnd() * 465;
     const d = dist[Math.min(FG_ROWS - 1, Math.floor(y / C)) * FG_COLS + Math.floor(x / C)]; if (d * C < BIG_CLEAR || rnd() > Math.exp(-(d - 1) / 3.5)) continue;
     if (!out.some(p => (p.kind === 'building' || p.kind === 'landmark') && Math.abs(p.x - x) < p.w / 2 + 46 && y > p.y - p.h * 0.5 && y < p.y + 40) && rnd() < 0.7) continue;
-    if (out.some(p => p.name === name && Math.hypot(p.x - x, p.y - y) < 150)) continue;
+    if (!lonely(x, y)) continue;
     const box = fits(x, y, w, h, 2); if (box) { put(name, 'clutter', x, y, w, h, box); made++; } }
   out.sort((a, b) => a.y - b.y);
   plan.yards = yards; plan.district = district;
