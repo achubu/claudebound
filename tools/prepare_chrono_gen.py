@@ -32,7 +32,7 @@ SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
 # Round 387: Neon Aftermath's set, for the same generator (python3 tools/prepare_chrono_gen.py <folder> city).
 WORLDS = {'city': {
     'out': 'assets/environment/city-gen',
-    'textures': {'floor': '1pi1qk', 'overgrowth': '549k97', 'yard': 'ijwi57', 'ground': 'pch07g', 'water': 'vkvpou'},
+    'textures': {'floor': '5uo2m3', 'overgrowth': '549k97', 'yard': 'k7s1hd', 'ground': 'wd498u', 'water': 'vkvpou'},  # Round 389: finer road, pavement and rubble
     'sheets': {
         '4m9l9k': (['lamp', 'vending', 'barrier', 'bench'], 200),
         'op0e6t': (['car', 'dumpsters', 'crates', 'traffic-light'], 220),
