@@ -41,6 +41,11 @@ WORLDS = {'city': {
         'hc4y4t': (['neon-tower', 'corner-store', 'apartment', 'scrap-shop'], 420),
         'mpp0pm': (['tenement', 'garden-block', 'container-home', 'clinic-block'], 420),
         'u7bx2o': (['noodle-bar', 'arcade', 'pawn-shop', 'capsule-hotel'], 420),
+        # Round 388: the second set of district sheets
+        '15gkwv': (['coolant-tower', 'drone-hangar', 'battery-depot', 'conveyor-factory'], 420),
+        '89mvgk': (['ac-tower', 'scrap-shack', 'courtyard-block', 'collapsed-block'], 420),
+        'm7qkdn': (['bell-pavilion', 'greenhouse', 'bridge-house', 'tea-terrace'], 420),
+        'qy8wma': (['ramen-stall', 'repair-shop', 'tattoo-parlour', 'cinema'], 420),
     }}}
 
 def find(folder, tag):

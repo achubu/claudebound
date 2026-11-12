@@ -32,6 +32,7 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
         const nearRoad = q => { for (let d = 0; d <= 60; d += 4) for (const [dx, dy] of [[0, d], [-q.w / 2 - d, -q.h * 0.2], [q.w / 2 + d, -q.h * 0.2], [0, -q.h - d]]) if (isF(q.x + dx, q.y + dy)) return true; return false; };
         out.buildings += bs.length; out.onStreet += bs.filter(nearRoad).length; out.lamps += ps.filter(q => q.kind === 'lamp').length; out.yards += (p.yards || []).length; out.districts[p.district] = (out.districts[p.district] || 0) + 1;
         const table = CHRONO_DISTRICTS[p.district]; out.ownQuarter += bs.filter(q => table[q.name]).length;
+        { const nb = bs.map(q => q.name).concat(ps.filter(q => q.kind === 'landmark').map(q => q.name)); if (new Set(nb).size !== nb.length) e.push('a building twice in one room'); }
         for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) { const a = ps[i].box, b = ps[j].box; if (a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]) e.push('two pieces of scenery overlap'); } }
       const t = chronoTerrain(String(seed), key);
       for (const q of chronoRoomProps(String(seed), p)) if (t.chasm(Math.floor(q.x / 50), Math.floor((q.y - 4) / 50))) e.push('prop standing in a chasm');
@@ -51,8 +52,8 @@ assert.deepStrictEqual(r.bad, [], 'every room of three seeds is sound');
 assert.strictEqual(r.rooms, 162); assert(r.plazas >= 162 * 1.6, 'most rooms have two squares: ' + r.plazas); assert(r.legs > 162, 'Round 383: roads take 45-degree legs: ' + r.legs);
 assert(!fs.existsSync(path.join(__dirname, '..', 'assets/environment/chronospire/gen/sand.webp')), 'Round 386: the sand texture is gone');
 assert(r.inlays > 20 && r.kinds.pipes > 162 * 160 * 0.08 && r.kinds.chasm > 162 * 160 * 0.04 && r.kinds.gears > r.kinds.pipes, 'Round 378: inlays, pipe beds and chasms across the world: ' + JSON.stringify(r.kinds));
-assert(r.buildings > 162 * 4.5 && r.onStreet / r.buildings > 0.9, 'Round 385: buildings stand along the streets: ' + r.onStreet + ' of ' + r.buildings);
-assert(r.yards >= r.buildings && r.lamps > 162 * 2 && r.ownQuarter / r.buildings > 0.6 && Object.keys(r.districts).length === 4, 'Round 385: yards, lamps and four districts: ' + JSON.stringify([r.yards, r.lamps, r.ownQuarter, r.districts]));
+assert(r.buildings > 162 * 4 && r.onStreet / r.buildings > 0.9, 'Round 385: buildings stand along the streets: ' + r.onStreet + ' of ' + r.buildings);
+assert(r.yards >= r.buildings && r.lamps > 162 * 2 && r.ownQuarter / r.buildings > 0.4 && Object.keys(r.districts).length === 4, 'Round 385: yards, lamps and four districts: ' + JSON.stringify([r.yards, r.lamps, r.ownQuarter, r.districts]));
 assert(r.same && r.differs, 'the same seed gives the same room; another seed another');
 assert(r.landing.length >= 2, 'the first room and the waypoint rooms are landing rooms: ' + r.landing);
 assert(r.resumed, 'Round 379: a save from an older map restarts the Chronospire at its gate, breakers off');
