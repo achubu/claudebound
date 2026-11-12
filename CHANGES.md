@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 392: small objects are never grouped
+
+Owner: "non building objects such as lamps benches barriers should never be grouped, keep them far apart, never 2 or 3 next
+to each other, that should be a placement rule". In `chronoRoomProps` (both worlds) every small piece (lamps, benches,
+bollards and vending machines, and clutter) stands at least 165px from every other small piece, and a square gets at most
+one piece of furniture. Checked on four seeds: 843 small pieces, no two within 160px of each other in a room. `chrono-gen`
+tests it.
+
 ## Round 391: the old city paintings are out; placement rules, matching curbs, no scenery shadows
 
 Owner: "im seeing old room images, you can remove them from the game or cache?". The generated city (Rounds 387-389)

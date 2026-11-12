@@ -32,6 +32,7 @@ const r = JSON.parse(run(`(() => { const out = { bad: [], rooms: 0, plazas: 0, i
         const nearRoad = q => { for (let d = 0; d <= 60; d += 4) for (const [dx, dy] of [[0, d], [-q.w / 2 - d, -q.h * 0.2], [q.w / 2 + d, -q.h * 0.2], [0, -q.h - d]]) if (isF(q.x + dx, q.y + dy)) return true; return false; };
         out.buildings += bs.length; out.onStreet += bs.filter(nearRoad).length; out.lamps += ps.filter(q => q.kind === 'lamp').length; out.yards += (p.yards || []).length; out.districts[p.district] = (out.districts[p.district] || 0) + 1;
         const table = CHRONO_DISTRICTS[p.district]; out.ownQuarter += bs.filter(q => table[q.name]).length;
+        { const sm = ps.filter(q => ['lamp', 'bench', 'bollard', 'clutter'].includes(q.kind)); for (let i = 0; i < sm.length; i++) for (let j = i + 1; j < sm.length; j++) if (Math.hypot(sm[i].x - sm[j].x, sm[i].y - sm[j].y) < 160) e.push('two small pieces within 160px'); }
         { const nb = bs.map(q => q.name).concat(ps.filter(q => q.kind === 'landmark').map(q => q.name)); if (new Set(nb).size !== nb.length) e.push('a building twice in one room'); }
         for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) { const a = ps[i].box, b = ps[j].box; if (a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]) e.push('two pieces of scenery overlap'); } }
       const t = chronoTerrain(String(seed), key);
