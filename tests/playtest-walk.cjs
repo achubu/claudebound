@@ -108,7 +108,7 @@ const only = process.argv[2];
           const raw = rooms[key].exits[d]; if (!raw) continue;
           state.room = key; state.pos = { ...pos };
           // Round 377: a door that is not at the middle of its edge (the generated Chronospire) is tapped where it is, like its exit label.
-          const od = door[d] && TILE_REGIONS[activeRegion] && typeof chronoPlan === 'function' && activeRegion === 'chronospire' && organicDoor(key, d);
+          const od = door[d] && typeof chronoPlan === 'function' && (activeRegion === 'chronospire' || activeRegion === 'city') && organicDoor(key, d);
           const res = walkTo(od ? { x: Math.max(15, Math.min(785, od.edge.x)), y: Math.max(15, Math.min(485, od.edge.y)) } : door[d] || solarisDiagDoor(key, d), { key, dir: d });
           if (!res.ok) { P('door unreachable', key, d + ' from ' + via + ': ' + res.why); continue; }
           if (!res.crossed) { P('route ends without crossing', key, d + ' from ' + via + ' (stopped at ' + Math.round(state.pos.x) + ',' + Math.round(state.pos.y) + ')'); continue; }
