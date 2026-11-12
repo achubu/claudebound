@@ -18,10 +18,41 @@ function cityGenEnsure() {
 }
 function cityGenPlan(key) { cityGenEnsure(); return genPlan('city', key, cityGenSeed); }
 // The walk mask, a cell at a time (8px cells judged at their centres, like the old traced mask).
+// Each room's floor as a 100x63 grid of 8px cells, built once per seed.
+let cityMaskSeed = null, cityMasks = {};
+function cityRoomMask(cx, cy) {
+  if (cityMaskSeed !== cityGenSeed) { cityMaskSeed = cityGenSeed; cityMasks = {}; }
+  const k = cx + ',' + (cy + 4); if (k in cityMasks) return cityMasks[k];
+  const p = cityGenPlan(k); if (!p) return cityMasks[k] = null;
+  const m = new Uint8Array(100 * 63);
+  for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) m[my * 100 + mx] = p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]; }
+  return cityMasks[k] = m;
+}
 function cityGenWalk(wx, wy) {
-  const x = Math.floor(wx / 8) * 8 + 4, y = Math.floor(wy / 8) * 8 + 4; if (x < 0 || y < 0) return false;
-  const cx = Math.floor(x / 800), cy = Math.floor(y / 500), p = cityGenPlan(cx + ',' + (cy + 4));
-  return !!p && p.floor[Math.floor((y - cy * 500) / FG_CELL) * FG_COLS + Math.floor((x - cx * 800) / FG_CELL)] === 1;
+  if (wx < 0 || wy < 0) return false;
+  if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure();
+  const cx = Math.floor(wx / 800), cy = Math.floor(wy / 500), m = cityRoomMask(cx, cy); if (!m) return false;
+  return m[Math.floor((wy - cy * 500) / 8) * 100 + Math.floor((wx - cx * 800) / 8)] === 1;
+}
+// A fast path for the city's rooms (not during the organic engine's patrol pass, where any spot in the room counts), the same answer the organic engine gives (a room's foot point is y+22, read no lower
+// than 495; standing is allowed 12px in from the room's sides), without its per-call lookups: new journeys re-plan the
+// city, and placement asks hundreds of thousands of these.
+function cityRoomWalk(key, x, y) {
+  const c = key.indexOf(','), cx = +key.slice(0, c), cy = +key.slice(c + 1) - 4, m = cityRoomMask(cx, cy); if (!m) return false;
+  const X = Math.max(0, Math.min(799, x)), Y = Math.min(495, Math.max(0, Math.min(499, y + 22)));
+  return m[Math.floor(Y / 8) * 100 + Math.floor(X / 8)] === 1;
+}
+{
+  const walkableBeforeCity = walkable;
+  walkable = function (key, x, y, margin) {
+    if (activeRegion === 'city' && rooms[key] && !(typeof organicSpawnPass !== 'undefined' && organicSpawnPass)) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); return x >= 12 && x <= 788 && y >= 12 && y <= 488 && cityRoomWalk(key, x, y); }
+    return walkableBeforeCity.apply(this, arguments);
+  };
+  const blockedBeforeCity = NeonCity.blocked;
+  NeonCity.blocked = function (key, x, y) {
+    if (activeRegion === 'city' && rooms[key]) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); return !cityRoomWalk(key, x, y); }
+    return blockedBeforeCity.apply(this, arguments);
+  };
 }
 {
   const walkBefore = neonWorldWalk;

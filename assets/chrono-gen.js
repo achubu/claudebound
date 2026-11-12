@@ -260,13 +260,17 @@ function chronoRoomPlan(seed, key) {
   // under the HUD panel or the minimap. A crowded room uses its hub.
   const plazas = [], PR = 2.5;
   for (let n = 0; n < 2; n++) {
-    const fl = []; for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) if (floor[y * FG_COLS + x]) fl.push([x + 0.5, y + 0.5]);
+    // Chebyshev distance from every cell to the nearest floor cell, and which floor cell that is (one sweep, not a search per candidate).
+    const N = FG_COLS * FG_ROWS, dd = new Int16Array(N).fill(-1), nearOf = new Int32Array(N), bq = [];
+    for (let i = 0; i < N; i++) if (floor[i]) { dd[i] = 0; nearOf[i] = i; bq.push(i); }
+    for (let h = 0; h < bq.length; h++) { const i = bq[h], x = i % FG_COLS, y = (i - x) / FG_COLS;
+      for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) { const nx = x + ox, ny = y + oy; if (nx < 0 || ny < 0 || nx >= FG_COLS || ny >= FG_ROWS) continue; const j = ny * FG_COLS + nx; if (dd[j] < 0) { dd[j] = dd[i] + 1; nearOf[j] = nearOf[i]; bq.push(j); } } }
     const cand = [];
     for (let py = 2 + PR; py <= FG_ROWS - 2 - PR; py++) for (let px = 2 + PR; px <= FG_COLS - 2 - PR; px++) {
       const x = px * FG_CELL, y = py * FG_CELL - 22;
       if (typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(x + dx, y + dy))) continue;
       if (plazas.some(p => Math.hypot(p.px - px, p.py - py) < 8)) continue;
-      let best = Infinity, near = null; for (const c of fl) { const dd = Math.max(Math.abs(c[0] - px), Math.abs(c[1] - py)); if (dd < best) { best = dd; near = c; } }
+      const ci = Math.floor(py) * FG_COLS + Math.floor(px); if (dd[ci] < 0) continue; const ni = nearOf[ci], near = [ni % FG_COLS + 0.5, Math.floor(ni / FG_COLS) + 0.5], best = Math.max(Math.abs(near[0] - px), Math.abs(near[1] - py));
       if (best < PR + 1.2 || best > PR + 6) continue;
       cand.push({ px, py, x, y, near, s: rnd() });
     }
