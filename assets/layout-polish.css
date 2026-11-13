@@ -350,6 +350,8 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
    world: 56px for points of interest, chests, relics, switches and vaults, 76px for the merchant and the Cardsmith. */
 #world#world .poi-node,#world#world .poi-node.poi-art,#world#world .map-chest,#world#world .relic:not(.hidden-crystal){width:56px!important;height:56px!important}
 #world#world .poi-node.poi-merchant,#world#world .poi-node.poi-art.poi-merchant,#world#world .poi-node.poi-cardsmith,#world#world .poi-node.poi-art.poi-cardsmith{width:76px!important;height:76px!important}
+/* Round 418: the Afterlight Vault door is a wide, flat picture: drawn 92px across (the height its picture gives) */
+#world#world .poi-node.poi-art.poi-vault[style*="city-vault-2"]{width:92px!important;height:56px!important}
 #world#world .relic.gear-relic img{width:48px;height:48px}
 #world#world .poi-node:not(.poi-art) .poi-glyph{font-size:30px!important}
 #world#world .map-chest.crystal-chest::after{right:-7px!important;top:-11px!important;font-size:22px!important}
