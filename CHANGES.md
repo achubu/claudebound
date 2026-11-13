@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 400: a tilted view of the city, alleys between buildings, squares cut from their lots
+
+Owner: "It looks okay maybe a little bit too dense. Maybe need some alleyways. Could the buildings be not quite directly
+over the top? I want to see a little bit of an angle maybe 10 degrees? What angle would work?"
+
+- **Tilt** (`tilt: 18` on the city theme, `paintTopdownCity`): each building has 2-6 floors (4-8 in the tech quarter) and
+  shows its south wall, sin(tilt) of its height (about 9px a floor at 18 degrees), drawn inside its own lot under the
+  roof, so nothing covers the streets. Walls carry rows of windows, some lit. Lots are drawn back to front. 10 degrees
+  shows only a sliver of wall; 15-20 reads clearly; past 30 buildings would start to hide the street behind them.
+- **Alleys** (`alleys: 0.35`): about a third of the cuts that split a block into lots leave a one-cell (25px) alley.
+- **Squares cut from their lots**: a square for objects no longer empties its whole lot; the lot is built on what is left
+  beside, behind and in front of it, with a cell of sidewalk round the square (before, a third of all lots stood empty).
+- Tests: chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration and playtest-walk city pass.
+
 ## Round 399: Neon Aftermath rebuilt as a top-down city of blocks and lots
 
 Owner: "improve our algorithm for city generation, it's just not good enough"; "try to find the best 2d city generation
