@@ -1,988 +1,1440 @@
 {
  "title": "Textures",
- "note": "Neon Aftermath, the generated top-down city. Built by tools/build-sprites-manifest.cjs from CITY_SURFACES and CITY_TD_ART in assets/chrono-gen.js.",
- "groups": [
+ "note": "Every picture the game draws, by world, then category, then type, then name. Built by tools/build-sprites-manifest.cjs from the game's own tables (CITY_SURFACES, CITY_TD_ART and the object and creature tables).",
+ "worlds": [
   {
-   "title": "Ground",
-   "items": [
+   "key": "city",
+   "name": "Neon Aftermath",
+   "categories": [
     {
-     "key": "sea",
-     "label": "Sea",
-     "rule": "Only along the city edge, never inland; whole 50px grid cells, corners rounded.",
-     "walk": false,
-     "scale": null,
-     "folder": "surfaces/sea/",
-     "files": [
+     "title": "Ground",
+     "types": [
       {
-       "name": "water",
-       "src": "assets/environment/city-gen/surfaces/sea/water.webp",
-       "bytes": 34474,
-       "role": "base texture"
+       "key": "park",
+       "label": "Park (grass)",
+       "rule": "About 8% of lots; corners rounded; trees on it block; at least one clear cell of sidewalk from any other park and from the shore.",
+       "walk": true,
+       "folder": "city-gen/surfaces/park/",
+       "scale": null,
+       "files": [
+        {
+         "name": "overgrowth",
+         "src": "assets/environment/city-gen/surfaces/park/overgrowth.webp",
+         "bytes": 134614,
+         "role": "base texture"
+        }
+       ]
+      },
+      {
+       "key": "road",
+       "label": "Road (asphalt)",
+       "rule": "Main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.",
+       "walk": true,
+       "folder": "city-gen/surfaces/road/",
+       "scale": 0.45,
+       "files": [
+        {
+         "name": "floor",
+         "src": "assets/environment/city-gen/surfaces/road/floor.webp",
+         "bytes": 129138,
+         "role": "base texture"
+        },
+        {
+         "name": "road-wet",
+         "src": "assets/environment/city-gen/surfaces/road/road-wet.webp",
+         "bytes": 101854,
+         "role": "base texture"
+        }
+       ]
+      },
+      {
+       "key": "sea",
+       "label": "Sea",
+       "rule": "Only along the city edge, never inland; whole 50px grid cells, corners rounded.",
+       "walk": false,
+       "folder": "city-gen/surfaces/sea/",
+       "scale": null,
+       "files": [
+        {
+         "name": "water",
+         "src": "assets/environment/city-gen/surfaces/sea/water.webp",
+         "bytes": 34474,
+         "role": "base texture"
+        }
+       ]
+      },
+      {
+       "key": "sidewalk",
+       "label": "Sidewalk paving",
+       "rule": "All ground that is not road, sea, sand, lot or park. One paving per city block (the first slot entry on half the blocks), so it only changes across a street. The squares where objects stand are sidewalk too.",
+       "walk": true,
+       "folder": "city-gen/surfaces/sidewalk/",
+       "scale": 0.22,
+       "files": [
+        {
+         "name": "pavement-old",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/pavement-old.webp",
+         "bytes": 125294,
+         "role": "base texture"
+        },
+        {
+         "name": "walk-cobbles",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-cobbles.webp",
+         "bytes": 28538
+        },
+        {
+         "name": "walk-herringbone",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-herringbone.webp",
+         "bytes": 25730
+        },
+        {
+         "name": "walk-plates",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-plates.webp",
+         "bytes": 17814
+        },
+        {
+         "name": "walk-slabs",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-slabs.webp",
+         "bytes": 16838
+        },
+        {
+         "name": "walk-tiles",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-tiles.webp",
+         "bytes": 21790
+        }
+       ]
+      },
+      {
+       "key": "lot",
+       "label": "Under buildings (lot footing)",
+       "rule": "Fills a building's whole lot; a 4px footing shows round the building. Lots lie wholly on their block, never over a street.",
+       "walk": false,
+       "folder": "city-gen/surfaces/lot/",
+       "scale": 0.3,
+       "files": [
+        {
+         "name": "yard",
+         "src": "assets/environment/city-gen/surfaces/lot/yard.webp",
+         "bytes": 85950,
+         "role": "base texture"
+        }
+       ]
+      },
+      {
+       "key": "waterfront",
+       "label": "Waterfront (beach sand)",
+       "rule": "Exactly one grid cell wide round the sea; meets the sea with no border.",
+       "walk": true,
+       "folder": "city-gen/surfaces/waterfront/",
+       "scale": null,
+       "files": [
+        {
+         "name": "sand",
+         "src": "assets/environment/city-gen/surfaces/waterfront/sand.webp",
+         "bytes": 123172,
+         "role": "base texture"
+        }
+       ]
       }
      ]
     },
     {
-     "key": "waterfront",
-     "label": "Waterfront (beach sand)",
-     "rule": "Exactly one grid cell wide round the sea; meets the sea with no border.",
-     "walk": true,
-     "scale": null,
-     "folder": "surfaces/waterfront/",
-     "files": [
+     "title": "Edges and borders",
+     "types": [
       {
-       "name": "sand",
-       "src": "assets/environment/city-gen/surfaces/waterfront/sand.webp",
-       "bytes": 123172,
-       "role": "base texture"
+       "key": "curb",
+       "label": "Curb (kerb along every road)",
+       "rule": "A kerb-stone strip along both edges of every road, on the sidewalk side, bent round corners.",
+       "walk": true,
+       "folder": "city-gen/surfaces/curb/",
+       "scale": null,
+       "files": [
+        {
+         "name": "curb-stone",
+         "src": "assets/environment/city-gen/surfaces/curb/curb-stone.webp",
+         "bytes": 42138
+        }
+       ]
+      },
+      {
+       "key": "park-edge",
+       "label": "Park edge (kerb round the grass)",
+       "rule": "One strip per park, round its rounded outline, on a solid base.",
+       "walk": true,
+       "folder": "city-gen/surfaces/park-edge/",
+       "scale": null,
+       "files": [
+        {
+         "name": "edge-granite",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-granite.webp",
+         "bytes": 11872
+        },
+        {
+         "name": "edge-kerb",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-kerb.webp",
+         "bytes": 42138
+        },
+        {
+         "name": "edge-planter",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-planter.webp",
+         "bytes": 68578
+        }
+       ]
+      },
+      {
+       "key": "waterfront-edge",
+       "label": "Waterfront edge (shoreline strip)",
+       "rule": "Laid along the outline where the sand meets the paving, bent round corners.",
+       "walk": true,
+       "folder": "city-gen/surfaces/waterfront-edge/",
+       "scale": null,
+       "files": [
+        {
+         "name": "shore-crumble",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-crumble.webp",
+         "bytes": 62734
+        }
+       ]
       }
      ]
     },
     {
-     "key": "sidewalk",
-     "label": "Sidewalk paving",
-     "rule": "All ground that is not road, sea, sand, lot or park. One paving per city block (the first slot entry on half the blocks), so it only changes across a street. The squares where objects stand are sidewalk too.",
-     "walk": true,
-     "scale": 0.22,
-     "folder": "surfaces/sidewalk/",
-     "files": [
+     "title": "Buildings",
+     "types": [
       {
-       "name": "pavement-old",
-       "src": "assets/environment/city-gen/surfaces/sidewalk/pavement-old.webp",
-       "bytes": 125294,
-       "role": "base texture"
+       "key": "wall",
+       "label": "Building walls (one floor)",
+       "rule": "Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS); at least 4 floors.",
+       "walk": false,
+       "folder": "city-gen/surfaces/wall/",
+       "scale": null,
+       "files": [
+        {
+         "name": "wall-brick",
+         "src": "assets/environment/city-gen/surfaces/wall/wall-brick.webp",
+         "bytes": 24146
+        },
+        {
+         "name": "wall-concrete",
+         "src": "assets/environment/city-gen/surfaces/wall/wall-concrete.webp",
+         "bytes": 12710
+        },
+        {
+         "name": "wall-panel",
+         "src": "assets/environment/city-gen/surfaces/wall/wall-panel.webp",
+         "bytes": 15388
+        }
+       ]
       },
       {
-       "name": "walk-slabs",
-       "src": "assets/environment/city-gen/surfaces/sidewalk/walk-slabs.webp",
-       "bytes": 16838
+       "key": "roof",
+       "label": "Roofs",
+       "rule": "One per building part, tiled 160px; a raised parapet and a cast shadow; rooftop props (props/) sized per kind.",
+       "walk": false,
+       "folder": "city-gen/surfaces/roof/",
+       "scale": null,
+       "files": [
+        {
+         "name": "roof-algae",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-algae.webp",
+         "bytes": 26588
+        },
+        {
+         "name": "roof-asphalt",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-asphalt.webp",
+         "bytes": 90380
+        },
+        {
+         "name": "roof-carpark",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-carpark.webp",
+         "bytes": 32746
+        },
+        {
+         "name": "roof-concrete",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-concrete.webp",
+         "bytes": 72142
+        },
+        {
+         "name": "roof-corrugated",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-corrugated.webp",
+         "bytes": 19690
+        },
+        {
+         "name": "roof-cracked",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-cracked.webp",
+         "bytes": 38714
+        },
+        {
+         "name": "roof-grating",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-grating.webp",
+         "bytes": 33204
+        },
+        {
+         "name": "roof-gravel",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-gravel.webp",
+         "bytes": 61568
+        },
+        {
+         "name": "roof-grit",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-grit.webp",
+         "bytes": 46050
+        },
+        {
+         "name": "roof-membrane",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-membrane.webp",
+         "bytes": 10218
+        },
+        {
+         "name": "roof-mossy",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-mossy.webp",
+         "bytes": 42276
+        },
+        {
+         "name": "roof-painted",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-painted.webp",
+         "bytes": 21176
+        },
+        {
+         "name": "roof-patched",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-patched.webp",
+         "bytes": 27106
+        },
+        {
+         "name": "roof-plate",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-plate.webp",
+         "bytes": 81736
+        },
+        {
+         "name": "roof-plates",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-plates.webp",
+         "bytes": 26084
+        },
+        {
+         "name": "roof-puddles",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-puddles.webp",
+         "bytes": 22740
+        },
+        {
+         "name": "roof-riveted",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-riveted.webp",
+         "bytes": 13824
+        },
+        {
+         "name": "roof-rust",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-rust.webp",
+         "bytes": 44820
+        },
+        {
+         "name": "roof-slab",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-slab.webp",
+         "bytes": 20356
+        },
+        {
+         "name": "roof-slate",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-slate.webp",
+         "bytes": 34928
+        },
+        {
+         "name": "roof-tar",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-tar.webp",
+         "bytes": 38432
+        },
+        {
+         "name": "roof-tarpaper",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-tarpaper.webp",
+         "bytes": 15796
+        },
+        {
+         "name": "roof-tin",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-tin.webp",
+         "bytes": 44206
+        }
+       ]
       },
       {
-       "name": "walk-herringbone",
-       "src": "assets/environment/city-gen/surfaces/sidewalk/walk-herringbone.webp",
-       "bytes": 25730
-      },
-      {
-       "name": "walk-cobbles",
-       "src": "assets/environment/city-gen/surfaces/sidewalk/walk-cobbles.webp",
-       "bytes": 28538
-      },
-      {
-       "name": "walk-tiles",
-       "src": "assets/environment/city-gen/surfaces/sidewalk/walk-tiles.webp",
-       "bytes": 21790
-      },
-      {
-       "name": "walk-plates",
-       "src": "assets/environment/city-gen/surfaces/sidewalk/walk-plates.webp",
-       "bytes": 17814
+       "key": "shop",
+       "label": "Shopfronts (street floor)",
+       "rule": "The street floor of a building whose street is to the south, fitted like a wall.",
+       "walk": false,
+       "folder": "city-gen/surfaces/shop/",
+       "scale": null,
+       "files": [
+        {
+         "name": "shop-noodle",
+         "src": "assets/environment/city-gen/surfaces/shop/shop-noodle.webp",
+         "bytes": 14408
+        },
+        {
+         "name": "shop-repair",
+         "src": "assets/environment/city-gen/surfaces/shop/shop-repair.webp",
+         "bytes": 22122
+        },
+        {
+         "name": "shop-shutters",
+         "src": "assets/environment/city-gen/surfaces/shop/shop-shutters.webp",
+         "bytes": 20468
+        }
+       ]
       }
      ]
     },
     {
-     "key": "road",
-     "label": "Road (asphalt)",
-     "rule": "Main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.",
-     "walk": true,
-     "scale": 0.45,
-     "folder": "surfaces/road/",
-     "files": [
+     "title": "Props",
+     "types": [
       {
-       "name": "floor",
-       "src": "assets/environment/city-gen/surfaces/road/floor.webp",
-       "bytes": 129138,
-       "role": "base texture"
+       "key": "prop-ac",
+       "label": "Air-conditioning units",
+       "rule": "Stands on roofs, sized per kind, never over a neighbour.",
+       "walk": false,
+       "folder": "city-gen/props/prop-ac/",
+       "scale": null,
+       "files": [
+        {
+         "name": "ac-1",
+         "src": "assets/environment/city-gen/props/prop-ac/ac-1.webp",
+         "bytes": 18982
+        },
+        {
+         "name": "ac-2",
+         "src": "assets/environment/city-gen/props/prop-ac/ac-2.webp",
+         "bytes": 28654
+        },
+        {
+         "name": "ac-3",
+         "src": "assets/environment/city-gen/props/prop-ac/ac-3.webp",
+         "bytes": 31198
+        }
+       ]
       },
       {
-       "name": "road-wet",
-       "src": "assets/environment/city-gen/surfaces/road/road-wet.webp",
-       "bytes": 101854,
-       "role": "base texture"
+       "key": "sign-v",
+       "label": "Neon signs (tall)",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/sign-v/",
+       "scale": null,
+       "files": [
+        {
+         "name": "sign-v-cyan",
+         "src": "assets/environment/city-gen/props/sign-v/sign-v-cyan.webp",
+         "bytes": 7692
+        },
+        {
+         "name": "sign-v-purple",
+         "src": "assets/environment/city-gen/props/sign-v/sign-v-purple.webp",
+         "bytes": 7426
+        },
+        {
+         "name": "sign-v-red",
+         "src": "assets/environment/city-gen/props/sign-v/sign-v-red.webp",
+         "bytes": 7394
+        },
+        {
+         "name": "sign-v-teal",
+         "src": "assets/environment/city-gen/props/sign-v/sign-v-teal.webp",
+         "bytes": 22192
+        }
+       ]
+      },
+      {
+       "key": "sign-h",
+       "label": "Neon signs (wide)",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/sign-h/",
+       "scale": null,
+       "files": [
+        {
+         "name": "sign-h-mixed",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-mixed.webp",
+         "bytes": 23512
+        },
+        {
+         "name": "sign-h-orange",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-orange.webp",
+         "bytes": 10438
+        },
+        {
+         "name": "sign-h-pink",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-pink.webp",
+         "bytes": 6300
+        },
+        {
+         "name": "sign-h-pink2",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-pink2.webp",
+         "bytes": 7846
+        }
+       ]
+      },
+      {
+       "key": "prop-skylight",
+       "label": "Skylights",
+       "rule": "Stands on roofs, sized per kind, never over a neighbour.",
+       "walk": false,
+       "folder": "city-gen/props/prop-skylight/",
+       "scale": null,
+       "files": [
+        {
+         "name": "skylight-1",
+         "src": "assets/environment/city-gen/props/prop-skylight/skylight-1.webp",
+         "bytes": 16192
+        },
+        {
+         "name": "skylight-2",
+         "src": "assets/environment/city-gen/props/prop-skylight/skylight-2.webp",
+         "bytes": 47970
+        },
+        {
+         "name": "skylight-3",
+         "src": "assets/environment/city-gen/props/prop-skylight/skylight-3.webp",
+         "bytes": 21842
+        }
+       ]
+      },
+      {
+       "key": "prop-solar",
+       "label": "Solar panels",
+       "rule": "Stands on roofs, sized per kind, never over a neighbour.",
+       "walk": false,
+       "folder": "city-gen/props/prop-solar/",
+       "scale": null,
+       "files": [
+        {
+         "name": "solar-1",
+         "src": "assets/environment/city-gen/props/prop-solar/solar-1.webp",
+         "bytes": 14970
+        },
+        {
+         "name": "solar-2",
+         "src": "assets/environment/city-gen/props/prop-solar/solar-2.webp",
+         "bytes": 48128
+        }
+       ]
+      },
+      {
+       "key": "prop-stairs",
+       "label": "Stair huts",
+       "rule": "Stands on roofs, sized per kind, never over a neighbour.",
+       "walk": false,
+       "folder": "city-gen/props/prop-stairs/",
+       "scale": null,
+       "files": [
+        {
+         "name": "stairs-1",
+         "src": "assets/environment/city-gen/props/prop-stairs/stairs-1.webp",
+         "bytes": 15688
+        },
+        {
+         "name": "stairs-2",
+         "src": "assets/environment/city-gen/props/prop-stairs/stairs-2.webp",
+         "bytes": 32480
+        },
+        {
+         "name": "stairs-3",
+         "src": "assets/environment/city-gen/props/prop-stairs/stairs-3.webp",
+         "bytes": 30900
+        }
+       ]
+      },
+      {
+       "key": "tree",
+       "label": "Trees",
+       "rule": "Stands in parks; blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/tree/",
+       "scale": null,
+       "files": [
+        {
+         "name": "tree-1",
+         "src": "assets/environment/city-gen/props/tree/tree-1.webp",
+         "bytes": 26410
+        },
+        {
+         "name": "tree-2",
+         "src": "assets/environment/city-gen/props/tree/tree-2.webp",
+         "bytes": 29508
+        },
+        {
+         "name": "tree-3",
+         "src": "assets/environment/city-gen/props/tree/tree-3.webp",
+         "bytes": 37418
+        }
+       ]
+      },
+      {
+       "key": "car",
+       "label": "Vehicles",
+       "rule": "Parked inside the main streets, clear of crossings, doors and objects; blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/car/",
+       "scale": null,
+       "files": [
+        {
+         "name": "car-armour",
+         "src": "assets/environment/city-gen/props/car/car-armour.webp",
+         "bytes": 18454
+        },
+        {
+         "name": "car-buggy",
+         "src": "assets/environment/city-gen/props/car/car-buggy.webp",
+         "bytes": 21456
+        },
+        {
+         "name": "car-camper",
+         "src": "assets/environment/city-gen/props/car/car-camper.webp",
+         "bytes": 22876
+        },
+        {
+         "name": "car-cargo",
+         "src": "assets/environment/city-gen/props/car/car-cargo.webp",
+         "bytes": 25180
+        },
+        {
+         "name": "car-crawler",
+         "src": "assets/environment/city-gen/props/car/car-crawler.webp",
+         "bytes": 20134
+        },
+        {
+         "name": "car-digger",
+         "src": "assets/environment/city-gen/props/car/car-digger.webp",
+         "bytes": 21710
+        },
+        {
+         "name": "car-forklift",
+         "src": "assets/environment/city-gen/props/car/car-forklift.webp",
+         "bytes": 21676
+        },
+        {
+         "name": "car-pickup",
+         "src": "assets/environment/city-gen/props/car/car-pickup.webp",
+         "bytes": 18168
+        },
+        {
+         "name": "car-rustpickup",
+         "src": "assets/environment/city-gen/props/car/car-rustpickup.webp",
+         "bytes": 11260
+        },
+        {
+         "name": "car-sedan",
+         "src": "assets/environment/city-gen/props/car/car-sedan.webp",
+         "bytes": 8374
+        },
+        {
+         "name": "car-sport",
+         "src": "assets/environment/city-gen/props/car/car-sport.webp",
+         "bytes": 17774
+        },
+        {
+         "name": "car-swat",
+         "src": "assets/environment/city-gen/props/car/car-swat.webp",
+         "bytes": 20540
+        },
+        {
+         "name": "car-taxi",
+         "src": "assets/environment/city-gen/props/car/car-taxi.webp",
+         "bytes": 11172
+        },
+        {
+         "name": "car-trike",
+         "src": "assets/environment/city-gen/props/car/car-trike.webp",
+         "bytes": 23886
+        },
+        {
+         "name": "car-van",
+         "src": "assets/environment/city-gen/props/car/car-van.webp",
+         "bytes": 21484
+        },
+        {
+         "name": "car-whitevan",
+         "src": "assets/environment/city-gen/props/car/car-whitevan.webp",
+         "bytes": 12518
+        }
+       ]
+      },
+      {
+       "key": "prop-vent",
+       "label": "Vents",
+       "rule": "Stands on roofs, sized per kind, never over a neighbour.",
+       "walk": false,
+       "folder": "city-gen/props/prop-vent/",
+       "scale": null,
+       "files": [
+        {
+         "name": "vent-1",
+         "src": "assets/environment/city-gen/props/prop-vent/vent-1.webp",
+         "bytes": 15168
+        },
+        {
+         "name": "vent-3",
+         "src": "assets/environment/city-gen/props/prop-vent/vent-3.webp",
+         "bytes": 38982
+        }
+       ]
+      },
+      {
+       "key": "prop-tank",
+       "label": "Water tanks",
+       "rule": "Stands on roofs, sized per kind, never over a neighbour.",
+       "walk": false,
+       "folder": "city-gen/props/prop-tank/",
+       "scale": null,
+       "files": [
+        {
+         "name": "tank-1",
+         "src": "assets/environment/city-gen/props/prop-tank/tank-1.webp",
+         "bytes": 17108
+        },
+        {
+         "name": "tank-2",
+         "src": "assets/environment/city-gen/props/prop-tank/tank-2.webp",
+         "bytes": 32856
+        },
+        {
+         "name": "tank-3",
+         "src": "assets/environment/city-gen/props/prop-tank/tank-3.webp",
+         "bytes": 26498
+        }
+       ]
       }
      ]
     },
     {
-     "key": "lot",
-     "label": "Under buildings (lot footing)",
-     "rule": "Fills a building's whole lot; a 4px footing shows round the building. Lots lie wholly on their block, never over a street.",
-     "walk": false,
-     "scale": 0.3,
-     "folder": "surfaces/lot/",
-     "files": [
+     "title": "Objects",
+     "types": [
       {
-       "name": "yard",
-       "src": "assets/environment/city-gen/surfaces/lot/yard.webp",
-       "bytes": 85950,
-       "role": "base texture"
+       "key": "vault",
+       "label": "Afterlight Vault",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-vault-2",
+         "src": "assets/items/poi/city-vault-2.webp",
+         "bytes": 13128
+        }
+       ]
+      },
+      {
+       "key": "breaker",
+       "label": "Breaker boxes",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-breaker",
+         "src": "assets/items/poi/city-breaker.webp",
+         "bytes": 19792
+        }
+       ]
+      },
+      {
+       "key": "cache",
+       "label": "Cache",
+       "rule": "Shared with other worlds.",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "cache",
+         "src": "assets/items/poi/cache.webp",
+         "bytes": 27846
+        }
+       ]
+      },
+      {
+       "key": "campfire",
+       "label": "Campfire",
+       "rule": "Shared with other worlds.",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "campfire",
+         "src": "assets/items/poi/campfire.webp",
+         "bytes": 28814
+        }
+       ]
+      },
+      {
+       "key": "cardsmith",
+       "label": "Cardsmith",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-cardsmith",
+         "src": "assets/items/poi/city-cardsmith.webp",
+         "bytes": 28820
+        }
+       ]
+      },
+      {
+       "key": "chest",
+       "label": "Chest",
+       "rule": "Stands on a square; glows.",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-chest",
+         "src": "assets/items/poi/city-chest.webp",
+         "bytes": 22288
+        }
+       ]
+      },
+      {
+       "key": "events",
+       "label": "City events",
+       "rule": "One picture per event that can appear in the city.",
+       "walk": false,
+       "folder": "items/poi/events/",
+       "scale": null,
+       "files": [
+        {
+         "name": "arcade",
+         "src": "assets/items/poi/events/arcade.webp",
+         "bytes": 20636
+        },
+        {
+         "name": "billboard",
+         "src": "assets/items/poi/events/billboard.webp",
+         "bytes": 23044
+        },
+        {
+         "name": "courier",
+         "src": "assets/items/poi/events/courier.webp",
+         "bytes": 20638
+        },
+        {
+         "name": "medic",
+         "src": "assets/items/poi/events/medic.webp",
+         "bytes": 29560
+        },
+        {
+         "name": "racer",
+         "src": "assets/items/poi/events/racer.webp",
+         "bytes": 21184
+        },
+        {
+         "name": "terminal",
+         "src": "assets/items/poi/events/terminal.webp",
+         "bytes": 25854
+        },
+        {
+         "name": "toll",
+         "src": "assets/items/poi/events/toll.webp",
+         "bytes": 22668
+        },
+        {
+         "name": "vending",
+         "src": "assets/items/poi/events/vending.webp",
+         "bytes": 21012
+        }
+       ]
+      },
+      {
+       "key": "event",
+       "label": "Event marker",
+       "rule": "Shared with other worlds.",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "event",
+         "src": "assets/items/poi/event.webp",
+         "bytes": 19056
+        }
+       ]
+      },
+      {
+       "key": "merchant",
+       "label": "Merchant",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-merchant",
+         "src": "assets/items/poi/city-merchant.webp",
+         "bytes": 33432
+        }
+       ]
+      },
+      {
+       "key": "nexus",
+       "label": "Nexus Waypoint",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-nexus",
+         "src": "assets/items/poi/city-nexus.webp",
+         "bytes": 26112
+        }
+       ]
+      },
+      {
+       "key": "portal",
+       "label": "Portal to Solaris",
+       "rule": "The gate on to the next world.",
+       "walk": false,
+       "folder": "environment/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-solaris-portal",
+         "src": "assets/environment/city-solaris-portal.webp",
+         "bytes": 37216
+        }
+       ]
+      },
+      {
+       "key": "sealed",
+       "label": "Sealed door",
+       "rule": "Shared with other worlds.",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "sealed",
+         "src": "assets/items/poi/sealed.webp",
+         "bytes": 32638
+        }
+       ]
+      },
+      {
+       "key": "shrine",
+       "label": "Shrine",
+       "rule": "Shared with other worlds.",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "shrine",
+         "src": "assets/items/poi/shrine.webp",
+         "bytes": 28456
+        }
+       ]
+      },
+      {
+       "key": "wantedBoard",
+       "label": "Wanted Board",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
+       "walk": false,
+       "folder": "items/poi/",
+       "scale": null,
+       "files": [
+        {
+         "name": "city-wanted-board",
+         "src": "assets/items/poi/city-wanted-board.webp",
+         "bytes": 18760
+        }
+       ]
       }
      ]
     },
     {
-     "key": "park",
-     "label": "Park (grass)",
-     "rule": "About 8% of lots; corners rounded; trees on it block; at least one clear cell of sidewalk from any other park and from the shore.",
-     "walk": true,
-     "scale": null,
-     "folder": "surfaces/park/",
-     "files": [
+     "title": "Creatures",
+     "types": [
       {
-       "name": "overgrowth",
-       "src": "assets/environment/city-gen/surfaces/park/overgrowth.webp",
-       "bytes": 134614,
-       "role": "base texture"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "title": "Edges and borders",
-   "items": [
-    {
-     "key": "waterfront-edge",
-     "label": "Waterfront edge (shoreline strip)",
-     "rule": "Laid along the outline where the sand meets the paving, bent round corners.",
-     "walk": true,
-     "scale": null,
-     "folder": "surfaces/waterfront-edge/",
-     "files": [
-      {
-       "name": "shore-crumble",
-       "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-crumble.webp",
-       "bytes": 62734
-      }
-     ]
-    },
-    {
-     "key": "curb",
-     "label": "Curb (kerb along every road)",
-     "rule": "A kerb-stone strip along both edges of every road, on the sidewalk side, bent round corners.",
-     "walk": true,
-     "scale": null,
-     "folder": "surfaces/curb/",
-     "files": [
-      {
-       "name": "curb-stone",
-       "src": "assets/environment/city-gen/surfaces/curb/curb-stone.webp",
-       "bytes": 42138
-      }
-     ]
-    },
-    {
-     "key": "park-edge",
-     "label": "Park edge (kerb round the grass)",
-     "rule": "One strip per park, round its rounded outline, on a solid base.",
-     "walk": true,
-     "scale": null,
-     "folder": "surfaces/park-edge/",
-     "files": [
-      {
-       "name": "edge-granite",
-       "src": "assets/environment/city-gen/surfaces/park-edge/edge-granite.webp",
-       "bytes": 11872
+       "key": "Briar Sentinel",
+       "label": "Briar Sentinel",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "briar-sentinel-v3",
+         "src": "assets/monsters/city/briar-sentinel-v3.png",
+         "bytes": 1333316
+        }
+       ]
       },
       {
-       "name": "edge-kerb",
-       "src": "assets/environment/city-gen/surfaces/park-edge/edge-kerb.webp",
-       "bytes": 42138
+       "key": "Circuit Thornling",
+       "label": "Circuit Thornling",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "circuit-thornling-v3",
+         "src": "assets/monsters/city/circuit-thornling-v3.png",
+         "bytes": 920739
+        }
+       ]
       },
       {
-       "name": "edge-planter",
-       "src": "assets/environment/city-gen/surfaces/park-edge/edge-planter.webp",
-       "bytes": 68578
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "title": "Buildings",
-   "items": [
-    {
-     "key": "roof",
-     "label": "Roofs",
-     "rule": "One per building part, tiled 160px; a raised parapet and a cast shadow; rooftop props (props/) sized per kind.",
-     "walk": false,
-     "scale": null,
-     "folder": "surfaces/roof/",
-     "files": [
-      {
-       "name": "roof-tar",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-tar.webp",
-       "bytes": 38432
+       "key": "Crown Observer",
+       "label": "Crown Observer",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "crown-observer-v2",
+         "src": "assets/monsters/city/crown-observer-v2.png",
+         "bytes": 716415
+        }
+       ]
       },
       {
-       "name": "roof-asphalt",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-asphalt.webp",
-       "bytes": 90380
+       "key": "Data Wisp",
+       "label": "Data Wisp",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "data-wisp-v2",
+         "src": "assets/monsters/city/data-wisp-v2.png",
+         "bytes": 951997
+        }
+       ]
       },
       {
-       "name": "roof-rust",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-rust.webp",
-       "bytes": 44820
+       "key": "Ember Jackal",
+       "label": "Ember Jackal",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "ember-jackal-v3",
+         "src": "assets/monsters/city/ember-jackal-v3.png",
+         "bytes": 653009
+        }
+       ]
       },
       {
-       "name": "roof-concrete",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-concrete.webp",
-       "bytes": 72142
+       "key": "Lunar Enforcer",
+       "label": "Lunar Enforcer",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "lunar-enforcer-v2",
+         "src": "assets/monsters/city/lunar-enforcer-v2.png",
+         "bytes": 622551
+        }
+       ]
       },
       {
-       "name": "roof-plate",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-plate.webp",
-       "bytes": 81736
+       "key": "Phase Shade",
+       "label": "Phase Shade",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "phase-shade-v2",
+         "src": "assets/monsters/city/phase-shade-v2.png",
+         "bytes": 444258
+        }
+       ]
       },
       {
-       "name": "roof-slate",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-slate.webp",
-       "bytes": 34928
+       "key": "Phase Shade",
+       "label": "Phase Shade",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "phase-shade",
+         "src": "assets/monsters/city/phase-shade.png",
+         "bytes": 255296
+        }
+       ]
       },
       {
-       "name": "roof-tin",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-tin.webp",
-       "bytes": 44206
+       "key": "Reactor Mauler",
+       "label": "Reactor Mauler",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "reactor-mauler",
+         "src": "assets/monsters/city/reactor-mauler.png",
+         "bytes": 1111486
+        }
+       ]
       },
       {
-       "name": "roof-tarpaper",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-tarpaper.webp",
-       "bytes": 15796
+       "key": "The Crown Sentinel",
+       "label": "The Crown Sentinel",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "crown-sentinel-v2",
+         "src": "assets/monsters/city/crown-sentinel-v2.png",
+         "bytes": 1274429
+        }
+       ]
       },
       {
-       "name": "roof-corrugated",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-corrugated.webp",
-       "bytes": 19690
+       "key": "Thorn Warden",
+       "label": "Thorn Warden",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "thorn-warden-v2",
+         "src": "assets/monsters/city/thorn-warden-v2.png",
+         "bytes": 853961
+        }
+       ]
       },
       {
-       "name": "roof-slab",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-slab.webp",
-       "bytes": 20356
-      },
-      {
-       "name": "roof-gravel",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-gravel.webp",
-       "bytes": 61568
-      },
-      {
-       "name": "roof-membrane",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-membrane.webp",
-       "bytes": 10218
-      },
-      {
-       "name": "roof-riveted",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-riveted.webp",
-       "bytes": 13824
-      },
-      {
-       "name": "roof-mossy",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-mossy.webp",
-       "bytes": 42276
-      },
-      {
-       "name": "roof-painted",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-painted.webp",
-       "bytes": 21176
-      },
-      {
-       "name": "roof-puddles",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-puddles.webp",
-       "bytes": 22740
-      },
-      {
-       "name": "roof-cracked",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-cracked.webp",
-       "bytes": 38714
-      },
-      {
-       "name": "roof-plates",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-plates.webp",
-       "bytes": 26084
-      },
-      {
-       "name": "roof-grit",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-grit.webp",
-       "bytes": 46050
-      },
-      {
-       "name": "roof-carpark",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-carpark.webp",
-       "bytes": 32746
-      },
-      {
-       "name": "roof-grating",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-grating.webp",
-       "bytes": 33204
-      },
-      {
-       "name": "roof-algae",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-algae.webp",
-       "bytes": 26588
-      },
-      {
-       "name": "roof-patched",
-       "src": "assets/environment/city-gen/surfaces/roof/roof-patched.webp",
-       "bytes": 27106
+       "key": "Tunnel Borehound",
+       "label": "Tunnel Borehound",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "tunnel-borehound-v2",
+         "src": "assets/monsters/city/tunnel-borehound-v2.png",
+         "bytes": 590870
+        }
+       ]
       }
      ]
     },
     {
-     "key": "wall",
-     "label": "Building walls (one floor)",
-     "rule": "Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS); at least 4 floors.",
-     "walk": false,
-     "scale": null,
-     "folder": "surfaces/wall/",
-     "files": [
-      {
-       "name": "wall-concrete",
-       "src": "assets/environment/city-gen/surfaces/wall/wall-concrete.webp",
-       "bytes": 12710
-      },
-      {
-       "name": "wall-brick",
-       "src": "assets/environment/city-gen/surfaces/wall/wall-brick.webp",
-       "bytes": 24146
-      },
-      {
-       "name": "wall-panel",
-       "src": "assets/environment/city-gen/surfaces/wall/wall-panel.webp",
-       "bytes": 15388
-      }
-     ]
-    },
-    {
-     "key": "shop",
-     "label": "Shopfronts (street floor)",
-     "rule": "The street floor of a building whose street is to the south, fitted like a wall.",
-     "walk": false,
-     "scale": null,
-     "folder": "surfaces/shop/",
-     "files": [
-      {
-       "name": "shop-noodle",
-       "src": "assets/environment/city-gen/surfaces/shop/shop-noodle.webp",
-       "bytes": 14408
-      },
-      {
-       "name": "shop-repair",
-       "src": "assets/environment/city-gen/surfaces/shop/shop-repair.webp",
-       "bytes": 22122
-      },
-      {
-       "name": "shop-shutters",
-       "src": "assets/environment/city-gen/surfaces/shop/shop-shutters.webp",
-       "bytes": 20468
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "title": "Props (standing on the surfaces)",
-   "items": [
-    {
-     "key": "prop-ac",
-     "label": "Air-conditioning units",
-     "rule": "Stands on roofs, sized per kind, never over a neighbour.",
-     "walk": false,
-     "folder": "props/prop-ac/",
-     "files": [
-      {
-       "name": "ac-1",
-       "src": "assets/environment/city-gen/props/prop-ac/ac-1.webp",
-       "bytes": 18982
-      },
-      {
-       "name": "ac-2",
-       "src": "assets/environment/city-gen/props/prop-ac/ac-2.webp",
-       "bytes": 28654
-      },
-      {
-       "name": "ac-3",
-       "src": "assets/environment/city-gen/props/prop-ac/ac-3.webp",
-       "bytes": 31198
-      }
-     ]
-    },
-    {
-     "key": "prop-vent",
-     "label": "Vents",
-     "rule": "Stands on roofs, sized per kind, never over a neighbour.",
-     "walk": false,
-     "folder": "props/prop-vent/",
-     "files": [
-      {
-       "name": "vent-1",
-       "src": "assets/environment/city-gen/props/prop-vent/vent-1.webp",
-       "bytes": 15168
-      },
-      {
-       "name": "vent-3",
-       "src": "assets/environment/city-gen/props/prop-vent/vent-3.webp",
-       "bytes": 38982
-      }
-     ]
-    },
-    {
-     "key": "prop-tank",
-     "label": "Water tanks",
-     "rule": "Stands on roofs, sized per kind, never over a neighbour.",
-     "walk": false,
-     "folder": "props/prop-tank/",
-     "files": [
-      {
-       "name": "tank-1",
-       "src": "assets/environment/city-gen/props/prop-tank/tank-1.webp",
-       "bytes": 17108
-      },
-      {
-       "name": "tank-2",
-       "src": "assets/environment/city-gen/props/prop-tank/tank-2.webp",
-       "bytes": 32856
-      },
-      {
-       "name": "tank-3",
-       "src": "assets/environment/city-gen/props/prop-tank/tank-3.webp",
-       "bytes": 26498
-      }
-     ]
-    },
-    {
-     "key": "prop-stairs",
-     "label": "Stair huts",
-     "rule": "Stands on roofs, sized per kind, never over a neighbour.",
-     "walk": false,
-     "folder": "props/prop-stairs/",
-     "files": [
-      {
-       "name": "stairs-1",
-       "src": "assets/environment/city-gen/props/prop-stairs/stairs-1.webp",
-       "bytes": 15688
-      },
-      {
-       "name": "stairs-2",
-       "src": "assets/environment/city-gen/props/prop-stairs/stairs-2.webp",
-       "bytes": 32480
-      },
-      {
-       "name": "stairs-3",
-       "src": "assets/environment/city-gen/props/prop-stairs/stairs-3.webp",
-       "bytes": 30900
-      }
-     ]
-    },
-    {
-     "key": "prop-solar",
-     "label": "Solar panels",
-     "rule": "Stands on roofs, sized per kind, never over a neighbour.",
-     "walk": false,
-     "folder": "props/prop-solar/",
-     "files": [
-      {
-       "name": "solar-1",
-       "src": "assets/environment/city-gen/props/prop-solar/solar-1.webp",
-       "bytes": 14970
-      },
-      {
-       "name": "solar-2",
-       "src": "assets/environment/city-gen/props/prop-solar/solar-2.webp",
-       "bytes": 48128
-      }
-     ]
-    },
-    {
-     "key": "prop-skylight",
-     "label": "Skylights",
-     "rule": "Stands on roofs, sized per kind, never over a neighbour.",
-     "walk": false,
-     "folder": "props/prop-skylight/",
-     "files": [
-      {
-       "name": "skylight-1",
-       "src": "assets/environment/city-gen/props/prop-skylight/skylight-1.webp",
-       "bytes": 16192
-      },
-      {
-       "name": "skylight-2",
-       "src": "assets/environment/city-gen/props/prop-skylight/skylight-2.webp",
-       "bytes": 47970
-      },
-      {
-       "name": "skylight-3",
-       "src": "assets/environment/city-gen/props/prop-skylight/skylight-3.webp",
-       "bytes": 21842
-      }
-     ]
-    },
-    {
-     "key": "sign-h",
-     "label": "Neon signs (wide)",
-     "rule": "Only on the front of a building whose street is in front; never stretched.",
-     "walk": false,
-     "folder": "props/sign-h/",
-     "files": [
-      {
-       "name": "sign-h-pink",
-       "src": "assets/environment/city-gen/props/sign-h/sign-h-pink.webp",
-       "bytes": 6300
-      },
-      {
-       "name": "sign-h-mixed",
-       "src": "assets/environment/city-gen/props/sign-h/sign-h-mixed.webp",
-       "bytes": 23512
-      },
-      {
-       "name": "sign-h-pink2",
-       "src": "assets/environment/city-gen/props/sign-h/sign-h-pink2.webp",
-       "bytes": 7846
-      },
-      {
-       "name": "sign-h-orange",
-       "src": "assets/environment/city-gen/props/sign-h/sign-h-orange.webp",
-       "bytes": 10438
-      }
-     ]
-    },
-    {
-     "key": "sign-v",
-     "label": "Neon signs (tall)",
-     "rule": "Only on the front of a building whose street is in front; never stretched.",
-     "walk": false,
-     "folder": "props/sign-v/",
-     "files": [
-      {
-       "name": "sign-v-cyan",
-       "src": "assets/environment/city-gen/props/sign-v/sign-v-cyan.webp",
-       "bytes": 7692
-      },
-      {
-       "name": "sign-v-teal",
-       "src": "assets/environment/city-gen/props/sign-v/sign-v-teal.webp",
-       "bytes": 22192
-      },
-      {
-       "name": "sign-v-purple",
-       "src": "assets/environment/city-gen/props/sign-v/sign-v-purple.webp",
-       "bytes": 7426
-      },
-      {
-       "name": "sign-v-red",
-       "src": "assets/environment/city-gen/props/sign-v/sign-v-red.webp",
-       "bytes": 7394
-      }
-     ]
-    },
-    {
-     "key": "car",
-     "label": "Vehicles",
-     "rule": "Parked inside the main streets, clear of crossings, doors and objects; blocks the way.",
-     "walk": false,
-     "folder": "props/car/",
-     "files": [
-      {
-       "name": "car-pickup",
-       "src": "assets/environment/city-gen/props/car/car-pickup.webp",
-       "bytes": 18168
-      },
-      {
-       "name": "car-swat",
-       "src": "assets/environment/city-gen/props/car/car-swat.webp",
-       "bytes": 20540
-      },
-      {
-       "name": "car-forklift",
-       "src": "assets/environment/city-gen/props/car/car-forklift.webp",
-       "bytes": 21676
-      },
-      {
-       "name": "car-digger",
-       "src": "assets/environment/city-gen/props/car/car-digger.webp",
-       "bytes": 21710
-      },
-      {
-       "name": "car-buggy",
-       "src": "assets/environment/city-gen/props/car/car-buggy.webp",
-       "bytes": 21456
-      },
-      {
-       "name": "car-camper",
-       "src": "assets/environment/city-gen/props/car/car-camper.webp",
-       "bytes": 22876
-      },
-      {
-       "name": "car-trike",
-       "src": "assets/environment/city-gen/props/car/car-trike.webp",
-       "bytes": 23886
-      },
-      {
-       "name": "car-armour",
-       "src": "assets/environment/city-gen/props/car/car-armour.webp",
-       "bytes": 18454
-      },
-      {
-       "name": "car-crawler",
-       "src": "assets/environment/city-gen/props/car/car-crawler.webp",
-       "bytes": 20134
-      },
-      {
-       "name": "car-sport",
-       "src": "assets/environment/city-gen/props/car/car-sport.webp",
-       "bytes": 17774
-      },
-      {
-       "name": "car-van",
-       "src": "assets/environment/city-gen/props/car/car-van.webp",
-       "bytes": 21484
-      },
-      {
-       "name": "car-cargo",
-       "src": "assets/environment/city-gen/props/car/car-cargo.webp",
-       "bytes": 25180
-      },
-      {
-       "name": "car-taxi",
-       "src": "assets/environment/city-gen/props/car/car-taxi.webp",
-       "bytes": 11172
-      },
-      {
-       "name": "car-sedan",
-       "src": "assets/environment/city-gen/props/car/car-sedan.webp",
-       "bytes": 8374
-      },
-      {
-       "name": "car-whitevan",
-       "src": "assets/environment/city-gen/props/car/car-whitevan.webp",
-       "bytes": 12518
-      },
-      {
-       "name": "car-rustpickup",
-       "src": "assets/environment/city-gen/props/car/car-rustpickup.webp",
-       "bytes": 11260
-      }
-     ]
-    },
-    {
-     "key": "tree",
-     "label": "Trees",
-     "rule": "Stands in parks; blocks the way.",
-     "walk": false,
-     "folder": "props/tree/",
-     "files": [
-      {
-       "name": "tree-1",
-       "src": "assets/environment/city-gen/props/tree/tree-1.webp",
-       "bytes": 26410
-      },
-      {
-       "name": "tree-2",
-       "src": "assets/environment/city-gen/props/tree/tree-2.webp",
-       "bytes": 29508
-      },
-      {
-       "name": "tree-3",
-       "src": "assets/environment/city-gen/props/tree/tree-3.webp",
-       "bytes": 37418
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "title": "Legacy (old 3/4 city, not drawn)",
-   "items": [
-    {
-     "key": "legacy",
-     "label": "Old side-on buildings and textures",
-     "rule": "Kept for reference; the top-down city does not draw these.",
-     "walk": null,
-     "folder": "legacy/",
-     "files": [
-      {
-       "name": "ac-tower",
-       "src": "assets/environment/city-gen/legacy/ac-tower.webp",
-       "bytes": 36688
-      },
-      {
-       "name": "apartment",
-       "src": "assets/environment/city-gen/legacy/apartment.webp",
-       "bytes": 47730
-      },
-      {
-       "name": "arcade",
-       "src": "assets/environment/city-gen/legacy/arcade.webp",
-       "bytes": 52762
-      },
-      {
-       "name": "barrier",
-       "src": "assets/environment/city-gen/legacy/barrier.webp",
-       "bytes": 12742
-      },
-      {
-       "name": "bathhouse",
-       "src": "assets/environment/city-gen/legacy/bathhouse.webp",
-       "bytes": 29220
-      },
-      {
-       "name": "battery-depot",
-       "src": "assets/environment/city-gen/legacy/battery-depot.webp",
-       "bytes": 43182
-      },
-      {
-       "name": "bell-pavilion",
-       "src": "assets/environment/city-gen/legacy/bell-pavilion.webp",
-       "bytes": 54842
-      },
-      {
-       "name": "bench",
-       "src": "assets/environment/city-gen/legacy/bench.webp",
-       "bytes": 14110
-      },
-      {
-       "name": "boarding-house",
-       "src": "assets/environment/city-gen/legacy/boarding-house.webp",
-       "bytes": 50896
-      },
-      {
-       "name": "bridge-house",
-       "src": "assets/environment/city-gen/legacy/bridge-house.webp",
-       "bytes": 48772
-      },
-      {
-       "name": "capsule-hotel",
-       "src": "assets/environment/city-gen/legacy/capsule-hotel.webp",
-       "bytes": 38358
-      },
-      {
-       "name": "car",
-       "src": "assets/environment/city-gen/legacy/car.webp",
-       "bytes": 12532
-      },
-      {
-       "name": "cinema",
-       "src": "assets/environment/city-gen/legacy/cinema.webp",
-       "bytes": 50050
-      },
-      {
-       "name": "clinic-block",
-       "src": "assets/environment/city-gen/legacy/clinic-block.webp",
-       "bytes": 47904
-      },
-      {
-       "name": "collapsed-block",
-       "src": "assets/environment/city-gen/legacy/collapsed-block.webp",
-       "bytes": 53366
-      },
-      {
-       "name": "container-home",
-       "src": "assets/environment/city-gen/legacy/container-home.webp",
-       "bytes": 40088
-      },
-      {
-       "name": "conveyor-factory",
-       "src": "assets/environment/city-gen/legacy/conveyor-factory.webp",
-       "bytes": 39910
-      },
-      {
-       "name": "coolant-tower",
-       "src": "assets/environment/city-gen/legacy/coolant-tower.webp",
-       "bytes": 32932
-      },
-      {
-       "name": "corner-store",
-       "src": "assets/environment/city-gen/legacy/corner-store.webp",
-       "bytes": 51260
-      },
-      {
-       "name": "courtyard-block",
-       "src": "assets/environment/city-gen/legacy/courtyard-block.webp",
-       "bytes": 46000
-      },
-      {
-       "name": "crates",
-       "src": "assets/environment/city-gen/legacy/crates.webp",
-       "bytes": 18934
-      },
-      {
-       "name": "data-relay",
-       "src": "assets/environment/city-gen/legacy/data-relay.webp",
-       "bytes": 39880
-      },
-      {
-       "name": "drone-hangar",
-       "src": "assets/environment/city-gen/legacy/drone-hangar.webp",
-       "bytes": 36798
-      },
-      {
-       "name": "dumpsters",
-       "src": "assets/environment/city-gen/legacy/dumpsters.webp",
-       "bytes": 14780
-      },
-      {
-       "name": "food-court",
-       "src": "assets/environment/city-gen/legacy/food-court.webp",
-       "bytes": 60152
-      },
-      {
-       "name": "garden-block",
-       "src": "assets/environment/city-gen/legacy/garden-block.webp",
-       "bytes": 57860
-      },
-      {
-       "name": "greenhouse",
-       "src": "assets/environment/city-gen/legacy/greenhouse.webp",
-       "bytes": 80774
-      },
-      {
-       "name": "ground",
-       "src": "assets/environment/city-gen/legacy/ground.webp",
-       "bytes": 97464
-      },
-      {
-       "name": "karaoke-bar",
-       "src": "assets/environment/city-gen/legacy/karaoke-bar.webp",
-       "bytes": 51920
-      },
-      {
-       "name": "lamp",
-       "src": "assets/environment/city-gen/legacy/lamp.webp",
-       "bytes": 8192
-      },
-      {
-       "name": "lantern-court",
-       "src": "assets/environment/city-gen/legacy/lantern-court.webp",
-       "bytes": 53950
-      },
-      {
-       "name": "laundromat",
-       "src": "assets/environment/city-gen/legacy/laundromat.webp",
-       "bytes": 51702
-      },
-      {
-       "name": "neon-tower",
-       "src": "assets/environment/city-gen/legacy/neon-tower.webp",
-       "bytes": 47458
-      },
-      {
-       "name": "noodle-bar",
-       "src": "assets/environment/city-gen/legacy/noodle-bar.webp",
-       "bytes": 52216
-      },
-      {
-       "name": "pagoda",
-       "src": "assets/environment/city-gen/legacy/pagoda.webp",
-       "bytes": 46854
-      },
-      {
-       "name": "parking-garage",
-       "src": "assets/environment/city-gen/legacy/parking-garage.webp",
-       "bytes": 36904
-      },
-      {
-       "name": "pawn-shop",
-       "src": "assets/environment/city-gen/legacy/pawn-shop.webp",
-       "bytes": 45336
-      },
-      {
-       "name": "pharmacy",
-       "src": "assets/environment/city-gen/legacy/pharmacy.webp",
-       "bytes": 52330
-      },
-      {
-       "name": "plaza",
-       "src": "assets/environment/city-gen/legacy/plaza.webp",
-       "bytes": 133552
-      },
-      {
-       "name": "ramen-stall",
-       "src": "assets/environment/city-gen/legacy/ramen-stall.webp",
-       "bytes": 57076
-      },
-      {
-       "name": "relay-hut",
-       "src": "assets/environment/city-gen/legacy/relay-hut.webp",
-       "bytes": 32940
-      },
-      {
-       "name": "repair-shop",
-       "src": "assets/environment/city-gen/legacy/repair-shop.webp",
-       "bytes": 47310
-      },
-      {
-       "name": "robotics-workshop",
-       "src": "assets/environment/city-gen/legacy/robotics-workshop.webp",
-       "bytes": 45022
-      },
-      {
-       "name": "rubble-big",
-       "src": "assets/environment/city-gen/legacy/rubble-big.webp",
-       "bytes": 130978
-      },
-      {
-       "name": "scrap-shack",
-       "src": "assets/environment/city-gen/legacy/scrap-shack.webp",
-       "bytes": 52004
-      },
-      {
-       "name": "scrap-shop",
-       "src": "assets/environment/city-gen/legacy/scrap-shop.webp",
-       "bytes": 55862
-      },
-      {
-       "name": "server-block",
-       "src": "assets/environment/city-gen/legacy/server-block.webp",
-       "bytes": 45124
-      },
-      {
-       "name": "shanty-block",
-       "src": "assets/environment/city-gen/legacy/shanty-block.webp",
-       "bytes": 52750
-      },
-      {
-       "name": "shrine-gate",
-       "src": "assets/environment/city-gen/legacy/shrine-gate.webp",
-       "bytes": 51880
-      },
-      {
-       "name": "substation",
-       "src": "assets/environment/city-gen/legacy/substation.webp",
-       "bytes": 46148
-      },
-      {
-       "name": "tattoo-parlour",
-       "src": "assets/environment/city-gen/legacy/tattoo-parlour.webp",
-       "bytes": 39548
-      },
-      {
-       "name": "tea-house",
-       "src": "assets/environment/city-gen/legacy/tea-house.webp",
-       "bytes": 42700
-      },
-      {
-       "name": "tea-terrace",
-       "src": "assets/environment/city-gen/legacy/tea-terrace.webp",
-       "bytes": 50674
-      },
-      {
-       "name": "temple-hall",
-       "src": "assets/environment/city-gen/legacy/temple-hall.webp",
-       "bytes": 31392
-      },
-      {
-       "name": "tenement",
-       "src": "assets/environment/city-gen/legacy/tenement.webp",
-       "bytes": 51270
-      },
-      {
-       "name": "traffic-light",
-       "src": "assets/environment/city-gen/legacy/traffic-light.webp",
-       "bytes": 18506
-      },
-      {
-       "name": "vending",
-       "src": "assets/environment/city-gen/legacy/vending.webp",
-       "bytes": 11944
-      },
-      {
-       "name": "walkup-flats",
-       "src": "assets/environment/city-gen/legacy/walkup-flats.webp",
-       "bytes": 51084
+     "title": "Legacy (not drawn)",
+     "types": [
+      {
+       "key": "legacy",
+       "label": "Old side-on buildings and textures",
+       "rule": "Kept for reference; the top-down city does not draw these.",
+       "walk": null,
+       "folder": "city-gen/legacy/",
+       "scale": null,
+       "files": [
+        {
+         "name": "ac-tower",
+         "src": "assets/environment/city-gen/legacy/ac-tower.webp",
+         "bytes": 36688
+        },
+        {
+         "name": "apartment",
+         "src": "assets/environment/city-gen/legacy/apartment.webp",
+         "bytes": 47730
+        },
+        {
+         "name": "arcade",
+         "src": "assets/environment/city-gen/legacy/arcade.webp",
+         "bytes": 52762
+        },
+        {
+         "name": "barrier",
+         "src": "assets/environment/city-gen/legacy/barrier.webp",
+         "bytes": 12742
+        },
+        {
+         "name": "bathhouse",
+         "src": "assets/environment/city-gen/legacy/bathhouse.webp",
+         "bytes": 29220
+        },
+        {
+         "name": "battery-depot",
+         "src": "assets/environment/city-gen/legacy/battery-depot.webp",
+         "bytes": 43182
+        },
+        {
+         "name": "bell-pavilion",
+         "src": "assets/environment/city-gen/legacy/bell-pavilion.webp",
+         "bytes": 54842
+        },
+        {
+         "name": "bench",
+         "src": "assets/environment/city-gen/legacy/bench.webp",
+         "bytes": 14110
+        },
+        {
+         "name": "boarding-house",
+         "src": "assets/environment/city-gen/legacy/boarding-house.webp",
+         "bytes": 50896
+        },
+        {
+         "name": "bridge-house",
+         "src": "assets/environment/city-gen/legacy/bridge-house.webp",
+         "bytes": 48772
+        },
+        {
+         "name": "capsule-hotel",
+         "src": "assets/environment/city-gen/legacy/capsule-hotel.webp",
+         "bytes": 38358
+        },
+        {
+         "name": "car",
+         "src": "assets/environment/city-gen/legacy/car.webp",
+         "bytes": 12532
+        },
+        {
+         "name": "cinema",
+         "src": "assets/environment/city-gen/legacy/cinema.webp",
+         "bytes": 50050
+        },
+        {
+         "name": "clinic-block",
+         "src": "assets/environment/city-gen/legacy/clinic-block.webp",
+         "bytes": 47904
+        },
+        {
+         "name": "collapsed-block",
+         "src": "assets/environment/city-gen/legacy/collapsed-block.webp",
+         "bytes": 53366
+        },
+        {
+         "name": "container-home",
+         "src": "assets/environment/city-gen/legacy/container-home.webp",
+         "bytes": 40088
+        },
+        {
+         "name": "conveyor-factory",
+         "src": "assets/environment/city-gen/legacy/conveyor-factory.webp",
+         "bytes": 39910
+        },
+        {
+         "name": "coolant-tower",
+         "src": "assets/environment/city-gen/legacy/coolant-tower.webp",
+         "bytes": 32932
+        },
+        {
+         "name": "corner-store",
+         "src": "assets/environment/city-gen/legacy/corner-store.webp",
+         "bytes": 51260
+        },
+        {
+         "name": "courtyard-block",
+         "src": "assets/environment/city-gen/legacy/courtyard-block.webp",
+         "bytes": 46000
+        },
+        {
+         "name": "crates",
+         "src": "assets/environment/city-gen/legacy/crates.webp",
+         "bytes": 18934
+        },
+        {
+         "name": "data-relay",
+         "src": "assets/environment/city-gen/legacy/data-relay.webp",
+         "bytes": 39880
+        },
+        {
+         "name": "drone-hangar",
+         "src": "assets/environment/city-gen/legacy/drone-hangar.webp",
+         "bytes": 36798
+        },
+        {
+         "name": "dumpsters",
+         "src": "assets/environment/city-gen/legacy/dumpsters.webp",
+         "bytes": 14780
+        },
+        {
+         "name": "food-court",
+         "src": "assets/environment/city-gen/legacy/food-court.webp",
+         "bytes": 60152
+        },
+        {
+         "name": "garden-block",
+         "src": "assets/environment/city-gen/legacy/garden-block.webp",
+         "bytes": 57860
+        },
+        {
+         "name": "greenhouse",
+         "src": "assets/environment/city-gen/legacy/greenhouse.webp",
+         "bytes": 80774
+        },
+        {
+         "name": "ground",
+         "src": "assets/environment/city-gen/legacy/ground.webp",
+         "bytes": 97464
+        },
+        {
+         "name": "karaoke-bar",
+         "src": "assets/environment/city-gen/legacy/karaoke-bar.webp",
+         "bytes": 51920
+        },
+        {
+         "name": "lamp",
+         "src": "assets/environment/city-gen/legacy/lamp.webp",
+         "bytes": 8192
+        },
+        {
+         "name": "lantern-court",
+         "src": "assets/environment/city-gen/legacy/lantern-court.webp",
+         "bytes": 53950
+        },
+        {
+         "name": "laundromat",
+         "src": "assets/environment/city-gen/legacy/laundromat.webp",
+         "bytes": 51702
+        },
+        {
+         "name": "neon-tower",
+         "src": "assets/environment/city-gen/legacy/neon-tower.webp",
+         "bytes": 47458
+        },
+        {
+         "name": "noodle-bar",
+         "src": "assets/environment/city-gen/legacy/noodle-bar.webp",
+         "bytes": 52216
+        },
+        {
+         "name": "pagoda",
+         "src": "assets/environment/city-gen/legacy/pagoda.webp",
+         "bytes": 46854
+        },
+        {
+         "name": "parking-garage",
+         "src": "assets/environment/city-gen/legacy/parking-garage.webp",
+         "bytes": 36904
+        },
+        {
+         "name": "pawn-shop",
+         "src": "assets/environment/city-gen/legacy/pawn-shop.webp",
+         "bytes": 45336
+        },
+        {
+         "name": "pharmacy",
+         "src": "assets/environment/city-gen/legacy/pharmacy.webp",
+         "bytes": 52330
+        },
+        {
+         "name": "plaza",
+         "src": "assets/environment/city-gen/legacy/plaza.webp",
+         "bytes": 133552
+        },
+        {
+         "name": "ramen-stall",
+         "src": "assets/environment/city-gen/legacy/ramen-stall.webp",
+         "bytes": 57076
+        },
+        {
+         "name": "relay-hut",
+         "src": "assets/environment/city-gen/legacy/relay-hut.webp",
+         "bytes": 32940
+        },
+        {
+         "name": "repair-shop",
+         "src": "assets/environment/city-gen/legacy/repair-shop.webp",
+         "bytes": 47310
+        },
+        {
+         "name": "robotics-workshop",
+         "src": "assets/environment/city-gen/legacy/robotics-workshop.webp",
+         "bytes": 45022
+        },
+        {
+         "name": "rubble-big",
+         "src": "assets/environment/city-gen/legacy/rubble-big.webp",
+         "bytes": 130978
+        },
+        {
+         "name": "scrap-shack",
+         "src": "assets/environment/city-gen/legacy/scrap-shack.webp",
+         "bytes": 52004
+        },
+        {
+         "name": "scrap-shop",
+         "src": "assets/environment/city-gen/legacy/scrap-shop.webp",
+         "bytes": 55862
+        },
+        {
+         "name": "server-block",
+         "src": "assets/environment/city-gen/legacy/server-block.webp",
+         "bytes": 45124
+        },
+        {
+         "name": "shanty-block",
+         "src": "assets/environment/city-gen/legacy/shanty-block.webp",
+         "bytes": 52750
+        },
+        {
+         "name": "shrine-gate",
+         "src": "assets/environment/city-gen/legacy/shrine-gate.webp",
+         "bytes": 51880
+        },
+        {
+         "name": "substation",
+         "src": "assets/environment/city-gen/legacy/substation.webp",
+         "bytes": 46148
+        },
+        {
+         "name": "tattoo-parlour",
+         "src": "assets/environment/city-gen/legacy/tattoo-parlour.webp",
+         "bytes": 39548
+        },
+        {
+         "name": "tea-house",
+         "src": "assets/environment/city-gen/legacy/tea-house.webp",
+         "bytes": 42700
+        },
+        {
+         "name": "tea-terrace",
+         "src": "assets/environment/city-gen/legacy/tea-terrace.webp",
+         "bytes": 50674
+        },
+        {
+         "name": "temple-hall",
+         "src": "assets/environment/city-gen/legacy/temple-hall.webp",
+         "bytes": 31392
+        },
+        {
+         "name": "tenement",
+         "src": "assets/environment/city-gen/legacy/tenement.webp",
+         "bytes": 51270
+        },
+        {
+         "name": "traffic-light",
+         "src": "assets/environment/city-gen/legacy/traffic-light.webp",
+         "bytes": 18506
+        },
+        {
+         "name": "vending",
+         "src": "assets/environment/city-gen/legacy/vending.webp",
+         "bytes": 11944
+        },
+        {
+         "name": "walkup-flats",
+         "src": "assets/environment/city-gen/legacy/walkup-flats.webp",
+         "bytes": 51084
+        }
+       ]
       }
      ]
     }

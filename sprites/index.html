@@ -20,11 +20,12 @@
   nav a:hover { border-color: var(--accent); }
   nav input { margin-left: auto; min-width: 180px; flex: 0 1 240px; background: var(--panel); border: 1px solid var(--line); color: var(--ink); border-radius: 8px; padding: 6px 10px; font: inherit; }
   main { max-width: 1200px; margin: 0 auto; padding: 8px 20px 60px; }
-  h2 { margin: 34px 0 6px; font-size: 22px; scroll-margin-top: 60px; }
-  h2 small { color: var(--muted); font-weight: 400; font-size: 14px; }
+  h2.world { margin: 26px 0 0; font-size: 26px; color: var(--accent); scroll-margin-top: 60px; }
+  h3.cat { margin: 26px 0 6px; font-size: 20px; scroll-margin-top: 60px; }
+  h2 small, h3 small { color: var(--muted); font-weight: 400; font-size: 14px; }
   section.item { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 12px 0; }
   .item-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-  .item-head h3 { margin: 0; font-size: 17px; }
+  .item-head h4 { margin: 0; font-size: 16px; }
   .badge { font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; }
   .walk { color: var(--yes); } .nowalk { color: var(--no); }
   .meta { color: var(--muted); font-size: 13px; }
@@ -60,20 +61,23 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 const kb = n => n ? (n / 1024).toFixed(n < 10240 ? 1 : 0) + ' KB' : '';
 fetch('manifest.json', { cache: 'no-store' }).then(r => r.json()).then(m => {
   document.title = m.title + ' · Aethercede';
-  const total = m.groups.reduce((a, g) => a + g.items.reduce((b, i) => b + i.files.length, 0), 0);
-  document.getElementById('note').innerHTML = esc(m.note) + ' ' + total + ' pictures in ' + m.groups.length + ' categories. <a href="../">Back to the game</a>';
+  const count = c => c.types.reduce((d, t) => d + t.files.length, 0), total = m.worlds.reduce((a, w) => a + w.categories.reduce((b, c) => b + count(c), 0), 0);
+  document.getElementById('note').innerHTML = esc(m.note) + ' ' + total + ' pictures. <a href="../">Back to the game</a>';
   const nav = document.getElementById('nav'), main = document.getElementById('main'), q = document.getElementById('q');
-  m.groups.forEach((g, gi) => {
-    const id = 'g' + gi, n = g.items.reduce((b, i) => b + i.files.length, 0);
-    const a = document.createElement('a'); a.href = '#' + id; a.textContent = g.title.replace(/ \(.*\)/, ''); nav.insertBefore(a, q);
-    let html = '<h2 id="' + id + '">' + esc(g.title) + ' <small>' + g.items.length + ' kinds · ' + n + ' pictures</small></h2>';
-    for (const it of g.items) {
-      const walk = it.walk == null ? '' : '<span class="badge ' + (it.walk ? 'walk">walkable' : 'nowalk">blocks the way') + '</span>';
-      html += '<section class="item"><div class="item-head"><h3>' + esc(it.label) + '</h3>' + walk + '<span class="meta">' + esc(it.folder) + (it.scale ? ' · drawn at ' + it.scale : '') + ' · ' + it.files.length + '</span></div>'
-        + '<p class="rule">' + esc(it.rule) + '</p><div class="grid">'
-        + (it.files.length ? it.files.map(f => '<figure data-name="' + esc(f.name.toLowerCase()) + '" data-src="../' + esc(f.src) + '"><div class="pic"><img loading="lazy" src="../' + esc(f.src) + '" alt="' + esc(f.name) + '"></div><figcaption><b>' + esc(f.name) + '</b><span class="dim"></span>' + (f.role ? ' <span class="tag">' + esc(f.role) + '</span>' : '') + ' ' + kb(f.bytes) + '</figcaption></figure>').join('') : '<p class="empty">No picture yet.</p>')
-        + '</div></section>';
-    }
+  // world, then category, then type, then the pictures by name
+  m.worlds.forEach((w, wi) => {
+    let html = '<h2 class="world" id="w' + wi + '">' + esc(w.name) + ' <small>' + w.categories.reduce((b, c) => b + count(c), 0) + ' pictures</small></h2>';
+    w.categories.forEach((c, ci) => {
+      const id = 'w' + wi + 'c' + ci, a = document.createElement('a'); a.href = '#' + id; a.textContent = c.title.replace(/ \(.*\)/, ''); nav.insertBefore(a, q);
+      html += '<h3 class="cat" id="' + id + '">' + esc(c.title) + ' <small>' + c.types.length + ' types · ' + count(c) + ' pictures</small></h3>';
+      for (const it of c.types) {
+        const walk = it.walk == null ? '' : '<span class="badge ' + (it.walk ? 'walk">walkable' : 'nowalk">blocks the way') + '</span>';
+        html += '<section class="item"><div class="item-head"><h4>' + esc(it.label) + '</h4>' + walk + '<span class="meta">' + esc(it.folder) + (it.scale ? ' · drawn at ' + it.scale : '') + ' · ' + it.files.length + '</span></div>'
+          + '<p class="rule">' + esc(it.rule) + '</p><div class="grid">'
+          + (it.files.length ? it.files.map(f => '<figure data-name="' + esc(f.name.toLowerCase()) + '" data-src="../' + esc(f.src) + '"><div class="pic"><img loading="lazy" src="../' + esc(f.src) + '" alt="' + esc(f.name) + '"></div><figcaption><b>' + esc(f.name) + '</b><span class="dim"></span>' + (f.role ? ' <span class="tag">' + esc(f.role) + '</span>' : '') + ' ' + kb(f.bytes) + '</figcaption></figure>').join('') : '<p class="empty">No picture yet.</p>')
+          + '</div></section>';
+      }
+    });
     const wrap = document.createElement('div'); wrap.innerHTML = html; main.append(wrap);
   });
   main.querySelectorAll('figure img').forEach(img => { const set = () => { const d = img.closest('figure').querySelector('.dim'); if (d && img.naturalWidth) d.textContent = img.naturalWidth + '×' + img.naturalHeight + ' · '; }; img.complete ? set() : img.addEventListener('load', set, { once: true }); });
