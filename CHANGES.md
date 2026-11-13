@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 421: the Textures page (aethercede.com/sprites)
+
+Owner: "add a page called textures that lists them all and groups them by category at aethercede.com/sprites".
+
+- `sprites/index.html` ("Textures"): every picture the top-down city draws, grouped Ground, Edges and borders, Buildings,
+  Props and Legacy; each surface shows its label, whether it can be walked on, its folder, its scale and its rule, then its
+  pictures on a checkerboard with name, size and file size. A filter by name, jump links, and click to enlarge. Works at
+  phone width.
+- It reads `sprites/manifest.json`, built by `node tools/build-sprites-manifest.cjs` from `CITY_SURFACES` and `CITY_TD_ART`
+  and the files on disk (147 pictures). `tests/sprites-page.test.cjs` fails when the manifest is out of date or a picture
+  is missing.
+
 ## Round 420: a rule and a folder for every city surface; curbs, lot footings and lanes; no stand-ins, no stretching
 
 Owner: "we need to have a rule for each texture tile, there should be tile for under buildings, tile for road, tile for
