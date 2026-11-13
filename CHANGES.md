@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 414: varied floors; roofs that read as roofs
+
+Owner: "our buildings have too many identical floors and the roofs look like ground".
+
+- Walls are laid floor by floor: each floor its own sideways shift of the wall art and its own light (about a third of
+  floors darkened), a ledge under each floor, a lit cornice at the top, and on a third of buildings the upper floors in
+  a second wall material (`tile` gains a sideways phase).
+- Roofs: a raised 6px parapet (lit top edge, dark inner face, a shadow falling onto the roof), and a cast shadow that grows
+  with the building's height; painted rooftop props no longer sit on a square placeholder shadow.
+
 ## Round 413: border strips that bend round corners; never edge on edge
 
 Owner: "the edges dont have rounded corner which is a problem, we need edges that can be curved and used at 90 degree
