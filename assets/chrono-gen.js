@@ -352,7 +352,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '397',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '403',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -487,7 +487,7 @@ function genWorld(seed) {
 // Slots: roof, wall, shop (seamless textures: a roof surface; one floor of wall; one floor of shopfront); prop-ac, prop-vent,
 // prop-tank, prop-stairs, prop-solar, prop-skylight (rooftop things seen from above); sign-h, sign-v (neon signs, wide and
 // tall); car (seen from above, facing east); tree (seen from above). Prompts: tools/art-refresh/city-topdown-prompts.md.
-const CITY_TD_ART = { roof: [], wall: [], shop: [], 'prop-ac': [], 'prop-vent': [], 'prop-tank': [], 'prop-stairs': [], 'prop-solar': [], 'prop-skylight': [], 'sign-h': [], 'sign-v': [], car: [], tree: [] };
+const CITY_TD_ART = { roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-brick', 'roof-plate', 'roof-stone', 'roof-slate', 'roof-tin', 'roof-tile', 'roof-scrap'], wall: ['wall-concrete'], shop: ['shop-noodle'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2', 'skylight-3'], 'sign-h': ['sign-h-pink', 'sign-h-mixed'], 'sign-v': ['sign-v-cyan', 'sign-v-teal'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo'], tree: ['tree-1', 'tree-2', 'tree-3'] };
 function cityTdArtNames() { return Object.values(CITY_TD_ART).flat().map(n => 'td/' + n); }
 function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   const A = slot => { const l = (CITY_TD_ART[slot] || []).map(n => imgs['td/' + n]).filter(i => i && i.naturalWidth); return l.length ? l : null; };
@@ -516,7 +516,8 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
       for (let d = 70; d < L - 70; d += 60 + rr() * 120) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1, off = rd.w / 2 - 16;
         const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, w = hz ? 46 : 22, h = hz ? 22 : 46, col = ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)];
-        const carArt = pick('car', rr); if (carArt) { const L2 = 50, T2 = L2 * carArt.height / carArt.width; ctx.save(); ctx.translate(S(px), S(py)); if (!hz) ctx.rotate(side > 0 ? Math.PI / 2 : -Math.PI / 2); else if (side < 0) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 / 2), S(L2), S(T2)); ctx.restore(); continue; }
+        const carArt = pick('car', rr); if (carArt) { // painted at the 3/4 angle, so stood upright, not turned with the street; half face the other way
+          const L2 = 56, T2 = L2 * carArt.height / carArt.width; ctx.save(); ctx.translate(S(px), S(py)); if (rr() < 0.5) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); continue; }
         ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 4), S(w), S(h)); ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(S(px - w / 2), S(py - h / 2), S(w), S(h), S(5)) : ctx.rect(S(px - w / 2), S(py - h / 2), S(w), S(h)); ctx.fill();
         ctx.fillStyle = 'rgba(20,30,45,.85)'; if (hz) ctx.fillRect(S(px - w / 2 + 12), S(py - h / 2 + 3), S(w - 26), S(h - 6)); else ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 12), S(w - 6), S(h - 26)); ctx.restore(); } } }
   // lots
