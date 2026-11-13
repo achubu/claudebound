@@ -3496,6 +3496,35 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 420: a rule and a folder for every city surface; curbs, lot footings and lanes; no stand-ins, no stretching
+
+Owner: "we need to have a rule for each texture tile, there should be tile for under buildings, tile for road, tile for
+curb, tile for waterfront, tile for roofs, and they should all be labeled and sorted clearly and accounted for in our
+algorithm for world generation"; "the road and curb tile scale should be smaller, the tiles appear too large"; "remove all
+placeholder graphics you setup using vector graphics, i still see the neon sign placeholders in game. Add lanes to the road
+paths"; "some neon signs appear stretched, never stretch graphics".
+
+- **`CITY_SURFACES`** (`assets/chrono-gen.js`): the twelve surfaces in drawing order (sea, waterfront, waterfront edge,
+  sidewalk, road, curb, lot, park, park edge, roof, wall, shop), each with a label, a rule, whether it can be walked on,
+  its folder and its art. The generator reads its scales and art from it.
+- **Sorted art**: `assets/environment/city-gen/surfaces/<surface>/` and `props/<kind>/`; the old 3/4 city's buildings and
+  textures in `legacy/` (still loadable by name). `CITY_TD_ART` slots renamed to match (`park-edge`, `waterfront-edge`,
+  new `curb`); the unused trims moved to `unused assets/`. `tools/prepare_city_art.py` and `tools/prepare_chrono_gen.py`
+  write to the new folders. `tools/art-refresh/city-surfaces.md` is the readable list.
+- **New surfaces in the generator**: the **curb**, a kerb-stone strip along both edges of every road on the sidewalk side
+  (`cityEdgeAlong` on the road mask turned inside out), and the **lot**, the ground under a building (its footing shows
+  round it).
+- **Smaller tiles**: road asphalt 0.45 (was 0.8), wet patches 0.35, sidewalk paving 0.22 (was 0.35), lot 0.3.
+- **Lanes**: a dashed centre line down every main road, out through its doors, stopping at the crossings.
+- **No drawn stand-ins**: the neon-sign boxes (drawn under every sign picture), and the drawn rooftop props, cars, trees,
+  park border, window rows, shop bands and roof shading are gone; a slot with no picture draws nothing.
+- **Never stretched**: signs keep their own proportions (scaled evenly to fit); wall and shop strips are scaled evenly
+  (never squeezed sideways) to land their ends on plain wall, any extra height cropped evenly.
+- Tests: new `tests/city-surfaces.test.cjs` (every surface has art in its own folder, every picture in surfaces/ and props/
+  is listed, nothing loose at the top of city-gen/, no building or sea cell can be walked on, every crossing can);
+  chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration, organic-paths, card-art,
+  playtest-walk city and city-enemies pass.
+
 ## Round 419: no old room images in Neon Aftermath
 
 Owner: "im also seeing old rooms generated when i enter them, please remove any old room images from the game".

@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 419) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 420) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -83,6 +83,11 @@ change set.
   roads, squares, terrain and buildings come from the journey's seed. The painted rooms, traced mask, nooks and
   `ROOM_SPOT_FIXES` below are history, kept in the code but no longer used by the city; Round 391 moved the paintings
   (`environment/rooms/`, `environment/world/`) to `unused assets/`.
+- **Round 420: the top-down city's surfaces** are listed, with their rules, in `CITY_SURFACES` (`assets/chrono-gen.js`):
+  sea, waterfront, waterfront edge, sidewalk, road (with lanes), curb, lot (under buildings), park, park edge, roof, wall,
+  shop. Art is sorted in `assets/environment/city-gen/surfaces/<surface>/` and `props/<kind>/` (old 3/4 art in `legacy/`);
+  add art with `tools/prepare_city_art.py`; `tools/art-refresh/city-surfaces.md` is the readable list and
+  `tests/city-surfaces.test.cjs` keeps the registry, folders and walk rules in step. Never stretch art; no drawn stand-ins.
 - **Neon Aftermath is one painted world map** (Round 91+):
   - 6 district images in a 3×2 grid, cut into 9×6 rooms. Room keys are
     `cx,(cy+4)` and the start room is `'0,5'`.
