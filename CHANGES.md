@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 410: kerbs and trims from the owner's edge strips
+
+The owner's sheet of six border strips on green (granite kerb, mossy planter edge, rusted steel trim, brick, crumbling
+shoreline, hazard curb).
+
+- `tools/prepare_city_art.py`: `edge` and `trim` strips keep see-through gaps where the green shows between stones.
+- Parks: `edge-kerb` and `edge-planter` join `edge-granite` (one per park).
+- New slot `trim`: `trim-steel` and `trim-brick` frame each square where an object stands (9px), so the squares read as
+  places on the sidewalk.
+- Not yet used: the shoreline strip (the beach edge is curved) and the hazard curb (kept for special spots such as
+  boss arenas and breakers). City art version 410.
+
 ## Round 409: granite kerbs round the parks
 
 The owner's Archive_17 (two takes on a sheet of border strips and corners: a stone kerb, a park planter edge, a

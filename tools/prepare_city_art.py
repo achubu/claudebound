@@ -24,7 +24,7 @@ from scipy import ndimage
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 OUT = os.path.join(ROOT, 'assets', 'environment', 'city-gen', 'td')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
-TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'edge'}
+TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'edge', 'trim'}
 SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree'}
 
 
@@ -38,6 +38,11 @@ def texture(img, slot):
     if slot in ('roof', 'sidewalk'):
         a = blend_x(a, max(8, a.shape[1] // 8)); a = blend_x(a.transpose(1, 0, 2), max(8, a.shape[0] // 8)).transpose(1, 0, 2)
         return Image.fromarray(a.clip(0, 255).astype(np.uint8)).resize((512, 512), Image.LANCZOS)
+    if slot in ('edge', 'trim'):  # Round 410: border strips keep see-through gaps where the green shows between stones
+        rgb = np.asarray(img.convert('RGB')).astype(np.float32); r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+        al = np.clip((50 - (g - np.maximum(r, b))) / 30, 0, 1); rgba = np.dstack([r, np.minimum(g, np.maximum(r, b) + 10), b, al * 255])
+        rgba = blend_x(rgba, max(8, rgba.shape[1] // 10)); o = Image.fromarray(rgba.clip(0, 255).astype(np.uint8), 'RGBA')
+        return o.resize((max(16, round(o.width * 128 / o.height)), 128), Image.LANCZOS)
     a = blend_x(a, max(8, a.shape[1] // 10)); o = Image.fromarray(a.clip(0, 255).astype(np.uint8))
     return o.resize((max(16, round(o.width * 128 / o.height)), 128), Image.LANCZOS)
 
