@@ -415,7 +415,7 @@ function genWorld(seed) {
   const inside = (r, id) => { let n = 0; for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) if (block[y * CW + x] === id) n++; return n / ((r[2] - r[0]) * (r[3] - r[1])); };
   const front = r => { for (let x = r[0]; x < r[2]; x++) for (const y of [r[1] - 1, r[1] - 2, r[3], r[3] + 1]) if (at(x, y) === 2) return true; for (let y = r[1]; y < r[3]; y++) for (const x of [r[0] - 1, r[0] - 2, r[2], r[2] + 1]) if (at(x, y) === 2) return true; return false; };
   const split = (r, id) => { const w = r[2] - r[0], h = r[3] - r[1]; if (w < MIN || h < MIN) return;
-    if (w <= LW && h <= LH) { if (inside(r, id) >= 0.85) lots.push({ r, id, front: front(r) }); else if (w > MIN * 2 || h > MIN * 2) { if (w >= h) { const m = r[0] + (w >> 1); split([r[0], r[1], m, r[3]], id); split([m, r[1], r[2], r[3]], id); } else { const m = r[1] + (h >> 1); split([r[0], r[1], r[2], m], id); split([r[0], m, r[2], r[3]], id); } } return; }
+    if (w <= LW && h <= LH) { if (inside(r, id) >= (GEN.topdown ? 1 : 0.85)) lots.push({ r, id, front: front(r) }); else if (w >= MIN * 2 || h >= MIN * 2) { /* Round 416 (owner: "some buildings are being drawn on top of the road path"): a lot lies wholly on its block; one that reaches over a street is split again */ if (w >= h) { const m = r[0] + (w >> 1); split([r[0], r[1], m, r[3]], id); split([m, r[1], r[2], r[3]], id); } else { const m = r[1] + (h >> 1); split([r[0], r[1], r[2], m], id); split([r[0], m, r[2], r[3]], id); } } return; }
     // Round 400 (owner: "a little bit too dense ... need some alleyways"): about a third of the cuts leave a one-cell alley.
     const gap = GEN.alleys && rnd() < GEN.alleys ? 1 : 0;
     if (w / LW >= h / LH) { const m = r[0] + Math.max(MIN, Math.min(w - MIN - gap, Math.round(w * (0.4 + rnd() * 0.2)))); split([r[0], r[1], m, r[3]], id); split([m + gap, r[1], r[2], r[3]], id); }
@@ -622,12 +622,15 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       ctx.save(); ctx.strokeStyle = 'rgba(140,150,165,0)'; ctx.lineWidth = S(4); ctx.strokeRect(S(q[0] + 2), S(q[1] + 2), S(w - 4), S(h - 4)); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + 5), S(q[1] + 5), S(w - 10), S(h - 10)); ctx.restore();
       // rooftop clutter
       const items = 2 + Math.floor(rr() * 4), placed = [];
-      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 6), iw = [24, 14, 30, 34, 46, 22][kind], ih = [18, 14, 30, 26, 28, 14][kind], ix = q[0] + 10 + rr() * (w - 20 - iw), iy = q[1] + 10 + rr() * (h - 20 - ih);
+      // Round 416 (owner: "some rooftop objects being too small, others being too big"): each kind has one size, the
+      // longer side of its picture (one storey of wall is 18px: an air unit 26, a vent 20, a tank 36, a stair hut 40,
+      // solar panels 46, a skylight 32), and its box follows the picture's own shape; it used to be squeezed into a fixed box.
+      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 6), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind], propArt = pick(slot, ra), L = [26, 20, 36, 40, 46, 32][kind];
+        let iw = [24, 14, 30, 34, 46, 22][kind], ih = [18, 14, 30, 26, 28, 14][kind]; if (propArt) { const k3 = L / Math.max(propArt.width, propArt.height); iw = propArt.width * k3; ih = propArt.height * k3; }
+        const ix = q[0] + 10 + rr() * (w - 20 - iw), iy = q[1] + 10 + rr() * (h - 20 - ih);
         if (w < iw + 22 || h < ih + 22 || placed.some(p => ix < p[2] + 10 && ix + iw > p[0] - 10 && iy < p[3] + 10 && iy + ih > p[1] - 10)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
         ctx.save(); if (!A(['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind])) { ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(ix + 4), S(iy + 5), S(iw), S(ih)); } // Round 414: no square shadow under painted props
-        const propArt = pick(['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind], ra);
-        if (propArt) { const k2 = Math.min(iw / propArt.width, ih / propArt.height), // inside its own box: never over a neighbour
-           dw = propArt.width * k2, dh = propArt.height * k2; ctx.drawImage(propArt, S(ix + (iw - dw) / 2), S(iy + (ih - dh) / 2), S(dw), S(dh)); }
+        if (propArt) ctx.drawImage(propArt, S(ix), S(iy), S(iw), S(ih)); // its box is its picture: never over a neighbour
         else if (kind === 0) { ctx.fillStyle = '#7d8590'; ctx.fillRect(S(ix), S(iy), S(iw), S(ih)); ctx.strokeStyle = '#3d434b'; ctx.lineWidth = S(1.5); ctx.beginPath(); ctx.arc(S(ix + iw / 2), S(iy + ih / 2), S(ih / 2 - 3), 0, 7); ctx.stroke(); }
         else if (kind === 1) { ctx.fillStyle = '#5c636c'; ctx.beginPath(); ctx.arc(S(ix + 7), S(iy + 7), S(7), 0, 7); ctx.fill(); ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(S(ix + 7), S(iy + 7), S(3), 0, 7); ctx.fill(); }
         else if (kind === 2) { ctx.fillStyle = '#6b5a4a'; ctx.beginPath(); ctx.arc(S(ix + 15), S(iy + 15), S(15), 0, 7); ctx.fill(); ctx.strokeStyle = '#3a3029'; ctx.lineWidth = S(2); ctx.beginPath(); ctx.arc(S(ix + 15), S(iy + 15), S(10), 0, 7); ctx.stroke(); }

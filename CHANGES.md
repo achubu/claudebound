@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 416: rooftop objects to one scale; no buildings on the streets
+
+Owner: "some scaling issues with some rooftop objects being too small, others being too big"; "some buildings are being
+drawn on top of the road path".
+
+- Rooftop objects: each kind has one size, the longer side of its picture, against one storey of wall (18px): an air
+  unit 26px, a vent 20, a tank 36, a stair hut 40, solar panels 46, a skylight 32. The box follows the picture's own shape
+  (they used to be squeezed into fixed boxes, so tall pictures such as the water tower on stilts came out tiny).
+- Buildings on streets: a lot cut from a block only had to be 85% on the block, so up to 15% of a building could stand on a
+  street (15-22 of about 240 buildings per city). In the top-down city a lot must lie wholly on its block; one that
+  reaches over a street is split again. Checked over three seeds: no building over a street (the lot count barely changes).
+- Tests: chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration, organic-paths and
+  playtest-walk city pass.
+
 ## Round 415: walk on any ground; building walls end between windows
 
 Owner: "make it a rule that if the tile is just a texture tile, it can be walked on, unless it has another image on top
