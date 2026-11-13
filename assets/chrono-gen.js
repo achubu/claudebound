@@ -355,7 +355,7 @@ const GEN_THEMES = {
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.9, landmark: 0.9, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
     tex: { pipes: 'overgrowth', chasm: 'water' }, kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { floor: 0.8, yard: 0.5, ground: 0.7, 'road-wet': 0.55, 'pavement-old': 0.45, plaza: 0.32, 'rubble-big': 0.8 },
-    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], plazaTex: 'plaza', plazaShade: 'rgba(6,12,20,.5)', // Round 397: the owner's hex-paver plaza tile under objects
+    mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], blend: true, // Round 398: no kerbs, no paving tile; roads and paths blend into the ground (the plaza tile from Round 397 is unused)
     bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
@@ -744,6 +744,10 @@ function paintChronoRoom(canvas, key) {
   if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
+    // Round 398 (owner: "water should always have that beach tile around it"): an even strip of sand round all water,
+    // under the ragged beach, so the noise never thins the beach to nothing.
+    const sandMin = ragged(terrain.chasm, 'sand2', { blur: 6, amp: 0.1, sharp: 9, grow: 18 });
+    ctx.drawImage(tintIn(sandMin, g => fill(g, imgs.sand)), 0, 0);
     ctx.drawImage(tintIn(sand, g => fill(g, imgs.sand)), 0, 0); // Round 394: the owner's beach-sand tile
     ctx.drawImage(tintIn(blurred(sand, 3 * K), g => { const w = blurred(shore, 14 * K); g.globalCompositeOperation = 'source-in'; g.drawImage(w, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = GEN.beach[1]; g.fillRect(0, 0, W, H); }), 0, 0);
     const water = tintIn(shore, g => fill(g, imgs.chasm)); ctx.drawImage(water, 0, 0);
@@ -806,6 +810,21 @@ function paintChronoRoom(canvas, key) {
   // Owner: "round the curb corners more": the road's inside corners turn on an arc too (and the pavement's on the same centre, an arc narrower).
   const f = { shape: GEN.square ? closed(floorShape, GEN.pavement + 30) : floorShape, art: document.createElement('canvas') }; f.art.width = W; f.art.height = H;
   { const g = f.art.getContext('2d'); g.drawImage(f.shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); g.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(g, f.shape, mix); }
+  if (GEN.blend) { // Round 398 (owner: "remove curbs from roads altogether and remove the special tile we use for off path
+    // travel, try to blend everything in but have a somewhat clear path"): no kerb, no pavement strip, no paving tile.
+    // The road is its own surface with a soft, slightly broken edge into the ground; the squares and paths to objects are
+    // worn ground in the same surface, fainter and with a looser edge, so the way to them reads without a border.
+    const pv = document.createElement('canvas'); pv.width = W; pv.height = H;
+    { const g = pv.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = g.lineJoin = 'round';
+      for (const sh of plan.shapes) if (sh.pave) { if (sh.t === 'poly') { g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.closePath(); g.fill(); } else if (sh.t === 'road') { g.lineWidth = sh.w * K; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); } } }
+    plan._plazaShape = pv;
+    const pm = ragged(pv, 'path', { blur: 16, amp: 0.7, sharp: 3, grow: 6, stretch: false }), pg = pm.getContext('2d');
+    pg.globalCompositeOperation = 'source-in'; fill(pg, imgs.floor); pg.globalCompositeOperation = 'source-atop'; pg.fillStyle = 'rgba(8,12,22,.4)'; pg.fillRect(0, 0, W, H);
+    ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(pm, 0, 0); ctx.restore();
+    const rm = ragged(f.shape, 'verge', { blur: 9, amp: 0.6, sharp: 4 }), rg = rm.getContext('2d');
+    rg.globalCompositeOperation = 'source-in'; fill(rg, imgs.floor); rg.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(rg, rm, mix);
+    ctx.drawImage(rm, 0, 0);
+  } else {
   if (GEN.pavement) { // a strip of pavement down both sides of every road
     // Owner (Round 393): "clean half circle edges ... and a corner cut at 90 degrees": the pavement is the same shapes drawn
     // wider, so its outside corners are true arcs and its inside corners (where a road meets a hub) stay crisp.
@@ -833,6 +852,7 @@ function paintChronoRoom(canvas, key) {
   if (!GEN.pavement) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12; ctx.drawImage(chronoTint(f.shape, '#0a0714'), 0, 0); ctx.restore(); }
   ring(chronoTint(f.shape, GEN.kerb[0]), 9); ring(chronoTint(f.shape, GEN.kerb[1]), 6); ring(chronoTint(f.shape, GEN.kerb[2]), 2);
   ctx.drawImage(f.art, 0, 0);
+  }
   if (GEN.laneLine) { // a dashed centre line along each road
     ctx.save(); ctx.strokeStyle = GEN.laneLine; ctx.lineWidth = 3 * K; ctx.lineCap = 'butt'; ctx.setLineDash([14 * K, 14 * K]);
     const g = ctx; for (const sh of plan.shapes) if (sh.t === 'road' && sh.w >= 90 && sh.pts.length > 1) { const pts = sh.pts, n = pts.length, Rr = (GEN.round || 0) * K * 1.6; g.beginPath(); g.moveTo(pts[0][0] * K, pts[0][1] * K);
