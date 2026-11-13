@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 418: a new Afterlight Vault door
+
+Owner: "use this as the new afterlight vault door" (a vault hatch set in a concrete frame, on green).
+
+- Keyed (largest part kept, holes filled, no green fringe), trimmed and saved as `assets/items/poi/city-vault-2.webp`
+  (a new name, as poi art has no version tag); source kept at `assets/items/poi/src/city-vault-source.jpg`;
+  `WORLD_POI_ART.city.vault` points to it (`cardsmith.js?v=round418`).
+- The door is wide and flat, so it draws 92x56px instead of the 56px square (`layout-polish.css?v=round418`).
+- `tests/city-cardsmith-art.test.cjs` checks the new picture.
+
 ## Round 417: enemies only on open ground; crossings as wide as their roads; no foam line
 
 Owner: "make sure enemy pathing is only allowed on texture tiles and not object sprites"; then, with a screenshot of the

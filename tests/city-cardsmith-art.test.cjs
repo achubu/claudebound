@@ -16,7 +16,7 @@ assert.strictEqual(r.city, 'city-cardsmith', 'the city Cardsmith uses its painti
 assert.strictEqual(r.cityShop, 'city-merchant', 'Round 342: the city merchant has its own painting');
 assert.strictEqual(r.board, 'city-wanted-board', 'Round 333: the Wanted Board uses its painting');
 assert.strictEqual(r.breaker, 'city-breaker', 'Round 334: the Breaker Boxes use their painting');
-assert.strictEqual(r.vault, 'city-vault', 'Round 335: the Afterlight Vault uses its painting');
+assert.strictEqual(r.vault, 'city-vault-2', 'Round 418: the Afterlight Vault uses the new vault door');
 assert.strictEqual(r.cityNexus, 'city-nexus', 'Round 340: the Neon Aftermath Nexus Waypoint uses its own painting');
 assert.strictEqual(r.solNexus, 'elaris-nexus', 'Round 349: the Solaris waypoint has its own painting');
 assert.strictEqual(r.solaris, 'sol-cardsmith', 'Solaris keeps its own');
@@ -27,7 +27,7 @@ assert.strictEqual(r.wildsLore, 'wilds-lore', 'Round 311: the Elaris Elder Stone
 assert.strictEqual(r.chronoLore, 'chronospire-lore', 'Round 311: the Chronospire inscription uses its painting');
 assert.strictEqual(r.chrono, 'chronospire-cardsmith', 'Round 312: the Chronospire Cardsmith uses its painting');
 assert.strictEqual(r.vespera, 'vespera-cardsmith', 'Round 313: the Vespera Cardsmith uses its painting');
-for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore', 'chronospire-cardsmith', 'vespera-cardsmith', 'city-wanted-board', 'city-breaker', 'city-vault', 'city-nexus']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
+for (const f of ['city-cardsmith', 'wilds-cardsmith', 'sky-cardsmith', 'sky-lore', 'wilds-lore', 'chronospire-lore', 'chronospire-cardsmith', 'vespera-cardsmith', 'city-wanted-board', 'city-breaker', 'city-vault-2', 'city-nexus']) assert.strictEqual(fs.readFileSync('assets/items/poi/' + f + '.webp').toString('ascii', 0, 4), 'RIFF', f + ' is a WebP image');
 assert.strictEqual(r.vesperaLore, 'vespera-lore', 'Round 341: the Vespera Storm Glyph uses its painting');
 assert.deepStrictEqual([r.skyNexus, r.wildsNexus, r.vesperaNexus], ['sky-nexus', 'wilds-nexus', 'vespera-nexus'], 'Round 341: three more worlds have their own waypoint');
 assert.strictEqual(JSON.parse(run('JSON.stringify(WORLD_CHEST_ART)')).sky, 'sky-chest', 'Round 341: the Sky Isles chest');
