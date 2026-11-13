@@ -371,7 +371,7 @@ const GEN_THEMES = {
     // Round 394: one storey of each building to the same height on screen (measured from each painting's floors, doors and windows).
     // Round 396: main roads on every third column line and on two row lines; the other streets are alleys.
     alley: (key, d) => { const [wx, wy] = GEN_THEMES.city.world(key); return d === 'e' || d === 'w' ? !(wy === 1 || wy === 4) : wx % 3 !== 1; }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
-    worldLots: true, topdown: true, tilt: 18, alleys: 0.35, keys: () => Object.keys(CITY_ROOMS),
+    worldLots: true, topdown: true, tilt: 30, alleys: 0.35, keys: () => Object.keys(CITY_ROOMS),
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
     maxH: 300, // Round 394 (owner: "buildings should probably be around 3 times bigger")
     storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 , 'laundromat': 1.6, 'pharmacy': 1.6, 'karaoke-bar': 1.6, 'food-court': 1.44, 'walkup-flats': 1.6, 'boarding-house': 1.6, 'shanty-block': 1.6, 'data-relay': 1.44, 'robotics-workshop': 0.83, 'bathhouse': 1.25, 'temple-hall': 1.39},
@@ -517,7 +517,8 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(S(bx[0] + 8), S(bx[1] + 10), S(bw), S(bh)); ctx.restore(); // drop shadow
     // Round 400 (owner: "could the buildings be not quite directly over the top? ... maybe 10 degrees?"): seen tilted by
     // GEN.tilt degrees, a building shows its south wall, sin(tilt) of its height, drawn inside its own lot under the roof.
-    const floors = (district === 'tech' ? 4 : 2) + Math.floor(rr() * 5), dz = Math.min(floors * 36 * SIN, bh * 0.45), wallTop = bx[3] - dz;
+    // Round 401: the tall shopfronts face a street to the south; a building with its street behind it (north) is kept low.
+    const southSt = sides.some(sd => sd[0] === 's'), floors = southSt ? (district === 'tech' ? 4 : 2) + Math.floor(rr() * 5) : 1 + Math.floor(rr() * 3), dz = Math.min(floors * 36 * SIN, bh * 0.5), wallTop = bx[3] - dz;
     const rb = [bx[0], bx[1], bx[2], wallTop]; bx[3] = wallTop; const bh0 = bh;
     // a roof, sometimes in two parts of different heights
     const parts = bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
@@ -541,11 +542,21 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
         ctx.restore(); } });
     if (dz > 3) { const wall = ctx.createLinearGradient(0, S(wallTop), 0, S(wallTop + dz)); wall.addColorStop(0, '#3a3f4a'); wall.addColorStop(1, '#1c1f27');
       ctx.save(); ctx.fillStyle = wall; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(dz)); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(1.5));
-      const rowH = dz / floors; for (let f = 0; f < floors; f++) { const yy = wallTop + f * rowH + rowH * 0.3, wh = Math.max(1.5, rowH * 0.45); for (let xx = bx[0] + 6; xx < bx[2] - 10; xx += 15) { const lit = rr() < 0.38; ctx.fillStyle = lit ? 'rgba(255,205,120,.9)' : 'rgba(40,60,90,.8)'; if (lit) { ctx.shadowColor = 'rgba(255,190,90,.8)'; ctx.shadowBlur = S(4); } else ctx.shadowBlur = 0; ctx.fillRect(S(xx), S(yy), S(8), S(wh)); } }
+      const rowH = dz / floors, shopF = southSt && floors > 1 ? floors - 1 : -1;
+      for (let f = 0; f < floors; f++) { if (f === shopF) continue; const yy = wallTop + f * rowH + rowH * 0.3, wh = Math.max(1.5, rowH * 0.45); for (let xx = bx[0] + 6; xx < bx[2] - 10; xx += 15) { const lit = rr() < 0.38; ctx.fillStyle = lit ? 'rgba(255,205,120,.9)' : 'rgba(40,60,90,.8)'; if (lit) { ctx.shadowColor = 'rgba(255,190,90,.8)'; ctx.shadowBlur = S(4); } else ctx.shadowBlur = 0; ctx.fillRect(S(xx), S(yy), S(8), S(wh)); } }
+      if (shopF >= 0) { // Round 401 (owner: 30 degrees): a shopfront at street level: a lit window band, doors, an awning
+        const y0 = wallTop + shopF * rowH, col = NEON[Math.floor(rr() * NEON.length)];
+        ctx.fillStyle = 'rgba(255,214,150,.55)'; ctx.shadowColor = 'rgba(255,200,120,.8)'; ctx.shadowBlur = S(8); ctx.fillRect(S(bx[0] + 6), S(y0 + rowH * 0.25), S(bw - 12), S(rowH * 0.6)); ctx.shadowBlur = 0;
+        for (let xx = bx[0] + 22 + rr() * 30; xx < bx[2] - 22; xx += 70 + rr() * 50) { ctx.fillStyle = '#0d1016'; ctx.fillRect(S(xx), S(y0 + rowH * 0.2), S(12), S(rowH * 0.8)); ctx.fillStyle = 'rgba(255,220,160,.35)'; ctx.fillRect(S(xx + 2), S(y0 + rowH * 0.3), S(8), S(rowH * 0.65)); }
+        ctx.fillStyle = col; ctx.globalAlpha = 0.85; ctx.fillRect(S(bx[0] + 4), S(y0), S(bw - 8), S(Math.max(3, rowH * 0.2))); ctx.globalAlpha = 1;
+        if (floors >= 3 && rr() < 0.75) { // a blade sign down the upper floors
+          const bxp = rr() < 0.5 ? bx[0] + 10 : bx[2] - 22, bt = wallTop + rowH * 0.3, bl = y0 - bt - 4, nc = NEON[Math.floor(rr() * NEON.length)];
+          ctx.fillStyle = '#0b0d14'; ctx.fillRect(S(bxp), S(bt), S(12), S(bl)); ctx.strokeStyle = nc; ctx.shadowColor = nc; ctx.shadowBlur = S(12); ctx.lineWidth = S(1.5); ctx.strokeRect(S(bxp + 1), S(bt + 1), S(10), S(bl - 2));
+          ctx.fillStyle = nc; for (let g = bt + 5; g < bt + bl - 7; g += 9) ctx.fillRect(S(bxp + 3.5), S(g), S(5), S(5)); ctx.shadowBlur = 0; } }
       ctx.restore(); }
     void bh0;
     // a neon sign on the street side
-    if (sides.length && rr() < 0.8) { const [sd] = sides[0], col = NEON[Math.floor(rr() * NEON.length)], long = 50 + rr() * Math.min(90, (sd === 'n' || sd === 's' ? bw : bh) - 60);
+    if (sides.length && !southSt && rr() < 0.8) { const [sd] = sides[0], col = NEON[Math.floor(rr() * NEON.length)], long = 50 + rr() * Math.min(90, (sd === 'n' || sd === 's' ? bw : bh) - 60);
       if (long > 40) { let sx, sy, sw, sh2; if (sd === 's') { sx = bx[0] + 16 + rr() * Math.max(0, bw - 32 - long); sy = bx[3] - 6; sw = long; sh2 = 12; } else if (sd === 'n') { sx = bx[0] + 16 + rr() * Math.max(0, bw - 32 - long); sy = bx[1] - 6; sw = long; sh2 = 12; } else { sx = sd === 'e' ? bx[2] - 6 : bx[0] - 6; sy = bx[1] + 16 + rr() * Math.max(0, bh - 32 - long); sw = 12; sh2 = long; }
         ctx.save(); ctx.fillStyle = '#0b0d14'; ctx.fillRect(S(sx), S(sy), S(sw), S(sh2)); ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = S(14); ctx.lineWidth = S(2); ctx.strokeRect(S(sx + 1.5), S(sy + 1.5), S(sw - 3), S(sh2 - 3));
         ctx.fillStyle = col; const n = Math.floor(long / 12); for (let i = 0; i < n; i++) { const g0 = 6 + i * 12; if (sw > sh2) ctx.fillRect(S(sx + g0), S(sy + 3.5), S(6), S(5)); else ctx.fillRect(S(sx + 3.5), S(sy + g0), S(5), S(6)); }
