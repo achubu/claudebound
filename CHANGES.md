@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 408: hard, bordered edges between grounds (no blends, no ponds)
+
+Owner (with a screenshot of a park, a beach and a pond): "the grass and sand and the circle thing here look horrible, we
+need to fix this and set rules so it cant happen again"; "find what technique is used by modern 2d games and lets
+implement that". Modern 2D games autotile: ground materials sit on a grid and every meeting is a hard edge with a
+border, never a fade. Without border art yet, the same rules with drawn borders:
+
+- **No inland ponds** in the top-down city (`hole`): water only along the coast.
+- **Beaches**: one crisp shape (no see-through fringe) with a dark border line where they meet the paving.
+- **Parks**: edged like planters, a stone kerb round the grass.
+- **Sidewalk paving per block** (`genWorld` now returns `block`): each block the streets enclose takes one paving (half of
+  them the main slabs), so a paving only changes across a street; the noise patches are gone.
+- Tests: chrono-gen, room-art, item-placement, neon-world, neon-world-pathing and playtest-walk city pass.
+
 ## Round 407: sidewalk paving
 
 The owner's sheet of eight sidewalk tiles.
