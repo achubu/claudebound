@@ -5,7 +5,8 @@
 
 Slots and what the tool does with the image:
   roof, sidewalk       seamless roof / sidewalk surface, 512x512 (blended at the edges so it tiles both ways)
-  wall, shop, edge     one floor (edge: a border strip, outer side up) of wall / shopfront: scaled to 128px tall and blended left-right so it tiles sideways
+  wall, shop           one floor of wall / shopfront
+  park-edge, curb, waterfront-edge   a border strip (outer side up) of wall / shopfront: scaled to 128px tall and blended left-right so it tiles sideways
   prop-ac, prop-vent, prop-tank, prop-stairs, prop-solar, prop-skylight,
   sign-h, sign-v, car, tree
                        a thing on a flat green background (magenta for green things such as trees): the green is keyed out, the picture trimmed and scaled so
@@ -14,7 +15,7 @@ Slots and what the tool does with the image:
 Uneven sheets: python3 tools/prepare_city_art.py --objects <image> <slot:name or -> ... (row by row, left to right).
 Sheets: python3 tools/prepare_city_art.py --sheet <image> <cols> <rows> <slot:name or -> ... (one per cell).
 
-The result goes to assets/environment/city-gen/td/<name>.webp and <name> is added to the slot in CITY_TD_ART.
+The result goes to assets/environment/city-gen/surfaces/<slot>/<name>.webp (surfaces) or props/<slot>/<name>.webp and <name> is added to the slot in CITY_TD_ART.
 """
 import os, re, sys
 import numpy as np
@@ -22,9 +23,14 @@ from PIL import Image
 from scipy import ndimage
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-OUT = os.path.join(ROOT, 'assets', 'environment', 'city-gen', 'td')
+CITY = os.path.join(ROOT, 'assets', 'environment', 'city-gen')
+# Round 420: art is sorted by what it is: the surfaces of the city (CITY_SURFACES in assets/chrono-gen.js) in
+# surfaces/<slot>/, things standing on them in props/<slot>/.
+SURFACE_SLOTS = {'roof', 'wall', 'shop', 'sidewalk', 'curb', 'park-edge', 'waterfront-edge'}
+def out_dir(slot): return os.path.join(CITY, 'surfaces' if slot in SURFACE_SLOTS else 'props', slot)
+def out_path(slot, name): d = out_dir(slot); os.makedirs(d, exist_ok=True); return os.path.join(d, name + '.webp')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
-TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'edge', 'trim', 'shore'}
+TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'park-edge', 'curb', 'waterfront-edge'}
 SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree'}
 
 
@@ -38,7 +44,7 @@ def texture(img, slot):
     if slot in ('roof', 'sidewalk'):
         a = blend_x(a, max(8, a.shape[1] // 8)); a = blend_x(a.transpose(1, 0, 2), max(8, a.shape[0] // 8)).transpose(1, 0, 2)
         return Image.fromarray(a.clip(0, 255).astype(np.uint8)).resize((512, 512), Image.LANCZOS)
-    if slot in ('edge', 'trim', 'shore'):  # Round 410: border strips keep see-through gaps where the green shows between stones
+    if slot in ('park-edge', 'curb', 'waterfront-edge'):  # Round 410: border strips keep see-through gaps where the green shows between stones
         rgb = np.asarray(img.convert('RGB')).astype(np.float32); r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
         al = np.clip((50 - (g - np.maximum(r, b))) / 30, 0, 1); rgba = np.dstack([r, np.minimum(g, np.maximum(r, b) + 10), b, al * 255])
         rgba = blend_x(rgba, max(8, rgba.shape[1] // 10)); o = Image.fromarray(rgba.clip(0, 255).astype(np.uint8), 'RGBA')
@@ -93,7 +99,7 @@ def register(slot, name):
     sm = re.search(re.escape(key) + r": \[(.*?)\]", body)
     items = [x.strip().strip("'") for x in sm.group(1).split(',') if x.strip()]
     if name in items: return
-    if slot in ('wall', 'shop'): register_gaps(name, gaps(os.path.join(OUT, name + '.webp')))
+    if slot in ('wall', 'shop'): register_gaps(name, gaps(out_path(slot, name)))
     items.append(name); new = key + ': [' + ', '.join("'%s'" % x for x in items) + ']'
     body = body[:sm.start()] + new + body[sm.end():]
     open(JS, 'w').write(s[:m.start(1)] + body + s[m.end(1):])
@@ -104,7 +110,7 @@ def sheet(args):
     (left to right, top to bottom); textures are cut a little inside their cell, so frame borders are left behind."""
     src, cols, rows, entries = args[0], int(args[1]), int(args[2]), args[3:]
     if len(entries) != cols * rows: sys.exit('need %d entries (slot:name or -), got %d' % (cols * rows, len(entries)))
-    img = Image.open(src).convert('RGB'); W, H = img.size; os.makedirs(OUT, exist_ok=True)
+    img = Image.open(src).convert('RGB'); W, H = img.size
     for i, e in enumerate(entries):
         if e == '-': continue
         slot, name = e.split(':')
@@ -112,7 +118,7 @@ def sheet(args):
         x0, y0, x1, y1 = (i % cols) * W // cols, (i // cols) * H // rows, (i % cols + 1) * W // cols, (i // cols + 1) * H // rows
         if slot in TEXTURE: m = (x1 - x0) // 20; x0, y0, x1, y1 = x0 + m, y0 + m, x1 - m, y1 - m
         o = texture(img.crop((x0, y0, x1, y1)), slot) if slot in TEXTURE else sprite(img.crop((x0, y0, x1, y1)))
-        path = os.path.join(OUT, name + '.webp'); o.save(path, quality=88, method=6); register(slot, name)
+        path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
         print('%s -> %s %s' % (slot, os.path.relpath(path, ROOT), o.size))
 
 
@@ -127,11 +133,11 @@ def objects(args):
     boxes = [s for s in ndimage.find_objects(lab) if s and (s[0].stop - s[0].start) * (s[1].stop - s[1].start) > fg.size * 0.004]
     if len(boxes) != len(entries): sys.exit('found %d objects, %d entries given' % (len(boxes), len(entries)))
     rowH = img.height / max(1, round(img.height / max(b[0].stop - b[0].start for b in boxes)))
-    boxes.sort(key=lambda b: (int((b[0].start + b[0].stop) / 2 // rowH), b[1].start)); os.makedirs(OUT, exist_ok=True)
+    boxes.sort(key=lambda b: (int((b[0].start + b[0].stop) / 2 // rowH), b[1].start))
     for b, e in zip(boxes, entries):
         if e == '-': continue
         slot, name = e.split(':'); y0, y1, x0, x1 = max(0, b[0].start - 4), min(img.height, b[0].stop + 4), max(0, b[1].start - 4), min(img.width, b[1].stop + 4)
-        o = sprite(img.crop((x0, y0, x1, y1))); path = os.path.join(OUT, name + '.webp'); o.save(path, quality=88, method=6); register(slot, name)
+        o = sprite(img.crop((x0, y0, x1, y1))); path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
         print('%s -> %s %s' % (slot, os.path.relpath(path, ROOT), o.size))
 
 
@@ -139,7 +145,7 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == '--gaps':  # (re)measure every wall and shopfront already in CITY_TD_ART
         s = open(JS).read(); m = re.search(r"const CITY_TD_ART = \{(.*?)\};", s)
         for slot in ('wall', 'shop'):
-            for n in re.findall(r"'([a-z0-9-]+)'", re.search(slot + r": \[(.*?)\]", m.group(1)).group(1)): g = gaps(os.path.join(OUT, n + '.webp')); register_gaps(n, g); print(n, len(g), 'gaps')
+            for n in re.findall(r"'([a-z0-9-]+)'", re.search(slot + r": \[(.*?)\]", m.group(1)).group(1)): g = gaps(out_path(slot, n)); register_gaps(n, g); print(n, len(g), 'gaps')
         return
     if len(sys.argv) > 1 and sys.argv[1] == '--sheet': return sheet(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == '--objects': return objects(sys.argv[2:])
@@ -147,9 +153,9 @@ def main():
     src, slot, name = sys.argv[1:]
     if slot not in TEXTURE | SPRITE: sys.exit('unknown slot %s; slots: %s' % (slot, ', '.join(sorted(TEXTURE | SPRITE))))
     if not re.fullmatch(r'[a-z0-9-]+', name): sys.exit('name: lower-case letters, digits and dashes only')
-    os.makedirs(OUT, exist_ok=True); img = Image.open(src)
+    img = Image.open(src)
     o = texture(img, slot) if slot in TEXTURE else sprite(img)
-    path = os.path.join(OUT, name + '.webp'); o.save(path, quality=88, method=6); register(slot, name)
+    path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
     print('%s -> %s %s; added to CITY_TD_ART.%s (bump the chrono-gen.js?v= tag in index.html)' % (src, os.path.relpath(path, ROOT), o.size, slot))
 
 

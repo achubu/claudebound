@@ -29,10 +29,11 @@ SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
     'exoyse': (['ruined-hall', 'columns', 'broken-dome', 'broken-stair'], 420),
 }
 
+# Round 420: city textures go to surfaces/<surface>/ (see CITY_SURFACES in assets/chrono-gen.js); the old 3/4 buildings to legacy/.
 # Round 387: Neon Aftermath's set, for the same generator (python3 tools/prepare_chrono_gen.py <folder> city).
 WORLDS = {'city': {
     'out': 'assets/environment/city-gen',
-    'textures': {'floor': '5uo2m3', 'overgrowth': '549k97', 'yard': 'k7s1hd', 'ground': 'wd498u', 'water': 'vkvpou', 'road-wet': '1pi1qk', 'pavement-old': 'ijwi57', 'rubble-big': 'pch07g', 'sand': 'nsyypy', 'plaza': '9ssefs'},  # Round 394: beach sand; Round 389: finer road, pavement and rubble
+    'textures': {'surfaces/road/floor': '5uo2m3', 'surfaces/park/overgrowth': '549k97', 'surfaces/lot/yard': 'k7s1hd', 'legacy/ground': 'wd498u', 'surfaces/sea/water': 'vkvpou', 'surfaces/road/road-wet': '1pi1qk', 'surfaces/sidewalk/pavement-old': 'ijwi57', 'legacy/rubble-big': 'pch07g', 'surfaces/waterfront/sand': 'nsyypy', 'legacy/plaza': '9ssefs'},  # Round 394: beach sand; Round 389: finer road, pavement and rubble
     'sheets': {
         # Round 397: single buildings, one per image (the whole picture is the building)
         'nfrfik': (['laundromat'], 420), 'dgth72': (['pharmacy'], 420), 'px41tz': (['karaoke-bar'], 420), 'ttx0vi': (['food-court'], 420),
@@ -69,7 +70,7 @@ def textures(folder):
         if not any(tag in f for f in os.listdir(folder)): continue
         a = np.asarray(Image.open(find(folder, tag)).convert('RGB')).astype(np.float32)
         o = Image.fromarray(seamless(a, 200).clip(0, 255).astype(np.uint8)).resize((800, 800), Image.LANCZOS)
-        o.save(os.path.join(OUT, name + '.webp'), quality=84, method=6); print(name, o.size)
+        os.makedirs(os.path.dirname(os.path.join(OUT, name + '.webp')), exist_ok=True); o.save(os.path.join(OUT, name + '.webp'), quality=84, method=6); print(name, o.size)
 
 def props(folder):
     for tag, (names, size) in SHEETS.items():
@@ -100,7 +101,7 @@ def props(folder):
             m = np.isin(lab, ids); ys, xs = np.nonzero(m)
             part = rgba[ys.min():ys.max() + 1, xs.min():xs.max() + 1].copy(); part[..., 3] = np.where(m[ys.min():ys.max() + 1, xs.min():xs.max() + 1], part[..., 3], 0)
             o = Image.fromarray(part, 'RGBA'); s = size / max(o.size); o = o.resize((round(o.width * s), round(o.height * s)), Image.LANCZOS)
-            o.save(os.path.join(OUT, name + '.webp'), quality=90, method=6); print(name, o.size)
+            dest = os.path.join(OUT, ('legacy/' if 'city-gen' in OUT else '') + name + '.webp'); os.makedirs(os.path.dirname(dest), exist_ok=True); o.save(dest, quality=90, method=6); print(name, o.size)
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
