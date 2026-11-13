@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 401: the city at a 30-degree three-quarter view, with shopfronts
+
+Owner asked what is standard; the answer was the front-on three-quarter view of exploration RPGs (A Link to the Past,
+Stardew Valley, Eastward) at about 30-35 degrees, which matches the game's three-quarter character and object art. Owner:
+"Let's do 30 degrees".
+
+- `tilt: 30`: a floor shows about 18px of wall. Walls stay inside their own lots (at most half the lot's depth).
+- A building with a street to its south is the tall one (2-6 floors, 4-8 in the tech quarter) and carries the street-level
+  detail: a lit shop-window band, doors, a neon awning strip, and often a vertical blade sign down the upper floors. A
+  building whose street is behind it (north) is kept low (1-3 floors) and keeps its sign on the roof edge.
+- Tests: chrono-gen, room-art, item-placement and neon-world pass.
+
 ## Round 400: a tilted view of the city, alleys between buildings, squares cut from their lots
 
 Owner: "It looks okay maybe a little bit too dense. Maybe need some alleyways. Could the buildings be not quite directly
