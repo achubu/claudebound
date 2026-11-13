@@ -481,7 +481,19 @@ function genWorld(seed) {
 // shadow, a roof surface, a parapet, rooftop clutter (air units, vents, tanks, stair huts, solar panels, skylights) and a
 // neon sign along its street side; parks are planted lots; the streets get zebra crossings, parked cars and pools of
 // light. All drawn as placeholders for now (owner: "use placeholders as necessary") until the owner's art arrives.
+// Round 402 (owner: "get it ready for new graphics"): art slots for the top-down city. Each slot lists file names under
+// assets/environment/city-gen/td/ (no extension); a slot with art draws it, an empty slot keeps the drawn placeholder.
+// Add files with `python3 tools/prepare_city_art.py <image> <slot> <name>`, which keys or tiles the image and adds it here.
+// Slots: roof, wall, shop (seamless textures: a roof surface; one floor of wall; one floor of shopfront); prop-ac, prop-vent,
+// prop-tank, prop-stairs, prop-solar, prop-skylight (rooftop things seen from above); sign-h, sign-v (neon signs, wide and
+// tall); car (seen from above, facing east); tree (seen from above). Prompts: tools/art-refresh/city-topdown-prompts.md.
+const CITY_TD_ART = { roof: [], wall: [], shop: [], 'prop-ac': [], 'prop-vent': [], 'prop-tank': [], 'prop-stairs': [], 'prop-solar': [], 'prop-skylight': [], 'sign-h': [], 'sign-v': [], car: [], tree: [] };
+function cityTdArtNames() { return Object.values(CITY_TD_ART).flat().map(n => 'td/' + n); }
 function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
+  const A = slot => { const l = (CITY_TD_ART[slot] || []).map(n => imgs['td/' + n]).filter(i => i && i.naturalWidth); return l.length ? l : null; };
+  const pick = (slot, r) => { const l = A(slot); return l ? l[Math.floor(r() * l.length)] : null; };
+  // a seamless picture laid over a rectangle, `th` px tall per repeat, starting at the rectangle's corner
+  const tile = (img, x, y, w, h, th) => { const p = ctx.createPattern(img, 'repeat'), k = th * K / img.height; if (p.setTransform) p.setTransform(new DOMMatrix().translate(x * K, y * K).scale(k)); ctx.save(); ctx.fillStyle = p; ctx.fillRect(x * K, y * K, w * K, h * K); ctx.restore(); };
   const seed = chronoSeed(), wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500;
   const S = v => v * K, isRoad = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && plan.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)] === 1;
   const lots = wl.lotsPx.filter(l => l.r[2] > ox && l.r[0] < ox + 800 && l.r[3] > oy && l.r[1] < oy + 500).map(l => ({ ...l, r: [l.r[0] - ox, l.r[1] - oy, l.r[2] - ox, l.r[3] - oy] })).sort((a, b) => a.r[3] - b.r[3]);
@@ -504,13 +516,14 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
       for (let d = 70; d < L - 70; d += 60 + rr() * 120) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1, off = rd.w / 2 - 16;
         const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, w = hz ? 46 : 22, h = hz ? 22 : 46, col = ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)];
+        const carArt = pick('car', rr); if (carArt) { const L2 = 50, T2 = L2 * carArt.height / carArt.width; ctx.save(); ctx.translate(S(px), S(py)); if (!hz) ctx.rotate(side > 0 ? Math.PI / 2 : -Math.PI / 2); else if (side < 0) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 / 2), S(L2), S(T2)); ctx.restore(); continue; }
         ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 4), S(w), S(h)); ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(S(px - w / 2), S(py - h / 2), S(w), S(h), S(5)) : ctx.rect(S(px - w / 2), S(py - h / 2), S(w), S(h)); ctx.fill();
         ctx.fillStyle = 'rgba(20,30,45,.85)'; if (hz) ctx.fillRect(S(px - w / 2 + 12), S(py - h / 2 + 3), S(w - 26), S(h - 6)); else ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 12), S(w - 6), S(h - 26)); ctx.restore(); } } }
   // lots
-  for (const l of lots) { const rr = chronoRng(seed + ':roof:' + l.seed), [x0, y0, x1, y1] = l.r, I = 4, bx = [x0 + I, y0 + I, x1 - I, y1 - I], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
+  for (const l of lots) { const ra = chronoRng(seed + ':art:' + l.seed), rr = chronoRng(seed + ':roof:' + l.seed), [x0, y0, x1, y1] = l.r, I = 4, bx = [x0 + I, y0 + I, x1 - I, y1 - I], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
     if (l.use === 'plaza') continue;
     if (l.use === 'park') { ctx.save(); ctx.beginPath(); ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.pipes); ctx.fillStyle = 'rgba(0,10,8,.35)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh));
-      for (let i = 0; i < 4 + rr() * 5; i++) { const tx = bx[0] + 14 + rr() * (bw - 28), ty = bx[1] + 14 + rr() * (bh - 28), tr = 12 + rr() * 12, g = ctx.createRadialGradient(S(tx - 3), S(ty - 3), 1, S(tx), S(ty), S(tr)); g.addColorStop(0, '#2f6a3c'); g.addColorStop(1, '#0e2a19'); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.arc(S(tx + 5), S(ty + 6), S(tr), 0, 7); ctx.fill(); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(S(tx), S(ty), S(tr), 0, 7); ctx.fill(); }
+      for (let i = 0; i < 4 + rr() * 5; i++) { const tx = bx[0] + 14 + rr() * (bw - 28), ty = bx[1] + 14 + rr() * (bh - 28), tr = 12 + rr() * 12, treeArt = pick('tree', ra); if (treeArt) { ctx.drawImage(treeArt, S(tx - tr * 1.3), S(ty - tr * 1.3), S(tr * 2.6), S(tr * 2.6)); continue; } const g = ctx.createRadialGradient(S(tx - 3), S(ty - 3), 1, S(tx), S(ty), S(tr)); g.addColorStop(0, '#2f6a3c'); g.addColorStop(1, '#0e2a19'); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.arc(S(tx + 5), S(ty + 6), S(tr), 0, 7); ctx.fill(); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(S(tx), S(ty), S(tr), 0, 7); ctx.fill(); }
       ctx.restore(); continue; }
     // the street side: the side with a road just beyond it
     const sides = [['s', (bx[0] + bx[2]) / 2, y1 + 20], ['n', (bx[0] + bx[2]) / 2, y0 - 20], ['e', x1 + 20, (bx[1] + bx[3]) / 2], ['w', x0 - 20, (bx[1] + bx[3]) / 2]].filter(([, x, y]) => isRoad(x, y) || isRoad(x, y + (y > y1 ? 20 : -20)));
@@ -524,7 +537,8 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     const parts = bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
     parts.forEach((q, pi) => { const w = q[2] - q[0], h = q[3] - q[1], col = ROOF[Math.floor(rr() * ROOF.length)];
       ctx.save(); ctx.beginPath(); ctx.rect(S(q[0]), S(q[1]), S(w), S(h)); ctx.clip(); ctx.fillStyle = col; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h));
-      ctx.globalAlpha = 0.28; ctx.globalCompositeOperation = 'multiply'; fill(ctx, imgs.floor); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      const roofArt = pick('roof', ra); if (roofArt) { tile(roofArt, q[0], q[1], w, h, 160); ctx.globalAlpha = 0.22; ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = col; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h)); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+      else { ctx.globalAlpha = 0.28; ctx.globalCompositeOperation = 'multiply'; fill(ctx, imgs.floor); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
       if (pi) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h)); }
       ctx.restore();
       ctx.save(); ctx.strokeStyle = 'rgba(140,150,165,.55)'; ctx.lineWidth = S(4); ctx.strokeRect(S(q[0] + 2), S(q[1] + 2), S(w - 4), S(h - 4)); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + 5), S(q[1] + 5), S(w - 10), S(h - 10)); ctx.restore();
@@ -533,7 +547,9 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 6), iw = [24, 14, 30, 34, 46, 22][kind], ih = [18, 14, 30, 26, 28, 14][kind], ix = q[0] + 10 + rr() * (w - 20 - iw), iy = q[1] + 10 + rr() * (h - 20 - ih);
         if (w < iw + 22 || h < ih + 22 || placed.some(p => ix < p[2] + 6 && ix + iw > p[0] - 6 && iy < p[3] + 6 && iy + ih > p[1] - 6)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
         ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(ix + 4), S(iy + 5), S(iw), S(ih));
-        if (kind === 0) { ctx.fillStyle = '#7d8590'; ctx.fillRect(S(ix), S(iy), S(iw), S(ih)); ctx.strokeStyle = '#3d434b'; ctx.lineWidth = S(1.5); ctx.beginPath(); ctx.arc(S(ix + iw / 2), S(iy + ih / 2), S(ih / 2 - 3), 0, 7); ctx.stroke(); }
+        const propArt = pick(['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind], ra);
+        if (propArt) { const k2 = Math.min(iw / propArt.width, ih / propArt.height) * 1.15, dw = propArt.width * k2, dh = propArt.height * k2; ctx.drawImage(propArt, S(ix + (iw - dw) / 2), S(iy + (ih - dh) / 2), S(dw), S(dh)); }
+        else if (kind === 0) { ctx.fillStyle = '#7d8590'; ctx.fillRect(S(ix), S(iy), S(iw), S(ih)); ctx.strokeStyle = '#3d434b'; ctx.lineWidth = S(1.5); ctx.beginPath(); ctx.arc(S(ix + iw / 2), S(iy + ih / 2), S(ih / 2 - 3), 0, 7); ctx.stroke(); }
         else if (kind === 1) { ctx.fillStyle = '#5c636c'; ctx.beginPath(); ctx.arc(S(ix + 7), S(iy + 7), S(7), 0, 7); ctx.fill(); ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(S(ix + 7), S(iy + 7), S(3), 0, 7); ctx.fill(); }
         else if (kind === 2) { ctx.fillStyle = '#6b5a4a'; ctx.beginPath(); ctx.arc(S(ix + 15), S(iy + 15), S(15), 0, 7); ctx.fill(); ctx.strokeStyle = '#3a3029'; ctx.lineWidth = S(2); ctx.beginPath(); ctx.arc(S(ix + 15), S(iy + 15), S(10), 0, 7); ctx.stroke(); }
         else if (kind === 3) { ctx.fillStyle = '#4a4f57'; ctx.fillRect(S(ix), S(iy), S(iw), S(ih)); ctx.fillStyle = '#2a2e34'; ctx.fillRect(S(ix + 4), S(iy + ih - 9), S(12), S(9)); }
@@ -543,23 +559,27 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     if (dz > 3) { const wall = ctx.createLinearGradient(0, S(wallTop), 0, S(wallTop + dz)); wall.addColorStop(0, '#3a3f4a'); wall.addColorStop(1, '#1c1f27');
       ctx.save(); ctx.fillStyle = wall; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(dz)); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(1.5));
       const rowH = dz / floors, shopF = southSt && floors > 1 ? floors - 1 : -1;
-      for (let f = 0; f < floors; f++) { if (f === shopF) continue; const yy = wallTop + f * rowH + rowH * 0.3, wh = Math.max(1.5, rowH * 0.45); for (let xx = bx[0] + 6; xx < bx[2] - 10; xx += 15) { const lit = rr() < 0.38; ctx.fillStyle = lit ? 'rgba(255,205,120,.9)' : 'rgba(40,60,90,.8)'; if (lit) { ctx.shadowColor = 'rgba(255,190,90,.8)'; ctx.shadowBlur = S(4); } else ctx.shadowBlur = 0; ctx.fillRect(S(xx), S(yy), S(8), S(wh)); } }
+      const wallArt = pick('wall', ra), shopArt = pick('shop', ra); if (wallArt) tile(wallArt, bx[0], wallTop, bw, shopF >= 0 ? dz - rowH : dz, rowH);
+      if (!wallArt) for (let f = 0; f < floors; f++) { if (f === shopF) continue; const yy = wallTop + f * rowH + rowH * 0.3, wh = Math.max(1.5, rowH * 0.45); for (let xx = bx[0] + 6; xx < bx[2] - 10; xx += 15) { const lit = rr() < 0.38; ctx.fillStyle = lit ? 'rgba(255,205,120,.9)' : 'rgba(40,60,90,.8)'; if (lit) { ctx.shadowColor = 'rgba(255,190,90,.8)'; ctx.shadowBlur = S(4); } else ctx.shadowBlur = 0; ctx.fillRect(S(xx), S(yy), S(8), S(wh)); } }
       if (shopF >= 0) { // Round 401 (owner: 30 degrees): a shopfront at street level: a lit window band, doors, an awning
         const y0 = wallTop + shopF * rowH, col = NEON[Math.floor(rr() * NEON.length)];
+        if (shopArt) tile(shopArt, bx[0], y0, bw, rowH, rowH); else {
         ctx.fillStyle = 'rgba(255,214,150,.55)'; ctx.shadowColor = 'rgba(255,200,120,.8)'; ctx.shadowBlur = S(8); ctx.fillRect(S(bx[0] + 6), S(y0 + rowH * 0.25), S(bw - 12), S(rowH * 0.6)); ctx.shadowBlur = 0;
         for (let xx = bx[0] + 22 + rr() * 30; xx < bx[2] - 22; xx += 70 + rr() * 50) { ctx.fillStyle = '#0d1016'; ctx.fillRect(S(xx), S(y0 + rowH * 0.2), S(12), S(rowH * 0.8)); ctx.fillStyle = 'rgba(255,220,160,.35)'; ctx.fillRect(S(xx + 2), S(y0 + rowH * 0.3), S(8), S(rowH * 0.65)); }
-        ctx.fillStyle = col; ctx.globalAlpha = 0.85; ctx.fillRect(S(bx[0] + 4), S(y0), S(bw - 8), S(Math.max(3, rowH * 0.2))); ctx.globalAlpha = 1;
+        ctx.fillStyle = col; ctx.globalAlpha = 0.85; ctx.fillRect(S(bx[0] + 4), S(y0), S(bw - 8), S(Math.max(3, rowH * 0.2))); ctx.globalAlpha = 1; }
         if (floors >= 3 && rr() < 0.75) { // a blade sign down the upper floors
           const bxp = rr() < 0.5 ? bx[0] + 10 : bx[2] - 22, bt = wallTop + rowH * 0.3, bl = y0 - bt - 4, nc = NEON[Math.floor(rr() * NEON.length)];
           ctx.fillStyle = '#0b0d14'; ctx.fillRect(S(bxp), S(bt), S(12), S(bl)); ctx.strokeStyle = nc; ctx.shadowColor = nc; ctx.shadowBlur = S(12); ctx.lineWidth = S(1.5); ctx.strokeRect(S(bxp + 1), S(bt + 1), S(10), S(bl - 2));
-          ctx.fillStyle = nc; for (let g = bt + 5; g < bt + bl - 7; g += 9) ctx.fillRect(S(bxp + 3.5), S(g), S(5), S(5)); ctx.shadowBlur = 0; } }
+          ctx.fillStyle = nc; for (let g = bt + 5; g < bt + bl - 7; g += 9) ctx.fillRect(S(bxp + 3.5), S(g), S(5), S(5)); ctx.shadowBlur = 0;
+          const vArt = pick('sign-v', ra); if (vArt) { const k2 = 16 / vArt.width; ctx.drawImage(vArt, S(bxp - 2), S(bt), S(16), S(Math.min(bl, vArt.height * k2))); } } }
       ctx.restore(); }
     void bh0;
     // a neon sign on the street side
     if (sides.length && !southSt && rr() < 0.8) { const [sd] = sides[0], col = NEON[Math.floor(rr() * NEON.length)], long = 50 + rr() * Math.min(90, (sd === 'n' || sd === 's' ? bw : bh) - 60);
       if (long > 40) { let sx, sy, sw, sh2; if (sd === 's') { sx = bx[0] + 16 + rr() * Math.max(0, bw - 32 - long); sy = bx[3] - 6; sw = long; sh2 = 12; } else if (sd === 'n') { sx = bx[0] + 16 + rr() * Math.max(0, bw - 32 - long); sy = bx[1] - 6; sw = long; sh2 = 12; } else { sx = sd === 'e' ? bx[2] - 6 : bx[0] - 6; sy = bx[1] + 16 + rr() * Math.max(0, bh - 32 - long); sw = 12; sh2 = long; }
         ctx.save(); ctx.fillStyle = '#0b0d14'; ctx.fillRect(S(sx), S(sy), S(sw), S(sh2)); ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = S(14); ctx.lineWidth = S(2); ctx.strokeRect(S(sx + 1.5), S(sy + 1.5), S(sw - 3), S(sh2 - 3));
-        ctx.fillStyle = col; const n = Math.floor(long / 12); for (let i = 0; i < n; i++) { const g0 = 6 + i * 12; if (sw > sh2) ctx.fillRect(S(sx + g0), S(sy + 3.5), S(6), S(5)); else ctx.fillRect(S(sx + 3.5), S(sy + g0), S(5), S(6)); }
+        const hArt = pick(sw > sh2 ? 'sign-h' : 'sign-v', ra); if (hArt) ctx.drawImage(hArt, S(sx), S(sy), S(sw), S(sh2));
+        else { ctx.fillStyle = col; const n = Math.floor(long / 12); for (let i = 0; i < n; i++) { const g0 = 6 + i * 12; if (sw > sh2) ctx.fillRect(S(sx + g0), S(sy + 3.5), S(6), S(5)); else ctx.fillRect(S(sx + 3.5), S(sy + g0), S(5), S(6)); } }
         ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(S(sx + sw / 2), S(sy + sh2 / 2), 0, S(sx + sw / 2), S(sy + sh2 / 2), S(long * 0.8)); g.addColorStop(0, col + '33'); g.addColorStop(1, col + '00'); ctx.fillStyle = g; ctx.shadowBlur = 0; ctx.fillRect(S(sx + sw / 2 - long), S(sy + sh2 / 2 - long), S(long * 2), S(long * 2)); ctx.restore(); } } }
 }
 function chronoDistrict(seed, key) {
@@ -858,7 +878,7 @@ function paintChronoRoom(canvas, key) {
     if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null; return true;
   }
   const props = chronoRoomProps(theme === 'chronospire' ? chronoSeed() : seed, plan);
-  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.beach ? ['sand'] : []), ...(GEN.topdown ? ['pavement-old'] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
+  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.beach ? ['sand'] : []), ...(GEN.topdown ? ['pavement-old', ...cityTdArtNames()] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set(props.map(p => p.name).concat(plan.inlays.map(i => i.name)))], imgs = {};
   for (const n of names) imgs[n] = chronoArtImage(n);
   const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth));
   if (waiting) {

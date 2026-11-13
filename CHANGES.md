@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 402: art slots for the top-down city
+
+Owner: "Looks great, get it ready for new graphics if you can".
+
+- `CITY_TD_ART` (`assets/chrono-gen.js`): thirteen art slots for `paintTopdownCity`: roof, wall and shop textures (tiled per
+  floor), six rooftop props, horizontal and vertical neon signs, cars and trees. A slot with art draws it (chosen per lot
+  from the seed); an empty slot keeps the Round 399-401 placeholder, so art can arrive a piece at a time. All slots are
+  empty for now; files go to `assets/environment/city-gen/td/` and are preloaded with the room.
+- `tools/prepare_city_art.py <image> <slot> <name>`: makes a seamless roof tile or a sideways-tiling wall/shop strip,
+  or keys a thing off flat green (or magenta, read from the corners) and trims it; then registers it in `CITY_TD_ART`.
+  Checked end to end with stand-in images for car, tree, wall and roof.
+- `tools/art-refresh/city-topdown-prompts.md`: one prompt per slot.
+
 ## Round 401: the city at a 30-degree three-quarter view, with shopfronts
 
 Owner asked what is standard; the answer was the front-on three-quarter view of exploration RPGs (A Link to the Past,
