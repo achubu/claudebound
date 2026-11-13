@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 398: no kerbs, no paving tile; city roads and paths blend into the ground
+
+Owner: "remove curbs from roads altogether and remove the special tile we use for off path travel, try to blend everything
+in but have a somewhat clear path".
+
+- City theme `blend: true` (`assets/chrono-gen.js`, `paintChronoRoom`): no kerb bands and no pavement strip. The road is its
+  own surface (the road texture and its wet patches) with a soft, slightly broken edge into the ground (`ragged`, tag
+  `verge`). The squares and paths to objects are worn ground in the same surface at 55% with a looser edge (tag `path`),
+  so the way to them reads without a border. The hex-paver tile (Round 397) is no longer drawn; its file stays.
+- Layout, walk masks and placement rules are unchanged (buildings keep the clearances the pavement had).
+
 ## Round 397: eleven new city buildings, a paved tile under objects, fuller blocks
 
 The owner's Archive_16 (two uploads): the hex-paver plaza tile and eleven buildings from the prompts given one at a time.
