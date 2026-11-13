@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 407: sidewalk paving
+
+The owner's sheet of eight sidewalk tiles.
+
+- New art slot `sidewalk` in `CITY_TD_ART` (`tools/prepare_city_art.py` makes it seamless both ways, like a roof). The
+  first is the city's main paving (cracked slabs); the others (herringbone, cobbles, chipped tiles, riveted plates) blend
+  in over large soft patches from world-wide noise, so a sidewalk changes material gradually and runs on across rooms.
+  The old paving tile is used only while the slot is empty.
+- The manhole, drain and broken-rebar tiles were left out: each has one feature that would repeat every 250px.
+- City art version 407.
+
 ## Round 406: eight more roofs
 
 The owner's Archive_16 (the same eight roofs twice; the copy with green separators was cut): puddles, cracked concrete,

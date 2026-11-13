@@ -4,7 +4,7 @@
     python3 tools/prepare_city_art.py <image> <slot> <name>
 
 Slots and what the tool does with the image:
-  roof                 seamless roof surface, 512x512 (blended at the edges so it tiles both ways)
+  roof, sidewalk       seamless roof / sidewalk surface, 512x512 (blended at the edges so it tiles both ways)
   wall, shop           one floor of wall / shopfront: scaled to 128px tall and blended left-right so it tiles sideways
   prop-ac, prop-vent, prop-tank, prop-stairs, prop-solar, prop-skylight,
   sign-h, sign-v, car, tree
@@ -24,7 +24,7 @@ from scipy import ndimage
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 OUT = os.path.join(ROOT, 'assets', 'environment', 'city-gen', 'td')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
-TEXTURE = {'roof', 'wall', 'shop'}
+TEXTURE = {'roof', 'wall', 'shop', 'sidewalk'}
 SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree'}
 
 
@@ -35,7 +35,7 @@ def blend_x(a, band):
 
 def texture(img, slot):
     a = np.asarray(img.convert('RGB')).astype(np.float32)
-    if slot == 'roof':
+    if slot in ('roof', 'sidewalk'):
         a = blend_x(a, max(8, a.shape[1] // 8)); a = blend_x(a.transpose(1, 0, 2), max(8, a.shape[0] // 8)).transpose(1, 0, 2)
         return Image.fromarray(a.clip(0, 255).astype(np.uint8)).resize((512, 512), Image.LANCZOS)
     a = blend_x(a, max(8, a.shape[1] // 10)); o = Image.fromarray(a.clip(0, 255).astype(np.uint8))
