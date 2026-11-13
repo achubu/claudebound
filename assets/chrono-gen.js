@@ -352,7 +352,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '412',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '415',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -499,6 +499,8 @@ function genWorld(seed) {
 // the city's main paving, the rest by block); edge (Round 409: a border strip run round parks, outer side at the top);
 // trim (Round 410: a border strip framing the squares where objects stand). Prompts: tools/art-refresh/city-topdown-prompts.md.
 const CITY_TD_ART = { shore: ['shore-crumble'], trim: ['trim-steel', 'trim-brick'], edge: ['edge-granite', 'edge-kerb', 'edge-planter'], sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-gravel', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2', 'skylight-3'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
+// Round 415: for each wall and shopfront strip, the columns (image px) of plain wall between windows (tools/prepare_city_art.py).
+const CITY_TD_GAPS = {'wall-concrete': [4, 19, 29, 41, 127, 134, 147, 258, 440, 446, 453], 'wall-brick': [2, 11, 19, 73, 81, 291, 299, 307, 362, 371, 377, 435, 441, 447, 456, 515, 523, 585, 595, 601, 674, 741, 750, 756, 804], 'wall-panel': [19, 30, 40, 47, 58, 64, 75, 158, 206, 213, 222, 237, 246, 286, 293, 304, 310, 618, 657, 667, 677, 687, 698, 740, 748], 'shop-noodle': [0, 6, 18, 24, 30, 38, 57, 66, 78, 84, 92, 103, 113, 302, 436, 443, 452], 'shop-repair': [25, 34, 41, 48, 56, 63, 76, 170, 176, 197, 280, 287, 401, 409, 437, 444, 450, 457, 596, 606, 628, 641, 655, 662, 669, 675], 'shop-shutters': [12, 28, 40, 79, 85, 100, 107, 125, 238, 252, 306, 320, 473, 479, 506, 515, 527, 538, 544, 559, 665, 671, 688, 698, 717] };
 function cityTdArtNames() { return Object.values(CITY_TD_ART).flat().map(n => 'td/' + n); }
 // Round 413 (owner: "the edges dont have rounded corner which is a problem, we need edges that can be curved and used at
 // 90 degree angles"): a border strip laid along any outline, as spline and path tools in 2D editors bend a strip. The
@@ -524,11 +526,45 @@ function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy) {
       const sx = (((sAlong - L / 2) * k) % art.width + art.width) % art.width, sw = Math.min(art.width - sx, (L + 1.2) * k);
       ctx.save(); ctx.translate(cx * K, cy * K); ctx.rotate(ang); ctx.drawImage(art, sx, 0, sw, art.height, (-L / 2 - 0.6) * K, 0, sw / k * K, T * K); ctx.restore(); } }
 }
+// Round 415: where a park's trees stand and where cars park, shared by the painter and the walk mask.
+function cityParkTrees(rr, bx, bw, bh) { const out = []; for (let i = 0; i < 4 + rr() * 5; i++) out.push([bx[0] + 14 + rr() * (bw - 28), bx[1] + 14 + rr() * (bh - 28), 12 + rr() * 12]); return out; }
+function cityParkedCars(seed, plan) { const out = [];
+  for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + plan.key + ':' + rd.pts.join());
+    for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
+      for (let d = 70; d < L - 70; d += 80 + rr() * 120) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1;
+        const off = hz ? (side < 0 ? rd.w / 2 - 36 : rd.w / 2 - 26) : rd.w / 2 - 30; // the whole car inside the street (Round 410)
+        const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, skip = Math.hypot(px - plan.hub[0], py - plan.hub[1] - 22) < 110 || px < 70 || px > 730 || py < 70 || py > 430 || (plan.plazas || []).some(([qx, qy]) => Math.hypot(px - qx, py - qy) < 90);
+        // Round 415: a car blocks the way, so none at a room's crossing (where the game sets you down), at its doors, or by an object
+        const rec = { px, py, hz, col: ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)], artR: rr(), flip: rr() < 0.5 }; if (!skip) out.push(rec); } } }
+  return out; }
+// Round 415 (owner: "make it a rule that if the tile is just a texture tile, it can be walked on, unless it has another
+// image on top like that of a building or car or other sprite"): what stands on the ground in a room of the top-down city,
+// in room px: buildings (their lots, roof and front wall), parked cars, park trees, and the sea (not ground). Everything
+// else, streets, sidewalks, squares, sand, park grass and kerbs, can be walked on.
+function cityBlockers(seed, key, plan) {
+  const wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, rects = [], circles = [];
+  for (const l of wl.lotsPx) { const r = [l.r[0] - ox + 4, l.r[1] - oy + 4, l.r[2] - ox - 4, l.r[3] - oy - 4]; if (r[2] < 0 || r[0] > 800 || r[3] < 0 || r[1] > 500) continue;
+    if (l.use === 'roof') rects.push(r);
+    else if (l.use === 'park') for (const [tx, ty, tr] of cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1])) circles.push([tx, ty, tr * 0.75]); }
+  for (const c of cityParkedCars(seed, plan)) rects.push([c.px - 26, c.py - 14, c.px + 26, c.py + 12]);
+  const t = chronoTerrain(seed, key); for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (t.chasm(x, y)) rects.push([x * CG_CELL, y * CG_CELL, (x + 1) * CG_CELL, (y + 1) * CG_CELL, 'water']);
+  return { rects, circles };
+}
 function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   const A = slot => { const l = (CITY_TD_ART[slot] || []).map(n => imgs['td/' + n]).filter(i => i && i.naturalWidth); return l.length ? l : null; };
   const pick = (slot, r) => { const l = A(slot); return l ? l[Math.floor(r() * l.length)] : null; };
   // a seamless picture laid over a rectangle, `th` px tall per repeat, starting at the rectangle's corner
   const tile = (img, x, y, w, h, th, ph = 0) => { const p = ctx.createPattern(img, 'repeat'), k = th * K / img.height; if (p.setTransform) p.setTransform(new DOMMatrix().translate((x - ph) * K, y * K).scale(k)); ctx.save(); ctx.fillStyle = p; ctx.fillRect(x * K, y * K, w * K, h * K); ctx.restore(); };
+  // Round 415 (owner: "never cut a building floor sprite halfway through a window at the edge, the edge of a building must
+  // always end on an edge"): one floor of a wall or shopfront strip laid so that both ends of the building fall on plain
+  // wall between windows (CITY_TD_GAPS): a random start column, then the end column whose span needs the least stretch.
+  const nameOf = new Map(Object.keys(imgs).filter(n => n.startsWith('td/')).map(n => [imgs[n], n.slice(3)]));
+  const fitRow = (img, x, y, w, h, r) => { const gaps = CITY_TD_GAPS[nameOf.get(img)], s = h / img.height, Wi = img.width;
+    if (!gaps || gaps.length < 2) return tile(img, x, y, w, h, h, Math.floor(r() * 400));
+    let best = null; for (let t = 0; t < 10 && !(best && best.dev < 0.08); t++) { const g = gaps[Math.floor(r() * gaps.length)], span = w / s;
+      for (const g2 of gaps) { const n = Math.round((g + span - g2) / Wi), sp = g2 + n * Wi - g; if (sp <= 0) continue; const kx = w / sp, dev = Math.abs(kx / s - 1); if (!best || dev < best.dev) best = { g, kx, dev }; } }
+    const p = ctx.createPattern(img, 'repeat'); if (p.setTransform) p.setTransform(new DOMMatrix().translate(x * K, y * K).scale(best.kx * K, s * K).translate(-best.g, 0));
+    ctx.save(); ctx.fillStyle = p; ctx.fillRect(x * K, y * K, w * K, h * K); ctx.restore(); };
   const seed = chronoSeed(), wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500;
   const S = v => v * K, isRoad = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && plan.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)] === 1;
   const lots = wl.lotsPx.filter(l => l.r[2] > ox && l.r[0] < ox + 800 && l.r[3] > oy && l.r[1] < oy + 500).map(l => ({ ...l, r: [l.r[0] - ox, l.r[1] - oy, l.r[2] - ox, l.r[3] - oy] })).sort((a, b) => a.r[3] - b.r[3]);
@@ -551,7 +587,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   for (const l of lots) { const ra = chronoRng(seed + ':art:' + l.seed), rr = chronoRng(seed + ':roof:' + l.seed), [x0, y0, x1, y1] = l.r, I = 4, bx = [x0 + I, y0 + I, x1 - I, y1 - I], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
     if (l.use === 'plaza') continue;
     if (l.use === 'park') { const PR = 16; ctx.save(); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(S(bx[0]), S(bx[1]), S(bw), S(bh), S(PR)); else ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.pipes); ctx.fillStyle = 'rgba(0,10,8,.35)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh));
-      for (let i = 0; i < 4 + rr() * 5; i++) { const tx = bx[0] + 14 + rr() * (bw - 28), ty = bx[1] + 14 + rr() * (bh - 28), tr = 12 + rr() * 12, treeArt = pick('tree', ra); if (treeArt) { ctx.drawImage(treeArt, S(tx - tr * 1.3), S(ty - tr * 1.3), S(tr * 2.6), S(tr * 2.6)); continue; } const g = ctx.createRadialGradient(S(tx - 3), S(ty - 3), 1, S(tx), S(ty), S(tr)); g.addColorStop(0, '#2f6a3c'); g.addColorStop(1, '#0e2a19'); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.arc(S(tx + 5), S(ty + 6), S(tr), 0, 7); ctx.fill(); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(S(tx), S(ty), S(tr), 0, 7); ctx.fill(); }
+      for (const [tx, ty, tr] of cityParkTrees(rr, bx, bw, bh)) { const treeArt = pick('tree', ra); if (treeArt) { ctx.drawImage(treeArt, S(tx - tr * 1.3), S(ty - tr * 1.3), S(tr * 2.6), S(tr * 2.6)); continue; } const g = ctx.createRadialGradient(S(tx - 3), S(ty - 3), 1, S(tx), S(ty), S(tr)); g.addColorStop(0, '#2f6a3c'); g.addColorStop(1, '#0e2a19'); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.arc(S(tx + 5), S(ty + 6), S(tr), 0, 7); ctx.fill(); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(S(tx), S(ty), S(tr), 0, 7); ctx.fill(); }
       ctx.restore();
       // Round 408: a park is edged like a planter: a stone kerb round the grass, so it never meets the paving bare
       const edgeArt = pick('edge', ra);
@@ -608,14 +644,14 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       // third of buildings the upper floors in a second material.
       if (wallArt) { const upper = rr() < 0.33 ? pick('wall', ra) : wallArt, split = 1 + Math.floor(rr() * Math.max(1, floors - 2));
         for (let f = 0; f < floors; f++) { if (f === shopF) continue; const fy = wallTop + f * rowH;
-          tile(f < split ? upper : wallArt, bx[0], fy, bw, rowH, rowH, Math.floor(rr() * 400));
+          fitRow(f < split ? upper : wallArt, bx[0], fy, bw, rowH, rr);
           const shade = rr(); if (shade < 0.3) { ctx.fillStyle = 'rgba(4,6,12,' + (0.25 + shade) + ')'; ctx.fillRect(S(bx[0]), S(fy), S(bw), S(rowH)); }
           ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(bx[0]), S(fy + rowH - 1.5), S(bw), S(1.5)); ctx.fillStyle = 'rgba(170,178,190,.22)'; ctx.fillRect(S(bx[0]), S(fy + rowH), S(bw), S(1)); }
         ctx.fillStyle = 'rgba(190,198,210,.35)'; ctx.fillRect(S(bx[0] - 1), S(wallTop), S(bw + 2), S(2.5)); }
       if (!wallArt) for (let f = 0; f < floors; f++) { if (f === shopF) continue; const yy = wallTop + f * rowH + rowH * 0.3, wh = Math.max(1.5, rowH * 0.45); for (let xx = bx[0] + 6; xx < bx[2] - 10; xx += 15) { const lit = rr() < 0.38; ctx.fillStyle = lit ? 'rgba(255,205,120,.9)' : 'rgba(40,60,90,.8)'; if (lit) { ctx.shadowColor = 'rgba(255,190,90,.8)'; ctx.shadowBlur = S(4); } else ctx.shadowBlur = 0; ctx.fillRect(S(xx), S(yy), S(8), S(wh)); } }
       if (shopF >= 0) { // Round 401 (owner: 30 degrees): a shopfront at street level: a lit window band, doors, an awning
         const y0 = wallTop + shopF * rowH, col = NEON[Math.floor(rr() * NEON.length)];
-        if (shopArt) tile(shopArt, bx[0], y0, bw, rowH, rowH); else {
+        if (shopArt) fitRow(shopArt, bx[0], y0, bw, rowH, rr); else {
         ctx.fillStyle = 'rgba(255,214,150,.55)'; ctx.shadowColor = 'rgba(255,200,120,.8)'; ctx.shadowBlur = S(8); ctx.fillRect(S(bx[0] + 6), S(y0 + rowH * 0.25), S(bw - 12), S(rowH * 0.6)); ctx.shadowBlur = 0;
         for (let xx = bx[0] + 22 + rr() * 30; xx < bx[2] - 22; xx += 70 + rr() * 50) { ctx.fillStyle = '#0d1016'; ctx.fillRect(S(xx), S(y0 + rowH * 0.2), S(12), S(rowH * 0.8)); ctx.fillStyle = 'rgba(255,220,160,.35)'; ctx.fillRect(S(xx + 2), S(y0 + rowH * 0.3), S(8), S(rowH * 0.65)); }
         ctx.fillStyle = col; ctx.globalAlpha = 0.85; ctx.fillRect(S(bx[0] + 4), S(y0), S(bw - 8), S(Math.max(3, rowH * 0.2))); ctx.globalAlpha = 1; }
@@ -637,15 +673,12 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
         else { ctx.fillStyle = col; const n = Math.floor(long / 12); for (let i = 0; i < n; i++) { const g0 = 6 + i * 12; if (sw > sh2) ctx.fillRect(S(sx + g0), S(sy + 3.5), S(6), S(5)); else ctx.fillRect(S(sx + 3.5), S(sy + g0), S(5), S(6)); } }
         ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(S(sx + sw / 2), S(sy + sh2 / 2), 0, S(sx + sw / 2), S(sy + sh2 / 2), S(long * 0.8)); g.addColorStop(0, col + '33'); g.addColorStop(1, col + '00'); ctx.fillStyle = g; ctx.shadowBlur = 0; ctx.fillRect(S(sx + sw / 2 - long), S(sy + sh2 / 2 - long), S(long * 2), S(long * 2)); ctx.restore(); } } }
   // Round 410: cars last, so no lot, park or border is ever drawn over one
-  // parked cars along the main streets
-  for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + key + ':' + rd.pts.join());
-    for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
-      for (let d = 70; d < L - 70; d += 80 + rr() * 120 /* Round 407: past a car's length, so parked cars never overlap */) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1, off = hz ? (side < 0 ? rd.w / 2 - 36 : rd.w / 2 - 26) : rd.w / 2 - 30; // Round 410 (owner: "a vehicle behind the border"): the whole car inside the street (an upright car is 56px wide, its top 60% above its foot)
-        const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, w = hz ? 46 : 22, h = hz ? 22 : 46, col = ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)];
-        const carArt = pick('car', rr); if (carArt) { // painted at the 3/4 angle, so stood upright, not turned with the street; half face the other way
-          const L2 = 56, T2 = L2 * carArt.height / carArt.width; ctx.save(); ctx.translate(S(px), S(py)); if (rr() < 0.5) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); continue; }
-        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 4), S(w), S(h)); ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(S(px - w / 2), S(py - h / 2), S(w), S(h), S(5)) : ctx.rect(S(px - w / 2), S(py - h / 2), S(w), S(h)); ctx.fill();
-        ctx.fillStyle = 'rgba(20,30,45,.85)'; if (hz) ctx.fillRect(S(px - w / 2 + 12), S(py - h / 2 + 3), S(w - 26), S(h - 6)); else ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 12), S(w - 6), S(h - 26)); ctx.restore(); } } }
+  // parked cars along the main streets (where they stand comes from cityParkedCars, which the walk mask reads too)
+  for (const c of cityParkedCars(seed, plan)) { const { px, py, hz, col } = c, w = hz ? 46 : 22, h = hz ? 22 : 46, cars = A('car');
+    if (cars) { const carArt = cars[Math.floor(c.artR * cars.length)], L2 = 56, T2 = L2 * carArt.height / carArt.width; // painted at the 3/4 angle, so stood upright; half face the other way
+      ctx.save(); ctx.translate(S(px), S(py)); if (c.flip) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); continue; }
+    ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 4), S(w), S(h)); ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(S(px - w / 2), S(py - h / 2), S(w), S(h), S(5)) : ctx.rect(S(px - w / 2), S(py - h / 2), S(w), S(h)); ctx.fill();
+    ctx.fillStyle = 'rgba(20,30,45,.85)'; if (hz) ctx.fillRect(S(px - w / 2 + 12), S(py - h / 2 + 3), S(w - 26), S(h - 6)); else ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 12), S(w - 6), S(h - 26)); ctx.restore(); }
 }
 function chronoDistrict(seed, key) {
   const [cx, cy] = GEN.world(key), a = chronoNoise(seed, 'district', cx, cy, 1.9), b = chronoNoise(seed, 'district2', cx, cy, 1.9), n = GEN.districtNames;

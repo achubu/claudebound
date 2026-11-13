@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 415: walk on any ground; building walls end between windows
+
+Owner: "make it a rule that if the tile is just a texture tile, it can be walked on, unless it has another image on top
+like that of a building or car or other sprite"; "never cut a building floor sprite halfway through a window at the edge,
+the edge of a building must always end on an edge".
+
+- **Walking** (`assets/city-gen.js` `cityRoomMask`, `cityBlockers` in `assets/chrono-gen.js`): in the top-down city every
+  ground can be walked (streets, sidewalks, squares, sand, park grass, kerbs). Blocked: buildings (their lots, roof and
+  front wall), parked cars, park trees, and the sea (a road over water stays open). Tree and car positions now come from
+  `cityParkTrees` / `cityParkedCars`, shared by the painter and the walk mask. Cars keep 110px from a room's crossing (where
+  the game sets you down), 70px from its edges (the doors) and 90px from an object, so none blocks a way through; without
+  this the first room's crossing could be parked over.
+- **Walls end between windows**: `tools/prepare_city_art.py` measures each wall and shopfront strip for columns of plain
+  wall between windows (`gaps`: low contrast down the column, plain 4px either side; `--gaps` re-measures all; kept in
+  `CITY_TD_GAPS`). Each floor of a building is laid from a random such column and stretched (as little as possible) so its
+  far end lands on another, so no floor starts or ends through a window or door.
+- Tests: chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration, organic-paths and four
+  playtest-walk city runs (fresh seeds) pass with no problems.
+
 ## Round 414: varied floors; roofs that read as roofs
 
 Owner: "our buildings have too many identical floors and the roofs look like ground".
