@@ -528,7 +528,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   const A = slot => { const l = (CITY_TD_ART[slot] || []).map(n => imgs['td/' + n]).filter(i => i && i.naturalWidth); return l.length ? l : null; };
   const pick = (slot, r) => { const l = A(slot); return l ? l[Math.floor(r() * l.length)] : null; };
   // a seamless picture laid over a rectangle, `th` px tall per repeat, starting at the rectangle's corner
-  const tile = (img, x, y, w, h, th) => { const p = ctx.createPattern(img, 'repeat'), k = th * K / img.height; if (p.setTransform) p.setTransform(new DOMMatrix().translate(x * K, y * K).scale(k)); ctx.save(); ctx.fillStyle = p; ctx.fillRect(x * K, y * K, w * K, h * K); ctx.restore(); };
+  const tile = (img, x, y, w, h, th, ph = 0) => { const p = ctx.createPattern(img, 'repeat'), k = th * K / img.height; if (p.setTransform) p.setTransform(new DOMMatrix().translate((x - ph) * K, y * K).scale(k)); ctx.save(); ctx.fillStyle = p; ctx.fillRect(x * K, y * K, w * K, h * K); ctx.restore(); };
   const seed = chronoSeed(), wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500;
   const S = v => v * K, isRoad = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && plan.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)] === 1;
   const lots = wl.lotsPx.filter(l => l.r[2] > ox && l.r[0] < ox + 800 && l.r[3] > oy && l.r[1] < oy + 500).map(l => ({ ...l, r: [l.r[0] - ox, l.r[1] - oy, l.r[2] - ox, l.r[3] - oy] })).sort((a, b) => a.r[3] - b.r[3]);
@@ -563,7 +563,8 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       continue; }
     // the street side: the side with a road just beyond it
     const sides = [['s', (bx[0] + bx[2]) / 2, y1 + 20], ['n', (bx[0] + bx[2]) / 2, y0 - 20], ['e', x1 + 20, (bx[1] + bx[3]) / 2], ['w', x0 - 20, (bx[1] + bx[3]) / 2]].filter(([, x, y]) => isRoad(x, y) || isRoad(x, y + (y > y1 ? 20 : -20)));
-    ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(S(bx[0] + 8), S(bx[1] + 10), S(bw), S(bh)); ctx.restore(); // drop shadow
+    // Round 414 (owner: "the roofs look like ground"): a cast shadow that grows with the building's height
+    { const hgt = 4 + Math.floor(rr() * 5); ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(S(bx[0] + 4 + hgt * 2.2), S(bx[1] + 4 + hgt * 1.2), S(bw), S(bh)); ctx.restore(); } // drop shadow
     // Round 400 (owner: "could the buildings be not quite directly over the top? ... maybe 10 degrees?"): seen tilted by
     // GEN.tilt degrees, a building shows its south wall, sin(tilt) of its height, drawn inside its own lot under the roof.
     // Round 401: the tall shopfronts face a street to the south; a building with its street behind it (north) is kept low.
@@ -577,12 +578,17 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       else { ctx.globalAlpha = 0.28; ctx.globalCompositeOperation = 'multiply'; fill(ctx, imgs.floor); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
       if (pi) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h)); }
       ctx.restore();
-      ctx.save(); ctx.strokeStyle = 'rgba(140,150,165,.55)'; ctx.lineWidth = S(4); ctx.strokeRect(S(q[0] + 2), S(q[1] + 2), S(w - 4), S(h - 4)); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + 5), S(q[1] + 5), S(w - 10), S(h - 10)); ctx.restore();
+      { ctx.save(); const P = 6; // Round 414: a raised parapet: a lit top, a dark inner face, a shadow falling onto the roof
+        for (let i = 0; i < 8; i++) { ctx.strokeStyle = 'rgba(0,0,0,' + (0.32 - i * 0.04) + ')'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + P + 1 + i * 1.6), S(q[1] + P + 1 + i * 1.6), S(w - 2 * (P + 1 + i * 1.6)), S(h - 2 * (P + 1 + i * 1.6))); }
+        ctx.strokeStyle = '#5d6672'; ctx.lineWidth = S(P); ctx.strokeRect(S(q[0] + P / 2), S(q[1] + P / 2), S(w - P), S(h - P));
+        ctx.strokeStyle = 'rgba(205,214,226,.55)'; ctx.lineWidth = S(1.5); ctx.strokeRect(S(q[0] + 1), S(q[1] + 1), S(w - 2), S(h - 2));
+        ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = S(1.2); ctx.strokeRect(S(q[0] + P), S(q[1] + P), S(w - 2 * P), S(h - 2 * P)); ctx.restore(); }
+      ctx.save(); ctx.strokeStyle = 'rgba(140,150,165,0)'; ctx.lineWidth = S(4); ctx.strokeRect(S(q[0] + 2), S(q[1] + 2), S(w - 4), S(h - 4)); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + 5), S(q[1] + 5), S(w - 10), S(h - 10)); ctx.restore();
       // rooftop clutter
       const items = 2 + Math.floor(rr() * 4), placed = [];
       for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 6), iw = [24, 14, 30, 34, 46, 22][kind], ih = [18, 14, 30, 26, 28, 14][kind], ix = q[0] + 10 + rr() * (w - 20 - iw), iy = q[1] + 10 + rr() * (h - 20 - ih);
         if (w < iw + 22 || h < ih + 22 || placed.some(p => ix < p[2] + 10 && ix + iw > p[0] - 10 && iy < p[3] + 10 && iy + ih > p[1] - 10)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
-        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(ix + 4), S(iy + 5), S(iw), S(ih));
+        ctx.save(); if (!A(['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind])) { ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(ix + 4), S(iy + 5), S(iw), S(ih)); } // Round 414: no square shadow under painted props
         const propArt = pick(['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind], ra);
         if (propArt) { const k2 = Math.min(iw / propArt.width, ih / propArt.height), // inside its own box: never over a neighbour
            dw = propArt.width * k2, dh = propArt.height * k2; ctx.drawImage(propArt, S(ix + (iw - dw) / 2), S(iy + (ih - dh) / 2), S(dw), S(dh)); }
@@ -596,7 +602,16 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     if (dz > 3) { const wall = ctx.createLinearGradient(0, S(wallTop), 0, S(wallTop + dz)); wall.addColorStop(0, '#3a3f4a'); wall.addColorStop(1, '#1c1f27');
       ctx.save(); ctx.fillStyle = wall; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(dz)); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(1.5));
       const rowH = dz / floors, shopF = southSt && floors > 1 ? floors - 1 : -1;
-      const wallArt = pick('wall', ra), shopArt = pick('shop', ra); if (wallArt) tile(wallArt, bx[0], wallTop, bw, shopF >= 0 ? dz - rowH : dz, rowH);
+      const wallArt = pick('wall', ra), shopArt = pick('shop', ra);
+      // Round 414 (owner: "our buildings have too many identical floors"): the wall is laid floor by floor, each floor its
+      // own sideways shift and its own light (some floors dark), a ledge under each floor, a cornice at the top, and on a
+      // third of buildings the upper floors in a second material.
+      if (wallArt) { const upper = rr() < 0.33 ? pick('wall', ra) : wallArt, split = 1 + Math.floor(rr() * Math.max(1, floors - 2));
+        for (let f = 0; f < floors; f++) { if (f === shopF) continue; const fy = wallTop + f * rowH;
+          tile(f < split ? upper : wallArt, bx[0], fy, bw, rowH, rowH, Math.floor(rr() * 400));
+          const shade = rr(); if (shade < 0.3) { ctx.fillStyle = 'rgba(4,6,12,' + (0.25 + shade) + ')'; ctx.fillRect(S(bx[0]), S(fy), S(bw), S(rowH)); }
+          ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(bx[0]), S(fy + rowH - 1.5), S(bw), S(1.5)); ctx.fillStyle = 'rgba(170,178,190,.22)'; ctx.fillRect(S(bx[0]), S(fy + rowH), S(bw), S(1)); }
+        ctx.fillStyle = 'rgba(190,198,210,.35)'; ctx.fillRect(S(bx[0] - 1), S(wallTop), S(bw + 2), S(2.5)); }
       if (!wallArt) for (let f = 0; f < floors; f++) { if (f === shopF) continue; const yy = wallTop + f * rowH + rowH * 0.3, wh = Math.max(1.5, rowH * 0.45); for (let xx = bx[0] + 6; xx < bx[2] - 10; xx += 15) { const lit = rr() < 0.38; ctx.fillStyle = lit ? 'rgba(255,205,120,.9)' : 'rgba(40,60,90,.8)'; if (lit) { ctx.shadowColor = 'rgba(255,190,90,.8)'; ctx.shadowBlur = S(4); } else ctx.shadowBlur = 0; ctx.fillRect(S(xx), S(yy), S(8), S(wh)); } }
       if (shopF >= 0) { // Round 401 (owner: 30 degrees): a shopfront at street level: a lit window band, doors, an awning
         const y0 = wallTop + shopF * rowH, col = NEON[Math.floor(rr() * NEON.length)];
