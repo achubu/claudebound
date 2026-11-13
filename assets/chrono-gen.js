@@ -367,7 +367,7 @@ const GEN_THEMES = {
     bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
     // 9x6 rooms, and a rare pond inland.
-    hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || chronoNoise(seed, 'pond', gx, gy, 4) > 0.9; },
+    hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || (!GEN.topdown && chronoNoise(seed, 'pond', gx, gy, 4) > 0.9); }, // Round 408: no inland ponds in the top-down city (owner: "the circle thing ... looks horrible")
     // Round 394: one storey of each building to the same height on screen (measured from each painting's floors, doors and windows).
     // Round 396: main roads on every third column line and on two row lines; the other streets are alleys.
     alley: (key, d) => { const [wx, wy] = GEN_THEMES.city.world(key); return d === 'e' || d === 'w' ? !(wy === 1 || wy === 4) : wx % 3 !== 1; }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
@@ -475,7 +475,7 @@ function genWorld(seed) {
   const lotsPx = [];
   lots.forEach((l, i) => { let pieces = [l.r]; for (const h of holes[i] || []) pieces = pieces.flatMap(q => cut(q, h));
     for (const q of pieces) lotsPx.push({ r: [q[0] * C, q[1] * C, q[2] * C, q[3] * C], use: used.has(i) ? 'plaza' : rnd() < 0.08 ? 'park' : 'roof', seed: Math.floor(rnd() * 1e9) }); });
-  return genWorldCache[ck] = { plazas, buildings, parks: parks.map(r => [r[0] * C, r[1] * C, r[2] * C, r[3] * C]), pos, lotsPx };
+  return genWorldCache[ck] = { plazas, buildings, parks: parks.map(r => [r[0] * C, r[1] * C, r[2] * C, r[3] * C]), pos, lotsPx, block, CW, CH, blocks: boxes.length };
 }
 // Round 399: the city seen from straight above (owner's reference). Every lot is a rooftop that fills it: a drop
 // shadow, a roof surface, a parapet, rooftop clutter (air units, vents, tanks, stair huts, solar panels, skylights) and a
@@ -526,7 +526,10 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     if (l.use === 'plaza') continue;
     if (l.use === 'park') { ctx.save(); ctx.beginPath(); ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.pipes); ctx.fillStyle = 'rgba(0,10,8,.35)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh));
       for (let i = 0; i < 4 + rr() * 5; i++) { const tx = bx[0] + 14 + rr() * (bw - 28), ty = bx[1] + 14 + rr() * (bh - 28), tr = 12 + rr() * 12, treeArt = pick('tree', ra); if (treeArt) { ctx.drawImage(treeArt, S(tx - tr * 1.3), S(ty - tr * 1.3), S(tr * 2.6), S(tr * 2.6)); continue; } const g = ctx.createRadialGradient(S(tx - 3), S(ty - 3), 1, S(tx), S(ty), S(tr)); g.addColorStop(0, '#2f6a3c'); g.addColorStop(1, '#0e2a19'); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.arc(S(tx + 5), S(ty + 6), S(tr), 0, 7); ctx.fill(); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(S(tx), S(ty), S(tr), 0, 7); ctx.fill(); }
-      ctx.restore(); continue; }
+      ctx.restore();
+      // Round 408: a park is edged like a planter: a stone kerb round the grass, so it never meets the paving bare
+      ctx.save(); ctx.strokeStyle = '#0b0e14'; ctx.lineWidth = S(7); ctx.strokeRect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.strokeStyle = '#6b7380'; ctx.lineWidth = S(3); ctx.strokeRect(S(bx[0] + 1), S(bx[1] + 1), S(bw - 2), S(bh - 2)); ctx.restore();
+      continue; }
     // the street side: the side with a road just beyond it
     const sides = [['s', (bx[0] + bx[2]) / 2, y1 + 20], ['n', (bx[0] + bx[2]) / 2, y0 - 20], ['e', x1 + 20, (bx[1] + bx[3]) / 2], ['w', x0 - 20, (bx[1] + bx[3]) / 2]].filter(([, x, y]) => isRoad(x, y) || isRoad(x, y + (y > y1 ? 20 : -20)));
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(S(bx[0] + 8), S(bx[1] + 10), S(bw), S(bh)); ctx.restore(); // drop shadow
@@ -918,7 +921,17 @@ function paintChronoRoom(canvas, key) {
   else { const sw = (typeof CITY_TD_ART !== 'undefined' ? CITY_TD_ART.sidewalk : []).map(n => 'td/' + n).filter(n => imgs[n] && imgs[n].naturalWidth);
     // Round 407 (owner: "sidewalk tile size is far too big"): drawn at 0.35, a paving tile about 90px across
     for (const n of sw) (GEN.texScale = GEN.texScale || {})[n] = 0.35;
-    if (sw.length) { fill(ctx, imgs[sw[0]]); sw.slice(1).forEach((n, i) => mixInto(ctx, null, { tex: n, tag: 'sidewalk' + i, period: 9, cut: 0.6 })); ctx.fillStyle = 'rgba(8,12,24,.38)'; ctx.fillRect(0, 0, W, H); } } // the machinery sits back, so the roads read at a glance
+    // Round 408 (owner: blends between very different tiles "look horrible ... set rules so it cant happen again"; "find what
+    // technique is used by modern 2d games"): as with autotiled terrain, a material change is a hard edge on the grid,
+    // never a fade. Each block of the city (the ground the streets enclose) takes one paving, half of them the main one;
+    // a block's edges run along its streets, so a paving only changes across a street.
+    if (sw.length) { fill(ctx, imgs[sw[0]]);
+      const wl = sw.length > 1 && genWorld(chronoSeed()), [wx, wy] = GEN.world(key);
+      if (wl) for (let m = 1; m < sw.length; m++) { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.fillStyle = '#fff'; let any2 = false;
+        for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) { const b = wl.block[(wy * FG_ROWS + y) * wl.CW + wx * FG_COLS + x]; if (b < 0) continue;
+          const h = chronoHash(chronoSeed() + ':paving:' + b) % (2 * (sw.length - 1)); if (h + 1 !== m) continue; g.fillRect(x * FG_CELL * K, y * FG_CELL * K, FG_CELL * K + 1, FG_CELL * K + 1); any2 = true; }
+        if (any2) { g.globalCompositeOperation = 'source-in'; fill(g, imgs[sw[m]]); ctx.drawImage(c, 0, 0); } }
+      ctx.fillStyle = 'rgba(8,12,24,.38)'; ctx.fillRect(0, 0, W, H); } } // the machinery sits back, so the roads read at a glance
   const layer = (grid, img, radius) => {
     const shape = chronoShape(grid, K, radius), c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, img);
@@ -989,8 +1002,12 @@ function paintChronoRoom(canvas, key) {
     // Round 398 (owner: "water should always have that beach tile around it"): an even strip of sand round all water,
     // under the ragged beach, so the noise never thins the beach to nothing.
     const sandMin = ragged(terrain.chasm, 'sand2', { blur: 6, amp: 0.1, sharp: 9, grow: 18 });
-    ctx.drawImage(tintIn(sandMin, g => fill(g, imgs.sand)), 0, 0);
-    ctx.drawImage(tintIn(sand, g => fill(g, imgs.sand)), 0, 0); // Round 394: the owner's beach-sand tile
+    // Round 408: in the top-down city the beach is one crisp shape (sharp edge, no see-through fringe) with a dark border
+    // where it meets the paving, like a kerb, so two very different grounds never fade into each other.
+    const beachShape = GEN.topdown ? (() => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(sandMin, 0, 0); g.drawImage(sand, 0, 0); return smoothed(c, 2 * K); })() : null;
+    if (beachShape) { ring(chronoTint(beachShape, '#0b0e14'), 4); ring(chronoTint(beachShape, '#3a414c'), 2); ctx.drawImage(tintIn(beachShape, g => fill(g, imgs.sand)), 0, 0); }
+    else { ctx.drawImage(tintIn(sandMin, g => fill(g, imgs.sand)), 0, 0);
+    ctx.drawImage(tintIn(sand, g => fill(g, imgs.sand)), 0, 0); } // Round 394: the owner's beach-sand tile
     ctx.drawImage(tintIn(blurred(sand, 3 * K), g => { const w = blurred(shore, 14 * K); g.globalCompositeOperation = 'source-in'; g.drawImage(w, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = GEN.beach[1]; g.fillRect(0, 0, W, H); }), 0, 0);
     const water = tintIn(shore, g => fill(g, imgs.chasm)); ctx.drawImage(water, 0, 0);
     for (const [r, a] of [[3, 0.55], [9, 0.18]]) { ctx.save(); ctx.globalAlpha = a; const foam = document.createElement('canvas'); foam.width = W; foam.height = H; const fg = foam.getContext('2d');
