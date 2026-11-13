@@ -65,6 +65,27 @@ def sprite(img):
     return o.resize((max(1, round(o.width * k)), max(1, round(o.height * k))), Image.LANCZOS)
 
 
+def gaps(path):
+    """Round 415 (owner: "never cut a building floor sprite halfway through a window at the edge"): the columns of a wall or
+    shopfront strip where there is plain wall between windows: low contrast down the column (smoothed), local minima, at
+    least 6px apart. A building's wall is fitted to start and end on these."""
+    a = np.asarray(Image.open(path).convert('L')).astype(np.float32); h, w = a.shape
+    band = a[int(h * 0.12):int(h * 0.88)]; v = band.std(axis=0)
+    k = np.ones(5) / 5; v = np.convolve(np.concatenate([v[-2:], v, v[:2]]), k, mode='valid')
+    cut = np.percentile(v, 40); out = []
+    for x in range(w):
+        if max(v[(x + d) % w] for d in range(-4, 5)) <= cut and v[x] <= v[(x - 1) % w] and v[x] <= v[(x + 1) % w] and all(abs(x - g) >= 6 for g in out): out.append(x)  # plain wall 4px either side
+    return out
+
+
+def register_gaps(name, g):
+    s = open(JS).read(); m = re.search(r"const CITY_TD_GAPS = \{(.*?)\};", s)
+    body = re.sub(r"'%s': \[[^\]]*\],? ?" % re.escape(name), '', m.group(1)).strip().rstrip(',')
+    entry = "'%s': [%s]" % (name, ', '.join(map(str, g)))
+    body = (body + ', ' if body else ' ') + entry + ' '
+    open(JS, 'w').write(s[:m.start(1)] + body + s[m.end(1):])
+
+
 def register(slot, name):
     s = open(JS).read(); m = re.search(r"const CITY_TD_ART = \{(.*?)\};", s)
     if not m: sys.exit('CITY_TD_ART not found in assets/chrono-gen.js')
@@ -72,6 +93,7 @@ def register(slot, name):
     sm = re.search(re.escape(key) + r": \[(.*?)\]", body)
     items = [x.strip().strip("'") for x in sm.group(1).split(',') if x.strip()]
     if name in items: return
+    if slot in ('wall', 'shop'): register_gaps(name, gaps(os.path.join(OUT, name + '.webp')))
     items.append(name); new = key + ': [' + ', '.join("'%s'" % x for x in items) + ']'
     body = body[:sm.start()] + new + body[sm.end():]
     open(JS, 'w').write(s[:m.start(1)] + body + s[m.end(1):])
@@ -114,6 +136,11 @@ def objects(args):
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == '--gaps':  # (re)measure every wall and shopfront already in CITY_TD_ART
+        s = open(JS).read(); m = re.search(r"const CITY_TD_ART = \{(.*?)\};", s)
+        for slot in ('wall', 'shop'):
+            for n in re.findall(r"'([a-z0-9-]+)'", re.search(slot + r": \[(.*?)\]", m.group(1)).group(1)): g = gaps(os.path.join(OUT, n + '.webp')); register_gaps(n, g); print(n, len(g), 'gaps')
+        return
     if len(sys.argv) > 1 and sys.argv[1] == '--sheet': return sheet(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == '--objects': return objects(sys.argv[2:])
     if len(sys.argv) != 4: sys.exit(__doc__)

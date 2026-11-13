@@ -26,6 +26,12 @@ function cityRoomMask(cx, cy) {
   const p = cityGenPlan(k); if (!p) return cityMasks[k] = null;
   const m = new Uint8Array(100 * 63);
   for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) m[my * 100 + mx] = p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]; }
+  // Round 415 (owner: a texture tile can be walked on unless a building, car or other sprite stands on it): in the top-down
+  // city all ground can be walked; buildings, parked cars, park trees and the sea (a road over the water stays) cannot.
+  if (GEN_THEMES.city.topdown) { const b = genWith('city', () => cityBlockers(cityGenSeed, k, p));
+    for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) { const x = mx * 8 + 4, road = p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)];
+      let ok = !b.rects.some(r => x >= r[0] && x < r[2] && y >= r[1] && y < r[3] && !(road && r[4] === 'water')) && !b.circles.some(c => Math.hypot(x - c[0], y - c[1]) < c[2]);
+      m[my * 100 + mx] = ok ? 1 : 0; } } }
   return cityMasks[k] = m;
 }
 function cityGenWalk(wx, wy) {
