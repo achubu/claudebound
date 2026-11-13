@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 407: sidewalk paving
+
+The owner's sheet of eight sidewalk tiles.
+
+- New art slot `sidewalk` in `CITY_TD_ART` (`tools/prepare_city_art.py` makes it seamless both ways, like a roof). The
+  first is the city's main paving (cracked slabs); the others (herringbone, cobbles, chipped tiles, riveted plates) blend
+  in over large soft patches from world-wide noise, so a sidewalk changes material gradually and runs on across rooms.
+  The old paving tile is used only while the slot is empty.
+- The manhole, drain and broken-rebar tiles were left out: each has one feature that would repeat every 250px.
+- Owner: "sidewalk tile size is far too big": sidewalk tiles drawn at 0.35 (about 90px a tile).
+- Owner: "billboards should only be placed on the front side of buildings never the back side ... and neon signs": a sign
+  only on a building whose street is in front (south): a blade sign down the front wall or a board on the front roof edge,
+  never both; nothing on back or side walls.
+- Owner: "make sure objects never overlap": rooftop objects draw inside their own box with 10px between boxes (they used to
+  draw 15% larger than their box); parked cars are spaced at least 80px apart.
+- City art version 407.
+
 ## Round 406: eight more roofs
 
 The owner's Archive_16 (the same eight roofs twice; the copy with green separators was cut): puddles, cracked concrete,

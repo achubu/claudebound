@@ -352,7 +352,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '406',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '407',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -486,8 +486,9 @@ function genWorld(seed) {
 // Add files with `python3 tools/prepare_city_art.py <image> <slot> <name>`, which keys or tiles the image and adds it here.
 // Slots: roof, wall, shop (seamless textures: a roof surface; one floor of wall; one floor of shopfront); prop-ac, prop-vent,
 // prop-tank, prop-stairs, prop-solar, prop-skylight (rooftop things seen from above); sign-h, sign-v (neon signs, wide and
-// tall); car (seen from above, facing east); tree (seen from above). Prompts: tools/art-refresh/city-topdown-prompts.md.
-const CITY_TD_ART = { roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-gravel', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2', 'skylight-3'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
+// tall); car (seen from above, facing east); tree (seen from above); sidewalk (Round 407: seamless paving; the first is
+// the city's main paving, the rest blend in over large soft patches from world-wide noise). Prompts: tools/art-refresh/city-topdown-prompts.md.
+const CITY_TD_ART = { sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-gravel', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2', 'skylight-3'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
 function cityTdArtNames() { return Object.values(CITY_TD_ART).flat().map(n => 'td/' + n); }
 function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   const A = slot => { const l = (CITY_TD_ART[slot] || []).map(n => imgs['td/' + n]).filter(i => i && i.naturalWidth); return l.length ? l : null; };
@@ -514,7 +515,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   // parked cars along the main streets
   for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + key + ':' + rd.pts.join());
     for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
-      for (let d = 70; d < L - 70; d += 60 + rr() * 120) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1, off = rd.w / 2 - 16;
+      for (let d = 70; d < L - 70; d += 80 + rr() * 120 /* Round 407: past a car's length, so parked cars never overlap */) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1, off = rd.w / 2 - 16;
         const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, w = hz ? 46 : 22, h = hz ? 22 : 46, col = ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)];
         const carArt = pick('car', rr); if (carArt) { // painted at the 3/4 angle, so stood upright, not turned with the street; half face the other way
           const L2 = 56, T2 = L2 * carArt.height / carArt.width; ctx.save(); ctx.translate(S(px), S(py)); if (rr() < 0.5) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); continue; }
@@ -532,7 +533,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     // Round 400 (owner: "could the buildings be not quite directly over the top? ... maybe 10 degrees?"): seen tilted by
     // GEN.tilt degrees, a building shows its south wall, sin(tilt) of its height, drawn inside its own lot under the roof.
     // Round 401: the tall shopfronts face a street to the south; a building with its street behind it (north) is kept low.
-    const southSt = sides.some(sd => sd[0] === 's'), floors = southSt ? (district === 'tech' ? 4 : 2) + Math.floor(rr() * 5) : 1 + Math.floor(rr() * 3), dz = Math.min(floors * 36 * SIN, bh * 0.5), wallTop = bx[3] - dz;
+    let blade = false; const southSt = sides.some(sd => sd[0] === 's'), floors = southSt ? (district === 'tech' ? 4 : 2) + Math.floor(rr() * 5) : 1 + Math.floor(rr() * 3), dz = Math.min(floors * 36 * SIN, bh * 0.5), wallTop = bx[3] - dz;
     const rb = [bx[0], bx[1], bx[2], wallTop]; bx[3] = wallTop; const bh0 = bh;
     // a roof, sometimes in two parts of different heights
     const parts = bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
@@ -546,10 +547,11 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       // rooftop clutter
       const items = 2 + Math.floor(rr() * 4), placed = [];
       for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 6), iw = [24, 14, 30, 34, 46, 22][kind], ih = [18, 14, 30, 26, 28, 14][kind], ix = q[0] + 10 + rr() * (w - 20 - iw), iy = q[1] + 10 + rr() * (h - 20 - ih);
-        if (w < iw + 22 || h < ih + 22 || placed.some(p => ix < p[2] + 6 && ix + iw > p[0] - 6 && iy < p[3] + 6 && iy + ih > p[1] - 6)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
+        if (w < iw + 22 || h < ih + 22 || placed.some(p => ix < p[2] + 10 && ix + iw > p[0] - 10 && iy < p[3] + 10 && iy + ih > p[1] - 10)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
         ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(ix + 4), S(iy + 5), S(iw), S(ih));
         const propArt = pick(['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind], ra);
-        if (propArt) { const k2 = Math.min(iw / propArt.width, ih / propArt.height) * 1.15, dw = propArt.width * k2, dh = propArt.height * k2; ctx.drawImage(propArt, S(ix + (iw - dw) / 2), S(iy + (ih - dh) / 2), S(dw), S(dh)); }
+        if (propArt) { const k2 = Math.min(iw / propArt.width, ih / propArt.height), // inside its own box: never over a neighbour
+           dw = propArt.width * k2, dh = propArt.height * k2; ctx.drawImage(propArt, S(ix + (iw - dw) / 2), S(iy + (ih - dh) / 2), S(dw), S(dh)); }
         else if (kind === 0) { ctx.fillStyle = '#7d8590'; ctx.fillRect(S(ix), S(iy), S(iw), S(ih)); ctx.strokeStyle = '#3d434b'; ctx.lineWidth = S(1.5); ctx.beginPath(); ctx.arc(S(ix + iw / 2), S(iy + ih / 2), S(ih / 2 - 3), 0, 7); ctx.stroke(); }
         else if (kind === 1) { ctx.fillStyle = '#5c636c'; ctx.beginPath(); ctx.arc(S(ix + 7), S(iy + 7), S(7), 0, 7); ctx.fill(); ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(S(ix + 7), S(iy + 7), S(3), 0, 7); ctx.fill(); }
         else if (kind === 2) { ctx.fillStyle = '#6b5a4a'; ctx.beginPath(); ctx.arc(S(ix + 15), S(iy + 15), S(15), 0, 7); ctx.fill(); ctx.strokeStyle = '#3a3029'; ctx.lineWidth = S(2); ctx.beginPath(); ctx.arc(S(ix + 15), S(iy + 15), S(10), 0, 7); ctx.stroke(); }
@@ -568,7 +570,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
         ctx.fillStyle = 'rgba(255,214,150,.55)'; ctx.shadowColor = 'rgba(255,200,120,.8)'; ctx.shadowBlur = S(8); ctx.fillRect(S(bx[0] + 6), S(y0 + rowH * 0.25), S(bw - 12), S(rowH * 0.6)); ctx.shadowBlur = 0;
         for (let xx = bx[0] + 22 + rr() * 30; xx < bx[2] - 22; xx += 70 + rr() * 50) { ctx.fillStyle = '#0d1016'; ctx.fillRect(S(xx), S(y0 + rowH * 0.2), S(12), S(rowH * 0.8)); ctx.fillStyle = 'rgba(255,220,160,.35)'; ctx.fillRect(S(xx + 2), S(y0 + rowH * 0.3), S(8), S(rowH * 0.65)); }
         ctx.fillStyle = col; ctx.globalAlpha = 0.85; ctx.fillRect(S(bx[0] + 4), S(y0), S(bw - 8), S(Math.max(3, rowH * 0.2))); ctx.globalAlpha = 1; }
-        if (floors >= 3 && rr() < 0.75) { // a blade sign down the upper floors
+        if (floors >= 3 && rr() < 0.75) { blade = true; // a blade sign down the upper floors
           const bxp = rr() < 0.5 ? bx[0] + 10 : bx[2] - 22, bt = wallTop + rowH * 0.3, bl = y0 - bt - 4, nc = NEON[Math.floor(rr() * NEON.length)];
           ctx.fillStyle = '#0b0d14'; ctx.fillRect(S(bxp), S(bt), S(12), S(bl)); ctx.strokeStyle = nc; ctx.shadowColor = nc; ctx.shadowBlur = S(12); ctx.lineWidth = S(1.5); ctx.strokeRect(S(bxp + 1), S(bt + 1), S(10), S(bl - 2));
           ctx.fillStyle = nc; for (let g = bt + 5; g < bt + bl - 7; g += 9) ctx.fillRect(S(bxp + 3.5), S(g), S(5), S(5)); ctx.shadowBlur = 0;
@@ -576,7 +578,10 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       ctx.restore(); }
     void bh0;
     // a neon sign on the street side
-    if (sides.length && !southSt && rr() < 0.8) { const [sd] = sides[0], col = NEON[Math.floor(rr() * NEON.length)], long = 50 + rr() * Math.min(90, (sd === 'n' || sd === 's' ? bw : bh) - 60);
+    // Round 407 (owner: "billboards should only be placed on the front side of buildings never the back side ... and neon
+    // signs"): a sign only on a building whose street is in front (south): a board along the front roof edge, unless the
+    // front wall already carries a blade sign. Never on a back or side wall.
+    if (southSt && !blade && rr() < 0.7) { const sd = 's', col = NEON[Math.floor(rr() * NEON.length)], long = 50 + rr() * Math.min(90, (sd === 'n' || sd === 's' ? bw : bh) - 60);
       if (long > 40) { let sx, sy, sw, sh2; if (sd === 's') { sx = bx[0] + 16 + rr() * Math.max(0, bw - 32 - long); sy = bx[3] - 6; sw = long; sh2 = 12; } else if (sd === 'n') { sx = bx[0] + 16 + rr() * Math.max(0, bw - 32 - long); sy = bx[1] - 6; sw = long; sh2 = 12; } else { sx = sd === 'e' ? bx[2] - 6 : bx[0] - 6; sy = bx[1] + 16 + rr() * Math.max(0, bh - 32 - long); sw = 12; sh2 = long; }
         ctx.save(); ctx.fillStyle = '#0b0d14'; ctx.fillRect(S(sx), S(sy), S(sw), S(sh2)); ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = S(14); ctx.lineWidth = S(2); ctx.strokeRect(S(sx + 1.5), S(sy + 1.5), S(sw - 3), S(sh2 - 3));
         const hArt = pick(sw > sh2 ? 'sign-h' : 'sign-v', ra); if (hArt) ctx.drawImage(hArt, S(sx), S(sy), S(sw), S(sh2));
@@ -909,7 +914,11 @@ function paintChronoRoom(canvas, key) {
     const lg = layerC.getContext('2d'); lg.drawImage(m, 0, 0); lg.globalCompositeOperation = 'source-in'; fill(lg, img); if (under) { lg.globalCompositeOperation = 'destination-in'; lg.drawImage(under, 0, 0); }
     target.drawImage(layerC, 0, 0); };
   if (!GEN.topdown) { for (const mix of (GEN.mix || []).filter(m => m.on === 'ground')) mixInto(ctx, null, mix);
-  ctx.fillStyle = GEN.groundShade; ctx.fillRect(0, 0, W, H); } // the machinery sits back, so the roads read at a glance
+  ctx.fillStyle = GEN.groundShade; ctx.fillRect(0, 0, W, H); }
+  else { const sw = (typeof CITY_TD_ART !== 'undefined' ? CITY_TD_ART.sidewalk : []).map(n => 'td/' + n).filter(n => imgs[n] && imgs[n].naturalWidth);
+    // Round 407 (owner: "sidewalk tile size is far too big"): drawn at 0.35, a paving tile about 90px across
+    for (const n of sw) (GEN.texScale = GEN.texScale || {})[n] = 0.35;
+    if (sw.length) { fill(ctx, imgs[sw[0]]); sw.slice(1).forEach((n, i) => mixInto(ctx, null, { tex: n, tag: 'sidewalk' + i, period: 9, cut: 0.6 })); ctx.fillStyle = 'rgba(8,12,24,.38)'; ctx.fillRect(0, 0, W, H); } } // the machinery sits back, so the roads read at a glance
   const layer = (grid, img, radius) => {
     const shape = chronoShape(grid, K, radius), c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, img);
