@@ -352,7 +352,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '410',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '412',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -433,12 +433,15 @@ function genWorld(seed) {
       if (ext > 3) continue;
       if (a < 0) q[0] -= ext; else if (a > 0) q[2] += ext; else if (b < 0) q[1] -= ext; else q[3] += ext;
       if (q[0] < ox + 1 || q[1] < oy + 1 || q[2] > ox + FG_COLS - 1 || q[3] > oy + FG_ROWS - 1) continue;
-      return [q[0] - ox, q[1] - oy, q[2] - ox, q[3] - oy]; }
+      // Round 412 (owner: "the squares around objects don't make any sense"): a square is a forecourt at a building's
+      // entrance, so at least 4 cells of the building must stand behind it (the old cut could empty the whole lot)
+      if (GEN.topdown && (b ? (r[3] - r[1]) - S5 - 1 < 4 : (r[2] - r[0]) - S5 - 1 < 4)) continue;
+      const out = [q[0] - ox, q[1] - oy, q[2] - ox, q[3] - oy]; out.front = b > 0; return out; }
     return null; };
   for (const k of keys) { const [wx, wy] = pos[k], ox = wx * FG_COLS, oy = wy * FG_ROWS, got = [];
     const cands = lots.map((l, i) => ({ l, i })).filter(({ l, i }) => l.front && !used.has(i) && l.r[2] > ox && l.r[0] < ox + FG_COLS && l.r[3] > oy && l.r[1] < oy + FG_ROWS);
-    for (const { l, i } of cands.sort(() => rnd() - 0.5)) { if (got.length >= 2) break;
-      const q = squareFor(l.r, [ox, oy]); if (!q) continue;
+    const ranked = cands.map(c => ({ ...c, q: squareFor(c.l.r, [ox, oy]), s: rnd() })).filter(c => c.q).sort((p, q2) => (q2.q.front - p.q.front) || p.s - q2.s);
+    for (const { i, q } of ranked) { if (got.length >= 2) break;
       const mx = (q[0] + q[2]) / 2 * FG_CELL, my = (q[1] + q[3]) / 2 * FG_CELL - 22;
       if (typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy))) continue;
       if (got.some(g => Math.hypot((g.x0 + g.x1) / 2 - (q[0] + q[2]) / 2, (g.y0 + g.y1) / 2 - (q[1] + q[3]) / 2) < 8)) continue;
@@ -489,7 +492,7 @@ function genWorld(seed) {
 // tall); car (seen from above, facing east); tree (seen from above); sidewalk (Round 407: seamless paving; the first is
 // the city's main paving, the rest by block); edge (Round 409: a border strip run round parks, outer side at the top);
 // trim (Round 410: a border strip framing the squares where objects stand). Prompts: tools/art-refresh/city-topdown-prompts.md.
-const CITY_TD_ART = { trim: ['trim-steel', 'trim-brick'], edge: ['edge-granite', 'edge-kerb', 'edge-planter'], sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-gravel', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2', 'skylight-3'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
+const CITY_TD_ART = { shore: ['shore-crumble'], trim: ['trim-steel', 'trim-brick'], edge: ['edge-granite', 'edge-kerb', 'edge-planter'], sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-gravel', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2', 'skylight-3'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
 function cityTdArtNames() { return Object.values(CITY_TD_ART).flat().map(n => 'td/' + n); }
 function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   const A = slot => { const l = (CITY_TD_ART[slot] || []).map(n => imgs['td/' + n]).filter(i => i && i.naturalWidth); return l.length ? l : null; };
@@ -513,11 +516,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       const dx = Math.sign(b[0] - a[0]), dy = Math.sign(b[1] - a[1]), hw = rd.w / 2 - 8;
       for (let i = 0; i < 7; i++) { const t = -hw + 6 + i * (2 * hw - 8) / 6; if (dx) { const x = dx > 0 ? x1 + 8 : x0 - 30; ctx.fillRect(S(x), S(a[1] + t - 3), S(22), S(6)); } else { const y = dy > 0 ? y1 + 8 : y0 - 30; ctx.fillRect(S(a[0] + t - 3), S(y), S(6), S(22)); } } } }
   ctx.restore();
-  // Round 410: each square where an object stands is framed by a trim strip (steel or brick), so it reads as a place
-  { const rt = chronoRng(seed + ':trim:' + key);
-    for (const sh of plan.shapes) { if (!sh.pave || sh.t !== 'rect') continue; const art = pick('trim', rt); if (!art) break; const T = 9, x0 = sh.x, y0 = sh.y, x1 = sh.x + sh.w, y1 = sh.y + sh.h;
-      for (const [ox, oy, len, ang] of [[x0, y0, x1 - x0, 0], [x1, y0, y1 - y0, Math.PI / 2], [x1, y1, x1 - x0, Math.PI], [x0, y1, y1 - y0, -Math.PI / 2]]) {
-        ctx.save(); ctx.translate(S(ox), S(oy)); ctx.rotate(ang); tile(art, 0, 0, len, T, T); ctx.restore(); } } }
+  // (Round 412: no frames round the squares; a square is a building's forecourt and reads by the building round it)
   // lots
   for (const l of lots) { const ra = chronoRng(seed + ':art:' + l.seed), rr = chronoRng(seed + ':roof:' + l.seed), [x0, y0, x1, y1] = l.r, I = 4, bx = [x0 + I, y0 + I, x1 - I, y1 - I], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
     if (l.use === 'plaza') continue;
@@ -528,7 +527,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       const edgeArt = pick('edge', ra);
       if (edgeArt) { // Round 409: the owner's granite kerb, run round the four sides (outer side outward), as autotiled games edge a bed
         const T = 14; for (const [ox, oy, len, ang] of [[bx[0], bx[1], bw, 0], [bx[2], bx[1], bh, Math.PI / 2], [bx[2], bx[3], bw, Math.PI], [bx[0], bx[3], bh, -Math.PI / 2]]) {
-          ctx.save(); ctx.translate(S(ox), S(oy)); ctx.rotate(ang); tile(edgeArt, 0, 0, len, T, T); ctx.restore(); } }
+          ctx.save(); ctx.translate(S(ox), S(oy)); ctx.rotate(ang); ctx.fillStyle = '#161a22'; ctx.fillRect(0, 0, S(len), S(T)); tile(edgeArt, 0, 0, len, T, T); ctx.restore(); } } // Round 412: on a solid base, so no grass shows through the kerb
       else { ctx.save(); ctx.strokeStyle = '#0b0e14'; ctx.lineWidth = S(7); ctx.strokeRect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.strokeStyle = '#6b7380'; ctx.lineWidth = S(3); ctx.strokeRect(S(bx[0] + 1), S(bx[1] + 1), S(bw - 2), S(bh - 2)); ctx.restore(); }
       continue; }
     // the street side: the side with a road just beyond it
@@ -537,7 +536,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     // Round 400 (owner: "could the buildings be not quite directly over the top? ... maybe 10 degrees?"): seen tilted by
     // GEN.tilt degrees, a building shows its south wall, sin(tilt) of its height, drawn inside its own lot under the roof.
     // Round 401: the tall shopfronts face a street to the south; a building with its street behind it (north) is kept low.
-    let blade = false; const southSt = sides.some(sd => sd[0] === 's'), floors = southSt ? (district === 'tech' ? 4 : 2) + Math.floor(rr() * 5) : 1 + Math.floor(rr() * 3), dz = Math.min(floors * 36 * SIN, bh * 0.5), wallTop = bx[3] - dz;
+    let blade = false; const southSt = sides.some(sd => sd[0] === 's'), floors = (southSt ? 4 + Math.floor(rr() * 4) : 4 + Math.floor(rr() * 2)) + (district === 'tech' ? 1 : 0) /* Round 412 (owner): at least 4 floors */, dz = Math.min(floors * 36 * SIN, bh * 0.5), wallTop = bx[3] - dz;
     const rb = [bx[0], bx[1], bx[2], wallTop]; bx[3] = wallTop; const bh0 = bh;
     // a roof, sometimes in two parts of different heights
     const parts = bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
@@ -1007,7 +1006,26 @@ function paintChronoRoom(canvas, key) {
     if (GEN.feather) { const m = ragged(terrain.pipes, 'grass', { blur: 30, amp: 0.8, sharp: 9 }), g = m.getContext('2d'); g.globalCompositeOperation = 'source-in'; fill(g, imgs.pipes); ctx.drawImage(m, 0, 0); }
     else { ring(chronoTint(s.shape, GEN.bedRim[0]), 5); ring(chronoTint(s.shape, GEN.bedRim[1]), 2); ctx.drawImage(s.art, 0, 0); }
   }
-  if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
+  if (any(terrain.chasm) && GEN.beach && GEN.topdown) {
+    // Round 412 (owner: "sand and grass tiles still do not transition well"): as in autotiled games, the coast keeps to the
+    // grid: water cells, then a band of sand exactly one cell wide, with a shoreline strip (CITY_TD_ART.shore: concrete
+    // crumbling into the sand) laid along every straight edge where the sand meets the paving, and a foam line along the water.
+    const T = CG_CELL, W8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], isW = (x, y) => terrain.chasm(x, y), isS = (x, y) => !isW(x, y) && W8.some(([a, b]) => isW(x + a, y + b));
+    const cells = (f, paint) => { ctx.save(); ctx.beginPath(); for (let y = -1; y <= CG_ROWS; y++) for (let x = -1; x <= CG_COLS; x++) if (f(x, y)) ctx.rect(x * T * K, y * T * K, T * K + 1, T * K + 1); ctx.clip(); paint(); ctx.restore(); };
+    cells(isS, () => { fill(ctx, imgs.sand); ctx.fillStyle = 'rgba(8,12,24,.25)'; ctx.fillRect(0, 0, W, H); });
+    cells(isW, () => { fill(ctx, imgs.chasm); ctx.fillStyle = 'rgba(4,2,14,.35)'; ctx.fillRect(0, 0, W, H); });
+    const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART.shore || []).map(n => imgs['td/' + n]).find(i => i && i.naturalWidth) : null;
+    const [wx0, wy0] = GEN.world(key);
+    for (let y = -1; y <= CG_ROWS; y++) for (let x = -1; x <= CG_COLS; x++) {
+      if (isS(x, y)) for (const [a, b, ox, oy, ang] of [[0, -1, x * T, y * T, 0], [1, 0, (x + 1) * T, y * T, Math.PI / 2], [0, 1, (x + 1) * T, (y + 1) * T, Math.PI], [-1, 0, x * T, (y + 1) * T, -Math.PI / 2]]) {
+        if (isS(x + a, y + b) || isW(x + a, y + b)) continue; // only where the sand meets the paving
+        if (shoreArt) { const ph = a ? (wy0 * 500 + oy) : (wx0 * 800 + ox), k = 18 * K / shoreArt.height, p = ctx.createPattern(shoreArt, 'repeat');
+          if (p.setTransform) p.setTransform(new DOMMatrix().translate(-((ph * K) % (shoreArt.width * k)), 0).scale(k));
+          ctx.save(); ctx.translate(ox * K, oy * K); ctx.rotate(ang); ctx.fillStyle = p; ctx.fillRect(0, 0, T * K, 18 * K); ctx.restore(); }
+        else { ctx.save(); ctx.translate(ox * K, oy * K); ctx.rotate(ang); ctx.fillStyle = '#0b0e14'; ctx.fillRect(0, 0, T * K, 4 * K); ctx.fillStyle = '#4a515c'; ctx.fillRect(0, 4 * K, T * K, 2 * K); ctx.restore(); } }
+      if (isW(x, y)) for (const [a, b, x0, y0, x1, y1] of [[0, -1, x, y, x + 1, y], [1, 0, x + 1, y, x + 1, y + 1], [0, 1, x, y + 1, x + 1, y + 1], [-1, 0, x, y, x, y + 1]]) {
+        if (isW(x + a, y + b)) continue; ctx.save(); ctx.strokeStyle = 'rgba(207,230,238,.55)'; ctx.lineWidth = 3 * K; ctx.beginPath(); ctx.moveTo(x0 * T * K, y0 * T * K); ctx.lineTo(x1 * T * K, y1 * T * K); ctx.stroke(); ctx.restore(); } }
+  } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
     // Round 398 (owner: "water should always have that beach tile around it"): an even strip of sand round all water,
