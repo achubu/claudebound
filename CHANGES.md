@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 422: the Textures page by world, category, type and name
+
+Owner: "group by world 1st, then category, then type, then name of the sprite/texture"; "we can just focus on world 1 for
+now, ignore the rest".
+
+- `sprites/manifest.json` is now worlds → categories → types → pictures; types are sorted by label and pictures by name.
+  World 1 (Neon Aftermath) only for now.
+- Neon Aftermath's categories: Ground, Edges and borders, Buildings, Props, **Objects** (its Cardsmith, Wanted Board,
+  breakers, Afterlight Vault, waypoint, merchant, chest, the shared map objects, its eight events and the portal to
+  Solaris, read from WORLD_POI_ART, WORLD_CHEST_ART, POI_ART and EVENT_POOLS.city), **Creatures** (each city creature's
+  sheet, from WILDLIFE_ART) and Legacy: 180 pictures.
+- `tests/sprites-page.test.cjs` also checks the name order and that world 1 comes first.
+
 ## Round 421: the Textures page (aethercede.com/sprites)
 
 Owner: "add a page called textures that lists them all and groups them by category at aethercede.com/sprites".
