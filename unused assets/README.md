@@ -50,3 +50,5 @@ Round 391 (owner: "im seeing old room images, you can remove them"): Neon Afterm
 painted rooms (`assets/environment/rooms/room-X-Y.webp`, 54 paintings) and the six district paintings they replaced
 (`assets/environment/world/`) moved here. `tools/build_room_masks.py`, `tools/nook_view.py` and `tools/kerb_spots.py`
 read them from their old paths; move them back with `git mv` to use those tools.
+- `assets/environment/neon-city.webp` (Round 419): the old Neon Aftermath district atlas, drawn under each city room until
+  the generated room had painted; the city is generated now.

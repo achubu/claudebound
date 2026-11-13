@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 419: no old room images in Neon Aftermath
+
+Owner: "im also seeing old rooms generated when i enter them, please remove any old room images from the game".
+
+The old city engine (`assets/environment/neon-city.js`) painted its district atlas (`neon-city.webp`: district colours,
+street props, a "BLOCK NN" stencil) onto each room's canvas first; the generated room painted over it only once its
+textures had loaded, and the atlas's own late load could repaint the old room on top. Now the atlas is not loaded (moved to
+`unused assets/`) and the old painter only clears the canvas to dark when the generated city is in the game. Checked in a
+browser: entering a fresh city room requests no old room art (atlas, rooms, world, city-blocks or city diagonals) and shows
+the generated room. The city uses no city-block or diagonal paintings (none of its rooms qualifies).
+
 ## Round 418: a new Afterlight Vault door
 
 Owner: "use this as the new afterlight vault door" (a vault hatch set in a concrete frame, on green).
