@@ -5,7 +5,7 @@
 
 Slots and what the tool does with the image:
   roof, sidewalk       seamless roof / sidewalk surface, 512x512 (blended at the edges so it tiles both ways)
-  wall, shop           one floor of wall / shopfront: scaled to 128px tall and blended left-right so it tiles sideways
+  wall, shop, edge     one floor (edge: a border strip, outer side up) of wall / shopfront: scaled to 128px tall and blended left-right so it tiles sideways
   prop-ac, prop-vent, prop-tank, prop-stairs, prop-solar, prop-skylight,
   sign-h, sign-v, car, tree
                        a thing on a flat green background (magenta for green things such as trees): the green is keyed out, the picture trimmed and scaled so
@@ -24,7 +24,7 @@ from scipy import ndimage
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 OUT = os.path.join(ROOT, 'assets', 'environment', 'city-gen', 'td')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
-TEXTURE = {'roof', 'wall', 'shop', 'sidewalk'}
+TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'edge'}
 SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree'}
 
 
