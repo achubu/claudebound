@@ -11,6 +11,9 @@ Slots and what the tool does with the image:
                        a thing on a flat green background (magenta for green things such as trees): the green is keyed out, the picture trimmed and scaled so
                        its longer side is 256px (cars should face east, to the right)
 
+Uneven sheets: python3 tools/prepare_city_art.py --objects <image> <slot:name or -> ... (row by row, left to right).
+Sheets: python3 tools/prepare_city_art.py --sheet <image> <cols> <rows> <slot:name or -> ... (one per cell).
+
 The result goes to assets/environment/city-gen/td/<name>.webp and <name> is added to the slot in CITY_TD_ART.
 """
 import os, re, sys
@@ -69,7 +72,45 @@ def register(slot, name):
     open(JS, 'w').write(s[:m.start(1)] + body + s[m.end(1):])
 
 
+def sheet(args):
+    """--sheet <image> <cols> <rows> <slot:name or -> ...: cut a sprite sheet into an even grid, one entry per cell
+    (left to right, top to bottom); textures are cut a little inside their cell, so frame borders are left behind."""
+    src, cols, rows, entries = args[0], int(args[1]), int(args[2]), args[3:]
+    if len(entries) != cols * rows: sys.exit('need %d entries (slot:name or -), got %d' % (cols * rows, len(entries)))
+    img = Image.open(src).convert('RGB'); W, H = img.size; os.makedirs(OUT, exist_ok=True)
+    for i, e in enumerate(entries):
+        if e == '-': continue
+        slot, name = e.split(':')
+        if slot not in TEXTURE | SPRITE: sys.exit('unknown slot ' + slot)
+        x0, y0, x1, y1 = (i % cols) * W // cols, (i // cols) * H // rows, (i % cols + 1) * W // cols, (i // cols + 1) * H // rows
+        if slot in TEXTURE: m = (x1 - x0) // 20; x0, y0, x1, y1 = x0 + m, y0 + m, x1 - m, y1 - m
+        o = texture(img.crop((x0, y0, x1, y1)), slot) if slot in TEXTURE else sprite(img.crop((x0, y0, x1, y1)))
+        path = os.path.join(OUT, name + '.webp'); o.save(path, quality=88, method=6); register(slot, name)
+        print('%s -> %s %s' % (slot, os.path.relpath(path, ROOT), o.size))
+
+
+def objects(args):
+    """--objects <image> <slot:name or -> ...: a sheet whose objects are not on an even grid: each object is found by its
+    outline on the flat background (pieces within 20px count as one), taken row by row, left to right."""
+    src, entries = args[0], args[1:]
+    img = Image.open(src).convert('RGB'); a = np.asarray(img).astype(np.float32)
+    c = np.concatenate([a[:8, :8].reshape(-1, 3), a[:8, -8:].reshape(-1, 3), a[-8:, :8].reshape(-1, 3), a[-8:, -8:].reshape(-1, 3)]); bg = np.median(c, axis=0)
+    fg = np.linalg.norm(a - bg, axis=2) > 70
+    lab, n = ndimage.label(ndimage.binary_dilation(fg, iterations=int(os.environ.get('GAP', 20))))
+    boxes = [s for s in ndimage.find_objects(lab) if s and (s[0].stop - s[0].start) * (s[1].stop - s[1].start) > fg.size * 0.004]
+    if len(boxes) != len(entries): sys.exit('found %d objects, %d entries given' % (len(boxes), len(entries)))
+    rowH = img.height / max(1, round(img.height / max(b[0].stop - b[0].start for b in boxes)))
+    boxes.sort(key=lambda b: (int((b[0].start + b[0].stop) / 2 // rowH), b[1].start)); os.makedirs(OUT, exist_ok=True)
+    for b, e in zip(boxes, entries):
+        if e == '-': continue
+        slot, name = e.split(':'); y0, y1, x0, x1 = max(0, b[0].start - 4), min(img.height, b[0].stop + 4), max(0, b[1].start - 4), min(img.width, b[1].stop + 4)
+        o = sprite(img.crop((x0, y0, x1, y1))); path = os.path.join(OUT, name + '.webp'); o.save(path, quality=88, method=6); register(slot, name)
+        print('%s -> %s %s' % (slot, os.path.relpath(path, ROOT), o.size))
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == '--sheet': return sheet(sys.argv[2:])
+    if len(sys.argv) > 1 and sys.argv[1] == '--objects': return objects(sys.argv[2:])
     if len(sys.argv) != 4: sys.exit(__doc__)
     src, slot, name = sys.argv[1:]
     if slot not in TEXTURE | SPRITE: sys.exit('unknown slot %s; slots: %s' % (slot, ', '.join(sorted(TEXTURE | SPRITE))))

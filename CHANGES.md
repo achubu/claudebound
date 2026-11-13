@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 403: the owner's first top-down city art
+
+The owner's Archive_16 (twelve single images) and Archive_116 (a tree, a sheet of ten roof textures, a sheet of ten
+vehicles and two sheets with one of every object).
+
+- Into `CITY_TD_ART`: 11 roofs, a concrete wall, a noodle-bar shopfront, 3 air units, 2 vents, 3 tanks, 3 stair huts,
+  2 solar arrays, 3 skylights, 2 wide and 2 tall neon signs, 12 vehicles and 3 trees (`assets/environment/city-gen/td/`).
+- Left out: the first taxi (drawn from the side), two signs whose pink neon keyed away with the mauve background, and a
+  vent with purple patches.
+- Vehicles are painted at the 3/4 angle, so they are stood upright (half flipped) instead of turned with the street.
+- `tools/prepare_city_art.py` gains `--sheet <image> <cols> <rows> <slot:name or -> ...` (cut on an even grid; textures cut
+  a little inside each cell so frame borders are left behind) and `--objects <image> <slot:name or -> ...` (find each
+  object by its outline, row by row; `GAP=<px>` sets how close pieces must be to count as one).
+- City art version 403, so browsers fetch the new pictures.
+
 ## Round 402: art slots for the top-down city
 
 Owner: "Looks great, get it ready for new graphics if you can".
