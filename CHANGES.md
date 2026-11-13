@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 413: border strips that bend round corners; never edge on edge
+
+Owner: "the edges dont have rounded corner which is a problem, we need edges that can be curved and used at 90 degree
+angles"; "make a rule that there can never be edge on edge, there must be tile in between".
+
+- `cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy)` (`assets/chrono-gen.js`): lays a border strip along any outline,
+  as spline/path tools in 2D editors bend a strip. The mask's outline is traced with marching squares every 4px (crossing
+  points placed by the mask's alpha, so curves are smooth); each segment draws a slice of the strip turned to the outline,
+  top on the line, depth going inward, taken from the strip at the segment's world position so straight runs read as one
+  strip and it runs on across rooms. Straight edges, 90-degree corners (inside and out) and curves all use it.
+- Coast: the beach and water shapes are the grid cells with their corners rounded (14px), the shoreline strip bends round
+  them, the foam follows the water's rounded edge. (Also fixes the sand and water tints, which had been erasing the fill.)
+- Parks: rounded corners (16px) on the grass, with the kerb bent round them.
+- No edge on edge: a lot becomes a park only with at least one clear cell of paving between its kerb and any other park,
+  and three cells from the shore band (whose strip is an edge too).
+- Tests: chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration and playtest-walk city pass.
+
 ## Round 412: a coast on the grid, forecourts for objects, four-floor buildings
 
 Owner: "the way you are using the transition tiles doesn't look very good, sand and grass tiles still do not transition
