@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 412: a coast on the grid, forecourts for objects, four-floor buildings
+
+Owner: "the way you are using the transition tiles doesn't look very good, sand and grass tiles still do not transition
+well. the squares around objects don't make any sense, can you find an optimal algorithm to place these logically?";
+"minimum building height should be 4 floors".
+
+- **Coast** (top-down city): as in autotiled games the coast keeps to the 50px grid: water cells, a band of sand exactly
+  one cell wide (8-neighbours of water), the owner's crumbling-shoreline strip (new slot `shore`, `shore-crumble`) laid
+  along every straight edge where sand meets paving (its pattern phased by world position, so it runs on across rooms),
+  and a foam line along the water. No fades.
+- **Parks**: the kerb strip sits on a solid base, so no grass shows through its gaps.
+- **Squares for objects are forecourts** (`genWorld`): a square is a recess at a building's entrance opening onto the
+  street; one is cut only where at least 4 cells of the building stand behind it (it used to empty whole lots), and
+  forecourts on a building's front (street to the south, the wall seen) are chosen first. The trim frames are gone.
+- **Buildings have at least 4 floors** (4-7 facing a street to the south, 4-5 otherwise; +1 in the tech quarter).
+- Tests: chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration and playtest-walk city pass.
+
 ## Round 411: parked cars stay in the street, drawn last
 
 Owner: "you can see a vehicle behind the border there". Upright vehicle art (56px wide, Round 403) stood 34px off a
