@@ -357,7 +357,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '420',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '423',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -368,7 +368,7 @@ const GEN_THEMES = {
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.9, landmark: 0.9, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
     // Round 420: the surfaces' textures by name (sorted into surfaces/<surface>/); everything else the old 3/4 city drew is in legacy/
-    tex: { pipes: 'surfaces/park/overgrowth', chasm: 'surfaces/sea/water', overgrowth: 'surfaces/park/overgrowth', water: 'surfaces/sea/water', sand: 'surfaces/waterfront/sand', floor: 'surfaces/road/floor', 'road-wet': 'surfaces/road/road-wet', yard: 'surfaces/lot/yard', 'pavement-old': 'surfaces/sidewalk/pavement-old' }, legacy: 'legacy/', kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { floor: 0.45, yard: 0.3, ground: 0.7, 'road-wet': 0.35, 'pavement-old': 0.45, plaza: 0.32, 'rubble-big': 0.8 },
+    tex: { pipes: 'surfaces/park/overgrowth', chasm: 'surfaces/sea/water', overgrowth: 'surfaces/park/overgrowth', water: 'surfaces/sea/water', sand: 'surfaces/waterfront/sand', floor: 'surfaces/road/floor', 'road-wet': 'surfaces/road/road-wet', gravel: 'surfaces/road/gravel', yard: 'surfaces/lot/yard', 'pavement-old': 'surfaces/sidewalk/pavement-old' }, legacy: 'legacy/', kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { chasm: 1.6, gravel: 0.3, floor: 0.45, yard: 0.3, ground: 0.7, 'road-wet': 0.35, 'pavement-old': 0.45, plaza: 0.32, 'rubble-big': 0.8 },
     mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], blend: true, // Round 398: no kerbs, no paving tile; roads and paths blend into the ground (the plaza tile from Round 397 is unused)
     bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
@@ -504,7 +504,7 @@ function genWorld(seed) {
 // tall); car (seen from above, facing east); tree (seen from above); sidewalk (Round 407: seamless paving; the first is
 // the city's main paving, the rest by block); edge (Round 409: a border strip run round parks, outer side at the top);
 // trim (Round 410: a border strip framing the squares where objects stand). Prompts: tools/art-refresh/city-topdown-prompts.md.
-const CITY_TD_ART = { 'waterfront-edge': ['shore-crumble'], curb: ['curb-stone'], 'park-edge': ['edge-granite', 'edge-kerb', 'edge-planter'], sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-gravel', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2', 'skylight-3'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
+const CITY_TD_ART = { 'waterfront-edge': ['shore-crumble'], curb: ['curb-stone'], 'park-edge': ['edge-granite', 'edge-kerb', 'edge-planter'], sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
 // Round 415: for each wall and shopfront strip, the columns (image px) of plain wall between windows (tools/prepare_city_art.py).
 const CITY_TD_GAPS = {'wall-concrete': [4, 19, 29, 41, 127, 134, 147, 258, 440, 446, 453], 'wall-brick': [2, 11, 19, 73, 81, 291, 299, 307, 362, 371, 377, 435, 441, 447, 456, 515, 523, 585, 595, 601, 674, 741, 750, 756, 804], 'wall-panel': [19, 30, 40, 47, 58, 64, 75, 158, 206, 213, 222, 237, 246, 286, 293, 304, 310, 618, 657, 667, 677, 687, 698, 740, 748], 'shop-noodle': [0, 6, 18, 24, 30, 38, 57, 66, 78, 84, 92, 103, 113, 302, 436, 443, 452], 'shop-repair': [25, 34, 41, 48, 56, 63, 76, 170, 176, 197, 280, 287, 401, 409, 437, 444, 450, 457, 596, 606, 628, 641, 655, 662, 669, 675], 'shop-shutters': [12, 28, 40, 79, 85, 100, 107, 125, 238, 252, 306, 320, 473, 479, 506, 515, 527, 538, 544, 559, 665, 671, 688, 698, 717] };
 // Round 420 (owner: "we need to have a rule for each texture tile, there should be tile for under buildings, tile for road,
@@ -519,8 +519,8 @@ const CITY_SURFACES = [
   { key: 'sea', label: 'Sea', kind: 'ground', walk: false, base: ['water'], rule: 'Only along the city edge, never inland; whole 50px grid cells, corners rounded.' },
   { key: 'waterfront', label: 'Waterfront (beach sand)', kind: 'ground', walk: true, base: ['sand'], rule: 'Exactly one grid cell wide round the sea; meets the sea with no border.' },
   { key: 'waterfront-edge', label: 'Waterfront edge (shoreline strip)', kind: 'edge', walk: true, slot: 'waterfront-edge', rule: 'Laid along the outline where the sand meets the paving, bent round corners.' },
-  { key: 'sidewalk', label: 'Sidewalk paving', kind: 'ground', walk: true, base: ['pavement-old'], slot: 'sidewalk', scale: 0.22, rule: 'All ground that is not road, sea, sand, lot or park. One paving per city block (the first slot entry on half the blocks), so it only changes across a street. The squares where objects stand are sidewalk too.' },
-  { key: 'road', label: 'Road (asphalt)', kind: 'ground', walk: true, base: ['floor', 'road-wet'], scale: 0.45, rule: 'Main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.' },
+  { key: 'sidewalk', label: 'Sidewalk paving', kind: 'ground', walk: true, base: ['pavement-old'], slot: 'sidewalk', scale: 0.22, scales: { 'walk-slabs': 0.13, 'walk-plates': 0.13 }, rule: 'All ground that is not road, sea, sand, lot or park. One paving per city block (the first slot entry on half the blocks), so it only changes across a street. The squares where objects stand are sidewalk too.' },
+  { key: 'road', label: 'Road (asphalt)', kind: 'ground', walk: true, base: ['floor', 'road-wet', 'gravel'], scale: 0.45, rule: 'Main roads 100px in asphalt, alleys 50px in gravel (Round 423); crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.' },
   { key: 'curb', label: 'Curb (kerb along every road)', kind: 'edge', walk: true, slot: 'curb', rule: 'A kerb-stone strip along both edges of every road, on the sidewalk side, bent round corners.' },
   { key: 'lot', label: 'Under buildings (lot footing)', kind: 'ground', walk: false, base: ['yard'], scale: 0.3, rule: 'Fills a building\'s whole lot; a 4px footing shows round the building. Lots lie wholly on their block, never over a street.' },
   { key: 'park', label: 'Park (grass)', kind: 'ground', walk: true, base: ['overgrowth'], rule: 'About 8% of lots; corners rounded; trees on it block; at least one clear cell of sidewalk from any other park and from the shore.' },
@@ -996,7 +996,7 @@ function paintChronoRoom(canvas, key) {
     if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null; return true;
   }
   const props = chronoRoomProps(theme === 'chronospire' ? chronoSeed() : seed, plan);
-  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.beach ? ['sand'] : []), ...(GEN.topdown ? ['pavement-old', ...cityTdArtNames()] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set((GEN.topdown ? [] : props.map(p => p.name)).concat(plan.inlays.map(i => i.name)))], imgs = {};
+  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.beach ? ['sand'] : []), ...(GEN.topdown ? ['pavement-old', 'gravel', ...cityTdArtNames()] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set((GEN.topdown ? [] : props.map(p => p.name)).concat(plan.inlays.map(i => i.name)))], imgs = {};
   for (const n of names) imgs[n] = chronoArtImage(n);
   const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth));
   if (waiting) {
@@ -1029,7 +1029,7 @@ function paintChronoRoom(canvas, key) {
   ctx.fillStyle = GEN.groundShade; ctx.fillRect(0, 0, W, H); }
   else { const sw = (typeof CITY_TD_ART !== 'undefined' ? CITY_TD_ART.sidewalk : []).map(n => cityArtPath('sidewalk', n)).filter(n => imgs[n] && imgs[n].naturalWidth);
     // Round 407 (owner: "sidewalk tile size is far too big"): drawn at 0.35, a paving tile about 90px across
-    for (const n of sw) (GEN.texScale = GEN.texScale || {})[n] = CITY_SURFACES.find(x => x.key === 'sidewalk').scale; // Round 420 (owner: "the road and curb tile scale should be smaller")
+    const swReg = CITY_SURFACES.find(x => x.key === 'sidewalk'); for (const n of sw) (GEN.texScale = GEN.texScale || {})[n] = (swReg.scales && swReg.scales[n.split('/').pop()]) || swReg.scale; // Round 423 (owner: "walk slabs and walk plates are too big"): per-picture scales // Round 420 (owner: "the road and curb tile scale should be smaller")
     // Round 408 (owner: blends between very different tiles "look horrible ... set rules so it cant happen again"; "find what
     // technique is used by modern 2d games"): as with autotiled terrain, a material change is a hard edge on the grid,
     // never a fade. Each block of the city (the ground the streets enclose) takes one paving, half of them the main one;
@@ -1110,12 +1110,19 @@ function paintChronoRoom(canvas, key) {
     // grid: water cells, then a band of sand exactly one cell wide, with a shoreline strip (CITY_TD_ART.shore: concrete
     // crumbling into the sand) laid along every straight edge where the sand meets the paving, and a foam line along the water.
     const T = CG_CELL, W8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], isW = (x, y) => terrain.chasm(x, y), isS = (x, y) => !isW(x, y) && W8.some(([a, b]) => isW(x + a, y + b));
+    // Round 423 (owner: "our water texture needs improvement, it repeats too much"): the water is drawn larger, and a second
+    // copy, turned a quarter and mirrored and shifted, is laid over it in soft patches from world-wide noise, so the
+    // picture's repeat no longer lines up into a visible grid.
+    const waterFill = g => { fill(g, imgs.chasm); const img = sized(imgs.chasm), m = patches('water2', 4, 0.42), c = document.createElement('canvas'); c.width = W; c.height = H; const cg = c.getContext('2d');
+      cg.drawImage(m, 0, 0); cg.globalCompositeOperation = 'source-in'; const p = cg.createPattern(img, 'repeat'); const [vx, vy] = GEN.world(key);
+      if (p.setTransform) p.setTransform(new DOMMatrix().translate(-((vx * W) % 1600) - 517, -((vy * H) % 1600) - 311).rotate(90).scale(-1, 1)); cg.fillStyle = p; cg.fillRect(0, 0, W, H);
+      g.save(); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.85; g.drawImage(c, 0, 0); g.restore(); };
     const cellMask = f => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.fillStyle = '#fff';
       for (let y = -1; y <= CG_ROWS; y++) for (let x = -1; x <= CG_COLS; x++) if (f(x, y)) g.fillRect(x * T * K, y * T * K, T * K + 1, T * K + 1); return smoothed(c, 14 * K); }; // corners rounded, in and out
     const beach = cellMask((x, y) => isS(x, y) || isW(x, y)), sea = cellMask(isW);
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
     ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.25)'; g.fillRect(0, 0, W, H); }), 0, 0);
-    ctx.drawImage(tintIn(sea, g => { fill(g, imgs.chasm); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(4,2,14,.35)'; g.fillRect(0, 0, W, H); }), 0, 0);
+    ctx.drawImage(tintIn(sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(4,2,14,.35)'; g.fillRect(0, 0, W, H); }), 0, 0);
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART['waterfront-edge'] || []).map(n => imgs[cityArtPath('waterfront-edge', n)]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
     if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
@@ -1207,6 +1214,20 @@ function paintChronoRoom(canvas, key) {
     const curbArt = GEN.topdown && (CITY_TD_ART.curb || []).map(n => imgs[cityArtPath('curb', n)]).find(i => i && i.naturalWidth);
     if (GEN.topdown && !curbArt) { ring(chronoTint(f.shape, '#05070c'), 4); ring(chronoTint(f.shape, '#3c4450'), 2); }
     rg.globalCompositeOperation = 'source-in'; fill(rg, imgs.floor); rg.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(rg, rm, mix);
+    if (GEN.topdown && imgs.gravel && imgs.gravel.naturalWidth) { // Round 423 (owner: "roof-gravel can be changed to road texture"): alleys are gravel
+      const am = document.createElement('canvas'); am.width = W; am.height = H; const ag = am.getContext('2d'); ag.fillStyle = ag.strokeStyle = '#fff'; ag.lineCap = 'butt';
+      for (const sh of plan.shapes) { if (sh.pave || sh.main !== false) continue;
+        if (sh.t === 'rect') ag.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
+        else if (sh.t === 'poly') { ag.beginPath(); sh.pts.forEach(([x, y], i) => i ? ag.lineTo(x * K, y * K) : ag.moveTo(x * K, y * K)); ag.closePath(); ag.fill(); }
+        else { ag.lineWidth = sh.w * K; ag.beginPath(); sh.pts.forEach(([x, y], i) => i ? ag.lineTo(x * K, y * K) : ag.moveTo(x * K, y * K)); ag.stroke(); } }
+      // a main road's own shapes are drawn back on top, so where an alley meets one the asphalt runs through
+      ag.globalCompositeOperation = 'destination-out';
+      for (const sh of plan.shapes) { if (sh.pave || sh.main === false) continue;
+        if (sh.t === 'rect') ag.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
+        else if (sh.t === 'poly') { const xs = sh.pts.map(q => q[0]), ys = sh.pts.map(q => q[1]); ag.fillRect(Math.min(...xs) * K, Math.min(...ys) * K, (Math.max(...xs) - Math.min(...xs)) * K, (Math.max(...ys) - Math.min(...ys)) * K); }
+        else { ag.lineWidth = sh.w * K; ag.beginPath(); sh.pts.forEach(([x, y], i) => i ? ag.lineTo(x * K, y * K) : ag.moveTo(x * K, y * K)); ag.stroke(); } }
+      ag.globalCompositeOperation = 'destination-in'; ag.drawImage(rm, 0, 0); ag.globalCompositeOperation = 'source-in'; fill(ag, imgs.gravel);
+      rg.globalCompositeOperation = 'source-atop'; rg.drawImage(am, 0, 0); }
     if (GEN.topdown) { rg.globalCompositeOperation = 'source-atop'; rg.fillStyle = 'rgba(4,6,12,.62)'; rg.fillRect(0, 0, W, H); }
     ctx.drawImage(rm, 0, 0);
     if (curbArt) { // Round 420: the curb, a kerb-stone strip along every road edge, on the sidewalk side (the road mask turned inside out)

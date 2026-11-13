@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 423: gravel alleys, water that doesn't repeat, smaller slabs and plates, skylight-3 out
+
+Owner: "skylight 3 can be removed from the game its no good"; "roof-gravel can be changed to road texture"; "our water
+texture needs improvement, it repeats too much"; "walk slabs and walk plates are too big need to scale them down".
+
+- `skylight-3` moved to `unused assets/`.
+- `roof-gravel` is now the road surface's `gravel` (`surfaces/road/gravel.webp`, drawn at 0.3): alleys are gravel, main
+  roads stay asphalt (where an alley meets a main road the asphalt runs through).
+- Water: drawn 1.6x larger, with a second copy (turned a quarter, mirrored, shifted) laid over it in soft patches from
+  world-wide noise, so its repeat no longer lines up into a visible grid.
+- Sidewalk pavings can have their own scale (`scales` in the registry): slabs and plates 0.13 (others 0.22).
+- Textures page rebuilt (179 pictures). Tests: city-surfaces, sprites-page, chrono-gen, item-placement, room-art,
+  neon-world, neon-world-pathing and playtest-walk city pass.
+
 ## Round 422: the Textures page by world, category, type and name
 
 Owner: "group by world 1st, then category, then type, then name of the sprite/texture"; "we can just focus on world 1 for

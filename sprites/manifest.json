@@ -28,7 +28,7 @@
       {
        "key": "road",
        "label": "Road (asphalt)",
-       "rule": "Main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.",
+       "rule": "Main roads 100px in asphalt, alleys 50px in gravel (Round 423); crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.",
        "walk": true,
        "folder": "city-gen/surfaces/road/",
        "scale": 0.45,
@@ -37,6 +37,12 @@
          "name": "floor",
          "src": "assets/environment/city-gen/surfaces/road/floor.webp",
          "bytes": 129138,
+         "role": "base texture"
+        },
+        {
+         "name": "gravel",
+         "src": "assets/environment/city-gen/surfaces/road/gravel.webp",
+         "bytes": 61568,
          "role": "base texture"
         },
         {
@@ -270,11 +276,6 @@
          "bytes": 33204
         },
         {
-         "name": "roof-gravel",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-gravel.webp",
-         "bytes": 61568
-        },
-        {
          "name": "roof-grit",
          "src": "assets/environment/city-gen/surfaces/roof/roof-grit.webp",
          "bytes": 46050
@@ -483,11 +484,6 @@
          "name": "skylight-2",
          "src": "assets/environment/city-gen/props/prop-skylight/skylight-2.webp",
          "bytes": 47970
-        },
-        {
-         "name": "skylight-3",
-         "src": "assets/environment/city-gen/props/prop-skylight/skylight-3.webp",
-         "bytes": 21842
         }
        ]
       },
