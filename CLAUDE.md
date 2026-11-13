@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 423) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 424) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -88,6 +88,8 @@ change set.
   shop. Art is sorted in `assets/environment/city-gen/surfaces/<surface>/` and `props/<kind>/` (old 3/4 art in `legacy/`);
   add art with `tools/prepare_city_art.py`; `tools/art-refresh/city-surfaces.md` is the readable list and
   `tests/city-surfaces.test.cjs` keeps the registry, folders and walk rules in step. Never stretch art; no drawn stand-ins.
+  Round 424: slots for park grasses, rubble, street lights, traffic lights, traffic signs and ruins (`cityStreetFurniture`,
+  `cityParkRubble`, `cityIsRuin`); an empty slot places nothing, so nothing invisible blocks the way.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):

@@ -3496,6 +3496,39 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 424: parks, street furniture and ruins (rules ready, waiting for art)
+
+Owner: "we also need more grass variety to make those grass areas more like park areas with rubble", "also we maybe street
+lights and stop lights and traffic signs", "also destroyed buildings", "we will need prompts for all these things and rules
+to integrate them all".
+
+- New art slots (empty until the owner's sheets arrive; an empty slot draws nothing and blocks nothing):
+  - `park`: grass textures in `surfaces/park/`;
+  - `ruin` and `ruin-wall`: two new surfaces;
+  - `rubble`, `lamp`, `traffic-light`, `sign-traffic`: in `props/`.
+- Where things go (`assets/chrono-gen.js`):
+  - **Parks:** a park lays one grass and a second in soft patches. `cityParkRubble` places 2 to 4 rubble piles clear of
+    the trees and of each other; they block the way.
+  - **Street furniture:** `cityStreetFurniture` places lamps on the kerbs of every main road, about every 150px, the two
+    sides staggered. Traffic lights go on two opposite corners of crossings of three or more main roads, and a traffic
+    sign at each alley mouth on a main road. Each post stands upright on its foot at its own proportions and blocks the
+    way (`cityBlockers`). Posts stay clear of cars, crossing centres, doors, object squares, buildings, the sea and each
+    other. Buildings stand close to the road, so a post stands on the kerb, 3 to 10px past the road's edge.
+  - **Lamp glow:** with lamp art, the pools of light lie under the lamps.
+  - **Ruins:** `cityIsRuin` makes about 1 building in 8 a ruin, by a fixed hash of the lot. A ruin has a gutted floor
+    for a roof with rubble on it, burnt-out walls, no parapet, no rooftop props, no shopfront and no signs. Ruins show
+    only once both ruin slots have art.
+- Tools and docs:
+  - `tools/prepare_city_art.py` knows the new slots; `ruin-wall` gets window gaps like walls.
+  - The Textures page lists the new types, with "No picture yet" for now.
+  - The four sheet prompts are in `tools/art-refresh/city-topdown-prompts.md`; the rules are listed in
+    `tools/art-refresh/city-surfaces.md`.
+- Tests:
+  - New `tests/city-furniture.test.cjs` checks that nothing is placed without art. With stand-in names it places 72
+    lamps, 10 traffic lights, 10 signs, 28 ruins of 221 buildings and 37 rubble piles, all on open ground, clear of cars,
+    squares and each other, each post blocking.
+  - `city-surfaces` allows a surface waiting for its art.
+
 ## Round 423: gravel alleys, water that doesn't repeat, smaller slabs and plates, skylight-3 out
 
 Owner: "skylight 3 can be removed from the game its no good"; "roof-gravel can be changed to road texture"; "our water

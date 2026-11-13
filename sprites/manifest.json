@@ -12,7 +12,7 @@
       {
        "key": "park",
        "label": "Park (grass)",
-       "rule": "About 8% of lots; corners rounded; trees on it block; at least one clear cell of sidewalk from any other park and from the shore.",
+       "rule": "About 8% of lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Round 424: each park lays one grass from its folder over the whole park and a second one in soft patches (worn grass, dirt, rubble-strewn ground), tiled 140px; with no grass art, the base overgrowth.",
        "walk": true,
        "folder": "city-gen/surfaces/park/",
        "scale": null,
@@ -231,6 +231,24 @@
          "bytes": 15388
         }
        ]
+      },
+      {
+       "key": "ruin-wall",
+       "label": "Destroyed buildings (burnt-out wall, one floor)",
+       "rule": "The front wall of a ruin, floor by floor like a wall (each floor starts and ends between window holes, CITY_TD_GAPS), no shopfront; at least 4 floors.",
+       "walk": false,
+       "folder": "city-gen/surfaces/ruin-wall/",
+       "scale": null,
+       "files": []
+      },
+      {
+       "key": "ruin",
+       "label": "Destroyed buildings (gutted roof)",
+       "rule": "About 1 lot in 8 (a hash of the lot, never a forecourt). Its roof is a gutted floor seen from above, tiled 160px, with no parapet, no rooftop props and no signs; rubble (props/rubble/) lies on it. Drawn only when ruin and ruin-wall both have art; until then the lot is an ordinary building. Blocks the way like any building.",
+       "walk": false,
+       "folder": "city-gen/surfaces/ruin/",
+       "scale": null,
+       "files": []
       },
       {
        "key": "roof",
@@ -468,6 +486,15 @@
        ]
       },
       {
+       "key": "rubble",
+       "label": "Rubble (parks and ruins)",
+       "rule": "Lies in parks (2 to 4, clear of trees) and on ruined floors; in parks it blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/rubble/",
+       "scale": null,
+       "files": []
+      },
+      {
        "key": "prop-skylight",
        "label": "Skylights",
        "rule": "Stands on roofs, sized per kind, never over a neighbour.",
@@ -531,6 +558,33 @@
          "bytes": 30900
         }
        ]
+      },
+      {
+       "key": "lamp",
+       "label": "Street lights",
+       "rule": "Along both kerbs of the main roads, about every 150px, the sides staggered; its post blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/lamp/",
+       "scale": null,
+       "files": []
+      },
+      {
+       "key": "traffic-light",
+       "label": "Traffic lights",
+       "rule": "On two opposite corners of a crossing where three or more main roads meet; its post blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/traffic-light/",
+       "scale": null,
+       "files": []
+      },
+      {
+       "key": "sign-traffic",
+       "label": "Traffic signs",
+       "rule": "Where an alley leaves a main road, on one side of its mouth; its post blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/sign-traffic/",
+       "scale": null,
+       "files": []
       },
       {
        "key": "tree",

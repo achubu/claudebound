@@ -6,7 +6,7 @@ and the walk rules. Art lives in `assets/environment/city-gen/`:
 
 - `surfaces/<surface>/`: the ground and building surfaces below;
 - `props/<kind>/`: things standing on them (rooftop air units, vents, tanks, stair huts, solar panels, skylights, neon
-  signs, cars, trees);
+  signs, cars, trees, rubble, street lights, traffic lights, traffic signs);
 - `legacy/`: the old 3/4 city's buildings and textures, not drawn by the top-down city.
 
 Add art with `python3 tools/prepare_city_art.py <image> <slot> <name>` (or `--sheet` / `--objects` for sheets); it goes to
@@ -21,11 +21,19 @@ the right folder and into `CITY_TD_ART`. Bump the `chrono-gen.js?v=` tag in `ind
 | 5 | Road | `surfaces/road/` (floor, road-wet) | yes | Main roads 100px with a dashed centre line (two lanes), alleys 50px; crossings exactly as wide as their roads. Drawn at 0.45. |
 | 6 | Curb | `surfaces/curb/` | yes | Kerb-stone strip along both edges of every road, on the sidewalk side, bent round corners. |
 | 7 | Under buildings (lot) | `surfaces/lot/` (yard) | no | Fills a building's whole lot; a 4px footing shows round the building. Lots lie wholly on their block. |
-| 8 | Park | `surfaces/park/` (overgrowth) | yes (trees no) | About 8% of lots; rounded corners; a clear cell of sidewalk from other parks and the shore. |
+| 8 | Park | `surfaces/park/` (overgrowth + grasses) | yes (trees, rubble no) | About 8% of lots; rounded corners; a clear cell of sidewalk from other parks and the shore. Round 424: one grass over the park, a second in soft patches, tiled 140px; rubble lies in it. |
 | 9 | Park edge | `surfaces/park-edge/` | yes | One kerb strip per park, round its outline, on a solid base. |
 | 10 | Roofs | `surfaces/roof/` | no | Tiled 160px; raised parapet and cast shadow; rooftop props sized per kind. |
 | 11 | Walls | `surfaces/wall/` | no | Floor by floor, each starting and ending on plain wall between windows; at least 4 floors. |
 | 12 | Shopfronts | `surfaces/shop/` | no | The street floor of a building whose street is to the south. |
+| 13 | Ruins (gutted floor) | `surfaces/ruin/` | no | Round 424: about 1 building in 8 (fixed hash of the lot); the gutted floor for its roof, rubble on it; no parapet, props, shop or signs. Waiting for art. |
+| 14 | Ruins (burnt-out wall) | `surfaces/ruin-wall/` | no | A ruin's walls, fitted floor by floor between window holes; at least 4 floors. Waiting for art. |
+
+Round 424, things standing in the street (`props/<slot>/`, placed by `cityStreetFurniture`): **lamp** (both kerbs of
+every main road, about every 150px), **traffic-light** (two opposite corners of each crossing of three or more main
+roads), **sign-traffic** (one side of each alley mouth on a main road), **rubble** (2 to 4 per park, on ruined floors).
+Posts stand upright on their foot at their own proportions, keep clear of cars, crossings, doors, object squares,
+buildings, the sea and each other (60px), and block the way. A slot with no art places nothing.
 
 Rules for all art: never stretched (scaled evenly only); nothing is drawn in a slot that has no picture (no drawn
 stand-ins); enemies stand only where their whole sprite is on walkable ground.
