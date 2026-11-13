@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 417: enemies only on open ground; crossings as wide as their roads; no foam line
+
+Owner: "make sure enemy pathing is only allowed on texture tiles and not object sprites"; then, with a screenshot of the
+coast: "whatever happened with the road here is no good, i also dont want a border between water and sand".
+
+- **Enemies** (`assets/city-gen.js`, `cityEnemyOk`): a patrol or boss is about 40px wide standing on its foot (y + 22), so
+  where it may stand is checked for its whole body (x +-20, y - 24 .. y + 24): no building, car, tree or sea under it and
+  its foot on walkable ground. Patrol steps (`walkable(..., 26)`) and spawn checks (`walkable(..., 28)`) in the top-down
+  city use it, and every patrol and boss is moved to the nearest such spot (the door-distance pass keeps to them too).
+  Before: 29-37 of the city's 90 patrols and bosses stood partly on an object and over a quarter of their steps did;
+  after, none in 162,000 simulated steps over three seeds, and every patrol still moves (`tests/city-enemies.cjs`).
+- **Crossings**: a crossing is as wide as the roads that meet in it (a main road's 100px square stood on 50px alleys, and a
+  dead end ended in a 200px court), and city roads end flat at a crossing (the crossing and door stubs cover the joins),
+  so no bump sticks out of a road.
+- **No foam line** between water and sand.
+- Tests: chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration, organic-paths, playtest-walk
+  city and city-enemies pass.
+
 ## Round 416: rooftop objects to one scale; no buildings on the streets
 
 Owner: "some scaling issues with some rooftop objects being too small, others being too big"; "some buildings are being

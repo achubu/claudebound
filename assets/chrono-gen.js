@@ -246,7 +246,12 @@ function chronoRoomPlan(seed, key, opts) {
   const hub = GEN.grid && boss ? octagon(lineX, lineY, Math.min(7, lineX - 4, FG_COLS - 4 - lineX), Math.min(4.5, lineY - 4, FG_ROWS - 4 - lineY))
     : GEN.grid && landing ? octagon(lineX, lineY, reach(Math.abs(lineX - 16), Math.min(lineX - 4, FG_COLS - 4 - lineX)), reach(Math.abs(lineY - 12), Math.min(lineY - 4, FG_ROWS - 4 - lineY)))
     : boss ? octagon(16, 12, 7, 4.5) : landing && !GEN.grid ? octagon(16, 12, 4)
-    : GEN.grid ? ((MAIN = dirs.length === 1 || dirs.some(d => !GEN.alley || !GEN.alley(key, d)) ? 1 : 0), octagon(gx.length ? Math.round(mean(gx)) : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : MAIN ? 2 : 1))
+    : GEN.grid ? ((MAIN = dirs.length === 1 || dirs.some(d => !GEN.alley || !GEN.alley(key, d)) ? 1 : 0), (GEN.alley ? (() => { // Round 417 (owner: "whatever happened with the road here is no good"): a crossing is exactly as wide as the roads that meet
+      // in it (it was a main road's 100px square on a 50px alley, and a 200px court at a dead end), so no bump sticks out
+      const hw = d => GEN.alley(key, d) ? 1 : 2, ns = dirs.filter(d => d === 'n' || d === 's').map(hw), ew = dirs.filter(d => d === 'e' || d === 'w').map(hw);
+      const rx = ns.length ? Math.max(...ns) : Math.max(...ew), ry = ew.length ? Math.max(...ew) : Math.max(...ns);
+      return octagon(gx.length ? Math.round(mean(gx)) : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : 6 + Math.floor(rnd() * 8), rx, ry); })()
+      : octagon(gx.length ? Math.round(mean(gx)) : 9 + Math.floor(rnd() * 15), gy.length ? Math.round(mean(gy)) : 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : MAIN ? 2 : 1)))
     : octagon(9 + Math.floor(rnd() * 15), 6 + Math.floor(rnd() * 8), dirs.length === 1 ? 4 : 3);
   const roads = [];
   // Round 396 (owner: "lets preview that" / "you can begin"): a theme with `alley` has a hierarchy of streets: main roads
@@ -1098,7 +1103,6 @@ function paintChronoRoom(canvas, key) {
     const beach = cellMask((x, y) => isS(x, y) || isW(x, y)), sea = cellMask(isW);
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
     ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.25)'; g.fillRect(0, 0, W, H); }), 0, 0);
-    ring(chronoTint(sea, '#cfe6ee'), 3); // foam along the water
     ctx.drawImage(tintIn(sea, g => { fill(g, imgs.chasm); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(4,2,14,.35)'; g.fillRect(0, 0, W, H); }), 0, 0);
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART.shore || []).map(n => imgs['td/' + n]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
@@ -1165,7 +1169,7 @@ function paintChronoRoom(canvas, key) {
         const xs = sh.pts.map(p => p[0]), ys = sh.pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys), x1 = Math.max(...xs), y1 = Math.max(...ys);
         box(x0, y0, x1, y1, Math.min(50, (x1 - x0) / 2, (y1 - y0) / 2)); }
       else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); if (G) { g.lineWidth = 2 * G; g.stroke(); } }
-      else if (GEN.square) { g.save(); g.lineCap = 'round'; g.lineJoin = 'round'; g.lineWidth = sh.w * K + 2 * G; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); g.restore(); }
+      else if (GEN.square) { g.save(); g.lineCap = GEN.alley ? 'butt' : 'round'; g.lineJoin = 'round'; /* Round 417: flat road ends; the crossing and door stubs cover the joins */ g.lineWidth = sh.w * K + 2 * G; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); g.restore(); }
       else { g.lineWidth = sh.w * K + 2 * G; turn(sh.pts, false); g.stroke(); }
     }
     return c; };

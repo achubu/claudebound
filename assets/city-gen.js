@@ -34,6 +34,20 @@ function cityRoomMask(cx, cy) {
       m[my * 100 + mx] = ok ? 1 : 0; } } }
   return cityMasks[k] = m;
 }
+// Round 417 (owner: "make sure enemy pathing is only allowed on texture tiles and not object sprites"): an enemy is a
+// sprite about 40px wide standing on its foot (y + 22), so where it may stand is checked for its whole body: its box
+// (x +-20, y - 24 .. y + 24) must touch no building, car, tree or sea, and its foot must be on walkable ground.
+let cityEnemySeed = null, cityEnemyBlock = {};
+function cityEnemyOk(key, x, y) {
+  if (cityEnemySeed !== cityGenSeed) { cityEnemySeed = cityGenSeed; cityEnemyBlock = {}; }
+  if (!cityRoomWalk(key, x, y)) return false;
+  if (x < 20 || x > 780 || y < 24 || y > 476) return false;
+  let b = cityEnemyBlock[key]; if (!b) { const p = cityGenPlan(key); b = cityEnemyBlock[key] = p ? genWith('city', () => cityBlockers(cityGenSeed, key, p)) : { rects: [], circles: [] }; }
+  const bx0 = x - 20, bx1 = x + 20, by0 = y - 24, by1 = y + 24, f = cityGenPlan(key).floor;
+  for (const r of b.rects) { if (bx0 < r[2] && bx1 > r[0] && by0 < r[3] && by1 > r[1]) { if (r[4] === 'water' && f[Math.floor(Math.min(495, y + 22) / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)]) continue; return false; } }
+  for (const c of b.circles) { const nx = Math.max(bx0, Math.min(c[0], bx1)), ny = Math.max(by0, Math.min(c[1], by1)); if (Math.hypot(nx - c[0], ny - c[1]) < c[2]) return false; }
+  return true;
+}
 function cityGenWalk(wx, wy) {
   if (wx < 0 || wy < 0) return false;
   if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure();
@@ -51,6 +65,7 @@ function cityRoomWalk(key, x, y) {
 {
   const walkableBeforeCity = walkable;
   walkable = function (key, x, y, margin) {
+    if (activeRegion === 'city' && rooms[key] && !(typeof organicSpawnPass !== 'undefined' && organicSpawnPass) && GEN_THEMES.city.topdown && (margin === 26 || margin === 28)) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); return cityEnemyOk(key, x, y); } // Round 417: a patrol's step or spot
     if (activeRegion === 'city' && rooms[key] && !(typeof organicSpawnPass !== 'undefined' && organicSpawnPass)) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); return x >= 12 && x <= 788 && y >= 12 && y <= 488 && cityRoomWalk(key, x, y); }
     return walkableBeforeCity.apply(this, arguments);
   };
@@ -97,13 +112,18 @@ function cityRoomWalk(key, x, y) {
     if (activeRegion !== 'city' || !Array.isArray(list) || list.cityDoorsChecked || !rooms[key]) return list;
     const doors = ['n', 's', 'e', 'w'].map(d => rooms[key].exits[d] && organicDoor(key, d)).filter(Boolean).map(d => d.inward);
     const far = (x, y) => Math.min(Infinity, ...doors.map(d => Math.hypot(x - d.x, y - d.y)));
+    // Round 417: a patrol (or boss) stands only where its whole sprite is clear of objects; else the nearest such spot on the road
+    if (GEN_THEMES.city.topdown) for (const s of list) { if (cityEnemyOk(key, s.x, s.y)) continue; const pts = organicGrid(key); let best = null;
+      for (let i = 0; i < pts.length; i += 2) { const x = pts[i], y = pts[i + 1]; if (!cityEnemyOk(key, x, y) || (!s.boss && far(x, y) < 120) || list.some(o => o !== s && Math.hypot(o.x - x, o.y - y) < 90)) continue; const d = Math.hypot(x - s.x, y - s.y); if (!best || d < best.d) best = { x, y, d }; }
+      if (best) { s.x = best.x; s.y = best.y; } }
     for (const s of list) {
       if (s.boss || far(s.x, s.y) >= 120) continue;
       const others = list.filter(o => o !== s);
       const q = typeof organicSpot === 'function' && (organicSpot(key, s.x, s.y, doors.concat(others), 125) || organicSpot(key, s.x, s.y, doors, 125));
-      if (q && far(q.x, q.y) >= 120) { s.x = q.x; s.y = q.y; continue; }
+      const eok = (x, y) => !GEN_THEMES.city.topdown || cityEnemyOk(key, x, y);
+      if (q && far(q.x, q.y) >= 120 && eok(q.x, q.y)) { s.x = q.x; s.y = q.y; continue; }
       let best = null; const pts = organicGrid(key);
-      for (let i = 0; i < pts.length; i += 2) { const d = far(pts[i], pts[i + 1]); if (others.every(o => Math.hypot(o.x - pts[i], o.y - pts[i + 1]) > 90) && (!best || d > best.d)) best = { x: pts[i], y: pts[i + 1], d }; }
+      for (let i = 0; i < pts.length; i += 2) { const d = far(pts[i], pts[i + 1]); if (others.every(o => Math.hypot(o.x - pts[i], o.y - pts[i + 1]) > 90) && eok(pts[i], pts[i + 1]) && (!best || d > best.d)) best = { x: pts[i], y: pts[i + 1], d }; }
       if (best && best.d > far(s.x, s.y)) { s.x = best.x; s.y = best.y; }
     }
     if (Object.isExtensible(list)) Object.defineProperty(list, 'cityDoorsChecked', { value: true });
