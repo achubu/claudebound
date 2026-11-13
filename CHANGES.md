@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 409: granite kerbs round the parks
+
+The owner's Archive_17 (two takes on a sheet of border strips and corners: a stone kerb, a park planter edge, a
+shoreline). The granite kerb band of the first sheet's top strip is now art slot `edge` (`edge-granite`,
+`tools/prepare_city_art.py ... edge`, tiled sideways like a wall); parks run it along their four sides, outer side
+outward, 14px deep, in place of the drawn border. The other strips carry their neighbouring ground (paving above, soil
+or sand below) in colours that don't match the city's paving, and the beach edge is curved, so they wait for a version
+drawn as a band alone. City art version 409.
+
 ## Round 408: hard, bordered edges between grounds (no blends, no ponds)
 
 Owner (with a screenshot of a park, a beach and a pond): "the grass and sand and the circle thing here look horrible, we
