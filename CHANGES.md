@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 405: eight new roofs; four odd ones out
+
+Owner: "do you need more roof textures? i am seeing some odd choices there", then a sheet of eight roofs.
+
+- Added (cut from a 4x2 sheet): tar paper, corrugated metal, concrete slab with drain, gravel, rubber membrane, riveted
+  plate, mossy cracked concrete, painted deck.
+- Removed: `roof-scrap` (a junk pile), `roof-stone`, `roof-tile` and `roof-brick` (they read as walls or floors).
+  The city now has 15 roofs. City art version 405.
+
 ## Round 404: brick and panel walls, two more shopfronts, more signs and cars
 
 The owner's all-in-one sheet (four storey strips above, eight objects below, on green).
