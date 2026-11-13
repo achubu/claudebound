@@ -12,14 +12,17 @@ const places={
  const atlas=new Image();let loaded=false,current=null;
  atlas.onload=()=>{loaded=true;if(current?.canvas.isConnected){paint(current.canvas,current.key);const status=current.world.querySelector('.city-status');if(status)status.textContent=''}};
  atlas.onerror=()=>{if(current?.canvas.isConnected){const status=current.world.querySelector('.city-status');if(status)status.textContent='Art download failed — refresh to retry'}};
- atlas.src='assets/environment/neon-city.webp';
+ // Round 418 (owner: "im also seeing old room images ... please remove any old room images from the game"): the city is
+ // generated (assets/chrono-gen.js), so the old district atlas is no longer loaded (moved to unused assets/) and the old
+ // painted ground below is not drawn: a room's canvas starts dark until the generator paints it.
+ loaded=true;
  const hash=key=>[...key].reduce((a,c)=>a*31+c.charCodeAt(0),17)>>>0;
  function configure(rooms){Object.entries(places).forEach(([key,[name,district,landmark]],i)=>{const r=rooms[key];if(!r)return;r.name=name;r.district=district;r.landmark=landmark;r.cityIndex=i;r.restPoint=[440,325];if(r.enemy){const spots=[[500,250],[400,185],[300,250],[400,350]];[r.enemy[1],r.enemy[2]]=spots[i%4]}if(r.relic&&!r.world){[r.relic[3],r.relic[4]]=r.relic[0]==='material'?[690,285]:[400,110]}})}
  // Solid corner blocks use the same street envelope in every district.
  function props(key){const i=hash(key)%4;return i===0?[[198,206,38,24],[557,282,32,18]]:i===1?[[248,287,42,16]]:i===2?[[541,205,35,21],[198,281,36,20]]:[[190,203,36,19]]}
  function solids(key){return [[0,0,292,157],[500,0,300,157],[0,322,292,178],[500,322,300,178],...props(key)]}
  function blocked(key,x,y){return solids(key).some(([l,t,w,h])=>x>l-12&&x<l+w+12&&y+25>t-5&&y+25<t+h+5)}
- function paint(canvas,key){const ctx=canvas.getContext('2d'),p=places[key],district=districts[p[1]]?p[1]:0,d=districts[district];ctx.imageSmoothingEnabled=false;ctx.fillStyle=d.light;ctx.fillRect(0,0,800,500);
+ function paint(canvas,key){if(typeof GEN_THEMES!=='undefined'){const c=canvas.getContext('2d');if(c){c.fillStyle='#05070c';c.fillRect(0,0,canvas.width,canvas.height)}return}const ctx=canvas.getContext('2d'),p=places[key],district=districts[p[1]]?p[1]:0,d=districts[district];ctx.imageSmoothingEnabled=false;ctx.fillStyle=d.light;ctx.fillRect(0,0,800,500);
  if(loaded){const sw=atlas.naturalWidth/2,sh=atlas.naturalHeight/3;ctx.drawImage(atlas,(district%2)*sw,Math.floor(district/2)*sh,sw,sh,0,0,800,500)}
  // Raised pedestrian service bridge across flooded streets.
  if(district===3){for(const [x,w] of [[0,302],[495,305]]){ctx.fillStyle='#101d28';ctx.fillRect(x,223,w,72);for(let j=x;j<x+w;j+=16){ctx.fillStyle='#4b6571';ctx.fillRect(j,227,14,60);ctx.fillStyle='#74858b';ctx.fillRect(j,227,14,2);ctx.fillStyle='#2c424e';for(let k=233;k<282;k+=7)ctx.fillRect(j+3,k,8,2)}ctx.fillStyle=d.color;ctx.fillRect(x,222,w,2);ctx.fillRect(x,293,w,2)}}
