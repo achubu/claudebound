@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 404: brick and panel walls, two more shopfronts, more signs and cars
+
+The owner's all-in-one sheet (four storey strips above, eight objects below, on green).
+
+- Walls: `wall-brick`, `wall-panel` (with `wall-concrete`). Shopfronts: `shop-repair`, `shop-shutters` (with `shop-noodle`).
+- Signs: pink and orange wide boards, purple and red blade signs. Vehicles: a taxi, a sedan, a white van, a rusty pickup
+  (painted from the side; they stand upright like the angled ones).
+- The strips were found as the rows with little green, cut full width and made to tile sideways; the objects were found
+  by outline (`GAP=8`). City art version 404.
+
 ## Round 403: the owner's first top-down city art
 
 The owner's Archive_16 (twelve single images) and Archive_116 (a tree, a sheet of ten roof textures, a sheet of ten
