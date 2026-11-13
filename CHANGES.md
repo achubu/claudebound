@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 399: Neon Aftermath rebuilt as a top-down city of blocks and lots
+
+Owner: "improve our algorithm for city generation, it's just not good enough"; "try to find the best 2d city generation
+algorithm and copy that"; "use placeholders as necessary"; a top-down cyberpunk street map as the reference ("we want
+something like this"); "don't be afraid to scrap everything if necessary and start the map over".
+
+- **The city as one plan** (`genWorld` in `assets/chrono-gen.js`, after ProbableTrain's MapGenerator): the streets (from the
+  rooms' own plans, so doors and walk masks are unchanged), then the blocks they enclose across the whole city, then each
+  block split in two again and again along its longer side until every piece is a lot (about 11x12 cells), then a use for
+  each lot. Water and a two-cell shore hold no lots.
+- **Squares for objects** are 5x5 street-front squares inside lots, joined to the street by a short run of paving, wholly in
+  one room and clear of the HUD corners; a room no lot serves takes any open 5x5 beside a street (its lots stay open).
+- **Seen from straight above** (`topdown`, `paintTopdownCity`): every other lot is a rooftop that fills it (drop shadow, roof
+  surface, parapet, sometimes two heights, air units, vents, tanks, stair huts, solar panels, lit skylights, a neon sign on
+  its street side); 8% are parks with trees; sidewalks (the paving tile, darkened) everywhere between; dark asphalt streets
+  with a fine kerb line, zebra crossings at crossings, parked cars along main streets, pools of street light. No rubble,
+  grass beds or painted buildings in the city view. All drawn as placeholders until the owner's top-down art arrives.
+- Tests: chrono-gen, item-placement, room-art, neon-world, neon-world-pathing, exploration and playtest-walk city pass.
+
 ## Round 398: no kerbs, no paving tile; city roads and paths blend into the ground
 
 Owner: "remove curbs from roads altogether and remove the special tile we use for off path travel, try to blend everything
