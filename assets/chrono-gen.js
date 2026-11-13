@@ -357,7 +357,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '423',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '424',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -504,7 +504,7 @@ function genWorld(seed) {
 // tall); car (seen from above, facing east); tree (seen from above); sidewalk (Round 407: seamless paving; the first is
 // the city's main paving, the rest by block); edge (Round 409: a border strip run round parks, outer side at the top);
 // trim (Round 410: a border strip framing the squares where objects stand). Prompts: tools/art-refresh/city-topdown-prompts.md.
-const CITY_TD_ART = { 'waterfront-edge': ['shore-crumble'], curb: ['curb-stone'], 'park-edge': ['edge-granite', 'edge-kerb', 'edge-planter'], sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'] };
+const CITY_TD_ART = { 'waterfront-edge': ['shore-crumble'], curb: ['curb-stone'], 'park-edge': ['edge-granite', 'edge-kerb', 'edge-planter'], sidewalk: ['walk-slabs', 'walk-herringbone', 'walk-cobbles', 'walk-tiles', 'walk-plates'], roof: ['roof-tar', 'roof-asphalt', 'roof-rust', 'roof-concrete', 'roof-plate', 'roof-slate', 'roof-tin', 'roof-tarpaper', 'roof-corrugated', 'roof-slab', 'roof-membrane', 'roof-riveted', 'roof-mossy', 'roof-painted', 'roof-puddles', 'roof-cracked', 'roof-plates', 'roof-grit', 'roof-carpark', 'roof-grating', 'roof-algae', 'roof-patched'], wall: ['wall-concrete', 'wall-brick', 'wall-panel'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3'], 'prop-vent': ['vent-1', 'vent-3'], 'prop-tank': ['tank-1', 'tank-2', 'tank-3'], 'prop-stairs': ['stairs-1', 'stairs-2', 'stairs-3'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-2'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-taxi', 'car-sedan', 'car-whitevan', 'car-rustpickup'], tree: ['tree-1', 'tree-2', 'tree-3'], park: [], ruin: [], 'ruin-wall': [], rubble: [], lamp: [], 'traffic-light': [], 'sign-traffic': [] };
 // Round 415: for each wall and shopfront strip, the columns (image px) of plain wall between windows (tools/prepare_city_art.py).
 const CITY_TD_GAPS = {'wall-concrete': [4, 19, 29, 41, 127, 134, 147, 258, 440, 446, 453], 'wall-brick': [2, 11, 19, 73, 81, 291, 299, 307, 362, 371, 377, 435, 441, 447, 456, 515, 523, 585, 595, 601, 674, 741, 750, 756, 804], 'wall-panel': [19, 30, 40, 47, 58, 64, 75, 158, 206, 213, 222, 237, 246, 286, 293, 304, 310, 618, 657, 667, 677, 687, 698, 740, 748], 'shop-noodle': [0, 6, 18, 24, 30, 38, 57, 66, 78, 84, 92, 103, 113, 302, 436, 443, 452], 'shop-repair': [25, 34, 41, 48, 56, 63, 76, 170, 176, 197, 280, 287, 401, 409, 437, 444, 450, 457, 596, 606, 628, 641, 655, 662, 669, 675], 'shop-shutters': [12, 28, 40, 79, 85, 100, 107, 125, 238, 252, 306, 320, 473, 479, 506, 515, 527, 538, 544, 559, 665, 671, 688, 698, 717] };
 // Round 420 (owner: "we need to have a rule for each texture tile, there should be tile for under buildings, tile for road,
@@ -523,11 +523,14 @@ const CITY_SURFACES = [
   { key: 'road', label: 'Road (asphalt)', kind: 'ground', walk: true, base: ['floor', 'road-wet', 'gravel'], scale: 0.45, rule: 'Main roads 100px in asphalt, alleys 50px in gravel (Round 423); crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.' },
   { key: 'curb', label: 'Curb (kerb along every road)', kind: 'edge', walk: true, slot: 'curb', rule: 'A kerb-stone strip along both edges of every road, on the sidewalk side, bent round corners.' },
   { key: 'lot', label: 'Under buildings (lot footing)', kind: 'ground', walk: false, base: ['yard'], scale: 0.3, rule: 'Fills a building\'s whole lot; a 4px footing shows round the building. Lots lie wholly on their block, never over a street.' },
-  { key: 'park', label: 'Park (grass)', kind: 'ground', walk: true, base: ['overgrowth'], rule: 'About 8% of lots; corners rounded; trees on it block; at least one clear cell of sidewalk from any other park and from the shore.' },
+  { key: 'park', label: 'Park (grass)', kind: 'ground', walk: true, base: ['overgrowth'], slot: 'park', rule: 'About 8% of lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Round 424: each park lays one grass from its folder over the whole park and a second one in soft patches (worn grass, dirt, rubble-strewn ground), tiled 140px; with no grass art, the base overgrowth.' },
   { key: 'park-edge', label: 'Park edge (kerb round the grass)', kind: 'edge', walk: true, slot: 'park-edge', rule: 'One strip per park, round its rounded outline, on a solid base.' },
   { key: 'roof', label: 'Roofs', kind: 'building', walk: false, slot: 'roof', rule: 'One per building part, tiled 160px; a raised parapet and a cast shadow; rooftop props (props/) sized per kind.' },
   { key: 'wall', label: 'Building walls (one floor)', kind: 'building', walk: false, slot: 'wall', rule: 'Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS); at least 4 floors.' },
-  { key: 'shop', label: 'Shopfronts (street floor)', kind: 'building', walk: false, slot: 'shop', rule: 'The street floor of a building whose street is to the south, fitted like a wall.' }
+  { key: 'shop', label: 'Shopfronts (street floor)', kind: 'building', walk: false, slot: 'shop', rule: 'The street floor of a building whose street is to the south, fitted like a wall.' },
+  // Round 424 (owner: "also destroyed buildings"): about one building in eight is a ruin, once both of its slots have art
+  { key: 'ruin', label: 'Destroyed buildings (gutted roof)', kind: 'building', walk: false, slot: 'ruin', awaitingArt: true, rule: 'About 1 lot in 8 (a hash of the lot, never a forecourt). Its roof is a gutted floor seen from above, tiled 160px, with no parapet, no rooftop props and no signs; rubble (props/rubble/) lies on it. Drawn only when ruin and ruin-wall both have art; until then the lot is an ordinary building. Blocks the way like any building.' },
+  { key: 'ruin-wall', label: 'Destroyed buildings (burnt-out wall, one floor)', kind: 'building', walk: false, slot: 'ruin-wall', awaitingArt: true, rule: 'The front wall of a ruin, floor by floor like a wall (each floor starts and ends between window holes, CITY_TD_GAPS), no shopfront; at least 4 floors.' }
 ];
 const CITY_SURFACE_SLOTS = new Set(CITY_SURFACES.map(x => x.slot).filter(Boolean));
 function cityArtPath(slot, n) { return (CITY_SURFACE_SLOTS.has(slot) ? 'surfaces/' : 'props/') + slot + '/' + n; }
@@ -567,6 +570,59 @@ function cityParkedCars(seed, plan) { const out = [];
         // Round 415: a car blocks the way, so none at a room's crossing (where the game sets you down), at its doors, or by an object
         const rec = { px, py, hz, col: ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)], artR: rr(), flip: rr() < 0.5 }; if (!skip) out.push(rec); } } }
   return out; }
+// Round 424 (owner: "more grass variety to make those grass areas more like park areas with rubble"; "street lights and
+// stop lights and traffic signs"; "destroyed buildings"). Where each of these stands is worked out here, from the seed
+// alone, so the painter and the walk mask agree. A slot with no art in CITY_TD_ART places nothing (nothing drawn, nothing
+// blocking: never an invisible wall). Every piece keeps clear of the others, of cars, crossings' centres, doors, squares
+// where objects stand, lots and the sea (owner: "objects never overlap").
+const CITY_HAS = slot => typeof CITY_TD_ART !== 'undefined' && (CITY_TD_ART[slot] || []).length > 0;
+// a ruin: about 1 lot in 8, a fixed hash of the lot, once both ruin slots have art
+function cityIsRuin(l) { return l.use === 'roof' && CITY_HAS('ruin') && CITY_HAS('ruin-wall') && chronoHash('ruin:' + l.seed) % 8 === 0; }
+// rubble lying in a park (bx: the park's box in room px): 2 to 4 pieces, each its own circle clear of the trees and of each other
+function cityParkRubble(seed, l, bx, trees) { if (!CITY_HAS('rubble')) return []; const rr = chronoRng(seed + ':rubble:' + l.seed), out = [], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
+  for (let i = 0, n = 2 + Math.floor(rr() * 3); i < 30 && out.length < n; i++) { const L = 22 + rr() * 12, x = bx[0] + 12 + L / 2 + rr() * Math.max(0, bw - 24 - L), y = bx[1] + 12 + L / 2 + rr() * Math.max(0, bh - 24 - L), artR = rr(), rot = rr() < 0.5;
+    if (bw < L + 24 || bh < L + 24) break;
+    if (trees.some(([tx, ty, tr]) => Math.hypot(x - tx, y - ty) < tr * 1.3 + L / 2 + 4) || out.some(o => Math.hypot(x - o.x, y - o.y) < (L + o.L) / 2 + 6)) continue;
+    out.push({ x, y, L, artR, rot }); }
+  return out; }
+// street furniture in a room (room px): lamps along both kerbs of the main roads, traffic lights on the corners of real
+// crossings (three or more main roads), a traffic sign where an alley meets a main road. Each is { slot, x, y, h, artR, flip }:
+// (x, y) is the foot of its post, h its drawn height (the picture keeps its own proportions); its post blocks the way.
+const CITY_FURNITURE_H = { lamp: 54, 'traffic-light': 48, 'sign-traffic': 32 };
+function cityStreetFurniture(seed, plan) {
+  if (!['lamp', 'traffic-light', 'sign-traffic'].some(CITY_HAS)) return [];
+  const wl = genWorld(seed), [wx, wy] = GEN.world(plan.key), ox = wx * 800, oy = wy * 500, terrain = chronoTerrain(seed, plan.key), out = [], rr = chronoRng(seed + ':furniture:' + plan.key);
+  const lots = wl.lotsPx.filter(l => l.use !== 'plaza').map(l => [l.r[0] - ox, l.r[1] - oy, l.r[2] - ox, l.r[3] - oy]).filter(r => r[2] > 0 && r[0] < 800 && r[3] > 0 && r[1] < 500);
+  const road = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && !!plan.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)];
+  const cars = cityParkedCars(seed, plan), mains = plan.shapes.filter(r => r.t === 'road' && !r.pave && r.w >= 90);
+  // (a building's own box is its lot less a 4px footing; posts may stand on the footing, where the kerb runs)
+  const onLot = (x, y) => lots.some(r => x > r[0] + 3 && x < r[2] - 3 && y > r[1] + 3 && y < r[3] - 3);
+  const ground = (x, y, hubOk) => x > 30 && x < 770 && y > 40 && y < 470 && !road(x, y) && !onLot(x, y)
+    && !onLot(x, y) && !terrain.chasm(Math.floor(x / CG_CELL), Math.floor(y / CG_CELL))
+    && (hubOk || Math.hypot(x - plan.hub[0], y - plan.hub[1]) > 90) && !(plan.plazas || []).some(([qx, qy]) => Math.hypot(x - qx, y - qy) < 80)
+    && !cars.some(c => Math.abs(x - c.px) < 40 && Math.abs(y - c.py) < 30) && !out.some(o => Math.hypot(x - o.x, y - o.y) < 60);
+  // buildings stand close to the road (a 4px footing, the kerb strip over it): from (x, y) step out along (nx, ny) to the
+  // road's edge and stand the post on the kerb, 3px past it, or up to 10px in where the sidewalk is wider
+  const kerb = (x, y, nx, ny) => { let t = 0; while (t < 70 && road(x + nx * t, y + ny * t)) t += 1; if (t >= 70) return null; let e = t; while (e < t + 30 && !road(x + nx * e, y + ny * e) && !onLot(x + nx * e, y + ny * e)) e += 1;
+    if (e - t < 3) return null; const u = Math.min(e - 1, t + Math.min(10, Math.max(3, (e - t) / 2))); return [x + nx * u, y + ny * u]; };
+  const add = (slot, x, y, hubOk) => { if (x == null || !CITY_HAS(slot) || !ground(x, y, hubOk)) return false; out.push({ slot, x, y, h: CITY_FURNITURE_H[slot], artR: rr(), flip: rr() < 0.5 }); return true; };
+  // traffic lights first: two opposite corners of each crossing where three or more main roads meet
+  for (const sh of plan.shapes) { if (sh.t !== 'poly' || sh.pave) continue; const xs = sh.pts.map(p => p[0]), ys = sh.pts.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const meet = mains.filter(rd => rd.pts.some(([px, py]) => px >= x0 - 2 && px <= x1 + 2 && py >= y0 - 2 && py <= y1 + 2)).length; if (meet < 3) continue;
+    const corners = [[x0, y0, -1, -1], [x1, y1, 1, 1], [x1, y0, 1, -1], [x0, y1, -1, 1]], first = rr() < 0.5 ? 0 : 2;
+    let n = 0; for (const i of [first, first + 1, (first + 2) % 4, (first + 3) % 4]) { const [cx, cy, sx, sy] = corners[i], at = kerb(cx - sx * 4, cy - sy * 4, sx * 0.7071, sy * 0.7071) || [];
+      if (n < 2 && add('traffic-light', at[0], at[1], true)) n++; } }
+  // traffic signs: where an alley leaves a main road or a crossing, on one side of its mouth
+  for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w >= 90) continue;
+    for (const [a, b] of [[rd.pts[0], rd.pts[1]], [rd.pts[rd.pts.length - 1], rd.pts[rd.pts.length - 2]]]) { if (!b) continue;
+      const onMain = mains.some(m => { for (let i = 1; i < m.pts.length; i++) { const p = m.pts[i - 1], q = m.pts[i], L2 = (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2 || 1, t = Math.max(0, Math.min(1, ((a[0] - p[0]) * (q[0] - p[0]) + (a[1] - p[1]) * (q[1] - p[1])) / L2)); if (Math.hypot(a[0] - p[0] - t * (q[0] - p[0]), a[1] - p[1] - t * (q[1] - p[1])) < m.w / 2 + 2) return true; } return false; });
+      if (!onMain) continue; const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, dx = (b[0] - a[0]) / L, dy = (b[1] - a[1]) / L, D = 64, side = rr() < 0.5 ? 1 : -1;
+      for (const sd of [side, -side]) { const at = kerb(a[0] + dx * D, a[1] + dy * D, -dy * sd, dx * sd) || []; if (add('sign-traffic', at[0], at[1])) break; } } }
+  // lamps: along both kerbs of every main road, about every 150px, the two sides staggered
+  for (const rd of mains) for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 1) continue; const dx = (b[0] - a[0]) / L, dy = (b[1] - a[1]) / L;
+    for (const sd of [1, -1]) for (let d = sd > 0 ? 50 : 125; d < L - 30; d += 150) { const at = kerb(a[0] + dx * d, a[1] + dy * d, -dy * sd, dx * sd); if (at) add('lamp', at[0], at[1]); } }
+  return out.sort((p, q) => p.y - q.y);
+}
 // Round 415 (owner: "make it a rule that if the tile is just a texture tile, it can be walked on, unless it has another
 // image on top like that of a building or car or other sprite"): what stands on the ground in a room of the top-down city,
 // in room px: buildings (their lots, roof and front wall), parked cars, park trees, and the sea (not ground). Everything
@@ -575,7 +631,9 @@ function cityBlockers(seed, key, plan) {
   const wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, rects = [], circles = [];
   for (const l of wl.lotsPx) { const r = [l.r[0] - ox + 4, l.r[1] - oy + 4, l.r[2] - ox - 4, l.r[3] - oy - 4]; if (r[2] < 0 || r[0] > 800 || r[3] < 0 || r[1] > 500) continue;
     if (l.use === 'roof') rects.push(r);
-    else if (l.use === 'park') for (const [tx, ty, tr] of cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1])) circles.push([tx, ty, tr * 0.75]); }
+    else if (l.use === 'park') { const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) circles.push([tx, ty, tr * 0.75]);
+      for (const b of cityParkRubble(seed, l, r, trees)) circles.push([b.x, b.y, b.L * 0.4]); } } // Round 424: rubble blocks too
+  for (const f of cityStreetFurniture(seed, plan)) circles.push([f.x, f.y, 8]); // Round 424: a lamp, light or sign post
   for (const c of cityParkedCars(seed, plan)) rects.push([c.px - 26, c.py - 14, c.px + 26, c.py + 12]);
   const t = chronoTerrain(seed, key); for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (t.chasm(x, y)) rects.push([x * CG_CELL, y * CG_CELL, (x + 1) * CG_CELL, (y + 1) * CG_CELL, 'water']);
   return { rects, circles };
@@ -606,7 +664,9 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   const ROOF = ['#2b303b', '#34302d', '#2a333b', '#3b3538', '#262b34', '#30363a', '#3a3a33'], NEON = ['#ff3b6b', '#36f1ff', '#ff9f1c', '#b85cff', '#4dff8a', '#ff4fd8'];
   // street lights: soft pools along the streets
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  for (let y = 40; y < 500; y += 90) for (let x = 40; x < 800; x += 90) { if (!isRoad(x, y) || isRoad(x, y - 60) && isRoad(x, y + 60) && isRoad(x - 60, y) && isRoad(x + 60, y)) continue;
+  const lamps = cityStreetFurniture(seed, plan).filter(f => f.slot === 'lamp'); // Round 424: with lamp art, the pools lie under the lamps
+  if (lamps.length) for (const f of lamps) { const c = chronoHash(seed + ':lamp:' + key + ':' + f.x + ',' + f.y), col = c % 3 ? '255,214,150' : '150,210,255', g = ctx.createRadialGradient(S(f.x), S(f.y), 0, S(f.x), S(f.y), S(80)); g.addColorStop(0, 'rgba(' + col + ',.2)'); g.addColorStop(1, 'rgba(' + col + ',0)'); ctx.fillStyle = g; ctx.fillRect(S(f.x - 80), S(f.y - 80), S(160), S(160)); }
+  else for (let y = 40; y < 500; y += 90) for (let x = 40; x < 800; x += 90) { if (!isRoad(x, y) || isRoad(x, y - 60) && isRoad(x, y + 60) && isRoad(x - 60, y) && isRoad(x + 60, y)) continue;
     const c = chronoHash(seed + ':lamp:' + key + ':' + x + ',' + y), col = c % 3 ? '90,200,255' : '255,120,200', g = ctx.createRadialGradient(S(x), S(y), 0, S(x), S(y), S(70)); g.addColorStop(0, 'rgba(' + col + ',.16)'); g.addColorStop(1, 'rgba(' + col + ',0)'); ctx.fillStyle = g; ctx.fillRect(S(x - 70), S(y - 70), S(140), S(140)); }
   ctx.restore();
   // zebra crossings where a street meets a crossing
@@ -620,8 +680,20 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   // lots
   for (const l of lots) { const ra = chronoRng(seed + ':art:' + l.seed), rr = chronoRng(seed + ':roof:' + l.seed), [x0, y0, x1, y1] = l.r, I = 4, bx = [x0 + I, y0 + I, x1 - I, y1 - I], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
     if (l.use === 'plaza') continue;
-    if (l.use === 'park') { const PR = 16; ctx.save(); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(S(bx[0]), S(bx[1]), S(bw), S(bh), S(PR)); else ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.pipes); ctx.fillStyle = 'rgba(0,10,8,.35)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh));
-      for (const [tx, ty, tr] of cityParkTrees(rr, bx, bw, bh)) { const treeArt = pick('tree', ra); if (treeArt) { ctx.drawImage(treeArt, S(tx - tr * 1.3), S(ty - tr * 1.3), S(tr * 2.6), S(tr * 2.6)); } }
+    if (l.use === 'park') { const PR = 16; ctx.save(); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(S(bx[0]), S(bx[1]), S(bw), S(bh), S(PR)); else ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.pipes);
+      // Round 424: the park's own grass over the whole park, and a second one in soft patches (each tiled 140px)
+      const grass = A('park'); if (grass) { const pr = chronoRng(seed + ':grass:' + l.seed), g1 = grass[Math.floor(pr() * grass.length)], g2 = grass[Math.floor(pr() * grass.length)];
+        tile(g1, bx[0], bx[1], bw, bh, 140, pr() * 140);
+        if (g2 !== g1) { const m = document.createElement('canvas'); m.width = Math.ceil(S(bw)); m.height = Math.ceil(S(bh)); const mg = m.getContext('2d');
+          for (let i = 0, n = 2 + Math.floor(pr() * 3); i < n; i++) { const cx = pr() * bw, cy = pr() * bh, rad = 30 + pr() * Math.min(bw, bh) * 0.45, gr = mg.createRadialGradient(S(cx), S(cy), 0, S(cx), S(cy), S(rad));
+            gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.55, 'rgba(255,255,255,.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); mg.fillStyle = gr; mg.fillRect(0, 0, m.width, m.height); }
+          mg.globalCompositeOperation = 'source-in'; const pat = mg.createPattern(g2, 'repeat'), k = 140 * K / g2.height; if (pat.setTransform) pat.setTransform(new DOMMatrix().scale(k)); mg.fillStyle = pat; mg.fillRect(0, 0, m.width, m.height);
+          ctx.drawImage(m, S(bx[0]), S(bx[1])); } }
+      ctx.fillStyle = 'rgba(0,10,8,.35)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh));
+      const trees = cityParkTrees(rr, bx, bw, bh);
+      for (const b of cityParkRubble(seed, l, bx, trees)) { const ru = A('rubble'), art = ru && ru[Math.floor(b.artR * ru.length)]; if (!art) continue; const k = b.L / Math.max(art.width, art.height), dw = art.width * k, dh = art.height * k;
+        ctx.save(); ctx.translate(S(b.x), S(b.y)); if (b.rot) ctx.scale(-1, 1); ctx.drawImage(art, S(-dw / 2), S(-dh / 2), S(dw), S(dh)); ctx.restore(); }
+      for (const [tx, ty, tr] of trees) { const treeArt = pick('tree', ra); if (treeArt) { ctx.drawImage(treeArt, S(tx - tr * 1.3), S(ty - tr * 1.3), S(tr * 2.6), S(tr * 2.6)); } }
       ctx.restore();
       // Round 408: a park is edged like a planter: a stone kerb round the grass, so it never meets the paving bare
       const edgeArt = pick('park-edge', ra);
@@ -639,15 +711,22 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     // Round 400 (owner: "could the buildings be not quite directly over the top? ... maybe 10 degrees?"): seen tilted by
     // GEN.tilt degrees, a building shows its south wall, sin(tilt) of its height, drawn inside its own lot under the roof.
     // Round 401: the tall shopfronts face a street to the south; a building with its street behind it (north) is kept low.
+    const ruin = cityIsRuin(l); // Round 424: a destroyed building (both ruin slots have art)
     let blade = false; const southSt = sides.some(sd => sd[0] === 's'), floors = (southSt ? 4 + Math.floor(rr() * 4) : 4 + Math.floor(rr() * 2)) + (district === 'tech' ? 1 : 0) /* Round 412 (owner): at least 4 floors */, dz = Math.min(floors * 36 * SIN, bh * 0.5), wallTop = bx[3] - dz;
     const rb = [bx[0], bx[1], bx[2], wallTop]; bx[3] = wallTop; const bh0 = bh;
     // a roof, sometimes in two parts of different heights
     const parts = bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
     parts.forEach((q, pi) => { const w = q[2] - q[0], h = q[3] - q[1], col = ROOF[Math.floor(rr() * ROOF.length)];
       ctx.save(); ctx.beginPath(); ctx.rect(S(q[0]), S(q[1]), S(w), S(h)); ctx.clip(); ctx.fillStyle = col; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h));
-      const roofArt = pick('roof', ra); if (roofArt) { tile(roofArt, q[0], q[1], w, h, 160); ctx.globalAlpha = 0.22; ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = col; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h)); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+      const roofArt = pick(ruin ? 'ruin' : 'roof', ra); if (roofArt) { tile(roofArt, q[0], q[1], w, h, 160); ctx.globalAlpha = 0.22; ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = col; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h)); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
       if (pi) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h)); }
       ctx.restore();
+      if (ruin) { // Round 424: a gutted building has no parapet or rooftop kit: a dark rim, rubble on the broken floor
+        ctx.save(); for (let i = 0; i < 6; i++) { ctx.strokeStyle = 'rgba(0,0,0,' + (0.4 - i * 0.06) + ')'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + 1 + i * 1.6), S(q[1] + 1 + i * 1.6), S(w - 2 * (1 + i * 1.6)), S(h - 2 * (1 + i * 1.6))); } ctx.restore();
+        const ru = A('rubble'), placed = []; if (ru) for (let i = 0, n = 1 + Math.floor(rr() * 3); i < n * 4 && placed.length < n; i++) { const art = ru[Math.floor(rr() * ru.length)], L = 24 + rr() * 14, k3 = L / Math.max(art.width, art.height), iw = art.width * k3, ih = art.height * k3;
+          if (w < iw + 16 || h < ih + 16) break; const ix = q[0] + 8 + rr() * (w - 16 - iw), iy = q[1] + 8 + rr() * (h - 16 - ih);
+          if (placed.some(p => ix < p[2] + 8 && ix + iw > p[0] - 8 && iy < p[3] + 8 && iy + ih > p[1] - 8)) continue; placed.push([ix, iy, ix + iw, iy + ih]); ctx.drawImage(art, S(ix), S(iy), S(iw), S(ih)); }
+        return; }
       { ctx.save(); const P = 6; // Round 414: a raised parapet: a lit top, a dark inner face, a shadow falling onto the roof
         for (let i = 0; i < 8; i++) { ctx.strokeStyle = 'rgba(0,0,0,' + (0.32 - i * 0.04) + ')'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + P + 1 + i * 1.6), S(q[1] + P + 1 + i * 1.6), S(w - 2 * (P + 1 + i * 1.6)), S(h - 2 * (P + 1 + i * 1.6))); }
         ctx.strokeStyle = '#5d6672'; ctx.lineWidth = S(P); ctx.strokeRect(S(q[0] + P / 2), S(q[1] + P / 2), S(w - P), S(h - P));
@@ -666,12 +745,12 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
         if (propArt) ctx.drawImage(propArt, S(ix), S(iy), S(iw), S(ih)); } }); // its box is its picture: never over a neighbour; no picture, nothing drawn
     if (dz > 3) { const wall = ctx.createLinearGradient(0, S(wallTop), 0, S(wallTop + dz)); wall.addColorStop(0, '#3a3f4a'); wall.addColorStop(1, '#1c1f27');
       ctx.save(); ctx.fillStyle = wall; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(dz)); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(S(bx[0]), S(wallTop), S(bw), S(1.5));
-      const rowH = dz / floors, shopF = southSt && floors > 1 ? floors - 1 : -1;
-      const wallArt = pick('wall', ra), shopArt = pick('shop', ra);
+      const rowH = dz / floors, shopF = southSt && floors > 1 && !ruin ? floors - 1 : -1;
+      const wallArt = pick(ruin ? 'ruin-wall' : 'wall', ra), shopArt = pick('shop', ra);
       // Round 414 (owner: "our buildings have too many identical floors"): the wall is laid floor by floor, each floor its
       // own sideways shift and its own light (some floors dark), a ledge under each floor, a cornice at the top, and on a
       // third of buildings the upper floors in a second material.
-      if (wallArt) { const upper = rr() < 0.33 ? pick('wall', ra) : wallArt, split = 1 + Math.floor(rr() * Math.max(1, floors - 2));
+      if (wallArt) { const upper = rr() < 0.33 ? pick(ruin ? 'ruin-wall' : 'wall', ra) : wallArt, split = 1 + Math.floor(rr() * Math.max(1, floors - 2));
         for (let f = 0; f < floors; f++) { if (f === shopF) continue; const fy = wallTop + f * rowH;
           fitRow(f < split ? upper : wallArt, bx[0], fy, bw, rowH, rr);
           const shade = rr(); if (shade < 0.3) { ctx.fillStyle = 'rgba(4,6,12,' + (0.25 + shade) + ')'; ctx.fillRect(S(bx[0]), S(fy), S(bw), S(rowH)); }
@@ -691,7 +770,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     // Round 407 (owner: "billboards should only be placed on the front side of buildings never the back side ... and neon
     // signs"): a sign only on a building whose street is in front (south): a board along the front roof edge, unless the
     // front wall already carries a blade sign. Never on a back or side wall.
-    if (southSt && !blade && rr() < 0.7) { const hArt = pick('sign-h', ra); // the sign's own picture at its own proportions, up to 16px tall, centred on the front roof edge
+    if (southSt && !blade && !ruin && rr() < 0.7) { const hArt = pick('sign-h', ra); // the sign's own picture at its own proportions, up to 16px tall, centred on the front roof edge
       if (hArt) { const k2 = Math.min(16 / hArt.height, (bw - 24) / hArt.width), dw = hArt.width * k2, dh = hArt.height * k2, sx = bx[0] + 12 + rr() * Math.max(0, bw - 24 - dw);
         if (dw > 30) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } } }
   // Round 410: cars last, so no lot, park or border is ever drawn over one
@@ -699,6 +778,9 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   for (const c of cityParkedCars(seed, plan)) { const { px, py, hz, col } = c, w = hz ? 46 : 22, h = hz ? 22 : 46, cars = A('car');
     if (cars) { const carArt = cars[Math.floor(c.artR * cars.length)], L2 = 56, T2 = L2 * carArt.height / carArt.width; // painted at the 3/4 angle, so stood upright; half face the other way
       ctx.save(); ctx.translate(S(px), S(py)); if (c.flip) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); } } // no picture, no car drawn
+  // Round 424: street lights, traffic lights and traffic signs, stood upright on their post's foot, nearest last
+  for (const f of cityStreetFurniture(seed, plan)) { const l = A(f.slot), art = l && l[Math.floor(f.artR * l.length)]; if (!art) continue; const dh = f.h, dw = art.width * dh / art.height;
+    ctx.save(); ctx.translate(S(f.x), S(f.y)); if (f.flip) ctx.scale(-1, 1); ctx.drawImage(art, S(-dw / 2), S(-dh), S(dw), S(dh)); ctx.restore(); }
 }
 function chronoDistrict(seed, key) {
   const [cx, cy] = GEN.world(key), a = chronoNoise(seed, 'district', cx, cy, 1.9), b = chronoNoise(seed, 'district2', cx, cy, 1.9), n = GEN.districtNames;

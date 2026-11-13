@@ -8,7 +8,7 @@ const path = require('path');
 const { run } = require('./expansion.test.cjs');
 const CITY = path.join(__dirname, '..', 'assets', 'environment', 'city-gen');
 const r = JSON.parse(run(`(() => { newGame(); state.seed = 77; configureRegion('city'); cityGenEnsure();
-  const t = GEN_THEMES.city, out = { surfaces: CITY_SURFACES.map(x => ({ key: x.key, walk: x.walk, slot: x.slot || null, base: (x.base || []).map(n => t.tex[n] || n), slotArt: x.slot ? CITY_TD_ART[x.slot] : null, rule: x.rule, label: x.label })),
+  const t = GEN_THEMES.city, out = { surfaces: CITY_SURFACES.map(x => ({ key: x.key, walk: x.walk, slot: x.slot || null, base: (x.base || []).map(n => t.tex[n] || n), slotArt: x.slot ? CITY_TD_ART[x.slot] : null, awaiting: !!x.awaitingArt, rule: x.rule, label: x.label })),
     props: Object.fromEntries(Object.entries(CITY_TD_ART).filter(([s]) => !CITY_SURFACE_SLOTS.has(s))), paths: cityTdArtNames() };
   // walk rules, in the rooms of the city: a building lot's middle and the sea are closed; the street at a crossing is open
   const wl = genWith('city', () => genWorld(chronoSeed())); let roofOpen = 0, roofs = 0, seaOpen = 0, seas = 0, hubs = 0, hubOpen = 0;
@@ -24,7 +24,7 @@ for (const k of ['sea', 'waterfront', 'sidewalk', 'road', 'curb', 'lot', 'park',
 const listed = new Set();
 for (const s of r.surfaces) {
   assert(s.label && s.rule, s.key + ' has a label and a rule');
-  assert(s.base.length || (s.slotArt && s.slotArt.length), s.key + ' has art');
+  assert(s.base.length || (s.slotArt && s.slotArt.length) || s.awaiting, s.key + ' has art'); // (Round 424: a surface waiting for its art draws nothing yet)
   for (const b of s.base) { assert(b.startsWith('surfaces/' + s.key + '/'), s.key + ': ' + b + ' is in its own folder'); assert(fs.existsSync(path.join(CITY, b + '.webp')), b + ' exists'); listed.add(b + '.webp'); }
   for (const n of s.slotArt || []) { const p = 'surfaces/' + s.slot + '/' + n + '.webp'; assert(fs.existsSync(path.join(CITY, p)), p + ' exists'); listed.add(p); }
 }
