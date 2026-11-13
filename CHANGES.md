@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 411: parked cars stay in the street, drawn last
+
+Owner: "you can see a vehicle behind the border there". Upright vehicle art (56px wide, Round 403) stood 34px off a
+north-south street's centre line, so it reached past the street's edge and the park drawn after it covered half of it.
+Cars now stand wholly inside the street (20px off the centre on north-south streets; 14px north / 24px south on east-west
+streets, as an upright car rises 60% of its height above its foot), and are drawn after every lot, park and border, so
+nothing is ever drawn over one.
+
 ## Round 410: kerbs and trims from the owner's edge strips
 
 The owner's sheet of six border strips on green (granite kerb, mossy planter edge, rusted steel trim, brick, crumbling

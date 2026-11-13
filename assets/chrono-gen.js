@@ -513,15 +513,6 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       const dx = Math.sign(b[0] - a[0]), dy = Math.sign(b[1] - a[1]), hw = rd.w / 2 - 8;
       for (let i = 0; i < 7; i++) { const t = -hw + 6 + i * (2 * hw - 8) / 6; if (dx) { const x = dx > 0 ? x1 + 8 : x0 - 30; ctx.fillRect(S(x), S(a[1] + t - 3), S(22), S(6)); } else { const y = dy > 0 ? y1 + 8 : y0 - 30; ctx.fillRect(S(a[0] + t - 3), S(y), S(6), S(22)); } } } }
   ctx.restore();
-  // parked cars along the main streets
-  for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + key + ':' + rd.pts.join());
-    for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
-      for (let d = 70; d < L - 70; d += 80 + rr() * 120 /* Round 407: past a car's length, so parked cars never overlap */) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1, off = rd.w / 2 - 16;
-        const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, w = hz ? 46 : 22, h = hz ? 22 : 46, col = ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)];
-        const carArt = pick('car', rr); if (carArt) { // painted at the 3/4 angle, so stood upright, not turned with the street; half face the other way
-          const L2 = 56, T2 = L2 * carArt.height / carArt.width; ctx.save(); ctx.translate(S(px), S(py)); if (rr() < 0.5) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); continue; }
-        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 4), S(w), S(h)); ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(S(px - w / 2), S(py - h / 2), S(w), S(h), S(5)) : ctx.rect(S(px - w / 2), S(py - h / 2), S(w), S(h)); ctx.fill();
-        ctx.fillStyle = 'rgba(20,30,45,.85)'; if (hz) ctx.fillRect(S(px - w / 2 + 12), S(py - h / 2 + 3), S(w - 26), S(h - 6)); else ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 12), S(w - 6), S(h - 26)); ctx.restore(); } } }
   // Round 410: each square where an object stands is framed by a trim strip (steel or brick), so it reads as a place
   { const rt = chronoRng(seed + ':trim:' + key);
     for (const sh of plan.shapes) { if (!sh.pave || sh.t !== 'rect') continue; const art = pick('trim', rt); if (!art) break; const T = 9, x0 = sh.x, y0 = sh.y, x1 = sh.x + sh.w, y1 = sh.y + sh.h;
@@ -600,6 +591,16 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
         const hArt = pick(sw > sh2 ? 'sign-h' : 'sign-v', ra); if (hArt) ctx.drawImage(hArt, S(sx), S(sy), S(sw), S(sh2));
         else { ctx.fillStyle = col; const n = Math.floor(long / 12); for (let i = 0; i < n; i++) { const g0 = 6 + i * 12; if (sw > sh2) ctx.fillRect(S(sx + g0), S(sy + 3.5), S(6), S(5)); else ctx.fillRect(S(sx + 3.5), S(sy + g0), S(5), S(6)); } }
         ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(S(sx + sw / 2), S(sy + sh2 / 2), 0, S(sx + sw / 2), S(sy + sh2 / 2), S(long * 0.8)); g.addColorStop(0, col + '33'); g.addColorStop(1, col + '00'); ctx.fillStyle = g; ctx.shadowBlur = 0; ctx.fillRect(S(sx + sw / 2 - long), S(sy + sh2 / 2 - long), S(long * 2), S(long * 2)); ctx.restore(); } } }
+  // Round 410: cars last, so no lot, park or border is ever drawn over one
+  // parked cars along the main streets
+  for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + key + ':' + rd.pts.join());
+    for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
+      for (let d = 70; d < L - 70; d += 80 + rr() * 120 /* Round 407: past a car's length, so parked cars never overlap */) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1, off = hz ? (side < 0 ? rd.w / 2 - 36 : rd.w / 2 - 26) : rd.w / 2 - 30; // Round 410 (owner: "a vehicle behind the border"): the whole car inside the street (an upright car is 56px wide, its top 60% above its foot)
+        const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, w = hz ? 46 : 22, h = hz ? 22 : 46, col = ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)];
+        const carArt = pick('car', rr); if (carArt) { // painted at the 3/4 angle, so stood upright, not turned with the street; half face the other way
+          const L2 = 56, T2 = L2 * carArt.height / carArt.width; ctx.save(); ctx.translate(S(px), S(py)); if (rr() < 0.5) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); continue; }
+        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 4), S(w), S(h)); ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(S(px - w / 2), S(py - h / 2), S(w), S(h), S(5)) : ctx.rect(S(px - w / 2), S(py - h / 2), S(w), S(h)); ctx.fill();
+        ctx.fillStyle = 'rgba(20,30,45,.85)'; if (hz) ctx.fillRect(S(px - w / 2 + 12), S(py - h / 2 + 3), S(w - 26), S(h - 6)); else ctx.fillRect(S(px - w / 2 + 3), S(py - h / 2 + 12), S(w - 6), S(h - 26)); ctx.restore(); } } }
 }
 function chronoDistrict(seed, key) {
   const [cx, cy] = GEN.world(key), a = chronoNoise(seed, 'district', cx, cy, 1.9), b = chronoNoise(seed, 'district2', cx, cy, 1.9), n = GEN.districtNames;
