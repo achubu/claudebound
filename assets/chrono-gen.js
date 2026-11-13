@@ -744,6 +744,10 @@ function paintChronoRoom(canvas, key) {
   if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
+    // Round 398 (owner: "water should always have that beach tile around it"): an even strip of sand round all water,
+    // under the ragged beach, so the noise never thins the beach to nothing.
+    const sandMin = ragged(terrain.chasm, 'sand2', { blur: 6, amp: 0.1, sharp: 9, grow: 18 });
+    ctx.drawImage(tintIn(sandMin, g => fill(g, imgs.sand)), 0, 0);
     ctx.drawImage(tintIn(sand, g => fill(g, imgs.sand)), 0, 0); // Round 394: the owner's beach-sand tile
     ctx.drawImage(tintIn(blurred(sand, 3 * K), g => { const w = blurred(shore, 14 * K); g.globalCompositeOperation = 'source-in'; g.drawImage(w, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = GEN.beach[1]; g.fillRect(0, 0, W, H); }), 0, 0);
     const water = tintIn(shore, g => fill(g, imgs.chasm)); ctx.drawImage(water, 0, 0);

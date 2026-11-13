@@ -3506,6 +3506,8 @@ in but have a somewhat clear path".
   `verge`). The squares and paths to objects are worn ground in the same surface at 55% with a looser edge (tag `path`),
   so the way to them reads without a border. The hex-paver tile (Round 397) is no longer drawn; its file stays.
 - Layout, walk masks and placement rules are unchanged (buildings keep the clearances the pavement had).
+- Owner: "water should always have that beach tile around it": an even 18px strip of the sand tile round all water
+  (tag `sand2`), under the ragged beach, so the noise never thins a beach to nothing.
 
 ## Round 397: eleven new city buildings, a paved tile under objects, fuller blocks
 
