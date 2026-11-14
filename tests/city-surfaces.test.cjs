@@ -12,7 +12,7 @@ const r = JSON.parse(run(`(() => { newGame(); state.seed = 77; configureRegion('
     props: Object.fromEntries(Object.entries(CITY_TD_ART).filter(([s]) => !CITY_SURFACE_SLOTS.has(s))), paths: cityTdArtNames() };
   // walk rules, in the rooms of the city: a building lot's middle and the sea are closed; the street at a crossing is open
   const wl = genWith('city', () => genWorld(chronoSeed())); let roofOpen = 0, roofs = 0, seaOpen = 0, seas = 0, hubs = 0, hubOpen = 0;
-  for (const l of wl.lotsPx) { if (l.use !== 'roof') continue; const cx = (l.r[0] + l.r[2]) / 2, cy = (l.r[1] + l.r[3]) / 2; roofs++; if (cityGenWalk(cx, cy - 22)) roofOpen++; }
+  for (const l of wl.lotsPx) { if (l.use !== 'roof' || cityIsYard(l)) continue; /* (Round 436: a cargo yard's ground is open) */ const cx = (l.r[0] + l.r[2]) / 2, cy = (l.r[1] + l.r[3]) / 2; roofs++; if (cityGenWalk(cx, cy - 22)) roofOpen++; }
   // (the terrain is read inside genWith('city'): it asks the active theme where the water is)
   for (const k of Object.keys(CITY_ROOMS)) genWith('city', () => { const p = cityGenPlan(k), tr = chronoTerrain(chronoSeed(), k);
     hubs++; if (walkable(k, p.hub[0], p.hub[1])) hubOpen++;

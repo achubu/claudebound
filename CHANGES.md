@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 436: docks and the homes district (Sheets E and F)
+
+- **Docks (Sheet E):** eight cargo pieces in `props/cargo/`: two containers, a container stack, pallets, a forklift, oil
+  drums, rope and crates.
+  - A lot within 4 cells of the shore is a dock lot (`dock` on `lotsPx`). About half of them are cargo yards
+    (`cityIsYard`, 19 on seed 77), if they are at least 4 cells each way.
+  - A yard is open lot ground edged by a kerb strip, so it never meets the paving without a border.
+  - Cargo stands on the yard (`cityYardCargo`, sizes in `CITY_CARGO_SIZE`): about one piece per 9000px², none twice in
+    a yard while others are left, never overlapping. Each piece blocks the way (`cityBlockers`); the ground between
+    them is open.
+  - Ruins skip yard lots.
+- **Homes district (Sheet F):** the city's `homes` quarter (`chronoDistrict`) gets its own walls and roofs (new
+  surfaces `home-wall` and `home-roof`):
+  - Walls: home-clapboard, home-stucco, home-tenement (the top storey of a two-storey strip) and home-shanty.
+  - Roofs: home-terracotta, home-gravel (cropped inside its rim) and home-tin. The asphalt shingles were left out, since
+    their hip-ridge X would repeat as a grid.
+  - Homes have 3 or 4 floors, no shopfronts and no signs.
+- Tests: `city-surfaces` skips yards in its "no building can be walked on" check. The pathing, placement, enemy and
+  walk-through suites all pass (54 rooms, 387 crossings, 80 item routes, no problems).
+
 ## Round 435: rubble, street furniture and ruins (Sheets B, C and D)
 
 The owner's three remaining Round 424 sheets (Archive_4 and a separate zip). Every slot from Round 424 now has art:

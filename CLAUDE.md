@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 435) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 436) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -96,7 +96,8 @@ change set.
   storeys 42px; a shallow lot drops floors instead of squeezing them. Round 428: every block is filled (open rectangles of
   3x3+ cells left by the splitting become lots), each room is scored for bare paving (`genWorldScore`) and the lots are
   re-drawn when the worst room is over 20%; `tests/city-fill.test.cjs`. Round 430 (owner): **never mix two textures without
-  a border between them**; every road and alley is the one `road-wet` texture.
+  a border between them**; every road and alley is the one `road-wet` texture. Round 436: cargo yards on the docks
+  (`cityIsYard`, `cityYardCargo`; open ground, each piece blocks) and the homes quarter's own walls and roofs.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):

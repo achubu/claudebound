@@ -321,6 +321,61 @@
        ]
       },
       {
+       "key": "home-roof",
+       "label": "Homes district: roofs",
+       "rule": "Every building in the homes quarter (chronoDistrict), tiled 160px like the other roofs.",
+       "walk": false,
+       "folder": "city-gen/surfaces/home-roof/",
+       "scale": null,
+       "files": [
+        {
+         "name": "home-gravel",
+         "src": "assets/environment/city-gen/surfaces/home-roof/home-gravel.webp",
+         "bytes": 59828
+        },
+        {
+         "name": "home-terracotta",
+         "src": "assets/environment/city-gen/surfaces/home-roof/home-terracotta.webp",
+         "bytes": 35436
+        },
+        {
+         "name": "home-tin",
+         "src": "assets/environment/city-gen/surfaces/home-roof/home-tin.webp",
+         "bytes": 25064
+        }
+       ]
+      },
+      {
+       "key": "home-wall",
+       "label": "Homes district: walls (one floor)",
+       "rule": "Every building in the homes quarter: 3 or 4 floors, no shopfront and no signs; fitted floor by floor between windows (CITY_TD_GAPS).",
+       "walk": false,
+       "folder": "city-gen/surfaces/home-wall/",
+       "scale": null,
+       "files": [
+        {
+         "name": "home-clapboard",
+         "src": "assets/environment/city-gen/surfaces/home-wall/home-clapboard.webp",
+         "bytes": 24540
+        },
+        {
+         "name": "home-shanty",
+         "src": "assets/environment/city-gen/surfaces/home-wall/home-shanty.webp",
+         "bytes": 25544
+        },
+        {
+         "name": "home-stucco",
+         "src": "assets/environment/city-gen/surfaces/home-wall/home-stucco.webp",
+         "bytes": 27024
+        },
+        {
+         "name": "home-tenement",
+         "src": "assets/environment/city-gen/surfaces/home-wall/home-tenement.webp",
+         "bytes": 35746
+        }
+       ]
+      },
+      {
        "key": "roof",
        "label": "Roofs",
        "rule": "One per building part, tiled 160px; a raised parapet and a cast shadow; rooftop props (props/) sized per kind.",
@@ -492,6 +547,56 @@
          "name": "ac-3",
          "src": "assets/environment/city-gen/props/prop-ac/ac-3.webp",
          "bytes": 31198
+        }
+       ]
+      },
+      {
+       "key": "cargo",
+       "label": "cargo",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/cargo/",
+       "scale": null,
+       "files": [
+        {
+         "name": "container-blue",
+         "src": "assets/environment/city-gen/props/cargo/container-blue.webp",
+         "bytes": 31136
+        },
+        {
+         "name": "container-red",
+         "src": "assets/environment/city-gen/props/cargo/container-red.webp",
+         "bytes": 36166
+        },
+        {
+         "name": "container-stack",
+         "src": "assets/environment/city-gen/props/cargo/container-stack.webp",
+         "bytes": 46416
+        },
+        {
+         "name": "crates",
+         "src": "assets/environment/city-gen/props/cargo/crates.webp",
+         "bytes": 41210
+        },
+        {
+         "name": "drums",
+         "src": "assets/environment/city-gen/props/cargo/drums.webp",
+         "bytes": 30476
+        },
+        {
+         "name": "forklift",
+         "src": "assets/environment/city-gen/props/cargo/forklift.webp",
+         "bytes": 31138
+        },
+        {
+         "name": "pallets",
+         "src": "assets/environment/city-gen/props/cargo/pallets.webp",
+         "bytes": 30658
+        },
+        {
+         "name": "rope",
+         "src": "assets/environment/city-gen/props/cargo/rope.webp",
+         "bytes": 35762
         }
        ]
       },
