@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 429: Crystal Ward and Crystal Aegis card art
+
+The owner's Crystal Ward and Crystal Aegis paintings, levels 0-3, are now at `assets/cards/level*/crystalWard` and
+`crystalAegis`: a 1024px PNG and a 512px WebP for each level. Both are listed in `refreshedCardArt` and in the card-art
+test, and the `cards.js?v=` tag is now `round429`.
+
 ## Round 428: every block filled; rooms scored and re-drawn
 
 Owner: "Any way to improve our procedural generation algorithm?" I proposed (1) fill every block, (2) districts, (3) a
