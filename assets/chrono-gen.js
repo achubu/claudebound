@@ -357,7 +357,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '425',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '426',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -706,7 +706,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     const sides = [['s', (bx[0] + bx[2]) / 2, y1 + 20], ['n', (bx[0] + bx[2]) / 2, y0 - 20], ['e', x1 + 20, (bx[1] + bx[3]) / 2], ['w', x0 - 20, (bx[1] + bx[3]) / 2]].filter(([, x, y]) => isRoad(x, y) || isRoad(x, y + (y > y1 ? 20 : -20)));
     // Round 414 (owner: "the roofs look like ground"): a cast shadow that grows with the building's height
     // Round 420: the lot under a building (surface 'lot'), its footing showing round the building
-    { ctx.save(); ctx.beginPath(); ctx.rect(S(x0), S(y0), S(x1 - x0), S(y1 - y0)); ctx.clip(); fill(ctx, imgs.yard); ctx.fillStyle = 'rgba(6,8,14,.35)'; ctx.fillRect(S(x0), S(y0), S(x1 - x0), S(y1 - y0)); ctx.restore(); }
+    { ctx.save(); ctx.beginPath(); ctx.rect(S(x0), S(y0), S(x1 - x0), S(y1 - y0)); ctx.clip(); fill(ctx, imgs.yard); ctx.fillStyle = 'rgba(4,6,10,.78)' /* Round 426 (owner: "the borders around the buildings look strange"): the footing reads as the building's contact shadow, not a pale frame */; ctx.fillRect(S(x0), S(y0), S(x1 - x0), S(y1 - y0)); ctx.restore(); }
     { const hgt = 4 + Math.floor(rr() * 5); ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(S(bx[0] + 4 + hgt * 2.2), S(bx[1] + 4 + hgt * 1.2), S(bw), S(bh)); ctx.restore(); } // drop shadow
     // Round 400 (owner: "could the buildings be not quite directly over the top? ... maybe 10 degrees?"): seen tilted by
     // GEN.tilt degrees, a building shows its south wall, sin(tilt) of its height, drawn inside its own lot under the roof.
@@ -727,12 +727,12 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
           if (w < iw + 16 || h < ih + 16) break; const ix = q[0] + 8 + rr() * (w - 16 - iw), iy = q[1] + 8 + rr() * (h - 16 - ih);
           if (placed.some(p => ix < p[2] + 8 && ix + iw > p[0] - 8 && iy < p[3] + 8 && iy + ih > p[1] - 8)) continue; placed.push([ix, iy, ix + iw, iy + ih]); ctx.drawImage(art, S(ix), S(iy), S(iw), S(ih)); }
         return; }
-      { ctx.save(); const P = 6; // Round 414: a raised parapet: a lit top, a dark inner face, a shadow falling onto the roof
+      { ctx.save(); const P = 4; // Round 426: a thinner parapet (was 6). Round 414: a raised parapet: a lit top, a dark inner face, a shadow falling onto the roof
         for (let i = 0; i < 8; i++) { ctx.strokeStyle = 'rgba(0,0,0,' + (0.32 - i * 0.04) + ')'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + P + 1 + i * 1.6), S(q[1] + P + 1 + i * 1.6), S(w - 2 * (P + 1 + i * 1.6)), S(h - 2 * (P + 1 + i * 1.6))); }
-        ctx.strokeStyle = '#5d6672'; ctx.lineWidth = S(P); ctx.strokeRect(S(q[0] + P / 2), S(q[1] + P / 2), S(w - P), S(h - P));
-        ctx.strokeStyle = 'rgba(205,214,226,.55)'; ctx.lineWidth = S(1.5); ctx.strokeRect(S(q[0] + 1), S(q[1] + 1), S(w - 2), S(h - 2));
+        ctx.strokeStyle = '#4b525c'; ctx.lineWidth = S(P); ctx.strokeRect(S(q[0] + P / 2), S(q[1] + P / 2), S(w - P), S(h - P));
+        ctx.strokeStyle = 'rgba(205,214,226,.22)'; ctx.lineWidth = S(1); ctx.strokeRect(S(q[0] + 1), S(q[1] + 1), S(w - 2), S(h - 2));
         ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = S(1.2); ctx.strokeRect(S(q[0] + P), S(q[1] + P), S(w - 2 * P), S(h - 2 * P)); ctx.restore(); }
-      ctx.save(); ctx.strokeStyle = 'rgba(140,150,165,0)'; ctx.lineWidth = S(4); ctx.strokeRect(S(q[0] + 2), S(q[1] + 2), S(w - 4), S(h - 4)); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = S(2); ctx.strokeRect(S(q[0] + 5), S(q[1] + 5), S(w - 10), S(h - 10)); ctx.restore();
+      /* Round 426: the second dark line inside the parapet is gone */
       // rooftop clutter
       const items = 2 + Math.floor(rr() * 4), placed = [];
       // Round 416 (owner: "some rooftop objects being too small, others being too big"): each kind has one size, the
