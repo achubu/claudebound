@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 433: Squall Step card art; owner notes
+
+- The owner's Squall Step paintings, levels 0-3, are at `assets/cards/level*/squallStep`. They are listed in
+  `refreshedCardArt` and the card-art test, and the `cards.js?v=` tag is now `round433`.
+- New `NOTES.md`: ideas the owner wants to be reminded of later. Its first entry is cards that use both Aether and
+  Energy ("not for now").
+
 ## Round 432: park grasses (Sheet A)
 
 The owner's Sheet A was cut with `tools/prepare_city_art.py --sheet` into eight seamless park grounds in
