@@ -54,11 +54,6 @@
          "bytes": 26596
         },
         {
-         "name": "park-mud",
-         "src": "assets/environment/city-gen/surfaces/park/park-mud.webp",
-         "bytes": 23456
-        },
-        {
          "name": "park-rubble",
          "src": "assets/environment/city-gen/surfaces/park/park-rubble.webp",
          "bytes": 26276
@@ -117,11 +112,6 @@
          "bytes": 28538
         },
         {
-         "name": "walk-herringbone",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-herringbone.webp",
-         "bytes": 25730
-        },
-        {
          "name": "walk-plates",
          "src": "assets/environment/city-gen/surfaces/sidewalk/walk-plates.webp",
          "bytes": 17814
@@ -130,11 +120,6 @@
          "name": "walk-slabs",
          "src": "assets/environment/city-gen/surfaces/sidewalk/walk-slabs.webp",
          "bytes": 16838
-        },
-        {
-         "name": "walk-tiles",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-tiles.webp",
-         "bytes": 21790
         }
        ]
       },
@@ -207,11 +192,6 @@
          "name": "edge-kerb",
          "src": "assets/environment/city-gen/surfaces/park-edge/edge-kerb.webp",
          "bytes": 42138
-        },
-        {
-         "name": "edge-planter",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-planter.webp",
-         "bytes": 68578
         }
        ]
       },
@@ -299,11 +279,6 @@
        "scale": null,
        "files": [
         {
-         "name": "ruin-ash",
-         "src": "assets/environment/city-gen/surfaces/ruin/ruin-ash.webp",
-         "bytes": 50708
-        },
-        {
          "name": "ruin-bricks",
          "src": "assets/environment/city-gen/surfaces/ruin/ruin-bricks.webp",
          "bytes": 48776
@@ -312,11 +287,6 @@
          "name": "ruin-girders",
          "src": "assets/environment/city-gen/surfaces/ruin/ruin-girders.webp",
          "bytes": 47306
-        },
-        {
-         "name": "ruin-slab",
-         "src": "assets/environment/city-gen/surfaces/ruin/ruin-slab.webp",
-         "bytes": 38796
         }
        ]
       },
@@ -329,19 +299,9 @@
        "scale": null,
        "files": [
         {
-         "name": "home-gravel",
-         "src": "assets/environment/city-gen/surfaces/home-roof/home-gravel.webp",
-         "bytes": 59828
-        },
-        {
          "name": "home-terracotta",
          "src": "assets/environment/city-gen/surfaces/home-roof/home-terracotta.webp",
          "bytes": 35436
-        },
-        {
-         "name": "home-tin",
-         "src": "assets/environment/city-gen/surfaces/home-roof/home-tin.webp",
-         "bytes": 25064
         }
        ]
       },
@@ -384,84 +344,14 @@
        "scale": null,
        "files": [
         {
-         "name": "roof-algae",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-algae.webp",
-         "bytes": 26588
-        },
-        {
-         "name": "roof-asphalt",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-asphalt.webp",
-         "bytes": 90380
-        },
-        {
-         "name": "roof-carpark",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-carpark.webp",
-         "bytes": 32746
-        },
-        {
-         "name": "roof-concrete",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-concrete.webp",
-         "bytes": 72142
-        },
-        {
-         "name": "roof-corrugated",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-corrugated.webp",
-         "bytes": 19690
-        },
-        {
          "name": "roof-cracked",
          "src": "assets/environment/city-gen/surfaces/roof/roof-cracked.webp",
          "bytes": 38714
         },
         {
-         "name": "roof-grating",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-grating.webp",
-         "bytes": 33204
-        },
-        {
-         "name": "roof-grit",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-grit.webp",
-         "bytes": 46050
-        },
-        {
-         "name": "roof-membrane",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-membrane.webp",
-         "bytes": 10218
-        },
-        {
-         "name": "roof-mossy",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-mossy.webp",
-         "bytes": 42276
-        },
-        {
-         "name": "roof-painted",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-painted.webp",
-         "bytes": 21176
-        },
-        {
-         "name": "roof-patched",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-patched.webp",
-         "bytes": 27106
-        },
-        {
          "name": "roof-plate",
          "src": "assets/environment/city-gen/surfaces/roof/roof-plate.webp",
          "bytes": 81736
-        },
-        {
-         "name": "roof-plates",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-plates.webp",
-         "bytes": 26084
-        },
-        {
-         "name": "roof-puddles",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-puddles.webp",
-         "bytes": 22740
-        },
-        {
-         "name": "roof-riveted",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-riveted.webp",
-         "bytes": 13824
         },
         {
          "name": "roof-rust",
@@ -482,11 +372,6 @@
          "name": "roof-tar",
          "src": "assets/environment/city-gen/surfaces/roof/roof-tar.webp",
          "bytes": 38432
-        },
-        {
-         "name": "roof-tarpaper",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-tarpaper.webp",
-         "bytes": 15796
         },
         {
          "name": "roof-tin",

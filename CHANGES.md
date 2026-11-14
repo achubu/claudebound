@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 437: textures that don't tile taken out
+
+Owner: "eliminate any texture that doesn't tile well from the game and from the sprites page".
+- **Method:** every tiling texture was laid 3x3 (strips 3x1) and judged by eye, with a seam score next to it (the jump
+  across the wrap-around edge against the texture's ordinary pixel-to-pixel change).
+- **Taken out:** 23 textures that showed a seam or an obvious repeat. They moved to `unused assets/` under their old
+  paths, and are no longer in `CITY_TD_ART` or on the Textures page (226 to 203 pictures).
+  - Sidewalks: walk-tiles, walk-herringbone.
+  - 15 roofs: algae, asphalt, carpark, concrete, corrugated, grating, grit, membrane, mossy, painted, patched, plates,
+    puddles, riveted, tarpaper.
+  - park-mud, ruin-ash, ruin-slab, home-gravel, home-tin, and the edge-planter strip.
+- **What's left:**
+  - 3 sidewalks, 7 roofs, 7 park grasses, 2 ruin floors, 1 home roof.
+  - Every wall and shop strip, the curb, 2 park edges and the shoreline.
+- **Kept although they repeat:** the sea's water and the road-wet road are the only textures for their surfaces, so they
+  stay until replacements come. The sea already lays a turned copy over itself in patches.
+- **New `tools/tile_check.py`:** scores every texture in the game (limit 2.3; everything left passes) and writes tiled
+  previews to `/tmp/tile_check/`. Run it after adding art.
+
 ## Round 436: docks and the homes district (Sheets E and F)
 
 - **Docks (Sheet E):** eight cargo pieces in `props/cargo/`: two containers, a container stack, pallets, a forklift, oil
