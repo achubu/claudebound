@@ -33,7 +33,7 @@ SHEETS = {  # draft id -> names (left to right, top to bottom), long side px
 # Round 387: Neon Aftermath's set, for the same generator (python3 tools/prepare_chrono_gen.py <folder> city).
 WORLDS = {'city': {
     'out': 'assets/environment/city-gen',
-    'textures': {'surfaces/road/floor': '5uo2m3', 'surfaces/park/overgrowth': '549k97', 'surfaces/lot/yard': 'k7s1hd', 'legacy/ground': 'wd498u', 'surfaces/sea/water': 'vkvpou', 'surfaces/road/road-wet': '1pi1qk', 'surfaces/sidewalk/pavement-old': 'ijwi57', 'legacy/rubble-big': 'pch07g', 'surfaces/waterfront/sand': 'nsyypy', 'legacy/plaza': '9ssefs'},  # Round 394: beach sand; Round 389: finer road, pavement and rubble
+    'textures': {'legacy/road-floor': '5uo2m3', 'surfaces/park/overgrowth': '549k97', 'surfaces/lot/yard': 'k7s1hd', 'legacy/ground': 'wd498u', 'surfaces/sea/water': 'vkvpou', 'surfaces/road/road-wet': '1pi1qk', 'surfaces/sidewalk/pavement-old': 'ijwi57', 'legacy/rubble-big': 'pch07g', 'surfaces/waterfront/sand': 'nsyypy', 'legacy/plaza': '9ssefs'},  # Round 394: beach sand; Round 389: finer road, pavement and rubble
     'sheets': {
         # Round 397: single buildings, one per image (the whole picture is the building)
         'nfrfik': (['laundromat'], 420), 'dgth72': (['pharmacy'], 420), 'px41tz': (['karaoke-bar'], 420), 'ttx0vi': (['food-court'], 420),

@@ -357,7 +357,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '428',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '430',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -368,7 +368,7 @@ const GEN_THEMES = {
     clutter: { car: [220, 141], dumpsters: [220, 143], crates: [220, 216], 'traffic-light': [218, 220], barrier: [200, 175] },
     scale: { building: 0.9, landmark: 0.9, lamp: 0.3, bench: 0.2, bollard: 0.2, clutter: 0.22 }, inlays: [],
     // Round 420: the surfaces' textures by name (sorted into surfaces/<surface>/); everything else the old 3/4 city drew is in legacy/
-    tex: { pipes: 'surfaces/park/overgrowth', chasm: 'surfaces/sea/water', overgrowth: 'surfaces/park/overgrowth', water: 'surfaces/sea/water', sand: 'surfaces/waterfront/sand', floor: 'surfaces/road/floor', 'road-wet': 'surfaces/road/road-wet', gravel: 'surfaces/road/gravel', yard: 'surfaces/lot/yard', 'pavement-old': 'surfaces/sidewalk/pavement-old' }, legacy: 'legacy/', kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { chasm: 1.6, gravel: 0.3, floor: 0.45, yard: 0.3, ground: 0.7, 'road-wet': 0.35, 'pavement-old': 0.45, plaza: 0.32, 'rubble-big': 0.8 },
+    tex: { pipes: 'surfaces/park/overgrowth', chasm: 'surfaces/sea/water', overgrowth: 'surfaces/park/overgrowth', water: 'surfaces/sea/water', sand: 'surfaces/waterfront/sand', floor: 'legacy/road-floor', 'road-wet': 'surfaces/road/road-wet', gravel: 'legacy/road-gravel', yard: 'surfaces/lot/yard', 'pavement-old': 'surfaces/sidewalk/pavement-old' }, legacy: 'legacy/', kerb: ['#070b10', '#aebcc6', '#4d5a66'], holeRim: ['#5d6b76', '#05080c'], bedRim: ['#04070a', '#22331f'], yardRim: ['#0a0e14', '#8794a0'], groundShade: 'rgba(4,8,18,.2)', yardShade: 'rgba(8,14,28,.55)', round: 20, pavement: 34, grid: true, lampGap: 240, texScale: { chasm: 1.6, gravel: 0.3, floor: 0.45, yard: 0.3, ground: 0.7, 'road-wet': 0.35, 'pavement-old': 0.45, plaza: 0.32, 'rubble-big': 0.8 },
     mix: [{ on: 'ground', tex: 'rubble-big', tag: 'rubble', period: 5, cut: 0.4 }, { on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 0.6 }], blend: true, // Round 398: no kerbs, no paving tile; roads and paths blend into the ground (the plaza tile from Round 397 is unused)
     bedCut: 0.78, feather: 9, square: true, beach: ['#5b5546', 'rgba(36,40,40,.55)', '#cfe6ee'],
     // Owner: "water should be only on the edges with an occasional pond": a ragged band round the edge of the city's
@@ -540,10 +540,10 @@ const CITY_SURFACES = [
   { key: 'waterfront', label: 'Waterfront (beach sand)', kind: 'ground', walk: true, base: ['sand'], rule: 'Exactly one grid cell wide round the sea; meets the sea with no border.' },
   { key: 'waterfront-edge', label: 'Waterfront edge (shoreline strip)', kind: 'edge', walk: true, slot: 'waterfront-edge', rule: 'Laid along the outline where the sand meets the paving, bent round corners.' },
   { key: 'sidewalk', label: 'Sidewalk paving', kind: 'ground', walk: true, base: ['pavement-old'], slot: 'sidewalk', scale: 0.22, scales: { 'walk-slabs': 0.13, 'walk-plates': 0.13 }, rule: 'All ground that is not road, sea, sand, lot or park. One paving per city block (the first slot entry on half the blocks), so it only changes across a street. The squares where objects stand are sidewalk too.' },
-  { key: 'road', label: 'Road (asphalt)', kind: 'ground', walk: true, base: ['floor', 'road-wet', 'gravel'], scale: 0.45, rule: 'Main roads 100px in asphalt, alleys 50px in gravel (Round 423); crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.' },
+  { key: 'road', label: 'Road (asphalt)', kind: 'ground', walk: true, base: ['road-wet'], scale: 0.45, rule: 'One texture for every road and alley (Round 430, owner: never mix textures without a border between them); main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them.' },
   { key: 'curb', label: 'Curb (kerb along every road)', kind: 'edge', walk: true, slot: 'curb', rule: 'A kerb-stone strip along both edges of every road, on the sidewalk side, bent round corners.' },
   { key: 'lot', label: 'Under buildings (lot footing)', kind: 'ground', walk: false, base: ['yard'], scale: 0.3, rule: 'Fills a building\'s whole lot; a 4px footing shows round the building. Lots lie wholly on their block, never over a street.' },
-  { key: 'park', label: 'Park (grass)', kind: 'ground', walk: true, base: ['overgrowth'], slot: 'park', rule: 'About 8% of lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Round 424: each park lays one grass from its folder over the whole park and a second one in soft patches (worn grass, dirt, rubble-strewn ground), tiled 140px; with no grass art, the base overgrowth.' },
+  { key: 'park', label: 'Park (grass)', kind: 'ground', walk: true, base: ['overgrowth'], slot: 'park', rule: 'About 8% of lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Round 424: each park lays one grass from its folder over the whole park (Round 430: only one, never mixed), tiled 140px; with no grass art, the base overgrowth.' },
   { key: 'park-edge', label: 'Park edge (kerb round the grass)', kind: 'edge', walk: true, slot: 'park-edge', rule: 'One strip per park, round its rounded outline, on a solid base.' },
   { key: 'roof', label: 'Roofs', kind: 'building', walk: false, slot: 'roof', rule: 'One per building part, tiled 160px; a raised parapet and a cast shadow; rooftop props (props/) sized per kind.' },
   { key: 'wall', label: 'Building walls (one floor)', kind: 'building', walk: false, slot: 'wall', rule: 'Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS); at least 3 floors (Round 427), 42px each; a shallow lot has fewer floors rather than squeezed ones.' },
@@ -702,7 +702,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     if (l.use === 'plaza') continue;
     if (l.use === 'park') { const PR = 16; ctx.save(); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(S(bx[0]), S(bx[1]), S(bw), S(bh), S(PR)); else ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.pipes);
       // Round 424: the park's own grass over the whole park, and a second one in soft patches (each tiled 140px)
-      const grass = A('park'); if (grass) { const pr = chronoRng(seed + ':grass:' + l.seed), g1 = grass[Math.floor(pr() * grass.length)], g2 = grass[Math.floor(pr() * grass.length)];
+      const grass = A('park'); if (grass) { const pr = chronoRng(seed + ':grass:' + l.seed), g1 = grass[Math.floor(pr() * grass.length)], g2 = g1; // Round 430: one grass per park (no mixing without a border)
         tile(g1, bx[0], bx[1], bw, bh, 140, pr() * 140);
         if (g2 !== g1) { const m = document.createElement('canvas'); m.width = Math.ceil(S(bw)); m.height = Math.ceil(S(bh)); const mg = m.getContext('2d');
           for (let i = 0, n = 2 + Math.floor(pr() * 3); i < n; i++) { const cx = pr() * bw, cy = pr() * bh, rad = 30 + pr() * Math.min(bw, bh) * 0.45, gr = mg.createRadialGradient(S(cx), S(cy), 0, S(cx), S(cy), S(rad));
@@ -1098,7 +1098,7 @@ function paintChronoRoom(canvas, key) {
     if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null; return true;
   }
   const props = chronoRoomProps(theme === 'chronospire' ? chronoSeed() : seed, plan);
-  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.beach ? ['sand'] : []), ...(GEN.topdown ? ['pavement-old', 'gravel', ...cityTdArtNames()] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set((GEN.topdown ? [] : props.map(p => p.name)).concat(plan.inlays.map(i => i.name)))], imgs = {};
+  const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.beach ? ['sand'] : []), ...(GEN.topdown ? ['pavement-old', ...cityTdArtNames()] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set((GEN.topdown ? [] : props.map(p => p.name)).concat(plan.inlays.map(i => i.name)))], imgs = {};
   for (const n of names) imgs[n] = chronoArtImage(n);
   const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth));
   if (waiting) {
@@ -1315,8 +1315,11 @@ function paintChronoRoom(canvas, key) {
     const rm = GEN.topdown ? (() => { const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(f.shape, 0, 0); return c; })() : ragged(f.shape, 'verge', { blur: 9, amp: 0.6, sharp: 4 }), rg = rm.getContext('2d');
     const curbArt = GEN.topdown && (CITY_TD_ART.curb || []).map(n => imgs[cityArtPath('curb', n)]).find(i => i && i.naturalWidth);
     if (GEN.topdown && !curbArt) { ring(chronoTint(f.shape, '#05070c'), 4); ring(chronoTint(f.shape, '#3c4450'), 2); }
-    rg.globalCompositeOperation = 'source-in'; fill(rg, imgs.floor); rg.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(rg, rm, mix);
-    if (GEN.topdown && imgs.gravel && imgs.gravel.naturalWidth) { // Round 423 (owner: "roof-gravel can be changed to road texture"): alleys are gravel
+    rg.globalCompositeOperation = 'source-in';
+    // Round 430 (owner: "road texture should all just be one, the road-wet one is good for now, lets try not to mix any
+    // textures unless we have a border in between"): the city's roads and alleys are one texture, with no patches
+    if (GEN.topdown) fill(rg, imgs['road-wet']); else { fill(rg, imgs.floor); rg.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(rg, rm, mix); }
+    if (false) { // Round 423 (owner: "roof-gravel can be changed to road texture"): alleys are gravel
       const am = document.createElement('canvas'); am.width = W; am.height = H; const ag = am.getContext('2d'); ag.fillStyle = ag.strokeStyle = '#fff'; ag.lineCap = 'butt';
       for (const sh of plan.shapes) { if (sh.pave || sh.main !== false) continue;
         if (sh.t === 'rect') ag.fillRect(sh.x * K, sh.y * K, sh.w * K, sh.h * K);
