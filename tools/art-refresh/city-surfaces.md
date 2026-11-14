@@ -18,7 +18,7 @@ the right folder and into `CITY_TD_ART`. Bump the `chrono-gen.js?v=` tag in `ind
 | 2 | Waterfront (beach sand) | `surfaces/waterfront/` (sand) | yes | Exactly one grid cell wide round the sea; no border between sand and sea. |
 | 3 | Waterfront edge | `surfaces/waterfront-edge/` | yes | Shoreline strip along the outline where sand meets paving, bent round corners. |
 | 4 | Sidewalk | `surfaces/sidewalk/` | yes | All ground that is not road, sea, sand, lot or park; one paving per city block (the first on half the blocks), so it only changes across a street. Squares where objects stand are sidewalk. Drawn at 0.22. |
-| 5 | Road | `surfaces/road/` (floor, road-wet) | yes | Main roads 100px with a dashed centre line (two lanes), alleys 50px; crossings exactly as wide as their roads. Drawn at 0.45. |
+| 5 | Road | `surfaces/road/` (road-wet) | yes | One texture for every road and alley (Round 430). Main roads 100px with a dashed centre line (two lanes), alleys 50px; crossings exactly as wide as their roads. Drawn at 0.45. |
 | 6 | Curb | `surfaces/curb/` | yes | Kerb-stone strip along both edges of every road, on the sidewalk side, bent round corners. |
 | 7 | Under buildings (lot) | `surfaces/lot/` (yard) | no | Fills a building's whole lot; a 4px footing shows round the building. Lots lie wholly on their block. |
 | 8 | Park | `surfaces/park/` (overgrowth + grasses) | yes (trees, rubble no) | About 8% of lots; rounded corners; a clear cell of sidewalk from other parks and the shore. Round 424: one grass over the park, a second in soft patches, tiled 140px; rubble lies in it. |
@@ -35,5 +35,5 @@ roads), **sign-traffic** (one side of each alley mouth on a main road), **rubble
 Posts stand upright on their foot at their own proportions, keep clear of cars, crossings, doors, object squares,
 buildings, the sea and each other (60px), and block the way. A slot with no art places nothing.
 
-Rules for all art: never stretched (scaled evenly only); nothing is drawn in a slot that has no picture (no drawn
+Rules for all art: two textures never meet without a border between them (a kerb, an edge strip or a building) (Round 430); never stretched (scaled evenly only); nothing is drawn in a slot that has no picture (no drawn
 stand-ins); enemies stand only where their whole sprite is on walkable ground.

@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 430: one road texture; no textures mixed without a border
+
+Owner: "lets make sure not to mix textures, road texture should all just be one, the road-wet one is good for now, lets
+try not to mix any textures unless we have a border in between".
+
+- **Roads:** every road and alley in the city is now the one road-wet texture. The asphalt base, its wet patches and the
+  gravel alleys (Round 423) are gone. `floor` and `gravel` moved to `city-gen/legacy/` as `road-floor` and `road-gravel`.
+  The road surface lists only `road-wet`.
+- **Parks:** each park lays one grass over the whole park, not a second grass in patches (Round 424; no grass art yet).
+- **Already following the rule:**
+  - Sidewalk paving changes only across a street, so the curb is the border.
+  - Sand meets paving at the shoreline strip; the owner asked for no border between sand and sea.
+  - The sea's anti-tiling layer is the same water texture.
+- The rule is in `tools/art-refresh/city-surfaces.md`: two textures never meet without a border between them (a kerb,
+  an edge strip or a building).
+
 ## Round 429: Crystal Ward and Crystal Aegis card art
 
 The owner's Crystal Ward and Crystal Aegis paintings, levels 0-3, are now at `assets/cards/level*/crystalWard` and

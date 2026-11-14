@@ -12,7 +12,7 @@
       {
        "key": "park",
        "label": "Park (grass)",
-       "rule": "About 8% of lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Round 424: each park lays one grass from its folder over the whole park and a second one in soft patches (worn grass, dirt, rubble-strewn ground), tiled 140px; with no grass art, the base overgrowth.",
+       "rule": "About 8% of lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Round 424: each park lays one grass from its folder over the whole park (Round 430: only one, never mixed), tiled 140px; with no grass art, the base overgrowth.",
        "walk": true,
        "folder": "city-gen/surfaces/park/",
        "scale": null,
@@ -28,23 +28,11 @@
       {
        "key": "road",
        "label": "Road (asphalt)",
-       "rule": "Main roads 100px in asphalt, alleys 50px in gravel (Round 423); crossings exactly as wide as the roads meeting in them; wet patches from world-wide noise.",
+       "rule": "One texture for every road and alley (Round 430, owner: never mix textures without a border between them); main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them.",
        "walk": true,
        "folder": "city-gen/surfaces/road/",
        "scale": 0.45,
        "files": [
-        {
-         "name": "floor",
-         "src": "assets/environment/city-gen/surfaces/road/floor.webp",
-         "bytes": 129138,
-         "role": "base texture"
-        },
-        {
-         "name": "gravel",
-         "src": "assets/environment/city-gen/surfaces/road/gravel.webp",
-         "bytes": 61568,
-         "role": "base texture"
-        },
         {
          "name": "road-wet",
          "src": "assets/environment/city-gen/surfaces/road/road-wet.webp",
@@ -1403,6 +1391,16 @@
          "name": "repair-shop",
          "src": "assets/environment/city-gen/legacy/repair-shop.webp",
          "bytes": 47310
+        },
+        {
+         "name": "road-floor",
+         "src": "assets/environment/city-gen/legacy/road-floor.webp",
+         "bytes": 129138
+        },
+        {
+         "name": "road-gravel",
+         "src": "assets/environment/city-gen/legacy/road-gravel.webp",
+         "bytes": 61568
         },
         {
          "name": "robotics-workshop",
