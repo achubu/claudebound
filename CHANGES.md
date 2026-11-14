@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 434: Static Coil card art
+
+The owner's Static Coil paintings, levels 0-3, are at `assets/cards/level*/staticCoil`. They are listed in
+`refreshedCardArt` and the card-art test, and the `cards.js?v=` tag is now `round434`.
+
 ## Round 433: Squall Step card art; owner notes
 
 - The owner's Squall Step paintings, levels 0-3, are at `assets/cards/level*/squallStep`. They are listed in
