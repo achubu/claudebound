@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 426: quieter building edges
+
+Owner: "The borders around the buildings look strange, are you dropping shadows or what's going on there". Several things
+were stacked round every building: a 4px strip of the pale lot texture, the drop shadow, a 6px grey parapet with a
+bright rim, and two dark lines inside it. Together they read as a pale frame. Changes:
+- The lot strip is darkened (78% black), so it reads as the building's contact shadow.
+- The parapet is 4px and darker, with a faint 1px rim.
+- The second dark line inside the parapet is gone.
+
 ## Round 425: taller storeys beside the hero
 
 Owner: "not liking the scale of the buildings in comparison to the size of the main character"; "the character should be
