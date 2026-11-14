@@ -4,7 +4,7 @@ Aethercede is a browser card-battler/exploration game in vanilla JS with no
 build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
-**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 427) is
+**Read `CHANGES.md` first.** Every round of work (Round 1 to Round 428) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -92,7 +92,9 @@ change set.
   `cityParkRubble`, `cityIsRuin`); an empty slot places nothing, so nothing invisible blocks the way.
   Round 425: a storey is 36px on screen (the hero is ~60px tall; owner: get buildings close to the hero's scale without
   shrinking the hero); walls up to 62% of a lot; cars 72px, rooftop props 1.4x. Round 427: at least 3 floors (owner),
-  storeys 42px; a shallow lot drops floors instead of squeezing them.
+  storeys 42px; a shallow lot drops floors instead of squeezing them. Round 428: every block is filled (open rectangles of
+  3x3+ cells left by the splitting become lots), each room is scored for bare paving (`genWorldScore`) and the lots are
+  re-drawn when the worst room is over 20%; `tests/city-fill.test.cjs`.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):
