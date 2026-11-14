@@ -26,8 +26,7 @@ the right folder and into `CITY_TD_ART`. Bump the `chrono-gen.js?v=` tag in `ind
 | 10 | Roofs | `surfaces/roof/` | no | Tiled 160px; raised parapet and cast shadow; rooftop props sized per kind. |
 | 11 | Walls | `surfaces/wall/` | no | Floor by floor, each starting and ending on plain wall between windows; at least 3 floors (Round 427), storeys 42px. |
 | 12 | Shopfronts | `surfaces/shop/` | no | The street floor of a building whose street is to the south. |
-| 13 | Ruins (gutted floor) | `surfaces/ruin/` | no | Round 424: about 1 building in 8 (fixed hash of the lot); the gutted floor for its roof, rubble on it; no parapet, props, shop or signs. Waiting for art. |
-| 14 | Ruins (burnt-out wall) | `surfaces/ruin-wall/` | no | A ruin's walls, fitted floor by floor between window holes; at least 4 floors. Waiting for art. |
+| 13 | Ruins (burnt-out wall) | `surfaces/ruin-wall/` | no | A ruin's walls, fitted floor by floor between window holes. Round 439: a ruin has an ordinary roof with a hole in it (`props/roof-hole/`), no rubble. |
 
 Round 424, things standing in the street (`props/<slot>/`, placed by `cityStreetFurniture`): **lamp** (both kerbs of
 every main road, about every 150px), **traffic-light** (two opposite corners of each crossing of three or more main

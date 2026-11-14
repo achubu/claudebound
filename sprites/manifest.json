@@ -298,7 +298,7 @@
       {
        "key": "ruin-wall",
        "label": "Destroyed buildings (burnt-out wall, one floor)",
-       "rule": "The front wall of a ruin, floor by floor like a wall (each floor starts and ends between window holes, CITY_TD_GAPS), no shopfront; at least 4 floors.",
+       "rule": "About 1 building in 8 is a ruin (a fixed hash of the lot; never a yard or forecourt). Round 439 (owner): an ordinary roof and parapet with a large hole in it (props/roof-hole/; nothing until that art comes), no rooftop kit, no rubble, no shopfront and no signs; its walls are these, floor by floor between window holes, at least 3 floors.",
        "walk": false,
        "folder": "city-gen/surfaces/ruin-wall/",
        "scale": null,
@@ -326,22 +326,112 @@
        ]
       },
       {
-       "key": "ruin",
-       "label": "Destroyed buildings (gutted roof)",
-       "rule": "About 1 lot in 8 (a hash of the lot, never a forecourt). Its roof is a gutted floor seen from above, tiled 160px, with no parapet, no rooftop props and no signs; rubble (props/rubble/) lies on it. Drawn only when ruin and ruin-wall both have art; until then the lot is an ordinary building. Blocks the way like any building.",
+       "key": "tech-roof",
+       "label": "Downtown (tech quarter): roofs",
+       "rule": "Every building in this quarter, tiled 160px.",
        "walk": false,
-       "folder": "city-gen/surfaces/ruin/",
+       "folder": "city-gen/surfaces/tech-roof/",
        "scale": null,
        "files": [
         {
-         "name": "ruin-bricks",
-         "src": "assets/environment/city-gen/surfaces/ruin/ruin-bricks.webp",
-         "bytes": 48776
+         "name": "tech-glass-grid",
+         "src": "assets/environment/city-gen/surfaces/tech-roof/tech-glass-grid.webp",
+         "bytes": 17124
         },
         {
-         "name": "ruin-girders",
-         "src": "assets/environment/city-gen/surfaces/ruin/ruin-girders.webp",
-         "bytes": 47306
+         "name": "tech-led-plates",
+         "src": "assets/environment/city-gen/surfaces/tech-roof/tech-led-plates.webp",
+         "bytes": 17144
+        }
+       ]
+      },
+      {
+       "key": "tech-shop",
+       "label": "Downtown (tech quarter): street floor",
+       "rule": "The street floor of a building in this quarter whose street is to the south.",
+       "walk": false,
+       "folder": "city-gen/surfaces/tech-shop/",
+       "scale": null,
+       "files": [
+        {
+         "name": "tech-lobby",
+         "src": "assets/environment/city-gen/surfaces/tech-shop/tech-lobby.webp",
+         "bytes": 10734
+        }
+       ]
+      },
+      {
+       "key": "tech-wall",
+       "label": "Downtown (tech quarter): walls (one floor)",
+       "rule": "The upper floors of every building in this quarter (chronoDistrict), fitted floor by floor between windows.",
+       "walk": false,
+       "folder": "city-gen/surfaces/tech-wall/",
+       "scale": null,
+       "files": [
+        {
+         "name": "tech-megablock",
+         "src": "assets/environment/city-gen/surfaces/tech-wall/tech-megablock.webp",
+         "bytes": 23122
+        }
+       ]
+      },
+      {
+       "key": "garden-roof",
+       "label": "Garden quarter: roofs",
+       "rule": "Every building in this quarter, tiled 160px.",
+       "walk": false,
+       "folder": "city-gen/surfaces/garden-roof/",
+       "scale": null,
+       "files": [
+        {
+         "name": "garden-beds",
+         "src": "assets/environment/city-gen/surfaces/garden-roof/garden-beds.webp",
+         "bytes": 67934
+        },
+        {
+         "name": "garden-glass",
+         "src": "assets/environment/city-gen/surfaces/garden-roof/garden-glass.webp",
+         "bytes": 33036
+        }
+       ]
+      },
+      {
+       "key": "garden-shop",
+       "label": "Garden quarter: street floor",
+       "rule": "The street floor of a building in this quarter whose street is to the south.",
+       "walk": false,
+       "folder": "city-gen/surfaces/garden-shop/",
+       "scale": null,
+       "files": [
+        {
+         "name": "garden-flowers",
+         "src": "assets/environment/city-gen/surfaces/garden-shop/garden-flowers.webp",
+         "bytes": 14996
+        }
+       ]
+      },
+      {
+       "key": "garden-wall",
+       "label": "Garden quarter: walls (one floor)",
+       "rule": "The upper floors of every building in this quarter (chronoDistrict), fitted floor by floor between windows.",
+       "walk": false,
+       "folder": "city-gen/surfaces/garden-wall/",
+       "scale": null,
+       "files": [
+        {
+         "name": "garden-ferns",
+         "src": "assets/environment/city-gen/surfaces/garden-wall/garden-ferns.webp",
+         "bytes": 27774
+        },
+        {
+         "name": "garden-greenhouse",
+         "src": "assets/environment/city-gen/surfaces/garden-wall/garden-greenhouse.webp",
+         "bytes": 29526
+        },
+        {
+         "name": "garden-ivy",
+         "src": "assets/environment/city-gen/surfaces/garden-wall/garden-ivy.webp",
+         "bytes": 27324
         }
        ]
       },
@@ -387,6 +477,51 @@
          "name": "home-tenement",
          "src": "assets/environment/city-gen/surfaces/home-wall/home-tenement.webp",
          "bytes": 35746
+        }
+       ]
+      },
+      {
+       "key": "market-roof",
+       "label": "Market quarter: roofs",
+       "rule": "Every building in this quarter, tiled 160px.",
+       "walk": false,
+       "folder": "city-gen/surfaces/market-roof/",
+       "scale": null,
+       "files": [
+        {
+         "name": "market-barrels",
+         "src": "assets/environment/city-gen/surfaces/market-roof/market-barrels.webp",
+         "bytes": 28934
+        }
+       ]
+      },
+      {
+       "key": "market-shop",
+       "label": "Market quarter: street floor",
+       "rule": "The street floor of a building in this quarter whose street is to the south.",
+       "walk": false,
+       "folder": "city-gen/surfaces/market-shop/",
+       "scale": null,
+       "files": [
+        {
+         "name": "market-cloth",
+         "src": "assets/environment/city-gen/surfaces/market-shop/market-cloth.webp",
+         "bytes": 26392
+        },
+        {
+         "name": "market-food",
+         "src": "assets/environment/city-gen/surfaces/market-shop/market-food.webp",
+         "bytes": 35162
+        },
+        {
+         "name": "market-pawn",
+         "src": "assets/environment/city-gen/surfaces/market-shop/market-pawn.webp",
+         "bytes": 31296
+        },
+        {
+         "name": "market-screens",
+         "src": "assets/environment/city-gen/surfaces/market-shop/market-screens.webp",
+         "bytes": 33718
         }
        ]
       },
@@ -512,7 +647,7 @@
       },
       {
        "key": "cargo",
-       "label": "cargo",
+       "label": "Cargo (dock yards)",
        "rule": "Only on the front of a building whose street is in front; never stretched.",
        "walk": false,
        "folder": "city-gen/props/cargo/",
@@ -619,6 +754,15 @@
          "bytes": 7846
         }
        ]
+      },
+      {
+       "key": "roof-hole",
+       "label": "Roof holes (destroyed buildings)",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/roof-hole/",
+       "scale": null,
+       "files": []
       },
       {
        "key": "rubble",

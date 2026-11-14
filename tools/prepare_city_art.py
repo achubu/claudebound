@@ -26,12 +26,12 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 CITY = os.path.join(ROOT, 'assets', 'environment', 'city-gen')
 # Round 420: art is sorted by what it is: the surfaces of the city (CITY_SURFACES in assets/chrono-gen.js) in
 # surfaces/<slot>/, things standing on them in props/<slot>/.
-SURFACE_SLOTS = {'roof', 'wall', 'shop', 'sidewalk', 'curb', 'park-edge', 'waterfront-edge', 'park', 'ruin', 'ruin-wall', 'home-wall', 'home-roof'}  # Round 424: park grass, ruins; Round 436: homes
+SURFACE_SLOTS = {'roof', 'wall', 'shop', 'sidewalk', 'curb', 'park-edge', 'waterfront-edge', 'park', 'ruin-wall', 'home-wall', 'home-roof', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'market-roof', 'market-shop'}  # Round 424: park grass, ruins; Round 436: homes
 def out_dir(slot): return os.path.join(CITY, 'surfaces' if slot in SURFACE_SLOTS else 'props', slot)
 def out_path(slot, name): d = out_dir(slot); os.makedirs(d, exist_ok=True); return os.path.join(d, name + '.webp')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
-TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'park-edge', 'curb', 'waterfront-edge', 'park', 'ruin', 'ruin-wall', 'home-wall', 'home-roof'}
-SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree', 'rubble', 'lamp', 'traffic-light', 'sign-traffic', 'cargo', 'prop-heater'}
+TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'park-edge', 'curb', 'waterfront-edge', 'park', 'ruin-wall', 'home-wall', 'home-roof', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'market-roof', 'market-shop'}
+SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree', 'rubble', 'lamp', 'traffic-light', 'sign-traffic', 'cargo', 'prop-heater', 'roof-hole'}
 
 
 def blend_x(a, band):
@@ -41,7 +41,7 @@ def blend_x(a, band):
 
 def texture(img, slot):
     a = np.asarray(img.convert('RGB')).astype(np.float32)
-    if slot in ('roof', 'sidewalk', 'park', 'ruin', 'home-roof'):
+    if slot in ('roof', 'sidewalk', 'park', 'home-roof', 'tech-roof', 'garden-roof', 'market-roof'):
         a = blend_x(a, max(8, a.shape[1] // 8)); a = blend_x(a.transpose(1, 0, 2), max(8, a.shape[0] // 8)).transpose(1, 0, 2)
         return Image.fromarray(a.clip(0, 255).astype(np.uint8)).resize((512, 512), Image.LANCZOS)
     if slot in ('park-edge', 'curb', 'waterfront-edge'):  # Round 410: border strips keep see-through gaps where the green shows between stones
@@ -115,7 +115,7 @@ def register(slot, name):
     body = body[:sm.start()] + new + body[sm.end():]
     open(JS, 'w').write(s[:m.start(1)] + body + s[m.end(1):])
     # Round 435: measured after the list is written (it used to be written over by the stale copy above)
-    if slot in ('wall', 'shop', 'ruin-wall', 'home-wall'): register_gaps(name, gaps(out_path(slot, name)))
+    if slot in ('wall', 'shop', 'ruin-wall', 'home-wall', 'tech-wall', 'tech-shop', 'garden-wall', 'garden-shop', 'market-shop'): register_gaps(name, gaps(out_path(slot, name)))
 
 
 def sheet(args):
@@ -158,7 +158,7 @@ def objects(args):
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == '--gaps':  # (re)measure every wall and shopfront already in CITY_TD_ART
         s = open(JS).read(); m = re.search(r"const CITY_TD_ART = \{(.*?)\};", s)
-        for slot in ('wall', 'shop', 'ruin-wall', 'home-wall'):
+        for slot in ('wall', 'shop', 'ruin-wall', 'home-wall', 'tech-wall', 'tech-shop', 'garden-wall', 'garden-shop', 'market-shop'):
             for n in re.findall(r"'([a-z0-9-]+)'", re.search(r"(?<![a-z-])'?" + re.escape(slot) + r"'?: \[(.*?)\]", m.group(1)).group(1)): g = gaps(out_path(slot, n)); register_gaps(n, g); print(n, len(g), 'gaps')
         return
     if len(sys.argv) > 1 and sys.argv[1] == '--sheet': return sheet(sys.argv[2:])
