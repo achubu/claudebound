@@ -85,9 +85,9 @@
        "scale": null,
        "files": [
         {
-         "name": "water",
-         "src": "assets/environment/city-gen/surfaces/sea/water.webp",
-         "bytes": 34474,
+         "name": "water-ripple",
+         "src": "assets/environment/city-gen/surfaces/sea/water-ripple.webp",
+         "bytes": 21920,
          "role": "base texture"
         }
        ]
@@ -107,14 +107,39 @@
          "role": "base texture"
         },
         {
+         "name": "walk-brick",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-brick.webp",
+         "bytes": 26758
+        },
+        {
          "name": "walk-cobbles",
          "src": "assets/environment/city-gen/surfaces/sidewalk/walk-cobbles.webp",
          "bytes": 28538
         },
         {
+         "name": "walk-hex",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-hex.webp",
+         "bytes": 20690
+        },
+        {
          "name": "walk-plates",
          "src": "assets/environment/city-gen/surfaces/sidewalk/walk-plates.webp",
          "bytes": 17814
+        },
+        {
+         "name": "walk-poured",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-poured.webp",
+         "bytes": 5336
+        },
+        {
+         "name": "walk-runbond",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-runbond.webp",
+         "bytes": 12908
+        },
+        {
+         "name": "walk-setts",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-setts.webp",
+         "bytes": 17586
         },
         {
          "name": "walk-slabs",
@@ -169,6 +194,16 @@
        "scale": null,
        "files": [
         {
+         "name": "curb-concrete",
+         "src": "assets/environment/city-gen/surfaces/curb/curb-concrete.webp",
+         "bytes": 16450
+        },
+        {
+         "name": "curb-granite",
+         "src": "assets/environment/city-gen/surfaces/curb/curb-granite.webp",
+         "bytes": 26884
+        },
+        {
          "name": "curb-stone",
          "src": "assets/environment/city-gen/surfaces/curb/curb-stone.webp",
          "bytes": 42138
@@ -189,9 +224,19 @@
          "bytes": 11872
         },
         {
+         "name": "edge-grass",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-grass.webp",
+         "bytes": 59632
+        },
+        {
          "name": "edge-kerb",
          "src": "assets/environment/city-gen/surfaces/park-edge/edge-kerb.webp",
          "bytes": 42138
+        },
+        {
+         "name": "edge-railing",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-railing.webp",
+         "bytes": 34146
         }
        ]
       },
@@ -204,9 +249,19 @@
        "scale": null,
        "files": [
         {
+         "name": "shore-boardwalk",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-boardwalk.webp",
+         "bytes": 41134
+        },
+        {
          "name": "shore-crumble",
          "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-crumble.webp",
          "bytes": 62734
+        },
+        {
+         "name": "shore-seawall",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-seawall.webp",
+         "bytes": 27926
         }
        ]
       }
@@ -344,9 +399,19 @@
        "scale": null,
        "files": [
         {
+         "name": "roof-bitumen",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-bitumen.webp",
+         "bytes": 90486
+        },
+        {
          "name": "roof-cracked",
          "src": "assets/environment/city-gen/surfaces/roof/roof-cracked.webp",
          "bytes": 38714
+        },
+        {
+         "name": "roof-finegravel",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-finegravel.webp",
+         "bytes": 81556
         },
         {
          "name": "roof-plate",
@@ -372,6 +437,11 @@
          "name": "roof-tar",
          "src": "assets/environment/city-gen/surfaces/roof/roof-tar.webp",
          "bytes": 38432
+        },
+        {
+         "name": "roof-tarchip",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-tarchip.webp",
+         "bytes": 55010
         },
         {
          "name": "roof-tin",
@@ -432,6 +502,11 @@
          "name": "ac-3",
          "src": "assets/environment/city-gen/props/prop-ac/ac-3.webp",
          "bytes": 31198
+        },
+        {
+         "name": "ac-twin",
+         "src": "assets/environment/city-gen/props/prop-ac/ac-twin.webp",
+         "bytes": 36386
         }
        ]
       },
@@ -609,9 +684,9 @@
          "bytes": 16192
         },
         {
-         "name": "skylight-2",
-         "src": "assets/environment/city-gen/props/prop-skylight/skylight-2.webp",
-         "bytes": 47970
+         "name": "skylight-grid",
+         "src": "assets/environment/city-gen/props/prop-skylight/skylight-grid.webp",
+         "bytes": 40986
         }
        ]
       },
@@ -647,16 +722,6 @@
          "name": "stairs-1",
          "src": "assets/environment/city-gen/props/prop-stairs/stairs-1.webp",
          "bytes": 15688
-        },
-        {
-         "name": "stairs-2",
-         "src": "assets/environment/city-gen/props/prop-stairs/stairs-2.webp",
-         "bytes": 32480
-        },
-        {
-         "name": "stairs-3",
-         "src": "assets/environment/city-gen/props/prop-stairs/stairs-3.webp",
-         "bytes": 30900
         }
        ]
       },
@@ -739,6 +804,21 @@
        "scale": null,
        "files": [
         {
+         "name": "brambles",
+         "src": "assets/environment/city-gen/props/tree/brambles.webp",
+         "bytes": 44408
+        },
+        {
+         "name": "bush-flower",
+         "src": "assets/environment/city-gen/props/tree/bush-flower.webp",
+         "bytes": 37412
+        },
+        {
+         "name": "grass-reeds",
+         "src": "assets/environment/city-gen/props/tree/grass-reeds.webp",
+         "bytes": 44606
+        },
+        {
          "name": "tree-1",
          "src": "assets/environment/city-gen/props/tree/tree-1.webp",
          "bytes": 26410
@@ -752,6 +832,26 @@
          "name": "tree-3",
          "src": "assets/environment/city-gen/props/tree/tree-3.webp",
          "bytes": 37418
+        },
+        {
+         "name": "tree-cypress",
+         "src": "assets/environment/city-gen/props/tree/tree-cypress.webp",
+         "bytes": 9482
+        },
+        {
+         "name": "tree-dead",
+         "src": "assets/environment/city-gen/props/tree/tree-dead.webp",
+         "bytes": 35752
+        },
+        {
+         "name": "tree-glow",
+         "src": "assets/environment/city-gen/props/tree/tree-glow.webp",
+         "bytes": 23128
+        },
+        {
+         "name": "tree-oak",
+         "src": "assets/environment/city-gen/props/tree/tree-oak.webp",
+         "bytes": 18076
         }
        ]
       },
@@ -862,6 +962,31 @@
          "name": "vent-3",
          "src": "assets/environment/city-gen/props/prop-vent/vent-3.webp",
          "bytes": 38982
+        },
+        {
+         "name": "vent-caps",
+         "src": "assets/environment/city-gen/props/prop-vent/vent-caps.webp",
+         "bytes": 28036
+        },
+        {
+         "name": "vent-mesh",
+         "src": "assets/environment/city-gen/props/prop-vent/vent-mesh.webp",
+         "bytes": 57140
+        }
+       ]
+      },
+      {
+       "key": "prop-heater",
+       "label": "Water heaters",
+       "rule": "Stands on roofs, sized per kind, never over a neighbour.",
+       "walk": false,
+       "folder": "city-gen/props/prop-heater/",
+       "scale": null,
+       "files": [
+        {
+         "name": "heater-1",
+         "src": "assets/environment/city-gen/props/prop-heater/heater-1.webp",
+         "bytes": 20082
         }
        ]
       },

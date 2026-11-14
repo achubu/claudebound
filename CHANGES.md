@@ -3496,6 +3496,34 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 438: new water, roofs, sidewalks, edges, trees and rooftop kit (Sheets J, K, L, M, N, P)
+
+From the owner's Archive_4 and Archive_5.
+- **Textures:** the lighting of each tile is flattened first (the broad brightness change removed), so a tile no longer
+  shows a light/dark cross where its edges were blended.
+- **Sea:** water-ripple (J3) replaces water, which repeated visibly; the old file moved to `unused assets/`.
+- **Road:** neither new asphalt tiled (a faint repeating cross, scratch lines), so the road keeps road-wet.
+- **Roofs:** roof-finegravel, roof-bitumen and roof-tarchip. Not used:
+  - roof-greenpaint, K1 and K7: a faint cross showed.
+  - The steel roof: banding.
+  - The pavers: a grid whose lines don't meet at the edge.
+- **Sidewalks:** walk-runbond, walk-hex, walk-brick, walk-setts and walk-poured. Not used: the square pavers, the slate
+  and the interlocking pavers (grids that don't meet at the edge, or a cross).
+- **Edges:**
+  - Curb: curb-granite and curb-concrete.
+  - Park edge: edge-grass and edge-railing.
+  - Shoreline: shore-seawall and shore-boardwalk.
+- **Trees:** tree-oak, tree-cypress, tree-dead, tree-glow, bush-flower, grass-reeds and brambles. The young tree was
+  drawn from the side, so it was left out. Trees now draw at their own proportions (they were squeezed into a square).
+- **Rooftop kit:** vent-mesh, vent-caps, skylight-grid and ac-twin, plus water heaters as a new rooftop kind
+  (`prop-heater`, 40px). The sheet's muted green keyed badly:
+  - `KEY_DIST` keys by colour distance, `CELL_INSET` trims glow leaking from neighbour cells, and the heater was trimmed
+    to its own outline.
+  - The solar panel, dish and antenna didn't survive the keying and were left out.
+- **Owner:** "eliminate stair hut 2 and 3", "and skylight 2". These moved to `unused assets/`.
+- **`tools/tile_check.py`:** the limit is 2.8 (brick and poured concrete score ~2.6 and tile cleanly by eye). See-through
+  edge strips are judged by eye only.
+
 ## Round 437: textures that don't tile taken out
 
 Owner: "eliminate any texture that doesn't tile well from the game and from the sprites page".
