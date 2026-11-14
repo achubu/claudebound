@@ -357,7 +357,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '427',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '428',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -400,12 +400,12 @@ function genPlan(id, key, seed = chronoSeed()) {
 // grid (the owner ruled out curves) and come from the rooms' own plans, so doors and walk masks work as before. The
 // squares where objects stand are street-front lots, chosen before the buildings. Built once per seed for the world.
 // =====================================================================
-const genWorldCache = {};
+const genWorldCache = {}, genWorldScore = {};
 function genWorld(seed) {
   const ck = GEN.id + ':' + seed; if (genWorldCache[ck]) return genWorldCache[ck];
   for (const k of Object.keys(genWorldCache)) if (k.startsWith(GEN.id + ':')) delete genWorldCache[k];
   const keys = GEN.keys(), pos = {}; let NX = 0, NY = 0; for (const k of keys) { const [x, y] = GEN.world(k); pos[k] = [x, y]; NX = Math.max(NX, x + 1); NY = Math.max(NY, y + 1); }
-  const CW = NX * FG_COLS, CH = NY * FG_ROWS, cell = new Uint8Array(CW * CH), rnd = chronoRng(seed + ':world:' + GEN.id); // 0 nothing, 1 open ground, 2 street, 3 water or its shore
+  const CW = NX * FG_COLS, CH = NY * FG_ROWS, cell = new Uint8Array(CW * CH); let rnd = chronoRng(seed + ':world:' + GEN.id); // 0 nothing, 1 open ground, 2 street, 3 water or its shore
   for (const k of keys) { const [wx, wy] = pos[k], p = chronoRoomPlan(seed, k, { roadsOnly: true }), t = chronoTerrain(seed, k);
     for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) cell[(wy * FG_ROWS + y) * CW + wx * FG_COLS + x] = p.floor[y * FG_COLS + x] ? 2 : t.chasm(x >> 1, y >> 1) ? 3 : 1; }
   const at = (x, y) => x < 0 || y < 0 || x >= CW || y >= CH ? 0 : cell[y * CW + x];
@@ -417,7 +417,7 @@ function genWorld(seed) {
       for (const [a, c] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + a, ny = y + c; if (nx < 0 || ny < 0 || nx >= CW || ny >= CH) continue; const n = ny * CW + nx; if (cell[n] === 1 && block[n] < 0) { block[n] = id; q.push(n); } } }
     boxes.push(b); }
   // lots: split each block's box in two, again and again, until a piece is lot-sized; keep pieces that are mostly this block
-  const LW = 11, LH = 12, MIN = 5, lots = [];
+  const LW = 11, LH = 12, MIN = 5; let lots = [];
   const inside = (r, id) => { let n = 0; for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) if (block[y * CW + x] === id) n++; return n / ((r[2] - r[0]) * (r[3] - r[1])); };
   const front = r => { for (let x = r[0]; x < r[2]; x++) for (const y of [r[1] - 1, r[1] - 2, r[3], r[3] + 1]) if (at(x, y) === 2) return true; for (let y = r[1]; y < r[3]; y++) for (const x of [r[0] - 1, r[0] - 2, r[2], r[2] + 1]) if (at(x, y) === 2) return true; return false; };
   const split = (r, id) => { const w = r[2] - r[0], h = r[3] - r[1]; if (w < MIN || h < MIN) return;
@@ -427,6 +427,26 @@ function genWorld(seed) {
     if (w / LW >= h / LH) { const m = r[0] + Math.max(MIN, Math.min(w - MIN - gap, Math.round(w * (0.4 + rnd() * 0.2)))); split([r[0], r[1], m, r[3]], id); split([m + gap, r[1], r[2], r[3]], id); }
     else { const m = r[1] + Math.max(MIN, Math.min(h - MIN - gap, Math.round(h * (0.4 + rnd() * 0.2)))); split([r[0], r[1], r[2], m], id); split([r[0], m + gap, r[2], r[3]], id); } };
   boxes.forEach((b, id) => split(b, id));
+  // Round 428 (owner: "do what you suggested": fill every block; check every room and regenerate the bad ones). In the
+  // top-down city the splitting leaves odd corners of a block bare (pieces too small, or reaching over a street). Those
+  // are filled: the largest open rectangle left in a block, again and again, becomes one more lot (at most LW x LH cells),
+  // until no rectangle of 3x3 cells or more is left. What stays open is sidewalk and the one-cell alleys.
+  const fill = () => { const cov = new Uint8Array(CW * CH); for (const l of lots) for (let y = l.r[1]; y < l.r[3]; y++) for (let x = l.r[0]; x < l.r[2]; x++) cov[y * CW + x] = 1;
+    const free = (x, y, id) => block[y * CW + x] === id && !cov[y * CW + x];
+    boxes.forEach((b, id) => { for (let guard = 0; guard < 400; guard++) { let best = null; const W = b[2] - b[0], hgt = new Int16Array(W);
+        for (let y = b[1]; y < b[3]; y++) { for (let x = b[0]; x < b[2]; x++) hgt[x - b[0]] = free(x, y, id) ? hgt[x - b[0]] + 1 : 0;
+          for (let i = 0; i < W; i++) { let h = hgt[i]; if (h < 3) continue; for (let j = i; j < W && hgt[j] >= 3; j++) { h = Math.min(h, hgt[j]); const w = j - i + 1; if (w >= 3 && (!best || w * Math.min(h, LH) > best.a)) best = { a: Math.min(w, LW) * Math.min(h, LH), r: [b[0] + i, y - h + 1, b[0] + i + Math.min(w, LW), y - h + 1 + Math.min(h, LH)] }; } } }
+        if (!best) break; const r = best.r; lots.push({ r, id, front: front(r), filled: true }); for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) cov[y * CW + x] = 1; } }); };
+  // the score of a room: the share of its open ground (not street, not water) left bare, in cells
+  const bareShare = () => { const cov = new Uint8Array(CW * CH); for (const l of lots) for (let y = l.r[1]; y < l.r[3]; y++) for (let x = l.r[0]; x < l.r[2]; x++) cov[y * CW + x] = 1; let worst = 0, sum = 0;
+    for (const k of keys) { const [wx, wy] = pos[k]; let bare = 0; for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) { const i = (wy * FG_ROWS + y) * CW + wx * FG_COLS + x; if (cell[i] === 1 && !cov[i]) bare++; }
+      const sh = bare / (FG_COLS * FG_ROWS); worst = Math.max(worst, sh); sum += sh; } return { worst, mean: sum / keys.length }; };
+  if (GEN.topdown) { fill();
+    // a city whose worst room is still more than a fifth bare is split again from a new draw (up to 3 more), the best kept
+    let score = bareShare(), keep = { lots, rnd, score };
+    for (let t = 1; t <= 3 && keep.score.worst > 0.2; t++) { lots = []; rnd = chronoRng(seed + ':world:' + GEN.id + ':try' + t); boxes.forEach((b, id) => split(b, id)); fill(); score = bareShare();
+      if (score.worst + score.mean < keep.score.worst + keep.score.mean) keep = { lots, rnd, score }; }
+    lots = keep.lots; rnd = keep.rnd; genWorldScore[GEN.id + ':' + seed] = keep.score; }
   const roomOf = (cx, cy) => { const k = keys.find(k2 => pos[k2][0] === Math.floor(cx / FG_COLS) && pos[k2][1] === Math.floor(cy / FG_ROWS)); return k || null; };
   // the squares for objects: up to two street-front lots in each room, wholly inside it, clear of the HUD corners
   const plazas = {}, used = new Set(), holes = {}; // Round 400: a square is cut out of its lot (holes); the rest stays built
@@ -480,7 +500,7 @@ function genWorld(seed) {
   // a lot with a square cut out of it is built on what is left: the pieces beside, behind and in front of the square
   // (a cell of sidewalk kept round the square), each at least 4 cells each way
   const cut = (r, h) => { const g = [h[0] - 1, h[1] - 1, h[2] + 1, h[3] + 1]; if (g[2] <= r[0] || g[0] >= r[2] || g[3] <= r[1] || g[1] >= r[3]) return [r];
-    return [[r[0], r[1], g[0], r[3]], [g[2], r[1], r[2], r[3]], [Math.max(r[0], g[0]), r[1], Math.min(r[2], g[2]), g[1]], [Math.max(r[0], g[0]), g[3], Math.min(r[2], g[2]), r[3]]].filter(q => q[2] - q[0] >= 4 && q[3] - q[1] >= 4); };
+    return [[r[0], r[1], g[0], r[3]], [g[2], r[1], r[2], r[3]], [Math.max(r[0], g[0]), r[1], Math.min(r[2], g[2]), g[1]], [Math.max(r[0], g[0]), g[3], Math.min(r[2], g[2]), r[3]]].filter(q => q[2] - q[0] >= (GEN.topdown ? 3 : 4) && q[3] - q[1] >= (GEN.topdown ? 3 : 4)); }; // Round 428: 3 cells, like the filled lots
   const lotsPx = [], parkCells = [];
   lots.forEach((l, i) => { let pieces = [l.r]; for (const h of holes[i] || []) pieces = pieces.flatMap(q => cut(q, h));
     for (const q of pieces) { let use = used.has(i) ? 'plaza' : rnd() < 0.08 ? 'park' : 'roof';

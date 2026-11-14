@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 428: every block filled; rooms scored and re-drawn
+
+Owner: "Any way to improve our procedural generation algorithm?" I proposed (1) fill every block, (2) districts, (3) a
+city-wide street network, (4) varied building shapes, (5) a check on every room that re-draws the bad ones, and
+(6) rooms laid out for play. Owner: "Go ahead and do what you suggested" (1 and 5 first).
+
+- **Measured first:** on seed 77, 29% of the city was bare paving, and the worst rooms were about half bare (0,7: 54%).
+  The cause: recursive splitting drops any piece that is under 5 cells or reaches past its block, so irregular blocks
+  kept big empty corners.
+- **Fill** (`genWorld`, top-down city only): after the splitting, the largest open rectangle left in each block (at
+  least 3x3 cells, at most a lot's size) becomes one more lot, again and again. Two fixes made this work:
+  - A huge block can need hundreds of lots, so the cap of 40 per block was raised to 400.
+  - Cutting a forecourt square out of a lot now keeps leftover pieces of 3 cells, not only 4, so filled lots are not
+    thrown away.
+- **Room check:** every room is scored by the share of its open ground left bare (`genWorldScore`). If the worst room is
+  over 20%, the lots are split again from a new draw (up to three times) and the best city is kept. Roads and doors
+  never change. With the fill, no seed tried so far needed a re-draw.
+- **Result** on three seeds: 14 to 16% bare paving (was 29%), worst room 26 to 28% (was 54%). Most of what is left is the
+  object forecourts, the sidewalks round them and the one-cell alleys. Generation takes about 0.3s.
+- Tests:
+  - New `tests/city-fill.test.cjs`: at most 20% bare, no room over 35%, every crossing open, on three seeds.
+  - The existing city, placement, pathing and walk-through suites all pass.
+
 ## Round 427: three floors at least, storeys 42px
 
 Owner: "Let's try 3 floor minimum". The rule changes from 4 floors at least (Round 412) to 3.
