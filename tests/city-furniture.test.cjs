@@ -7,7 +7,7 @@ const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); state.seed = 77; configureRegion('city'); cityGenEnsure();
   const keys = Object.keys(CITY_ROOMS), seed = chronoSeed(), out = { empty: 0, n: {}, bad: [], ruins: 0, roofs: 0, rubble: 0, blocked: 0 };
-  const save = {}; for (const s of ['lamp', 'traffic-light', 'sign-traffic', 'rubble', 'ruin', 'ruin-wall']) save[s] = CITY_TD_ART[s];
+  const save = {}; for (const s of ['lamp', 'traffic-light', 'sign-traffic', 'rubble', 'ruin-wall']) save[s] = CITY_TD_ART[s];
   for (const s of Object.keys(save)) CITY_TD_ART[s] = []; // (Round 435: the slots have art now; empty them for this check)
   genWith('city', () => { for (const k of keys) out.empty += cityStreetFurniture(seed, cityGenPlan(k)).length; });
   for (const s of Object.keys(save)) CITY_TD_ART[s] = ['test'];

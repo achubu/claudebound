@@ -6,7 +6,7 @@ the score can't measure. Textures that failed the owner's review sit in unused a
 import os, re, sys, numpy as np
 from PIL import Image
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'); C = os.path.join(ROOT, 'assets', 'environment', 'city-gen', 'surfaces')
-SQUARE = ['sidewalk', 'roof', 'park', 'ruin', 'home-roof']; STRIP = ['wall', 'shop', 'ruin-wall', 'home-wall', 'curb', 'park-edge', 'waterfront-edge']
+SQUARE = ['sidewalk', 'roof', 'park', 'home-roof', 'tech-roof', 'garden-roof', 'market-roof']; STRIP = ['wall', 'shop', 'ruin-wall', 'home-wall', 'tech-wall', 'tech-shop', 'garden-wall', 'garden-shop', 'market-shop', 'curb', 'park-edge', 'waterfront-edge']
 LIMIT = 2.8  # Round 438: brick and poured concrete at ~2.6 tile cleanly by eye; a faint cross shows from ~3
 ALPHA = {'curb', 'park-edge', 'waterfront-edge'}  # see-through strips: their gaps throw the score off, judge the previews by eye
 def seam(a, axis):

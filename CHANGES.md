@@ -3496,6 +3496,36 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 439: each quarter its own look (Sheets G, H, I); ruins with an ordinary roof
+
+- **Quarters (`CITY_DISTRICT_ART`):** each of the city's four quarters (`chronoDistrict`) has its own walls, roofs and
+  street floors where it has art. A quarter with fewer than three pictures for a part uses the city's general ones on
+  about half its buildings, so nothing repeats down a street. New surfaces, cut with a background read from each sheet's
+  corners and checked tiled by eye:
+  - **Downtown (tech):**
+    - Wall: tech-megablock.
+    - Street floor: tech-lobby.
+    - Roofs: tech-led-plates and tech-glass-grid.
+    - Left out: the glass curtain wall (light/dark bands at each repeat), the LED wall (its lines break at the repeat),
+      the grating roof (seam lines) and the pipes roof.
+  - **Garden:**
+    - Walls: garden-ivy, garden-ferns and garden-greenhouse.
+    - Street floor: garden-flowers.
+    - Roofs: garden-beds and garden-glass.
+    - Left out: the moss and vine roofs (their repeats show).
+  - **Market:**
+    - Street floors: market-food, market-screens, market-cloth and market-pawn.
+    - Roof: market-barrels.
+    - Left out: the tarps, billboards and crates (composed pictures that repeat visibly).
+  - **Homes** (Round 436) runs on the same table.
+- **Ruins** (owner: "the destroyed building roofs don't look good ... maybe a roof with a large hole or something but not
+  rubble"):
+  - A ruin now has an ordinary roof and parapet, with a hole in its largest part from a new prop slot (`props/roof-hole/`;
+    nothing until that art arrives). It keeps its burnt-out walls and has no rooftop kit and no rubble.
+  - The gutted-floor surface (`ruin`, ruin-bricks and ruin-girders) moved to `unused assets/`.
+  - `cityIsRuin` needs only the wall art now.
+- Street clutter (Sheet Q) and landmarks (Sheet S) come next round; neon signs (O) and wrecks (R) have not arrived.
+
 ## Round 438: new water, roofs, sidewalks, edges, trees and rooftop kit (Sheets J, K, L, M, N, P)
 
 From the owner's Archive_4 and Archive_5.
