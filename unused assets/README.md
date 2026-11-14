@@ -52,3 +52,10 @@ painted rooms (`assets/environment/rooms/room-X-Y.webp`, 54 paintings) and the s
 read them from their old paths; move them back with `git mv` to use those tools.
 - `assets/environment/neon-city.webp` (Round 419): the old Neon Aftermath district atlas, drawn under each city room until
   the generated room had painted; the city is generated now.
+
+## Round 437: textures that don't tile
+
+`assets/environment/city-gen/surfaces/` (under this folder): 23 city textures taken out because they showed seams or an
+obvious repeat when tiled (owner: "eliminate any texture that doesn't tile well from the game and from the sprites page").
+They are 2 sidewalks, 15 roofs, park-mud, ruin-ash, ruin-slab, home-gravel, home-tin and edge-planter.
+`tools/tile_check.py` scores the ones still in the game.
