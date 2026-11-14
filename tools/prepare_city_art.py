@@ -53,12 +53,19 @@ def texture(img, slot):
     return o.resize((max(16, round(o.width * 128 / o.height)), 128), Image.LANCZOS)
 
 
-def sprite(img):
+POSTS = {'lamp', 'traffic-light', 'sign-traffic'}
+
+
+def sprite(img, slot=None):
     a = np.asarray(img.convert('RGB')).astype(np.float32); r, g, b = a[..., 0], a[..., 1], a[..., 2]
     # the background is read from the corners: flat green (most art) or flat magenta (green things, like trees)
     h, w = r.shape; c = np.concatenate([a[:8, :8].reshape(-1, 3), a[:8, -8:].reshape(-1, 3), a[-8:, :8].reshape(-1, 3), a[-8:, -8:].reshape(-1, 3)]); bg = np.median(c, axis=0)
     if bg[1] > max(bg[0], bg[2]) + 40: gx = g - np.maximum(r, b); alpha = np.clip((60 - gx) / 40, 0, 1)
-    else: d = np.linalg.norm(a - bg, axis=2); alpha = np.clip((d - 60) / 50, 0, 1)
+    else:  # Round 435: KEY_MIN raises the cut (lamp glow cones over magenta drop out instead of turning pink)
+        d = np.linalg.norm(a - bg, axis=2); lo = float(os.environ.get('KEY_MIN', 60)); alpha = np.clip((d - lo) / 50, 0, 1)
+        if os.environ.get('FILL_ENCLOSED'):  # Round 435: only background joined to the frame's edge is cut; red sign faces inside a rim stay
+            lab, n = ndimage.label(alpha < 0.5); edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+            alpha = np.where((lab > 0) & ~np.isin(lab, list(edge)), 1.0, alpha)
     lab, n = ndimage.label(alpha > 0.5)
     if n:
         sz = ndimage.sum(np.ones_like(alpha), lab, range(1, n + 1)); keep = [i + 1 for i, v in enumerate(sz) if v >= max(60, sz.max() * 0.02)]
@@ -67,7 +74,12 @@ def sprite(img):
     rgba = np.dstack([r, g2, b, alpha * 255]).clip(0, 255).astype(np.uint8)
     ys, xs = np.nonzero(alpha > 0.1)
     if not len(ys): sys.exit('nothing left after keying out the green: is the background flat green?')
-    o = Image.fromarray(rgba[ys.min():ys.max() + 1, xs.min():xs.max() + 1], 'RGBA'); k = 256 / max(o.size)
+    o = Image.fromarray(rgba[ys.min():ys.max() + 1, xs.min():xs.max() + 1], 'RGBA')
+    if slot in POSTS:  # Round 435: a post stands on its foot, drawn at the picture's bottom centre: pad so the foot is there
+        al = np.asarray(o)[..., 3].astype(np.float32); h = al.shape[0]; base = al[int(h * 0.96):].sum(axis=0)
+        fx = (base * np.arange(base.size)).sum() / max(1, base.sum()); w = o.width; pad = int(round(abs(2 * fx - w)))
+        if pad: n = Image.new('RGBA', (w + pad, o.height)); n.paste(o, (pad if fx < w / 2 else 0, 0)); o = n
+    k = 256 / max(o.size)
     return o.resize((max(1, round(o.width * k)), max(1, round(o.height * k))), Image.LANCZOS)
 
 
@@ -99,10 +111,11 @@ def register(slot, name):
     sm = re.search(re.escape(key) + r": \[(.*?)\]", body)
     items = [x.strip().strip("'") for x in sm.group(1).split(',') if x.strip()]
     if name in items: return
-    if slot in ('wall', 'shop', 'ruin-wall'): register_gaps(name, gaps(out_path(slot, name)))
     items.append(name); new = key + ': [' + ', '.join("'%s'" % x for x in items) + ']'
     body = body[:sm.start()] + new + body[sm.end():]
     open(JS, 'w').write(s[:m.start(1)] + body + s[m.end(1):])
+    # Round 435: measured after the list is written (it used to be written over by the stale copy above)
+    if slot in ('wall', 'shop', 'ruin-wall'): register_gaps(name, gaps(out_path(slot, name)))
 
 
 def sheet(args):
@@ -117,7 +130,7 @@ def sheet(args):
         if slot not in TEXTURE | SPRITE: sys.exit('unknown slot ' + slot)
         x0, y0, x1, y1 = (i % cols) * W // cols, (i // cols) * H // rows, (i % cols + 1) * W // cols, (i // cols + 1) * H // rows
         if slot in TEXTURE: m = (x1 - x0) // 20; x0, y0, x1, y1 = x0 + m, y0 + m, x1 - m, y1 - m
-        o = texture(img.crop((x0, y0, x1, y1)), slot) if slot in TEXTURE else sprite(img.crop((x0, y0, x1, y1)))
+        o = texture(img.crop((x0, y0, x1, y1)), slot) if slot in TEXTURE else sprite(img.crop((x0, y0, x1, y1)), slot)
         path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
         print('%s -> %s %s' % (slot, os.path.relpath(path, ROOT), o.size))
 
@@ -137,7 +150,7 @@ def objects(args):
     for b, e in zip(boxes, entries):
         if e == '-': continue
         slot, name = e.split(':'); y0, y1, x0, x1 = max(0, b[0].start - 4), min(img.height, b[0].stop + 4), max(0, b[1].start - 4), min(img.width, b[1].stop + 4)
-        o = sprite(img.crop((x0, y0, x1, y1))); path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
+        o = sprite(img.crop((x0, y0, x1, y1)), slot); path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
         print('%s -> %s %s' % (slot, os.path.relpath(path, ROOT), o.size))
 
 
@@ -145,7 +158,7 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == '--gaps':  # (re)measure every wall and shopfront already in CITY_TD_ART
         s = open(JS).read(); m = re.search(r"const CITY_TD_ART = \{(.*?)\};", s)
         for slot in ('wall', 'shop', 'ruin-wall'):
-            for n in re.findall(r"'([a-z0-9-]+)'", re.search(slot + r": \[(.*?)\]", m.group(1)).group(1)): g = gaps(out_path(slot, n)); register_gaps(n, g); print(n, len(g), 'gaps')
+            for n in re.findall(r"'([a-z0-9-]+)'", re.search(r"(?<![a-z-])'?" + re.escape(slot) + r"'?: \[(.*?)\]", m.group(1)).group(1)): g = gaps(out_path(slot, n)); register_gaps(n, g); print(n, len(g), 'gaps')
         return
     if len(sys.argv) > 1 and sys.argv[1] == '--sheet': return sheet(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == '--objects': return objects(sys.argv[2:])
@@ -154,7 +167,7 @@ def main():
     if slot not in TEXTURE | SPRITE: sys.exit('unknown slot %s; slots: %s' % (slot, ', '.join(sorted(TEXTURE | SPRITE))))
     if not re.fullmatch(r'[a-z0-9-]+', name): sys.exit('name: lower-case letters, digits and dashes only')
     img = Image.open(src)
-    o = texture(img, slot) if slot in TEXTURE else sprite(img)
+    o = texture(img, slot) if slot in TEXTURE else sprite(img, slot)
     path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
     print('%s -> %s %s; added to CITY_TD_ART.%s (bump the chrono-gen.js?v= tag in index.html)' % (src, os.path.relpath(path, ROOT), o.size, slot))
 

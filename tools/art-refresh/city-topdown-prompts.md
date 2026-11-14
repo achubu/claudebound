@@ -45,7 +45,7 @@ warm window light and neon accents, no text, no letters*.
 
 13. **tree**: a single tree crown seen from directly above, round and leafy, dark green with a few glowing teal leaves.
 
-## Round 424: parks, street furniture and ruins
+## Round 424: parks, street furniture and ruins (all four sheets in: Rounds 432 and 435)
 
 Four sheets. Every one ends with the shared style line. Send each as a zip and say which sheet it is. Until art arrives,
 none of these is drawn and none of them blocks the way.
