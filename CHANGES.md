@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 431: no building's shadow on another building
+
+Owner: "make sure buildings dont drop shadows on other buildings, it looks akward". A building's drop shadow (offset down
+and to the right, longer for taller buildings) is now clipped to the ground outside every other building's lot. It falls
+on streets, sidewalks and squares, never on a neighbour's roof or wall.
+
 ## Round 430: one road texture; no textures mixed without a border
 
 Owner: "lets make sure not to mix textures, road texture should all just be one, the road-wet one is good for now, lets
