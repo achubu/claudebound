@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 425: taller storeys beside the hero
+
+Owner: "not liking the scale of the buildings in comparison to the size of the main character"; "the character should be
+about the size of the front door but I understand that's not realistic so let's try to get close without shrinking the
+character".
+
+- The hero is about 60px tall. One storey of wall was 18px, so the hero stood over three floors tall.
+- A storey is now 36px on screen (`72 * sin(tilt)`), and a building's front wall may take up to 62% of its lot (was 50%).
+  Half the buildings now show storeys of 30px or more and three quarters 22px or more, with windows, doors and
+  shopfronts growing to match. A shallow lot still
+  fits its four floors by squeezing them.
+- The rest of the city is scaled to match:
+  - Rooftop props are 1.4x larger.
+  - Parked cars are 72px long (was 56); their blocking boxes and their offsets in the street are updated to match.
+  - Blade signs are up to 26px wide and wide signs 23px tall.
+  - The Round 424 street posts (not drawn yet) are 80/70/48px.
+- Tried and dropped: larger lots made fewer buildings and left bare paving; shrinking the hero (the owner asked not to).
+
 ## Round 424: parks, street furniture and ruins (rules ready, waiting for art)
 
 Owner: "we also need more grass variety to make those grass areas more like park areas with rubble", "also we maybe street

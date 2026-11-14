@@ -357,7 +357,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '424',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '425',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -565,7 +565,7 @@ function cityParkedCars(seed, plan) { const out = [];
   for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + plan.key + ':' + rd.pts.join());
     for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
       for (let d = 70; d < L - 70; d += 80 + rr() * 120) { if (rr() < 0.45) continue; const t = d / L, cx = a[0] + (b[0] - a[0]) * t, cy = a[1] + (b[1] - a[1]) * t, side = rr() < 0.5 ? -1 : 1;
-        const off = hz ? (side < 0 ? rd.w / 2 - 36 : rd.w / 2 - 26) : rd.w / 2 - 30; // the whole car inside the street (Round 410)
+        const off = hz ? (side < 0 ? rd.w / 2 - 38 : rd.w / 2 - 22) : rd.w / 2 - 40; // Round 425: the larger cars still inside the street // the whole car inside the street (Round 410)
         const px = hz ? cx : cx + side * off, py = hz ? cy + side * off : cy, skip = Math.hypot(px - plan.hub[0], py - plan.hub[1] - 22) < 110 || px < 70 || px > 730 || py < 70 || py > 430 || (plan.plazas || []).some(([qx, qy]) => Math.hypot(px - qx, py - qy) < 90);
         // Round 415: a car blocks the way, so none at a room's crossing (where the game sets you down), at its doors, or by an object
         const rec = { px, py, hz, col: ['#c9a227', '#8a1c2b', '#2d4f7c', '#d8d8d8', '#1d1d1d', '#3f6b4a'][Math.floor(rr() * 6)], artR: rr(), flip: rr() < 0.5 }; if (!skip) out.push(rec); } } }
@@ -588,7 +588,7 @@ function cityParkRubble(seed, l, bx, trees) { if (!CITY_HAS('rubble')) return []
 // street furniture in a room (room px): lamps along both kerbs of the main roads, traffic lights on the corners of real
 // crossings (three or more main roads), a traffic sign where an alley meets a main road. Each is { slot, x, y, h, artR, flip }:
 // (x, y) is the foot of its post, h its drawn height (the picture keeps its own proportions); its post blocks the way.
-const CITY_FURNITURE_H = { lamp: 54, 'traffic-light': 48, 'sign-traffic': 32 };
+const CITY_FURNITURE_H = { lamp: 80, 'traffic-light': 70, 'sign-traffic': 48 }; // Round 425: beside the 60px hero
 function cityStreetFurniture(seed, plan) {
   if (!['lamp', 'traffic-light', 'sign-traffic'].some(CITY_HAS)) return [];
   const wl = genWorld(seed), [wx, wy] = GEN.world(plan.key), ox = wx * 800, oy = wy * 500, terrain = chronoTerrain(seed, plan.key), out = [], rr = chronoRng(seed + ':furniture:' + plan.key);
@@ -634,7 +634,7 @@ function cityBlockers(seed, key, plan) {
     else if (l.use === 'park') { const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) circles.push([tx, ty, tr * 0.75]);
       for (const b of cityParkRubble(seed, l, r, trees)) circles.push([b.x, b.y, b.L * 0.4]); } } // Round 424: rubble blocks too
   for (const f of cityStreetFurniture(seed, plan)) circles.push([f.x, f.y, 8]); // Round 424: a lamp, light or sign post
-  for (const c of cityParkedCars(seed, plan)) rects.push([c.px - 26, c.py - 14, c.px + 26, c.py + 12]);
+  for (const c of cityParkedCars(seed, plan)) rects.push([c.px - 34, c.py - 18, c.px + 34, c.py + 16]); // Round 425: the larger cars
   const t = chronoTerrain(seed, key); for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (t.chasm(x, y)) rects.push([x * CG_CELL, y * CG_CELL, (x + 1) * CG_CELL, (y + 1) * CG_CELL, 'water']);
   return { rects, circles };
 }
@@ -712,7 +712,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     // GEN.tilt degrees, a building shows its south wall, sin(tilt) of its height, drawn inside its own lot under the roof.
     // Round 401: the tall shopfronts face a street to the south; a building with its street behind it (north) is kept low.
     const ruin = cityIsRuin(l); // Round 424: a destroyed building (both ruin slots have art)
-    let blade = false; const southSt = sides.some(sd => sd[0] === 's'), floors = (southSt ? 4 + Math.floor(rr() * 4) : 4 + Math.floor(rr() * 2)) + (district === 'tech' ? 1 : 0) /* Round 412 (owner): at least 4 floors */, dz = Math.min(floors * 36 * SIN, bh * 0.5), wallTop = bx[3] - dz;
+    let blade = false; const southSt = sides.some(sd => sd[0] === 's'), floors = (southSt ? 4 + Math.floor(rr() * 4) : 4 + Math.floor(rr() * 2)) + (district === 'tech' ? 1 : 0) /* Round 412 (owner): at least 4 floors */, dz = Math.min(floors * 72 * SIN, bh * 0.62) /* Round 425 (owner: "the character should be about the size of the front door"): a storey 36px on screen (was 18), the wall up to 62% of the lot */, wallTop = bx[3] - dz;
     const rb = [bx[0], bx[1], bx[2], wallTop]; bx[3] = wallTop; const bh0 = bh;
     // a roof, sometimes in two parts of different heights
     const parts = bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
@@ -736,10 +736,10 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       // rooftop clutter
       const items = 2 + Math.floor(rr() * 4), placed = [];
       // Round 416 (owner: "some rooftop objects being too small, others being too big"): each kind has one size, the
-      // longer side of its picture (one storey of wall is 18px: an air unit 26, a vent 20, a tank 36, a stair hut 40,
+      // longer side of its picture (Round 425: 1.4x these: an air unit 36, a vent 28, a tank 50, a stair hut 56, solar 64, a skylight 44; before: an air unit 26, a vent 20, a tank 36, a stair hut 40,
       // solar panels 46, a skylight 32), and its box follows the picture's own shape; it used to be squeezed into a fixed box.
-      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 6), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind], propArt = pick(slot, ra), L = [26, 20, 36, 40, 46, 32][kind];
-        let iw = [24, 14, 30, 34, 46, 22][kind], ih = [18, 14, 30, 26, 28, 14][kind]; if (propArt) { const k3 = L / Math.max(propArt.width, propArt.height); iw = propArt.width * k3; ih = propArt.height * k3; }
+      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 6), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight'][kind], propArt = pick(slot, ra), L = [36, 28, 50, 56, 64, 44][kind]; /* Round 425: 1.4x, with the taller storeys */
+        let iw = 0, ih = 0; if (propArt) { const k3 = L / Math.max(propArt.width, propArt.height); iw = propArt.width * k3; ih = propArt.height * k3; }
         if (!propArt) continue; const ix = q[0] + 10 + rr() * (w - 20 - iw), iy = q[1] + 10 + rr() * (h - 20 - ih);
         if (w < iw + 22 || h < ih + 22 || placed.some(p => ix < p[2] + 10 && ix + iw > p[0] - 10 && iy < p[3] + 10 && iy + ih > p[1] - 10)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
         if (propArt) ctx.drawImage(propArt, S(ix), S(iy), S(iw), S(ih)); } }); // its box is its picture: never over a neighbour; no picture, nothing drawn
@@ -763,7 +763,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
           const bxp = rr() < 0.5 ? bx[0] + 10 : bx[2] - 22, bt = wallTop + rowH * 0.3, bl = y0 - bt - 4, nc = NEON[Math.floor(rr() * NEON.length)];
           // Round 420 (owner: "remove all placeholder graphics"; "never stretch graphics"): only the sign's own picture, at its own
           // proportions, as large as fits down the upper floors and 18px wide; no drawn stand-in
-          const vArt = pick('sign-v', ra); if (vArt) { const k2 = Math.min(bl / vArt.height, 18 / vArt.width), dw = vArt.width * k2, dh = vArt.height * k2; ctx.drawImage(vArt, S(bxp + 6 - dw / 2), S(bt + (bl - dh) / 2), S(dw), S(dh)); } else blade = false; } }
+          const vArt = pick('sign-v', ra); if (vArt) { const k2 = Math.min(bl / vArt.height, 26 / vArt.width), dw = vArt.width * k2, dh = vArt.height * k2; ctx.drawImage(vArt, S(bxp + 6 - dw / 2), S(bt + (bl - dh) / 2), S(dw), S(dh)); } else blade = false; } }
       ctx.restore(); }
     void bh0;
     // a neon sign on the street side
@@ -771,12 +771,12 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     // signs"): a sign only on a building whose street is in front (south): a board along the front roof edge, unless the
     // front wall already carries a blade sign. Never on a back or side wall.
     if (southSt && !blade && !ruin && rr() < 0.7) { const hArt = pick('sign-h', ra); // the sign's own picture at its own proportions, up to 16px tall, centred on the front roof edge
-      if (hArt) { const k2 = Math.min(16 / hArt.height, (bw - 24) / hArt.width), dw = hArt.width * k2, dh = hArt.height * k2, sx = bx[0] + 12 + rr() * Math.max(0, bw - 24 - dw);
+      if (hArt) { const k2 = Math.min(23 / hArt.height, (bw - 24) / hArt.width), dw = hArt.width * k2, dh = hArt.height * k2, sx = bx[0] + 12 + rr() * Math.max(0, bw - 24 - dw);
         if (dw > 30) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } } }
   // Round 410: cars last, so no lot, park or border is ever drawn over one
   // parked cars along the main streets (where they stand comes from cityParkedCars, which the walk mask reads too)
   for (const c of cityParkedCars(seed, plan)) { const { px, py, hz, col } = c, w = hz ? 46 : 22, h = hz ? 22 : 46, cars = A('car');
-    if (cars) { const carArt = cars[Math.floor(c.artR * cars.length)], L2 = 56, T2 = L2 * carArt.height / carArt.width; // painted at the 3/4 angle, so stood upright; half face the other way
+    if (cars) { const carArt = cars[Math.floor(c.artR * cars.length)], L2 = 72, T2 = L2 * carArt.height / carArt.width; /* Round 425: 56 -> 72 */ // painted at the 3/4 angle, so stood upright; half face the other way
       ctx.save(); ctx.translate(S(px), S(py)); if (c.flip) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); } } // no picture, no car drawn
   // Round 424: street lights, traffic lights and traffic signs, stood upright on their post's foot, nearest last
   for (const f of cityStreetFurniture(seed, plan)) { const l = A(f.slot), art = l && l[Math.floor(f.artR * l.length)]; if (!art) continue; const dh = f.h, dw = art.width * dh / art.height;
