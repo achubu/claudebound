@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 437) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 438) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 

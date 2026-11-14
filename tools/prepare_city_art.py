@@ -31,7 +31,7 @@ def out_dir(slot): return os.path.join(CITY, 'surfaces' if slot in SURFACE_SLOTS
 def out_path(slot, name): d = out_dir(slot); os.makedirs(d, exist_ok=True); return os.path.join(d, name + '.webp')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
 TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'park-edge', 'curb', 'waterfront-edge', 'park', 'ruin', 'ruin-wall', 'home-wall', 'home-roof'}
-SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree', 'rubble', 'lamp', 'traffic-light', 'sign-traffic', 'cargo'}
+SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree', 'rubble', 'lamp', 'traffic-light', 'sign-traffic', 'cargo', 'prop-heater'}
 
 
 def blend_x(a, band):
@@ -60,7 +60,7 @@ def sprite(img, slot=None):
     a = np.asarray(img.convert('RGB')).astype(np.float32); r, g, b = a[..., 0], a[..., 1], a[..., 2]
     # the background is read from the corners: flat green (most art) or flat magenta (green things, like trees)
     h, w = r.shape; c = np.concatenate([a[:8, :8].reshape(-1, 3), a[:8, -8:].reshape(-1, 3), a[-8:, :8].reshape(-1, 3), a[-8:, -8:].reshape(-1, 3)]); bg = np.median(c, axis=0)
-    if bg[1] > max(bg[0], bg[2]) + 40: gx = g - np.maximum(r, b); alpha = np.clip((60 - gx) / 40, 0, 1)
+    if bg[1] > max(bg[0], bg[2]) + 40 and not os.environ.get('KEY_DIST'): gx = g - np.maximum(r, b); alpha = np.clip((60 - gx) / 40, 0, 1)  # Round 438: KEY_DIST=1 keys a muted green by colour distance instead
     else:  # Round 435: KEY_MIN raises the cut (lamp glow cones over magenta drop out instead of turning pink)
         d = np.linalg.norm(a - bg, axis=2); lo = float(os.environ.get('KEY_MIN', 60)); alpha = np.clip((d - lo) / 50, 0, 1)
         if os.environ.get('FILL_ENCLOSED'):  # Round 435: only background joined to the frame's edge is cut; red sign faces inside a rim stay
@@ -70,7 +70,7 @@ def sprite(img, slot=None):
     if n:
         sz = ndimage.sum(np.ones_like(alpha), lab, range(1, n + 1)); keep = [i + 1 for i, v in enumerate(sz) if v >= max(60, sz.max() * 0.02)]
         alpha = alpha * ndimage.binary_dilation(np.isin(lab, keep), iterations=2)
-    g2 = np.minimum(g, np.maximum(r, b)) if bg[1] > max(bg[0], bg[2]) + 40 else g  # no green fringe
+    g2 = np.minimum(g, np.maximum(r, b) + 12) if bg[1] > max(bg[0], bg[2]) + 40 else g  # no green fringe
     rgba = np.dstack([r, g2, b, alpha * 255]).clip(0, 255).astype(np.uint8)
     ys, xs = np.nonzero(alpha > 0.1)
     if not len(ys): sys.exit('nothing left after keying out the green: is the background flat green?')
@@ -130,6 +130,7 @@ def sheet(args):
         if slot not in TEXTURE | SPRITE: sys.exit('unknown slot ' + slot)
         x0, y0, x1, y1 = (i % cols) * W // cols, (i // cols) * H // rows, (i % cols + 1) * W // cols, (i // cols + 1) * H // rows
         if slot in TEXTURE: m = (x1 - x0) // 20; x0, y0, x1, y1 = x0 + m, y0 + m, x1 - m, y1 - m
+        if slot not in TEXTURE and os.environ.get('CELL_INSET'): m = int((x1 - x0) * float(os.environ['CELL_INSET'])); x0, y0, x1, y1 = x0 + m, y0 + m, x1 - m, y1 - m  # Round 438: trim glow that leaks in from a neighbour cell
         o = texture(img.crop((x0, y0, x1, y1)), slot) if slot in TEXTURE else sprite(img.crop((x0, y0, x1, y1)), slot)
         path = out_path(slot, name); o.save(path, quality=88, method=6); register(slot, name)
         print('%s -> %s %s' % (slot, os.path.relpath(path, ROOT), o.size))
