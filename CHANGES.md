@@ -3496,6 +3496,32 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 435: rubble, street furniture and ruins (Sheets B, C and D)
+
+The owner's three remaining Round 424 sheets (Archive_4 and a separate zip). Every slot from Round 424 now has art:
+- **Rubble (Sheet B):** eight piles in `props/rubble/`: slabs, bricks, rebar, masonry, trolley, barrel, glass and
+  cornice. They lie in parks (2 to 4 each, blocking the way) and on ruined floors.
+- **Street furniture (Sheet C):**
+  - Lamps in `props/lamp/`: lamp-arm, lamp-twin and lamp-led.
+  - Traffic lights in `props/traffic-light/`: light-pole and light-arm.
+  - Signs in `props/sign-traffic/`: sign-stop, sign-warning and sign-noentry.
+  - These are placed by the Round 424 rules: lamps on the kerbs of main roads, lights at crossings of three or more
+    main roads, signs at alley mouths. With lamp art, the light pools lie under the lamps.
+- **Ruins (Sheet D):**
+  - Four burnt-out walls in `surfaces/ruin-wall/`: ruin-brick, ruin-concrete, ruin-cladding and ruin-plaster. The green
+    window holes were filled with a dark interior.
+  - Four gutted floors in `surfaces/ruin/`: ruin-ash, ruin-slab, ruin-bricks and ruin-girders. These were cropped inside
+    the stone frame Gemini drew round each tile.
+  - With both slots filled, about 1 building in 8 is now a ruin.
+- **`tools/prepare_city_art.py`:**
+  - A post's picture is padded so its foot sits at the bottom centre. The arm traffic light would otherwise stand off
+    its post.
+  - `KEY_MIN` raises the background cut, so the lamps' glow cones over magenta drop out.
+  - `FILL_ENCLOSED` keeps colour enclosed by an outline (the red sign faces are close to magenta).
+  - Bug fix: wall gaps were measured and then written over by a stale copy of the file. `--gaps` now also finds quoted
+    slot names.
+- `tests/city-furniture.test.cjs` empties the slots for its "no art, nothing placed" check.
+
 ## Round 434: Static Coil card art
 
 The owner's Static Coil paintings, levels 0-3, are at `assets/cards/level*/staticCoil`. They are listed in

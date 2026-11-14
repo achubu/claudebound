@@ -267,7 +267,28 @@
        "walk": false,
        "folder": "city-gen/surfaces/ruin-wall/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "ruin-brick",
+         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-brick.webp",
+         "bytes": 20708
+        },
+        {
+         "name": "ruin-cladding",
+         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-cladding.webp",
+         "bytes": 22980
+        },
+        {
+         "name": "ruin-concrete",
+         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-concrete.webp",
+         "bytes": 21600
+        },
+        {
+         "name": "ruin-plaster",
+         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-plaster.webp",
+         "bytes": 20182
+        }
+       ]
       },
       {
        "key": "ruin",
@@ -276,7 +297,28 @@
        "walk": false,
        "folder": "city-gen/surfaces/ruin/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "ruin-ash",
+         "src": "assets/environment/city-gen/surfaces/ruin/ruin-ash.webp",
+         "bytes": 50708
+        },
+        {
+         "name": "ruin-bricks",
+         "src": "assets/environment/city-gen/surfaces/ruin/ruin-bricks.webp",
+         "bytes": 48776
+        },
+        {
+         "name": "ruin-girders",
+         "src": "assets/environment/city-gen/surfaces/ruin/ruin-girders.webp",
+         "bytes": 47306
+        },
+        {
+         "name": "ruin-slab",
+         "src": "assets/environment/city-gen/surfaces/ruin/ruin-slab.webp",
+         "bytes": 38796
+        }
+       ]
       },
       {
        "key": "roof",
@@ -520,7 +562,48 @@
        "walk": false,
        "folder": "city-gen/props/rubble/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "rubble-barrel",
+         "src": "assets/environment/city-gen/props/rubble/rubble-barrel.webp",
+         "bytes": 27138
+        },
+        {
+         "name": "rubble-bricks",
+         "src": "assets/environment/city-gen/props/rubble/rubble-bricks.webp",
+         "bytes": 29744
+        },
+        {
+         "name": "rubble-cornice",
+         "src": "assets/environment/city-gen/props/rubble/rubble-cornice.webp",
+         "bytes": 32762
+        },
+        {
+         "name": "rubble-glass",
+         "src": "assets/environment/city-gen/props/rubble/rubble-glass.webp",
+         "bytes": 32250
+        },
+        {
+         "name": "rubble-masonry",
+         "src": "assets/environment/city-gen/props/rubble/rubble-masonry.webp",
+         "bytes": 35388
+        },
+        {
+         "name": "rubble-rebar",
+         "src": "assets/environment/city-gen/props/rubble/rubble-rebar.webp",
+         "bytes": 25098
+        },
+        {
+         "name": "rubble-slabs",
+         "src": "assets/environment/city-gen/props/rubble/rubble-slabs.webp",
+         "bytes": 27248
+        },
+        {
+         "name": "rubble-trolley",
+         "src": "assets/environment/city-gen/props/rubble/rubble-trolley.webp",
+         "bytes": 34126
+        }
+       ]
       },
       {
        "key": "prop-skylight",
@@ -594,7 +677,23 @@
        "walk": false,
        "folder": "city-gen/props/lamp/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "lamp-arm",
+         "src": "assets/environment/city-gen/props/lamp/lamp-arm.webp",
+         "bytes": 6026
+        },
+        {
+         "name": "lamp-led",
+         "src": "assets/environment/city-gen/props/lamp/lamp-led.webp",
+         "bytes": 5092
+        },
+        {
+         "name": "lamp-twin",
+         "src": "assets/environment/city-gen/props/lamp/lamp-twin.webp",
+         "bytes": 7550
+        }
+       ]
       },
       {
        "key": "traffic-light",
@@ -603,7 +702,18 @@
        "walk": false,
        "folder": "city-gen/props/traffic-light/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "light-arm",
+         "src": "assets/environment/city-gen/props/traffic-light/light-arm.webp",
+         "bytes": 6386
+        },
+        {
+         "name": "light-pole",
+         "src": "assets/environment/city-gen/props/traffic-light/light-pole.webp",
+         "bytes": 4228
+        }
+       ]
       },
       {
        "key": "sign-traffic",
@@ -612,7 +722,23 @@
        "walk": false,
        "folder": "city-gen/props/sign-traffic/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "sign-noentry",
+         "src": "assets/environment/city-gen/props/sign-traffic/sign-noentry.webp",
+         "bytes": 10990
+        },
+        {
+         "name": "sign-stop",
+         "src": "assets/environment/city-gen/props/sign-traffic/sign-stop.webp",
+         "bytes": 7612
+        },
+        {
+         "name": "sign-warning",
+         "src": "assets/environment/city-gen/props/sign-traffic/sign-warning.webp",
+         "bytes": 5248
+        }
+       ]
       },
       {
        "key": "tree",
