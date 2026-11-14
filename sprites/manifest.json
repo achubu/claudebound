@@ -210,7 +210,7 @@
       {
        "key": "wall",
        "label": "Building walls (one floor)",
-       "rule": "Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS); at least 4 floors.",
+       "rule": "Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS); at least 3 floors (Round 427), 42px each; a shallow lot has fewer floors rather than squeezed ones.",
        "walk": false,
        "folder": "city-gen/surfaces/wall/",
        "scale": null,
