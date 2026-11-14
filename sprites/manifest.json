@@ -22,6 +22,46 @@
          "src": "assets/environment/city-gen/surfaces/park/overgrowth.webp",
          "bytes": 134614,
          "role": "base texture"
+        },
+        {
+         "name": "park-clover",
+         "src": "assets/environment/city-gen/surfaces/park/park-clover.webp",
+         "bytes": 39422
+        },
+        {
+         "name": "park-cracked",
+         "src": "assets/environment/city-gen/surfaces/park/park-cracked.webp",
+         "bytes": 21300
+        },
+        {
+         "name": "park-dry",
+         "src": "assets/environment/city-gen/surfaces/park/park-dry.webp",
+         "bytes": 29156
+        },
+        {
+         "name": "park-gravel",
+         "src": "assets/environment/city-gen/surfaces/park/park-gravel.webp",
+         "bytes": 29046
+        },
+        {
+         "name": "park-leaves",
+         "src": "assets/environment/city-gen/surfaces/park/park-leaves.webp",
+         "bytes": 33462
+        },
+        {
+         "name": "park-moss",
+         "src": "assets/environment/city-gen/surfaces/park/park-moss.webp",
+         "bytes": 26596
+        },
+        {
+         "name": "park-mud",
+         "src": "assets/environment/city-gen/surfaces/park/park-mud.webp",
+         "bytes": 23456
+        },
+        {
+         "name": "park-rubble",
+         "src": "assets/environment/city-gen/surfaces/park/park-rubble.webp",
+         "bytes": 26276
         }
        ]
       },

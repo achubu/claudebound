@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 432: park grasses (Sheet A)
+
+The owner's Sheet A was cut with `tools/prepare_city_art.py --sheet` into eight seamless park grounds in
+`surfaces/park/`: park-clover, park-dry, park-rubble, park-cracked, park-moss, park-gravel, park-leaves and park-mud.
+Each park lays one of them over its whole area, tiled 140px, with no mixing (Round 430). The Textures page lists them
+(187 pictures).
+
 ## Round 431: no building's shadow on another building; Ghost Protocol card art
 
 Owner: "make sure buildings dont drop shadows on other buildings, it looks akward". A building's drop shadow (offset down
