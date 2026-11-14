@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 427: three floors at least, storeys 42px
+
+Owner: "Let's try 3 floor minimum". The rule changes from 4 floors at least (Round 412) to 3.
+- A storey is now 42px on screen (`84 * sin(tilt)`, was 36).
+- A building picks its floors as before (4 to 8), then drops floors (never below 3) when its lot is too shallow for all
+  of them at full height. Before, it squeezed them.
+- Half the buildings now show 40px storeys or more, and shopfront doors stand close to the hero's height.
+- Only the shallowest lots still squeeze their three floors.
+
 ## Round 426: quieter building edges
 
 Owner: "The borders around the buildings look strange, are you dropping shadows or what's going on there". Several things
