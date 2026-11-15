@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 442: smaller cars; rooftop objects clear of the roof's edge
+
+- Owner: "reduce car size 15%". Cars are now 61px long (were 72); their blocking boxes shrank to match.
+- Owner: "improve our algorithm so that rooftop objects are never touching the edge of the roofs".
+  - Rooftop props keep 18px from every edge of their roof part (were 10). That clears the 4px parapet and its inner
+    shadow, which reaches about 17px in.
+  - A roof part too small for a prop with that margin gets none.
+  - Ruin holes keep the same margin.
+  - The market's barrel roof was a texture with barrels painted into it, so a roof's edge cut barrels in half. It moved to
+    `unused assets/`, and the market now uses the general roofs.
+
 ## Round 441: smaller objects, bigger buildings (city)
 
 Owner: "need to reduce interactable object size, increase building size". In the top-down city:
