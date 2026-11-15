@@ -3496,6 +3496,34 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 443: style pass; one traffic light per crossing; evenly spaced lamps
+
+- Owner: "terracota tile texture can be removed, try to review all tiles and textures and delete any that dont fit our
+  neon aftermath futuristic city aesthetic", "anything that clashes in style can be removed", and a screenshot of the
+  stucco wall ("this doesnt fit the style").
+  - Every texture and prop was laid out on contact sheets and judged.
+  - Moved to `unused assets/`:
+    - Textures:
+      - Terracotta roof.
+      - Cobbled, brick and sett sidewalks: old-European streets.
+      - Fish-scale tin roof.
+      - Clapboard and stucco homes: country and Mediterranean.
+      - Ferns-and-plaster garden wall.
+      - Wooden boardwalk shoreline.
+    - Props:
+      - Yellow taxi, sedan, white van and rusty pickup: present-day cars beside the futuristic rigs.
+      - Vent caps and water heater: they keyed see-through.
+  - The homes quarter keeps its own walls (tenement and shanty) with the general roofs; a homes building still has 3 or
+    4 floors and no shopfront.
+- Owner: "make sure traffic lights are only placed once per intersection". A crossing of three or more main roads now
+  gets one traffic light, on its first clear corner.
+- Owner: "other lights should be evenly spaced if possible via algorithm".
+  - Each side of a main road gets lamps at one even spacing: the road's length shared out at about 150px, with the far
+    side half a step along.
+  - A lamp that can't stand at its spot moves up to 20px either way rather than leaving a gap. Seed 77 has 87 lamps
+    (was 73).
+- `tests/city-furniture.test.cjs` now expects fewer traffic lights.
+
 ## Round 442: smaller cars; rooftop objects clear of the roof's edge
 
 - Owner: "reduce car size 15%". Cars are now 61px long (were 72); their blocking boxes shrank to match.

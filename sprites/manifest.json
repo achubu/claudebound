@@ -107,16 +107,6 @@
          "role": "base texture"
         },
         {
-         "name": "walk-brick",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-brick.webp",
-         "bytes": 26758
-        },
-        {
-         "name": "walk-cobbles",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-cobbles.webp",
-         "bytes": 28538
-        },
-        {
          "name": "walk-hex",
          "src": "assets/environment/city-gen/surfaces/sidewalk/walk-hex.webp",
          "bytes": 20690
@@ -135,11 +125,6 @@
          "name": "walk-runbond",
          "src": "assets/environment/city-gen/surfaces/sidewalk/walk-runbond.webp",
          "bytes": 12908
-        },
-        {
-         "name": "walk-setts",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-setts.webp",
-         "bytes": 17586
         },
         {
          "name": "walk-slabs",
@@ -248,11 +233,6 @@
        "folder": "city-gen/surfaces/waterfront-edge/",
        "scale": null,
        "files": [
-        {
-         "name": "shore-boardwalk",
-         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-boardwalk.webp",
-         "bytes": 41134
-        },
         {
          "name": "shore-crumble",
          "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-crumble.webp",
@@ -419,11 +399,6 @@
        "scale": null,
        "files": [
         {
-         "name": "garden-ferns",
-         "src": "assets/environment/city-gen/surfaces/garden-wall/garden-ferns.webp",
-         "bytes": 27774
-        },
-        {
          "name": "garden-greenhouse",
          "src": "assets/environment/city-gen/surfaces/garden-wall/garden-greenhouse.webp",
          "bytes": 29526
@@ -436,21 +411,6 @@
        ]
       },
       {
-       "key": "home-roof",
-       "label": "Homes district: roofs",
-       "rule": "Every building in the homes quarter (chronoDistrict), tiled 160px like the other roofs.",
-       "walk": false,
-       "folder": "city-gen/surfaces/home-roof/",
-       "scale": null,
-       "files": [
-        {
-         "name": "home-terracotta",
-         "src": "assets/environment/city-gen/surfaces/home-roof/home-terracotta.webp",
-         "bytes": 35436
-        }
-       ]
-      },
-      {
        "key": "home-wall",
        "label": "Homes district: walls (one floor)",
        "rule": "Every building in the homes quarter: 3 or 4 floors, no shopfront and no signs; fitted floor by floor between windows (CITY_TD_GAPS).",
@@ -459,19 +419,9 @@
        "scale": null,
        "files": [
         {
-         "name": "home-clapboard",
-         "src": "assets/environment/city-gen/surfaces/home-wall/home-clapboard.webp",
-         "bytes": 24540
-        },
-        {
          "name": "home-shanty",
          "src": "assets/environment/city-gen/surfaces/home-wall/home-shanty.webp",
          "bytes": 25544
-        },
-        {
-         "name": "home-stucco",
-         "src": "assets/environment/city-gen/surfaces/home-wall/home-stucco.webp",
-         "bytes": 27024
         },
         {
          "name": "home-tenement",
@@ -562,11 +512,6 @@
          "name": "roof-tarchip",
          "src": "assets/environment/city-gen/surfaces/roof/roof-tarchip.webp",
          "bytes": 55010
-        },
-        {
-         "name": "roof-tin",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-tin.webp",
-         "bytes": 44206
         }
        ]
       },
@@ -679,6 +624,15 @@
          "bytes": 35762
         }
        ]
+      },
+      {
+       "key": "home-roof",
+       "label": "home-roof",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/home-roof/",
+       "scale": null,
+       "files": []
       },
       {
        "key": "market-roof",
@@ -1063,16 +1017,6 @@
          "bytes": 18168
         },
         {
-         "name": "car-rustpickup",
-         "src": "assets/environment/city-gen/props/car/car-rustpickup.webp",
-         "bytes": 11260
-        },
-        {
-         "name": "car-sedan",
-         "src": "assets/environment/city-gen/props/car/car-sedan.webp",
-         "bytes": 8374
-        },
-        {
          "name": "car-sport",
          "src": "assets/environment/city-gen/props/car/car-sport.webp",
          "bytes": 17774
@@ -1083,11 +1027,6 @@
          "bytes": 20540
         },
         {
-         "name": "car-taxi",
-         "src": "assets/environment/city-gen/props/car/car-taxi.webp",
-         "bytes": 11172
-        },
-        {
          "name": "car-trike",
          "src": "assets/environment/city-gen/props/car/car-trike.webp",
          "bytes": 23886
@@ -1096,11 +1035,6 @@
          "name": "car-van",
          "src": "assets/environment/city-gen/props/car/car-van.webp",
          "bytes": 21484
-        },
-        {
-         "name": "car-whitevan",
-         "src": "assets/environment/city-gen/props/car/car-whitevan.webp",
-         "bytes": 12518
         }
        ]
       },
@@ -1123,11 +1057,6 @@
          "bytes": 38982
         },
         {
-         "name": "vent-caps",
-         "src": "assets/environment/city-gen/props/prop-vent/vent-caps.webp",
-         "bytes": 28036
-        },
-        {
          "name": "vent-mesh",
          "src": "assets/environment/city-gen/props/prop-vent/vent-mesh.webp",
          "bytes": 57140
@@ -1141,13 +1070,7 @@
        "walk": false,
        "folder": "city-gen/props/prop-heater/",
        "scale": null,
-       "files": [
-        {
-         "name": "heater-1",
-         "src": "assets/environment/city-gen/props/prop-heater/heater-1.webp",
-         "bytes": 20082
-        }
-       ]
+       "files": []
       },
       {
        "key": "prop-tank",

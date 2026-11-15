@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 442) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 443) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -101,7 +101,9 @@ change set.
   `python3 tools/tile_check.py` after adding art (seam score; tiled previews to judge repeats by eye). Round 439: each
   quarter's walls, roofs and street floors in `CITY_DISTRICT_ART`; a ruin is an ordinary roof with a hole (`props/roof-hole/`). Round 441: storeys 50px; city objects 42px
   (merchant/Cardsmith 58px) via `#world.td-city`. Round 442: cars 61px; rooftop props keep 18px from a roof's edge;
-  no roof texture with objects painted into it (an edge would cut them).
+  no roof texture with objects painted into it (an edge would cut them). Round 443 (owner): only art that fits the
+  futuristic neon city (no old-world brick, cobbles, terracotta, clapboard, present-day cars); one traffic light per crossing;
+  lamps evenly spaced along each kerb.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):
