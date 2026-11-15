@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 441: smaller objects, bigger buildings (city)
+
+Owner: "need to reduce interactable object size, increase building size". In the top-down city:
+- **Objects:** a quarter smaller. Points of interest, chests and relics are 42px (were 56). The merchant and the
+  Cardsmith are 58px (were 76). The Afterlight Vault door is 69x42.
+  - This uses a `td-city` class that the city's `renderWorld` wrapper puts on `#world`; other worlds keep their sizes.
+- **Buildings:** a storey is 50px on screen (`100 * sin(tilt)`, was 42). The front wall may take up to 66% of a lot
+  (was 62%). A shallow lot still drops floors, down to 3, rather than squeeze them.
+- Tests: chrono-gen, city-surfaces, city-fill, item-placement, neon-world-pathing and city-enemies pass.
+
 ## Round 440: holes in ruined roofs (Sheet T)
 
 The owner's Sheet T, cut into `props/roof-hole/`: hole-round, hole-crack, hole-double and hole-tear.
