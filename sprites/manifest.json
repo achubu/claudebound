@@ -481,21 +481,6 @@
        ]
       },
       {
-       "key": "market-roof",
-       "label": "Market quarter: roofs",
-       "rule": "Every building in this quarter, tiled 160px.",
-       "walk": false,
-       "folder": "city-gen/surfaces/market-roof/",
-       "scale": null,
-       "files": [
-        {
-         "name": "market-barrels",
-         "src": "assets/environment/city-gen/surfaces/market-roof/market-barrels.webp",
-         "bytes": 28934
-        }
-       ]
-      },
-      {
        "key": "market-shop",
        "label": "Market quarter: street floor",
        "rule": "The street floor of a building in this quarter whose street is to the south.",
@@ -694,6 +679,15 @@
          "bytes": 35762
         }
        ]
+      },
+      {
+       "key": "market-roof",
+       "label": "market-roof",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/market-roof/",
+       "scale": null,
+       "files": []
       },
       {
        "key": "sign-v",
