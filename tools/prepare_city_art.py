@@ -71,6 +71,8 @@ def sprite(img, slot=None):
         sz = ndimage.sum(np.ones_like(alpha), lab, range(1, n + 1)); keep = [i + 1 for i, v in enumerate(sz) if v >= max(60, sz.max() * 0.02)]
         alpha = alpha * ndimage.binary_dilation(np.isin(lab, keep), iterations=2)
     g2 = np.minimum(g, np.maximum(r, b) + 12) if bg[1] > max(bg[0], bg[2]) + 40 else g  # no green fringe
+    if os.environ.get('DESPILL') and not bg[1] > max(bg[0], bg[2]) + 40:  # Round 440: pull magenta fringe back toward grey
+        m = np.clip(np.minimum(r, b) - g, 0, None) * (1 - alpha * 0.5); r = r - m * 0.9; b = b - m * 0.9
     rgba = np.dstack([r, g2, b, alpha * 255]).clip(0, 255).astype(np.uint8)
     ys, xs = np.nonzero(alpha > 0.1)
     if not len(ys): sys.exit('nothing left after keying out the green: is the background flat green?')

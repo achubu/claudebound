@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 440: holes in ruined roofs (Sheet T)
+
+The owner's Sheet T, cut into `props/roof-hole/`: hole-round, hole-crack, hole-double and hole-tear.
+- The other four holes were painted on a square of roof of their own, which would clash with the roof they land on, so
+  they were left out.
+- A new `DESPILL` option in `tools/prepare_city_art.py` pulls the magenta fringe on the rebar tips back to grey.
+- A ruin's hole fills 85 to 97% of the roof part it lands on. It goes on the main part and on half of the second parts.
+  Roofs are shallow next to the tall walls (Round 425), so a hole is about as tall as its roof.
+
 ## Round 439: each quarter its own look (Sheets G, H, I); ruins with an ordinary roof
 
 - **Quarters (`CITY_DISTRICT_ART`):** each of the city's four quarters (`chronoDistrict`) has its own walls, roofs and

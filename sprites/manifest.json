@@ -762,7 +762,28 @@
        "walk": false,
        "folder": "city-gen/props/roof-hole/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "hole-crack",
+         "src": "assets/environment/city-gen/props/roof-hole/hole-crack.webp",
+         "bytes": 13798
+        },
+        {
+         "name": "hole-double",
+         "src": "assets/environment/city-gen/props/roof-hole/hole-double.webp",
+         "bytes": 15332
+        },
+        {
+         "name": "hole-round",
+         "src": "assets/environment/city-gen/props/roof-hole/hole-round.webp",
+         "bytes": 17602
+        },
+        {
+         "name": "hole-tear",
+         "src": "assets/environment/city-gen/props/roof-hole/hole-tear.webp",
+         "bytes": 11588
+        }
+       ]
       },
       {
        "key": "rubble",
