@@ -586,42 +586,42 @@
         {
          "name": "container-blue",
          "src": "assets/environment/city-gen/props/cargo/container-blue.webp",
-         "bytes": 31136
+         "bytes": 14912
         },
         {
          "name": "container-red",
          "src": "assets/environment/city-gen/props/cargo/container-red.webp",
-         "bytes": 36166
+         "bytes": 13758
         },
         {
          "name": "container-stack",
          "src": "assets/environment/city-gen/props/cargo/container-stack.webp",
-         "bytes": 46416
+         "bytes": 13892
         },
         {
          "name": "crates",
          "src": "assets/environment/city-gen/props/cargo/crates.webp",
-         "bytes": 41210
+         "bytes": 15242
         },
         {
          "name": "drums",
          "src": "assets/environment/city-gen/props/cargo/drums.webp",
-         "bytes": 30476
+         "bytes": 14596
         },
         {
          "name": "forklift",
          "src": "assets/environment/city-gen/props/cargo/forklift.webp",
-         "bytes": 31138
+         "bytes": 18920
         },
         {
          "name": "pallets",
          "src": "assets/environment/city-gen/props/cargo/pallets.webp",
-         "bytes": 30658
+         "bytes": 14290
         },
         {
          "name": "rope",
          "src": "assets/environment/city-gen/props/cargo/rope.webp",
-         "bytes": 35762
+         "bytes": 20240
         }
        ]
       },

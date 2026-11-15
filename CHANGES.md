@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 444: solid cargo
+
+Owner: "you seem to have made cargo opaque, no need for that". The pallets, rope and crates had come out partly
+see-through: their muted colours sit close to the magenta background, so the key took them as half background.
+- The cargo sheet was cut again with a new `SOLID` option in `tools/prepare_city_art.py`: everything inside an object's
+  outline is fully opaque, with a 1px soft edge. Enclosed pockets that are clearly background (the forklift cab, the
+  rope coil, the gaps between drums) stay clear.
+- `DESPILL` (Round 440) removes the magenta fringe.
+
 ## Round 443: style pass; one traffic light per crossing; evenly spaced lamps
 
 - Owner: "terracota tile texture can be removed, try to review all tiles and textures and delete any that dont fit our

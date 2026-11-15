@@ -66,6 +66,8 @@ def sprite(img, slot=None):
         if os.environ.get('FILL_ENCLOSED'):  # Round 435: only background joined to the frame's edge is cut; red sign faces inside a rim stay
             lab, n = ndimage.label(alpha < 0.5); edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
             alpha = np.where((lab > 0) & ~np.isin(lab, list(edge)), 1.0, alpha)
+    if os.environ.get('SOLID'):  # Round 444: a solid object: everything inside its outline fully opaque, a 1px soft edge
+        core = ndimage.binary_fill_holes(ndimage.binary_closing(alpha > 0.25, iterations=2)) & ~ndimage.binary_opening(np.linalg.norm(a - bg, axis=2) < 38, iterations=2); alpha = np.clip(ndimage.gaussian_filter(core.astype(np.float32), 0.8) * 1.4, 0, 1) * core + 0.0
     lab, n = ndimage.label(alpha > 0.5)
     if n:
         sz = ndimage.sum(np.ones_like(alpha), lab, range(1, n + 1)); keep = [i + 1 for i, v in enumerate(sz) if v >= max(60, sz.max() * 0.02)]
