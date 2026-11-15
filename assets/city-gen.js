@@ -98,7 +98,10 @@ function cityRoomWalk(key, x, y) {
   const renderBefore = renderWorld;
   renderWorld = function () {
     if (state && activeRegion === 'city' && !state.battle && state.pos && rooms[state.room] && !walkable(state.room, state.pos.x, state.pos.y)) { const p = cityGenPlan(state.room); if (p) state.pos = { x: p.hub[0], y: p.hub[1] }; }
-    return renderBefore.apply(this, arguments);
+    const out = renderBefore.apply(this, arguments);
+    // Round 441 (owner: "reduce interactable object size, increase building size"): smaller objects in the top-down city
+    const w = document.getElementById('world'); if (w) w.classList.toggle('td-city', activeRegion === 'city' && typeof GEN_THEMES !== 'undefined');
+    return out;
   };
   const saveBefore = save;
   save = function () { if (state) state.cityGen = CITY_GEN_VERSION; return saveBefore.apply(this, arguments); };
