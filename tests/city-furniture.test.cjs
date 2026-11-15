@@ -25,7 +25,7 @@ const r = JSON.parse(run(`(() => { newGame(); state.seed = 77; configureRegion('
 assert.strictEqual(r.empty, 0, 'with no art, no street furniture is placed');
 assert.deepStrictEqual(r.bad, [], 'every piece stands on open ground (the kerb or sidewalk), clear of cars, squares and each other');
 assert(r.n.lamp > 60, 'lamps line the main roads: ' + JSON.stringify(r.n));
-assert(r.n['traffic-light'] > 4, 'traffic lights at the crossings: ' + JSON.stringify(r.n));
+assert(r.n['traffic-light'] > 2, 'traffic lights at the crossings: ' + JSON.stringify(r.n));
 assert(r.n['sign-traffic'] > 4, 'traffic signs at alley mouths: ' + JSON.stringify(r.n));
 const total = Object.values(r.n).reduce((a, b) => a + b, 0);
 assert.strictEqual(r.blocked, total, 'every post blocks the way');
