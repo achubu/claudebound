@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 451: the city's interactable objects redrawn to match it (16 of 20)
+
+Owner: "give me a prompt to replace all interactable objects in neon city in one prompt. I want them all to match the city
+better", then a sheet of 20 objects: "let me know if any of these don't work well".
+
+- The sheet (`assets/items/poi/src/city-objects-sheet-round451.jpg`) was cut into its 20 objects and keyed with
+  `tools/key_object.py` (without `--keep-green`: the fires' and lamps' glow had spilled green onto the background).
+- **Wired in (16):** Nexus Waypoint, loot chest, merchant, Cardsmith, Wanted Board, lore terminal (same files as before);
+  Aether Shrine, Campfire, Supply Cache and Sealed Cache as the city's own (`city-shrine`, `city-campfire`, `city-cache`,
+  `city-sealed` in `WORLD_POI_ART.city`; other worlds keep the shared ones); the events Abandoned Terminal, Street Medic,
+  Busted Vending Machine, Arcade Cabinet, Glitched Billboard and Gang Toll (all city-only events). The old pictures moved
+  to `unused assets/` with `-round450` in their names.
+- **Not used (4), a new prompt given:** the Blackout breaker and the Afterlight Vault (owner: they don't work as standalone
+  objects; the vault should be an entryway to an underground vault, not a door floating in the street), and Drone Racers and
+  Lost Courier (too scattered and too dark to read at 42px). They keep their old pictures for now.
+- The second chest on the sheet (a strongbox under a tarp) is not used: the city has one chest picture.
+
 ## Round 450: a shopping mall with its parking, four rooms in size
 
 Owner: "would it be possible to add a large shopping mall and parking lot style area?" ... "it should take the size of 4 rooms".

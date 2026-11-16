@@ -1264,31 +1264,31 @@
       },
       {
        "key": "cache",
-       "label": "Cache",
-       "rule": "Shared with other worlds.",
+       "label": "cache",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
        "walk": false,
        "folder": "items/poi/",
        "scale": null,
        "files": [
         {
-         "name": "cache",
-         "src": "assets/items/poi/cache.webp",
-         "bytes": 27846
+         "name": "city-cache",
+         "src": "assets/items/poi/city-cache.webp",
+         "bytes": 21416
         }
        ]
       },
       {
        "key": "campfire",
-       "label": "Campfire",
-       "rule": "Shared with other worlds.",
+       "label": "campfire",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
        "walk": false,
        "folder": "items/poi/",
        "scale": null,
        "files": [
         {
-         "name": "campfire",
-         "src": "assets/items/poi/campfire.webp",
-         "bytes": 28814
+         "name": "city-campfire",
+         "src": "assets/items/poi/city-campfire.webp",
+         "bytes": 19848
         }
        ]
       },
@@ -1303,7 +1303,7 @@
         {
          "name": "city-cardsmith",
          "src": "assets/items/poi/city-cardsmith.webp",
-         "bytes": 28820
+         "bytes": 22760
         }
        ]
       },
@@ -1318,7 +1318,7 @@
         {
          "name": "city-chest",
          "src": "assets/items/poi/city-chest.webp",
-         "bytes": 22288
+         "bytes": 20898
         }
        ]
       },
@@ -1333,12 +1333,12 @@
         {
          "name": "arcade",
          "src": "assets/items/poi/events/arcade.webp",
-         "bytes": 20636
+         "bytes": 16800
         },
         {
          "name": "billboard",
          "src": "assets/items/poi/events/billboard.webp",
-         "bytes": 23044
+         "bytes": 12934
         },
         {
          "name": "courier",
@@ -1348,7 +1348,7 @@
         {
          "name": "medic",
          "src": "assets/items/poi/events/medic.webp",
-         "bytes": 29560
+         "bytes": 22382
         },
         {
          "name": "racer",
@@ -1358,17 +1358,17 @@
         {
          "name": "terminal",
          "src": "assets/items/poi/events/terminal.webp",
-         "bytes": 25854
+         "bytes": 23634
         },
         {
          "name": "toll",
          "src": "assets/items/poi/events/toll.webp",
-         "bytes": 22668
+         "bytes": 29964
         },
         {
          "name": "vending",
          "src": "assets/items/poi/events/vending.webp",
-         "bytes": 21012
+         "bytes": 14690
         }
        ]
       },
@@ -1398,7 +1398,7 @@
         {
          "name": "city-merchant",
          "src": "assets/items/poi/city-merchant.webp",
-         "bytes": 33432
+         "bytes": 24688
         }
        ]
       },
@@ -1413,7 +1413,7 @@
         {
          "name": "city-nexus",
          "src": "assets/items/poi/city-nexus.webp",
-         "bytes": 26112
+         "bytes": 17470
         }
        ]
       },
@@ -1434,31 +1434,31 @@
       },
       {
        "key": "sealed",
-       "label": "Sealed door",
-       "rule": "Shared with other worlds.",
+       "label": "sealed",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
        "walk": false,
        "folder": "items/poi/",
        "scale": null,
        "files": [
         {
-         "name": "sealed",
-         "src": "assets/items/poi/sealed.webp",
-         "bytes": 32638
+         "name": "city-sealed",
+         "src": "assets/items/poi/city-sealed.webp",
+         "bytes": 24680
         }
        ]
       },
       {
        "key": "shrine",
-       "label": "Shrine",
-       "rule": "Shared with other worlds.",
+       "label": "shrine",
+       "rule": "Stands on its own square (a forecourt at a building entrance).",
        "walk": false,
        "folder": "items/poi/",
        "scale": null,
        "files": [
         {
-         "name": "shrine",
-         "src": "assets/items/poi/shrine.webp",
-         "bytes": 28456
+         "name": "city-shrine",
+         "src": "assets/items/poi/city-shrine.webp",
+         "bytes": 20996
         }
        ]
       },
@@ -1473,7 +1473,7 @@
         {
          "name": "city-wanted-board",
          "src": "assets/items/poi/city-wanted-board.webp",
-         "bytes": 18760
+         "bytes": 22342
         }
        ]
       }
