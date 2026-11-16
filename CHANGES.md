@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 449: main roads that differ per journey; doors pinned to their roads
+
+Owner: "go ahead" (main roads on different lines in each journey's city).
+
+- **Main roads come from the seed** (`GEN_THEMES.city.mains(seed)`): the two east-west avenues run on world row 1 or 2
+  and row 3 or 4, and one north-south avenue runs in each third of the city (columns 0-2, 3-5, 6-8). `alley()` reads it
+  through `GEN.seedNow`, which `chronoRoomPlan` sets, so a plan for another seed never reads the wrong city's roads.
+- **A room's edge is crossed only on a street.** The walk mask's edge strips (`cityRoomMask`) are walkable only on street
+  cells. Doors are picked from the widest walkable run along an edge, so on open ground they had drifted off the roads;
+  now all 136 doors of a city land on a street.
+- **Mask rule order:** blockers, then the edge rule, then the flood from the streets over the inner part of the room
+  (rows 5-60, cols 2-97). Running the flood first left a cell cut off by the edge rule.
+- **The walk-through's `SEED` now really applies.** `tests/playtest-walk.cjs` calls `newGame()` itself, which re-rolled
+  the seed, so the Round 448 "seeded" walks were in fact random cities. The seed is now set after that call, the start
+  position comes from the game, and the script prints the seed.
+- Tests: `city-layout` also checks that edge strips are walkable only on streets and that every door exists and lands on
+  a street; passes on 18 seeds. Truly seeded walks of all 54 rooms are clean on seeds 1, 2, 8, 9, 77 and 4242.
+
 ## Round 448: bugs that only some journeys' cities had
 
 Owner: "continue working". The browser walk-through had failed once in Round 428 and once in Round 447 and passed on

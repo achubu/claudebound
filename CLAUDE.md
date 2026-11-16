@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 448) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 449) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -122,6 +122,8 @@ change set.
   tests/playtest-walk.cjs city` (seeds 1, 2, 9 and 77 found bugs before) and `tests/city-layout.test.cjs` (six seeds). Walkable
   ground must be joined to the streets through the part of the room that can be walked (not the edge strips); object squares
   keep clear of room edges and of where doors set you down.
+  Round 449: the main roads' rows and columns come from the seed (`GEN_THEMES.city.mains`; `GEN.seedNow`); a room's
+  edge is walkable only on street cells, so every door sits on its road. `tests/playtest-walk.cjs` applies `SEED` after its own `newGame()`.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):

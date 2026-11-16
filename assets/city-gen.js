@@ -34,12 +34,18 @@ function cityRoomMask(cx, cy) {
       m[my * 100 + mx] = ok ? 1 : 0; } }
     // Round 445: only ground joined to the room's streets counts. A yard or a strip of paving walled in by buildings is
     // not somewhere to stand: nothing is placed there and nobody can be set down there with no way out.
-    // Round 448: joined through the part of the room that can be walked (rows 4-61, columns 2-97: a step needs its foot
-    // 12px inside the room). A notch that met the street only along the room's top strip passed the old check, and a door
-    // could set you down in it with no way on. A cell in the edge strips stays only if the walkable cell straight in from
-    // it stays, so crossing a room's edge always lands on ground with a way to the streets.
-    const R0 = 4, R1 = 61, C0 = 2, C1 = 97, seen = new Uint8Array(100 * 63), q = [];
-    for (let my = R0; my <= R1; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = C0; mx <= C1; mx++) { const i = my * 100 + mx; if (m[i] && (p.street || p.floor)[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]) { seen[i] = 1; q.push(i); } } }
+    // Round 449: a room's edge is crossed only on a street. The game takes each door from the widest walkable stretch along
+    // an edge; with sidewalks and yards walkable that was often not the road, so doors, their labels and where they set
+    // you down drifted off the streets (and onto objects' squares). In the strips the doors are read from (the top 40px,
+    // the bottom 12px, 16px at each side) only street cells stay walkable.
+    const st = (mx, my) => { const y = my * 8 + 4; return y < 500 && (p.street || p.floor)[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]; };
+    for (let my = 0; my < 63; my++) for (let mx = 0; mx < 100; mx++) { if (my > 4 && my < 61 && mx > 1 && mx < 98) continue; const i = my * 100 + mx; if (m[i] && !st(mx, my)) m[i] = 0; }
+    // Round 448: only ground joined to the room's streets counts, and joined through the part of the room inside those
+    // strips (rows 5-60, columns 2-97). A notch that met the street only along the room's top strip passed the first
+    // version of this check, and a door could set you down in it with no way on. A street cell in the strips stays only
+    // if the cell straight in from it stays.
+    const R0 = 5, R1 = 60, C0 = 2, C1 = 97, seen = new Uint8Array(100 * 63), q = [];
+    for (let my = R0; my <= R1; my++) for (let mx = C0; mx <= C1; mx++) { const i = my * 100 + mx; if (m[i] && st(mx, my)) { seen[i] = 1; q.push(i); } }
     for (let h = 0; h < q.length; h++) { const i = q[h], mx = i % 100, my = (i - mx) / 100; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = mx + a, ny = my + b; if (nx < C0 || ny < R0 || nx > C1 || ny > R1) continue; const n = ny * 100 + nx; if (m[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
     for (let my = 0; my < 63; my++) for (let mx = 0; mx < 100; mx++) { const i = my * 100 + mx; if (!m[i]) continue; const cy = Math.max(R0, Math.min(R1, my)), cx = Math.max(C0, Math.min(C1, mx)); if (!seen[cy * 100 + cx]) m[i] = 0; } }
   return cityMasks[k] = m;

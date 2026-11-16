@@ -65,3 +65,5 @@ Checked by `tests/city-layout.test.cjs`:
 - **Quarters (Round 447):** a quarter is a neighbourhood of several streets, not a single room.
 - **Soft edges (Round 447):** roads have a dark gutter along the kerbs; parks and yards have a darker rim; building
   shadows have soft edges.
+- **Main roads (Round 449):** their rows and columns come from the journey's seed; a room's edge is crossed only on a
+  street, so every door sits on its road.

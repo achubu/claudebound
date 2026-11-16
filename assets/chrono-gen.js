@@ -195,6 +195,7 @@ function chronoApplyGraph(g) {
 // =====================================================================
 const FG_COLS = 32, FG_ROWS = 20, FG_CELL = 25;
 function chronoRoomPlan(seed, key, opts) {
+  GEN.seedNow = seed; // (Round 449: a theme's alley() reads the seed its plan is for)
   const lay = { exits: GEN.exits(key) }, rnd = chronoRng(seed + ':room:' + key);
   // Round 396: `main` marks the cells of main roads (and their squares); a theme's alleys are floor but not main.
   const floor = new Uint8Array(FG_COLS * FG_ROWS), main = new Uint8Array(FG_COLS * FG_ROWS), shapes = []; let MAIN = 1;
@@ -362,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '448',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '449',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -381,7 +382,12 @@ const GEN_THEMES = {
     hole: (seed, gx, gy) => { const d = Math.min(gx, 9 * CG_COLS - 1 - gx, gy, 6 * CG_ROWS - 1 - gy); return d < 0.6 + chronoNoise(seed, 'shore', gx, gy, 5) * 3.4 || (!GEN.topdown && chronoNoise(seed, 'pond', gx, gy, 4) > 0.9); }, // Round 408: no inland ponds in the top-down city (owner: "the circle thing ... looks horrible")
     // Round 394: one storey of each building to the same height on screen (measured from each painting's floors, doors and windows).
     // Round 396: main roads on every third column line and on two row lines; the other streets are alleys.
-    alley: (key, d) => { const [wx, wy] = GEN_THEMES.city.world(key); return d === 'e' || d === 'w' ? !(wy === 1 || wy === 4) : wx % 3 !== 1; }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
+    // Round 449: which lines carry the main roads comes from the journey's seed: one east-west main road in the upper
+    // half of the city (row 1 or 2) and one in the lower (row 3 or 4), and three north-south ones, one in each third of the
+    // city's width. Every city used to have them on the same lines (rows 1 and 4, columns 1, 4 and 7).
+    mains: seed => { const T = GEN_THEMES.city, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':mains:' + t);
+      return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
+    alley: (key, d) => { const T = GEN_THEMES.city, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
     worldLots: true, topdown: true, tilt: 30, alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
     maxH: 300, // Round 394 (owner: "buildings should probably be around 3 times bigger")
