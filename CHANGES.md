@@ -3496,6 +3496,38 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 448: bugs that only some journeys' cities had
+
+Owner: "continue working". The browser walk-through had failed once in Round 428 and once in Round 447 and passed on
+the next run each time. The cause: a new journey's seed is random, so every run walked a different city. The failures
+were real, on some seeds only.
+
+- **`tests/playtest-walk.cjs` takes `SEED=<n>`** and prints the seed it walked, so a finding can be reproduced.
+- **Bugs found on seeds 1, 2 and 9, and fixed:**
+  - **No way on from a door** (seed 1, room 6,5). A door set the hero down in a notch of open ground that met the
+    street only along the room's top strip, where no step is allowed. The walk mask's "joined to the streets" rule
+    (Round 445) now counts only ground joined through the part of the room that can be walked (rows 4-61, columns 2-97
+    of the mask). A cell in the edge strips stays only if the cell straight in from it stays.
+  - **Objects opening as you walk in** (seed 1, rooms 2,8 and 3,8). A square for an object could sit at the room's edge
+    beside a door. Now:
+    - A square keeps 100px from the room's edges.
+    - What stands in it keeps 115px from each door of the plan and 125px from every edge.
+    - A square within 70px of where a door really sets you down is not used while the room has another (`plazaSpots`).
+  - **An object on the sidewalk** (seed 1, room 2,7). The room needed more spots than its two squares. A room may now
+    have three.
+  - **The start spot.** A new journey starts on the street at once. The fixed start spot (400,300) is on a street only
+    in some cities, and was put right only when the room was first drawn.
+- **Generator:**
+  - Landmarks: twelve a city, never in rooms side by side. A chance per room had given some cities two and others
+    over twenty.
+  - Quarters: each quarter's noise is measured against its own average and spread before the strongest is taken, so
+    every city has all four quarters. Some cities had three.
+  - Downtown (tech) buildings show more wall and less roof (82% of the lot, was 66%), so that quarter reads as towers.
+- **Tests:** `city-layout` runs on six seeds (1 and 2 added) and also checks that every door sets you down on walkable
+  ground and that no object stands within reach of it. The walk-through is clean on seeds 1, 2, 9 and 77: 54 rooms, 387
+  crossings, no problems, nothing opening in passing. The city suites, placement, pathing, map-roads, exploration and
+  `city-enemies` pass.
+
 ## Round 447: landmarks, street clutter, quarters as neighbourhoods; softer edges
 
 Owner: "keep trying to improve the algorithm for city generation"; "what you did with the water is great, can you

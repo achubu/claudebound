@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 447) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 448) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -118,6 +118,10 @@ change set.
   Round 447: landmarks (`use: 'landmark'`, about 1 room in 4, `cityLandmarkBox`), street clutter on the main roads' sidewalks
   (`cityStreetFurniture`, `CITY_CLUTTER_H`), a lot's quarter from smooth noise at its own place (neighbourhoods), `l.south`
   looks past the sidewalk; soft edge bands on roads (gutters), parks, yards and building shadows.
+  Round 448: **a new journey's seed is random, so check city changes on several seeds**: `SEED=<n> node
+  tests/playtest-walk.cjs city` (seeds 1, 2, 9 and 77 found bugs before) and `tests/city-layout.test.cjs` (six seeds). Walkable
+  ground must be joined to the streets through the part of the room that can be walked (not the edge strips); object squares
+  keep clear of room edges and of where doors set you down.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):
@@ -232,7 +236,8 @@ change set.
   - `exploration`
   - `rebalance`
 - Browser check: serve with `python3 -m http.server 8123` and drive it with
-  Playwright. `node tests/playtest-walk.cjs [world]` walks every door and item with tap routes.
+  Playwright. `node tests/playtest-walk.cjs [world]` walks every door and item with tap routes. `SEED=<n>` fixes the
+  journey's seed (Round 448); without it each run walks a different city.
 - Difficulty: compendium → Difficulty lab, or `node tests/difficulty-report.cjs [fights] [world]`
   (shared code in `assets/sim/`; `POLICY: 'naive'` plays cards left to right with no counters or combos, and should lose, Round 262).
   **Win-rate targets (Round 288, owner: 20% lower than the Round 263 Solaris benchmark of 72% / 41%):** about 58% on
