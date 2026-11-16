@@ -362,7 +362,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '447',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '448',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -528,25 +528,33 @@ function genWorld(seed) {
         let ext = 0; for (; ext <= 3; ext++) { const probe = a ? [a < 0 ? q[0] - 1 - ext : q[2] + ext, q[1] + 2] : [q[0] + 2, b < 0 ? q[1] - 1 - ext : q[3] + ext]; if (at(probe[0], probe[1]) === 2) break; }
         if (ext > 3) continue;
         if (a < 0) q[0] -= ext; else if (a > 0) q[2] += ext; else if (b < 0) q[1] -= ext; else q[3] += ext;
-        if (q[0] < ox + 1 || q[1] < oy + 1 || q[2] > ox + FG_COLS - 1 || q[3] > oy + FG_ROWS - 1) continue;
+        // Round 448: a square keeps 4 cells (100px) from the room's edges: one beside a door opened its object as you walked in
+        if (q[0] < ox + 4 || q[1] < oy + 4 || q[2] > ox + FG_COLS - 4 || q[3] > oy + FG_ROWS - 4) continue;
         // what is left of the lot: a building kept is worth most; a lot that was never going to be a building loses nothing
         const pieces = cut(r, q), score = (isBuild(r) ? pieces.reduce((n, pc) => n + (isBuild(pc) ? 2 : -0.5), -2) : 2.5) + (b > 0 ? 1 : 0);
         if (!best || score > best.score) { best = [q[0] - ox, q[1] - oy, q[2] - ox, q[3] - oy]; best.front = b > 0; best.score = score; best.back = b > 0 ? 'n' : b < 0 ? 's' : a > 0 ? 'w' : 'e'; } } }
     return best; };
   for (const k of keys) { const [wx, wy] = pos[k], ox = wx * FG_COLS, oy = wy * FG_ROWS, got = [];
+    // Round 448: what stands in a square keeps 115px from where each door sets you down, so nothing opens as you walk in
+    const ex = GEN.exits(k) || {}, doorPts = GEN.topdown ? Object.keys(ex).filter(d => d.length === 1).map(d => { const c = chronoDoorCell(seed, k, d) * 2 + 2; return d === 'n' ? [c, 2] : d === 's' ? [c, FG_ROWS - 2] : d === 'w' ? [2, c] : [FG_COLS - 2, c]; }) : [];
+    const doorClear = (x0, y0, x1, y1, back) => { const sx = back === 'w' ? x0 + 2 : back === 'e' ? x1 - 2 : (x0 + x1) / 2, sy = back === 'n' ? y0 + 2 : back === 's' ? y1 - 2 : (y0 + y1) / 2; // where the object stands: at the square's back
+      // and 125px from every edge of the room: where a door sets you down is worked out from the ground on both sides of
+      // the edge, so it can be anywhere along an edge, up to about 55px in
+      return sx >= 5 && sy >= 5 && sx <= FG_COLS - 5 && sy <= FG_ROWS - 5 && !doorPts.some(([dx, dy]) => Math.hypot(sx - dx, sy - dy) < 4.6); };
     const cands = lots.map((l, i) => ({ l, i })).filter(({ l, i }) => l.front && !used.has(i) && l.r[2] > ox && l.r[0] < ox + FG_COLS && l.r[3] > oy && l.r[1] < oy + FG_ROWS);
     const ranked = cands.map(c => ({ ...c, q: GEN.topdown ? squareBest(c.l.r, [ox, oy]) : squareFor(c.l.r, [ox, oy]), s: rnd() })).filter(c => c.q).sort((p, q2) => GEN.topdown ? (q2.q.score - p.q.score) || p.s - q2.s : (q2.q.front - p.q.front) || p.s - q2.s);
-    for (const { i, q } of ranked) { if (got.length >= 2) break;
+    for (const { i, q } of ranked) { if (got.length >= (GEN.topdown ? 3 : 2)) break; // Round 448: up to three squares in the city, so a room with three objects needs no spot on the sidewalk
       const mx = (q[0] + q[2]) / 2 * FG_CELL, my = (q[1] + q[3]) / 2 * FG_CELL - 22;
       if (typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy))) continue;
       if (got.some(g => Math.hypot((g.x0 + g.x1) / 2 - (q[0] + q[2]) / 2, (g.y0 + g.y1) / 2 - (q[1] + q[3]) / 2) < 8)) continue;
+      if (!doorClear(q[0], q[1], q[2], q[3], q.back)) continue;
       got.push({ x0: q[0], y0: q[1], x1: q[2], y1: q[3], back: q.back }); if (GEN.topdown) (holes[i] = holes[i] || []).push([q[0] + ox, q[1] + oy, q[2] + ox, q[3] + oy]); else used.add(i); }
     // a room no lot gives a square to: any open 5x5 beside a street in the room; the lots under it stay open
     if (!got.length) { const spots = [];
-      for (let y = 1; y + S5 <= FG_ROWS - 1; y++) for (let x = 1; x + S5 <= FG_COLS - 1; x++) { let open = true; /* (the arrow `open` above is shadowed here) */ for (let j = 0; j < S5 && open; j++) for (let i2 = 0; i2 < S5; i2++) if (at(ox + x + i2, oy + y + j) !== 1 && at(ox + x + i2, oy + y + j) !== 4) { open = false; break; }
+      for (const EM of GEN.topdown ? [4, 2, 1] : [1]) { if (spots.length) break; /* Round 448: well inside the room first */ for (let y = EM; y + S5 <= FG_ROWS - EM; y++) for (let x = EM; x + S5 <= FG_COLS - EM; x++) { let open = true; /* (the arrow `open` above is shadowed here) */ for (let j = 0; j < S5 && open; j++) for (let i2 = 0; i2 < S5; i2++) if (at(ox + x + i2, oy + y + j) !== 1 && at(ox + x + i2, oy + y + j) !== 4) { open = false; break; }
         if (!open) continue; let touch = false; for (let t = 0; t < S5; t++) if (at(ox + x - 1, oy + y + t) === 2 || at(ox + x + S5, oy + y + t) === 2 || at(ox + x + t, oy + y - 1) === 2 || at(ox + x + t, oy + y + S5) === 2) touch = true;
         const mx = (x + S5 / 2) * FG_CELL, my = (y + S5 / 2) * FG_CELL - 22;
-        if (touch && !(typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy)))) spots.push([x, y]); }
+        if (touch && doorClear(x, y, x + S5, y + S5) && !(typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy)))) spots.push([x, y]); } }
       for (const [x, y] of spots.sort(() => rnd() - 0.5)) { if (got.length >= 2) break; if (got.some(g => Math.hypot(g.x0 - x, g.y0 - y) < 8)) continue;
         got.push({ x0: x, y0: y, x1: x + S5, y1: y + S5 }); lots.forEach((l, i) => { if (l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) { if (GEN.topdown) (holes[i] = holes[i] || []).push([ox + x, oy + y, ox + x + S5, oy + y + S5]); else used.add(i); } }); } }
     plazas[k] = got; }
@@ -594,22 +602,26 @@ function genWorld(seed) {
         const rk = roomOf(cx, cy) || keys.find(k2 => q[2] > pos[k2][0] * FG_COLS && q[0] < (pos[k2][0] + 1) * FG_COLS && q[3] > pos[k2][1] * FG_ROWS && q[1] < (pos[k2][1] + 1) * FG_ROWS);
         // Round 447: the quarter comes from smooth noise at the lot's own place (about two and a half rooms across), so a
         // quarter is a neighbourhood of several streets with one look; by the room, quarters changed building by building
-        { const dn = GEN.districtNames; let best = 0, bv = -1; void rk; // the strongest of four noises, one per quarter: every quarter gets its share
-          dn.forEach((d, di) => { const v = chronoNoise(seed, 'quarter:' + d, cx / FG_COLS, cy / FG_ROWS, 2.2); if (v > bv) { bv = v; best = di; } }); rec.district = dn[best]; }
+        void rk; rec.qv = GEN.districtNames.map(d => chronoNoise(seed, 'quarter:' + d, cx / FG_COLS, cy / FG_ROWS, 2.2)); rec.district = GEN.districtNames[0]; // (settled below, once every lot's values are known)
         // ruins gather in blast zones (smooth noise over the city) instead of being sprinkled evenly: about 6 in 10 buildings
         // inside a zone, 1 in 40 outside
         rec.blast = chronoNoise(seed, 'blast', cx, cy, 30); }
       lotsPx.push(rec); } });
-  // Round 447: landmarks. About 1 room in 4 gets one: a building lot on a street, with its middle well inside the room, becomes an open
+  // Round 448: each quarter's noise is measured against its own average and spread over the whole city before the strongest
+  // is taken, so every city has all four quarters in fair shares (the raw noises left some cities with three)
+  if (GEN.topdown) { const Q = lotsPx.filter(l => l.qv), nq = GEN.districtNames.length, mean = new Array(nq).fill(0), sd = new Array(nq).fill(0);
+    for (const l of Q) l.qv.forEach((v, i) => { mean[i] += v / Q.length; }); for (const l of Q) l.qv.forEach((v, i) => { sd[i] += (v - mean[i]) ** 2 / Q.length; });
+    for (const l of Q) { let best = 0, bv = -1e9; l.qv.forEach((v, i) => { const z = (v - mean[i]) / (Math.sqrt(sd[i]) || 1); if (z > bv) { bv = z; best = i; } }); l.district = GEN.districtNames[best]; delete l.qv; } }
+  // Round 447: landmarks. About 1 room in 5 gets one (twelve a city): a building lot on a street, with its middle well inside the room, becomes an open
   // square (the city's own paving, so no new border) with a landmark standing in it. The same landmark is never used
   // again until every other has been, and then as far from its last place as can be: a room is "the one with the statue".
   if (GEN.topdown && CITY_HAS('landmark')) { const names = CITY_TD_ART.landmark, placed = [];
-    for (const k of keys.slice().sort((a, b) => chronoHash(seed + ':lm:' + a) - chronoHash(seed + ':lm:' + b))) { if (chronoHash(seed + ':lmroom:' + k) % 100 >= 28) continue; const ox = pos[k][0] * 800, oy = pos[k][1] * 500;
+    for (const k of keys.slice().sort((a, b) => chronoHash(seed + ':lm:' + a) - chronoHash(seed + ':lm:' + b))) { if (placed.length >= 12) break; if (placed.some(q => Math.abs(q[3] - pos[k][0]) <= 1 && Math.abs(q[4] - pos[k][1]) <= 1)) continue; /* Round 448: twelve a city, never in rooms side by side (a chance per room gave some cities two) */ const ox = pos[k][0] * 800, oy = pos[k][1] * 500;
       const c = lotsPx.filter(l => l.use === 'roof' && !l.small && (l.south || l.front) && (l.r[0] + l.r[2]) / 2 >= ox + 90 && (l.r[0] + l.r[2]) / 2 <= ox + 710 && (l.r[1] + l.r[3]) / 2 >= oy + 110 && (l.r[1] + l.r[3]) / 2 <= oy + 400 && l.r[2] - l.r[0] >= 125 && l.r[2] - l.r[0] <= 275)
         .sort((a, b) => (b.south - a.south) || (a.r[2] - a.r[0]) * (a.r[3] - a.r[1]) - (b.r[2] - b.r[0]) * (b.r[3] - b.r[1]) || a.seed - b.seed)[0]; if (!c) continue; // on a street (one to its south first), the smallest such lot
       const cx = (c.r[0] + c.r[2]) / 2, cy = (c.r[1] + c.r[3]) / 2, far = n => Math.min(1e9, ...placed.filter(q => q[2] === n).map(q => Math.hypot(q[0] - cx, q[1] - cy))), uses = n => placed.filter(q => q[2] === n).length;
       const n = names.map((_, i) => i).sort((a, b) => uses(a) - uses(b) || far(b) - far(a) || a - b)[0];
-      c.use = 'landmark'; c.landmark = names[n]; placed.push([cx, cy, n]); } }
+      c.use = 'landmark'; c.landmark = names[n]; placed.push([cx, cy, n, pos[k][0], pos[k][1]]); } }
   // the blast zones are the 18% of the city where that noise runs highest, so every journey's city has them, about as large
   if (GEN.topdown) { const bl = lotsPx.filter(l => l.use === 'roof').map(l => l.blast).sort((a, b) => a - b), T = bl.length ? bl[Math.floor(bl.length * 0.82)] : 1;
     for (const l of lotsPx) { l.zone = l.blast >= T; l.ruin = (l.seed % 1000) / 1000 < (l.zone ? 0.6 : 0.02); } }
@@ -768,7 +780,7 @@ const CITY_STOREY = 50;
 // already a thing in itself takes nothing (a glass roof, vegetable beds: a tank on a greenhouse made no sense); a roof with
 // its own lights or drain takes only small kit. Roofs not listed take everything.
 const CITY_ROOF_KIT = { 'garden-glass': [], 'garden-beds': [], 'tech-glass-grid': [], 'tech-led-plates': ['prop-ac', 'prop-vent'], 'roof-slab': ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs'], 'roof-plate': ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'] };
-function cityLotFloors(l, floors0) { const bh = l.r[3] - l.r[1] - 8, fmax = Math.max(3, Math.floor(bh * 0.66 / CITY_STOREY)), floors = Math.max(3, Math.min(floors0, fmax)), dz = Math.min(floors * CITY_STOREY, bh - 40);
+function cityLotFloors(l, floors0) { const bh = l.r[3] - l.r[1] - 8, share = l.district === 'tech' ? 0.82 : 0.66 /* Round 448: downtown is towers: more wall, less roof */, fmax = Math.max(3, Math.floor(bh * share / CITY_STOREY)), floors = Math.max(3, Math.min(floors0, fmax)), dz = Math.min(floors * CITY_STOREY, bh - 40);
   return { floors, dz, storey: dz / floors }; }
 const CITY_DISTRICT_ART = { homes: { wall: 'home-wall' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' }, market: { roof: 'market-roof', shop: 'market-shop' } };
 function cityIsRuin(l) { return l.use === 'roof' && CITY_HAS('ruin-wall') && (l.ruin !== undefined ? l.ruin : chronoHash('ruin:' + l.seed) % 8 === 0); } // Round 445: in blast zones (genWorld)

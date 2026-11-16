@@ -34,10 +34,14 @@ function cityRoomMask(cx, cy) {
       m[my * 100 + mx] = ok ? 1 : 0; } }
     // Round 445: only ground joined to the room's streets counts. A yard or a strip of paving walled in by buildings is
     // not somewhere to stand: nothing is placed there and nobody can be set down there with no way out.
-    const seen = new Uint8Array(100 * 63), q = [];
-    for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) { const i = my * 100 + mx; if (m[i] && (p.street || p.floor)[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]) { seen[i] = 1; q.push(i); } } }
-    for (let h = 0; h < q.length; h++) { const i = q[h], mx = i % 100, my = (i - mx) / 100; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = mx + a, ny = my + b; if (nx < 0 || ny < 0 || nx >= 100 || ny >= 63) continue; const n = ny * 100 + nx; if (m[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
-    for (let i = 0; i < m.length; i++) if (m[i] && !seen[i]) m[i] = 0; }
+    // Round 448: joined through the part of the room that can be walked (rows 4-61, columns 2-97: a step needs its foot
+    // 12px inside the room). A notch that met the street only along the room's top strip passed the old check, and a door
+    // could set you down in it with no way on. A cell in the edge strips stays only if the walkable cell straight in from
+    // it stays, so crossing a room's edge always lands on ground with a way to the streets.
+    const R0 = 4, R1 = 61, C0 = 2, C1 = 97, seen = new Uint8Array(100 * 63), q = [];
+    for (let my = R0; my <= R1; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = C0; mx <= C1; mx++) { const i = my * 100 + mx; if (m[i] && (p.street || p.floor)[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]) { seen[i] = 1; q.push(i); } } }
+    for (let h = 0; h < q.length; h++) { const i = q[h], mx = i % 100, my = (i - mx) / 100; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = mx + a, ny = my + b; if (nx < C0 || ny < R0 || nx > C1 || ny > R1) continue; const n = ny * 100 + nx; if (m[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
+    for (let my = 0; my < 63; my++) for (let mx = 0; mx < 100; mx++) { const i = my * 100 + mx; if (!m[i]) continue; const cy = Math.max(R0, Math.min(R1, my)), cx = Math.max(C0, Math.min(C1, mx)); if (!seen[cy * 100 + cx]) m[i] = 0; } }
   return cityMasks[k] = m;
 }
 // Round 417 (owner: "make sure enemy pathing is only allowed on texture tiles and not object sprites"): an enemy is a
@@ -93,7 +97,13 @@ function cityRoomWalk(key, x, y) {
   // Objects stand on the generated squares.
   const plazaSpotsBefore = plazaSpots;
   plazaSpots = function (key, region = activeRegion) {
-    if (region === 'city') { const p = cityGenPlan(key); return p && p.plazas.length ? p.plazas : null; }
+    if (region === 'city') { const p = cityGenPlan(key); if (!p || !p.plazas.length) return null;
+      // Round 448: a square within 70px of where a door really sets you down is not used while the room has another (the
+      // landing spots come from the ground on both sides of a room's edge, so the city's plan can only keep squares roughly
+      // clear of them; an object there opened as you walked in)
+      if (p.clearSpots === undefined) { p.clearSpots = null; const lands = ['n', 's', 'e', 'w'].map(d => rooms[key] && rooms[key].exits[d] && organicDoor(key, d)).filter(Boolean).map(d => d.inward);
+        const ok = p.plazas.filter(([x, y]) => !lands.some(l => Math.hypot(l.x - x, l.y - y) < 70)); p.clearSpots = ok.length ? ok : p.plazas; }
+      return p.clearSpots || p.plazas; }
     return plazaSpotsBefore.apply(this, arguments);
   };
   if (typeof ROOM_SPOT_FIXES !== 'undefined') delete ROOM_SPOT_FIXES.city;
@@ -111,6 +121,12 @@ function cityRoomWalk(key, x, y) {
   };
   const saveBefore = save;
   save = function () { if (state) state.cityGen = CITY_GEN_VERSION; return saveBefore.apply(this, arguments); };
+  // Round 448: a new journey starts on the street at once. The start spot (400,300) is only on a street in some cities;
+  // it used to be put right when the room was first drawn, after the tutorial.
+  const newGameBeforeCity = newGame;
+  newGame = function () { const out = newGameBeforeCity.apply(this, arguments);
+    if (state && activeRegion === 'city' && rooms[state.room] && state.pos) { cityGenEnsure(); const p = cityGenPlan(state.room); if (p && !cityRoomWalk(state.room, state.pos.x, state.pos.y)) state.pos = { x: p.hub[0], y: p.hub[1] }; }
+    return out; };
 }
 // Patrols keep 120px from every door's landing spot in the generated city (walking in never starts a fight); a patrol that
 // cannot is moved to the farthest spot on the road from the doors.

@@ -19,6 +19,10 @@ const only = process.argv[2];
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://localhost:8123/index.html'); await page.waitForTimeout(1000);
   await page.click('#newBtn'); await page.waitForTimeout(300);
+  // Round 448: a new journey's seed is random, so every run walked a different city and its findings could not be
+  // reproduced. SEED=<n> walks that journey's city; the seed walked is printed either way.
+  const seedUsed = await page.evaluate(sd => { if (sd && state) { state.seed = isNaN(+sd) ? sd : +sd; if (typeof cityGenEnsure === 'function') cityGenEnsure(); if (typeof configureRegion === 'function') configureRegion(activeRegion); if (typeof renderWorld === 'function') renderWorld(); /* the game puts the hero on the street when it draws the room */ } return state ? state.seed : null; }, process.env.SEED || '');
+  console.log('seed', seedUsed);
   // Measure where the HUD and minimap cover the world on this screen, in room pixels.
   const covers = await page.evaluate(() => {
     const w = document.getElementById('world').getBoundingClientRect(), sx = w.width / 800, sy = w.height / 500;
