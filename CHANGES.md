@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 454: a third sheet in: the market quarter's own wall and roof, more of downtown
+
+Owner: "let me know if you want more", then a sheet of 12.
+
+- **Market quarter:** its own wall (`market-wall` slot: `market-flats`) and roof (`market-roof`: `market-cables`); it had
+  neither. `CITY_DISTRICT_ART.market` now names a wall; both slots are in `CITY_SURFACES` and the art tools.
+- **Downtown:** walls `tech-glass` and `tech-vents` (it had one), the street floor `tech-revolving`, the roof `tech-solar`
+  (nothing stands on it). The solar roof is cut on its panel lines (two panels by two) and not edge-blended: blending had
+  left panels of uneven width.
+- **Also in:** the general wall `wall-porthole`, the garden street floor `garden-plantshop`, two rooftop stair huts
+  (`stairs-hut`, `stairs-pod`; there was one), the landmark `holo-beam`.
+- **Not used (1):** the traffic signal cell came back as a second copy of the wrecked truck with a pole through it.
+- `tools/tile_check.py` marks `tech-glass` (5.9): flat dark glass, clean in the tiled preview.
+
 ## Round 453: the mall's own art; the garden quarter's walls; a second sheet in
 
 Owner: "i can make many more if needed, whatever will make the world look better", then a sheet of 12.

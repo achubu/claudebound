@@ -26,11 +26,11 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 CITY = os.path.join(ROOT, 'assets', 'environment', 'city-gen')
 # Round 420: art is sorted by what it is: the surfaces of the city (CITY_SURFACES in assets/chrono-gen.js) in
 # surfaces/<slot>/, things standing on them in props/<slot>/.
-SURFACE_SLOTS = {'roof', 'wall', 'shop', 'sidewalk', 'curb', 'park-edge', 'waterfront-edge', 'park', 'ruin-wall', 'home-wall', 'home-roof', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'market-roof', 'market-shop', 'mall-wall', 'mall-roof', 'mall-shop'}  # Round 424: park grass, ruins; Round 436: homes
+SURFACE_SLOTS = {'roof', 'wall', 'shop', 'sidewalk', 'curb', 'park-edge', 'waterfront-edge', 'park', 'ruin-wall', 'home-wall', 'home-roof', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'market-roof', 'market-shop', 'mall-wall', 'mall-roof', 'mall-shop', 'market-wall'}  # Round 424: park grass, ruins; Round 436: homes
 def out_dir(slot): return os.path.join(CITY, 'surfaces' if slot in SURFACE_SLOTS else 'props', slot)
 def out_path(slot, name): d = out_dir(slot); os.makedirs(d, exist_ok=True); return os.path.join(d, name + '.webp')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
-TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'park-edge', 'curb', 'waterfront-edge', 'park', 'ruin-wall', 'home-wall', 'home-roof', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'market-roof', 'market-shop', 'mall-wall', 'mall-roof', 'mall-shop'}
+TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'park-edge', 'curb', 'waterfront-edge', 'park', 'ruin-wall', 'home-wall', 'home-roof', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'market-roof', 'market-shop', 'mall-wall', 'mall-roof', 'mall-shop', 'market-wall'}
 SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree', 'rubble', 'lamp', 'traffic-light', 'sign-traffic', 'cargo', 'prop-heater', 'roof-hole', 'clutter', 'landmark'}
 
 
@@ -119,7 +119,7 @@ def register(slot, name):
     body = body[:sm.start()] + new + body[sm.end():]
     open(JS, 'w').write(s[:m.start(1)] + body + s[m.end(1):])
     # Round 435: measured after the list is written (it used to be written over by the stale copy above)
-    if slot in ('wall', 'shop', 'ruin-wall', 'home-wall', 'tech-wall', 'tech-shop', 'garden-wall', 'garden-shop', 'market-shop', 'mall-wall', 'mall-shop'): register_gaps(name, gaps(out_path(slot, name)))
+    if slot in ('wall', 'shop', 'ruin-wall', 'home-wall', 'tech-wall', 'tech-shop', 'garden-wall', 'garden-shop', 'market-shop', 'mall-wall', 'mall-shop', 'market-wall'): register_gaps(name, gaps(out_path(slot, name)))
 
 
 def sheet(args):
@@ -162,7 +162,7 @@ def objects(args):
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == '--gaps':  # (re)measure every wall and shopfront already in CITY_TD_ART
         s = open(JS).read(); m = re.search(r"const CITY_TD_ART = \{(.*?)\};", s)
-        for slot in ('wall', 'shop', 'ruin-wall', 'home-wall', 'tech-wall', 'tech-shop', 'garden-wall', 'garden-shop', 'market-shop', 'mall-wall', 'mall-shop'):
+        for slot in ('wall', 'shop', 'ruin-wall', 'home-wall', 'tech-wall', 'tech-shop', 'garden-wall', 'garden-shop', 'market-shop', 'mall-wall', 'mall-shop', 'market-wall'):
             for n in re.findall(r"'([a-z0-9-]+)'", re.search(r"(?<![a-z-])'?" + re.escape(slot) + r"'?: \[(.*?)\]", m.group(1)).group(1)): g = gaps(out_path(slot, n)); register_gaps(n, g); print(n, len(g), 'gaps')
         return
     if len(sys.argv) > 1 and sys.argv[1] == '--sheet': return sheet(sys.argv[2:])
