@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 455: five card art sets; the city's traffic signal
+
+- The owner's paintings for **Gust Chain, Gearward Bulwark, Featherfall Grace, Crystal Shard and Cistern Aegis**, levels 0-3,
+  are at `assets/cards/level*/<card>` (1024px PNG, 512px WebP), listed in `refreshedCardArt` and the card-art test; the
+  `cards.js?v=` tag is `round455`.
+- The city's **traffic signal** (`props/traffic-light/light-signal`, the owner's redo of the cell that failed on the Round
+  454 sheet) replaces the two present-day traffic lights, which moved to `unused assets/`.
+
 ## Round 454: a third sheet in: the market quarter's own wall and roof, more of downtown
 
 Owner: "let me know if you want more", then a sheet of 12.

@@ -1128,14 +1128,9 @@
        "scale": null,
        "files": [
         {
-         "name": "light-arm",
-         "src": "assets/environment/city-gen/props/traffic-light/light-arm.webp",
-         "bytes": 6386
-        },
-        {
-         "name": "light-pole",
-         "src": "assets/environment/city-gen/props/traffic-light/light-pole.webp",
-         "bytes": 4228
+         "name": "light-signal",
+         "src": "assets/environment/city-gen/props/traffic-light/light-signal.webp",
+         "bytes": 6928
         }
        ]
       },
