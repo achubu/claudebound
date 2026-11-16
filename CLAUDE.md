@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 452) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 453) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -125,7 +125,7 @@ change set.
   Round 449: the main roads' rows and columns come from the seed (`GEN_THEMES.city.mains`; `GEN.seedNow`); a room's
   edge is walkable only on street cells, so every door sits on its road. `tests/playtest-walk.cjs` applies `SEED` after its own `newGame()`.
   Round 450: **one mall a city** (`GEN.mall`): a four-room window holds one wide three-storey building (`l.mall === 'building'`)
-  and parking lots with aisles (`l.mall === 'parking'`, `cityYardPieces`); its streets stay as planned. It has no art of its own yet.
+  and parking lots with aisles (`l.mall === 'parking'`, `cityYardPieces`); its streets stay as planned. Round 453: its own art in the slots `mall-wall`, `mall-roof`, `mall-shop` (`cityLotSlots`).
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):
