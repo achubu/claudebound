@@ -134,7 +134,7 @@
         {
          "name": "yard",
          "src": "assets/environment/city-gen/surfaces/lot/yard.webp",
-         "bytes": 25956,
+         "bytes": 23860,
          "role": "base texture"
         }
        ]
@@ -289,6 +289,11 @@
          "bytes": 21600
         },
         {
+         "name": "ruin-girder",
+         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-girder.webp",
+         "bytes": 4664
+        },
+        {
          "name": "ruin-panel",
          "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-panel.webp",
          "bytes": 5404
@@ -397,6 +402,16 @@
          "name": "garden-greenhouse",
          "src": "assets/environment/city-gen/surfaces/garden-wall/garden-greenhouse.webp",
          "bytes": 29526
+        },
+        {
+         "name": "garden-moss",
+         "src": "assets/environment/city-gen/surfaces/garden-wall/garden-moss.webp",
+         "bytes": 11888
+        },
+        {
+         "name": "garden-planters",
+         "src": "assets/environment/city-gen/surfaces/garden-wall/garden-planters.webp",
+         "bytes": 12058
         }
        ]
       },
@@ -474,6 +489,11 @@
          "bytes": 81736
         },
         {
+         "name": "roof-rubber",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-rubber.webp",
+         "bytes": 4280
+        },
+        {
          "name": "roof-seam",
          "src": "assets/environment/city-gen/surfaces/roof/roof-seam.webp",
          "bytes": 11570
@@ -517,6 +537,56 @@
          "name": "shop-shutters",
          "src": "assets/environment/city-gen/surfaces/shop/shop-shutters.webp",
          "bytes": 20468
+        }
+       ]
+      },
+      {
+       "key": "mall-roof",
+       "label": "The mall: roof",
+       "rule": "Round 453: the mall's one roof; only small kit stands on it (CITY_ROOF_KIT).",
+       "walk": false,
+       "folder": "city-gen/surfaces/mall-roof/",
+       "scale": null,
+       "files": [
+        {
+         "name": "mall-skylights",
+         "src": "assets/environment/city-gen/surfaces/mall-roof/mall-skylights.webp",
+         "bytes": 16024
+        }
+       ]
+      },
+      {
+       "key": "mall-shop",
+       "label": "The mall: street floor",
+       "rule": "Round 453: the mall's front, facing its walkway and parking: entrances and display windows.",
+       "walk": false,
+       "folder": "city-gen/surfaces/mall-shop/",
+       "scale": null,
+       "files": [
+        {
+         "name": "mall-entrance",
+         "src": "assets/environment/city-gen/surfaces/mall-shop/mall-entrance.webp",
+         "bytes": 3564
+        }
+       ]
+      },
+      {
+       "key": "mall-wall",
+       "label": "The mall: walls (one floor)",
+       "rule": "Round 453: the upper floors of the city's one mall (GEN.mall), fitted floor by floor between windows.",
+       "walk": false,
+       "folder": "city-gen/surfaces/mall-wall/",
+       "scale": null,
+       "files": [
+        {
+         "name": "mall-glass-cyan",
+         "src": "assets/environment/city-gen/surfaces/mall-wall/mall-glass-cyan.webp",
+         "bytes": 3920
+        },
+        {
+         "name": "mall-glass-magenta",
+         "src": "assets/environment/city-gen/surfaces/mall-wall/mall-glass-magenta.webp",
+         "bytes": 3186
         }
        ]
       }
@@ -651,6 +721,11 @@
          "name": "metro",
          "src": "assets/environment/city-gen/props/landmark/metro.webp",
          "bytes": 15262
+        },
+        {
+         "name": "pylon",
+         "src": "assets/environment/city-gen/props/landmark/pylon.webp",
+         "bytes": 8956
         },
         {
          "name": "sculpture",
@@ -932,6 +1007,11 @@
          "bytes": 14138
         },
         {
+         "name": "pay-bollard",
+         "src": "assets/environment/city-gen/props/clutter/pay-bollard.webp",
+         "bytes": 8822
+        },
+        {
          "name": "recycler",
          "src": "assets/environment/city-gen/props/clutter/recycler.webp",
          "bytes": 15384
@@ -1140,6 +1220,16 @@
          "name": "car-van",
          "src": "assets/environment/city-gen/props/car/car-van.webp",
          "bytes": 21484
+        },
+        {
+         "name": "car-wreck",
+         "src": "assets/environment/city-gen/props/car/car-wreck.webp",
+         "bytes": 11186
+        },
+        {
+         "name": "truck-wreck",
+         "src": "assets/environment/city-gen/props/car/truck-wreck.webp",
+         "bytes": 16880
         }
        ]
       },

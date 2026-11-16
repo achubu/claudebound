@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 453: the mall's own art; the garden quarter's walls; a second sheet in
+
+Owner: "i can make many more if needed, whatever will make the world look better", then a sheet of 12.
+
+- **The mall has its own art**: slots `mall-wall` (glass curtain wall, cyan and magenta), `mall-roof` (decking with skylight
+  strips; only air units and vents stand on it) and `mall-shop` (entrances under a lit canopy, display windows), used by
+  `cityLotSlots` for the lot with `l.mall === 'building'`. The slots are in `CITY_SURFACES`, `tools/prepare_city_art.py` and
+  `tools/tile_check.py`.
+- **Garden quarter walls:** `garden-planters` and `garden-moss` (it was down to one after Round 452).
+- **Also in:** `ruin-girder` (the sheet's green holes filled with near-black), `roof-rubber`, a clean asphalt for the lot
+  ground (no painted marks, replacing Round 452's), the landmark `pylon`, wrecks among the parked cars (`car-wreck`,
+  `truck-wreck`), the clutter `pay-bollard`.
+- Greenish haze round the grow-lights was taken out of the planters wall (green capped at the larger of red and blue).
+- `tools/tile_check.py` marks `roof-rubber` (6.1) and `mall-skylights` (7.0): both are very flat surfaces, which inflates
+  the score (the jump at the edge is divided by a tiny ordinary change); they repeat cleanly in the tiled previews.
+- Tests: `city-layout` checks the mall uses its three slots.
+
 ## Round 452: the city's art reviewed; 19 pieces replaced from the owner's sheet
 
 Owner: "review all of our textures and tiles for neon city and find any that don't fit the theme or need to be improved and

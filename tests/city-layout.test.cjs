@@ -31,7 +31,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
     // Round 447: landmarks, street clutter, quarters
     // Round 450: the mall
     { const MB = L.filter(l => l.mall === 'building'), MP = L.filter(l => l.mall === 'parking'), all = L.filter(l => l.mall);
-      o.mall = { n: MB.length, w: MB[0] ? MB[0].r[2] - MB[0].r[0] : 0, ok: MB.every(l => l.use === 'roof' && !cityIsRuin(l) && l.south && l.district === 'market' && cityLotFloors(l, 3).floors === 3), parking: MP.length, parkingOk: MP.every(l => l.use === 'yard' && cityYardKind(l) === 'cars'),
+      o.mall = { art: MB.every(l => { const sl = cityLotSlots(l); return sl.wall === 'mall-wall' && sl.roof === 'mall-roof' && sl.shop === 'mall-shop'; }), n: MB.length, w: MB[0] ? MB[0].r[2] - MB[0].r[0] : 0, ok: MB.every(l => l.use === 'roof' && !cityIsRuin(l) && l.south && l.district === 'market' && cityLotFloors(l, 3).floors === 3), parking: MP.length, parkingOk: MP.every(l => l.use === 'yard' && cityYardKind(l) === 'cars'),
         cars: MP.reduce((n, l) => n + cityYardPieces(sd, l, [l.r[0] + 4, l.r[1] + 4, l.r[2] - 4, l.r[3] - 4]).length, 0),
         spanX: Math.max(...all.map(l => l.r[2])) - Math.min(...all.map(l => l.r[0])), spanY: Math.max(...all.map(l => l.r[3])) - Math.min(...all.map(l => l.r[1])),
         atStart: all.filter(l => l.r[0] < wl.pos['0,5'][0] * 800 + 800 && l.r[2] > wl.pos['0,5'][0] * 800 && l.r[1] < wl.pos['0,5'][1] * 500 + 500 && l.r[3] > wl.pos['0,5'][1] * 500).length }; }
@@ -71,7 +71,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
   assert(r.cars > 5 && r.carsAcross === 0, 'vehicles park along east-west streets only; ' + at);
   assert.strictEqual(r.courts, 0, 'a waypoint room has a plain crossing; ' + at);
   assert(r.bare.worst <= 0.1 && r.bare.mean <= 0.04, 'little ground is left bare; ' + at);
-  assert(r.mall.n === 1 && r.mall.w >= 500 && r.mall.ok && r.mall.parking >= 3 && r.mall.parkingOk && r.mall.cars >= 30 && r.mall.spanX <= 1700 && r.mall.spanY <= 1100 && r.mall.atStart === 0, 'one mall: a wide three-storey building with its front on its parking, inside four rooms, away from the start; ' + at);
+  assert(r.mall.n === 1 && r.mall.art /* Round 453: its own walls, roof and street floor */ && r.mall.w >= 500 && r.mall.ok && r.mall.parking >= 3 && r.mall.parkingOk && r.mall.cars >= 30 && r.mall.spanX <= 1700 && r.mall.spanY <= 1100 && r.mall.atStart === 0, 'one mall: a wide three-storey building with its front on its parking, inside four rooms, away from the start; ' + at);
   assert(r.landmarks >= 3 && r.landmarkKinds >= Math.min(5, r.landmarks) && r.landmarkRepeatNear === 0, 'landmarks: several, different, never the same one close by; ' + at);
   assert(r.clutter >= 8 && r.clutterBad === 0, 'street clutter stands on the sidewalks; ' + at);
   assert(Object.keys(r.quarters).length === 4 && r.quarterSame > 0.75, 'four quarters, each a neighbourhood; ' + at);
@@ -81,7 +81,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
   console.log(seed + ': ' + r.buildings + ' buildings (storeys ' + r.storeyMin.toFixed(0) + '-' + r.storeyMax.toFixed(0) + 'px), ' + r.yards + ' yards, ' + r.ruins + ' ruins (' + r.ruinsInZone + ' in zones), ' + r.sameWall + '/' + r.pairs + ' neighbours alike, worst room ' + Math.round(r.bare.worst * 100) + '% bare');
 }
 // Round 446: the roofs that take no (or little) rooftop kit are real roofs, and name real kinds of kit
-{ const k = JSON.parse(run(`JSON.stringify({ kit: CITY_ROOF_KIT, roofs: [...CITY_TD_ART.roof, ...Object.values(CITY_DISTRICT_ART).flatMap(d => d.roof ? CITY_TD_ART[d.roof] : [])], slots: Object.keys(CITY_TD_ART) })`));
+{ const k = JSON.parse(run(`JSON.stringify({ kit: CITY_ROOF_KIT, roofs: [...CITY_TD_ART.roof, ...(CITY_TD_ART['mall-roof'] || []) /* Round 453 */, ...Object.values(CITY_DISTRICT_ART).flatMap(d => d.roof ? CITY_TD_ART[d.roof] : [])], slots: Object.keys(CITY_TD_ART) })`));
   for (const [roof, kit] of Object.entries(k.kit)) { assert(k.roofs.includes(roof), 'CITY_ROOF_KIT names a roof in the game: ' + roof); for (const s of kit) assert(k.slots.includes(s), roof + ' allows a real kind of kit: ' + s); }
   for (const glass of ['garden-glass', 'tech-glass-grid', 'garden-hydro']) assert(k.kit[glass] && k.kit[glass].length === 0, 'nothing stands on ' + glass); }
 console.log('PASS: the city\'s lots follow its streets; one scale; buildings agree across rooms; ruins in zones; no pockets.');
