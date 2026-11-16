@@ -34,11 +34,6 @@
          "bytes": 21300
         },
         {
-         "name": "park-dry",
-         "src": "assets/environment/city-gen/surfaces/park/park-dry.webp",
-         "bytes": 29156
-        },
-        {
          "name": "park-gravel",
          "src": "assets/environment/city-gen/surfaces/park/park-gravel.webp",
          "bytes": 29046
@@ -49,14 +44,9 @@
          "bytes": 33462
         },
         {
-         "name": "park-moss",
-         "src": "assets/environment/city-gen/surfaces/park/park-moss.webp",
-         "bytes": 26596
-        },
-        {
-         "name": "park-rubble",
-         "src": "assets/environment/city-gen/surfaces/park/park-rubble.webp",
-         "bytes": 26276
+         "name": "park-turf",
+         "src": "assets/environment/city-gen/surfaces/park/park-turf.webp",
+         "bytes": 20744
         }
        ]
       },
@@ -144,7 +134,7 @@
         {
          "name": "yard",
          "src": "assets/environment/city-gen/surfaces/lot/yard.webp",
-         "bytes": 85950,
+         "bytes": 25956,
          "role": "base texture"
         }
        ]
@@ -160,7 +150,7 @@
         {
          "name": "sand",
          "src": "assets/environment/city-gen/surfaces/waterfront/sand.webp",
-         "bytes": 123172,
+         "bytes": 37134,
          "role": "base texture"
         }
        ]
@@ -259,11 +249,6 @@
        "scale": null,
        "files": [
         {
-         "name": "wall-brick",
-         "src": "assets/environment/city-gen/surfaces/wall/wall-brick.webp",
-         "bytes": 24146
-        },
-        {
          "name": "wall-concrete",
          "src": "assets/environment/city-gen/surfaces/wall/wall-concrete.webp",
          "bytes": 12710
@@ -272,6 +257,16 @@
          "name": "wall-panel",
          "src": "assets/environment/city-gen/surfaces/wall/wall-panel.webp",
          "bytes": 15388
+        },
+        {
+         "name": "wall-strip",
+         "src": "assets/environment/city-gen/surfaces/wall/wall-strip.webp",
+         "bytes": 2462
+        },
+        {
+         "name": "wall-strip-dark",
+         "src": "assets/environment/city-gen/surfaces/wall/wall-strip-dark.webp",
+         "bytes": 2188
         }
        ]
       },
@@ -284,11 +279,6 @@
        "scale": null,
        "files": [
         {
-         "name": "ruin-brick",
-         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-brick.webp",
-         "bytes": 20708
-        },
-        {
          "name": "ruin-cladding",
          "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-cladding.webp",
          "bytes": 22980
@@ -299,9 +289,14 @@
          "bytes": 21600
         },
         {
-         "name": "ruin-plaster",
-         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-plaster.webp",
-         "bytes": 20182
+         "name": "ruin-panel",
+         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-panel.webp",
+         "bytes": 5404
+        },
+        {
+         "name": "ruin-panel-blown",
+         "src": "assets/environment/city-gen/surfaces/ruin-wall/ruin-panel-blown.webp",
+         "bytes": 5966
         }
        ]
       },
@@ -364,14 +359,14 @@
        "scale": null,
        "files": [
         {
-         "name": "garden-beds",
-         "src": "assets/environment/city-gen/surfaces/garden-roof/garden-beds.webp",
-         "bytes": 67934
-        },
-        {
          "name": "garden-glass",
          "src": "assets/environment/city-gen/surfaces/garden-roof/garden-glass.webp",
          "bytes": 33036
+        },
+        {
+         "name": "garden-hydro",
+         "src": "assets/environment/city-gen/surfaces/garden-roof/garden-hydro.webp",
+         "bytes": 52672
         }
        ]
       },
@@ -402,11 +397,6 @@
          "name": "garden-greenhouse",
          "src": "assets/environment/city-gen/surfaces/garden-wall/garden-greenhouse.webp",
          "bytes": 29526
-        },
-        {
-         "name": "garden-ivy",
-         "src": "assets/environment/city-gen/surfaces/garden-wall/garden-ivy.webp",
-         "bytes": 27324
         }
        ]
       },
@@ -419,14 +409,14 @@
        "scale": null,
        "files": [
         {
+         "name": "home-pods",
+         "src": "assets/environment/city-gen/surfaces/home-wall/home-pods.webp",
+         "bytes": 5852
+        },
+        {
          "name": "home-shanty",
          "src": "assets/environment/city-gen/surfaces/home-wall/home-shanty.webp",
          "bytes": 25544
-        },
-        {
-         "name": "home-tenement",
-         "src": "assets/environment/city-gen/surfaces/home-wall/home-tenement.webp",
-         "bytes": 35746
         }
        ]
       },
@@ -438,11 +428,6 @@
        "folder": "city-gen/surfaces/market-shop/",
        "scale": null,
        "files": [
-        {
-         "name": "market-cloth",
-         "src": "assets/environment/city-gen/surfaces/market-shop/market-cloth.webp",
-         "bytes": 26392
-        },
         {
          "name": "market-food",
          "src": "assets/environment/city-gen/surfaces/market-shop/market-food.webp",
@@ -457,6 +442,11 @@
          "name": "market-screens",
          "src": "assets/environment/city-gen/surfaces/market-shop/market-screens.webp",
          "bytes": 33718
+        },
+        {
+         "name": "market-tech",
+         "src": "assets/environment/city-gen/surfaces/market-shop/market-tech.webp",
+         "bytes": 6060
         }
        ]
       },
@@ -474,11 +464,6 @@
          "bytes": 90486
         },
         {
-         "name": "roof-cracked",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-cracked.webp",
-         "bytes": 38714
-        },
-        {
          "name": "roof-finegravel",
          "src": "assets/environment/city-gen/surfaces/roof/roof-finegravel.webp",
          "bytes": 81556
@@ -489,19 +474,14 @@
          "bytes": 81736
         },
         {
-         "name": "roof-rust",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-rust.webp",
-         "bytes": 44820
+         "name": "roof-seam",
+         "src": "assets/environment/city-gen/surfaces/roof/roof-seam.webp",
+         "bytes": 11570
         },
         {
          "name": "roof-slab",
          "src": "assets/environment/city-gen/surfaces/roof/roof-slab.webp",
          "bytes": 20356
-        },
-        {
-         "name": "roof-slate",
-         "src": "assets/environment/city-gen/surfaces/roof/roof-slate.webp",
-         "bytes": 34928
         },
         {
          "name": "roof-tar",
@@ -584,6 +564,11 @@
        "scale": null,
        "files": [
         {
+         "name": "cable-drum",
+         "src": "assets/environment/city-gen/props/cargo/cable-drum.webp",
+         "bytes": 16280
+        },
+        {
          "name": "container-blue",
          "src": "assets/environment/city-gen/props/cargo/container-blue.webp",
          "bytes": 14912
@@ -599,29 +584,24 @@
          "bytes": 13892
         },
         {
-         "name": "crates",
-         "src": "assets/environment/city-gen/props/cargo/crates.webp",
-         "bytes": 15242
-        },
-        {
          "name": "drums",
          "src": "assets/environment/city-gen/props/cargo/drums.webp",
          "bytes": 14596
         },
         {
-         "name": "forklift",
-         "src": "assets/environment/city-gen/props/cargo/forklift.webp",
-         "bytes": 18920
+         "name": "hover-pallet",
+         "src": "assets/environment/city-gen/props/cargo/hover-pallet.webp",
+         "bytes": 18496
         },
         {
-         "name": "pallets",
-         "src": "assets/environment/city-gen/props/cargo/pallets.webp",
-         "bytes": 14290
+         "name": "loader",
+         "src": "assets/environment/city-gen/props/cargo/loader.webp",
+         "bytes": 14662
         },
         {
-         "name": "rope",
-         "src": "assets/environment/city-gen/props/cargo/rope.webp",
-         "bytes": 20240
+         "name": "pods",
+         "src": "assets/environment/city-gen/props/cargo/pods.webp",
+         "bytes": 17408
         }
        ]
       },
@@ -643,11 +623,6 @@
        "scale": null,
        "files": [
         {
-         "name": "bandstand",
-         "src": "assets/environment/city-gen/props/landmark/bandstand.webp",
-         "bytes": 25834
-        },
-        {
          "name": "billboard",
          "src": "assets/environment/city-gen/props/landmark/billboard.webp",
          "bytes": 28278
@@ -658,9 +633,19 @@
          "bytes": 13768
         },
         {
+         "name": "holo-stage",
+         "src": "assets/environment/city-gen/props/landmark/holo-stage.webp",
+         "bytes": 19748
+        },
+        {
          "name": "hovercar",
          "src": "assets/environment/city-gen/props/landmark/hovercar.webp",
          "bytes": 12508
+        },
+        {
+         "name": "mech",
+         "src": "assets/environment/city-gen/props/landmark/mech.webp",
+         "bytes": 17708
         },
         {
          "name": "metro",
@@ -671,11 +656,6 @@
          "name": "sculpture",
          "src": "assets/environment/city-gen/props/landmark/sculpture.webp",
          "bytes": 18276
-        },
-        {
-         "name": "statue",
-         "src": "assets/environment/city-gen/props/landmark/statue.webp",
-         "bytes": 13978
         }
        ]
       },
@@ -827,11 +807,6 @@
          "bytes": 27138
         },
         {
-         "name": "rubble-bricks",
-         "src": "assets/environment/city-gen/props/rubble/rubble-bricks.webp",
-         "bytes": 29744
-        },
-        {
          "name": "rubble-cornice",
          "src": "assets/environment/city-gen/props/rubble/rubble-cornice.webp",
          "bytes": 32762
@@ -845,6 +820,11 @@
          "name": "rubble-masonry",
          "src": "assets/environment/city-gen/props/rubble/rubble-masonry.webp",
          "bytes": 35388
+        },
+        {
+         "name": "rubble-panels",
+         "src": "assets/environment/city-gen/props/rubble/rubble-panels.webp",
+         "bytes": 17534
         },
         {
          "name": "rubble-rebar",
@@ -942,19 +922,19 @@
          "bytes": 10034
         },
         {
-         "name": "bench",
-         "src": "assets/environment/city-gen/props/clutter/bench.webp",
+         "name": "bench-led",
+         "src": "assets/environment/city-gen/props/clutter/bench-led.webp",
          "bytes": 18038
-        },
-        {
-         "name": "bins",
-         "src": "assets/environment/city-gen/props/clutter/bins.webp",
-         "bytes": 12074
         },
         {
          "name": "dumpster",
          "src": "assets/environment/city-gen/props/clutter/dumpster.webp",
          "bytes": 14138
+        },
+        {
+         "name": "recycler",
+         "src": "assets/environment/city-gen/props/clutter/recycler.webp",
+         "bytes": 15384
         },
         {
          "name": "tyres",
@@ -1022,19 +1002,14 @@
        "scale": null,
        "files": [
         {
+         "name": "sign-holo",
+         "src": "assets/environment/city-gen/props/sign-traffic/sign-holo.webp",
+         "bytes": 7020
+        },
+        {
          "name": "sign-noentry",
          "src": "assets/environment/city-gen/props/sign-traffic/sign-noentry.webp",
          "bytes": 10990
-        },
-        {
-         "name": "sign-stop",
-         "src": "assets/environment/city-gen/props/sign-traffic/sign-stop.webp",
-         "bytes": 7612
-        },
-        {
-         "name": "sign-warning",
-         "src": "assets/environment/city-gen/props/sign-traffic/sign-warning.webp",
-         "bytes": 5248
         }
        ]
       },
@@ -1216,14 +1191,14 @@
          "bytes": 17108
         },
         {
-         "name": "tank-2",
-         "src": "assets/environment/city-gen/props/prop-tank/tank-2.webp",
-         "bytes": 32856
+         "name": "tank-cylinder",
+         "src": "assets/environment/city-gen/props/prop-tank/tank-cylinder.webp",
+         "bytes": 18024
         },
         {
-         "name": "tank-3",
-         "src": "assets/environment/city-gen/props/prop-tank/tank-3.webp",
-         "bytes": 26498
+         "name": "tank-sphere",
+         "src": "assets/environment/city-gen/props/prop-tank/tank-sphere.webp",
+         "bytes": 12640
         }
        ]
       }

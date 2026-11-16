@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 452: the city's art reviewed; 19 pieces replaced from the owner's sheet
+
+Owner: "review all of our textures and tiles for neon city and find any that don't fit the theme or need to be improved and
+provide a prompt to generate a sprite sheet for all at once", then a sheet of 24.
+
+- **Review:** every city texture and prop (about 170) laid out on contact sheets. Found: old-world brick (walls, ruins,
+  rubble), old-world or present-day props (wooden crates, pallets, rope, a forklift, a bandstand, a classical statue, a
+  wooden water tank, a water tower, a wooden bench, tin bins, stop and warning signs), ground far too bright for a night
+  city (the white lot tiles, a pale cracked roof, tan garden beds), flat cartoony park grounds, a muddy red-brown beach.
+- **In from the sheet (19):** walls `wall-strip`, `wall-strip-dark`, `home-pods`, `ruin-panel`, `ruin-panel-blown`; the
+  street floor `market-tech`; roofs `roof-seam`, `garden-hydro`; park ground `park-turf`; the lot ground (`lot/yard`, dark
+  asphalt) and the beach (`waterfront/sand`, pale sand); cargo `pods`, `hover-pallet`, `cable-drum`, `loader`; landmarks
+  `holo-stage`, `mech`; rooftop tanks `tank-sphere`, `tank-cylinder`; clutter `bench-led`, `recycler`; `rubble-panels`;
+  `sign-holo`. A wall tile is one storey cut from the sheet's three, from pillar to pillar so it ends between windows.
+- **Out (to `unused assets/`, 23):** `wall-brick`, `home-tenement`, `garden-ivy`, `ruin-brick`, `ruin-plaster`,
+  `market-cloth`, `roof-rust`, `roof-cracked`, `roof-slate` (the same as `roof-tar`), `garden-beds`, `park-dry`, `park-moss`,
+  `park-rubble`, `crates`, `pallets`, `rope`, `forklift`, `bandstand`, `statue`, `tank-2`, `tank-3`, `bench`, `bins`,
+  `rubble-bricks`, `sign-stop`, `sign-warning`, and the old lot and sand.
+- **Not used from the sheet (3):** the living wall and the ruined girder wall (green shows through them and their glow is
+  mixed with the green, so they can't be cut as wall tiles), and the roof membrane (its patches repeat as a grid: seam score
+  3.4 against the limit of 2.8). The garden quarter is down to one wall of its own until a new one arrives.
+- Yards are darkened less (30%, was 62% over the old white tiles).
+- `tools/tile_check.py` marks `wall-strip` (3.0) and `home-pods` (5.2) over its limit; both are panel walls whose tile edge
+  is a pillar or a pod's rim, and they repeat cleanly by eye, so they stay.
+
 ## Round 451: the city's interactable objects redrawn to match it (16 of 20)
 
 Owner: "give me a prompt to replace all interactable objects in neon city in one prompt. I want them all to match the city
