@@ -259,6 +259,11 @@
          "bytes": 15388
         },
         {
+         "name": "wall-porthole",
+         "src": "assets/environment/city-gen/surfaces/wall/wall-porthole.webp",
+         "bytes": 6304
+        },
+        {
          "name": "wall-strip",
          "src": "assets/environment/city-gen/surfaces/wall/wall-strip.webp",
          "bytes": 2462
@@ -322,6 +327,11 @@
          "name": "tech-led-plates",
          "src": "assets/environment/city-gen/surfaces/tech-roof/tech-led-plates.webp",
          "bytes": 17144
+        },
+        {
+         "name": "tech-solar",
+         "src": "assets/environment/city-gen/surfaces/tech-roof/tech-solar.webp",
+         "bytes": 18398
         }
        ]
       },
@@ -337,6 +347,11 @@
          "name": "tech-lobby",
          "src": "assets/environment/city-gen/surfaces/tech-shop/tech-lobby.webp",
          "bytes": 10734
+        },
+        {
+         "name": "tech-revolving",
+         "src": "assets/environment/city-gen/surfaces/tech-shop/tech-revolving.webp",
+         "bytes": 4036
         }
        ]
       },
@@ -349,9 +364,19 @@
        "scale": null,
        "files": [
         {
+         "name": "tech-glass",
+         "src": "assets/environment/city-gen/surfaces/tech-wall/tech-glass.webp",
+         "bytes": 2376
+        },
+        {
          "name": "tech-megablock",
          "src": "assets/environment/city-gen/surfaces/tech-wall/tech-megablock.webp",
          "bytes": 23122
+        },
+        {
+         "name": "tech-vents",
+         "src": "assets/environment/city-gen/surfaces/tech-wall/tech-vents.webp",
+         "bytes": 6872
         }
        ]
       },
@@ -387,6 +412,11 @@
          "name": "garden-flowers",
          "src": "assets/environment/city-gen/surfaces/garden-shop/garden-flowers.webp",
          "bytes": 14996
+        },
+        {
+         "name": "garden-plantshop",
+         "src": "assets/environment/city-gen/surfaces/garden-shop/garden-plantshop.webp",
+         "bytes": 5960
         }
        ]
       },
@@ -436,6 +466,21 @@
        ]
       },
       {
+       "key": "market-roof",
+       "label": "Market quarter: roofs",
+       "rule": "Round 454: the roofs of this quarter (CITY_ROOF_KIT says what stands on each).",
+       "walk": false,
+       "folder": "city-gen/surfaces/market-roof/",
+       "scale": null,
+       "files": [
+        {
+         "name": "market-cables",
+         "src": "assets/environment/city-gen/surfaces/market-roof/market-cables.webp",
+         "bytes": 29706
+        }
+       ]
+      },
+      {
        "key": "market-shop",
        "label": "Market quarter: street floor",
        "rule": "The street floor of a building in this quarter whose street is to the south.",
@@ -462,6 +507,21 @@
          "name": "market-tech",
          "src": "assets/environment/city-gen/surfaces/market-shop/market-tech.webp",
          "bytes": 6060
+        }
+       ]
+      },
+      {
+       "key": "market-wall",
+       "label": "Market quarter: walls (one floor)",
+       "rule": "Round 454: the upper floors of a building in this quarter, fitted floor by floor between windows.",
+       "walk": false,
+       "folder": "city-gen/surfaces/market-wall/",
+       "scale": null,
+       "files": [
+        {
+         "name": "market-flats",
+         "src": "assets/environment/city-gen/surfaces/market-wall/market-flats.webp",
+         "bytes": 7882
         }
        ]
       },
@@ -703,6 +763,11 @@
          "bytes": 13768
         },
         {
+         "name": "holo-beam",
+         "src": "assets/environment/city-gen/props/landmark/holo-beam.webp",
+         "bytes": 13564
+        },
+        {
          "name": "holo-stage",
          "src": "assets/environment/city-gen/props/landmark/holo-stage.webp",
          "bytes": 19748
@@ -733,15 +798,6 @@
          "bytes": 18276
         }
        ]
-      },
-      {
-       "key": "market-roof",
-       "label": "market-roof",
-       "rule": "Only on the front of a building whose street is in front; never stretched.",
-       "walk": false,
-       "folder": "city-gen/props/market-roof/",
-       "scale": null,
-       "files": []
       },
       {
        "key": "sign-v",
@@ -970,6 +1026,16 @@
          "name": "stairs-1",
          "src": "assets/environment/city-gen/props/prop-stairs/stairs-1.webp",
          "bytes": 15688
+        },
+        {
+         "name": "stairs-hut",
+         "src": "assets/environment/city-gen/props/prop-stairs/stairs-hut.webp",
+         "bytes": 13934
+        },
+        {
+         "name": "stairs-pod",
+         "src": "assets/environment/city-gen/props/prop-stairs/stairs-pod.webp",
+         "bytes": 14250
         }
        ]
       },
