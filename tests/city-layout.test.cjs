@@ -29,6 +29,12 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
     o.carsAcross = 0; o.cars = 0; for (const k of keys) for (const c of cityParkedCars(sd, cityGenPlan(k))) { o.cars++; if (!c.hz) o.carsAcross++; }
     o.courts = 0; for (const k of chronoLandingRooms()) { if (GEN.bossRooms().includes(k)) continue; const hub = cityGenPlan(k).shapes.find(sh => sh.t === 'poly' && !sh.pave), xs = hub.pts.map(p => p[0]), ys = hub.pts.map(p => p[1]); if (Math.max(...xs) - Math.min(...xs) > 100 || Math.max(...ys) - Math.min(...ys) > 100) o.courts++; }
     // Round 447: landmarks, street clutter, quarters
+    // Round 450: the mall
+    { const MB = L.filter(l => l.mall === 'building'), MP = L.filter(l => l.mall === 'parking'), all = L.filter(l => l.mall);
+      o.mall = { n: MB.length, w: MB[0] ? MB[0].r[2] - MB[0].r[0] : 0, ok: MB.every(l => l.use === 'roof' && !cityIsRuin(l) && l.south && l.district === 'market' && cityLotFloors(l, 3).floors === 3), parking: MP.length, parkingOk: MP.every(l => l.use === 'yard' && cityYardKind(l) === 'cars'),
+        cars: MP.reduce((n, l) => n + cityYardPieces(sd, l, [l.r[0] + 4, l.r[1] + 4, l.r[2] - 4, l.r[3] - 4]).length, 0),
+        spanX: Math.max(...all.map(l => l.r[2])) - Math.min(...all.map(l => l.r[0])), spanY: Math.max(...all.map(l => l.r[3])) - Math.min(...all.map(l => l.r[1])),
+        atStart: all.filter(l => l.r[0] < wl.pos['0,5'][0] * 800 + 800 && l.r[2] > wl.pos['0,5'][0] * 800 && l.r[1] < wl.pos['0,5'][1] * 500 + 500 && l.r[3] > wl.pos['0,5'][1] * 500).length }; }
     const LM = L.filter(l => l.use === 'landmark'); o.landmarks = LM.length; o.landmarkKinds = new Set(LM.map(l => l.landmark)).size; o.landmarkRepeatNear = 0;
     for (let i = 0; i < LM.length; i++) for (let j = i + 1; j < LM.length; j++) if (LM[i].landmark === LM[j].landmark && Math.hypot(LM[i].r[0] - LM[j].r[0], LM[i].r[1] - LM[j].r[1]) < 800) o.landmarkRepeatNear++;
     o.clutter = 0; o.clutterBad = 0; for (const k of keys) { const p = cityGenPlan(k), [wx, wy] = GEN.world(k); for (const f of cityStreetFurniture(sd, p)) { if (f.slot !== 'clutter') continue; o.clutter++;
@@ -56,15 +62,16 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
   const at = seed + ': ' + JSON.stringify(r);
   assert.strictEqual(r.overlaps, 0, 'no two lots overlap; ' + at);
   assert.strictEqual(r.offGround, 0, 'lots stand only on buildable ground; ' + at);
-  assert(r.buildings > 200, 'the city is built up; ' + at);
+  assert(r.buildings > 180, 'the city is built up; ' + at); // Round 450: 180 (the mall and its parking stand where about thirty buildings would)
   assert(r.floorsMin >= 3 && r.storeyMin >= 41.9 && r.storeyMax <= 50.01, 'three floors at least, storeys 42 to 50px; ' + at);
   assert.strictEqual(r.small, 0, 'no building on a lot too small for one; ' + at);
   assert(r.planned, 'every building has its street side, quarter, wall and roof from the plan; ' + at);
-  assert(r.sameWall <= r.pairs * 0.03, 'neighbours do not share a wall; ' + at);
+  assert(r.sameWall <= r.pairs * 0.04 /* Round 450: 4% (the general wall list has three pictures; a building with three neighbours behind it can't differ from all) */, 'neighbours do not share a wall; ' + at);
   assert(r.ruins >= r.buildings * 0.08 && r.ruins <= r.buildings * 0.17 && r.ruinsInZone >= r.ruins * 0.75, 'ruins gather in blast zones; ' + at);
   assert(r.cars > 5 && r.carsAcross === 0, 'vehicles park along east-west streets only; ' + at);
   assert.strictEqual(r.courts, 0, 'a waypoint room has a plain crossing; ' + at);
   assert(r.bare.worst <= 0.1 && r.bare.mean <= 0.04, 'little ground is left bare; ' + at);
+  assert(r.mall.n === 1 && r.mall.w >= 500 && r.mall.ok && r.mall.parking >= 3 && r.mall.parkingOk && r.mall.cars >= 30 && r.mall.spanX <= 1700 && r.mall.spanY <= 1100 && r.mall.atStart === 0, 'one mall: a wide three-storey building with its front on its parking, inside four rooms, away from the start; ' + at);
   assert(r.landmarks >= 3 && r.landmarkKinds >= Math.min(5, r.landmarks) && r.landmarkRepeatNear === 0, 'landmarks: several, different, never the same one close by; ' + at);
   assert(r.clutter >= 8 && r.clutterBad === 0, 'street clutter stands on the sidewalks; ' + at);
   assert(Object.keys(r.quarters).length === 4 && r.quarterSame > 0.75, 'four quarters, each a neighbourhood; ' + at);
