@@ -3496,6 +3496,44 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 447: landmarks, street clutter, quarters as neighbourhoods; softer edges
+
+Owner: "keep trying to improve the algorithm for city generation"; "what you did with the water is great, can you
+similarly improve other textures and edges?". The whole city was painted again and looked at. Three weaknesses stood
+out: quarters mixed building by building, every room made of the same pieces, and bare sidewalks.
+
+- **Art placed** (from the owner's Archive_5, cut in earlier rounds' style but never wired in):
+  - Seven landmarks in `props/landmark/`: fountain, statue, billboard, bandstand, hovercar, sculpture and metro. The
+    radio tower was cut off at the top of its frame and was left out.
+  - Eight pieces of street clutter in `props/clutter/`: dumpster, bags, vending, bins, barricade, barrier, tyres, bench.
+  - Seven more neon signs: four wide (zigzag, rings, bulbs, spiral) and three tall (tubes, awning, bulbs). The eighth
+    had a reflection painted under it and was left out.
+- **Landmarks** (`genWorld`): about 1 room in 4 gets one. A building lot on a street (one with the street to its south
+  first), with its middle well inside the room, becomes an open square on the city's own paving, with the landmark in
+  the middle under a pool of light (`cityLandmarkBox`). The landmark blocks the way; its square is open. The same
+  landmark is not used again until every other has been, and then as far from its last place as possible.
+- **Street clutter** (`cityStreetFurniture`): on the sidewalks of the main roads, against the buildings, between the
+  lamps. About every 150px, a little under half the spots are taken. Each piece blocks like a post.
+- **Quarters are neighbourhoods.** A building's quarter came from its room, and the rooms' quarters changed every room
+  or two, so walls of four looks were mixed along one street. Now each quarter has its own smooth noise over the city and
+  a lot belongs to the strongest one at its own place. About 84% of buildings share their quarter with those around
+  them, and all four quarters appear in every city.
+- **Bug: no fronts on main roads.** Since Round 445 a sidewalk lies between a main road and its buildings, and "is
+  there a street to the south" only looked one cell down. No building on a main road had a shopfront or a sign. It now
+  looks past the sidewalk.
+- **Softer edges, as on the coast:**
+  - Roads: a dark, damp gutter along both kerbs, fading toward the middle of the road.
+  - Buildings: the drop shadow has a soft edge, and a faint dark halo lies where a building meets the ground.
+  - Parks: a worn, darker rim inside the kerb, fading toward the middle.
+  - Yards: grime gathered along the edge.
+- An object stands at the back of its square (Round 445) only when that spot is clear of the HUD panel and the minimap;
+  otherwise at the square's middle.
+- **Tests:** `city-layout` now also checks landmarks (several, different, none repeated within a room's width),
+  clutter (on sidewalks only), quarters (all four, each a neighbourhood) and fronts on main roads. `city-furniture`
+  empties the clutter slot for its "no art" check. The city suites, placement, pathing, `city-enemies` and the browser
+  walk-through pass. The walk-through failed once at the first room on the first run after a code change and passed on
+  the next two runs; the same one-off was seen in Round 428.
+
 ## Round 446: a new coast; roofs and their kit; the city's map roads
 
 - **Coast** (owner: "design a better beach and water algorithm, our beach and water looks terrible"). The coast was the

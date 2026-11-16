@@ -635,6 +635,51 @@
        "files": []
       },
       {
+       "key": "landmark",
+       "label": "Landmarks",
+       "rule": "In about 1 room in 4, in an open square on a lot beside a street; never the same one twice until all are used; blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/landmark/",
+       "scale": null,
+       "files": [
+        {
+         "name": "bandstand",
+         "src": "assets/environment/city-gen/props/landmark/bandstand.webp",
+         "bytes": 25834
+        },
+        {
+         "name": "billboard",
+         "src": "assets/environment/city-gen/props/landmark/billboard.webp",
+         "bytes": 28278
+        },
+        {
+         "name": "fountain",
+         "src": "assets/environment/city-gen/props/landmark/fountain.webp",
+         "bytes": 13768
+        },
+        {
+         "name": "hovercar",
+         "src": "assets/environment/city-gen/props/landmark/hovercar.webp",
+         "bytes": 12508
+        },
+        {
+         "name": "metro",
+         "src": "assets/environment/city-gen/props/landmark/metro.webp",
+         "bytes": 15262
+        },
+        {
+         "name": "sculpture",
+         "src": "assets/environment/city-gen/props/landmark/sculpture.webp",
+         "bytes": 18276
+        },
+        {
+         "name": "statue",
+         "src": "assets/environment/city-gen/props/landmark/statue.webp",
+         "bytes": 13978
+        }
+       ]
+      },
+      {
        "key": "market-roof",
        "label": "market-roof",
        "rule": "Only on the front of a building whose street is in front; never stretched.",
@@ -651,6 +696,16 @@
        "folder": "city-gen/props/sign-v/",
        "scale": null,
        "files": [
+        {
+         "name": "sign-v-awning",
+         "src": "assets/environment/city-gen/props/sign-v/sign-v-awning.webp",
+         "bytes": 10096
+        },
+        {
+         "name": "sign-v-bulbs",
+         "src": "assets/environment/city-gen/props/sign-v/sign-v-bulbs.webp",
+         "bytes": 8982
+        },
         {
          "name": "sign-v-cyan",
          "src": "assets/environment/city-gen/props/sign-v/sign-v-cyan.webp",
@@ -670,6 +725,11 @@
          "name": "sign-v-teal",
          "src": "assets/environment/city-gen/props/sign-v/sign-v-teal.webp",
          "bytes": 22192
+        },
+        {
+         "name": "sign-v-tubes",
+         "src": "assets/environment/city-gen/props/sign-v/sign-v-tubes.webp",
+         "bytes": 4666
         }
        ]
       },
@@ -681,6 +741,11 @@
        "folder": "city-gen/props/sign-h/",
        "scale": null,
        "files": [
+        {
+         "name": "sign-h-bulbs",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-bulbs.webp",
+         "bytes": 13988
+        },
         {
          "name": "sign-h-mixed",
          "src": "assets/environment/city-gen/props/sign-h/sign-h-mixed.webp",
@@ -700,6 +765,21 @@
          "name": "sign-h-pink2",
          "src": "assets/environment/city-gen/props/sign-h/sign-h-pink2.webp",
          "bytes": 7846
+        },
+        {
+         "name": "sign-h-rings",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-rings.webp",
+         "bytes": 10242
+        },
+        {
+         "name": "sign-h-spiral",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-spiral.webp",
+         "bytes": 10812
+        },
+        {
+         "name": "sign-h-zigzag",
+         "src": "assets/environment/city-gen/props/sign-h/sign-h-zigzag.webp",
+         "bytes": 11658
         }
        ]
       },
@@ -835,6 +915,56 @@
          "name": "stairs-1",
          "src": "assets/environment/city-gen/props/prop-stairs/stairs-1.webp",
          "bytes": 15688
+        }
+       ]
+      },
+      {
+       "key": "clutter",
+       "label": "Street clutter",
+       "rule": "On the sidewalks of the main roads, against the buildings, between the lamps; blocks the way.",
+       "walk": false,
+       "folder": "city-gen/props/clutter/",
+       "scale": null,
+       "files": [
+        {
+         "name": "bags",
+         "src": "assets/environment/city-gen/props/clutter/bags.webp",
+         "bytes": 11222
+        },
+        {
+         "name": "barricade",
+         "src": "assets/environment/city-gen/props/clutter/barricade.webp",
+         "bytes": 18998
+        },
+        {
+         "name": "barrier",
+         "src": "assets/environment/city-gen/props/clutter/barrier.webp",
+         "bytes": 10034
+        },
+        {
+         "name": "bench",
+         "src": "assets/environment/city-gen/props/clutter/bench.webp",
+         "bytes": 18038
+        },
+        {
+         "name": "bins",
+         "src": "assets/environment/city-gen/props/clutter/bins.webp",
+         "bytes": 12074
+        },
+        {
+         "name": "dumpster",
+         "src": "assets/environment/city-gen/props/clutter/dumpster.webp",
+         "bytes": 14138
+        },
+        {
+         "name": "tyres",
+         "src": "assets/environment/city-gen/props/clutter/tyres.webp",
+         "bytes": 13634
+        },
+        {
+         "name": "vending",
+         "src": "assets/environment/city-gen/props/clutter/vending.webp",
+         "bytes": 12026
         }
        ]
       },

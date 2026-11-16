@@ -31,7 +31,7 @@ def out_dir(slot): return os.path.join(CITY, 'surfaces' if slot in SURFACE_SLOTS
 def out_path(slot, name): d = out_dir(slot); os.makedirs(d, exist_ok=True); return os.path.join(d, name + '.webp')
 JS = os.path.join(ROOT, 'assets', 'chrono-gen.js')
 TEXTURE = {'roof', 'wall', 'shop', 'sidewalk', 'park-edge', 'curb', 'waterfront-edge', 'park', 'ruin-wall', 'home-wall', 'home-roof', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'market-roof', 'market-shop'}
-SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree', 'rubble', 'lamp', 'traffic-light', 'sign-traffic', 'cargo', 'prop-heater', 'roof-hole'}
+SPRITE = {'prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'sign-h', 'sign-v', 'car', 'tree', 'rubble', 'lamp', 'traffic-light', 'sign-traffic', 'cargo', 'prop-heater', 'roof-hole', 'clutter', 'landmark'}
 
 
 def blend_x(a, band):
