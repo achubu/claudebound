@@ -9,6 +9,8 @@
 //   - ruins gather in blast zones (8 to 17% of buildings, three quarters of them inside a zone);
 //   - vehicles park along east-west streets only; a waypoint room's crossing is no wider than its roads;
 //   - little open ground is left bare (under 10% of any room's cells, sidewalks and alleys apart);
+//   - Round 447: landmarks (several per city, never the same one within a room's width), street clutter on the sidewalks, and
+//     four quarters that are neighbourhoods (three in four buildings share their quarter with those around them);
 //   - all ground that can be walked on is joined to the room's streets (no walled-in pockets).
 process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
@@ -26,6 +28,15 @@ for (const seed of [77, 4242, 2026, 9]) {
     o.small = L.filter(l => l.small && l.use === 'roof').length; o.yards = L.filter(cityIsYard).length;
     o.carsAcross = 0; o.cars = 0; for (const k of keys) for (const c of cityParkedCars(sd, cityGenPlan(k))) { o.cars++; if (!c.hz) o.carsAcross++; }
     o.courts = 0; for (const k of chronoLandingRooms()) { if (GEN.bossRooms().includes(k)) continue; const hub = cityGenPlan(k).shapes.find(sh => sh.t === 'poly' && !sh.pave), xs = hub.pts.map(p => p[0]), ys = hub.pts.map(p => p[1]); if (Math.max(...xs) - Math.min(...xs) > 100 || Math.max(...ys) - Math.min(...ys) > 100) o.courts++; }
+    // Round 447: landmarks, street clutter, quarters
+    const LM = L.filter(l => l.use === 'landmark'); o.landmarks = LM.length; o.landmarkKinds = new Set(LM.map(l => l.landmark)).size; o.landmarkRepeatNear = 0;
+    for (let i = 0; i < LM.length; i++) for (let j = i + 1; j < LM.length; j++) if (LM[i].landmark === LM[j].landmark && Math.hypot(LM[i].r[0] - LM[j].r[0], LM[i].r[1] - LM[j].r[1]) < 800) o.landmarkRepeatNear++;
+    o.clutter = 0; o.clutterBad = 0; for (const k of keys) { const p = cityGenPlan(k), [wx, wy] = GEN.world(k); for (const f of cityStreetFurniture(sd, p)) { if (f.slot !== 'clutter') continue; o.clutter++;
+      const onRoad = !!p.floor[Math.floor(f.y / 25) * 32 + Math.floor(f.x / 25)], onLot = L.some(l => l.use !== 'plaza' && f.x + wx * 800 > l.r[0] + 4 && f.x + wx * 800 < l.r[2] - 4 && f.y + wy * 500 > l.r[1] + 4 && f.y + wy * 500 < l.r[3] - 4); if (onRoad || onLot || !CITY_CLUTTER_H[f.n]) o.clutterBad++; } }
+    o.quarters = {}; for (const l of B) o.quarters[l.district] = (o.quarters[l.district] || 0) + 1;
+    // a quarter is a neighbourhood: most buildings share their quarter with the building next door
+    let qp = 0, qs = 0; for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++) { const a = B[i], b = B[j]; if (Math.abs(a.r[0] - b.r[0]) < 300 && Math.abs(a.r[1] - b.r[1]) < 300) { qp++; if (a.district === b.district) qs++; } } o.quarterSame = qs / qp;
+    o.southMain = B.filter(l => l.south).length;
     o.bare = genWorldScore['city:' + sd]; return o; });
     // walled-in pockets: walkable ground the room's streets don't reach (read after the masks are built)
     o.pockets = 0; for (const k of Object.keys(CITY_ROOMS)) { const [x, y] = k.split(',').map(Number), m = cityRoomMask(x, y - 4), p = cityGenPlan(k), seen = new Uint8Array(6300), q = [];
@@ -45,6 +56,10 @@ for (const seed of [77, 4242, 2026, 9]) {
   assert(r.cars > 5 && r.carsAcross === 0, 'vehicles park along east-west streets only; ' + at);
   assert.strictEqual(r.courts, 0, 'a waypoint room has a plain crossing; ' + at);
   assert(r.bare.worst <= 0.1 && r.bare.mean <= 0.04, 'little ground is left bare; ' + at);
+  assert(r.landmarks >= 3 && r.landmarkKinds >= Math.min(5, r.landmarks) && r.landmarkRepeatNear === 0, 'landmarks: several, different, never the same one close by; ' + at);
+  assert(r.clutter >= 15 && r.clutterBad === 0, 'street clutter stands on the sidewalks; ' + at);
+  assert(Object.keys(r.quarters).length === 4 && r.quarterSame > 0.75, 'four quarters, each a neighbourhood; ' + at);
+  assert(r.southMain >= r.buildings * 0.2, 'buildings with a street to the south have a front (shopfront and signs), main roads included; ' + at);
   assert.strictEqual(r.pockets, 0, 'no walled-in pockets of walkable ground; ' + at);
   console.log(seed + ': ' + r.buildings + ' buildings (storeys ' + r.storeyMin.toFixed(0) + '-' + r.storeyMax.toFixed(0) + 'px), ' + r.yards + ' yards, ' + r.ruins + ' ruins (' + r.ruinsInZone + ' in zones), ' + r.sameWall + '/' + r.pairs + ' neighbours alike, worst room ' + Math.round(r.bare.worst * 100) + '% bare');
 }

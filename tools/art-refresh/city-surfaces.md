@@ -59,3 +59,9 @@ Checked by `tests/city-layout.test.cjs`:
   bays, with a wet band at the water, pale shallows and a thin line of foam.
 - **Rooftop kit (Round 446):** nothing stands on glass or garden roofs; roofs with their own lights or drains take only
   small kit (`CITY_ROOF_KIT`).
+- **Landmarks (Round 447):** about 1 room in 4 has one, in an open square on a lot beside a street. The same landmark is
+  never used twice close together.
+- **Street clutter (Round 447):** on the sidewalks of main roads, against the buildings, between the lamps.
+- **Quarters (Round 447):** a quarter is a neighbourhood of several streets, not a single room.
+- **Soft edges (Round 447):** roads have a dark gutter along the kerbs; parks and yards have a darker rim; building
+  shadows have soft edges.
