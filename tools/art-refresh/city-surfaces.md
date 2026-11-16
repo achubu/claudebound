@@ -1,4 +1,4 @@
-# Neon Aftermath: city surfaces (Round 420)
+# Neon Aftermath: city surfaces (Round 420; layout rules Round 445)
 
 Every surface of the top-down city, in drawing order. The rules live in `CITY_SURFACES` (`assets/chrono-gen.js`), which
 the generator reads; `tests/city-surfaces.test.cjs` checks that every surface has its art, that every picture is listed,
@@ -36,3 +36,22 @@ buildings, the sea and each other (60px), and block the way. A slot with no art 
 
 Rules for all art: two textures never meet without a border between them (a kerb, an edge strip or a building) (Round 430); never stretched (scaled evenly only); nothing is drawn in a slot that has no picture (no drawn
 stand-ins); enemies stand only where their whole sprite is on walkable ground.
+
+## Layout rules (Round 445)
+
+Checked by `tests/city-layout.test.cjs`:
+
+- **Sidewalk:** a strip 25px wide runs along every main road and round its corners, and is never built on. Alleys have none.
+- **Lots:** the rest of the ground is cut into rectangles along the streets, then into rows 175 to 325px deep and lots
+  125 to 275px wide, with 25px alleys in about a third of the cuts.
+- **Buildings:** a lot with room for three storeys is a building. Every storey is 42 to 50px tall on screen.
+- **Small lots:** a lot too small for a building is a yard (cargo on the docks, rubble in a blast zone, a parking lot
+  elsewhere) or a pocket park.
+- **Beach:** nothing stands within 75px of the sea, so the sand and the shoreline strip are always clear.
+- **Across rooms:** a building looks the same in every room it reaches into.
+- **Neighbours:** buildings beside or behind each other don't share a wall or a roof, where the art allows.
+- **Ruins:** gathered in blast zones, not sprinkled evenly.
+- **Roads:** every corner, square and dead end turns on one 22px radius. Only a boss's room has a square. Vehicles park
+  along east-west streets and in parking lots.
+- **Paving:** one sidewalk paving for the whole city.
+- **Walking:** only ground joined to a room's streets can be walked on.

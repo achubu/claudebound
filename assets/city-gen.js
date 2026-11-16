@@ -31,7 +31,13 @@ function cityRoomMask(cx, cy) {
   if (GEN_THEMES.city.topdown) { const b = genWith('city', () => cityBlockers(cityGenSeed, k, p));
     for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) { const x = mx * 8 + 4, road = p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)];
       let ok = !b.rects.some(r => x >= r[0] && x < r[2] && y >= r[1] && y < r[3] && !(road && r[4] === 'water')) && !b.circles.some(c => Math.hypot(x - c[0], y - c[1]) < c[2]);
-      m[my * 100 + mx] = ok ? 1 : 0; } } }
+      m[my * 100 + mx] = ok ? 1 : 0; } }
+    // Round 445: only ground joined to the room's streets counts. A yard or a strip of paving walled in by buildings is
+    // not somewhere to stand: nothing is placed there and nobody can be set down there with no way out.
+    const seen = new Uint8Array(100 * 63), q = [];
+    for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) { const i = my * 100 + mx; if (m[i] && (p.street || p.floor)[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]) { seen[i] = 1; q.push(i); } } }
+    for (let h = 0; h < q.length; h++) { const i = q[h], mx = i % 100, my = (i - mx) / 100; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = mx + a, ny = my + b; if (nx < 0 || ny < 0 || nx >= 100 || ny >= 63) continue; const n = ny * 100 + nx; if (m[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
+    for (let i = 0; i < m.length; i++) if (m[i] && !seen[i]) m[i] = 0; }
   return cityMasks[k] = m;
 }
 // Round 417 (owner: "make sure enemy pathing is only allowed on texture tiles and not object sprites"): an enemy is a

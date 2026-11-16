@@ -12,7 +12,7 @@
       {
        "key": "park",
        "label": "Park (grass)",
-       "rule": "About 8% of lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Round 424: each park lays one grass from its folder over the whole park (Round 430: only one, never mixed), tiled 140px; with no grass art, the base overgrowth.",
+       "rule": "About 6% of building lots and 3 in 10 of the small lots; corners rounded; trees and rubble on it block; at least one clear cell of sidewalk from any other park and from the shore. Each park lays one grass from its folder over the whole park (Round 430: only one, never mixed), tiled 140px; with no grass art, the base overgrowth.",
        "walk": true,
        "folder": "city-gen/surfaces/park/",
        "scale": null,
@@ -63,7 +63,7 @@
       {
        "key": "road",
        "label": "Road (asphalt)",
-       "rule": "One texture for every road and alley (Round 430, owner: never mix textures without a border between them); main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them.",
+       "rule": "One texture for every road and alley (Round 430, owner: never mix textures without a border between them); main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them. Round 445: street corners, squares and dead ends all turn on one 22px radius; a waypoint room has a plain crossing (no court); only a boss's room has a square. Vehicles park along east-west streets only (they are painted side-on).",
        "walk": true,
        "folder": "city-gen/surfaces/road/",
        "scale": 0.45,
@@ -95,7 +95,7 @@
       {
        "key": "sidewalk",
        "label": "Sidewalk paving",
-       "rule": "All ground that is not road, sea, sand, lot or park. One paving per city block (the first slot entry on half the blocks), so it only changes across a street. The squares where objects stand are sidewalk too.",
+       "rule": "All ground that is not road, sea, sand, lot or park. One paving for the whole city, picked by the journey's seed (Round 445; a paving per block clashed across every alley). A strip one cell (25px) wide runs along every main road and round its corners, never built on; alleys have none. The squares where objects stand are sidewalk too: a 100px notch in the street wall.",
        "walk": true,
        "folder": "city-gen/surfaces/sidewalk/",
        "scale": 0.22,
@@ -136,7 +136,7 @@
       {
        "key": "lot",
        "label": "Under buildings (lot footing)",
-       "rule": "Fills a building's whole lot; a 4px footing shows round the building. Lots lie wholly on their block, never over a street.",
+       "rule": "Under every building, yard and parking lot. Round 445: lots are laid out along the streets. The buildable ground (open ground less the sidewalks) is cut into rectangles, largest first; each into rows 7 to 13 cells deep and lots 5 to 11 cells wide, with one-cell alleys in about a third of the cuts; lots then grow over any sliver beside them. A lot with room for three full storeys is a building; a smaller one is a yard (cargo on the docks, rubble in a blast zone, a parking lot elsewhere) or a pocket park. Never over a street, a sidewalk or the shore.",
        "walk": false,
        "folder": "city-gen/surfaces/lot/",
        "scale": 0.3,
@@ -253,7 +253,7 @@
       {
        "key": "wall",
        "label": "Building walls (one floor)",
-       "rule": "Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS); at least 3 floors (Round 427), 42px each; a shallow lot has fewer floors rather than squeezed ones.",
+       "rule": "Floor by floor, each starting and ending on plain wall between windows (CITY_TD_GAPS). Round 445: three floors at least, every storey 42 to 50px on screen (cityLotFloors): a lot too shallow for that is not a building. A building's street side and quarter come from the city's plan, so it looks the same in every room it reaches into; no building has the same wall as the one beside or behind it, where the art allows.",
        "walk": false,
        "folder": "city-gen/surfaces/wall/",
        "scale": null,
@@ -278,7 +278,7 @@
       {
        "key": "ruin-wall",
        "label": "Destroyed buildings (burnt-out wall, one floor)",
-       "rule": "About 1 building in 8 is a ruin (a fixed hash of the lot; never a yard or forecourt). Round 439 (owner): an ordinary roof and parapet with a large hole in it (props/roof-hole/; nothing until that art comes), no rooftop kit, no rubble, no shopfront and no signs; its walls are these, floor by floor between window holes, at least 3 floors.",
+       "rule": "A ruin's walls, floor by floor between window holes. Round 445: ruins gather in blast zones (the 18% of the city where a smooth noise runs highest): about 6 in 10 buildings there, 1 in 50 elsewhere. A ruin has an ordinary roof and parapet with a large hole in it (props/roof-hole/), no rooftop kit, no shopfront and no signs.",
        "walk": false,
        "folder": "city-gen/surfaces/ruin-wall/",
        "scale": null,
@@ -463,7 +463,7 @@
       {
        "key": "roof",
        "label": "Roofs",
-       "rule": "One per building part, tiled 160px; a raised parapet and a cast shadow; rooftop props (props/) sized per kind.",
+       "rule": "One per building part, tiled 160px; a raised parapet and a cast shadow; rooftop props (props/) sized per kind, 18px clear of the edge. Round 445: no building has the same roof as the one beside or behind it, where the art allows.",
        "walk": false,
        "folder": "city-gen/surfaces/roof/",
        "scale": null,
