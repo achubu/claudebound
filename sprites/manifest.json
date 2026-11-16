@@ -79,7 +79,7 @@
       {
        "key": "sea",
        "label": "Sea",
-       "rule": "Only along the city edge, never inland; whole 50px grid cells, corners rounded.",
+       "rule": "Only along the city edge, never inland. Round 446: its outline is the sea cells blurred into bays and headlands (never a staircase of cells), wobbled by world-wide noise; darker far out, pale teal shallows at the shore, a thin broken line of foam.",
        "walk": false,
        "folder": "city-gen/surfaces/sea/",
        "scale": null,
@@ -152,7 +152,7 @@
       {
        "key": "waterfront",
        "label": "Waterfront (beach sand)",
-       "rule": "Exactly one grid cell wide round the sea; meets the sea with no border.",
+       "rule": "The beach: from the shoreline to about one cell inland, wider in bays and narrower on points (Round 446); a darker wet band at the water; meets the sea with no border. Nothing is built within 75px of the sea.",
        "walk": true,
        "folder": "city-gen/surfaces/waterfront/",
        "scale": null,

@@ -3496,6 +3496,33 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 446: a new coast; roofs and their kit; the city's map roads
+
+- **Coast** (owner: "design a better beach and water algorithm, our beach and water looks terrible"). The coast was the
+  sea's 50px cells with rounded corners: a staircase of square notches, a sand band of one fixed width, flat dark water
+  and a hard line between them. The new one (`paintChronoRoom`, the `coast` block):
+  - Two smooth fields are worked out per room px from the whole world's sea cells, so they run on across room edges:
+    the sea blurred (three box passes of 22px), and the same for the sea plus the ring of cells round it. World-wide
+    noise wobbles both. The blur turns the notches into bays and headlands.
+  - The shoreline is where the first field crosses half; the sand runs to where the second does, so it is wider in bays
+    and narrower on points.
+  - The water has depth: the texture a little bluer, darker far out, a band of pale teal shallows at the shore.
+  - The sand has a darker wet band at the water. A thin broken line of foam marks the edge, with a fainter second line a
+    little way out. There is still no border strip between water and sand (owner, Round 417).
+  - Where you can walk is unchanged: the sea's cells still decide it, and the drawn shore keeps within a few px of them.
+- **Roofs and their kit** (owner: "certain roof textures clash with certain roof objects"). `CITY_ROOF_KIT` lists what
+  may stand on each roof:
+  - Nothing on the greenhouse glass, the glass grid or the vegetable beds (a tank on a greenhouse made no sense).
+  - Only air units and vents on the LED plates.
+  - No skylights on roofs that already have a drain or a grid.
+  - Roofs not listed take everything.
+- **Map roads in the city.** `tests/map-roads.test.cjs` had been failing since the walk mask opened up to sidewalks and
+  yards (Round 415): the Map screen's road net traced the walkable ground, found several "roads" per edge and drew jogs.
+  For the generated city, `mapRoadNet` now reads the street plan: each door's road runs straight to the room's crossing.
+  The test passes.
+- Tests: `city-layout` also checks `CITY_ROOF_KIT` names real roofs and kit. city-layout, city-surfaces,
+  city-furniture, chrono-gen and map-roads pass.
+
 ## Round 445: the city generator reviewed, debugged and improved
 
 Owner: "I want you to review our neon aftermath procedural world generation algorithm, debug it, and improve it"; "also

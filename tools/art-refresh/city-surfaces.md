@@ -55,3 +55,7 @@ Checked by `tests/city-layout.test.cjs`:
   along east-west streets and in parking lots.
 - **Paving:** one sidewalk paving for the whole city.
 - **Walking:** only ground joined to a room's streets can be walked on.
+- **Coast (Round 446):** the shoreline is smooth bays and headlands, never a staircase of cells. The sand is wider in
+  bays, with a wet band at the water, pale shallows and a thin line of foam.
+- **Rooftop kit (Round 446):** nothing stands on glass or garden roofs; roofs with their own lights or drains take only
+  small kit (`CITY_ROOF_KIT`).
