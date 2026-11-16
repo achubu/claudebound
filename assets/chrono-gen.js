@@ -360,7 +360,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '445',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '446',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -636,8 +636,8 @@ const CITY_TD_GAPS = {'wall-concrete': [4, 19, 29, 41, 127, 134, 147, 258, 440, 
 // city-gen/props/<slot>/. tests/city-surfaces.test.cjs checks that every surface has its art, that every file in
 // surfaces/ and props/ is listed here or in CITY_TD_ART, and the walk rules; tools/art-refresh/city-surfaces.md lists them.
 const CITY_SURFACES = [
-  { key: 'sea', label: 'Sea', kind: 'ground', walk: false, base: ['water'], rule: 'Only along the city edge, never inland; whole 50px grid cells, corners rounded.' },
-  { key: 'waterfront', label: 'Waterfront (beach sand)', kind: 'ground', walk: true, base: ['sand'], rule: 'Exactly one grid cell wide round the sea; meets the sea with no border.' },
+  { key: 'sea', label: 'Sea', kind: 'ground', walk: false, base: ['water'], rule: 'Only along the city edge, never inland. Round 446: its outline is the sea cells blurred into bays and headlands (never a staircase of cells), wobbled by world-wide noise; darker far out, pale teal shallows at the shore, a thin broken line of foam.' },
+  { key: 'waterfront', label: 'Waterfront (beach sand)', kind: 'ground', walk: true, base: ['sand'], rule: 'The beach: from the shoreline to about one cell inland, wider in bays and narrower on points (Round 446); a darker wet band at the water; meets the sea with no border. Nothing is built within 75px of the sea.' },
   { key: 'waterfront-edge', label: 'Waterfront edge (shoreline strip)', kind: 'edge', walk: true, slot: 'waterfront-edge', rule: 'Laid along the outline where the sand meets the paving, bent round corners.' },
   { key: 'sidewalk', label: 'Sidewalk paving', kind: 'ground', walk: true, base: ['pavement-old'], slot: 'sidewalk', scale: 0.22, scales: { 'walk-slabs': 0.13, 'walk-plates': 0.13 }, rule: 'All ground that is not road, sea, sand, lot or park. One paving for the whole city, picked by the journey\'s seed (Round 445; a paving per block clashed across every alley). A strip one cell (25px) wide runs along every main road and round its corners, never built on; alleys have none. The squares where objects stand are sidewalk too: a 100px notch in the street wall.' },
   { key: 'road', label: 'Road (asphalt)', kind: 'ground', walk: true, base: ['road-wet'], scale: 0.45, rule: 'One texture for every road and alley (Round 430, owner: never mix textures without a border between them); main roads 100px, alleys 50px; crossings exactly as wide as the roads meeting in them. Round 445: street corners, squares and dead ends all turn on one 22px radius; a waypoint room has a plain crossing (no court); only a boss\'s room has a square. Vehicles park along east-west streets only (they are painted side-on).' },
@@ -743,6 +743,10 @@ function cityLotSlots(l) { const DA = CITY_DISTRICT_ART[l.district], ruin = city
 // Round 445: a building's storeys. Three at least (owner, Round 427), each CITY_STOREY px on screen where the lot has the
 // depth (its roof keeps 40px), and never under 42px: lots too shallow for that are not buildings (genWorld).
 const CITY_STOREY = 50;
+// Round 446 (owner: "certain roof textures clash with certain roof objects"): what may stand on each roof. A roof that is
+// already a thing in itself takes nothing (a glass roof, vegetable beds: a tank on a greenhouse made no sense); a roof with
+// its own lights or drain takes only small kit. Roofs not listed take everything.
+const CITY_ROOF_KIT = { 'garden-glass': [], 'garden-beds': [], 'tech-glass-grid': [], 'tech-led-plates': ['prop-ac', 'prop-vent'], 'roof-slab': ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs'], 'roof-plate': ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'] };
 function cityLotFloors(l, floors0) { const bh = l.r[3] - l.r[1] - 8, fmax = Math.max(3, Math.floor(bh * 0.66 / CITY_STOREY)), floors = Math.max(3, Math.min(floors0, fmax)), dz = Math.min(floors * CITY_STOREY, bh - 40);
   return { floors, dz, storey: dz / floors }; }
 const CITY_DISTRICT_ART = { homes: { wall: 'home-wall' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' }, market: { roof: 'market-roof', shop: 'market-shop' } };
@@ -924,7 +928,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       // Round 416 (owner: "some rooftop objects being too small, others being too big"): each kind has one size, the
       // longer side of its picture (Round 425: 1.4x these: an air unit 36, a vent 28, a tank 50, a stair hut 56, solar 64, a skylight 44; before: an air unit 26, a vent 20, a tank 36, a stair hut 40,
       // solar panels 46, a skylight 32), and its box follows the picture's own shape; it used to be squeezed into a fixed box.
-      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 7), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'prop-heater'][kind], propArt = pick(slot, ra), L = [36, 28, 50, 56, 64, 44, 40][kind]; /* Round 438: water heaters */ /* Round 425: 1.4x, with the taller storeys */
+      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 7), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'prop-heater'][kind], kitOk = !CITY_ROOF_KIT[nameOf.get(roofArt)] || CITY_ROOF_KIT[nameOf.get(roofArt)].includes(slot), propArt = kitOk ? pick(slot, ra) : (ra(), null), L = [36, 28, 50, 56, 64, 44, 40][kind]; /* Round 438: water heaters */ /* Round 425: 1.4x, with the taller storeys */
         let iw = 0, ih = 0; if (propArt) { const k3 = L / Math.max(propArt.width, propArt.height); iw = propArt.width * k3; ih = propArt.height * k3; }
         if (!propArt) continue; const EM = 18; /* Round 442 (owner: "rooftop objects are never touching the edge of the roofs"): clear of the parapet (4px) and its inner shadow (to ~17px) */ const ix = q[0] + EM + rr() * (w - 2 * EM - iw), iy = q[1] + EM + rr() * (h - 2 * EM - ih);
         if (w < iw + 2 * EM || h < ih + 2 * EM || placed.some(p => ix < p[2] + 10 && ix + iw > p[0] - 10 && iy < p[3] + 10 && iy + ih > p[1] - 10)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
@@ -1382,12 +1386,53 @@ function paintChronoRoom(canvas, key) {
       cg.drawImage(m, 0, 0); cg.globalCompositeOperation = 'source-in'; const p = cg.createPattern(img, 'repeat'); const [vx, vy] = GEN.world(key);
       if (p.setTransform) p.setTransform(new DOMMatrix().translate(-((vx * W) % 1600) - 517, -((vy * H) % 1600) - 311).rotate(90).scale(-1, 1)); cg.fillStyle = p; cg.fillRect(0, 0, W, H);
       g.save(); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.85; g.drawImage(c, 0, 0); g.restore(); };
-    const cellMask = f => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.fillStyle = '#fff';
-      for (let y = -1; y <= CG_ROWS; y++) for (let x = -1; x <= CG_COLS; x++) if (f(x, y)) g.fillRect(x * T * K, y * T * K, T * K + 1, T * K + 1); return smoothed(c, 14 * K); }; // corners rounded, in and out
-    const beach = cellMask((x, y) => isS(x, y) || isW(x, y)), sea = cellMask(isW);
+    // Round 446 (owner: "design a better beach and water algorithm, our beach and water looks terrible"). The coast used to
+    // be the sea's 50px cells with their corners rounded: a staircase of square notches, a sand band of one fixed width, flat
+    // dark water and a hard line where they met. Now:
+    //   1. Two smooth fields are worked out per room px from the whole world's cells (so they run on across room edges):
+    //      `v`, the sea's cells blurred (three box passes, about 22px), and `sv`, the same for the sea and the ring of cells
+    //      round it. A little world-wide noise wobbles both. Blurring turns the notches into bays and headlands.
+    //   2. The shoreline is where v = 0.5; the sand runs to where sv = 0.5 (so it is wider in bays, narrower on points).
+    //   3. The water has depth: full texture far out, darker with distance, a band of pale teal shallows at the shore.
+    //   4. The sand has a darker wet band at the water, and a thin broken line of foam where the two meet, with a fainter
+    //      second line a little way out. No border strip between water and sand (owner, Round 417).
+    // The sea's cells still decide where you can walk; the drawn shore keeps within a few px of them.
+    const coast = (() => { const P = 66, R = 22, w = 800 + 2 * P, h = 500 + 2 * P, V = new Float32Array(w * h), SV = new Float32Array(w * h), tmp = new Float32Array(w * h);
+      const cw = Math.ceil(w / T) + 2, c0 = Math.floor(-P / T), cellW = new Uint8Array(cw * (Math.ceil(h / T) + 2)), cellS = new Uint8Array(cellW.length);
+      for (let cy = 0; cy * cw < cellW.length; cy++) for (let cx = 0; cx < cw; cx++) { const wv = isW(cx + c0, cy + c0); cellW[cy * cw + cx] = wv ? 1 : 0; cellS[cy * cw + cx] = wv || isS(cx + c0, cy + c0) ? 1 : 0; }
+      for (let y = 0; y < h; y++) { const cy = Math.floor((y - P) / T) - c0; for (let x = 0; x < w; x++) { const ci = cy * cw + Math.floor((x - P) / T) - c0; V[y * w + x] = cellW[ci]; SV[y * w + x] = cellS[ci]; } }
+      const box = (a) => { for (let pass = 0; pass < 3; pass++) { // three box blurs: close to a Gaussian
+          for (let y = 0; y < h; y++) { let sum = 0; const o = y * w; for (let x = -R; x <= R; x++) sum += a[o + Math.max(0, Math.min(w - 1, x))];
+            for (let x = 0; x < w; x++) { tmp[o + x] = sum / (2 * R + 1); sum += a[o + Math.min(w - 1, x + R + 1)] - a[o + Math.max(0, x - R)]; } }
+          for (let x = 0; x < w; x++) { let sum = 0; for (let y = -R; y <= R; y++) sum += tmp[Math.max(0, Math.min(h - 1, y)) * w + x];
+            for (let y = 0; y < h; y++) { a[y * w + x] = sum / (2 * R + 1); sum += tmp[Math.min(h - 1, y + R + 1) * w + x] - tmp[Math.max(0, y - R) * w + x]; } } } };
+      box(V); box(SV);
+      // noise on a 10px grid over the world, read between its points
+      const [nwx, nwy] = GEN.world(key), sd = chronoSeed(), G = 10, gw = Math.ceil(800 / G) + 2, gh = Math.ceil(500 / G) + 2, n1 = new Float32Array(gw * gh), n2 = new Float32Array(gw * gh), n3 = new Float32Array(gw * gh);
+      for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) { const X = nwx * 800 + gx * G, Y = nwy * 500 + gy * G; n1[gy * gw + gx] = chronoNoise(sd, 'coast', X, Y, 90) - 0.5; n2[gy * gw + gx] = chronoNoise(sd, 'coast2', X, Y, 26) - 0.5; n3[gy * gw + gx] = chronoNoise(sd, 'foam', X, Y, 14); }
+      const lerp = (a, x, y) => { const fx = x / G, fy = y / G, x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0, i = y0 * gw + x0; return (a[i] * (1 - tx) + a[i + 1] * tx) * (1 - ty) + (a[i + gw] * (1 - tx) + a[i + gw + 1] * tx) * ty; };
+      const mk = () => { const c = document.createElement('canvas'); c.width = 800; c.height = 500; const g = c.getContext('2d'), d = g.createImageData(800, 500); return { c, g, d }; };
+      const sea = mk(), beach = mk(), shallow = mk(), deep = mk(), wet = mk(), foam = mk(), cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
+      for (let y = 0; y < 500; y++) for (let x = 0; x < 800; x++) { const o = (y + P) * w + x + P, a = lerp(n1, x, y), b = lerp(n2, x, y), v = V[o] + a * 0.16 + b * 0.07, sv = SV[o] + a * 0.2 + b * 0.05, i = (y * 800 + x) * 4;
+        const inSea = cl((v - 0.5) * 50 + 0.5), inBeach = Math.max(inSea, cl((sv - 0.5) * 50 + 0.5));
+        for (const m of [sea, beach, shallow, deep, wet, foam]) m.d.data[i] = m.d.data[i + 1] = m.d.data[i + 2] = 255;
+        sea.d.data[i + 3] = inSea * 255; beach.d.data[i + 3] = inBeach * 255;
+        shallow.d.data[i + 3] = inSea * Math.pow(cl(1 - (v - 0.5) / 0.5), 1.6) * 255;           // strongest at the shore, gone about 30px out
+        deep.d.data[i + 3] = inSea * cl((v - 0.8) / 0.2) * 255;                  // the open sea, darker
+        wet.d.data[i + 3] = (1 - inSea) * cl(1 - (0.5 - v) / 0.24) * 255;         // wet sand: about 14px up the beach
+        const f = lerp(n3, x, y), line = cl(1 - Math.abs(v - 0.505) / 0.03) * cl((f - 0.3) * 4), swash = cl(1 - Math.abs(v - 0.66) / 0.016) * cl((f - 0.5) * 5) * 0.45;
+        foam.d.data[i + 3] = Math.max(line, swash) * 255; }
+      const up = m => { m.g.putImageData(m.d, 0, 0); const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(m.c, 0, 0, W, H); return c; };
+      return { sea: up(sea), beach: up(beach), shallow: up(shallow), deep: up(deep), wet: up(wet), foam: up(foam) }; })();
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
-    ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.25)'; g.fillRect(0, 0, W, H); }), 0, 0);
-    ctx.drawImage(tintIn(sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(4,2,14,.35)'; g.fillRect(0, 0, W, H); }), 0, 0);
+    const flat = (mask, col) => tintIn(mask, g => { g.fillStyle = col; g.fillRect(0, 0, W, H); });
+    const beach = coast.beach;
+    ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
+    ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
+    ctx.drawImage(tintIn(coast.sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(30,70,110,.16)'; g.fillRect(0, 0, W, H); }), 0, 0);
+    ctx.save(); ctx.globalAlpha = 0.28; ctx.drawImage(flat(coast.deep, '#02040e'), 0, 0); ctx.restore();                      // deep water
+    ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.42; ctx.drawImage(flat(coast.shallow, '#2a7f8e'), 0, 0); ctx.restore(); // shallows
+    ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore();                     // foam
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART['waterfront-edge'] || []).map(n => imgs[cityArtPath('waterfront-edge', n)]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
     if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }

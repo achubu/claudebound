@@ -48,4 +48,8 @@ for (const seed of [77, 4242, 2026, 9]) {
   assert.strictEqual(r.pockets, 0, 'no walled-in pockets of walkable ground; ' + at);
   console.log(seed + ': ' + r.buildings + ' buildings (storeys ' + r.storeyMin.toFixed(0) + '-' + r.storeyMax.toFixed(0) + 'px), ' + r.yards + ' yards, ' + r.ruins + ' ruins (' + r.ruinsInZone + ' in zones), ' + r.sameWall + '/' + r.pairs + ' neighbours alike, worst room ' + Math.round(r.bare.worst * 100) + '% bare');
 }
+// Round 446: the roofs that take no (or little) rooftop kit are real roofs, and name real kinds of kit
+{ const k = JSON.parse(run(`JSON.stringify({ kit: CITY_ROOF_KIT, roofs: [...CITY_TD_ART.roof, ...Object.values(CITY_DISTRICT_ART).flatMap(d => d.roof ? CITY_TD_ART[d.roof] : [])], slots: Object.keys(CITY_TD_ART) })`));
+  for (const [roof, kit] of Object.entries(k.kit)) { assert(k.roofs.includes(roof), 'CITY_ROOF_KIT names a roof in the game: ' + roof); for (const s of kit) assert(k.slots.includes(s), roof + ' allows a real kind of kit: ' + s); }
+  for (const glass of ['garden-glass', 'tech-glass-grid', 'garden-beds']) assert(k.kit[glass] && k.kit[glass].length === 0, 'nothing stands on ' + glass); }
 console.log('PASS: the city\'s lots follow its streets; one scale; buildings agree across rooms; ruins in zones; no pockets.');

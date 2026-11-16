@@ -172,6 +172,16 @@ function mapRoadAlign() {
 }
 function mapRoadNet(key) {
   const r = rooms[key]; if (!r || !r.world || typeof neonWorldWalk !== 'function') return null;
+  const rk0 = activeRegion + ':' + key + (activeRegion === 'city' && typeof chronoSeed === 'function' ? ':' + chronoSeed() : ''); if (mapRoadCache[rk0]) return mapRoadCache[rk0];
+  // Round 446: the generated city's map roads come from its own street plan (each door's road runs straight to the room's
+  // crossing), not from tracing the ground that can be walked on: since Round 415 that is every sidewalk and yard, so the
+  // trace found several "roads" per edge and drew jogs.
+  if (activeRegion === 'city' && typeof cityGenPlan === 'function' && typeof chronoDoorCell === 'function') { const p = cityGenPlan(key); if (p) { const hub = [p.hub[0], p.hub[1] + 22], paths = [];
+      for (const d of ['n', 's', 'e', 'w']) { if (!r.exits[d]) continue; const c = genWith('city', () => chronoDoorCell(chronoSeed(), key, d)) * 50 + 50, vert = d === 'n' || d === 's';
+        const start = d === 'n' ? [c, -4] : d === 's' ? [c, 504] : d === 'w' ? [-4, c] : [804, c], pts = [start];
+        if (vert ? c !== hub[0] : c !== hub[1]) pts.push(vert ? [c, hub[1]] : [hub[0], c]); // (a door off the crossing's line: a square corner; the grid keeps them on it)
+        pts.push(hub); paths.push(pts); }
+      return mapRoadCache[rk0] = { hub, paths }; } }
   const rk = activeRegion + ':' + key; if (mapRoadCache[rk]) return mapRoadCache[rk];
   const W = 800, H = 500, G = MAP_ROAD_GRID, base = mapRoadRaw(key); if (!base) return null;
   if (!base.exits.length) return mapRoadCache[rk] = { hub: base.hub, paths: [] };

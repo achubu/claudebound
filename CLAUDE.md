@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 445) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 446) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -112,6 +112,9 @@ change set.
   edge. Ruins gather in blast zones (`l.zone`). Only ground joined to a room's streets is walkable. One paving per city;
   corners turn on `cornerR` (22px). `node tests/city-atlas.cjs [seed] [out.png] [x0,y0,cols,rows] [scale]` paints the whole
   city into one picture for checking by eye.
+  Round 446: the coast is drawn from smooth fields over the world's sea cells (bays and headlands, shallows, wet sand,
+  foam: the `coast` block in `paintChronoRoom`); `CITY_ROOF_KIT` says what rooftop kit each roof takes (none on glass or
+  garden roofs); the city's Map-screen roads come from its street plan (`mapRoadNet`).
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):
