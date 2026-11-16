@@ -3496,6 +3496,87 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 445: the city generator reviewed, debugged and improved
+
+Owner: "I want you to review our neon aftermath procedural world generation algorithm, debug it, and improve it"; "also
+improve roads, textures clashing, borders, and road shapes being unnatural"; and a screenshot of a yard lying over the
+beach ("make sure it cant happen in the future").
+
+**How it was reviewed.** The generator was read end to end, measured on five seeds, and the whole city was painted room
+by room into one picture (new `tests/city-atlas.cjs`) and looked at.
+
+**Bugs found and fixed**
+- **Buildings changed at room edges.** About half the buildings cross a room's edge. Each room worked out a building's
+  quarter, and whether a street ran along its south side, for itself. So in 50 to 90 buildings per city the walls, the
+  number of floors or the shopfront changed at the seam. Both are now worked out once, from the whole city's plan
+  (`l.district`, `l.south` on `lotsPx`).
+- **Storeys at many scales.** A lot 75px deep still got three floors, squeezed to 15px each. About 20% of buildings had
+  storeys under 25px and only 30% the full size. Now every building has storeys of 42 to 50px (`cityLotFloors`), and a
+  lot too small for that is not a building.
+- **Lots ignored the streets.** Lots came from splitting each block's bounding box and throwing away pieces that
+  crossed a street, so buildings stood back from the streets at odd distances with bare patches between them.
+- **A yard over the beach.** Nothing could be built within 2 cells of the sea, counted straight across only. A lot at a
+  corner of the shore, or against the shoreline strip, lay over the sand. Now nothing is built within 3 cells (75px) of
+  the sea, diagonals included.
+- **Walled-in ground counted as walkable.** Two buildings side by side left an 8px slit between them, and yards behind
+  buildings were open ground with no way in. The walk mask now keeps only ground joined to the room's streets, and a
+  building blocks its whole lot.
+- **Vehicles across the road.** The vehicles are painted side-on, so one parked on a north-south street lay across the
+  lane. They now park along east-west streets only; the rest stand in parking lots.
+- **Stray pink and cyan patches.** Rooms with no main road still drew the old stand-in light pools. Gone: light pools
+  lie only under lamps.
+- **Walls cut through a window.** A narrow wall whose dozen random starts found no fit fell back to a random cut. Every
+  start is now tried, then a little more scale allowed.
+- **Objects opened in passing.** An object stood at the middle of its square, which could reach out over the sidewalk.
+  It now stands at the back of its square.
+
+**Improvements**
+- **Lots follow the streets** (`genWorld`):
+  - A sidewalk one cell (25px) wide runs along every main road and round its corners, and is never built on.
+  - The rest of the ground is cut into rectangles, largest first, so every side lies on a street, a sidewalk, the shore
+    or another rectangle.
+  - Each rectangle is cut into rows 7 to 13 cells deep and lots 5 to 11 cells wide, with one-cell alleys in about a
+    third of the cuts. Lots then grow over any sliver beside them.
+- **What a lot is follows from its size.** A lot with room for three full storeys is a building. A smaller one is a
+  yard (`use: 'yard'`) or a pocket park. A yard holds cargo on the docks, rubble in a blast zone, and is a parking lot
+  elsewhere (`cityYardPieces`).
+- **Neighbours differ.** A building never has the same wall or roof as the one beside or behind it, where the art
+  allows (`wallN`, `roofN`; at most 6 of about 370 pairs per city still match).
+- **Ruins gather in blast zones:** the 18% of the city where a smooth noise runs highest has about 6 ruins in 10
+  buildings; elsewhere 1 in 50. They used to be sprinkled evenly.
+- **Roads:**
+  - Street corners, squares and dead ends all turn on one 22px radius (`cornerR`). It was 64px, which made lopsided
+    flares where a wide road met a narrow one, and a dead-end alley ended in a pill shape.
+  - A waypoint room has a plain crossing; the wide "court" there is gone. Only a boss's room has a square.
+- **Textures and borders:**
+  - One sidewalk paving for the whole city, picked by the journey's seed. A paving per block put a pale paving beside a
+    dark one across every alley.
+  - A square for an object is a 100px notch in the street wall, with the buildings right beside and behind it. It used
+    to keep a strip of bare paving round it.
+  - Yards are darker, so they don't glare beside the paving.
+
+**Numbers (seed 77, before and after)**
+
+| | Before | After |
+|---|---|---|
+| Buildings with storeys under 42px | about 240 of 346 | 0 |
+| Buildings that change at a room edge | 73 to 89 | 0 |
+| Bare ground in the worst room (cells) | 12% | 8% |
+| Vehicles lying across a road | 5 | 0 |
+
+**Tests**
+- New `tests/city-layout.test.cjs` pins all of this on four seeds: no overlaps, lots only on buildable ground (never
+  the beach), storeys 42 to 50px, facts from the plan, neighbours differ, ruins in zones, parking, plain crossings,
+  little bare ground, no walled-in pockets.
+- `tests/city-fill.test.cjs` thresholds now allow for the sidewalks and beach, which are meant to be open.
+- The browser walk-through passes: 54 rooms, 387 crossings, 74 item routes, no problems, nothing opening in passing.
+  `city-enemies` passes.
+- `tests/map-roads.test.cjs` fails ("roads with a jog" in city rooms on the Map screen). It fails the same way on main
+  before this round, so it is not from this change; it needs its own look.
+
+**Also:** the owner's card art for Capacitor Spark, Ancient Oak, Heatwave and Dusk Protocol, levels 0-3
+(`refreshedCardArt`, `cards.js?v=round445`).
+
 ## Round 444: solid cargo
 
 Owner: "you seem to have made cargo opaque, no need for that". The pallets, rope and crates had come out partly

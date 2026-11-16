@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 444) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 445) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -104,6 +104,14 @@ change set.
   no roof texture with objects painted into it (an edge would cut them). Round 443 (owner): only art that fits the
   futuristic neon city (no old-world brick, cobbles, terracotta, clapboard, present-day cars); one traffic light per crossing;
   lamps evenly spaced along each kerb.
+  **Round 445: the city's layout rules** (`genWorld`, pinned by `tests/city-layout.test.cjs`): a 25px sidewalk along every
+  main road; lots cut from the buildable ground along the streets (rows 7-13 cells deep, lots 5-11 wide); a lot with room for
+  three storeys of 42-50px is a building (`cityLotFloors`), a smaller one a yard (`cityYardPieces`: cargo, rubble or a
+  parking lot) or a pocket park; nothing within 75px of the sea. A building's quarter, street side, wall and roof come from
+  the city's plan (`l.district`, `l.south`, `l.wallN`, `l.roofN`), never per room: about half the buildings cross a room's
+  edge. Ruins gather in blast zones (`l.zone`). Only ground joined to a room's streets is walkable. One paving per city;
+  corners turn on `cornerR` (22px). `node tests/city-atlas.cjs [seed] [out.png] [x0,y0,cols,rows] [scale]` paints the whole
+  city into one picture for checking by eye.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):
