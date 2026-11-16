@@ -32,18 +32,18 @@ const only = process.argv[2];
   const worlds = only ? [only] : await page.evaluate(() => WORLD_ORDER.slice());
   const report = {};
   for (const world of worlds) {
-    const r = await page.evaluate(({ world, covers }) => {
+    const r = await page.evaluate(({ world, covers, seed }) => {
       function clear() { closeMenu(); for (const id of ['menuOverlay', 'startOverlay', 'battleOverlay']) document.getElementById(id).classList.add('hidden'); state.battle = null; }
       const interruptions = [];
       const out = { rooms: 0, fights: 0, crossings: 0, arrivals: 0, itemRoutes: 0, problems: [] };
       const P = (kind, room, what) => out.problems.push({ kind, room, what });
       // Quiet the screen while walking; restore afterwards.
       const quiet = {}; for (const f of ['renderWorld', 'toast', 'save']) { quiet[f] = window.eval(f); window.eval(f + '=function(){}'); }
-      newGame(); state.region = world; configureRegion(world); state.relics = Object.keys(GEAR); ensureGear(); state.playerLevel = 60;
+      newGame(); if (seed) state.seed = isNaN(+seed) ? seed : +seed; /* Round 449: this journey's seed (newGame draws a random one) */ state.region = world; configureRegion(world); state.relics = Object.keys(GEAR); ensureGear(); state.playerLevel = 60;
       state.bosses = Object.values(WORLD_BOSS_ROOMS).map(b => b[1]); // boss doors open, bosses gone
       if (world === 'chronospire') { state.bosses.push('mainspringColossus', 'hollowHour'); state.worldRelays = { chronospire: { on: [0, 1, 2], vault: false } }; } // Round 379: its breakers thrown and its two bosses down, so every door is open
       clear();
-      const start = regionStartRoom(world), dirs = ['n', 's', 'e', 'w'], seen = new Set(), queue = [[start, { x: 400, y: 300 }, 'start']];
+      const start = regionStartRoom(world), dirs = ['n', 's', 'e', 'w'], seen = new Set(), startPos = (() => { state.room = start; state.pos = { x: 400, y: 300 }; try { quiet.renderWorld(); } catch (e) {} return { x: state.pos.x, y: state.pos.y }; })() /* Round 449: where the game itself stands the hero (it moves a start spot that is off the street) */, queue = [[start, startPos, 'start']];
       const door = { n: { x: 400, y: 15 }, s: { x: 400, y: 485 }, e: { x: 785, y: 250 }, w: { x: 15, y: 250 } };
       const exitTo = raw => typeof raw === 'string' ? raw : raw && raw.to;
       const walkTo = (target, exit, item = null) => { // pump the real move() like the game loop does at 30 fps
@@ -125,7 +125,7 @@ const only = process.argv[2];
       out.unvisited = Object.keys(rooms).filter(k => ![...seen].some(t => t.startsWith(k + '<')));
       for (const [f, v] of Object.entries(quiet)) { window.__q = v; window.eval(f + '=__q'); }
       return out;
-    }, { world, covers });
+    }, { world, covers, seed: process.env.SEED || '' });
     // Menus in this world.
     const menuErrors = await page.evaluate(world => {
       const bad = [];

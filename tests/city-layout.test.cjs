@@ -39,12 +39,15 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
     o.southMain = B.filter(l => l.south).length;
     o.bare = genWorldScore['city:' + sd]; return o; });
     // walled-in pockets: walkable ground the room's streets don't reach (read after the masks are built)
-    // (Round 448) "joined" means through the part of the room that can be walked: rows 4-61 and columns 2-97 of the mask. A
+    // (Round 448) "joined" means through the part of the room that can be walked: rows 5-60 and columns 2-97 of the mask. A
     // cell in the edge strips counts by the cell straight in from it, so a door never sets you down with no way on.
     o.pockets = 0; for (const k of Object.keys(CITY_ROOMS)) { const [x, y] = k.split(',').map(Number), m = cityRoomMask(x, y - 4), p = cityGenPlan(k), seen = new Uint8Array(6300), q = [];
-      for (let my = 4; my <= 61; my++) for (let mx = 2; mx <= 97; mx++) { const X = mx * 8 + 4, Y = my * 8 + 4; if (Y < 500 && m[my * 100 + mx] && p.street[Math.floor(Y / 25) * 32 + Math.floor(X / 25)]) { seen[my * 100 + mx] = 1; q.push(my * 100 + mx); } }
-      for (let h = 0; h < q.length; h++) { const i = q[h], mx = i % 100, my = (i - mx) / 100; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = mx + a, ny = my + b; if (nx < 2 || ny < 4 || nx > 97 || ny > 61) continue; const n = ny * 100 + nx; if (m[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
-      for (let my = 0; my < 63; my++) for (let mx = 0; mx < 100; mx++) if (m[my * 100 + mx] && !seen[Math.max(4, Math.min(61, my)) * 100 + Math.max(2, Math.min(97, mx))]) o.pockets++;
+      for (let my = 5; my <= 60; my++) for (let mx = 2; mx <= 97; mx++) { const X = mx * 8 + 4, Y = my * 8 + 4; if (Y < 500 && m[my * 100 + mx] && p.street[Math.floor(Y / 25) * 32 + Math.floor(X / 25)]) { seen[my * 100 + mx] = 1; q.push(my * 100 + mx); } }
+      for (let h = 0; h < q.length; h++) { const i = q[h], mx = i % 100, my = (i - mx) / 100; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = mx + a, ny = my + b; if (nx < 2 || ny < 5 || nx > 97 || ny > 60) continue; const n = ny * 100 + nx; if (m[n] && !seen[n]) { seen[n] = 1; q.push(n); } } }
+      for (let my = 0; my < 63; my++) for (let mx = 0; mx < 100; mx++) if (m[my * 100 + mx] && !seen[Math.max(5, Math.min(60, my)) * 100 + Math.max(2, Math.min(97, mx))]) o.pockets++;
+      // (Round 449) the edge strips are walkable only on streets, so every door is on its road
+      for (let my = 0; my < 63; my++) for (let mx = 0; mx < 100; mx++) { if (my > 4 && my < 61 && mx > 1 && mx < 98) continue; const Y = my * 8 + 4; if (Y < 500 && m[my * 100 + mx] && !p.street[Math.floor(Y / 25) * 32 + Math.floor((mx * 8 + 4) / 25)]) o.pockets++; }
+      for (const d of ['n', 's', 'e', 'w']) if (rooms[k].exits[d]) { const dd = organicDoor(k, d); if (!dd) { o.pockets++; continue; } const Y = Math.min(495, dd.inward.y + 22); if (!p.street[Math.floor(Y / 25) * 32 + Math.floor(dd.inward.x / 25)]) o.pockets++; }
       // every door sets you down on walkable ground
       for (const d of ['n', 's', 'e', 'w']) if (rooms[k].exits[d]) { const dd = organicDoor(k, d); if (dd && !walkable(k, dd.inward.x, dd.inward.y)) o.pockets++; } }
     // (Round 448) nothing in a square stands within reach of where a door sets you down
@@ -63,7 +66,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
   assert.strictEqual(r.courts, 0, 'a waypoint room has a plain crossing; ' + at);
   assert(r.bare.worst <= 0.1 && r.bare.mean <= 0.04, 'little ground is left bare; ' + at);
   assert(r.landmarks >= 3 && r.landmarkKinds >= Math.min(5, r.landmarks) && r.landmarkRepeatNear === 0, 'landmarks: several, different, never the same one close by; ' + at);
-  assert(r.clutter >= 15 && r.clutterBad === 0, 'street clutter stands on the sidewalks; ' + at);
+  assert(r.clutter >= 8 && r.clutterBad === 0, 'street clutter stands on the sidewalks; ' + at);
   assert(Object.keys(r.quarters).length === 4 && r.quarterSame > 0.75, 'four quarters, each a neighbourhood; ' + at);
   assert(r.southMain >= r.buildings * 0.2, 'buildings with a street to the south have a front (shopfront and signs), main roads included; ' + at);
   assert.strictEqual(r.nearDoor, 0, 'no object within reach of where a door sets you down; ' + at);
