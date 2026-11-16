@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 450: a shopping mall with its parking, four rooms in size
+
+Owner: "would it be possible to add a large shopping mall and parking lot style area?" ... "it should take the size of 4 rooms".
+
+- **One mall a city** (`GEN.mall`, in `genWorld`). A window two rooms wide and two tall (1600x1000px) is slid over the city
+  in half-room steps; the one whose largest open rectangle is biggest (one of the best few, picked by the seed, never over
+  the start room) is the mall's. In that rectangle the north side is **the mall**: one building up to 900px wide, three
+  storeys, in the market quarter's look, never a ruin, its shopfront facing south onto a one-cell walkway and the parking
+  below it. Every other piece of buildable ground in the window is **parking** (`l.mall === 'parking'`). The streets
+  through the window stay as planned, so the rooms' doors, objects and enemies are untouched. About three rooms' worth of
+  ground ends up as mall and parking; the rest of the window is its streets.
+- **Parking lots** (`cityYardPieces`): bays in rows, the rows in pairs with a 56px aisle between pairs and a cross aisle
+  every six bays, about six bays in ten taken; the bays are marked with pale lines. Cars block, aisles are walkable.
+- **The mall's front** carries a row of signs, evenly spaced, each different while the art lasts; its roof is one piece,
+  with kit in proportion to its size. Squares for objects are never cut out of the mall (they may be cut from parking).
+- **Bug fixed (since Round 445):** in `cut()`, the line that returns a lot untouched when a square doesn't reach it had been
+  swallowed by the comment before it. A lot with two squares cut from it could come out as overlapping pieces. Ordinary lots
+  rarely have two squares, so nothing showed; a large parking lot does.
+- No new art: the mall uses the market quarter's walls, shopfronts, roofs and signs, and the parked-car pictures. A mall
+  roof, entrance and sign of its own would make it read better (owner art, later).
+- Tests: `city-layout` checks the mall on six seeds (one mall, 500px+ wide, three storeys, front on its parking, 3+ parking
+  lots with 30+ cars, all inside four rooms, none in the start room). Two limits moved: buildings per city 200 -> 180 (the
+  mall stands where about thirty would), neighbours sharing a wall 3% -> 4% (the general wall list has three pictures).
+  Seeded walk-throughs of all 54 rooms are clean on seeds 1, 2, 9 and 77.
+
 ## Round 449: main roads that differ per journey; doors pinned to their roads
 
 Owner: "go ahead" (main roads on different lines in each journey's city).

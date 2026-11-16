@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '449',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '450',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -388,7 +388,7 @@ const GEN_THEMES = {
     mains: seed => { const T = GEN_THEMES.city, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':mains:' + t);
       return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
     alley: (key, d) => { const T = GEN_THEMES.city, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
-    worldLots: true, topdown: true, tilt: 30, alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
+    worldLots: true, topdown: true, tilt: 30, mall: true, startKey: '0,5', alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
     maxH: 300, // Round 394 (owner: "buildings should probably be around 3 times bigger")
     storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 , 'laundromat': 1.6, 'pharmacy': 1.6, 'karaoke-bar': 1.6, 'food-court': 1.44, 'walkup-flats': 1.6, 'boarding-house': 1.6, 'shanty-block': 1.6, 'data-relay': 1.44, 'robotics-workshop': 0.83, 'bathhouse': 1.25, 'temple-hall': 1.39},
@@ -469,12 +469,32 @@ function genWorld(seed) {
   const isBuild = r => r[2] - r[0] >= BUILD_W - 1 && r[3] - r[1] >= BUILD_D; // (a building may be 4 cells wide where a square was cut from its lot)
   if (GEN.topdown) { const free = new Uint8Array(CW * CH); for (let i = 0; i < cell.length; i++) free[i] = cell[i] === 1 ? 1 : 0;
     const rects = [], hgt = new Int16Array(CW);
-    for (let guard = 0; guard < 4000; guard++) { let best = null; hgt.fill(0); // the largest rectangle of free cells, at least 3 cells each way
-      for (let y = 0; y < CH; y++) { const st = [];
-        for (let x = 0; x <= CW; x++) { const h = x < CW ? (hgt[x] = free[y * CW + x] ? hgt[x] + 1 : 0) : 0; let start = x;
+    const bigRect = (X0, Y0, X1, Y1) => { let best = null; hgt.fill(0); // the largest rectangle of free cells inside a box, at least 3 cells each way
+      for (let y = Y0; y < Y1; y++) { const st = [];
+        for (let x = X0; x <= X1; x++) { const h = x < X1 ? (hgt[x] = free[y * CW + x] ? hgt[x] + 1 : 0) : 0; let start = x;
           while (st.length && st[st.length - 1][1] >= h) { const [sx, sh] = st.pop(), w = x - sx; if (sh >= 3 && w >= 3 && (!best || w * sh > best.a)) best = { a: w * sh, r: [sx, y - sh + 1, x, y + 1] }; start = sx; }
           st.push([start, h]); } }
-      if (!best) break; rects.push(best.r); for (let y = best.r[1]; y < best.r[3]; y++) for (let x = best.r[0]; x < best.r[2]; x++) free[y * CW + x] = 0; }
+      return best; };
+    const takeRect = r => { for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) free[y * CW + x] = 0; };
+    // Round 450 (owner: "a large shopping mall and parking lot style area ... it should take the size of 4 rooms"): one
+    // mall a city. A window two rooms wide and two tall (64x40 cells) is slid over the city in half-room steps; the one
+    // whose largest open rectangle is biggest (one of the best few, by the seed) is the mall's. In it, that rectangle's
+    // north side is the mall, one building up to 900px wide whose front opens on a walkway and the parking lot below it;
+    // every other piece of buildable ground in the window is parking too. The streets through it stay as they are.
+    const mallLots = [];
+    if (GEN.mall) { const MW = 2 * FG_COLS, MH = 2 * FG_ROWS, wins = [], sk = GEN.startKey && pos[GEN.startKey];
+      for (let y0 = 0; y0 + MH <= CH; y0 += FG_ROWS / 2) for (let x0 = 0; x0 + MW <= CW; x0 += FG_COLS / 2) {
+        if (sk && sk[0] * FG_COLS < x0 + MW && (sk[0] + 1) * FG_COLS > x0 && sk[1] * FG_ROWS < y0 + MH && (sk[1] + 1) * FG_ROWS > y0) continue; // not where the journey starts
+        const b = bigRect(x0, y0, x0 + MW, y0 + MH); if (b && b.r[2] - b.r[0] >= 20 && b.r[3] - b.r[1] >= 14) wins.push({ x0, y0, b }); }
+      if (wins.length) { wins.sort((a, b) => b.b.a - a.b.a); const top = wins.filter(w => w.b.a >= wins[0].b.a * 0.85), W = top[chronoHash(seed + ':mall') % top.length], M = W.b.r, w = M[2] - M[0], h = M[3] - M[1];
+        const bw = Math.min(w, 36), bd = h >= 21 ? Math.min(15, Math.max(10, Math.round(h * 0.4))) : h, bx0 = M[0] + ((w - bw) >> 1);
+        mallLots.push({ r: [bx0, M[1], bx0 + bw, M[1] + bd], mall: 'building' });
+        if (bx0 - M[0] >= 4) mallLots.push({ r: [M[0], M[1], bx0 - 1, M[1] + bd], mall: 'parking' }); // beside a mall narrower than its ground
+        if (M[2] - (bx0 + bw) >= 4) mallLots.push({ r: [bx0 + bw + 1, M[1], M[2], M[1] + bd], mall: 'parking' });
+        if (h - bd - 1 >= 4) mallLots.push({ r: [M[0], M[1] + bd + 1, M[2], M[3]], mall: 'parking' }); // the walkway along the mall's front is the cell row left between
+        takeRect(M);
+        for (let g = 0; g < 200; g++) { const b = bigRect(W.x0, W.y0, W.x0 + MW, W.y0 + MH); if (!b) break; takeRect(b.r); mallLots.push({ r: b.r, mall: 'parking' }); } } }
+    for (let guard = 0; guard < 4000; guard++) { const best = bigRect(0, 0, CW, CH); if (!best) break; rects.push(best.r); takeRect(best.r); }
     const rowsOf = D => { // a rectangle's depth as rows of 7 to 13 cells: [offset, depth] of each
       if (D < 2 * BUILD_D) return [[0, D]];
       const nmin = Math.ceil(D / ROW_MAX), nmax = Math.floor(D / BUILD_D), n = Math.max(nmin, Math.min(nmax, Math.round(D / 9.5)));
@@ -488,6 +508,8 @@ function genWorld(seed) {
       const gap = w > 2 * BUILD_W && rnd() < GEN.alleys ? 1 : 0, m = x0 + Math.max(BUILD_W, Math.min(w - BUILD_W - gap, Math.round(w * (0.4 + rnd() * 0.2))));
       colsOf(x0, m, out); colsOf(m + gap, x1, out); };
     const cov = new Uint8Array(CW * CH); // 1 a lot, 2 an alley left between lots on purpose
+    for (const m of mallLots) { const r = m.r; lots.push({ r, id: block[r[1] * CW + r[0]], front: front(r), mall: m.mall }); for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) cov[y * CW + x] = 1;
+      if (m.mall === 'building') for (let x = r[0]; x < r[2]; x++) if (r[3] < CH && cell[r[3] * CW + x] === 1 && !cov[r[3] * CW + x]) cov[r[3] * CW + x] = 2; }
     for (const R of rects) { const id = block[R[1] * CW + R[0]], rows = rowsOf(R[3] - R[1]);
       rows.forEach(([o, d], ri) => { const cols = []; colsOf(R[0], R[2], cols);
         if (ri < rows.length - 1 && rows[ri + 1][0] > o + d) for (let x = R[0]; x < R[2]; x++) cov[(R[1] + o + d) * CW + x] = 2;
@@ -498,7 +520,7 @@ function genWorld(seed) {
     //    stand up to the sidewalk all along a street.
     for (let pass = 0; pass < 2; pass++) for (const l of lots) { const r = l.r, clear = (x0, y0, x1, y1) => { if (x0 < 0 || y0 < 0 || x1 > CW || y1 > CH) return false; for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (cell[y * CW + x] !== 1 || cov[y * CW + x]) return false; return true; };
       const take = (x0, y0, x1, y1) => { for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) cov[y * CW + x] = 1; };
-      if (clear(r[0], r[3], r[2], r[3] + 1)) { take(r[0], r[3], r[2], r[3] + 1); r[3]++; }
+      if (l.mall !== 'building' && clear(r[0], r[3], r[2], r[3] + 1)) { take(r[0], r[3], r[2], r[3] + 1); r[3]++; }
       if (clear(r[0], r[1] - 1, r[2], r[1])) { take(r[0], r[1] - 1, r[2], r[1]); r[1]--; }
       if (clear(r[2], r[1], r[2] + 1, r[3])) { take(r[2], r[1], r[2] + 1, r[3]); r[2]++; }
       if (clear(r[0] - 1, r[1], r[0], r[3])) { take(r[0] - 1, r[1], r[0], r[3]); r[0]--; }
@@ -507,7 +529,8 @@ function genWorld(seed) {
     let worst = 0, sum = 0; for (const k of keys) { const [wx, wy] = pos[k]; let bare = 0; for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) { const i = (wy * FG_ROWS + y) * CW + wx * FG_COLS + x; if (cell[i] === 1 && !cov[i]) bare++; }
       const sh = bare / (FG_COLS * FG_ROWS); worst = Math.max(worst, sh); sum += sh; }
     genWorldScore[GEN.id + ':' + seed] = { worst, mean: sum / keys.length }; }
-  const cut = (r, h) => { const mg = GEN.topdown ? 0 : 1, g = [h[0] - mg, h[1] - mg, h[2] + mg, h[3] + mg]; // Round 445: in the top-down city a square is a notch in the street wall: the buildings stand right beside and behind it if (g[2] <= r[0] || g[0] >= r[2] || g[3] <= r[1] || g[1] >= r[3]) return [r];
+  const cut = (r, h) => { const mg = GEN.topdown ? 0 : 1, g = [h[0] - mg, h[1] - mg, h[2] + mg, h[3] + mg]; // Round 445: in the top-down city a square is a notch in the street wall: the buildings stand right beside and behind it
+    if (g[2] <= r[0] || g[0] >= r[2] || g[3] <= r[1] || g[1] >= r[3]) return [r]; // (Round 450: this line had been swallowed by the comment above since Round 445, so a lot with two squares could be cut into overlapping pieces)
     return [[r[0], r[1], g[0], r[3]], [g[2], r[1], r[2], r[3]], [Math.max(r[0], g[0]), r[1], Math.min(r[2], g[2]), g[1]], [Math.max(r[0], g[0]), g[3], Math.min(r[2], g[2]), r[3]]].filter(q => GEN.topdown ? isBuild(q) || (q[2] - q[0] >= 4 && q[3] - q[1] >= 4) : q[2] - q[0] >= 4 && q[3] - q[1] >= 4); }; // Round 445: what is left beside a square is a building where one fits, a small lot from 100px each way, else part of the square's paving // Round 428: 3 cells, like the filled lots
   const roomOf = (cx, cy) => { const k = keys.find(k2 => pos[k2][0] === Math.floor(cx / FG_COLS) && pos[k2][1] === Math.floor(cy / FG_ROWS)); return k || null; };
   // the squares for objects: up to two street-front lots in each room, wholly inside it, clear of the HUD corners
@@ -547,7 +570,7 @@ function genWorld(seed) {
       // and 125px from every edge of the room: where a door sets you down is worked out from the ground on both sides of
       // the edge, so it can be anywhere along an edge, up to about 55px in
       return sx >= 5 && sy >= 5 && sx <= FG_COLS - 5 && sy <= FG_ROWS - 5 && !doorPts.some(([dx, dy]) => Math.hypot(sx - dx, sy - dy) < 4.6); };
-    const cands = lots.map((l, i) => ({ l, i })).filter(({ l, i }) => l.front && !used.has(i) && l.r[2] > ox && l.r[0] < ox + FG_COLS && l.r[3] > oy && l.r[1] < oy + FG_ROWS);
+    const cands = lots.map((l, i) => ({ l, i })).filter(({ l, i }) => l.front && l.mall !== 'building' && !used.has(i) && l.r[2] > ox && l.r[0] < ox + FG_COLS && l.r[3] > oy && l.r[1] < oy + FG_ROWS);
     const ranked = cands.map(c => ({ ...c, q: GEN.topdown ? squareBest(c.l.r, [ox, oy]) : squareFor(c.l.r, [ox, oy]), s: rnd() })).filter(c => c.q).sort((p, q2) => GEN.topdown ? (q2.q.score - p.q.score) || p.s - q2.s : (q2.q.front - p.q.front) || p.s - q2.s);
     for (const { i, q } of ranked) { if (got.length >= (GEN.topdown ? 3 : 2)) break; // Round 448: up to three squares in the city, so a room with three objects needs no spot on the sidewalk
       const mx = (q[0] + q[2]) / 2 * FG_CELL, my = (q[1] + q[3]) / 2 * FG_CELL - 22;
@@ -560,7 +583,7 @@ function genWorld(seed) {
       for (const EM of GEN.topdown ? [4, 2, 1] : [1]) { if (spots.length) break; /* Round 448: well inside the room first */ for (let y = EM; y + S5 <= FG_ROWS - EM; y++) for (let x = EM; x + S5 <= FG_COLS - EM; x++) { let open = true; /* (the arrow `open` above is shadowed here) */ for (let j = 0; j < S5 && open; j++) for (let i2 = 0; i2 < S5; i2++) if (at(ox + x + i2, oy + y + j) !== 1 && at(ox + x + i2, oy + y + j) !== 4) { open = false; break; }
         if (!open) continue; let touch = false; for (let t = 0; t < S5; t++) if (at(ox + x - 1, oy + y + t) === 2 || at(ox + x + S5, oy + y + t) === 2 || at(ox + x + t, oy + y - 1) === 2 || at(ox + x + t, oy + y + S5) === 2) touch = true;
         const mx = (x + S5 / 2) * FG_CELL, my = (y + S5 / 2) * FG_CELL - 22;
-        if (touch && doorClear(x, y, x + S5, y + S5) && !(typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy)))) spots.push([x, y]); } }
+        if (touch && !lots.some(l => l.mall === 'building' && l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) && doorClear(x, y, x + S5, y + S5) && !(typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy)))) spots.push([x, y]); } }
       for (const [x, y] of spots.sort(() => rnd() - 0.5)) { if (got.length >= 2) break; if (got.some(g => Math.hypot(g.x0 - x, g.y0 - y) < 8)) continue;
         got.push({ x0: x, y0: y, x1: x + S5, y1: y + S5 }); lots.forEach((l, i) => { if (l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) { if (GEN.topdown) (holes[i] = holes[i] || []).push([ox + x, oy + y, ox + x + S5, oy + y + S5]); else used.add(i); } }); } }
     plazas[k] = got; }
@@ -596,6 +619,7 @@ function genWorld(seed) {
       if (use === 'roof') { if (small) use = !dock && roll < 0.3 && parkOk(q) ? 'park' : 'yard';
         else if (roll < (GEN.topdown ? 0.06 : 0.08) && parkOk(q)) use = 'park';
         else if (GEN.topdown && dock && roll > 0.7) use = 'yard'; }
+      if (l.mall && use !== 'plaza') use = l.mall === 'building' ? 'roof' : 'yard'; // Round 450: the mall and its parking
       if (use === 'park') parkCells.push(q);
       const rec = { r: [q[0] * C, q[1] * C, q[2] * C, q[3] * C], use, seed: lseed, dock, small, front: front(q) };
       if (GEN.topdown) { const cx = (q[0] + q[2]) >> 1, cy = (q[1] + q[3]) >> 1;
@@ -611,26 +635,27 @@ function genWorld(seed) {
         void rk; rec.qv = GEN.districtNames.map(d => chronoNoise(seed, 'quarter:' + d, cx / FG_COLS, cy / FG_ROWS, 2.2)); rec.district = GEN.districtNames[0]; // (settled below, once every lot's values are known)
         // ruins gather in blast zones (smooth noise over the city) instead of being sprinkled evenly: about 6 in 10 buildings
         // inside a zone, 1 in 40 outside
-        rec.blast = chronoNoise(seed, 'blast', cx, cy, 30); }
+        rec.blast = chronoNoise(seed, 'blast', cx, cy, 30);
+        if (l.mall) { rec.mall = l.mall; if (l.mall === 'building') { rec.south = true; rec.small = false; } } }
       lotsPx.push(rec); } });
   // Round 448: each quarter's noise is measured against its own average and spread over the whole city before the strongest
   // is taken, so every city has all four quarters in fair shares (the raw noises left some cities with three)
   if (GEN.topdown) { const Q = lotsPx.filter(l => l.qv), nq = GEN.districtNames.length, mean = new Array(nq).fill(0), sd = new Array(nq).fill(0);
     for (const l of Q) l.qv.forEach((v, i) => { mean[i] += v / Q.length; }); for (const l of Q) l.qv.forEach((v, i) => { sd[i] += (v - mean[i]) ** 2 / Q.length; });
-    for (const l of Q) { let best = 0, bv = -1e9; l.qv.forEach((v, i) => { const z = (v - mean[i]) / (Math.sqrt(sd[i]) || 1); if (z > bv) { bv = z; best = i; } }); l.district = GEN.districtNames[best]; delete l.qv; } }
+    for (const l of Q) { let best = 0, bv = -1e9; l.qv.forEach((v, i) => { const z = (v - mean[i]) / (Math.sqrt(sd[i]) || 1); if (z > bv) { bv = z; best = i; } }); l.district = l.mall && GEN.districtNames.includes('market') ? 'market' : GEN.districtNames[best]; delete l.qv; } }
   // Round 447: landmarks. About 1 room in 5 gets one (twelve a city): a building lot on a street, with its middle well inside the room, becomes an open
   // square (the city's own paving, so no new border) with a landmark standing in it. The same landmark is never used
   // again until every other has been, and then as far from its last place as can be: a room is "the one with the statue".
   if (GEN.topdown && CITY_HAS('landmark')) { const names = CITY_TD_ART.landmark, placed = [];
     for (const k of keys.slice().sort((a, b) => chronoHash(seed + ':lm:' + a) - chronoHash(seed + ':lm:' + b))) { if (placed.length >= 12) break; if (placed.some(q => Math.abs(q[3] - pos[k][0]) <= 1 && Math.abs(q[4] - pos[k][1]) <= 1)) continue; /* Round 448: twelve a city, never in rooms side by side (a chance per room gave some cities two) */ const ox = pos[k][0] * 800, oy = pos[k][1] * 500;
-      const c = lotsPx.filter(l => l.use === 'roof' && !l.small && (l.south || l.front) && (l.r[0] + l.r[2]) / 2 >= ox + 90 && (l.r[0] + l.r[2]) / 2 <= ox + 710 && (l.r[1] + l.r[3]) / 2 >= oy + 110 && (l.r[1] + l.r[3]) / 2 <= oy + 400 && l.r[2] - l.r[0] >= 125 && l.r[2] - l.r[0] <= 275)
+      const c = lotsPx.filter(l => l.use === 'roof' && !l.mall && !l.small && (l.south || l.front) && (l.r[0] + l.r[2]) / 2 >= ox + 90 && (l.r[0] + l.r[2]) / 2 <= ox + 710 && (l.r[1] + l.r[3]) / 2 >= oy + 110 && (l.r[1] + l.r[3]) / 2 <= oy + 400 && l.r[2] - l.r[0] >= 125 && l.r[2] - l.r[0] <= 275)
         .sort((a, b) => (b.south - a.south) || (a.r[2] - a.r[0]) * (a.r[3] - a.r[1]) - (b.r[2] - b.r[0]) * (b.r[3] - b.r[1]) || a.seed - b.seed)[0]; if (!c) continue; // on a street (one to its south first), the smallest such lot
       const cx = (c.r[0] + c.r[2]) / 2, cy = (c.r[1] + c.r[3]) / 2, far = n => Math.min(1e9, ...placed.filter(q => q[2] === n).map(q => Math.hypot(q[0] - cx, q[1] - cy))), uses = n => placed.filter(q => q[2] === n).length;
       const n = names.map((_, i) => i).sort((a, b) => uses(a) - uses(b) || far(b) - far(a) || a - b)[0];
       c.use = 'landmark'; c.landmark = names[n]; placed.push([cx, cy, n, pos[k][0], pos[k][1]]); } }
   // the blast zones are the 18% of the city where that noise runs highest, so every journey's city has them, about as large
   if (GEN.topdown) { const bl = lotsPx.filter(l => l.use === 'roof').map(l => l.blast).sort((a, b) => a - b), T = bl.length ? bl[Math.floor(bl.length * 0.82)] : 1;
-    for (const l of lotsPx) { l.zone = l.blast >= T; l.ruin = (l.seed % 1000) / 1000 < (l.zone ? 0.6 : 0.02); } }
+    for (const l of lotsPx) { l.zone = l.blast >= T; l.ruin = !l.mall && (l.seed % 1000) / 1000 < (l.zone ? 0.6 : 0.02); } }
   // Round 445 (owner, Round 393: "shouldn't allow the same building more than once"): neighbours never share a wall or a
   // roof where the art allows. Each building takes numbers for its wall and roof pictures that no building beside or behind it has taken
   // (out of its own slot's list); the painter uses them in place of a random pick.
@@ -754,13 +779,18 @@ function cityLandmarkBox(l, r) { const asp = CITY_LANDMARK_ASPECT[l.landmark] ||
 // lots on the docks). What stands in it: cargo on the docks; rubble in a blast zone; parked vehicles elsewhere (they are
 // painted side-on, so a parking lot is where they belong). Each piece is { slot, n | artR, x, y, w, h, flip, block }.
 function cityIsYard(l) { return l.use === 'yard'; }
-function cityYardKind(l) { return l.dock && CITY_HAS('cargo') && (!l.small || l.seed % 2 === 0) ? 'cargo' : (l.zone || !CITY_HAS('car')) && CITY_HAS('rubble') ? 'rubble' : CITY_HAS('car') ? 'cars' : CITY_HAS('cargo') ? 'cargo' : null; }
+function cityYardKind(l) { return l.mall ? (CITY_HAS('car') ? 'cars' : null) : l.dock && CITY_HAS('cargo') && (!l.small || l.seed % 2 === 0) ? 'cargo' : (l.zone || !CITY_HAS('car')) && CITY_HAS('rubble') ? 'rubble' : CITY_HAS('car') ? 'cars' : CITY_HAS('cargo') ? 'cargo' : null; }
 function cityYardPieces(seed, l, bx) { const kind = cityYardKind(l), rr = chronoRng(seed + ':yard:' + l.seed), out = [], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
   if (kind === 'cargo') { const names = CITY_TD_ART.cargo, want = Math.max(1, Math.round(bw * bh / 9000));
     for (let t = 0; t < want * 8 && out.length < want; t++) { const left = names.filter(m => !out.some(o => o.n === m)), n = (left.length ? left : names)[Math.floor(rr() * (left.length || names.length))], /* no piece twice in a yard while others are left */ [L, asp] = CITY_CARGO_SIZE[n] || [70, 1], w0 = asp >= 1 ? L : L * asp, h0 = asp >= 1 ? L / asp : L, k = Math.min(1, (bw - 16) / w0, (bh - 16) / h0), w = w0 * k, h = h0 * k;
       if (k < 0.6) continue; const x = bx[0] + 8 + rr() * (bw - 16 - w), y = bx[1] + 8 + rr() * (bh - 16 - h), flip = rr() < 0.5;
       if (out.some(o => x < o.x + o.w + 10 && x + w > o.x - 10 && y < o.y + o.h + 10 && y + h > o.y - 10)) continue;
       out.push({ slot: 'cargo', n, x, y, w, h, flip, block: [x + w * 0.08, y + h * 0.3, x + w * 0.92, y + h * 0.95] }); } }
+  else if (kind === 'cars' && l.mall) { // Round 450: the mall's parking: rows of bays in pairs with a 56px aisle between pairs, a cross aisle every six bays, about 6 bays in 10 taken
+    const CWd = 61, CHt = 40; out.bays = [];
+    for (let y = bx[1] + 10, ry = 0; y + CHt <= bx[3] - 10; y += CHt + (ry % 2 ? 56 : 6), ry++)
+      for (let x = bx[0] + 12, cx = 0; x + CWd <= bx[2] - 12; x += CWd + (cx % 6 === 5 ? 56 : 8), cx++) { const take = rr() < 0.6, artR = rr(), flip = rr() < 0.5; out.bays.push([x, y, CWd, CHt]);
+        if (take) out.push({ slot: 'car', artR, x, y, w: CWd, h: CHt, flip, block: [x + 3, y + 10, x + CWd - 3, y + CHt - 1] }); } }
   else if (kind === 'cars') { // a parking lot: bays in rows, about two in three taken
     const CWd = 61, CHt = 40, cols = Math.floor((bw - 16 + 12) / (CWd + 12)), rows = Math.floor((bh - 16 + 14) / (CHt + 14));
     const gx = cols > 1 ? (bw - 16 - cols * CWd) / (cols - 1) : 0, gy = rows > 1 ? (bh - 16 - rows * CHt) / (rows - 1) : 0;
@@ -919,7 +949,8 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       ctx.save(); ctx.beginPath(); ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.yard); ctx.fillStyle = 'rgba(6,8,14,.62)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = S(14); ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = S(8); ctx.strokeRect(S(bx[0] - 4), S(bx[1] - 4), S(bw + 8), S(bh + 8)); /* Round 447: grime gathered along the yard's edge */ ctx.restore(); // (Round 445: darker, so a yard doesn't glare beside the paving)
       const edgeArt = pick('park-edge', ra); if (edgeArt) { const m = document.createElement('canvas'); m.width = Math.ceil((bw + 8) * K); m.height = Math.ceil((bh + 8) * K); const mg = m.getContext('2d'); mg.fillStyle = '#fff'; mg.fillRect(4 * K, 4 * K, bw * K, bh * K);
         const [ywx, ywy] = GEN.world(key); cityEdgeAlong(ctx, m, bx[0] - 4, bx[1] - 4, K, edgeArt, 12, ywx, ywy); }
-      for (const c of cityYardPieces(seed, l, bx).sort((a, b) => (a.y + a.h) - (b.y + b.h))) { const list = A(c.slot), art = c.n ? imgs[cityArtPath(c.slot, c.n)] : list && list[Math.floor(c.artR * list.length)]; if (!art || !art.naturalWidth) continue;
+      const yardPieces = cityYardPieces(seed, l, bx); if (yardPieces.bays) { ctx.save(); ctx.fillStyle = 'rgba(214,222,232,.3)'; for (const [x, y, w, h] of yardPieces.bays) { ctx.fillRect(S(x - 4.5), S(y + 4), S(1.5), S(h - 4)); ctx.fillRect(S(x + w + 3), S(y + 4), S(1.5), S(h - 4)); } ctx.restore(); } // Round 450: the mall's bays are marked
+      for (const c of yardPieces.sort((a, b) => (a.y + a.h) - (b.y + b.h))) { const list = A(c.slot), art = c.n ? imgs[cityArtPath(c.slot, c.n)] : list && list[Math.floor(c.artR * list.length)]; if (!art || !art.naturalWidth) continue;
         const k = Math.min(c.w / art.width, c.h / art.height), dw = art.width * k, dh = art.height * k; // at its own proportions, standing on the bottom of its box
         ctx.save(); ctx.translate(S(c.x + c.w / 2), 0); if (c.flip) ctx.scale(-1, 1); ctx.drawImage(art, S(-dw / 2), S(c.y + c.h - dh), S(dw), S(dh)); ctx.restore(); }
       continue; }
@@ -961,10 +992,10 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     const district = l.district || roomDistrict, SL = cityLotSlots({ ...l, district }), dRoof = SL.roof, home = SL.home; // Round 436: the homes quarter: 3-4 floors, no shops or signs
     // Round 445: the street side and the quarter come from the city's plan (l.south, l.district), the same in every room a
     // building reaches into; its storeys from cityLotFloors (three at least, 42 to 50px each)
-    let blade = false; const southSt = !!l.south, floors0 = home ? 3 + Math.floor(rr() * 2) : (southSt ? 4 + Math.floor(rr() * 4) : 4 + Math.floor(rr() * 2)) + (district === 'tech' ? 1 : 0), LF = cityLotFloors(l, floors0), floors = LF.floors, dz = LF.dz, wallTop = bx[3] - dz;
+    let blade = false; const southSt = !!l.south, floors0 = l.mall ? 3 : home ? 3 + Math.floor(rr() * 2) : (southSt ? 4 + Math.floor(rr() * 4) : 4 + Math.floor(rr() * 2)) + (district === 'tech' ? 1 : 0), LF = cityLotFloors(l, floors0), floors = LF.floors, dz = LF.dz, wallTop = bx[3] - dz;
     const rb = [bx[0], bx[1], bx[2], wallTop]; bx[3] = wallTop; const bh0 = bh;
     // a roof, sometimes in two parts of different heights
-    const parts = bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
+    const parts = l.mall ? [bx] /* Round 450: the mall is one roof */ : bw > 140 && rr() < 0.5 ? (() => { const m = bx[0] + bw * (0.35 + rr() * 0.3); return [[bx[0], bx[1], m, bx[3]], [m, bx[1], bx[2], bx[3]]]; })() : bh > 140 && rr() < 0.5 ? (() => { const m = bx[1] + bh * (0.35 + rr() * 0.3); return [[bx[0], bx[1], bx[2], m], [bx[0], m, bx[2], bx[3]]]; })() : [bx];
     parts.forEach((q, pi) => { const w = q[2] - q[0], h = q[3] - q[1], col = ROOF[Math.floor(rr() * ROOF.length)];
       ctx.save(); ctx.beginPath(); ctx.rect(S(q[0]), S(q[1]), S(w), S(h)); ctx.clip(); ctx.fillStyle = col; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h));
       const roofList = A(dRoof), roofArt = roofList ? roofList[((l.roofN || 0) + pi) % roofList.length] : null; ra(); /* Round 445: the lot's own number (no neighbour has it); the second part takes the next */ if (roofArt) { tile(roofArt, q[0], q[1], w, h, 160); ctx.globalAlpha = 0.22; ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = col; ctx.fillRect(S(q[0]), S(q[1]), S(w), S(h)); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
@@ -981,7 +1012,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       if (ruin) { const ho = (pi === 0 || parts.length > 1 && rr() < 0.5) && pick('roof-hole', ra); if (ho) { const k = Math.min((w - 36) / ho.width, (h - 36) / ho.height) * (0.85 + rr() * 0.12), dw = ho.width * k, dh = ho.height * k;
           if (dw > 30 && dh > 30) ctx.drawImage(ho, S(q[0] + 18 + rr() * (w - 36 - dw)), S(q[1] + 18 + rr() * (h - 36 - dh)), S(dw), S(dh)); } return; }
       // rooftop clutter
-      const items = 2 + Math.floor(rr() * 4), placed = [];
+      const items = l.mall ? Math.round(w * h / 12000) : 2 + Math.floor(rr() * 4), placed = [];
       // Round 416 (owner: "some rooftop objects being too small, others being too big"): each kind has one size, the
       // longer side of its picture (Round 425: 1.4x these: an air unit 36, a vent 28, a tank 50, a stair hut 56, solar 64, a skylight 44; before: an air unit 26, a vent 20, a tank 36, a stair hut 40,
       // solar panels 46, a skylight 32), and its box follows the picture's own shape; it used to be squeezed into a fixed box.
@@ -1006,7 +1037,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       if (shopF >= 0) { // Round 401 (owner: 30 degrees): a shopfront at street level: a lit window band, doors, an awning
         const y0 = wallTop + shopF * rowH, col = NEON[Math.floor(rr() * NEON.length)];
         if (shopArt) fitRow(shopArt, bx[0], y0, bw, rowH, rr);
-        if (floors >= 3 && rr() < 0.75) { blade = true; // a blade sign down the upper floors
+        if (floors >= 3 && !l.mall && rr() < 0.75) { blade = true; // a blade sign down the upper floors
           const bxp = rr() < 0.5 ? bx[0] + 10 : bx[2] - 22, bt = wallTop + rowH * 0.3, bl = y0 - bt - 4, nc = NEON[Math.floor(rr() * NEON.length)];
           // Round 420 (owner: "remove all placeholder graphics"; "never stretch graphics"): only the sign's own picture, at its own
           // proportions, as large as fits down the upper floors and 18px wide; no drawn stand-in
@@ -1017,7 +1048,9 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     // Round 407 (owner: "billboards should only be placed on the front side of buildings never the back side ... and neon
     // signs"): a sign only on a building whose street is in front (south): a board along the front roof edge, unless the
     // front wall already carries a blade sign. Never on a back or side wall.
-    if (southSt && !blade && !ruin && !home && rr() < 0.7) { const hArt = pick('sign-h', ra); // the sign's own picture at its own proportions, up to 16px tall, centred on the front roof edge
+    if (l.mall) { const list = A('sign-h'); // Round 450: the mall's front carries a row of signs, evenly spaced, each a different one while they last
+      if (list) for (let sx = bx[0] + 40, i = Math.floor(rr() * list.length); sx + 60 < bx[2]; sx += 150, i++) { const hArt = list[i % list.length], k2 = 23 / hArt.height, dw = Math.min(110, hArt.width * k2), dh = dw / hArt.width * hArt.height; if (sx + dw < bx[2] - 20) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } }
+    else if (southSt && !blade && !ruin && !home && rr() < 0.7) { const hArt = pick('sign-h', ra); // the sign's own picture at its own proportions, up to 16px tall, centred on the front roof edge
       if (hArt) { const k2 = Math.min(23 / hArt.height, (bw - 24) / hArt.width), dw = hArt.width * k2, dh = hArt.height * k2, sx = bx[0] + 12 + rr() * Math.max(0, bw - 24 - dw);
         if (dw > 30) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } } }
   // Round 410: cars last, so no lot, park or border is ever drawn over one

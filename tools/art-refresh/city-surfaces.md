@@ -67,3 +67,4 @@ Checked by `tests/city-layout.test.cjs`:
   shadows have soft edges.
 - **Main roads (Round 449):** their rows and columns come from the journey's seed; a room's edge is crossed only on a
   street, so every door sits on its road.
+- **The mall (Round 450):** one a city, about four rooms with its parking; market-quarter art for now (no mall art of its own yet).
