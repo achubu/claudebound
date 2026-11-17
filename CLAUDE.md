@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 461) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 462) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -135,7 +135,9 @@ change set.
   Round 460 (owner): the edges (kerbs, park and yard rims, shore: art and `cityEdgeAlong`) are as in Round 457; the Round 458
   strips and Round 459's mitred drawing looked worse to the owner. Don't change edges without showing the owner first.
   Round 461 (owner chose it): the beach's edge is a drawn concrete lip (`GEN.coastLip`), its masks at full resolution
-  (`GEN.coastCrisp`), sand at 0.4 scale, small bare-paving pockets by the sea turned to sand.
+  (`GEN.coastCrisp`), sand at 0.4 scale, small bare-paving pockets by the sea turned to sand. Round 462: streets meeting the
+  sand get the lip too and kerbs stop short of it (never an edge on an edge); rooftop kit only on the plain roofs in
+  `CITY_ROOF_KIT` (owner), 24px from a roof's edge.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):

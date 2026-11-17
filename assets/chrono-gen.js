@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '461',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '462',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -825,7 +825,11 @@ const CITY_DOOR_WALLS = ['home-pods'];
 // Round 446 (owner: "certain roof textures clash with certain roof objects"): what may stand on each roof. A roof that is
 // already a thing in itself takes nothing (a glass roof, vegetable beds: a tank on a greenhouse made no sense); a roof with
 // its own lights or drain takes only small kit. Roofs not listed take everything.
-const CITY_ROOF_KIT = { 'tech-solar': [], 'market-cables': ['prop-ac', 'prop-vent', 'prop-stairs'], 'mall-skylights': ['prop-ac', 'prop-vent'], 'garden-glass': [], 'garden-hydro': [], 'tech-glass-grid': [], 'tech-led-plates': ['prop-ac', 'prop-vent'], 'roof-slab': ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs'], 'roof-plate': ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'] };
+// Round 462 (owner: "object sprites can only be placed on roofs with simple tile textures, not more complex ones"): rooftop
+// kit stands only on the plain roofs listed here; every other roof (glass, gardens, plates, seams, cables, solar, skylights,
+// lit panels, a roof with its own drain or windows) takes nothing.
+const CITY_ROOF_KIT_ALL = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'prop-heater'];
+const CITY_ROOF_KIT = { 'roof-finegravel': CITY_ROOF_KIT_ALL, 'roof-bitumen': CITY_ROOF_KIT_ALL, 'roof-tarchip': CITY_ROOF_KIT_ALL, 'roof-rubber': CITY_ROOF_KIT_ALL };
 function cityLotFloors(l, floors0) { const bh = l.r[3] - l.r[1] - 8, share = l.district === 'tech' ? 0.82 : 0.66 /* Round 448: downtown is towers: more wall, less roof */, fmax = Math.max(3, Math.floor(bh * share / CITY_STOREY)), floors = Math.max(3, Math.min(floors0, fmax)), dz = Math.min(floors * CITY_STOREY, bh - 40);
   return { floors, dz, storey: dz / floors }; }
 const CITY_DISTRICT_ART = { homes: { wall: 'home-wall' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' }, market: { wall: 'market-wall', roof: 'market-roof', shop: 'market-shop' } };
@@ -1046,9 +1050,9 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       // Round 416 (owner: "some rooftop objects being too small, others being too big"): each kind has one size, the
       // longer side of its picture (Round 425: 1.4x these: an air unit 36, a vent 28, a tank 50, a stair hut 56, solar 64, a skylight 44; before: an air unit 26, a vent 20, a tank 36, a stair hut 40,
       // solar panels 46, a skylight 32), and its box follows the picture's own shape; it used to be squeezed into a fixed box.
-      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 7), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'prop-heater'][kind], kitOk = !CITY_ROOF_KIT[nameOf.get(roofArt)] || CITY_ROOF_KIT[nameOf.get(roofArt)].includes(slot), propArt = kitOk ? pick(slot, ra) : (ra(), null), L = [36, 28, 50, 56, 64, 44, 40][kind]; /* Round 438: water heaters */ /* Round 425: 1.4x, with the taller storeys */
+      for (let i = 0; i < items * 3 && placed.length < items; i++) { const kind = Math.floor(rr() * 7), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'prop-heater'][kind], kitOk = !!roofArt && (CITY_ROOF_KIT[nameOf.get(roofArt)] || []).includes(slot), propArt = kitOk ? pick(slot, ra) : (ra(), null), L = [36, 28, 50, 56, 64, 44, 40][kind]; /* Round 438: water heaters */ /* Round 425: 1.4x, with the taller storeys */
         let iw = 0, ih = 0; if (propArt) { const k3 = L / Math.max(propArt.width, propArt.height); iw = propArt.width * k3; ih = propArt.height * k3; }
-        if (!propArt) continue; const EM = 18; /* Round 442 (owner: "rooftop objects are never touching the edge of the roofs"): clear of the parapet (4px) and its inner shadow (to ~17px) */ const ix = q[0] + EM + rr() * (w - 2 * EM - iw), iy = q[1] + EM + rr() * (h - 2 * EM - ih);
+        if (!propArt) continue; const EM = 24; /* Round 462 (owner: "should also not touch the roof edges"): clear of the parapet, its shadow and a front sign by a few px more */ /* Round 442 (owner: "rooftop objects are never touching the edge of the roofs"): clear of the parapet (4px) and its inner shadow (to ~17px) */ const ix = q[0] + EM + rr() * (w - 2 * EM - iw), iy = q[1] + EM + rr() * (h - 2 * EM - ih);
         if (w < iw + 2 * EM || h < ih + 2 * EM || placed.some(p => ix < p[2] + 10 && ix + iw > p[0] - 10 && iy < p[3] + 10 && iy + ih > p[1] - 10)) continue; placed.push([ix, iy, ix + iw, iy + ih]);
         if (propArt) ctx.drawImage(propArt, S(ix), S(iy), S(iw), S(ih)); } }); // its box is its picture: never over a neighbour; no picture, nothing drawn
     if (dz > 3) { const wall = ctx.createLinearGradient(0, S(wallTop), 0, S(wallTop + dz)); wall.addColorStop(0, '#3a3f4a'); wall.addColorStop(1, '#1c1f27');
@@ -1506,6 +1510,7 @@ function paintChronoRoom(canvas, key) {
     if (GEN.feather) { const m = ragged(terrain.pipes, 'grass', { blur: 30, amp: 0.8, sharp: 9 }), g = m.getContext('2d'); g.globalCompositeOperation = 'source-in'; fill(g, imgs.pipes); ctx.drawImage(m, 0, 0); }
     else { ring(chronoTint(s.shape, GEN.bedRim[0]), 5); ring(chronoTint(s.shape, GEN.bedRim[1]), 2); ctx.drawImage(s.art, 0, 0); }
   }
+  let coastBeachMask = null, coastLipDraw = null; // (Round 461) for the streets drawn later: their kerbs stop at the sand, the lip runs on along them
   if (any(terrain.chasm) && GEN.beach && GEN.topdown) {
     // Round 412 (owner: "sand and grass tiles still do not transition well"): as in autotiled games, the coast keeps to the
     // grid: water cells, then a band of sand exactly one cell wide, with a shoreline strip (CITY_TD_ART.shore: concrete
@@ -1588,13 +1593,16 @@ function paintChronoRoom(canvas, key) {
     ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore();                     // foam
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART['waterfront-edge'] || []).map(n => imgs[cityArtPath('waterfront-edge', n)]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
-    if (GEN.coastLip) { // (Round 461 trial) no strip: the paving ends in a drawn concrete lip, crisp at canvas resolution, with a soft shadow on the sand
-      const pave = document.createElement('canvas'); pave.width = W; pave.height = H; const pg = pave.getContext('2d'); pg.fillStyle = '#fff'; pg.fillRect(0, 0, W, H); pg.globalCompositeOperation = 'destination-out'; pg.drawImage(beach, 0, 0);
-      const grow = (src, r) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); for (let a = 0; a < 16; a++) for (const rr of [r, r * 0.5]) g.drawImage(src, Math.cos(a * Math.PI / 8) * rr, Math.sin(a * Math.PI / 8) * rr); g.drawImage(src, 0, 0); return c; };
-      const sh = document.createElement('canvas'); sh.width = W; sh.height = H; const sg = sh.getContext('2d'); sg.filter = 'blur(' + (5 * K) + 'px)'; sg.drawImage(pave, 0, 3 * K); sg.filter = 'none'; sg.globalCompositeOperation = 'source-in'; sg.fillStyle = 'rgba(0,0,0,.55)'; sg.fillRect(0, 0, W, H); sg.globalCompositeOperation = 'destination-in'; sg.drawImage(beach, 0, 0);
-      ctx.drawImage(sh, 0, 0);
-      const band = (r, col) => { const c = grow(beach, r * K), g = c.getContext('2d'); g.globalCompositeOperation = 'destination-in'; g.drawImage(pave, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, W, H); ctx.drawImage(c, 0, 0); };
-      band(7, '#3a3f48'); band(5.5, '#5d636d'); band(1.6, '#9aa2ad'); }
+    if (GEN.coastLip) { // Round 461: no strip: the paving ends in a drawn concrete lip, crisp at canvas resolution, with a soft shadow on the sand
+      const cv = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
+      const grow = (src, r) => { const c = cv(), g = c.getContext('2d'); for (let a = 0; a < 16; a++) for (const rr of [r, r * 0.5]) g.drawImage(src, Math.cos(a * Math.PI / 8) * rr, Math.sin(a * Math.PI / 8) * rr); g.drawImage(src, 0, 0); return c; };
+      // sand: the sand that shows; caster: what throws the shadow onto it (all of the rest, or only the streets later)
+      const lipWith = (sand, caster) => { const out = cv(), og = out.getContext('2d'); og.fillStyle = '#fff'; og.fillRect(0, 0, W, H); og.globalCompositeOperation = 'destination-out'; og.drawImage(sand, 0, 0);
+        const src = caster || out, sh = cv(), sg = sh.getContext('2d'); sg.filter = 'blur(' + (5 * K) + 'px)'; sg.drawImage(src, 0, 3 * K); sg.filter = 'none'; sg.globalCompositeOperation = 'source-in'; sg.fillStyle = 'rgba(0,0,0,.55)'; sg.fillRect(0, 0, W, H); sg.globalCompositeOperation = 'destination-in'; sg.drawImage(sand, 0, 0); ctx.drawImage(sh, 0, 0);
+        for (const [r, col] of [[7, '#3a3f48'], [5.5, '#5d636d'], [1.6, '#9aa2ad']]) { const c = grow(sand, r * K), g = c.getContext('2d'); g.globalCompositeOperation = 'destination-in'; g.drawImage(caster || out, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, W, H); ctx.drawImage(c, 0, 0); } };
+      lipWith(beach, null);
+      // (the streets are drawn later, over the sand where they reach it: their edge against the sand gets the same lip, on the street's side)
+      coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(beach, 0, 0); sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); lipWith(sand, road); return grow(sand, 10 * K); }; }
     else if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
   } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
@@ -1710,7 +1718,11 @@ function paintChronoRoom(canvas, key) {
       ctx.save(); ctx.globalAlpha = 0.75; ctx.drawImage(band, 0, 0); ctx.restore(); }
     if (curbArt) { // Round 420: the curb, a kerb-stone strip along every road edge, on the sidewalk side (the road mask turned inside out)
       const inv = document.createElement('canvas'); inv.width = W; inv.height = H; const ig = inv.getContext('2d'); ig.fillStyle = '#fff'; ig.fillRect(0, 0, W, H); ig.globalCompositeOperation = 'destination-out'; ig.drawImage(f.shape, 0, 0);
-      const [cwx, cwy] = GEN.world(key); cityEdgeAlong(ctx, inv, 0, 0, K, curbArt, 7, cwx, cwy); }
+      const [cwx, cwy] = GEN.world(key);
+      if (coastBeachMask) { // Round 461 (owner: "need to fix these edges too"): no kerb strip on the sand where a street meets the beach; the beach's concrete lip runs along the street there instead
+        const cl = document.createElement('canvas'); cl.width = W; cl.height = H; const cg = cl.getContext('2d'); cityEdgeAlong(cg, inv, 0, 0, K, curbArt, 7, cwx, cwy);
+        const near = coastLipDraw(f.shape); cg.globalCompositeOperation = 'destination-out'; cg.drawImage(near, 0, 0); ctx.drawImage(cl, 0, 0); } // Round 462 (owner: "you put an edge over an edge"): the kerb stops where the lip begins, never on it or across it
+      else cityEdgeAlong(ctx, inv, 0, 0, K, curbArt, 7, cwx, cwy); }
     if (GEN.topdown) { // Round 420 (owner: "add lanes to the road paths"): a dashed centre line down each main road (two lanes), stopping at the crossings
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H);
       for (const sh of plan.shapes) if (sh.t === 'poly' && !sh.pave) { const xs = sh.pts.map(q => q[0]), ys = sh.pts.map(q => q[1]); ctx.rect(Math.max(...xs) * K + 10 * K, (Math.min(...ys) - 10) * K, -(Math.max(...xs) - Math.min(...xs) + 20) * K, (Math.max(...ys) - Math.min(...ys) + 20) * K); }
