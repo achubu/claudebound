@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 460: edges back to Round 457
+
+Owner: "the beach edge looks horrible, all edges are now looking way worse than before". The kerbs, park and yard rims and
+the shore are back exactly as they were in Round 457: the same strip art (`curb-stone`, `curb-granite`, `curb-concrete`;
+`edge-granite`, `edge-kerb`, `edge-grass`, `edge-railing`; `shore-crumble`, `shore-seawall`) and the same drawing code
+(`cityEdgeAlong`, checked identical to Round 457's). The Round 458 strips and the Round 459 coping are in `unused assets/`
+(the planter rim as `edge-planter-round458`, beside an older file of that name). Round 459's other changes stay: doors
+only on the ground floor, hand-marked window gaps, stepped floors, the two strip-window walls removed, waypoint rings.
+
 ## Round 459: clean edges, a plain beach edge, doors on the ground floor, windows that step and never get cut, waypoint rings
 
 Owner: "your edgework is shoddy all over"; "those beach borders are all wrong looking"; "buildings should only use a sprite

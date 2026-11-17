@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 459) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 460) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -129,9 +129,11 @@ change set.
   Round 457 (owner): **an interactable object's picture never overlaps a building or any other sprite** (cars, signs, lamps,
   clutter, landmarks, yard pieces): `citySpriteBoxes` / `cityItemBox`, enforced in `assets/city-gen.js` (`cityFixSpot`), which
   also keeps objects off the street; every room gets a square. Add new sprite kinds to `citySpriteBoxes`.
-  Round 459: borders are drawn as straight runs mitred at the joins (`cityEdgeAlong`); wall pictures with doors
+  Round 459: wall pictures with doors
   (`CITY_DOOR_WALLS`) only on the ground floor; a new wall needs its gaps (`CITY_TD_GAPS`) checked by eye over a ruler, as the
   tool's measure misreads dark or lit windows; floors step their windows (`fitRow`'s `prev`).
+  Round 460 (owner): the edges (kerbs, park and yard rims, shore: art and `cityEdgeAlong`) are as in Round 457; the Round 458
+  strips and Round 459's mitred drawing looked worse to the owner. Don't change edges without showing the owner first.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):

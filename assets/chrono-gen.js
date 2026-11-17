@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '459',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '460',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -683,7 +683,7 @@ function genWorld(seed) {
 // tall); car (seen from above, facing east); tree (seen from above); sidewalk (Round 407: seamless paving; the first is
 // the city's main paving, the rest by block); edge (Round 409: a border strip run round parks, outer side at the top);
 // trim (Round 410: a border strip framing the squares where objects stand). Prompts: tools/art-refresh/city-topdown-prompts.md.
-const CITY_TD_ART = { 'market-wall': ['market-flats'], 'mall-wall': ['mall-glass-cyan', 'mall-glass-magenta'], 'mall-roof': ['mall-skylights'], 'mall-shop': ['mall-entrance'], 'waterfront-edge': ['shore-coping'] /* Round 459 (owner: "those beach borders are all wrong looking"): a plain concrete coping where the paving meets the sand, like the kerbs; tetrapods belong in the surf and steel piling broke up on the curves */, curb: ['curb-composite', 'curb-poured', 'curb-steel'], 'park-edge': ['edge-planter', 'edge-glass', 'edge-slab'], sidewalk: ['walk-slabs', 'walk-plates', 'walk-runbond', 'walk-hex', 'walk-poured'], roof: ['roof-tar', 'roof-plate', 'roof-slab', 'roof-finegravel', 'roof-bitumen', 'roof-tarchip', 'roof-seam', 'roof-rubber'], wall: ['wall-concrete', 'wall-panel', 'wall-porthole'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3', 'ac-twin'], 'prop-vent': ['vent-1', 'vent-3', 'vent-mesh'], 'prop-tank': ['tank-1', 'tank-sphere', 'tank-cylinder'], 'prop-stairs': ['stairs-1', 'stairs-hut', 'stairs-pod'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-grid'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange', 'sign-h-zigzag', 'sign-h-rings', 'sign-h-bulbs', 'sign-h-spiral'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red', 'sign-v-tubes', 'sign-v-awning', 'sign-v-bulbs'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-wreck', 'truck-wreck'], tree: ['tree-1', 'tree-2', 'tree-3', 'tree-oak', 'tree-cypress', 'tree-dead', 'tree-glow', 'bush-flower', 'grass-reeds', 'brambles'], park: ['park-clover', 'park-cracked', 'park-gravel', 'park-leaves', 'park-turf'], 'roof-hole': ['hole-round', 'hole-crack', 'hole-double', 'hole-tear'], 'ruin-wall': ['ruin-concrete', 'ruin-cladding', 'ruin-panel', 'ruin-panel-blown', 'ruin-girder'], rubble: ['rubble-slabs', 'rubble-rebar', 'rubble-masonry', 'rubble-trolley', 'rubble-barrel', 'rubble-glass', 'rubble-cornice', 'rubble-panels'], lamp: ['lamp-arm', 'lamp-twin', 'lamp-led'], 'traffic-light': ['light-signal'], 'sign-traffic': ['sign-noentry', 'sign-holo'], cargo: ['container-red', 'container-blue', 'container-stack', 'drums', 'pods', 'hover-pallet', 'cable-drum', 'loader'], 'home-wall': ['home-shanty', 'home-pods'], 'home-roof': [], 'prop-heater': [], 'tech-wall': ['tech-megablock', 'tech-glass', 'tech-vents'], 'tech-roof': ['tech-led-plates', 'tech-glass-grid', 'tech-solar'], 'tech-shop': ['tech-lobby', 'tech-revolving'], 'garden-wall': ['garden-greenhouse', 'garden-planters', 'garden-moss'], 'garden-roof': ['garden-glass', 'garden-hydro'], 'garden-shop': ['garden-flowers', 'garden-plantshop'], 'market-roof': ['market-cables'], 'market-shop': ['market-food', 'market-screens', 'market-pawn', 'market-tech'], clutter: ['dumpster', 'bags', 'vending', 'barricade', 'barrier', 'tyres', 'bench-led', 'recycler', 'pay-bollard'], landmark: ['fountain', 'billboard', 'hovercar', 'sculpture', 'metro', 'holo-stage', 'mech', 'pylon', 'holo-beam'] };
+const CITY_TD_ART = { 'market-wall': ['market-flats'], 'mall-wall': ['mall-glass-cyan', 'mall-glass-magenta'], 'mall-roof': ['mall-skylights'], 'mall-shop': ['mall-entrance'], 'waterfront-edge': ['shore-crumble', 'shore-seawall'], curb: ['curb-stone', 'curb-granite', 'curb-concrete'], 'park-edge': ['edge-granite', 'edge-kerb', 'edge-grass', 'edge-railing'], sidewalk: ['walk-slabs', 'walk-plates', 'walk-runbond', 'walk-hex', 'walk-poured'], roof: ['roof-tar', 'roof-plate', 'roof-slab', 'roof-finegravel', 'roof-bitumen', 'roof-tarchip', 'roof-seam', 'roof-rubber'], wall: ['wall-concrete', 'wall-panel', 'wall-porthole'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3', 'ac-twin'], 'prop-vent': ['vent-1', 'vent-3', 'vent-mesh'], 'prop-tank': ['tank-1', 'tank-sphere', 'tank-cylinder'], 'prop-stairs': ['stairs-1', 'stairs-hut', 'stairs-pod'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-grid'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange', 'sign-h-zigzag', 'sign-h-rings', 'sign-h-bulbs', 'sign-h-spiral'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red', 'sign-v-tubes', 'sign-v-awning', 'sign-v-bulbs'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-wreck', 'truck-wreck'], tree: ['tree-1', 'tree-2', 'tree-3', 'tree-oak', 'tree-cypress', 'tree-dead', 'tree-glow', 'bush-flower', 'grass-reeds', 'brambles'], park: ['park-clover', 'park-cracked', 'park-gravel', 'park-leaves', 'park-turf'], 'roof-hole': ['hole-round', 'hole-crack', 'hole-double', 'hole-tear'], 'ruin-wall': ['ruin-concrete', 'ruin-cladding', 'ruin-panel', 'ruin-panel-blown', 'ruin-girder'], rubble: ['rubble-slabs', 'rubble-rebar', 'rubble-masonry', 'rubble-trolley', 'rubble-barrel', 'rubble-glass', 'rubble-cornice', 'rubble-panels'], lamp: ['lamp-arm', 'lamp-twin', 'lamp-led'], 'traffic-light': ['light-signal'], 'sign-traffic': ['sign-noentry', 'sign-holo'], cargo: ['container-red', 'container-blue', 'container-stack', 'drums', 'pods', 'hover-pallet', 'cable-drum', 'loader'], 'home-wall': ['home-shanty', 'home-pods'], 'home-roof': [], 'prop-heater': [], 'tech-wall': ['tech-megablock', 'tech-glass', 'tech-vents'], 'tech-roof': ['tech-led-plates', 'tech-glass-grid', 'tech-solar'], 'tech-shop': ['tech-lobby', 'tech-revolving'], 'garden-wall': ['garden-greenhouse', 'garden-planters', 'garden-moss'], 'garden-roof': ['garden-glass', 'garden-hydro'], 'garden-shop': ['garden-flowers', 'garden-plantshop'], 'market-roof': ['market-cables'], 'market-shop': ['market-food', 'market-screens', 'market-pawn', 'market-tech'], clutter: ['dumpster', 'bags', 'vending', 'barricade', 'barrier', 'tyres', 'bench-led', 'recycler', 'pay-bollard'], landmark: ['fountain', 'billboard', 'hovercar', 'sculpture', 'metro', 'holo-stage', 'mech', 'pylon', 'holo-beam'] };
 // Round 415: for each wall and shopfront strip, the columns (image px) of plain wall between windows (tools/prepare_city_art.py).
 // Round 459: the gaps of the walls from the Round 452-454 sheets were marked by hand (a ruler over each picture: pillars,
 // seams and plain wall between window bays); the measuring tool took the flat insides of dark or lit windows for plain wall
@@ -736,66 +736,23 @@ function cityTdArtNames() { return Object.entries(CITY_TD_ART).flatMap(([slot, l
 // px, the crossing points placed by the mask's own alpha so curves come out smooth, and each little segment draws a
 // slice of the strip turned to the outline, its top on the line and its depth T going inward. The slice is taken from the
 // strip at the segment's world position, so straight runs read as one strip and it runs on across rooms.
-function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy, tol) {
-  // Round 459 (owner: "your edgework is shoddy all over"): the outline is no longer drawn as hundreds of 4px slices, each
-  // turned on its own (they overlapped and gapped at every corner and stepped along curves). It is traced into whole
-  // lines (marching squares, chained), straightened (Douglas-Peucker, 0.9px; a corner the grid cut off is put back), and
-  // each straight run is one piece of strip, mitred where it meets the next like a picture frame: one clean diagonal seam
-  // per corner. A run takes its place in the strip from its own line in world px, so a straight edge carries on across rooms.
+function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy) {
   const g = mask.getContext && mask.getContext('2d'); if (!g || !g.getImageData || !art || !art.naturalWidth) return;
   const mw = mask.width, mh = mask.height, D = g.getImageData(0, 0, mw, mh).data, st = 4, nx = Math.floor(mw / (st * K)), ny = Math.floor(mh / (st * K));
   const A = (i, j) => D[(Math.min(mh - 1, Math.round(j * st * K)) * mw + Math.min(mw - 1, Math.round(i * st * K))) * 4 + 3];
-  const inside = (x, y) => { const tx = Math.round((x - ox) * K), ty = Math.round((y - oy) * K); return tx >= 0 && ty >= 0 && tx < mw && ty < mh && D[(ty * mw + tx) * 4 + 3] > 127; };
   const val = []; for (let j = 0; j <= ny; j++) { const row = []; for (let i = 0; i <= nx; i++) row.push(A(i, j)); val.push(row); }
-  const cross = (va, vb) => va === vb ? 0.5 : Math.max(0, Math.min(1, (127.5 - va) / (vb - va)));
-  // 1. crossings, one per grid edge ('h' along x, 'v' along y), and the segments joining them
-  const P = new Map(), segs = [], at = id => P.get(id);
-  const hE = (i, j) => { const id = 'h' + i + ',' + j; if (!P.has(id)) P.set(id, [ox + (i + cross(val[j][i], val[j][i + 1])) * st, oy + j * st]); return id; };
-  const vE = (i, j) => { const id = 'v' + i + ',' + j; if (!P.has(id)) P.set(id, [ox + i * st, oy + (j + cross(val[j][i], val[j + 1][i])) * st]); return id; };
+  const k = art.height / T, cross = (va, vb) => va === vb ? 0.5 : Math.max(0, Math.min(1, (127.5 - va) / (vb - va)));
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
-    const a = val[j][i] > 127, b = val[j][i + 1] > 127, c = val[j + 1][i + 1] > 127, d = val[j + 1][i] > 127; if (a === b && b === c && c === d) continue;
-    const e = []; if (a !== b) e.push(hE(i, j)); if (b !== c) e.push(vE(i + 1, j)); if (c !== d) e.push(hE(i, j + 1)); if (d !== a) e.push(vE(i, j));
-    for (let q = 0; q + 1 < e.length; q += 2) segs.push([e[q], e[q + 1]]); }
-  // 2. chained into lines: open ones (ending at the mask's edge) first, then closed loops
-  const by = new Map(); segs.forEach((sg, n) => { for (const id of sg) (by.get(id) || by.set(id, []).get(id)).push(n); });
-  const used = new Uint8Array(segs.length), lines = [];
-  const walk = (n0, from) => { const ids = [from]; let n = n0, cur = from; while (n != null && !used[n]) { used[n] = 1; const nxt = segs[n][0] === cur ? segs[n][1] : segs[n][0]; ids.push(nxt); cur = nxt; n = (by.get(cur) || []).find(m => !used[m]); } return ids; };
-  for (const [id, list] of by) if (list.length === 1 && !used[list[0]]) lines.push({ pts: walk(list[0], id).map(at), closed: false });
-  segs.forEach((sg, n) => { if (!used[n]) { const ids = walk(n, sg[0]); ids.pop(); lines.push({ pts: ids.map(at), closed: true }); } });
-  // 3. straightened
-  const dp = (pts, tol) => { if (pts.length < 3) return pts.slice(); const [x0, y0] = pts[0], [x1, y1] = pts[pts.length - 1], L = Math.hypot(x1 - x0, y1 - y0) || 1e-9; let best = -1, bi = 0;
-    for (let i = 1; i < pts.length - 1; i++) { const d = Math.abs((x1 - x0) * (y0 - pts[i][1]) - (x0 - pts[i][0]) * (y1 - y0)) / L; if (d > best) { best = d; bi = i; } }
-    return best <= tol ? [pts[0], pts[pts.length - 1]] : [...dp(pts.slice(0, bi + 1), tol).slice(0, -1), ...dp(pts.slice(bi), tol)]; };
-  const TOL = tol || 0.9; // (the coast passes more: its outline wanders, and short runs of a regular strip read as chewed)
-  for (const ln of lines) { let p = ln.pts; if (p.length < 2) { ln.pts = []; continue; }
-    if (ln.closed) { let far = 0, fd = -1; p.forEach((q, i) => { const d = Math.hypot(q[0] - p[0][0], q[1] - p[0][1]); if (d > fd) { fd = d; far = i; } }); const h1 = dp(p.slice(0, far + 1), TOL), h2 = dp([...p.slice(far), p[0]], TOL); p = [...h1.slice(0, -1), ...h2.slice(0, -1)]; }
-    else p = dp(p, TOL);
-    // a corner the grid cut off (a short run between two that turn sharply) is put back where its neighbours' lines meet
-    for (let guard = 0, done = false; !done && guard < 200; guard++) { done = true; const n = p.length;
-      for (let i = 0; i < n && n > 3; i++) { if (!ln.closed && (i === 0 || i >= n - 2)) continue; const a0 = p[(i - 1 + n) % n], a1 = p[i], b0 = p[(i + 1) % n], b1 = p[(i + 2) % n];
-        if (Math.hypot(b0[0] - a1[0], b0[1] - a1[1]) > 7) continue; const u = [a1[0] - a0[0], a1[1] - a0[1]], v = [b1[0] - b0[0], b1[1] - b0[1]], den = u[0] * v[1] - u[1] * v[0];
-        if (Math.abs(den) < 1e-6 || Math.abs(den) / (Math.hypot(...u) * Math.hypot(...v)) < 0.7) continue; // only a real corner (45 degrees or more)
-        const t = ((b0[0] - a1[0]) * v[1] - (b0[1] - a1[1]) * v[0]) / den, X = [a1[0] + u[0] * t, a1[1] + u[1] * t]; if (Math.hypot(X[0] - (a1[0] + b0[0]) / 2, X[1] - (a1[1] + b0[1]) / 2) > 8) continue;
-        if (i + 1 < n) p.splice(i, 2, X); else { p[i] = X; p.splice(0, 1); } done = false; break; } }
-    ln.pts = p; }
-  // 4. drawn: the inside to the left of travel (the strip runs inward from the line), mitred at each joint
-  const k = art.height / T, AW = art.width / k;
-  const run = (s0, x0, len) => { let x = x0, sx = ((s0 % AW) + AW) % AW; while (x < x0 + len - 0.01) { const piece = Math.min(AW - sx, x0 + len - x); ctx.drawImage(art, sx * k, 0, Math.max(0.5, piece * k), art.height, x * K, 0, piece * K + 0.6, T * K); x += piece; sx = 0; } };
-  for (const ln of lines) { let p = ln.pts; const n = p.length; if (n < 2) continue;
-    let li = 0, ll = -1; for (let i = 0; i + 1 < n + (ln.closed ? 1 : 0); i++) { const q0 = p[i], q1 = p[(i + 1) % n], L = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]); if (L > ll) { ll = L; li = i; } }
-    { const q0 = p[li], q1 = p[(li + 1) % n], L = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]) || 1, mx = (q0[0] + q1[0]) / 2, my = (q0[1] + q1[1]) / 2; if (!inside(mx - (q1[1] - q0[1]) / L * 2.5, my + (q1[0] - q0[0]) / L * 2.5)) p = p.slice().reverse(); }
-    const m = p.length, segN = ln.closed ? m : m - 1, dir = i => { const q0 = p[i % m], q1 = p[(i + 1) % m], L = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]) || 1; return [(q1[0] - q0[0]) / L, (q1[1] - q0[1]) / L, L]; };
-    const nrm = u => [-u[1], u[0]];
-    const miter = i => { // at point i: from the run before it and the run after it
-      if (!ln.closed && (i === 0 || i === m - 1)) return nrm(dir(i === 0 ? 0 : m - 2));
-      const n0 = nrm(dir((i - 1 + m) % m)), n1 = nrm(dir(i % m)), b = [n0[0] + n1[0], n0[1] + n1[1]], dd = b[0] * n1[0] + b[1] * n1[1];
-      if (dd < 0.25) return n1; const f = Math.min(4, 1 / dd); return [b[0] * f, b[1] * f]; };
-    for (let i = 0; i < segN; i++) { const [ux, uy, L] = dir(i); if (L < 0.05) continue; const q0 = p[i], q1 = p[(i + 1) % m], m0 = miter(i), m1 = miter((i + 1) % m), e = 0.5;
-      ctx.save(); ctx.beginPath(); // the run's own shape, a little long at each end so neighbours overlap at the seam (no hairline)
-      ctx.moveTo((q0[0] - ux * e) * K, (q0[1] - uy * e) * K); ctx.lineTo((q1[0] + ux * e) * K, (q1[1] + uy * e) * K);
-      ctx.lineTo((q1[0] + m1[0] * T + ux * e) * K, (q1[1] + m1[1] * T + uy * e) * K); ctx.lineTo((q0[0] + m0[0] * T - ux * e) * K, (q0[1] + m0[1] * T - uy * e) * K); ctx.closePath(); ctx.clip();
-      ctx.translate(q0[0] * K, q0[1] * K); ctx.rotate(Math.atan2(uy, ux));
-      const ext = T * 4 + 2, s0 = (q0[0] + wx * 800) * ux + (q0[1] + wy * 500) * uy; run(s0 - ext, -ext, L + 2 * ext); ctx.restore(); } }
+    const a = val[j][i], b = val[j][i + 1], c = val[j + 1][i + 1], d = val[j + 1][i], A2 = a > 127, B2 = b > 127, C2 = c > 127, D2 = d > 127; if (A2 === B2 && B2 === C2 && C2 === D2) continue;
+    const pts = []; if (A2 !== B2) pts.push([i + cross(a, b), j]); if (B2 !== C2) pts.push([i + 1, j + cross(b, c)]); if (C2 !== D2) pts.push([i + 1 - cross(c, d), j + 1]); if (D2 !== A2) pts.push([i, j + 1 - cross(d, a)]);
+    for (let q = 0; q + 1 < pts.length; q += 2) { const p0 = pts[q], p1 = pts[q + 1], x0 = ox + p0[0] * st, y0 = oy + p0[1] * st, x1 = ox + p1[0] * st, y1 = oy + p1[1] * st, L = Math.hypot(x1 - x0, y1 - y0); if (L < 0.01) continue;
+      let ang = Math.atan2(y1 - y0, x1 - x0); const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      // the strip goes inward: turn it round if the inside is on the other side
+      const tx = Math.round((cx - ox - Math.sin(ang) * 3) * K), ty = Math.round((cy - oy + Math.cos(ang) * 3) * K);
+      if (!(tx >= 0 && ty >= 0 && tx < mw && ty < mh && D[(ty * mw + tx) * 4 + 3] > 127)) ang += Math.PI;
+      const ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang)), sAlong = (ca >= sa ? wx * 800 + cx : wy * 500 + cy);
+      const sx = (((sAlong - L / 2) * k) % art.width + art.width) % art.width, sw = Math.min(art.width - sx, (L + 1.2) * k);
+      ctx.save(); ctx.translate(cx * K, cy * K); ctx.rotate(ang); ctx.drawImage(art, sx, 0, sw, art.height, (-L / 2 - 0.6) * K, 0, sw / k * K, T * K); ctx.restore(); } }
 }
 // Round 415: where a park's trees stand and where cars park, shared by the painter and the walk mask.
 function cityParkTrees(rr, bx, bw, bh) { const out = [], n = Math.min(4 + Math.floor(rr() * 5), Math.max(1, Math.round(bw * bh / 3500))); /* Round 445: fewer in a pocket park */ for (let i = 0; i < n; i++) out.push([bx[0] + 14 + rr() * (bw - 28), bx[1] + 14 + rr() * (bh - 28), 12 + rr() * 12]); return out; }
@@ -1610,7 +1567,7 @@ function paintChronoRoom(canvas, key) {
     ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore();                     // foam
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART['waterfront-edge'] || []).map(n => imgs[cityArtPath('waterfront-edge', n)]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
-    if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 9, wx0, wy0, 2.5); else { ring(chronoTint(beach, '#0b0e14'), 3); }
+    if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
   } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
