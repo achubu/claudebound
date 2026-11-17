@@ -169,19 +169,19 @@
        "scale": null,
        "files": [
         {
-         "name": "curb-composite",
-         "src": "assets/environment/city-gen/surfaces/curb/curb-composite.webp",
-         "bytes": 8820
+         "name": "curb-concrete",
+         "src": "assets/environment/city-gen/surfaces/curb/curb-concrete.webp",
+         "bytes": 16450
         },
         {
-         "name": "curb-poured",
-         "src": "assets/environment/city-gen/surfaces/curb/curb-poured.webp",
-         "bytes": 27286
+         "name": "curb-granite",
+         "src": "assets/environment/city-gen/surfaces/curb/curb-granite.webp",
+         "bytes": 26884
         },
         {
-         "name": "curb-steel",
-         "src": "assets/environment/city-gen/surfaces/curb/curb-steel.webp",
-         "bytes": 19944
+         "name": "curb-stone",
+         "src": "assets/environment/city-gen/surfaces/curb/curb-stone.webp",
+         "bytes": 42138
         }
        ]
       },
@@ -194,19 +194,24 @@
        "scale": null,
        "files": [
         {
-         "name": "edge-glass",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-glass.webp",
-         "bytes": 6038
+         "name": "edge-granite",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-granite.webp",
+         "bytes": 11872
         },
         {
-         "name": "edge-planter",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-planter.webp",
-         "bytes": 7630
+         "name": "edge-grass",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-grass.webp",
+         "bytes": 59632
         },
         {
-         "name": "edge-slab",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-slab.webp",
-         "bytes": 3208
+         "name": "edge-kerb",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-kerb.webp",
+         "bytes": 42138
+        },
+        {
+         "name": "edge-railing",
+         "src": "assets/environment/city-gen/surfaces/park-edge/edge-railing.webp",
+         "bytes": 34146
         }
        ]
       },
@@ -219,9 +224,14 @@
        "scale": null,
        "files": [
         {
-         "name": "shore-coping",
-         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-coping.webp",
-         "bytes": 27286
+         "name": "shore-crumble",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-crumble.webp",
+         "bytes": 62734
+        },
+        {
+         "name": "shore-seawall",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-seawall.webp",
+         "bytes": 27926
         }
        ]
       }
