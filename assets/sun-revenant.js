@@ -109,7 +109,7 @@ if (typeof document !== 'undefined' && document.createElement && document.head) 
   const style = document.createElement('style');
   style.textContent = `
 .enemy-node .wildlife-sprite.pose-sprite,.battle-monster .wildlife-sprite.pose-sprite,.compact-monster .wildlife-sprite.pose-sprite{background-position:0 0;animation:revenantSway 2.6s ease-in-out infinite}
-.enemy-node .wildlife-sprite.pose-sprite.has-walk{background-image:var(--walk-sheet)!important;animation:wildlifeFrames 1.1s steps(1,end) infinite}
+.enemy-node .wildlife-sprite.pose-sprite.has-walk{background-image:var(--walk-sheet)!important;animation:wildlifeFrames 1.55s steps(1,end) infinite}
 .wildlife-sprite.pose-sprite.pose-attack{background-position:var(--pose-attack,33.333333%) 0;animation:revenantLunge .65s ease-out}
 .wildlife-sprite.pose-sprite.pose-hurt{background-position:var(--pose-hurt,100%) 0;animation:revenantRecoil .42s ease-out}
 #battleModal .compact-monster .wildlife-sprite.pose-sprite.pose-attack{background-position:var(--pose-attack,33.333333%) 0}#battleModal .compact-monster .wildlife-sprite.pose-sprite.pose-hurt{background-position:var(--pose-hurt,100%) 0}
