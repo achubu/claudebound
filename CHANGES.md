@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 463: 3x3-bitmask streets and kerbs (built, switched off until the owner picks)
+
+Owner: "the curb is not perfectly placed covering the intersection between texture tiles"; "it also doesn't touch the beach
+edge"; "are you using 3x3 Bitmasking for this? can you implement it?". It was not: the kerb was a strip bent along the
+road's traced outline, lying beside the seam, and stopped 10px short of the sand.
+
+- `GEN.gridKerb` (off): the road surface is cut from the city's 25px street cells (`cityGridRoad`). Each cell reads its 3x3
+  neighbourhood: a corner with no street on either side is rounded (12px), a non-street cell with street on two sides of a
+  corner gets a fillet. In the room a cell counts only where the plan's own drawing has road at its middle (so stubs the
+  plan trims stay trimmed). The kerb (`cityGridKerb`) follows those edges: straight runs as single pieces of strip and
+  each corner as an arc of it, centred on the edge (half on the road, half on the sidewalk or the sand), the strip taken
+  from world position so runs carry on across rooms. Where a street meets the beach the kerb lies on that seam.
+- Shown to the owner side by side before switching on. `CITY_FLAGS='{"gridKerb":true}'` renders it with `city-atlas`.
+- Also retriggers the GitHub Pages deploy that failed for Round 462.
+
 ## Round 462: streets meet the beach with the lip; rooftop kit only on plain roofs
 
 Owner: "need to fix these edges too" (a road's kerb on the sand at a corner); "you put an edge over an edge in a way that

@@ -736,6 +736,52 @@ function cityTdArtNames() { return Object.entries(CITY_TD_ART).flatMap(([slot, l
 // px, the crossing points placed by the mask's own alpha so curves come out smooth, and each little segment draws a
 // slice of the strip turned to the outline, its top on the line and its depth T going inward. The slice is taken from the
 // strip at the segment's world position, so straight runs read as one strip and it runs on across rooms.
+// Round 463 (owner: "are you using 3x3 bitmasking for this? can you implement it?"): the streets and their kerbs from the
+// city's 25px cells. Each street cell reads its 3x3 neighbourhood: a corner with no street on either side is rounded off
+// (radius r), and a sidewalk cell with street on two sides of a corner gets a fillet there; so the road's edge always lies
+// on a grid line or on one of those arcs. The kerb is laid centred on that edge (half over the road, half over what is
+// beside it): each straight run is one piece of strip, each corner an arc of it, the strip taken from world position.
+function cityGridRoad(road, x0, y0, nx, ny, C, r, K, W, H) { // road(cx, cy) over cells x0..x0+nx; returns the road's mask
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.fillStyle = '#fff';
+  for (let cy = -2; cy < ny + 2; cy++) for (let cx = -2; cx < nx + 2; cx++) { const X = cx * C * K, Y = cy * C * K, S = C * K, R = r * K, at = (a, b) => road(x0 + cx + a, y0 + cy + b);
+    if (at(0, 0)) { const tl = !at(-1, 0) && !at(0, -1) ? R : 0, tr = !at(1, 0) && !at(0, -1) ? R : 0, br = !at(1, 0) && !at(0, 1) ? R : 0, bl = !at(-1, 0) && !at(0, 1) ? R : 0;
+      g.beginPath(); g.moveTo(X + tl, Y); g.lineTo(X + S - tr, Y); if (tr) g.arc(X + S - tr, Y + tr, tr, -Math.PI / 2, 0); g.lineTo(X + S, Y + S - br); if (br) g.arc(X + S - br, Y + S - br, br, 0, Math.PI / 2);
+      g.lineTo(X + bl, Y + S); if (bl) g.arc(X + bl, Y + S - bl, bl, Math.PI / 2, Math.PI); g.lineTo(X, Y + tl); if (tl) g.arc(X + tl, Y + tl, tl, Math.PI, Math.PI * 1.5); g.closePath(); g.fill(); }
+    else for (const [a, b, px, py, a0, a1] of [[-1, -1, X, Y, Math.PI * 1.5, Math.PI], [1, -1, X + S, Y, Math.PI, Math.PI / 2], [1, 1, X + S, Y + S, Math.PI / 2, 0], [-1, 1, X, Y + S, 0, -Math.PI / 2]]) {
+      if (!(at(a, 0) && at(0, b))) continue; // a fillet in this corner: the corner square less a quarter circle centred r in from it
+      const cx2 = px - a * R, cy2 = py - b * R, A = Math.atan2(0, px - cx2), B = Math.atan2(py - cy2, 0); let dl = B - A; while (dl > Math.PI) dl -= 2 * Math.PI; while (dl <= -Math.PI) dl += 2 * Math.PI; void a0; void a1;
+      g.beginPath(); g.moveTo(px, py); g.lineTo(px, cy2); g.arc(cx2, cy2, R, A, B, dl < 0); g.closePath(); g.fill(); } }
+  return c; }
+function cityGridKerb(ctx, road, x0, y0, nx, ny, C, r, K, art, T, wx0, wy0) { // wx0, wy0: the room's origin in world px
+  if (!art || !art.naturalWidth) return; const key = (x, y) => x + ',' + y, out = new Map();
+  for (let cy = -2; cy < ny + 2; cy++) for (let cx = -2; cx < nx + 2; cx++) { if (!road(x0 + cx, y0 + cy)) continue; const at = (a, b) => road(x0 + cx + a, y0 + cy + b);
+    // edges with the road on their right (screen y down)
+    if (!at(0, -1)) out.set(key(cx, cy), [cx + 1, cy]); if (!at(1, 0)) out.set(key(cx + 1, cy), [cx + 1, cy + 1]); if (!at(0, 1)) out.set(key(cx + 1, cy + 1), [cx, cy + 1]); if (!at(-1, 0)) out.set(key(cx, cy + 1), [cx, cy]); }
+  // (two edges from one point only where streets touch at a corner; the Map keeps one, the other loop is found from its own start)
+  const seen = new Set(), loops = [], into = new Set([...out.values()].map(v => key(...v)));
+  const walk = k0 => { const pts = []; let k = k0, guard = 0; while (!seen.has(k) && guard++ < 5000) { seen.add(k); const [x, y] = k.split(',').map(Number); pts.push([x, y]); if (!out.has(k)) break; k = key(...out.get(k)); } return { pts, closed: k === k0 && out.has(pts[pts.length - 1].join(',')) }; };
+  for (const [k0] of out) if (!into.has(k0)) loops.push(walk(k0)); // open lines first (they run off the area), from their start
+  for (const [k0] of out) if (!seen.has(k0)) loops.push(walk(k0));
+  const k = art.height / T, AW = art.width / k, S = C, R = r;
+  const strip = (s0, len) => { let x = 0, sx = ((s0 % AW) + AW) % AW; while (x < len - 0.01) { const piece = Math.min(AW - sx, len - x); ctx.drawImage(art, sx * k, 0, Math.max(0.5, piece * k), art.height, x * K, 0, piece * K + 0.6, T * K); x += piece; sx = 0; } };
+  for (const { pts, closed } of loops) { const n = pts.length; if (n < 2) continue; // corners: where the direction changes
+    const dir = i => { const a = pts[((i % n) + n) % n], b = pts[(((i + 1) % n) + n) % n]; return [Math.sign(b[0] - a[0]), Math.sign(b[1] - a[1])]; }, corners = [];
+    for (let i = closed ? 0 : 1; i < (closed ? n : n - 1); i++) { const d0 = dir(i - 1), d1 = dir(i); if (d0[0] !== d1[0] || d0[1] !== d1[1]) corners.push(i); }
+    const ends = closed ? corners : [0, ...corners, n - 1]; if (closed && !corners.length) continue;
+    for (let j = 0; j < (closed ? ends.length : ends.length - 1); j++) { const i0 = ends[j], i1 = ends[(j + 1) % ends.length], d = dir(i0), L = closed ? ((((i1 - i0) % n) + n) % n || n) : i1 - i0; if (L <= 0) continue;
+      const cutA = closed || j > 0 ? R : 0, cutB = closed || j < ends.length - 2 ? R : 0;
+      const A = [pts[i0][0] * S, pts[i0][1] * S], nr = [-d[1], d[0]] /* the road's side */, cut = cutA, len = L * S - cutA + cutB; // the run, less r at each end that turns into an arc
+      ctx.save(); ctx.translate((A[0] + d[0] * cut + nr[0] * T / 2) * K, (A[1] + d[1] * cut + nr[1] * T / 2) * K); ctx.rotate(Math.atan2(d[1], d[0])); ctx.scale(1, -1);
+      strip(wx0 * d[0] + wy0 * d[1] + (A[0] + d[0] * cut) * d[0] + (A[1] + d[1] * cut) * d[1], L * S - cutA - cutB); ctx.restore(); void len; if (!cutB) continue;
+      // the arc at the run's end: centre r back along this run and r on along the next
+      const V = [pts[i1][0] * S, pts[i1][1] * S], e = dir(i1), cen = [V[0] - d[0] * R + e[0] * R, V[1] - d[1] * R + e[1] * R], convex = d[0] * e[1] - d[1] * e[0] > 0;
+      const aStart = Math.atan2(V[1] - d[1] * R - cen[1], V[0] - d[0] * R - cen[0]), aEnd = Math.atan2(V[1] + e[1] * R - cen[1], V[0] + e[0] * R - cen[0]); let sweep = aEnd - aStart; while (sweep > Math.PI) sweep -= 2 * Math.PI; while (sweep < -Math.PI) sweep += 2 * Math.PI;
+      const steps = Math.max(4, Math.ceil(Math.abs(sweep) * (R + T) / 1.5)), rr = convex ? R - T / 2 : R + T / 2, r0 = R - T / 2, r1 = R + T / 2;
+      for (let q = 0; q < steps; q++) { const t0 = aStart + sweep * q / steps, t1 = aStart + sweep * (q + 1) / steps, tm = (t0 + t1) / 2;
+        ctx.save(); ctx.beginPath(); ctx.arc(cen[0] * K, cen[1] * K, (r1 + 0.5) * K, t0 - 0.002 * Math.sign(sweep), t1 + 0.002 * Math.sign(sweep), sweep < 0); ctx.arc(cen[0] * K, cen[1] * K, Math.max(0, r0 - 0.5) * K, t1 + 0.002 * Math.sign(sweep), t0 - 0.002 * Math.sign(sweep), sweep > 0); ctx.closePath(); ctx.clip();
+        const tan = [-Math.sin(tm) * Math.sign(sweep), Math.cos(tm) * Math.sign(sweep)], P0 = [cen[0] + Math.cos(tm) * rr, cen[1] + Math.sin(tm) * rr], toRoad = convex ? [-Math.cos(tm), -Math.sin(tm)] : [Math.cos(tm), Math.sin(tm)];
+        ctx.translate(P0[0] * K, P0[1] * K); ctx.rotate(Math.atan2(tan[1], tan[0])); if (toRoad[0] * -tan[1] + toRoad[1] * tan[0] > 0) ctx.scale(1, -1); // (the strip's top on the road's side, running away from the road)
+        ctx.translate(-T * K, 0); strip(q * 1.3, 2 * T); ctx.restore(); } } } }
 function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy) {
   const g = mask.getContext && mask.getContext('2d'); if (!g || !g.getImageData || !art || !art.naturalWidth) return;
   const mw = mask.width, mh = mask.height, D = g.getImageData(0, 0, mw, mh).data, st = 4, nx = Math.floor(mw / (st * K)), ny = Math.floor(mh / (st * K));
@@ -1675,7 +1721,11 @@ function paintChronoRoom(canvas, key) {
     const copy = document.createElement('canvas'); copy.width = W; copy.height = H; copy.getContext('2d').drawImage(floorShape, 0, 0);
     const g = floorShape.getContext('2d'); for (let a = 0; a < 8; a++) g.drawImage(copy, Math.round(Math.cos(a * Math.PI / 4) * 5), Math.round(Math.sin(a * Math.PI / 4) * 5)); }
   // Owner: "round the curb corners more": the road's inside corners turn on an arc too (and the pavement's on the same centre, an arc narrower).
-  const f = { shape: GEN.square ? closed(floorShape, GEN.cornerR || GEN.pavement + 30) : floorShape, /* Round 445: the city's street corners turn on one modest radius (GEN.cornerR); 64px made lopsided flares where roads of different widths met */ art: document.createElement('canvas') }; f.art.width = W; f.art.height = H;
+  const gridRoad = GEN.gridKerb && GEN.worldLots ? (() => { const wl = genWorld(chronoSeed()), [qx, qy] = GEN.world(key), x0g = qx * FG_COLS, y0g = qy * FG_ROWS, fn = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2 && (X < x0g || Y < y0g || X >= x0g + FG_COLS || Y >= y0g + FG_ROWS || !!plan.floor[(Y - y0g) * FG_COLS + X - x0g]); /* (in the room, only where its plan lays road: a stub the plan trims stays trimmed) */ return { fn, x0: qx * FG_COLS, y0: qy * FG_ROWS, ox: qx * 800, oy: qy * 500 }; })() : null;
+  const vecShape = GEN.square ? closed(floorShape, GEN.cornerR || GEN.pavement + 30) : floorShape;
+  if (gridRoad) { const d = vecShape.getContext('2d').getImageData(0, 0, W, H).data, base = gridRoad.fn; // (in the room, a cell is road only where the plan's own drawing has road at its middle)
+    gridRoad.fn = (X, Y) => { const cx = X - gridRoad.x0, cy = Y - gridRoad.y0; if (cx < 0 || cy < 0 || cx >= FG_COLS || cy >= FG_ROWS) return base(X, Y); return base(X, Y) && d[(Math.round((cy + 0.5) * FG_CELL * K) * W + Math.round((cx + 0.5) * FG_CELL * K)) * 4 + 3] > 127; }; }
+  const f = { shape: gridRoad ? cityGridRoad(gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, W, H) : vecShape, /* Round 445: the city's street corners turn on one modest radius (GEN.cornerR); 64px made lopsided flares where roads of different widths met */ art: document.createElement('canvas') }; f.art.width = W; f.art.height = H;
   { const g = f.art.getContext('2d'); g.drawImage(f.shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, imgs.floor); g.globalCompositeOperation = 'source-over'; for (const mix of (GEN.mix || []).filter(m => m.on === 'road')) mixInto(g, f.shape, mix); }
   if (GEN.blend) { // Round 398 (owner: "remove curbs from roads altogether and remove the special tile we use for off path
     // travel, try to blend everything in but have a somewhat clear path"): no kerb, no pavement strip, no paving tile.
@@ -1719,7 +1769,8 @@ function paintChronoRoom(canvas, key) {
     if (curbArt) { // Round 420: the curb, a kerb-stone strip along every road edge, on the sidewalk side (the road mask turned inside out)
       const inv = document.createElement('canvas'); inv.width = W; inv.height = H; const ig = inv.getContext('2d'); ig.fillStyle = '#fff'; ig.fillRect(0, 0, W, H); ig.globalCompositeOperation = 'destination-out'; ig.drawImage(f.shape, 0, 0);
       const [cwx, cwy] = GEN.world(key);
-      if (coastBeachMask) { // Round 461 (owner: "need to fix these edges too"): no kerb strip on the sand where a street meets the beach; the beach's concrete lip runs along the street there instead
+      if (gridRoad) cityGridKerb(ctx, gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, curbArt, 7, gridRoad.ox, gridRoad.oy); // Round 463 trial: the bitmasked kerb, centred on the road's edge, on sand too
+      else if (coastBeachMask) { // Round 461 (owner: "need to fix these edges too"): no kerb strip on the sand where a street meets the beach; the beach's concrete lip runs along the street there instead
         const cl = document.createElement('canvas'); cl.width = W; cl.height = H; const cg = cl.getContext('2d'); cityEdgeAlong(cg, inv, 0, 0, K, curbArt, 7, cwx, cwy);
         const near = coastLipDraw(f.shape); cg.globalCompositeOperation = 'destination-out'; cg.drawImage(near, 0, 0); ctx.drawImage(cl, 0, 0); } // Round 462 (owner: "you put an edge over an edge"): the kerb stops where the lip begins, never on it or across it
       else cityEdgeAlong(ctx, inv, 0, 0, K, curbArt, 7, cwx, cwy); }
