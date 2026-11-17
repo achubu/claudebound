@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 461: the beach: sharp sand, a concrete lip, no paving bumps
+
+Owner: "focus on fixing the beach ... the sand looks blurry and low res. can you look into new techniques". Three options
+were shown (now, sharp sand only, sharp sand with a concrete lip); the owner chose the lip, and asked to remove "these
+pieces where road tile is underneath sticking out onto the beach".
+
+- **Sharp sand:** the coast's masks (sea, beach, shallows, wet sand, foam) were worked out at room px and stretched to the
+  canvas's 2x, which softened every edge; they are now worked out per canvas px from the fields read between room px
+  (`GEN.coastCrisp`). The sand picture is drawn at 0.4 of its size (`texScale.sand`), so its ripples are fine, not smeared.
+- **Concrete lip** (`GEN.coastLip`): no strip art at the beach. The paving ends in a lip drawn at canvas resolution (a dark
+  rim, the concrete, a pale top line) with a soft shadow falling on the sand. It follows any curve in one piece; the old
+  strip, bent round the coast, broke into slices. `shore-crumble` and `shore-seawall` are in `unused assets/`; the
+  `waterfront-edge` surface is marked `drawn`.
+- **No paving bumps:** the city's no-build margin by the sea showed as bare paving wherever the smooth sand stopped short
+  of a street. A pocket of that bare ground under 6000 px², hemmed in by sand and a street or lot, is now sand.
+- `tests/city-atlas.cjs` takes `CITY_FLAGS` to try theme settings side by side. Walk-throughs clean on seeds 1 and 9.
+
 ## Round 460: edges back to Round 457
 
 Owner: "the beach edge looks horrible, all edges are now looking way worse than before". The kerbs, park and yard rims and

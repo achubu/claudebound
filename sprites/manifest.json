@@ -217,23 +217,12 @@
       },
       {
        "key": "waterfront-edge",
-       "label": "Waterfront edge (shoreline strip)",
-       "rule": "Laid along the outline where the sand meets the paving, bent round corners.",
+       "label": "Waterfront edge (concrete lip)",
+       "rule": "Round 461 (owner chose it): no strip art; the paving ends in a concrete lip drawn by the painter (GEN.coastLip) at full resolution along the sand, with a soft shadow on the sand. A strip bent round the curving coast broke into slices.",
        "walk": true,
        "folder": "city-gen/surfaces/waterfront-edge/",
        "scale": null,
-       "files": [
-        {
-         "name": "shore-crumble",
-         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-crumble.webp",
-         "bytes": 62734
-        },
-        {
-         "name": "shore-seawall",
-         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-seawall.webp",
-         "bytes": 27926
-        }
-       ]
+       "files": []
       }
      ]
     },
