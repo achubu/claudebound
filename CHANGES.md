@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 469: every yard and park keeps its border, with space round it
+
+Owner: "the edging around some areas has disappeared, find the cause and address it with a rule so it doesn't happen
+again"; "make sure there is some space between that border and its surroundings".
+
+- **Cause:** Round 465 skipped a yard's or park's rim along a building, counting the building's wall as the border; Round
+  466 then set buildings 8px in from their lots, so paving showed there and the park met it with no border.
+- **Rule** (`cityRimKeep`): a rim is skipped only where a street's kerb takes the seam, or where a neighbouring yard or park
+  draws the shared rim; against buildings, landmarks, squares and open paving it is always drawn. `city-layout` now checks,
+  on six seeds, that every side of every yard and park has a kerb or a rim.
+- **Space:** the rim lies wholly inside its own lot (`cityGridKerb`'s `off`), so 8px or more of paving shows between it and a
+  building beside it; its corners turn on a radius that keeps the grass and yard ground inside them (yards' ground now has
+  rounded corners too).
+
 ## Round 468: no shadows
 
 Owner: "lets remove all shadows they dont look right". `GEN.noShadows` (on for the city): no building shadows, no dark
