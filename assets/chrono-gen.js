@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '478',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '479b',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -1130,7 +1130,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       // Round 439 (owner: "the destroyed building roofs don't look good ... maybe a roof with a large hole or something but not
       // rubble"): a ruin keeps an ordinary roof and parapet, with a hole (props/roof-hole/) in its largest part; no rooftop kit
       if (ruin) { const ho = (pi === 0 || parts.length > 1 && rr() < 0.5) && pick('roof-hole', ra); if (ho && CITY_ROOF_KIT[nameOf.get(roofArt)]) { const k = Math.min((w - 48) / ho.width, (h - 48) / ho.height) * (0.85 + rr() * 0.12), dw = ho.width * k, dh = ho.height * k; // Round 475 (owner: "a rule not to place objects on roofs that dont fit"): a hole too only on a plain roof, 24px clear of every edge (as rooftop kit)
-          if (dw > 30 && dh > 30) ctx.drawImage(ho, S(q[0] + 24 + rr() * (w - 48 - dw)), S(q[1] + 24 + rr() * (h - 48 - dh)), S(dw), S(dh)); } return; }
+          const hx = q[0] + 24 + rr() * (w - 48 - dw), hy = q[1] + 24 + rr() * (h - 48 - dh); if (dw > 30 && dh > 30 && hx >= 0 && hy >= 0 && hx + dw <= 800 && hy + dh <= 500) ctx.drawImage(ho, S(hx), S(hy), S(dw), S(dh)); } return; } // Round 479 (owner: "roof of this building has a cut off graphic"): a hole only where the whole of it lies inside the room (one drawn across a room's edge could show cut)
       // rooftop clutter
       const items = l.mall ? Math.round(w * h / 12000) : 2 + Math.floor(rr() * 4), placed = [];
       // Round 416 (owner: "some rooftop objects being too small, others being too big"): each kind has one size, the
@@ -1641,14 +1641,34 @@ function paintChronoRoom(canvas, key) {
       // ground (the city's no-build margin by the sea) left between the sand and a street or a lot. A pocket of it under
       // 6000 px² (a bump between the beach and the road) becomes sand, grown 6px under the sand's edge so the beach's
       // wobble leaves no sliver; larger stretches stay paving (promenades, squares). Found over the room and 66px round it.
-      const pocket = new Uint8Array(w * h); if (GEN.coastCrisp && GEN.worldLots) { const wl = genWorld(chronoSeed()), [qx, qy] = GEN.world(key), FC = FG_CELL;
+      const pocket = new Uint8Array(w * h), dry = new Uint8Array(w * h); /* dry: Round 479, no beach or sea here whatever the noise adds later */ if (GEN.coastCrisp && GEN.worldLots) { const wl = genWorld(chronoSeed()), [qx, qy] = GEN.world(key), FC = FG_CELL;
         const kind = (x, y) => { const X = qx * 800 + x - P, Y = qy * 500 + y - P, cx = Math.floor(X / FC), cy = Math.floor(Y / FC); if (cx < 0 || cy < 0 || cx >= wl.CW || cy >= wl.CH) return 9; return wl.cell[cy * wl.CW + cx]; };
-        const bare = new Uint8Array(w * h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; bare[i] = SV[i] < 0.5 && kind(x, y) === 3 ? 1 : 0; }
+        // Round 479: sand cut off from the water by a street (a street along the coast covers the sea's first cells, and the band
+        // of sand round them then lay on its far side, inside the block) is paving: a stretch of sand not touching visible water
+        // without crossing a street is dropped
+        { // first the water: a patch of sea cut off from the open sea by a street (the smooth coast bulging past a street
+          // laid over the sea's edge) is dry land; the open sea is what reaches the edge of the area worked out
+          const wet0 = new Uint8Array(w * h), seenW = new Uint8Array(w * h), qw = new Int32Array(w * h);
+          for (let i = 0; i < w * h; i++) { const x = i % w; wet0[i] = V[i] >= 0.5 && kind(x, (i - x) / w) !== 2 ? 1 : 0; }
+          for (let s0 = 0; s0 < w * h; s0++) { if (!wet0[s0] || seenW[s0]) continue; let qh = 0, qt = 0, open = false; qw[qt++] = s0; seenW[s0] = 1;
+            while (qh < qt) { const i = qw[qh++], x = i % w, y = (i - x) / w; if (x === 0 || y === 0 || x === w - 1 || y === h - 1) open = true;
+              for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < w * h && Math.abs((j % w) - x) <= 1 && wet0[j] && !seenW[j]) { seenW[j] = 1; qw[qt++] = j; } }
+            if (!open) for (let n = 0; n < qt; n++) { V[qw[n]] = 0.2; SV[qw[n]] = 0.2; dry[qw[n]] = 1; } } }
+        { const sand = new Uint8Array(w * h), seen2 = new Uint8Array(w * h), q2 = new Int32Array(w * h);
+          for (let i = 0; i < w * h; i++) { const x = i % w, y = (i - x) / w; sand[i] = SV[i] >= 0.5 && V[i] < 0.5 && kind(x, y) !== 2 ? 1 : 0; }
+          for (let s0 = 0; s0 < w * h; s0++) { if (!sand[s0] || seen2[s0]) continue; let qh = 0, qt = 0, wet = false; q2[qt++] = s0; seen2[s0] = 1;
+            while (qh < qt) { const i = q2[qh++], x = i % w;
+              for (const j of [i - 1, i + 1, i - w, i + w]) { if (j < 0 || j >= w * h || Math.abs((j % w) - x) > 1) continue; if (V[j] >= 0.5 && kind(j % w, (j - (j % w)) / w) !== 2) wet = true; if (sand[j] && !seen2[j]) { seen2[j] = 1; q2[qt++] = j; } } }
+            if (!wet) for (let n = 0; n < qt; n++) { SV[q2[n]] = 0; dry[q2[n]] = 1; } } }
+          for (let i = 0; i < w * h; i++) if (V[i] < 0.5 && SV[i] >= 0.5) { const x = i % w; if (kind(x, (i - x) / w) === 2) { SV[i] = 0.49; dry[i] = 1; } } // (no sand under a street: the street is drawn over it, and the hidden sand's edge drew a scrap of lip into the block)
+        const nearSt = (x, y) => kind(x - 25, y) === 2 || kind(x + 25, y) === 2 || kind(x, y - 25) === 2 || kind(x, y + 25) === 2 || kind(x - 18, y - 18) === 2 || kind(x + 18, y - 18) === 2 || kind(x - 18, y + 18) === 2 || kind(x + 18, y + 18) === 2;
+        const bare = new Uint8Array(w * h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; bare[i] = SV[i] < 0.5 && kind(x, y) === 3 ? 1 : 0; } void nearSt;
         const seen = new Uint8Array(w * h), q = new Int32Array(w * h);
         for (let s0 = 0; s0 < w * h; s0++) { if (!bare[s0] || seen[s0]) continue; let qh = 0, qt = 0, edge = false; q[qt++] = s0; seen[s0] = 1;
           while (qh < qt) { const i = q[qh++], x = i % w, y = (i - x) / w; if (x === 0 || y === 0 || x === w - 1 || y === h - 1) edge = true;
             for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < w * h && !seen[j] && bare[j] && Math.abs((j % w) - x) <= 1) { seen[j] = 1; q[qt++] = j; } }
-          if (qt < 6000 && !edge) for (let n = 0; n < qt; n++) pocket[q[n]] = 1; }
+          let touches = false; for (let n = 0; n < qt && !touches; n++) { const i = q[n]; for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < w * h && !bare[j] && SV[j] >= 0.5 && kind(j % w, (j - (j % w)) / w) === 3) { touches = true; break; } }
+          if (qt < 6000 && !edge && touches) for (let n = 0; n < qt; n++) pocket[q[n]] = 1; } // Round 479: only a pocket touching the beach becomes sand (one hemmed in by streets and lots far from the sand showed as a stray strip of sand)
         for (let pass = 0; pass < 6; pass++) { const add = []; for (let i = w; i < w * h - w; i++) if (!pocket[i] && SV[i] >= 0.5 && kind(i % w, (i - (i % w)) / w) === 3 && (pocket[i - 1] || pocket[i + 1] || pocket[i - w] || pocket[i + w])) add.push(i); for (const i of add) pocket[i] = 1; } }
       // noise on a 10px grid over the world, read between its points
       const [nwx, nwy] = GEN.world(key), sd = chronoSeed(), G = 10, gw = Math.ceil(800 / G) + 2, gh = Math.ceil(500 / G) + 2, n1 = new Float32Array(gw * gh), n2 = new Float32Array(gw * gh), n3 = new Float32Array(gw * gh);
@@ -1658,7 +1678,15 @@ function paintChronoRoom(canvas, key) {
       const mk = () => { const c = document.createElement('canvas'); c.width = MW; c.height = MH; const g = c.getContext('2d'), d = g.createImageData(MW, MH); return { c, g, d }; };
       // (Round 461) the fields at room px, noise added; read between px for each canvas px when crisp
       const VF = new Float32Array(801 * 501), SF = new Float32Array(801 * 501), NF = new Float32Array(801 * 501), PF = new Float32Array(801 * 501);
-      for (let y = 0; y <= 500; y++) for (let x = 0; x <= 800; x++) { const o = (Math.min(y, h - P - 1) + P) * w + Math.min(x, w - P - 1) + P, a = lerp(n1, Math.min(x, 799), Math.min(y, 499)), b = lerp(n2, Math.min(x, 799), Math.min(y, 499)); VF[y * 801 + x] = V[o] + a * 0.16 + b * 0.07; SF[y * 801 + x] = SV[o] + a * 0.2 + b * 0.05; NF[y * 801 + x] = lerp(n3, Math.min(x, 799), Math.min(y, 499)); PF[y * 801 + x] = pocket[o]; }
+      for (let y = 0; y <= 500; y++) for (let x = 0; x <= 800; x++) { const o = (Math.min(y, h - P - 1) + P) * w + Math.min(x, w - P - 1) + P, a = lerp(n1, Math.min(x, 799), Math.min(y, 499)), b = lerp(n2, Math.min(x, 799), Math.min(y, 499)); VF[y * 801 + x] = dry[o] ? Math.min(0.3, V[o]) : V[o] + a * 0.16 + b * 0.07; SF[y * 801 + x] = dry[o] ? Math.min(0.3, SV[o]) : SV[o] + a * 0.2 + b * 0.05; NF[y * 801 + x] = lerp(n3, Math.min(x, 799), Math.min(y, 499)); PF[y * 801 + x] = pocket[o]; }
+      if (GEN.coastCrisp && GEN.worldLots) { // Round 479: the same rule once more on the final fields (the noise can lift sand just outside a cleared stretch back over the line, leaving a sliver): sand that can't reach water without crossing a street goes
+        const wlF = genWorld(chronoSeed()), [fx, fy] = GEN.world(key), st = (x, y) => wlF.cell[Math.floor((fy * 500 + y) / FG_CELL) * wlF.CW + Math.floor((fx * 800 + x) / FG_CELL)] === 2, N = 801 * 501;
+        const sd2 = new Uint8Array(N), sn = new Uint8Array(N), qq = new Int32Array(N);
+        for (let i = 0; i < N; i++) { const x = i % 801, y = (i - x) / 801; sd2[i] = SF[i] >= 0.5 && VF[i] < 0.5 && !st(Math.min(x, 799), Math.min(y, 499)) ? 1 : 0; }
+        for (let s0 = 0; s0 < N; s0++) { if (!sd2[s0] || sn[s0]) continue; let qh = 0, qt = 0, wet = false; qq[qt++] = s0; sn[s0] = 1;
+          while (qh < qt) { const i = qq[qh++], x = i % 801; for (const j of [i - 1, i + 1, i - 801, i + 801]) { if (j < 0 || j >= N || Math.abs((j % 801) - x) > 1) continue; const jx = j % 801, jy = (j - jx) / 801;
+            if (VF[j] >= 0.5 && !st(Math.min(jx, 799), Math.min(jy, 499))) wet = true; if (sd2[j] && !sn[j]) { sn[j] = 1; qq[qt++] = j; } } }
+          if (!wet) for (let n = 0; n < qt; n++) SF[qq[n]] = Math.min(SF[qq[n]], 0.3); } }
       const bil = (F, x, y) => { const x0 = Math.floor(x), y0 = Math.floor(y), tx = x - x0, ty = y - y0, i = y0 * 801 + x0; return (F[i] * (1 - tx) + F[i + 1] * tx) * (1 - ty) + (F[i + 801] * (1 - tx) + F[i + 802] * tx) * ty; };
       const cellAt = (x, y) => { const cy = Math.floor(y / T), cx = Math.floor(x / T); return cellS[(cy - c0 + Math.floor(P / T) * 0 + 0) * cw + cx - c0] ; };
       const sea = mk(), beach = mk(), shallow = mk(), deep = mk(), wet = mk(), foam = mk(), cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
@@ -1693,9 +1721,13 @@ function paintChronoRoom(canvas, key) {
       const lipWith = (sand, caster) => { const out = cv(), og = out.getContext('2d'); og.fillStyle = '#fff'; og.fillRect(0, 0, W, H); og.globalCompositeOperation = 'destination-out'; og.drawImage(sand, 0, 0);
         const src = caster || out, sh = cv(), sg = sh.getContext('2d'); sg.filter = 'blur(' + (5 * K) + 'px)'; sg.drawImage(src, 0, 3 * K); sg.filter = 'none'; sg.globalCompositeOperation = 'source-in'; sg.fillStyle = 'rgba(0,0,0,.55)'; sg.fillRect(0, 0, W, H); sg.globalCompositeOperation = 'destination-in'; sg.drawImage(sand, 0, 0); if (!GEN.noShadows) ctx.drawImage(sh, 0, 0);
         for (const [r, col] of [[7, '#3a3f48'], [5.5, '#5d636d'], [1.6, '#9aa2ad']]) { const c = grow(sand, r * K), g = c.getContext('2d'); g.globalCompositeOperation = 'destination-in'; g.drawImage(caster || out, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, W, H); ctx.drawImage(c, 0, 0); if (cityEdgeMask) cityEdgeMask.getContext('2d').drawImage(c, 0, 0); } };
-      lipWith(beach, null);
+      // Round 479: the lip runs only round what shows: beach (sand and sea) under a street is left out, or the sea a coastal
+      // street covers got a lip drawn round it, out into the block
+      const shown = (() => { const c = cv(), g = c.getContext('2d'); g.drawImage(beach, 0, 0); if (GEN.worldLots) { const wl2 = genWorld(chronoSeed()), [qx2, qy2] = GEN.world(key); g.globalCompositeOperation = 'destination-out';
+        for (let cy = 0; cy < FG_ROWS; cy++) for (let cx = 0; cx < FG_COLS; cx++) if (wl2.cell[(qy2 * FG_ROWS + cy) * wl2.CW + qx2 * FG_COLS + cx] === 2 && plan.floor[cy * FG_COLS + cx]) g.fillRect(cx * FG_CELL * K, cy * FG_CELL * K, FG_CELL * K, FG_CELL * K); } return c; })();
+      lipWith(shown, null);
       // (the streets are drawn later, over the sand where they reach it: their edge against the sand gets the same lip, on the street's side)
-      coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(beach, 0, 0); sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); lipWith(sand, road); return grow(sand, 10 * K); }; }
+      coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(shown, 0, 0); /* (Round 479: only the beach that shows) */ sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); lipWith(sand, road); return grow(sand, 10 * K); }; }
     else if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
   } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
