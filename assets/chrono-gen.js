@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '470',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '471',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -758,8 +758,8 @@ function cityGridRoad(road, x0, y0, nx, ny, C, r, K, W, H) { // road(cx, cy) ove
 function cityRimKeep(l) { const wl = genWorld(chronoSeed()), C = FG_CELL;
   if (!wl.lotIndex) { wl.lotIndex = new Int32Array(wl.CW * wl.CH).fill(-1); wl.lotsPx.forEach((q, i) => { for (let y = q.r[1] / C; y < q.r[3] / C; y++) for (let x = q.r[0] / C; x < q.r[2] / C; x++) wl.lotIndex[y * wl.CW + x] = i; }); }
   const me = wl.lotsPx.indexOf(l) >= 0 ? wl.lotsPx.indexOf(l) : wl.lotsPx.findIndex(q => q.seed === l.seed);
-  return (X, Y, NX, NY) => { if (NX < 0 || NY < 0 || NX >= wl.CW || NY >= wl.CH) return true; const c = wl.cell[NY * wl.CW + NX]; if (c === 2) return false;
-    const o = wl.lotIndex[NY * wl.CW + NX]; if (o < 0 || o === me) return true; const ol = wl.lotsPx[o]; if (ol.use === 'roof' || ol.use === 'landmark' || ol.use === 'plaza') return true; return me < o; }; } // Round 469: a building no longer borders its lot's edge (it stands 8px in, Round 466), so a rim is drawn against it; only a street (its kerb) or a neighbouring yard/park that draws the shared rim takes it over
+  const fn = (X, Y, NX, NY) => { if (NX < 0 || NY < 0 || NX >= wl.CW || NY >= wl.CH) return true; const c = wl.cell[NY * wl.CW + NX]; if (c === 2) return false;
+    const o = wl.lotIndex[NY * wl.CW + NX]; if (o < 0 || o === me) return true; const ol = wl.lotsPx[o]; if (ol.use === 'roof' || ol.use === 'landmark' || ol.use === 'plaza') return true; return me < o; }; fn.street = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2; return fn; } // Round 469: a building no longer borders its lot's edge (it stands 8px in, Round 466), so a rim is drawn against it; only a street (its kerb) or a neighbouring yard/park that draws the shared rim takes it over
 function cityGridKerb(ctx, road, x0, y0, nx, ny, C, r, K, art, T, wx0, wy0, keep, off) { off = off || 0; // off: Round 469, px the strip is moved toward the inside (a lot's rim lies wholly inside its lot) // keep(X, Y, NX, NY): whether the seam between world cell X,Y (inside) and NX,NY gets this edge (Round 465) // wx0, wy0: the room's origin in world px
   if (!art || !art.naturalWidth) return; const key = (x, y) => x + ',' + y, out = new Map();
   for (let cy = -2; cy < ny + 2; cy++) for (let cx = -2; cx < nx + 2; cx++) { if (!road(x0 + cx, y0 + cy)) continue; const at = (a, b) => road(x0 + cx + a, y0 + cy + b);
@@ -778,7 +778,10 @@ function cityGridKerb(ctx, road, x0, y0, nx, ny, C, r, K, art, T, wx0, wy0, keep
     for (let i = closed ? 0 : 1; i < (closed ? n : n - 1); i++) { const d0 = dir(i - 1), d1 = dir(i); if (d0[0] !== d1[0] || d0[1] !== d1[1]) corners.push(i); }
     const ends = closed ? corners : [0, ...corners, n - 1]; if (closed && !corners.length) continue;
     for (let j = 0; j < (closed ? ends.length : ends.length - 1); j++) { const i0 = ends[j], i1 = ends[(j + 1) % ends.length], d = dir(i0), L = closed ? ((((i1 - i0) % n) + n) % n || n) : i1 - i0; if (L <= 0) continue;
-      const cutA = closed || j > 0 ? R : (keep ? T / 2 + 4 : 0), cutB = closed || j < ends.length - 2 ? R : (keep ? T / 2 + 4 : 0); // (Round 465: a rim's open end stops short of the edge it gives way to)
+      // (Round 471, owner: "make the park edge run up until the curb edge"): a rim's open end runs on to the edge it gives way
+      // to: up to the kerb's inner face (3.5px, half the kerb) where a street touches that corner, else right to the corner
+      const openCut = i => { if (!keep || !keep.street) return 0; const [px, py] = pts[i], X = x0 + px, Y = y0 + py; return [[-1, -1], [0, -1], [-1, 0], [0, 0]].some(([a, b]) => keep.street(X + a, Y + b)) ? 3.5 : 0; };
+      const cutA = closed || j > 0 ? R : openCut(i0), cutB = closed || j < ends.length - 2 ? R : openCut(i1);
       const A = [pts[i0][0] * S, pts[i0][1] * S], nr = [-d[1], d[0]] /* the road's side */, cut = cutA, len = L * S - cutA + cutB; // the run, less r at each end that turns into an arc
       ctx.save(); ctx.translate((A[0] + d[0] * cut + nr[0] * (T / 2 + off)) * K, (A[1] + d[1] * cut + nr[1] * (T / 2 + off)) * K); ctx.rotate(Math.atan2(d[1], d[0])); ctx.scale(1, -1);
       strip(wx0 * d[0] + wy0 * d[1] + (A[0] + d[0] * cut) * d[0] + (A[1] + d[1] * cut) * d[1], L * S - cutA - cutB); ctx.restore(); void len; if (!closed && j === ends.length - 2) continue;
