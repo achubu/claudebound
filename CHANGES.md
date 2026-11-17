@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 479: no cut-off roof holes; no stray sand or lip scraps behind coastal streets
+
+Owner: "roof of this building has a cut off graphic".
+
+- **Roof holes:** a ruin's hole is drawn only where the whole of it lies inside the room; one placed across a room's edge
+  showed cut in half.
+- **Coast, found while checking ruins near the shore:** where a street runs along the coast over the sea's first cells,
+  the smooth beach shape spilled past it into the block, as a strip of sand, a scrap of concrete lip or an arc of lip with
+  no sand. Now: sea cut off from the open sea by a street is dry land; sand that can't reach water without crossing a
+  street is paving (worked out again on the final, noise-wobbled fields, which had been lifting near-threshold sand back
+  as a thin sliver); no sand under a drawn street; the gap-filling sand (Round 461) only where it touches the beach; and
+  the lip runs only round the beach that shows. One known leftover: on some seeds a street stub the room trims leaves a
+  small paving square in the sand.
+
 ## Round 478: landmark squares the same colour as the paving
 
 Owner: "the area around the statue is a different color ... it should be the same color". Each landmark had a pale cyan pool
