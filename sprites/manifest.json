@@ -892,11 +892,6 @@
          "bytes": 15332
         },
         {
-         "name": "hole-round",
-         "src": "assets/environment/city-gen/props/roof-hole/hole-round.webp",
-         "bytes": 17602
-        },
-        {
          "name": "hole-tear",
          "src": "assets/environment/city-gen/props/roof-hole/hole-tear.webp",
          "bytes": 11588

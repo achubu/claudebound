@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 475: no blur when standing still; one border round touching yards; holes only on plain roofs; orange elite glow
+
+Owner: "sometimes the game gets blurred when i move and stop moving"; "found an issue with edges, can we fix this with
+rules?" (two touching parking lots); "delete this hole roof sprite ... a rule not to place objects on roofs that dont fit";
+"the circle under the elite enemies doesn't look good, just keep the glow but make it orange".
+
+- **Blur:** a standing hero played a "breathe" scale animation, which browsers draw at low quality; removed. The camera also
+  writes the world's size, place and transform only when they change, snapped to whole device pixels, and the hero too.
+- **Touching yards and parks:** yards beside yards and parks beside parks form one area (`wl.rimLead`): one rim round the
+  whole area, none down the middle. A yard beside a park still shares one rim on their seam. The ground of a yard or park
+  now fills its whole lot under its rim, and a corner is rounded only where the rim turns round it (`groundPath`), so no
+  paving shows through at seams. `city-layout`'s border check knows about areas.
+- **Roof holes:** `hole-round` removed (in `unused assets/`); a ruin's hole now follows the rooftop rule: only on a plain roof
+  (`CITY_ROOF_KIT`), 24px clear of every edge, else no hole.
+- **Elite enemies:** the ring under them is gone; an orange glow hugs the sprite.
+
 ## Round 474: street clutter never drawn over a building
 
 Owner: "need a rule to keep objects from being placed on buildings like this" (a vending machine on the sidewalk, its
