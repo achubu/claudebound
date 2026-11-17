@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 456: the last four city objects
+
+The owner's redo of the four objects that didn't work in Round 451, cut and keyed from
+`assets/items/poi/src/city-objects-redo-round456.jpg`:
+
+- **Blackout breaker** (`city-breaker`): a street substation with one big lever.
+- **Afterlight Vault** (`city-vault-3`): an entryway down to an underground vault (owner: "not a floating door in the
+  street"). It is drawn at the merchant's size (58px in the city), since it is a small building.
+- **Drone Racers** and **Lost Courier** (`events/racer`, `events/courier`): one compact group each.
+
+All twenty of the city's interactable objects are now from the owner's new set. The old pictures are in `unused assets/`.
+
 ## Round 455: five card art sets; the city's traffic signal
 
 - The owner's paintings for **Gust Chain, Gearward Bulwark, Featherfall Grace, Crystal Shard and Cistern Aegis**, levels 0-3,

@@ -1367,9 +1367,9 @@
        "scale": null,
        "files": [
         {
-         "name": "city-vault-2",
-         "src": "assets/items/poi/city-vault-2.webp",
-         "bytes": 13128
+         "name": "city-vault-3",
+         "src": "assets/items/poi/city-vault-3.webp",
+         "bytes": 22262
         }
        ]
       },
@@ -1384,7 +1384,7 @@
         {
          "name": "city-breaker",
          "src": "assets/items/poi/city-breaker.webp",
-         "bytes": 19792
+         "bytes": 19042
         }
        ]
       },
@@ -1469,7 +1469,7 @@
         {
          "name": "courier",
          "src": "assets/items/poi/events/courier.webp",
-         "bytes": 20638
+         "bytes": 21944
         },
         {
          "name": "medic",
@@ -1479,7 +1479,7 @@
         {
          "name": "racer",
          "src": "assets/items/poi/events/racer.webp",
-         "bytes": 21184
+         "bytes": 19464
         },
         {
          "name": "terminal",
