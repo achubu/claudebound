@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 458: new edge strips for kerbs, parks and the shore
+
+Owner: "do our edge textures need work? like the dividers?" The old ones were rounded cartoon stone blocks, an old iron
+railing and beige rock rubble. From the owner's sheet (`assets/environment/city-gen/src/edges-round458.jpg`):
+
+- **Kerbs:** `curb-composite` (amber reflectors), `curb-poured` (drain slots), `curb-steel` (riveted, cyan light line).
+- **Park edges:** `edge-planter` (metal planter rim), `edge-glass` (glass rail, see-through), `edge-slab` (dark slabs,
+  magenta light line).
+- **Shore:** `shore-piling` (steel sheet piling), `shore-tetrapod` (concrete wave-breakers).
+- Each strip on the sheet repeats exactly (every 250 to 1000px), so each is cut on whole repeats instead of edge-blended:
+  they tile with no seam. The nine old strips are in `unused assets/`.
+
 ## Round 457: objects never overlap a sprite; waypoints pulse
 
 Owner: "make sure we have a rule that interactable objects don't overlap buildings or other sprites like cars and signs"
