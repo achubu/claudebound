@@ -36,12 +36,18 @@ updateAreaCamera = function () {
   const area = joinedArea(), offset = cellOffset(state.room, area), v = worldViewport();
   const camera = cameraPosition(area, { x: offset.x + state.pos.x, y: offset.y + state.pos.y }, v.viewWidth, v.viewHeight);
   const world = $('world');
-  world.style.width = area.width + 'px'; world.style.height = area.height + 'px';
-  world.style.left = v.left + 'px'; world.style.top = v.top + 'px'; world.style.transformOrigin = '0 0';
-  world.style.transform = 'scale(' + v.scale + ') translate(' + (-camera.x) + 'px,' + (-camera.y) + 'px)';
+  // Round 475 (owner: "sometimes the game gets blurred when i move and stop moving"): the world's size, place and transform
+  // were written every frame while walking, even unchanged, so the browser treated the whole map as an animating layer and
+  // drew it at low quality, sharpening again after a stop. Now each is written only when it changes, and the position is
+  // snapped to whole device pixels (left/top and the camera's offset), so the map never sits between pixels.
+  const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1, snap = px => Math.round(px * dpr) / dpr, cx = snap(camera.x * v.scale) / v.scale, cy = snap(camera.y * v.scale) / v.scale;
+  const set = (k, val) => { if (world.style[k] !== val) world.style[k] = val; };
+  set('width', area.width + 'px'); set('height', area.height + 'px');
+  set('left', snap(v.left) + 'px'); set('top', snap(v.top) + 'px'); set('transformOrigin', '0px 0px');
+  const tf = 'scale(' + v.scale + ') translate(' + (-cx) + 'px, ' + (-cy) + 'px)'; if (world.dataset.tf !== tf) { world.dataset.tf = tf; world.style.transform = tf; }
   // On short phones only part of the room fits: clip the rest so it never draws under the HUD or the controls.
-  world.style.clipPath = v.viewHeight < area.height ? 'inset(' + camera.y + 'px 0 ' + Math.max(0, area.height - camera.y - v.viewHeight) + 'px 0)' : '';
-  const player = $('player'); if (player) { player.style.left = (offset.x + state.pos.x) + 'px'; player.style.top = (offset.y + state.pos.y) + 'px'; }
+  const clip = v.viewHeight < area.height ? 'inset(' + cy + 'px 0px ' + Math.max(0, area.height - cy - v.viewHeight) + 'px 0px)' : ''; if (world.dataset.clip !== clip) { world.dataset.clip = clip; world.style.clipPath = clip; }
+  const player = $('player'); if (player) { player.style.left = snap((offset.x + state.pos.x) * v.scale) / v.scale + 'px'; player.style.top = snap((offset.y + state.pos.y) * v.scale) / v.scale + 'px'; } // (the hero on whole pixels too)
 };
 const renderHUDBeforeLayout = renderHUD;
 renderHUD = function () {

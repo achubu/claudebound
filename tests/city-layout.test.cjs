@@ -103,7 +103,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) {
   const bad = JSON.parse(run(`(() => { newGame(); state.seed = ${seed}; configureRegion('city'); cityGenEnsure(); return genWith('city', () => { const wl = genWorld(chronoSeed()), C = 25, bad = []; const L = wl.lotsPx, rim = l => l.use === 'park' || cityIsYard(l);
     cityRimKeep(L[0]); const idx = wl.lotIndex;
     L.forEach((l, i) => { if (!rim(l)) return; const keep = cityRimKeep(l), x0 = l.r[0] / C, y0 = l.r[1] / C, x1 = l.r[2] / C, y1 = l.r[3] / C;
-      const side = (X, Y, NX, NY) => { if (NX < 0 || NY < 0 || NX >= wl.CW || NY >= wl.CH) return; if (keep(X, Y, NX, NY)) return; if (wl.cell[NY * wl.CW + NX] === 2) return; const o = idx[NY * wl.CW + NX]; if (o >= 0 && o !== i && rim(L[o]) && cityRimKeep(L[o])(NX, NY, X, Y)) return; bad.push(i + '@' + X + ',' + Y + '>' + NX + ',' + NY); };
+      const side = (X, Y, NX, NY) => { if (NX < 0 || NY < 0 || NX >= wl.CW || NY >= wl.CH) return; if (keep(X, Y, NX, NY)) return; if (wl.cell[NY * wl.CW + NX] === 2) return; if (keep.inArea && keep.inArea(NX, NY)) return; /* (Round 475: the same area: no seam inside it) */ const o = idx[NY * wl.CW + NX]; if (o >= 0 && o !== i && rim(L[o]) && cityRimKeep(L[o])(NX, NY, X, Y)) return; bad.push(i + '@' + X + ',' + Y + '>' + NX + ',' + NY); };
       for (let x = x0; x < x1; x++) { side(x, y0, x, y0 - 1); side(x, y1 - 1, x, y1); } for (let y = y0; y < y1; y++) { side(x0, y, x0 - 1, y); side(x1 - 1, y, x1, y); } });
     return JSON.stringify(bad.slice(0, 8)); }); })()`));
   assert(bad.length === 0, 'every side of a yard or park has a border; seed ' + seed + ': ' + bad.join(' '));
