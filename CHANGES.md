@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 471: park and yard rims run up to the kerb
+
+Owner: "find out why this corner isn't properly edged and fix the rules to make the park edge run up until the curb edge".
+
+- **Cause:** where a yard's or park's side faces a street, the kerb owns that side and the rim stops at the corner; Round
+  465 ended it half the rim's width plus 4px short (11px) so it could never cross the kerb, which left bare ground between
+  the two.
+- **Rule:** a rim's open end runs on to whatever takes over: up to the kerb's inner face (3.5px from the corner, half the
+  kerb's width) where a street cell touches that corner (`keep.street`), else right to the corner (a neighbouring rim
+  continues from there). So the rim and the kerb meet, without a gap and without overlapping.
+
 ## Round 470: a 1px black outline on every building
 
 Owner: "can we add a 1px black border to all buildings as well?". Drawn last round each building (roof and front wall
