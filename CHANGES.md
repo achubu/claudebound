@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 472: a better look for elite enemies
+
+Owner: "the glow around elite enemies is not very good". The wide, blurry gold halo is replaced by a crisp gold outline
+hugging the sprite (two 1px passes and a faint 3px halo) and a pulsing gold ring on the ground under its feet (still under
+reduced motion). `assets/layout-polish.css`.
+
 ## Round 471: park and yard rims run up to the kerb
 
 Owner: "find out why this corner isn't properly edged and fix the rules to make the park edge run up until the curb edge".
