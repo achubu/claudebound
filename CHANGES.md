@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 466: padding round buildings
+
+Owner: "can we also add a few pixels of padding between buildings and edges and the like".
+
+- A building now stands 8px in from its lot (was 4), and its lot no longer shows a dark footing round it, so 4px or more
+  of the city's paving shows between a building and a kerb or rim, and 16px between two buildings side by side. Yards,
+  parks and landmarks keep their 4px inset. What blocks the way is unchanged (the whole lot).
+
 ## Round 465: one edge per seam
 
 Owner: "things are looking good except for overlapping edges, any way to create a rule to keep this from happening?" (a
