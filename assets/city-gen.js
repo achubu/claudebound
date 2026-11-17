@@ -112,6 +112,52 @@ function cityRoomWalk(key, x, y) {
       return p.clearSpots || p.plazas; }
     return plazaSpotsBefore.apply(this, arguments);
   };
+  // Round 457 (owner: "make sure we have a rule that interactable objects don't overlap buildings or other sprites like
+  // cars and signs"): whatever spot an object is given in the city, its picture must be clear of every sprite's picture
+  // (citySpriteBoxes: buildings, landmarks, yard pieces, trees, rubble, cars, lamps, lights, signs, clutter). A spot that
+  // isn't is moved to the nearest ground that is: walkable, joined to the streets, 60px inside the room, clear of the HUD,
+  // and clear of whatever the caller keeps a gap from. (The old fallback, "just off the path", is a building here.)
+  const CITY_ITEM_PAD = 3, cityItemClear = (key, x, y, boxes, small) => { const B = small ? [x - 21 - CITY_ITEM_PAD, y - 34 - CITY_ITEM_PAD, x + 21 + CITY_ITEM_PAD, y + 22 + CITY_ITEM_PAD] : [x - 29 - CITY_ITEM_PAD, y - 47 - CITY_ITEM_PAD, x + 29 + CITY_ITEM_PAD, y + 22 + CITY_ITEM_PAD]; // the largest object's box (58px) with a 3px margin, so any object fits
+    return !boxes.some(b => B[0] < b.x1 && B[2] > b.x0 && B[1] < b.y1 && B[3] > b.y0); };
+  const cityItemBoxesCache = {};
+  // an object stands on open ground, never on a street: its foot point (22px under its spot, as everywhere) and the ground
+  // a little to each side must be clear of the room's street cells
+  const cityItemOnStreet = globalThis.cityItemOnStreet = function (key, x, y) { const wl = genWith('city', () => genWorld(chronoSeed())), [wx, wy] = GEN_THEMES.city.world(key), road = (px, py) => px >= 0 && py >= 0 && px < 800 && py < 500 && wl.cell[(wy * FG_ROWS + Math.floor(py / FG_CELL)) * wl.CW + wx * FG_COLS + Math.floor(px / FG_CELL)] === 2; // (the city's street cells: a room's plan also counts the squares' paving as floor)
+    return [[0, 22], [-16, 22], [16, 22], [0, 10], [0, 30]].some(([dx, dy]) => road(x + dx, y + dy)); };
+  const cityItemSpotClear = globalThis.cityItemSpotClear = function (key, x, y, small) { const sd = genWith('city', () => chronoSeed()), ck = sd + ':' + key, boxes = cityItemBoxesCache[ck] || (cityItemBoxesCache[ck] = genWith('city', () => citySpriteBoxes(sd, key, cityGenPlan(key)))); return cityItemClear(key, x, y, boxes, small); };
+  const itemSpotBefore = organicItemSpot;
+  organicItemSpot = function (key, x, y, avoid = [], gap = 0) {
+    const p = itemSpotBefore.apply(this, arguments);
+    if (activeRegion !== 'city' || !neonWorldCell(key) || !cityGenPlan(key)) return p;
+    const ok = (cx, cy) => cx >= 60 && cx <= 740 && cy >= 70 && cy <= 440 && walkable(key, cx, cy) && !cityItemOnStreet(key, cx, cy) && cityItemSpotClear(key, cx, cy) && !(typeof screenCovered === 'function' && screenCovered(cx, cy))
+      && !avoid.some(a => Math.hypot(a.x - cx, a.y - cy) < gap) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, { x: cx, y: cy }));
+    if (p && ok(p.x, p.y)) return p;
+    const from = p || { x, y }; let best = null, bd = Infinity;
+    for (let cy = 72; cy <= 440; cy += 8) for (let cx = 60; cx <= 740; cx += 8) { const d = Math.hypot(cx - from.x, cy - from.y); if (d < bd && ok(cx, cy)) { bd = d; best = { x: cx, y: cy }; } }
+    return best || p;
+  };
+  // The same rule for spots that don't come through organicItemSpot (a point of interest's own spot table, the start
+  // room's waypoint, the city's night objects, chests, the merchant): each is checked once per journey and moved if needed.
+  const cityFixCache = {}; let cityFixBusy = false;
+  const cityFixSpot = (key, o) => { if (!o || activeRegion !== 'city' || !rooms[key] || !neonWorldCell(key) || !cityGenPlan(key)) return o; const tag = String(state && state.seed) + ':' + key; if (o.cityClear === tag) return o;
+    const fk = tag + ':' + Math.round(o.x) + ',' + Math.round(o.y), hit = cityFixCache[fk]; if (hit) { o.x = hit[0]; o.y = hit[1]; o.cityClear = tag; return o; } // (some callers build a new object every time: the answer is kept by spot)
+    // the rule in order of what gives way when a room has little open ground: first the HUD and the room's margin, then
+    // the patrols' distance, last the street; never a sprite, never ground that can't be reached
+    const small = !(o.type === 'merchant' || o.type === 'cardsmith' || o.type === 'vault');
+    const ok = (cx, cy, tier) => cx >= (tier ? 40 : 60) && cx <= (tier ? 760 : 740) && cy >= (tier ? 56 : 70) && cy <= (tier ? 456 : 440) && walkable(key, cx, cy) && (tier > 1 || !cityItemOnStreet(key, cx, cy)) && cityItemSpotClear(key, cx, cy, small)
+      && (tier > 0 || !(typeof screenCovered === 'function' && screenCovered(cx, cy))) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, { x: cx, y: cy }));
+    if (!ok(o.x, o.y, 0)) { let best = null, bd = Infinity, sp = []; try { sp = cityFixBusy ? [] : (cityFixBusy = true, roomSpawns(key) || []); } catch (e) { sp = []; } cityFixBusy = false;
+      for (const [tier, far] of [[0, 152], [1, 152], [0, 70], [1, 70], [0, 0], [1, 0], [2, 152], [2, 70], [2, 0]]) /* 150px from patrols first (a point of interest's own rule), then 70, then any */ { if (best) break; for (let cy = 56; cy <= 456; cy += 8) for (let cx = 40; cx <= 760; cx += 8) { const d = Math.hypot(cx - o.x, cy - o.y); if (d < bd && ok(cx, cy, tier) && !sp.some(q => Math.hypot(q.x - cx, q.y - cy) < far)) { bd = d; best = [cx, cy]; } } }
+      if (best) { o.x = best[0]; o.y = best[1]; } }
+    cityFixCache[fk] = [o.x, o.y]; o.cityClear = tag; return o; };
+  // "beside the street" in the city means: on open ground joined to the streets, off the street itself, clear of every sprite
+  const besideStreetBeforeCity = organicBesideStreet;
+  organicBesideStreet = function (key, p) { if (activeRegion === 'city' && rooms[key] && neonWorldCell(key) && cityGenPlan(key)) return walkable(key, p.x, p.y) && !cityItemOnStreet(key, p.x, p.y) && cityItemSpotClear(key, p.x, p.y, !(p.type === 'merchant' || p.type === 'cardsmith' || p.type === 'vault')) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, p)); return besideStreetBeforeCity.apply(this, arguments); };
+  if (typeof worldPOIs === 'function') { const worldPOIsBefore = worldPOIs; worldPOIs = function () { const t = worldPOIsBefore.apply(this, arguments); if (activeRegion === 'city' && t) for (const k of Object.keys(t)) cityFixSpot(t[k].key || k, t[k]); return t; }; } // (the table itself, for whoever reads it whole)
+  const poiAtBeforeCityClear = poiAt; poiAt = function (key) { return cityFixSpot(key, poiAtBeforeCityClear.apply(this, arguments)); };
+  if (typeof chestFor === 'function') { const chestForBefore = chestFor; chestFor = function (key) { return cityFixSpot(key, chestForBefore.apply(this, arguments)); }; }
+  if (typeof cardsmithFor === 'function') { const cardsmithForBefore = cardsmithFor; cardsmithFor = function () { const c = cardsmithForBefore.apply(this, arguments); return c && c.key ? cityFixSpot(c.key, c) : c; }; }
+  if (typeof merchantRoom === 'function') { const merchantRoomBefore = merchantRoom; merchantRoom = function () { const m = merchantRoomBefore.apply(this, arguments); return m && m.key ? cityFixSpot(m.key, m) : m; }; }
   if (typeof ROOM_SPOT_FIXES !== 'undefined') delete ROOM_SPOT_FIXES.city;
   if (typeof organicDef === 'function') { const defBefore = organicDef; organicDef = function () { if (activeRegion === 'city') cityGenEnsure(); return defBefore.apply(this, arguments); }; }
   const configureBefore = configureRegion;

@@ -84,4 +84,15 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
 { const k = JSON.parse(run(`JSON.stringify({ kit: CITY_ROOF_KIT, roofs: [...CITY_TD_ART.roof, ...(CITY_TD_ART['mall-roof'] || []) /* Round 453 */, ...Object.values(CITY_DISTRICT_ART).flatMap(d => d.roof ? CITY_TD_ART[d.roof] : [])], slots: Object.keys(CITY_TD_ART) })`));
   for (const [roof, kit] of Object.entries(k.kit)) { assert(k.roofs.includes(roof), 'CITY_ROOF_KIT names a roof in the game: ' + roof); for (const s of kit) assert(k.slots.includes(s), roof + ' allows a real kind of kit: ' + s); }
   for (const glass of ['garden-glass', 'tech-glass-grid', 'garden-hydro']) assert(k.kit[glass] && k.kit[glass].length === 0, 'nothing stands on ' + glass); }
+// Round 457 (owner: "make sure we have a rule that interactable objects don't overlap buildings or other sprites like cars
+// and signs"): on every seed, the picture of every object (points of interest, chests, relics, the merchant, the
+// Cardsmith) is clear of the picture of everything that stands in its room (citySpriteBoxes).
+for (const seed of [77, 4242, 2026, 9, 1, 2]) {
+  const bad = JSON.parse(run(`(() => { newGame(); state.seed = ${seed}; configureRegion('city'); state.region = 'city'; cityGenEnsure(); const items = [];
+    for (const k of Object.keys(rooms)) { const p = poiAt(k); if (p) items.push([k, p.type, p]); const c = chestFor(k); if (c) items.push([k, 'chest', c]); const r = rooms[k].relic; if (r) items.push([k, 'relic', { x: r[3], y: r[4] }]); }
+    const m = merchantRoom(); if (m) items.push([m.key, 'merchant', m]); const cs = typeof cardsmithFor === 'function' && cardsmithFor(); if (cs) items.push([cs.key, 'cardsmith', cs]);
+    const bad = []; genWith('city', () => { for (const [k, t, p] of items) { const B = cityItemBox(p, t); for (const sp of citySpriteBoxes(chronoSeed(), k, cityGenPlan(k))) if (B.x0 < sp.x1 && B.x1 > sp.x0 && B.y0 < sp.y1 && B.y1 > sp.y0) bad.push(k + ' ' + t + ' on ' + sp.kind); } });
+    return JSON.stringify({ n: items.length, bad }); })()`));
+  assert(bad.n >= 20 && bad.bad.length === 0, 'no object overlaps a building, a car, a sign or any other sprite; seed ' + seed + ': ' + bad.bad.join(', '));
+}
 console.log('PASS: the city\'s lots follow its streets; one scale; buildings agree across rooms; ruins in zones; no pockets.');

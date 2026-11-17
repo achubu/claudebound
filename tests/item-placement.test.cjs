@@ -23,6 +23,7 @@ for (const region of ['city','elaris','vespera']) {
     // Round 358: the owner placed every Neon Aftermath room's object by hand (assets/spot-fixes.js, kerbs and grass), on or
     // off the path; it must still be within reach.
     if (typeof roomSpotFix==='function' && roomSpotFix(k)) { if (!st || st.d>rad-8) bad.push(k+' '+t+' far '+(st&&st.d.toFixed(1))); }
+    else if (region==='city' && typeof cityItemOnStreet==='function') { if (!walkable(k,p.x,p.y)) bad.push(k+' '+t+' OFF the ground'); else if (cityItemOnStreet(k,p.x,p.y)) bad.push(k+' '+t+' ON the street'); else if (!cityItemSpotClear(k,p.x,p.y,t!=='merchant')) bad.push(k+' '+t+' on a sprite'); } // Round 457: the generated city: open ground, off the street, clear of every sprite
     else if (itemsOnGround() || isPlazaSpot(k,p)) { if (!walkable(k,p.x,p.y)) bad.push(k+' '+t+' OFF the ground'); }
     else if (walkable(k,p.x,p.y)) bad.push(k+' '+t+' ON path');
     else if (!st || st.d>rad-8) bad.push(k+' '+t+' far '+(st&&st.d.toFixed(1)));
