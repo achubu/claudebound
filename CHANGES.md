@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 464: bitmasked kerbs and rims switched on, for streets, parks and yards
+
+Owner: "switch it on"; "we should use this technique everywhere if it wont break the algo".
+
+- `GEN.gridKerb` is on: the city's streets are cut from its 25px cells by their 3x3 neighbourhood and the kerb is laid
+  centred on the road's edge (Round 463).
+- **Parks and yards** use the same: their lots are whole cells, so `cityGridKerb` lays their rim along the lot's edge
+  (straight runs, a 12px arc at each corner) in place of the traced outline; a park's grass corner turns on the same centre
+  as the rim's arc (8px at its 4px inset).
+- Not changed: the beach's concrete lip (the coast is a smooth curve, not cells) and building walls and roofs.
+- Checked on seeds 2, 77 and 4242 (whole city) and close-ups; walk-throughs clean on seeds 1 and 9; city, pathing,
+  item-placement and map-roads suites pass.
+
 ## Round 463: 3x3-bitmask streets and kerbs (built, switched off until the owner picks)
 
 Owner: "the curb is not perfectly placed covering the intersection between texture tiles"; "it also doesn't touch the beach
