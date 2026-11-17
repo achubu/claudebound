@@ -1543,18 +1543,26 @@ function paintChronoRoom(canvas, key) {
       const [nwx, nwy] = GEN.world(key), sd = chronoSeed(), G = 10, gw = Math.ceil(800 / G) + 2, gh = Math.ceil(500 / G) + 2, n1 = new Float32Array(gw * gh), n2 = new Float32Array(gw * gh), n3 = new Float32Array(gw * gh);
       for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) { const X = nwx * 800 + gx * G, Y = nwy * 500 + gy * G; n1[gy * gw + gx] = chronoNoise(sd, 'coast', X, Y, 90) - 0.5; n2[gy * gw + gx] = chronoNoise(sd, 'coast2', X, Y, 26) - 0.5; n3[gy * gw + gx] = chronoNoise(sd, 'foam', X, Y, 14); }
       const lerp = (a, x, y) => { const fx = x / G, fy = y / G, x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0, i = y0 * gw + x0; return (a[i] * (1 - tx) + a[i + 1] * tx) * (1 - ty) + (a[i + gw] * (1 - tx) + a[i + gw + 1] * tx) * ty; };
-      const mk = () => { const c = document.createElement('canvas'); c.width = 800; c.height = 500; const g = c.getContext('2d'), d = g.createImageData(800, 500); return { c, g, d }; };
+      const crisp = !!GEN.coastCrisp, MW = crisp ? W : 800, MH = crisp ? H : 500, sK = crisp ? K : 1;
+      const mk = () => { const c = document.createElement('canvas'); c.width = MW; c.height = MH; const g = c.getContext('2d'), d = g.createImageData(MW, MH); return { c, g, d }; };
+      // (Round 461) the fields at room px, noise added; read between px for each canvas px when crisp
+      const VF = new Float32Array(801 * 501), SF = new Float32Array(801 * 501), NF = new Float32Array(801 * 501);
+      for (let y = 0; y <= 500; y++) for (let x = 0; x <= 800; x++) { const o = (Math.min(y, h - P - 1) + P) * w + Math.min(x, w - P - 1) + P, a = lerp(n1, Math.min(x, 799), Math.min(y, 499)), b = lerp(n2, Math.min(x, 799), Math.min(y, 499)); VF[y * 801 + x] = V[o] + a * 0.16 + b * 0.07; SF[y * 801 + x] = SV[o] + a * 0.2 + b * 0.05; NF[y * 801 + x] = lerp(n3, Math.min(x, 799), Math.min(y, 499)); }
+      const bil = (F, x, y) => { const x0 = Math.floor(x), y0 = Math.floor(y), tx = x - x0, ty = y - y0, i = y0 * 801 + x0; return (F[i] * (1 - tx) + F[i + 1] * tx) * (1 - ty) + (F[i + 801] * (1 - tx) + F[i + 802] * tx) * ty; };
+      const cellAt = (x, y) => { const cy = Math.floor(y / T), cx = Math.floor(x / T); return cellS[(cy - c0 + Math.floor(P / T) * 0 + 0) * cw + cx - c0] ; };
       const sea = mk(), beach = mk(), shallow = mk(), deep = mk(), wet = mk(), foam = mk(), cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
-      for (let y = 0; y < 500; y++) for (let x = 0; x < 800; x++) { const o = (y + P) * w + x + P, a = lerp(n1, x, y), b = lerp(n2, x, y), v = V[o] + a * 0.16 + b * 0.07, sv = SV[o] + a * 0.2 + b * 0.05, i = (y * 800 + x) * 4;
-        const inSea = cl((v - 0.5) * 50 + 0.5), inBeach = Math.max(inSea, cl((sv - 0.5) * 50 + 0.5));
+      const straight = !!GEN.coastStraight, sharp = 50 * sK;
+      for (let Y = 0; Y < MH; Y++) for (let X = 0; X < MW; X++) { const x = sK > 1 ? Math.min(799.999, Math.max(0, (X + 0.5) / sK - 0.5)) : X, y = sK > 1 ? Math.min(499.999, Math.max(0, (Y + 0.5) / sK - 0.5)) : Y /* (off: the same room px as before) */, v = bil(VF, Math.max(0, x), Math.max(0, y)), sv = bil(SF, Math.max(0, x), Math.max(0, y)), i = (Y * MW + X) * 4;
+        // (Round 461, straight) the paving ends on the cells' own straight edges, as a sea wall: the beach is the sea's cells and the ring round them
+        const inSea = cl((v - 0.5) * sharp + 0.5), inBeach = Math.max(inSea, straight ? (cellAt(x + 0.0001, y + 0.0001) ? 1 : 0) : cl((sv - 0.5) * sharp + 0.5));
         for (const m of [sea, beach, shallow, deep, wet, foam]) m.d.data[i] = m.d.data[i + 1] = m.d.data[i + 2] = 255;
         sea.d.data[i + 3] = inSea * 255; beach.d.data[i + 3] = inBeach * 255;
         shallow.d.data[i + 3] = inSea * Math.pow(cl(1 - (v - 0.5) / 0.5), 1.6) * 255;           // strongest at the shore, gone about 30px out
         deep.d.data[i + 3] = inSea * cl((v - 0.8) / 0.2) * 255;                  // the open sea, darker
         wet.d.data[i + 3] = (1 - inSea) * cl(1 - (0.5 - v) / 0.24) * 255;         // wet sand: about 14px up the beach
-        const f = lerp(n3, x, y), line = cl(1 - Math.abs(v - 0.505) / 0.03) * cl((f - 0.3) * 4), swash = cl(1 - Math.abs(v - 0.66) / 0.016) * cl((f - 0.5) * 5) * 0.45;
+        const f = bil(NF, Math.max(0, x), Math.max(0, y)), line = cl(1 - Math.abs(v - 0.505) / 0.03) * cl((f - 0.3) * 4), swash = cl(1 - Math.abs(v - 0.66) / 0.016) * cl((f - 0.5) * 5) * 0.45;
         foam.d.data[i + 3] = Math.max(line, swash) * 255; }
-      const up = m => { m.g.putImageData(m.d, 0, 0); const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(m.c, 0, 0, W, H); return c; };
+      const up = m => { m.g.putImageData(m.d, 0, 0); if (MW === W) return m.c; const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(m.c, 0, 0, W, H); return c; };
       return { sea: up(sea), beach: up(beach), shallow: up(shallow), deep: up(deep), wet: up(wet), foam: up(foam) }; })();
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
     const flat = (mask, col) => tintIn(mask, g => { g.fillStyle = col; g.fillRect(0, 0, W, H); });
@@ -1567,7 +1575,14 @@ function paintChronoRoom(canvas, key) {
     ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore();                     // foam
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART['waterfront-edge'] || []).map(n => imgs[cityArtPath('waterfront-edge', n)]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
-    if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
+    if (GEN.coastLip) { // (Round 461 trial) no strip: the paving ends in a drawn concrete lip, crisp at canvas resolution, with a soft shadow on the sand
+      const pave = document.createElement('canvas'); pave.width = W; pave.height = H; const pg = pave.getContext('2d'); pg.fillStyle = '#fff'; pg.fillRect(0, 0, W, H); pg.globalCompositeOperation = 'destination-out'; pg.drawImage(beach, 0, 0);
+      const grow = (src, r) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); for (let a = 0; a < 16; a++) for (const rr of [r, r * 0.5]) g.drawImage(src, Math.cos(a * Math.PI / 8) * rr, Math.sin(a * Math.PI / 8) * rr); g.drawImage(src, 0, 0); return c; };
+      const sh = document.createElement('canvas'); sh.width = W; sh.height = H; const sg = sh.getContext('2d'); sg.filter = 'blur(' + (5 * K) + 'px)'; sg.drawImage(pave, 0, 3 * K); sg.filter = 'none'; sg.globalCompositeOperation = 'source-in'; sg.fillStyle = 'rgba(0,0,0,.55)'; sg.fillRect(0, 0, W, H); sg.globalCompositeOperation = 'destination-in'; sg.drawImage(beach, 0, 0);
+      ctx.drawImage(sh, 0, 0);
+      const band = (r, col) => { const c = grow(beach, r * K), g = c.getContext('2d'); g.globalCompositeOperation = 'destination-in'; g.drawImage(pave, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, W, H); ctx.drawImage(c, 0, 0); };
+      band(7, '#3a3f48'); band(5.5, '#5d636d'); band(1.6, '#9aa2ad'); }
+    else if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
   } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
