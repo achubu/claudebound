@@ -3496,6 +3496,32 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 474: street clutter never drawn over a building
+
+Owner: "need a rule to keep objects from being placed on buildings like this" (a vending machine on the sidewalk, its
+picture rising over a shopfront), "although the lights are fine".
+
+- `cityStreetFurniture`: a piece of clutter's whole picture (0.7 of its height to each side, its full height up) keeps 2px
+  clear of every building (8px inside its lot) and landmark; if the chosen piece is too tall for the spot, the tallest one
+  that fits is taken (bags, tyres, a barrier), else none. Lamps, traffic lights and signs are posts and may rise in front
+  of a building. `city-layout` checks it on six seeds.
+
+## Round 473: interactable objects sized to the hero
+
+Owner: "scale interactable objects to be scaled to the main character sprite".
+
+- Every city object was drawn in the same 42px box (58 for the merchant and Cardsmith), so a campfire and a vending
+  machine came out the same size. `CITY_ITEM_PX` (`assets/chrono-gen.js`) now gives each kind its own size against the
+  hero (about 60px tall): things a person stands at (terminals, machines, boards, the breaker, the shrine) about his
+  height, the merchant 96 (his figure as tall as the hero), the Cardsmith's container 88, waist-high things (chests,
+  caches, the campfire, the courier drone) 44-46, the waypoint pad 84, the vault entrance 92, the medic 76 and the gang
+  80. The sizes on screen are written from the table (`city-gen.js`), and the no-overlap rule (`cityItemBox`) and the tests
+  read the same table.
+- Fixed while checking it: the overlap check could run while the region was still being set up and nothing counted as
+  reachable, and cached that failure; an object copied to a new spot (the waypoint) kept the old "checked" mark; the night
+  objects (Wanted Board, breakers, vault) weren't checked at all. All three fixed, the night objects added to the test.
+  Browser check: no object overlaps a sprite on 8 seeds.
+
 ## Round 472: a better look for elite enemies
 
 Owner: "the glow around elite enemies is not very good". The wide, blurry gold halo is replaced by a crisp gold outline

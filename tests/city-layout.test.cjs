@@ -37,7 +37,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
         atStart: all.filter(l => l.r[0] < wl.pos['0,5'][0] * 800 + 800 && l.r[2] > wl.pos['0,5'][0] * 800 && l.r[1] < wl.pos['0,5'][1] * 500 + 500 && l.r[3] > wl.pos['0,5'][1] * 500).length }; }
     const LM = L.filter(l => l.use === 'landmark'); o.landmarks = LM.length; o.landmarkKinds = new Set(LM.map(l => l.landmark)).size; o.landmarkRepeatNear = 0;
     for (let i = 0; i < LM.length; i++) for (let j = i + 1; j < LM.length; j++) if (LM[i].landmark === LM[j].landmark && Math.hypot(LM[i].r[0] - LM[j].r[0], LM[i].r[1] - LM[j].r[1]) < 800) o.landmarkRepeatNear++;
-    o.clutter = 0; o.clutterBad = 0; for (const k of keys) { const p = cityGenPlan(k), [wx, wy] = GEN.world(k); for (const f of cityStreetFurniture(sd, p)) { if (f.slot !== 'clutter') continue; o.clutter++;
+    o.clutter = 0; o.clutterBad = 0; o.clutterOnBuilding = 0; for (const k of keys) { const p = cityGenPlan(k), [wx, wy] = GEN.world(k); for (const f of cityStreetFurniture(sd, p)) { if (f.slot !== 'clutter') continue; o.clutter++; { const hw = f.h * 0.7, X = f.x + wx * 800, Y = f.y + wy * 500; if (L.some(l => { const I2 = l.use === 'roof' ? 8 : l.use === 'landmark' ? 4 : -1; return I2 >= 0 && X - hw < l.r[2] - I2 && X + hw > l.r[0] + I2 && Y - f.h < l.r[3] - I2 && Y > l.r[1] + I2; })) o.clutterOnBuilding++; } // Round 474
       const onRoad = !!p.floor[Math.floor(f.y / 25) * 32 + Math.floor(f.x / 25)], onLot = L.some(l => l.use !== 'plaza' && f.x + wx * 800 > l.r[0] + 4 && f.x + wx * 800 < l.r[2] - 4 && f.y + wy * 500 > l.r[1] + 4 && f.y + wy * 500 < l.r[3] - 4); if (onRoad || onLot || !CITY_CLUTTER_H[f.n]) o.clutterBad++; } }
     o.quarters = {}; for (const l of B) o.quarters[l.district] = (o.quarters[l.district] || 0) + 1;
     // a quarter is a neighbourhood: most buildings share their quarter with the building next door
@@ -73,6 +73,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
   assert(r.bare.worst <= 0.1 && r.bare.mean <= 0.04, 'little ground is left bare; ' + at);
   assert(r.mall.n === 1 && r.mall.art /* Round 453: its own walls, roof and street floor */ && r.mall.w >= 500 && r.mall.ok && r.mall.parking >= 3 && r.mall.parkingOk && r.mall.cars >= 30 && r.mall.spanX <= 1700 && r.mall.spanY <= 1100 && r.mall.atStart === 0, 'one mall: a wide three-storey building with its front on its parking, inside four rooms, away from the start; ' + at);
   assert(r.landmarks >= 3 && r.landmarkKinds >= Math.min(5, r.landmarks) && r.landmarkRepeatNear === 0, 'landmarks: several, different, never the same one close by; ' + at);
+  assert(r.clutterOnBuilding === 0, 'no street clutter drawn over a building (Round 474); ' + at);
   assert(r.clutter >= 8 && r.clutterBad === 0, 'street clutter stands on the sidewalks; ' + at);
   assert(Object.keys(r.quarters).length === 4 && r.quarterSame > 0.75, 'four quarters, each a neighbourhood; ' + at);
   assert(r.southMain >= r.buildings * 0.2, 'buildings with a street to the south have a front (shopfront and signs), main roads included; ' + at);
@@ -91,7 +92,7 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
 for (const seed of [77, 4242, 2026, 9, 1, 2]) {
   const bad = JSON.parse(run(`(() => { newGame(); state.seed = ${seed}; configureRegion('city'); state.region = 'city'; cityGenEnsure(); const items = [];
     for (const k of Object.keys(rooms)) { const p = poiAt(k); if (p) items.push([k, p.type, p]); const c = chestFor(k); if (c) items.push([k, 'chest', c]); const r = rooms[k].relic; if (r) items.push([k, 'relic', { x: r[3], y: r[4] }]); }
-    const m = merchantRoom(); if (m) items.push([m.key, 'merchant', m]); const cs = typeof cardsmithFor === 'function' && cardsmithFor(); if (cs) items.push([cs.key, 'cardsmith', cs]);
+    const m = merchantRoom(); if (m) items.push([m.key, 'merchant', m]); if (typeof cityNightsItems === 'function') for (const k of Object.keys(rooms)) for (const it of cityNightsItems(k)) items.push([k, it.type, it]); // Round 473: the night objects too const cs = typeof cardsmithFor === 'function' && cardsmithFor(); if (cs) items.push([cs.key, 'cardsmith', cs]);
     const bad = []; genWith('city', () => { for (const [k, t, p] of items) { const B = cityItemBox(p, t); for (const sp of citySpriteBoxes(chronoSeed(), k, cityGenPlan(k))) if (B.x0 < sp.x1 && B.x1 > sp.x0 && B.y0 < sp.y1 && B.y1 > sp.y0) bad.push(k + ' ' + t + ' on ' + sp.kind); } });
     return JSON.stringify({ n: items.length, bad }); })()`));
   assert(bad.n >= 20 && bad.bad.length === 0, 'no object overlaps a building, a car, a sign or any other sprite; seed ' + seed + ': ' + bad.bad.join(', '));
