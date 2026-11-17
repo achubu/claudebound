@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 467: shadows only on walkable ground, never on edges
+
+Owner: "shadows should only drop on walkable tiles, not on anything else please"; "dont drop it on edges either".
+
+- Building shadows are drawn into their own layer and laid down after all the lots, cut out of: every building (its own
+  included), every other lot (yards, parks, landmarks, the mall's parking), and every edge. Edges (kerbs, park and yard
+  rims, the beach's lip) are drawn into `cityEdgeMask` as well as onto the room for this. So a shadow shows only on the
+  streets and paving.
+
 ## Round 466: padding round buildings
 
 Owner: "can we also add a few pixels of padding between buildings and edges and the like".
