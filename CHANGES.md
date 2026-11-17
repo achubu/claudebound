@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 478: landmark squares the same colour as the paving
+
+Owner: "the area around the statue is a different color ... it should be the same color". Each landmark had a pale cyan pool
+of light, clipped to its lot, so it showed as a lighter rectangle on every landmark square. Removed.
+
 ## Round 477: enemies walk more slowly
 
 Owner: "can we slow the movement of the enemies a little? their limbs move too fast". Every creature's walk cycle plays

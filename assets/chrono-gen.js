@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '475',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '478',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -1062,7 +1062,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     if (l.use === 'plaza') continue;
     if (l.use === 'landmark') { // Round 447: an open square on the city's own paving, a pool of light, the landmark in the middle
       const b = cityLandmarkBox(l, bx), art = imgs[cityArtPath('landmark', l.landmark)], mx = b.x + b.w / 2, my = b.y + b.h * 0.6, R2 = Math.max(bw, bh) * 0.6;
-      ctx.save(); ctx.beginPath(); ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); ctx.globalCompositeOperation = 'lighter'; const g2 = ctx.createRadialGradient(S(mx), S(my), 0, S(mx), S(my), S(R2)); g2.addColorStop(0, 'rgba(90,200,220,.2)'); g2.addColorStop(1, 'rgba(90,200,220,0)'); ctx.fillStyle = g2; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.restore();
+      void R2; // Round 478 (owner: "the area around the statue is a different color ... it should be the same color"): no pool of light round a landmark (it was clipped to the lot, so it showed as a pale rectangle); its square is the city's paving like any other
       if (art && art.naturalWidth) ctx.drawImage(art, S(b.x), S(b.y), S(b.w), S(b.h));
       continue; }
     if (cityIsYard(l)) { // Round 436: a cargo yard: the lot ground edged by a kerb strip (never two textures without a border), its cargo on it
