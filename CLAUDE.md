@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 467) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 468) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -141,7 +141,7 @@ change set.
   for kerbs and park/yard rims (`cityGridKerb`, `GEN.gridKerb`): edges on the 25px cell grid, the strip centred on the seam,
   one piece per straight run and an arc per corner. Use it for any new cell-aligned edge. Round 465 (owner): **one edge per
   seam** (`cityRimKeep`): streets own their kerb, buildings their wall, two yards/parks share one rim. Round 466: buildings stand 8px in from their lot, paving round them.
-  Round 467 (owner): shadows only on walkable ground, never on lots or edges; draw any new edge into `cityEdgeMask` too.
+  Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
 - **Neon Aftermath is one painted world map** (Round 91+):
