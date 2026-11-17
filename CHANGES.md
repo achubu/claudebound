@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 468: no shadows
+
+Owner: "lets remove all shadows they dont look right". `GEN.noShadows` (on for the city): no building shadows, no dark
+band round yards and parks, no shadow from the beach's lip onto the sand, no dark gutter along the kerbs. The roof's
+parapet keeps its own shading (part of the roof, not a cast shadow).
+
 ## Round 467: shadows only on walkable ground, never on edges
 
 Owner: "shadows should only drop on walkable tiles, not on anything else please"; "dont drop it on edges either".

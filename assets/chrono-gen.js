@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '467',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '468',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -388,7 +388,7 @@ const GEN_THEMES = {
     mains: seed => { const T = GEN_THEMES.city, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':mains:' + t);
       return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
     alley: (key, d) => { const T = GEN_THEMES.city, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
-    worldLots: true, topdown: true, tilt: 30, mall: true, coastCrisp: true, coastLip: true /* Round 461 (owner chose C) */, gridKerb: true /* Round 464 (owner: "switch it on") */, startKey: '0,5', alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
+    worldLots: true, topdown: true, tilt: 30, mall: true, coastCrisp: true, coastLip: true /* Round 461 (owner chose C) */, gridKerb: true /* Round 464 (owner: "switch it on") */, noShadows: true /* Round 468 (owner: "lets remove all shadows they dont look right") */, startKey: '0,5', alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
     maxH: 300, // Round 394 (owner: "buildings should probably be around 3 times bigger")
     storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 , 'laundromat': 1.6, 'pharmacy': 1.6, 'karaoke-bar': 1.6, 'food-court': 1.44, 'walkup-flats': 1.6, 'boarding-house': 1.6, 'shanty-block': 1.6, 'data-relay': 1.44, 'robotics-workshop': 0.83, 'bathhouse': 1.25, 'temple-hall': 1.39},
@@ -1040,7 +1040,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       if (art && art.naturalWidth) ctx.drawImage(art, S(b.x), S(b.y), S(b.w), S(b.h));
       continue; }
     if (cityIsYard(l)) { // Round 436: a cargo yard: the lot ground edged by a kerb strip (never two textures without a border), its cargo on it
-      ctx.save(); ctx.beginPath(); ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.yard); ctx.fillStyle = 'rgba(6,8,14,.3)'; /* Round 452: the new lot ground is dark asphalt already (was .62 over the old white tiles) */ ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = S(14); ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = S(8); ctx.strokeRect(S(bx[0] - 4), S(bx[1] - 4), S(bw + 8), S(bh + 8)); /* Round 447: grime gathered along the yard's edge */ ctx.restore(); // (Round 445: darker, so a yard doesn't glare beside the paving)
+      ctx.save(); ctx.beginPath(); ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); ctx.clip(); fill(ctx, imgs.yard); ctx.fillStyle = 'rgba(6,8,14,.3)'; /* Round 452: the new lot ground is dark asphalt already (was .62 over the old white tiles) */ ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh)); /* Round 468 (owner: "remove all shadows"): no grime shadow round the yard */ /* Round 447: grime gathered along the yard's edge */ ctx.restore(); // (Round 445: darker, so a yard doesn't glare beside the paving)
       const edgeArt = pick('park-edge', ra); if (edgeArt) { const m = document.createElement('canvas'); m.width = Math.ceil((bw + 8) * K); m.height = Math.ceil((bh + 8) * K); const mg = m.getContext('2d'); mg.fillStyle = '#fff'; mg.fillRect(4 * K, 4 * K, bw * K, bh * K);
         const [ywx, ywy] = GEN.world(key), TT = 12; (GEN.gridKerb ? (() => { const [gwx, gwy] = GEN.world(key), r = l.r, gx = gwx * FG_COLS, gy = gwy * FG_ROWS, inLot = (X, Y) => (X - gx) * FG_CELL >= r[0] && (X - gx + 1) * FG_CELL <= r[2] && (Y - gy) * FG_CELL >= r[1] && (Y - gy + 1) * FG_CELL <= r[3]; for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, inLot, gx, gy, FG_COLS, FG_ROWS, FG_CELL, 12, K, edgeArt, TT, gwx * 800, gwy * 500, cityRimKeep(l)); })() : cityEdgeAlong(ctx, m, bx[0] - 4, bx[1] - 4, K, edgeArt, 12, ywx, ywy)); } // Round 464: the bitmasked rim, centred on the lot's edge
       const yardPieces = cityYardPieces(seed, l, bx); if (yardPieces.bays) { ctx.save(); ctx.fillStyle = 'rgba(214,222,232,.3)'; for (const [x, y, w, h] of yardPieces.bays) { ctx.fillRect(S(x - 4.5), S(y + 4), S(1.5), S(h - 4)); ctx.fillRect(S(x + w + 3), S(y + 4), S(1.5), S(h - 4)); } ctx.restore(); } // Round 450: the mall's bays are marked
@@ -1062,7 +1062,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       for (const b of cityParkRubble(seed, l, bx, trees)) { const ru = A('rubble'), art = ru && ru[Math.floor(b.artR * ru.length)]; if (!art) continue; const k = b.L / Math.max(art.width, art.height), dw = art.width * k, dh = art.height * k;
         ctx.save(); ctx.translate(S(b.x), S(b.y)); if (b.rot) ctx.scale(-1, 1); ctx.drawImage(art, S(-dw / 2), S(-dh / 2), S(dw), S(dh)); ctx.restore(); }
       // Round 447: a worn, darker rim inside the kerb fading toward the middle, so the grass has depth (as the shallows give the sea)
-      ctx.save(); ctx.shadowColor = 'rgba(10,8,2,.9)'; ctx.shadowBlur = S(18); ctx.strokeStyle = 'rgba(10,8,2,.55)'; ctx.lineWidth = S(8); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(S(bx[0] - 4), S(bx[1] - 4), S(bw + 8), S(bh + 8), S(PR + 4)); else ctx.rect(S(bx[0] - 4), S(bx[1] - 4), S(bw + 8), S(bh + 8)); ctx.stroke(); ctx.restore();
+      /* Round 468 (owner: "remove all shadows"): no shadow round the park */
       for (const [tx, ty, tr] of trees) { const treeArt = pick('tree', ra); if (treeArt) { const k = tr * 2.6 / Math.max(treeArt.width, treeArt.height), dw = treeArt.width * k, dh = treeArt.height * k; ctx.drawImage(treeArt, S(tx - dw / 2), S(ty - dh / 2), S(dw), S(dh)); } /* Round 438: at its own proportions, never stretched */ }
       ctx.restore();
       // Round 408: a park is edged like a planter: a stone kerb round the grass, so it never meets the paving bare
@@ -1162,7 +1162,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   { // Round 467: the shadows fall only on walkable ground: never on a building (its own included), another lot, or an edge
     shG.save(); shG.globalCompositeOperation = 'destination-out'; shG.fillStyle = '#000';
     for (const l of lots) { const I2 = l.use === 'roof' ? 8 : 0; if (l.use !== 'plaza') shG.fillRect(S(l.r[0] + I2), S(l.r[1] + I2), S(l.r[2] - l.r[0] - 2 * I2), S(l.r[3] - l.r[1] - 2 * I2)); }
-    if (cityEdgeMask) shG.drawImage(cityEdgeMask, 0, 0); shG.restore(); ctx.drawImage(shL, 0, 0); }
+    if (cityEdgeMask) shG.drawImage(cityEdgeMask, 0, 0); shG.restore(); if (!GEN.noShadows) ctx.drawImage(shL, 0, 0); } // Round 468: off (GEN.noShadows)
   // Round 410: cars last, so no lot, park or border is ever drawn over one
   // parked cars along the main streets (where they stand comes from cityParkedCars, which the walk mask reads too)
   for (const c of cityParkedCars(seed, plan)) { const { px, py, hz, col } = c, w = hz ? 46 : 22, h = hz ? 22 : 46, cars = A('car');
@@ -1663,7 +1663,7 @@ function paintChronoRoom(canvas, key) {
       const grow = (src, r) => { const c = cv(), g = c.getContext('2d'); for (let a = 0; a < 16; a++) for (const rr of [r, r * 0.5]) g.drawImage(src, Math.cos(a * Math.PI / 8) * rr, Math.sin(a * Math.PI / 8) * rr); g.drawImage(src, 0, 0); return c; };
       // sand: the sand that shows; caster: what throws the shadow onto it (all of the rest, or only the streets later)
       const lipWith = (sand, caster) => { const out = cv(), og = out.getContext('2d'); og.fillStyle = '#fff'; og.fillRect(0, 0, W, H); og.globalCompositeOperation = 'destination-out'; og.drawImage(sand, 0, 0);
-        const src = caster || out, sh = cv(), sg = sh.getContext('2d'); sg.filter = 'blur(' + (5 * K) + 'px)'; sg.drawImage(src, 0, 3 * K); sg.filter = 'none'; sg.globalCompositeOperation = 'source-in'; sg.fillStyle = 'rgba(0,0,0,.55)'; sg.fillRect(0, 0, W, H); sg.globalCompositeOperation = 'destination-in'; sg.drawImage(sand, 0, 0); ctx.drawImage(sh, 0, 0);
+        const src = caster || out, sh = cv(), sg = sh.getContext('2d'); sg.filter = 'blur(' + (5 * K) + 'px)'; sg.drawImage(src, 0, 3 * K); sg.filter = 'none'; sg.globalCompositeOperation = 'source-in'; sg.fillStyle = 'rgba(0,0,0,.55)'; sg.fillRect(0, 0, W, H); sg.globalCompositeOperation = 'destination-in'; sg.drawImage(sand, 0, 0); if (!GEN.noShadows) ctx.drawImage(sh, 0, 0);
         for (const [r, col] of [[7, '#3a3f48'], [5.5, '#5d636d'], [1.6, '#9aa2ad']]) { const c = grow(sand, r * K), g = c.getContext('2d'); g.globalCompositeOperation = 'destination-in'; g.drawImage(caster || out, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, W, H); ctx.drawImage(c, 0, 0); if (cityEdgeMask) cityEdgeMask.getContext('2d').drawImage(c, 0, 0); } };
       lipWith(beach, null);
       // (the streets are drawn later, over the sand where they reach it: their edge against the sand gets the same lip, on the street's side)
@@ -1784,7 +1784,7 @@ function paintChronoRoom(canvas, key) {
       // a road has depth like the water: a dark, damp gutter along both kerbs fading toward the crown of the road
       const inv0 = document.createElement('canvas'); inv0.width = W; inv0.height = H; const i0 = inv0.getContext('2d'); i0.fillStyle = '#fff'; i0.fillRect(0, 0, W, H); i0.globalCompositeOperation = 'destination-out'; i0.drawImage(f.shape, 0, 0);
       const band = blurred(inv0, 9 * K), bg2 = band.getContext('2d'); bg2.globalCompositeOperation = 'destination-in'; bg2.drawImage(f.shape, 0, 0); bg2.globalCompositeOperation = 'source-in'; bg2.fillStyle = '#01030a'; bg2.fillRect(0, 0, W, H);
-      ctx.save(); ctx.globalAlpha = 0.75; ctx.drawImage(band, 0, 0); ctx.restore(); }
+      if (!GEN.noShadows) { ctx.save(); ctx.globalAlpha = 0.75; ctx.drawImage(band, 0, 0); ctx.restore(); } }
     if (curbArt) { // Round 420: the curb, a kerb-stone strip along every road edge, on the sidewalk side (the road mask turned inside out)
       const inv = document.createElement('canvas'); inv.width = W; inv.height = H; const ig = inv.getContext('2d'); ig.fillStyle = '#fff'; ig.fillRect(0, 0, W, H); ig.globalCompositeOperation = 'destination-out'; ig.drawImage(f.shape, 0, 0);
       const [cwx, cwy] = GEN.world(key);
