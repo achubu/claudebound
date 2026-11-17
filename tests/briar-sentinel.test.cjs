@@ -7,7 +7,7 @@ const fs = require('fs');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`JSON.stringify({ html: monsterArt('vineguard'), arc: monsterArt('arcSentinel'), sentry: monsterArt('chronoSentry'),
   poses: posesOf('vineguard'), revenant: posesOf('sunRevenant'), revenantHtml: monsterArt('sunRevenant') })`));
-assert(r.html.includes('city/briar-sentinel-v3.png'), 'Round 356: the Briar Sentinel walks on the owner\'s refreshed sheet');
+assert(r.html.includes('city/riot-sentinel.png'), 'Round 476: the Riot Sentinel walks on the owner\'s sheet');
 assert(r.sentry.includes('chronospire/brass-sentry.png') && !r.sentry.includes('briar-sentinel'), 'Round 364: the Brass Sentry walks on its own sheet');
 assert(r.arc.includes('vespera/arc-sentinel.png') && !r.arc.includes('briar-sentinel'), 'Round 339: The Arc Sentinel has its own sheet');
 assert.deepStrictEqual(r.revenant, { attack: 1, hurt: 3, walk: 'elaris/sun-revenant-walk' }, 'the Revenant keeps its poses');

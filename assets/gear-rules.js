@@ -6,7 +6,7 @@
 // =====================================================================
 const GEAR_RULES = {
   ember:           { icon: '🔥', name: 'Kindle', desc: 'Your first attack each turn also Burns the enemy for 2.' },
-  boots:           { icon: '🌿', name: 'Briar Guard', desc: 'When your Block stops an enemy hit completely, the enemy takes 3 damage.' },
+  boots:           { icon: '🛡', name: 'Riot Guard', desc: 'When your Block stops an enemy hit completely, the enemy takes 3 damage.' },
   sunwovenShirt:   { icon: '☀', name: 'Sunwell', desc: 'Healing past your max HP becomes Block.' },
   scarabBelt:      { icon: '🪲', name: 'Scarab Swarm', desc: 'The first 0-energy card you play each turn draws a card.' },
   galeweavePants:  { icon: '🪶', name: 'Gale Rhythm', desc: 'Your 4th card each turn gets +4 damage or +4 Block.' },
@@ -47,7 +47,7 @@ cardEffect = function (c, empowered, doubleAttack) {
   if (attack && gearRule('tempestGloves') && ELEMENTS_FOR_RULES.includes(d.element) && b.enemy.hp > 0) { const hit = Math.min(3, b.enemy.hp); b.enemy.hp -= hit; gearRuleLog(b, 'tempestGloves', hit + ' more damage.'); }
   return r;
 };
-// The enemy's turn: Cloudstep, Briar Guard; the start of yours: Moss Mend, Saved Moment.
+// The enemy's turn: Cloudstep, Riot Guard; the start of yours: Moss Mend, Saved Moment.
 const endTurnBeforeGearRules = endTurn;
 endTurn = function () {
   const b = state && state.battle;
