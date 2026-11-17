@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 462: streets meet the beach with the lip; rooftop kit only on plain roofs
+
+Owner: "need to fix these edges too" (a road's kerb on the sand at a corner); "you put an edge over an edge in a way that
+doesn't make sense, we need to fix the algorithm so this cant happen"; "object sprites can only be placed on roofs with
+simple tile textures"; "the object sprites for roofs should also not touch the roof edges".
+
+- **Streets at the beach:** the sand that shows is the beach less the streets drawn over it. Where a street meets it, the
+  street's edge gets the same concrete lip and soft shadow as the paving (`coastLipDraw(road)`), and the kerb strip is
+  erased from the sand and from 10px round it, so a kerb never lies on the sand, on the lip or across it: it stops where the
+  lip begins (no edge over an edge).
+- **Rooftop kit only on plain roofs** (`CITY_ROOF_KIT`): fine gravel, bitumen, tar chip and rubber take kit; every other
+  roof (glass, gardens, plates, seams, cables, solar, skylights, lit panels, the slab with its drain, the tar roof with its
+  windows) takes nothing. A roof missing from the table takes nothing.
+- **Clear of the roof's edges:** kit keeps 24px from a roof's edge (was 18): past the parapet, its shadow and a front sign.
+- `city-layout` checks the busy roofs take no kit.
+
 ## Round 461: the beach: sharp sand, a concrete lip, no paving bumps
 
 Owner: "focus on fixing the beach ... the sand looks blurry and low res. can you look into new techniques". Three options
