@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '471',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '474',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -952,7 +952,10 @@ function cityStreetFurniture(seed, plan) {
     for (const rd of mains) for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 100) continue; const dx = (b[0] - a[0]) / L, dy = (b[1] - a[1]) / L;
       const n = Math.max(1, Math.round((L - 60) / 150)), sp = (L - 60) / n;
       for (const sd of [1, -1]) for (let j = 0; j < n; j++) { const take = rr() < 0.45, d = 30 + sp * (j + (sd > 0 ? 0.75 : 0.25)); if (!take) continue;
-        const at = back(a[0] + dx * d, a[1] + dy * d, -dy * sd, dx * sd); if (at && add('clutter', at[0], at[1])) { const f = out[out.length - 1]; f.n = names[Math.floor(f.artR * names.length)]; f.h = CITY_CLUTTER_H[f.n] || 30; } } } }
+        const at = back(a[0] + dx * d, a[1] + dy * d, -dy * sd, dx * sd); if (at && add('clutter', at[0], at[1])) { const f = out[out.length - 1]; f.n = names[Math.floor(f.artR * names.length)]; f.h = CITY_CLUTTER_H[f.n] || 30;
+          // Round 473 (owner: "need a rule to keep objects from being placed on buildings ... although the lights are fine"): a piece of clutter's whole picture (up to 0.7 of its height to each side, its full height up) keeps 4px clear of every building and landmark; posts (lamps, lights, signs) may rise in front of them
+          const hits = h => { const hw = h * 0.7; return wl.lotsPx.some(l => { const I2 = l.use === 'roof' ? 8 : l.use === 'landmark' ? 4 : -1; return I2 >= 0 && f.x - hw < l.r[2] - ox - I2 + 2 && f.x + hw > l.r[0] - ox + I2 - 2 && f.y - h < l.r[3] - oy - I2 + 2 && f.y > l.r[1] - oy + I2 - 2; }); };
+          if (hits(f.h)) { const alt = names.filter(n2 => !hits(CITY_CLUTTER_H[n2] || 30)).sort((a2, b2) => (CITY_CLUTTER_H[b2] || 30) - (CITY_CLUTTER_H[a2] || 30))[0]; if (alt) { f.n = alt; f.h = CITY_CLUTTER_H[alt] || 30; } else out.pop(); } } } } }
   return out.sort((p, q) => p.y - q.y);
 }
 // Round 415 (owner: "make it a rule that if the tile is just a texture tile, it can be walked on, unless it has another
@@ -974,9 +977,17 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
   for (const f of cityStreetFurniture(seed, plan)) { const hw = f.slot === 'clutter' ? f.h * 0.6 : f.h * 0.2; add(f.x - hw, f.y - f.h, f.x + hw, f.y, f.slot); }
   for (const c of cityParkedCars(seed, plan)) add(c.px - 31, c.py - 20, c.px + 31, c.py + 20, 'car');
   return out; }
-// an object's picture box at its spot (measured in the browser): 42px, standing a little above its spot (the merchant, the
-// Cardsmith and the vault 58px); a chest or a relic is centred on its spot
-function cityItemBox(p, kind) { const big = kind === 'merchant' || kind === 'cardsmith' || kind === 'vault', mid = kind === 'chest' || kind === 'relic', w = big ? 58 : 42; return mid ? { x0: p.x - 21, y0: p.y - 22, x1: p.x + 21, y1: p.y + 21 } : { x0: p.x - w / 2, y0: p.y - w * 0.8, x1: p.x + w / 2, y1: p.y + w * 0.21 }; }
+// Round 473 (owner: "scale interactable objects to be scaled to the main character sprite"): each kind of object has its own
+// size, in room px, set against the hero (about 60px tall: a person): things a person stands at (terminals, machines, boards,
+// the merchant) about the hero's height, waist-high things (chests, caches, a campfire) about two thirds of it, the waypoint
+// pad and the vault entrance larger. The painter's boxes (CSS, built from this table in city-gen.js), the overlap rule and
+// the tests all read it.
+const CITY_ITEM_PX = { nexus: 84, chest: 44, relic: 40, merchant: 96, cardsmith: 88, wantedBoard: 64, breaker: 60, vault: 92, lore: 58, shrine: 60, campfire: 46, cache: 46, sealed: 46,
+  'event:terminal': 58, 'event:medic': 76, 'event:vending': 60, 'event:courier': 44, 'event:arcade': 60, 'event:racer': 56, 'event:billboard': 62, 'event:toll': 80 };
+function cityItemPx(p, kind) { const k = kind || (p && p.type) || 'chest'; return CITY_ITEM_PX[k === 'event' && p && p.event ? 'event:' + p.event : k] || 48; }
+// an object's picture box at its spot (measured in the browser): standing on its spot, a little below it (the foot point);
+// a chest or a relic is centred on its spot
+function cityItemBox(p, kind) { const k = kind || (p && p.type) || 'chest', mid = k === 'chest' || k === 'relic', w = cityItemPx(p, k); return mid ? { x0: p.x - w / 2, y0: p.y - w / 2, x1: p.x + w / 2, y1: p.y + w / 2 } : { x0: p.x - w / 2, y0: p.y - w * 0.8, x1: p.x + w / 2, y1: p.y + w * 0.22 }; }
 function cityBlockers(seed, key, plan) {
   const wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, rects = [], circles = [];
   for (const l of wl.lotsPx) { const r = [l.r[0] - ox + 4, l.r[1] - oy + 4, l.r[2] - ox - 4, l.r[3] - oy - 4]; if (r[2] < 0 || r[0] > 800 || r[3] < 0 || r[1] > 500) continue;
