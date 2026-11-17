@@ -10,11 +10,16 @@ for (const region of ['city', 'elaris', 'vespera']) {
   assert(pois.length >= Math.round(eligible * .3) && pois.length <= Math.max(Math.round(eligible * POI_SHARE), LORE_PER_WORLD + 4), region + ': about a third of ordinary rooms have a point of interest (' + pois.length + '/' + eligible + ')');
   assert.equal(pois.filter(p => p.type === 'lore').length, LORE_PER_WORLD, region + ': five lore finds');
   for (const t of ['shrine', 'campfire', 'cache']) assert(pois.some(p => p.type === t), region + ' has a ' + t);
+  let cityNear = 0;
   for (const p of pois) {
     assert(!isStartRoom(p.key) && !roomSpawns(p.key).some(s => s.boss) && !chestFor(p.key), 'never in start, boss or chest rooms');
     assert(organicDef(p.key) ? organicBesideStreet(p.key, p) : walkable(p.key, p.x, p.y, 30), 'reachable spot (beside the path in organic rooms)');
-    assert(roomSpawns(p.key).every(s => Math.hypot(s.x - p.x, s.y - p.y) > 150), 'clear of patrols');
+    // Round 457: in the generated city an object may not stand on a building, a car or a sign, nor on the street; in a
+    // room with little open ground that can leave it nearer a patrol than 150px (never under 60, and rarely)
+    if (region === 'city') { const d = Math.min(Infinity, ...roomSpawns(p.key).map(s => Math.hypot(s.x - p.x, s.y - p.y))); assert(d > 60, 'clear of patrols (city: 60px at least)'); if (d <= 150) cityNear++; }
+    else assert(roomSpawns(p.key).every(s => Math.hypot(s.x - p.x, s.y - p.y) > 150), 'clear of patrols');
   }
+  assert(cityNear <= 3, 'few city objects stand within 150px of a patrol (' + cityNear + ')');
   const shop = merchantRoom(); assert(shop, region + ' has a merchant'); assert(!worldPOIs()[shop.key], 'merchant is not on a point of interest');
   const firstShop = shop.key; let moved = false;
   for (let k = 0; k < 6 && !moved; k++) { state.poi.merchantMoves++; moved = merchantRoom().key !== firstShop; }

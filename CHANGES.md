@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 457: objects never overlap a sprite; waypoints pulse
+
+Owner: "make sure we have a rule that interactable objects don't overlap buildings or other sprites like cars and signs"
+and "can you make waypoints pulse with energy?".
+
+- **The rule** (`assets/city-gen.js`): in the city, the picture of every interactable object (points of interest, the
+  night objects, chests, the merchant, the Cardsmith, waypoints) must be clear of the picture of everything that stands in
+  its room: buildings, landmarks, yard pieces, park trees and rubble, parked cars, lamps, lights, signs, clutter
+  (`citySpriteBoxes`, `cityItemBox` in `assets/chrono-gen.js`). A spot that isn't is moved to the nearest ground that is
+  walkable, joined to the streets, off the street itself (`cityItemOnStreet`, from the city's street cells) and clear, with
+  a 3px margin. When a room has little open ground the rule gives way in this order: the HUD corners and the room's margin,
+  the distance from patrols (150px, then 70), the street; never a sprite.
+- **What was wrong:** measured in the browser, 3 to 5 of a city's 32 objects overlapped something, a few of them standing
+  right on a building. An old fallback puts an object "just off the path", which in the generated city is a building lot;
+  some spots also came from tables that skip the usual placement. The guard wraps `organicItemSpot`, `poiAt`, `worldPOIs`,
+  `chestFor`, `merchantRoom` and `cardsmithFor`, and `organicBesideStreet` means the new rule in the city.
+- **Every room gets a square:** the generator's last fallback takes any open 4x4 beside a street, even near a door or under
+  the HUD. A room with no square had no open ground for its object but the street.
+- **Waypoints pulse** (`assets/layout-polish.css`): a Nexus Waypoint breathes brighter and sends two rings of its world's
+  colour out across the ground, in every world; off under reduced motion.
+- Tests: `city-layout` checks the rule on six seeds; `item-placement` and the walk-through check city objects stand on open
+  ground, off the street and off every sprite; `exploration` allows a city object nearer a patrol than 150px in a tight
+  room (never under 60px, at most three a city). Browser check: no overlaps on 8 seeds (32 objects each); seeded
+  walk-throughs clean on seeds 1, 9, 2026 and 4242.
+
 ## Round 456: the last four city objects
 
 The owner's redo of the four objects that didn't work in Round 451, cut and keyed from

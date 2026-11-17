@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '455',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '457',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -580,10 +580,10 @@ function genWorld(seed) {
       got.push({ x0: q[0], y0: q[1], x1: q[2], y1: q[3], back: q.back }); if (GEN.topdown) (holes[i] = holes[i] || []).push([q[0] + ox, q[1] + oy, q[2] + ox, q[3] + oy]); else used.add(i); }
     // a room no lot gives a square to: any open 5x5 beside a street in the room; the lots under it stay open
     if (!got.length) { const spots = [];
-      for (const EM of GEN.topdown ? [4, 2, 1] : [1]) { if (spots.length) break; /* Round 448: well inside the room first */ for (let y = EM; y + S5 <= FG_ROWS - EM; y++) for (let x = EM; x + S5 <= FG_COLS - EM; x++) { let open = true; /* (the arrow `open` above is shadowed here) */ for (let j = 0; j < S5 && open; j++) for (let i2 = 0; i2 < S5; i2++) if (at(ox + x + i2, oy + y + j) !== 1 && at(ox + x + i2, oy + y + j) !== 4) { open = false; break; }
+      for (const [EM, loose] of GEN.topdown ? [[4, 0], [2, 0], [1, 0], [1, 1] /* Round 457: last, a square anywhere beside a street, even near a door or under the HUD: a room with no square had no open ground for its object but the street */] : [[1, 0]]) { if (spots.length) break; /* Round 448: well inside the room first */ for (let y = EM; y + S5 <= FG_ROWS - EM; y++) for (let x = EM; x + S5 <= FG_COLS - EM; x++) { let open = true; /* (the arrow `open` above is shadowed here) */ for (let j = 0; j < S5 && open; j++) for (let i2 = 0; i2 < S5; i2++) if (at(ox + x + i2, oy + y + j) !== 1 && at(ox + x + i2, oy + y + j) !== 4) { open = false; break; }
         if (!open) continue; let touch = false; for (let t = 0; t < S5; t++) if (at(ox + x - 1, oy + y + t) === 2 || at(ox + x + S5, oy + y + t) === 2 || at(ox + x + t, oy + y - 1) === 2 || at(ox + x + t, oy + y + S5) === 2) touch = true;
         const mx = (x + S5 / 2) * FG_CELL, my = (y + S5 / 2) * FG_CELL - 22;
-        if (touch && !lots.some(l => l.mall === 'building' && l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) && doorClear(x, y, x + S5, y + S5) && !(typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy)))) spots.push([x, y]); } }
+        if (touch && !lots.some(l => l.mall === 'building' && l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) && (loose || (doorClear(x, y, x + S5, y + S5) && !(typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy)))))) spots.push([x, y]); } }
       for (const [x, y] of spots.sort(() => rnd() - 0.5)) { if (got.length >= 2) break; if (got.some(g => Math.hypot(g.x0 - x, g.y0 - y) < 8)) continue;
         got.push({ x0: x, y0: y, x1: x + S5, y1: y + S5 }); lots.forEach((l, i) => { if (l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) { if (GEN.topdown) (holes[i] = holes[i] || []).push([ox + x, oy + y, ox + x + S5, oy + y + S5]); else used.add(i); } }); } }
     plazas[k] = got; }
@@ -889,6 +889,24 @@ function cityStreetFurniture(seed, plan) {
 // image on top like that of a building or car or other sprite"): what stands on the ground in a room of the top-down city,
 // in room px: buildings (their lots, roof and front wall), parked cars, park trees, and the sea (not ground). Everything
 // else, streets, sidewalks, squares, sand, park grass and kerbs, can be walked on.
+// Round 457 (owner: "make sure we have a rule that interactable objects don't overlap buildings or other sprites like cars
+// and signs"): the picture box of everything that stands in a room of the top-down city, in room px, as
+// { x0, y0, x1, y1, kind }: buildings (their lots), landmarks, yard pieces, park trees and rubble, parked cars, lamps,
+// lights, signs and street clutter. An object's own picture (cityItemBox) must not touch any of them:
+// tests/city-layout.test.cjs holds the rule on six seeds, and cityParkedCars keeps cars off the squares.
+function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, out = [], add = (x0, y0, x1, y1, kind) => out.push({ x0, y0, x1, y1, kind });
+  for (const l of wl.lotsPx) { const r = [l.r[0] - ox + 4, l.r[1] - oy + 4, l.r[2] - ox - 4, l.r[3] - oy - 4]; if (r[2] < 0 || r[0] > 800 || r[3] < 0 || r[1] > 500) continue;
+    if (l.use === 'landmark') { const b = cityLandmarkBox(l, r); add(b.x, b.y, b.x + b.w, b.y + b.h, 'landmark'); }
+    else if (cityIsYard(l)) { for (const c of cityYardPieces(seed, l, r)) add(c.x, c.y, c.x + c.w, c.y + c.h, 'yard:' + c.slot); }
+    else if (l.use === 'roof') add(r[0], r[1], r[2], r[3], 'building');
+    else if (l.use === 'park') { const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) add(tx - tr, ty - tr, tx + tr, ty + tr, 'tree');
+      for (const b of cityParkRubble(seed, l, r, trees)) add(b.x - b.L / 2, b.y - b.L / 2, b.x + b.L / 2, b.y + b.L / 2, 'rubble'); } }
+  for (const f of cityStreetFurniture(seed, plan)) { const hw = f.slot === 'clutter' ? f.h * 0.6 : f.h * 0.2; add(f.x - hw, f.y - f.h, f.x + hw, f.y, f.slot); }
+  for (const c of cityParkedCars(seed, plan)) add(c.px - 31, c.py - 20, c.px + 31, c.py + 20, 'car');
+  return out; }
+// an object's picture box at its spot (measured in the browser): 42px, standing a little above its spot (the merchant, the
+// Cardsmith and the vault 58px); a chest or a relic is centred on its spot
+function cityItemBox(p, kind) { const big = kind === 'merchant' || kind === 'cardsmith' || kind === 'vault', mid = kind === 'chest' || kind === 'relic', w = big ? 58 : 42; return mid ? { x0: p.x - 21, y0: p.y - 22, x1: p.x + 21, y1: p.y + 21 } : { x0: p.x - w / 2, y0: p.y - w * 0.8, x1: p.x + w / 2, y1: p.y + w * 0.21 }; }
 function cityBlockers(seed, key, plan) {
   const wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, rects = [], circles = [];
   for (const l of wl.lotsPx) { const r = [l.r[0] - ox + 4, l.r[1] - oy + 4, l.r[2] - ox - 4, l.r[3] - oy - 4]; if (r[2] < 0 || r[0] > 800 || r[3] < 0 || r[1] > 500) continue;
