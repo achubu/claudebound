@@ -363,7 +363,7 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '469',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '470',
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -1158,7 +1158,9 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
       if (list) for (let sx = bx[0] + 40, i = Math.floor(rr() * list.length); sx + 60 < bx[2]; sx += 150, i++) { const hArt = list[i % list.length], k2 = 23 / hArt.height, dw = Math.min(110, hArt.width * k2), dh = dw / hArt.width * hArt.height; if (sx + dw < bx[2] - 20) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } }
     else if (southSt && !blade && !ruin && !home && rr() < 0.7) { const hArt = pick('sign-h', ra); // the sign's own picture at its own proportions, up to 16px tall, centred on the front roof edge
       if (hArt) { const k2 = Math.min(23 / hArt.height, (bw - 24) / hArt.width), dw = hArt.width * k2, dh = hArt.height * k2, sx = bx[0] + 12 + rr() * Math.max(0, bw - 24 - dw);
-        if (dw > 30) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } } }
+        if (dw > 30) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } }
+    // Round 470 (owner: "can we add a 1px black border to all buildings as well?"): round the whole building, roof and front wall
+    ctx.save(); ctx.strokeStyle = '#000'; ctx.lineWidth = S(1); ctx.strokeRect(S(bx[0] + 0.5), S(bx[1] + 0.5), S(bw - 1), S(bh0 - 1)); ctx.restore(); }
   { // Round 467: the shadows fall only on walkable ground: never on a building (its own included), another lot, or an edge
     shG.save(); shG.globalCompositeOperation = 'destination-out'; shG.fillStyle = '#000';
     for (const l of lots) { const I2 = l.use === 'roof' ? 8 : 0; if (l.use !== 'plaza') shG.fillRect(S(l.r[0] + I2), S(l.r[1] + I2), S(l.r[2] - l.r[0] - 2 * I2), S(l.r[3] - l.r[1] - 2 * I2)); }

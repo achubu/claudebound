@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 470: a 1px black outline on every building
+
+Owner: "can we add a 1px black border to all buildings as well?". Drawn last round each building (roof and front wall
+together, the mall and ruins included), 1px on screen.
+
 ## Round 469: every yard and park keeps its border, with space round it
 
 Owner: "the edging around some areas has disappeared, find the cause and address it with a rule so it doesn't happen
