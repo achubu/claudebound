@@ -3496,6 +3496,34 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 459: clean edges, a plain beach edge, doors on the ground floor, windows that step and never get cut, waypoint rings
+
+Owner: "your edgework is shoddy all over"; "those beach borders are all wrong looking"; "buildings should only use a sprite
+with a door on the 1st floor"; "window tiles should be offset from floor to floor if possible, but dont cut a window at the
+building edge"; "any windows that cant be properly cut to fit can be removed"; "waypoint pulse doesn't start from the center
+dot of the waypoint".
+
+- **Edges** (`cityEdgeAlong`): every border (kerbs, park rims, yard rails, the beach edge) was drawn as hundreds of 4px
+  slices of strip, each turned on its own; they overlapped and gapped at every corner and stepped along curves. Now the
+  outline is traced into whole lines, straightened (Douglas-Peucker; a corner the 4px grid cut off is put back), and each
+  straight run is one piece of strip, mitred at the joins like a picture frame. Runs still take their place in the strip
+  from world coordinates, so a straight edge carries on across rooms.
+- **Beach edge:** tetrapods belong in the surf and the steel piling broke up on the curving coast; where the paving meets
+  the sand is now a plain concrete coping (`shore-coping`, the poured kerb's art), 9px, on a smoother line (2.5px).
+  Both shore strips from Round 458 are in `unused assets/`.
+- **Doors only on the ground floor:** `CITY_DOOR_WALLS` (`home-pods`, the only wall picture with doors) is laid only as a
+  building's bottom floor; an upper floor that would get it takes a doorless wall; homes show it at street level.
+- **Windows never cut at a building's edge:** the measured gap lists for the eighteen walls from the Round 452-454 sheets
+  were wrong (the tool took the flat insides of dark or lit windows for plain wall); they are now marked by hand from a
+  ruler over each picture (pillars, seams, plain wall between bays). A wall that can't start and end between windows on a
+  given building gives way to the next picture of its list that can.
+- **Removed:** `wall-strip` and `wall-strip-dark`: one window band across nearly the whole picture, so 1 building in 9
+  could not be fitted without a cut, and floors could never step.
+- **Windows step floor to floor:** each floor takes a start gap different from the floor above where a fit within 15% of
+  the snuggest allows (90-100% of buildings for most walls).
+- **Waypoint rings** start as a point on the pad's centre dot (`--wp-cx`/`--wp-cy` per world's picture), not a fixed
+  point of the box.
+
 ## Round 458: new edge strips for kerbs, parks and the shore
 
 Owner: "do our edge textures need work? like the dividers?" The old ones were rounded cartoon stone blocks, an old iron

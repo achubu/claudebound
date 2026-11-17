@@ -219,14 +219,9 @@
        "scale": null,
        "files": [
         {
-         "name": "shore-piling",
-         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-piling.webp",
-         "bytes": 25908
-        },
-        {
-         "name": "shore-tetrapod",
-         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-tetrapod.webp",
-         "bytes": 46598
+         "name": "shore-coping",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/shore-coping.webp",
+         "bytes": 27286
         }
        ]
       }
@@ -257,16 +252,6 @@
          "name": "wall-porthole",
          "src": "assets/environment/city-gen/surfaces/wall/wall-porthole.webp",
          "bytes": 6304
-        },
-        {
-         "name": "wall-strip",
-         "src": "assets/environment/city-gen/surfaces/wall/wall-strip.webp",
-         "bytes": 2462
-        },
-        {
-         "name": "wall-strip-dark",
-         "src": "assets/environment/city-gen/surfaces/wall/wall-strip-dark.webp",
-         "bytes": 2188
         }
        ]
       },
