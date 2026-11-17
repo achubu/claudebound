@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 465: one edge per seam
+
+Owner: "things are looking good except for overlapping edges, any way to create a rule to keep this from happening?" (a
+parking lot's rim running beside a road's kerb and along a building).
+
+- `cityRimKeep(l)`: a yard's or park's rim is drawn only where the cell beside it is open paving. A seam with a street is
+  the kerb's; a seam with a building (or a landmark's lot) is the building's own wall; of two yards or parks side by side,
+  only the lower-numbered one draws their shared seam (so the two textures still have one border between them).
+- Where a rim stops at a seam it gives way on, it ends short (half its width plus 4px), so it never reaches into the kerb
+  or wall beside it.
+- `cityGridKerb` takes the rule as `keep(X, Y, NX, NY)`; the lot-to-cell index is built once per city (`wl.lotIndex`).
+
 ## Round 464: bitmasked kerbs and rims switched on, for streets, parks and yards
 
 Owner: "switch it on"; "we should use this technique everywhere if it wont break the algo".
