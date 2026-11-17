@@ -46,7 +46,7 @@ const WILDLIFE_ART={
  // and a walk on the map. The Arc Sentinel and the Brass Sentry borrow it.
  // Round 356 (trial of the owner's refreshed art): the new walk is used everywhere. Before:
  // vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel',cycle:'1.6s',poses:{attack:2,hurt:1,walk:'city/briar-sentinel-walk'}},
- vineguard:{name:'Briar Sentinel',sheet:'city/briar-sentinel-v3',cycle:'.8s'}, // Round 358: the owner's detailed 2x2-grid redraw (v2 was Round 356's)
+ vineguard:{name:'Riot Sentinel',sheet:'city/riot-sentinel',cycle:'.8s'}, // Round 476 (owner): the Briar Sentinel is now the Riot Sentinel, a cybernetic security robot (owner's 2x2 draft; its fourth frame, missing the shield, replaced by the second) // Round 358: the owner's detailed 2x2-grid redraw (v2 was Round 356's)
  // Round 252: the Ember Jackal is animated too: stand, rear back when hit, lunge with a raised paw.
  // Round 356 (trial of the owner's refreshed art): the new walk is used everywhere. Before:
  // emberling:{name:'Ember Jackal',sheet:'city/ember-jackal',cycle:'1.2s',poses:{attack:2,hurt:1,walk:'city/ember-jackal-walk'}},
@@ -89,7 +89,7 @@ const cityMonsterArt=monsterArt;
 // Round 196: a sheet name with a folder ('sky/zenith-roc') is read from assets/monsters/<folder>/;
 // big:true draws it in the larger boss box.
 // Round 200: bump SPRITE_VERSION when sheets are re-cut, so browsers fetch the new images.
-const SPRITE_VERSION='379';
+const SPRITE_VERSION='476';
 function wildlifeSheetUrl(sheet){return 'assets/monsters/'+(sheet.includes('/')?sheet:'elaris/'+sheet)+'.png?v='+SPRITE_VERSION}
 monsterArt=function(id){const animal=ELARIS_WILDLIFE[id]||WILDLIFE_ART[id];if(!animal)return cityMonsterArt(id);return '<span class="monster-sprite wildlife-sprite'+(animal.big?' bloom-tyrant':'')+'" role="img" aria-label="'+animal.name+'" style="background-image:url('+wildlifeSheetUrl(animal.sheet)+');--wildlife-cycle:'+animal.cycle+'"></span>'};
 // Round 249: a boss node's sprite box was square (142px, sized for Neon Aftermath's boss pictures), which

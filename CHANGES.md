@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 476: the Riot Sentinel replaces the Briar Sentinel
+
+Owner: "a new animated enemy sprite for neon aftermath to replace the briar sentinel ... more futuristic and cybernetic",
+then "lets change it to riot sentinel and use this art".
+
+- The owner's 2x2 walk draft (`assets/monsters/city/src/riot-sentinel-draft.jpg`) cut with `tools/strip_to_sheet.py
+  --grid 2 --align 1` into `assets/monsters/city/riot-sentinel.png`; the draft's fourth frame had lost the shield and grown
+  a second blade, so the second frame (the other passing pose) stands in for it. `vineguard` is now named the Riot
+  Sentinel; the old sheet is in `unused assets/`. `enemy-sizes.css` regenerated; `SPRITE_VERSION` 476.
+- The boots' gear rule "Briar Guard" is now "Riot Guard" (🛡); the Briarstep Boots keep their name.
+
 ## Round 475: no blur when standing still; one border round touching yards; holes only on plain roofs; orange elite glow
 
 Owner: "sometimes the game gets blurred when i move and stop moving"; "found an issue with edges, can we fix this with

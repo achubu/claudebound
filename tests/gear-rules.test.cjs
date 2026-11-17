@@ -32,7 +32,7 @@ assert(r.moss.turn === 2 && r.moss.hp === 51, 'Moss Mend heals 1 at the start of
 assert(r.cloud > 0 && r.cloud < r.cloud2, 'Cloudstep halves only the first hit');
 assert.strictEqual(r.hour, 1, 'Saved Moment carries over 1 energy');
 assert(r.second.phase === 'fight' && r.second.hp === 1 && r.second2 === 'lost', 'Second Chance saves you once'); assert.strictEqual(r.chip, 'lost', 'but not from low health');
-assert.strictEqual(r.briar, 3, 'Briar Guard hits back when Block stops the hit');
+assert.strictEqual(r.briar, 3, 'Riot Guard hits back when Block stops the hit');
 assert.strictEqual(r.storm, 11, 'Stormglass: the 7th card gains 6 more Block'); assert.strictEqual(r.none, 0, 'no rules without gear');
 assert(/Kindle/.test(r.text), 'the rule shows with the boost');
 console.log('gear-rules ok');

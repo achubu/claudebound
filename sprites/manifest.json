@@ -1583,21 +1583,6 @@
      "title": "Creatures",
      "types": [
       {
-       "key": "Briar Sentinel",
-       "label": "Briar Sentinel",
-       "rule": "A sheet of four frames, one row.",
-       "walk": false,
-       "folder": "monsters/city/",
-       "scale": null,
-       "files": [
-        {
-         "name": "briar-sentinel-v3",
-         "src": "assets/monsters/city/briar-sentinel-v3.png",
-         "bytes": 1333316
-        }
-       ]
-      },
-      {
        "key": "Circuit Thornling",
        "label": "Circuit Thornling",
        "rule": "A sheet of four frames, one row.",
@@ -1714,6 +1699,21 @@
          "name": "reactor-mauler",
          "src": "assets/monsters/city/reactor-mauler.png",
          "bytes": 1111486
+        }
+       ]
+      },
+      {
+       "key": "Riot Sentinel",
+       "label": "Riot Sentinel",
+       "rule": "A sheet of four frames, one row.",
+       "walk": false,
+       "folder": "monsters/city/",
+       "scale": null,
+       "files": [
+        {
+         "name": "riot-sentinel",
+         "src": "assets/monsters/city/riot-sentinel.png",
+         "bytes": 850600
         }
        ]
       },
