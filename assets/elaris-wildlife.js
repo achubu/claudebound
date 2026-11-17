@@ -99,7 +99,7 @@ wildlifeBossStyle.textContent='.enemy-node.boss .monster-sprite.wildlife-sprite{
 document.head.append(wildlifeBossStyle);
 const wildlifeStyle=document.createElement('style');
 wildlifeStyle.textContent=`
-.enemy-node .wildlife-sprite,.battle-monster .wildlife-sprite{display:block;background-repeat:no-repeat;background-size:400% 100%;background-position:0 0;image-rendering:auto;animation:wildlifeFrames var(--wildlife-cycle,1s) steps(1,end) infinite;transform:scaleX(var(--enemy-facing,1));transform-origin:center;filter:drop-shadow(0 5px 3px #0009)}
+.enemy-node .wildlife-sprite,.battle-monster .wildlife-sprite{display:block;background-repeat:no-repeat;background-size:400% 100%;background-position:0 0;image-rendering:auto;animation:wildlifeFrames calc(var(--wildlife-cycle,1s) * 1.4) steps(1,end) infinite;transform:scaleX(var(--enemy-facing,1));transform-origin:center;filter:drop-shadow(0 5px 3px #0009)}
 .enemy-node .wildlife-sprite{width:88px;height:117.333px;position:absolute;left:50%;top:-28px;margin-left:-44px}
 .enemy-node:has(.wildlife-sprite){animation:none;transform:translate(-50%,-50%)}
 .enemy-node:has(.wildlife-sprite):after{top:98px}

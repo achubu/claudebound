@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 477: enemies walk more slowly
+
+Owner: "can we slow the movement of the enemies a little? their limbs move too fast". Every creature's walk cycle plays
+40% slower (`calc(var(--wildlife-cycle) * 1.4)` in `assets/elaris-wildlife.js`; the posed walk in `sun-revenant.js` 1.1s
+to 1.55s). Their speed across the map is unchanged.
+
 ## Round 476: the Riot Sentinel replaces the Briar Sentinel
 
 Owner: "a new animated enemy sprite for neon aftermath to replace the briar sentinel ... more futuristic and cybernetic",
