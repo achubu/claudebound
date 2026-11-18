@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 479) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 480) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -144,7 +144,8 @@ change set.
   Round 469 (owner): every side of a yard or park has a kerb or a rim (tested); rims lie inside their lot, with space round them. Round 470: a 1px black outline round every building. Round 471: a rim's open end meets the kerb (no gap, no overlap).
   Round 473 (owner): objects sized to the hero by kind (`CITY_ITEM_PX`; screen sizes, overlap rule and tests all read it).
   Round 474 (owner): street clutter's picture never over a building (posts may be). Round 475: touching yards (or parks)
-  are one area with one rim (`wl.rimLead`); roof holes follow the rooftop-kit rule; no scale animations on the hero (blur).
+  are one area with one rim (`wl.rimLead`); roof holes follow the rooftop-kit rule; no scale animations on the hero (blur). Round 480: rims are drawn per room by the
+  area's first lot there, after all ground (`rimDone`, `rimQueue`).
   Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).

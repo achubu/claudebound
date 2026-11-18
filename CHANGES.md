@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 480: a yard's or park's rim drawn in every room it reaches, over all the ground
+
+Owner: "still having edge issues, find a permanent rule fix for this" (a parking yard's rim stopping partway along).
+
+- Touching yards (or parks) form one area with one rim (Round 475), and only the area's lowest-numbered lot drew it. When
+  that lot lay in another room, this room drew no rim for its part of the area. Now the first of the area's lots in the
+  room draws it (`rimDone`).
+- Rims are queued and drawn after every lot's ground (`rimQueue`), so a later lot of the same area can't paint over them.
+
 ## Round 479: no cut-off roof holes; no stray sand or lip scraps behind coastal streets
 
 Owner: "roof of this building has a cut off graphic".
