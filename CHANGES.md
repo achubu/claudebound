@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 481: Solaris generator art prepared
+
+The owner's four Solaris sheets (ground and edges, walls and shop fronts, roofs and rooftop kit, landmarks, vehicles,
+street objects and plants) cut into 41 pieces in `assets/environment/solaris-gen/` (see its README), ready for a Solaris
+theme on the city's generator. Not wired in yet. Left out: the thatched and canvas roofs (single roofs, not repeating) and
+the oasis rim (curved in the middle).
+
 ## Round 480: a yard's or park's rim drawn in every room it reaches, over all the ground
 
 Owner: "still having edge issues, find a permanent rule fix for this" (a parking yard's rim stopping partway along).
