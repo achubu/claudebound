@@ -172,12 +172,12 @@ function mapRoadAlign() {
 }
 function mapRoadNet(key) {
   const r = rooms[key]; if (!r || !r.world || typeof neonWorldWalk !== 'function') return null;
-  const rk0 = activeRegion + ':' + key + (activeRegion === 'city' && typeof chronoSeed === 'function' ? ':' + chronoSeed() : ''); if (mapRoadCache[rk0]) return mapRoadCache[rk0];
+  const rk0 = activeRegion + ':' + key + ((activeRegion === 'city' || (typeof genLive === 'function' && genLive())) && typeof chronoSeed === 'function' ? ':' + chronoSeed() : ''); if (mapRoadCache[rk0]) return mapRoadCache[rk0];
   // Round 446: the generated city's map roads come from its own street plan (each door's road runs straight to the room's
   // crossing), not from tracing the ground that can be walked on: since Round 415 that is every sidewalk and yard, so the
   // trace found several "roads" per edge and drew jogs.
-  if (activeRegion === 'city' && typeof cityGenPlan === 'function' && typeof chronoDoorCell === 'function') { const p = cityGenPlan(key); if (p) { const hub = [p.hub[0], p.hub[1] + 22], paths = [];
-      for (const d of ['n', 's', 'e', 'w']) { if (!r.exits[d]) continue; const c = genWith('city', () => chronoDoorCell(chronoSeed(), key, d)) * 50 + 50, vert = d === 'n' || d === 's';
+  if (typeof genLive === 'function' && genLive() && typeof cityGenPlan === 'function' && typeof chronoDoorCell === 'function') { const p = cityGenPlan(key); if (p) { const hub = [p.hub[0], p.hub[1] + 22], paths = [];
+      for (const d of ['n', 's', 'e', 'w']) { if (!r.exits[d]) continue; const c = genWith(genTheme(), () => chronoDoorCell(chronoSeed(), key, d)) * 50 + 50, vert = d === 'n' || d === 's';
         const start = d === 'n' ? [c, -4] : d === 's' ? [c, 504] : d === 'w' ? [-4, c] : [804, c], pts = [start];
         if (vert ? c !== hub[0] : c !== hub[1]) pts.push(vert ? [c, hub[1]] : [hub[0], c]); // (a door off the crossing's line: a square corner; the grid keeps them on it)
         pts.push(hub); paths.push(pts); }
@@ -267,7 +267,7 @@ const MAP_ROAD_STYLE = { shadow: 'rgba(0,0,0,.35)', kerb: '#cfe6ee', asphalt: '#
 function mapRoadTile(key, onReady) {
   // Round 383: the generated Chronospire's map shows each room's real roads.
   if (activeRegion === 'chronospire' && typeof chronoMapTile === 'function') { const t = chronoMapTile(key, onReady); if (t) return t; }
-  if (activeRegion === 'city' && typeof cityGenPlan === 'function') { cityGenEnsure(); const t = genWith('city', () => chronoMapTile(key, onReady)); if (t) return t; } // Round 387
+  if (typeof genLive === 'function' && genLive() && typeof cityGenPlan === 'function') { cityGenEnsure(); const t = genWith(genTheme(), () => chronoMapTile(key, onReady)); if (t) return t; } // Round 387
   const r = rooms[key], net = mapRoadNet(key); if (!net) return null;
   const objs = mapRoomObjects(key), sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
   const ck = 'roads:' + activeRegion + ':' + key + ':' + sig; if (mapTileCache[ck]) return mapTileCache[ck];

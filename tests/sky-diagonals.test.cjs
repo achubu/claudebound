@@ -44,7 +44,7 @@ assert.equal(r.bossLevel, 27, 'the Eye of the Sky stays level 27');
 assert.equal(r.migrated.err, null, 'a save in a cut room still loads');
 assert.equal(r.migrated.room, r.migrated.start, 'it resumes at Windgate Landing');
 assert(!r.migrated.visited.includes('8,0'), 'cut rooms leave the visited list');
-assert.equal(r.solarisDoors, 6, 'Solaris keeps its own diagonal doors');
+assert.equal(r.solarisDoors, 0, 'the generated Solaris has no diagonal doors (Round 486)');
 assert.equal(r.cityDoors, 0, 'Neon Aftermath has no tile-world diagonals');
 // Every tile the plan uses has a painting and a walk mask.
 for (const n of r.tiles) {
