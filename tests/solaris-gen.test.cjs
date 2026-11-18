@@ -13,7 +13,8 @@ const r = JSON.parse(run(`(() => { newGame(); const out = { seeds: {} };
   out.cityRoof = CITY_TD_ART.roof.slice(); out.cityKit = Object.keys(CITY_ROOF_KIT);
   out.paths = genWith('solaris', () => cityTdArtNames()); out.tex = Object.values(GEN_THEMES.solaris.tex);
   out.solRoof = genWith('solaris', () => CITY_TD_ART.roof.slice()); out.solKit = genWith('solaris', () => Object.keys(CITY_ROOF_KIT));
-  out.cityRoofAfter = CITY_TD_ART.roof.slice();
+  out.cityRoofAfter = CITY_TD_ART.roof.slice(); out.solLamps = genWith('solaris', () => CITY_HAS('lamp')); // Round 484
+  state.seed = 9; out.lampsPlaced = genWith('solaris', () => Object.keys(SOLARIS_LAYOUT).reduce((n, k) => n + cityStreetFurniture('9', genPlan('solaris', k, '9')).filter(f => f.kind === 'lamp').length, 0));
   for (const sd of ${JSON.stringify(seeds)}) { state.seed = sd; const keys = Object.keys(SOLARIS_LAYOUT);
     const o = genWith('solaris', () => { const wl = genWorld(String(sd)), L = wl.lotsPx; let floors = [];
       for (const l of L) if (l.use === 'roof') floors.push(cityLotFloors(l, 3 + (l.seed % 5)).floors);
@@ -25,6 +26,7 @@ for (const p of r.paths) assert(fs.existsSync(path.join(DIR, p + '.webp')), 'Sol
 for (const p of r.tex) assert(fs.existsSync(path.join(DIR, p + '.webp')), 'Solaris texture on disk: ' + p);
 assert(!r.cityRoof.some(n => r.solRoof.includes(n)), 'the city and Solaris roofs are separate tables');
 assert.deepStrictEqual(r.cityRoof, r.cityRoofAfter, 'the city reads its own art again once Solaris is done');
+assert(!r.solLamps && r.lampsPlaced === 0, 'no lamps in the desert (owner, Round 484)');
 assert(r.solKit.every(k => r.solRoof.includes(k)), 'Solaris rooftop kit only on its own roofs');
 for (const [sd, o] of Object.entries(r.seeds)) {
   assert.strictEqual(o.planned, o.rooms, 'seed ' + sd + ': every Solaris room is planned');

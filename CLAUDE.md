@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 483) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 484) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -148,7 +148,7 @@ change set.
   area's first lot there, after all ground (`rimDone`, `rimQueue`).
   Round 483: **Solaris on the generator, as a preview** (`GEN_THEMES.solaris`, art in `assets/environment/solaris-gen/`; not
   played yet): the city's art tables read the theme in use (`genThemed`: `GEN.tdArt`, `GEN.districtArt`, ...); oases with pools
-  (`cityOasisPool`); `THEME=solaris node tests/city-atlas.cjs` paints it; `tests/solaris-gen.test.cjs`.
+  (`cityOasisPool`); `THEME=solaris node tests/city-atlas.cjs` paints it; `tests/solaris-gen.test.cjs`. Round 484 (owner): no lamps in the desert.
   Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).

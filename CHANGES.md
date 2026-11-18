@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 484: no lamps in the desert
+
+Owner, on the Solaris preview: "No lamps in desert". Solaris's lamp slot is empty (`GEN_THEMES.solaris.tdArt.lamp`), so the
+generator places no street lamps there and draws no lamp glow; the city keeps its lamps. `tests/solaris-gen.test.cjs` checks it.
+
 ## Round 483: Solaris on the city's generator (a preview)
 
 Owner: "can we apply the same world generation algorithm to solaris but instead of city buildings we will want to have
