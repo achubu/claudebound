@@ -11,24 +11,35 @@
 // are no longer used by the city: objects stand on the generated squares.
 // =====================================================================
 const CITY_GEN_VERSION = 1;
-let cityGenSeed = null;
+// Round 486: the generated worlds in play. Neon Aftermath always; Solaris (region 'elaris', theme GEN_THEMES.solaris) while
+// GEN_SOLARIS_LIVE. Everything below answers for the region you are in: its theme, and where its room keys sit on the
+// world grid (the city's keys run from row 4, Solaris's from row 0).
+let GEN_SOLARIS_LIVE = true;
+const GEN_REGIONS = { city: { id: 'city', theme: 'city', dy: 4 }, elaris: { id: 'elaris', theme: 'solaris', dy: 0, live: () => GEN_SOLARIS_LIVE } };
+function genRegion(region) { const r = GEN_REGIONS[region === undefined ? (typeof activeRegion !== 'undefined' ? activeRegion : 'city') : region]; return r && (!r.live || r.live()) ? r : null; }
+function genLive(region) { return !!genRegion(region); }
+function genTheme() { const r = genRegion(); return r ? r.theme : 'city'; }
+function genDy() { const r = genRegion(); return r ? r.dy : 4; }
+function genWorldCell(key) { const r = genLive() && rooms[key]; return r && r.world ? r.world : null; }
+let cityGenSeed = null, cityGenKey = null;
 function cityGenEnsure() {
-  const s = chronoSeed(); if (s === cityGenSeed) return;
-  cityGenSeed = s; chronoFlushCaches('city');
+  const s = chronoSeed(), k = genTheme() + ':' + s; if (k === cityGenKey) return;
+  cityGenKey = k; cityGenSeed = s; chronoFlushCaches((genRegion() || GEN_REGIONS.city).id);
 }
-function cityGenPlan(key) { cityGenEnsure(); return genPlan('city', key, cityGenSeed); }
+function cityGenStale() { return typeof state !== 'undefined' && state && state.seed != null && genTheme() + ':' + String(state.seed) !== cityGenKey; }
+function cityGenPlan(key) { cityGenEnsure(); return genPlan(genTheme(), key, cityGenSeed); }
 // The walk mask, a cell at a time (8px cells judged at their centres, like the old traced mask).
 // Each room's floor as a 100x63 grid of 8px cells, built once per seed.
 let cityMaskSeed = null, cityMasks = {};
 function cityRoomMask(cx, cy) {
-  if (cityMaskSeed !== cityGenSeed) { cityMaskSeed = cityGenSeed; cityMasks = {}; }
-  const k = cx + ',' + (cy + 4); if (k in cityMasks) return cityMasks[k];
+  if (cityMaskSeed !== cityGenKey) { cityMaskSeed = cityGenKey; cityMasks = {}; }
+  const k = cx + ',' + (cy + genDy()); if (k in cityMasks) return cityMasks[k];
   const p = cityGenPlan(k); if (!p) return cityMasks[k] = null;
   const m = new Uint8Array(100 * 63);
   for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) m[my * 100 + mx] = p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]; }
   // Round 415 (owner: a texture tile can be walked on unless a building, car or other sprite stands on it): in the top-down
   // city all ground can be walked; buildings, parked cars, park trees and the sea (a road over the water stays) cannot.
-  if (GEN_THEMES.city.topdown) { const b = genWith('city', () => cityBlockers(cityGenSeed, k, p));
+  if (GEN_THEMES[genTheme()].topdown) { const b = genWith(genTheme(), () => cityBlockers(cityGenSeed, k, p));
     for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) { const x = mx * 8 + 4, road = p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)];
       let ok = !b.rects.some(r => x >= r[0] && x < r[2] && y >= r[1] && y < r[3] && !(road && r[4] === 'water')) && !b.circles.some(c => Math.hypot(x - c[0], y - c[1]) < c[2]);
       m[my * 100 + mx] = ok ? 1 : 0; } }
@@ -55,10 +66,10 @@ function cityRoomMask(cx, cy) {
 // (x +-20, y - 24 .. y + 24) must touch no building, car, tree or sea, and its foot must be on walkable ground.
 let cityEnemySeed = null, cityEnemyBlock = {};
 function cityEnemyOk(key, x, y) {
-  if (cityEnemySeed !== cityGenSeed) { cityEnemySeed = cityGenSeed; cityEnemyBlock = {}; }
+  if (cityEnemySeed !== cityGenKey) { cityEnemySeed = cityGenKey; cityEnemyBlock = {}; }
   if (!cityRoomWalk(key, x, y)) return false;
   if (x < 20 || x > 780 || y < 24 || y > 476) return false;
-  let b = cityEnemyBlock[key]; if (!b) { const p = cityGenPlan(key); b = cityEnemyBlock[key] = p ? genWith('city', () => cityBlockers(cityGenSeed, key, p)) : { rects: [], circles: [] }; }
+  let b = cityEnemyBlock[key]; if (!b) { const p = cityGenPlan(key); b = cityEnemyBlock[key] = p ? genWith(genTheme(), () => cityBlockers(cityGenSeed, key, p)) : { rects: [], circles: [] }; }
   const bx0 = x - 20, bx1 = x + 20, by0 = y - 24, by1 = y + 24, f = cityGenPlan(key).floor;
   for (const r of b.rects) { if (bx0 < r[2] && bx1 > r[0] && by0 < r[3] && by1 > r[1]) { if (r[4] === 'water' && f[Math.floor(Math.min(495, y + 22) / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)]) continue; return false; } }
   for (const c of b.circles) { const nx = Math.max(bx0, Math.min(c[0], bx1)), ny = Math.max(by0, Math.min(c[1], by1)); if (Math.hypot(nx - c[0], ny - c[1]) < c[2]) return false; }
@@ -66,7 +77,7 @@ function cityEnemyOk(key, x, y) {
 }
 function cityGenWalk(wx, wy) {
   if (wx < 0 || wy < 0) return false;
-  if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure();
+  if (cityGenStale()) cityGenEnsure();
   const cx = Math.floor(wx / 800), cy = Math.floor(wy / 500), m = cityRoomMask(cx, cy); if (!m) return false;
   return m[Math.floor((wy - cy * 500) / 8) * 100 + Math.floor((wx - cx * 800) / 8)] === 1;
 }
@@ -74,36 +85,36 @@ function cityGenWalk(wx, wy) {
 // than 495; standing is allowed 12px in from the room's sides), without its per-call lookups: new journeys re-plan the
 // city, and placement asks hundreds of thousands of these.
 function cityRoomWalk(key, x, y) {
-  const c = key.indexOf(','), cx = +key.slice(0, c), cy = +key.slice(c + 1) - 4, m = cityRoomMask(cx, cy); if (!m) return false;
+  const c = key.indexOf(','), cx = +key.slice(0, c), cy = +key.slice(c + 1) - genDy(), m = cityRoomMask(cx, cy); if (!m) return false;
   const X = Math.max(0, Math.min(799, x)), Y = Math.min(495, Math.max(0, Math.min(499, y + 22)));
   return m[Math.floor(Y / 8) * 100 + Math.floor(X / 8)] === 1;
 }
 {
   const walkableBeforeCity = walkable;
   walkable = function (key, x, y, margin) {
-    if (activeRegion === 'city' && rooms[key] && !(typeof organicSpawnPass !== 'undefined' && organicSpawnPass) && GEN_THEMES.city.topdown && (margin === 26 || margin === 28)) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); return cityEnemyOk(key, x, y); } // Round 417: a patrol's step or spot
-    if (activeRegion === 'city' && rooms[key] && !(typeof organicSpawnPass !== 'undefined' && organicSpawnPass)) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); return x >= 12 && x <= 788 && y >= 12 && y <= 488 && cityRoomWalk(key, x, y); }
+    if (genLive() && rooms[key] && !(typeof organicSpawnPass !== 'undefined' && organicSpawnPass) && GEN_THEMES[genTheme()].topdown && (margin === 26 || margin === 28)) { if (cityGenStale()) cityGenEnsure(); return cityEnemyOk(key, x, y); } // Round 417: a patrol's step or spot
+    if (genLive() && rooms[key] && !(typeof organicSpawnPass !== 'undefined' && organicSpawnPass)) { if (cityGenStale()) cityGenEnsure(); return x >= 12 && x <= 788 && y >= 12 && y <= 488 && cityRoomWalk(key, x, y); }
     return walkableBeforeCity.apply(this, arguments);
   };
   const blockedBeforeCity = NeonCity.blocked;
   NeonCity.blocked = function (key, x, y) {
-    if (activeRegion === 'city' && rooms[key]) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); return !cityRoomWalk(key, x, y); }
+    if (genLive() && rooms[key]) { if (cityGenStale()) cityGenEnsure(); return !cityRoomWalk(key, x, y); }
     return blockedBeforeCity.apply(this, arguments);
   };
 }
 {
   const walkBefore = neonWorldWalk;
-  neonWorldWalk = function (wx, wy) { return activeRegion === 'city' ? cityGenWalk(wx, wy) : walkBefore.apply(this, arguments); };
+  neonWorldWalk = function (wx, wy) { return genLive() ? cityGenWalk(wx, wy) : walkBefore.apply(this, arguments); };
   // No room has its own painting or hand-listed nooks any more.
   neonRoomArt = function () { return false; };
   const looseBefore = neonLoose;
-  neonLoose = function () { return activeRegion === 'city' ? true : looseBefore.apply(this, arguments); };
+  neonLoose = function () { return genLive() ? true : looseBefore.apply(this, arguments); };
   const paintBefore = paintNeonWorld;
-  paintNeonWorld = function (canvas, key) { return activeRegion === 'city' && neonWorldCell(key) ? genWith('city', () => paintChronoRoom(canvas, key)) : paintBefore.apply(this, arguments); };
+  paintNeonWorld = function (canvas, key) { return genLive() && genWorldCell(key) ? genWith(genTheme(), () => paintChronoRoom(canvas, key)) : paintBefore.apply(this, arguments); };
   // Objects stand on the generated squares.
   const plazaSpotsBefore = plazaSpots;
   plazaSpots = function (key, region = activeRegion) {
-    if (region === 'city') { const p = cityGenPlan(key); if (!p || !p.plazas.length) return null;
+    if (genLive(region) && region === activeRegion) { const p = cityGenPlan(key); if (!p || !p.plazas.length) return null;
       // Round 448: a square within 70px of where a door really sets you down is not used while the room has another (the
       // landing spots come from the ground on both sides of a room's edge, so the city's plan can only keep squares roughly
       // clear of them; an object there opened as you walked in)
@@ -127,14 +138,14 @@ function cityRoomWalk(key, x, y) {
     if (typeof document !== 'undefined' && document.createElement && document.head) { const st = document.createElement('style'); st.id = 'city-item-sizes'; st.textContent = css; document.head.append(st); } }
   // an object stands on open ground, never on a street: its foot point (22px under its spot, as everywhere) and the ground
   // a little to each side must be clear of the room's street cells
-  const cityItemOnStreet = globalThis.cityItemOnStreet = function (key, x, y) { const wl = genWith('city', () => genWorld(chronoSeed())), [wx, wy] = GEN_THEMES.city.world(key), road = (px, py) => px >= 0 && py >= 0 && px < 800 && py < 500 && wl.cell[(wy * FG_ROWS + Math.floor(py / FG_CELL)) * wl.CW + wx * FG_COLS + Math.floor(px / FG_CELL)] === 2; // (the city's street cells: a room's plan also counts the squares' paving as floor)
+  const cityItemOnStreet = globalThis.cityItemOnStreet = function (key, x, y) { const wl = genWith(genTheme(), () => genWorld(chronoSeed())), [wx, wy] = GEN_THEMES[genTheme()].world(key), road = (px, py) => px >= 0 && py >= 0 && px < 800 && py < 500 && wl.cell[(wy * FG_ROWS + Math.floor(py / FG_CELL)) * wl.CW + wx * FG_COLS + Math.floor(px / FG_CELL)] === 2; // (the city's street cells: a room's plan also counts the squares' paving as floor)
     return [[0, 22], [-16, 22], [16, 22], [0, 10], [0, 30]].some(([dx, dy]) => road(x + dx, y + dy)); };
-  const cityItemSpotClear = globalThis.cityItemSpotClear = function (key, x, y, o) { if (state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); // (Round 473: never against the last journey's city: its plans and boxes could be cached under the new seed)
-    const sd = genWith('city', () => chronoSeed()), ck = sd + ':' + key, boxes = cityItemBoxesCache[ck] || (cityItemBoxesCache[ck] = genWith('city', () => citySpriteBoxes(sd, key, cityGenPlan(key)))); return cityItemClear(key, x, y, boxes, o); };
+  const cityItemSpotClear = globalThis.cityItemSpotClear = function (key, x, y, o) { if (cityGenStale()) cityGenEnsure(); // (Round 473: never against the last journey's city: its plans and boxes could be cached under the new seed)
+    const sd = genWith(genTheme(), () => chronoSeed()), ck = sd + ':' + key, boxes = cityItemBoxesCache[ck] || (cityItemBoxesCache[ck] = genWith(genTheme(), () => citySpriteBoxes(sd, key, cityGenPlan(key)))); return cityItemClear(key, x, y, boxes, o); };
   const itemSpotBefore = organicItemSpot;
   organicItemSpot = function (key, x, y, avoid = [], gap = 0) {
     const p = itemSpotBefore.apply(this, arguments);
-    if (activeRegion !== 'city' || !neonWorldCell(key) || !cityGenPlan(key)) return p;
+    if (!genLive() || !genWorldCell(key) || !cityGenPlan(key)) return p;
     const ok = (cx, cy) => cx >= 60 && cx <= 740 && cy >= 70 && cy <= 440 && walkable(key, cx, cy) && !cityItemOnStreet(key, cx, cy) && cityItemSpotClear(key, cx, cy) && !(typeof screenCovered === 'function' && screenCovered(cx, cy))
       && !avoid.some(a => Math.hypot(a.x - cx, a.y - cy) < gap) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, { x: cx, y: cy }));
     if (p && ok(p.x, p.y)) return p;
@@ -145,7 +156,7 @@ function cityRoomWalk(key, x, y) {
   // The same rule for spots that don't come through organicItemSpot (a point of interest's own spot table, the start
   // room's waypoint, the city's night objects, chests, the merchant): each is checked once per journey and moved if needed.
   const cityFixCache = {}; let cityFixBusy = false;
-  const cityFixSpot = (key, o) => { if (o && activeRegion === 'city' && state && state.seed != null && String(state.seed) !== cityGenSeed) cityGenEnsure(); if (!o || activeRegion !== 'city' || !rooms[key] || !neonWorldCell(key) || !cityGenPlan(key)) return o; const tag = String(state && state.seed) + ':' + key, mark = () => tag + '@' + Math.round(o.x) + ',' + Math.round(o.y); if (o.cityClear === mark()) return o; // (Round 473: the mark holds the spot it was checked at: a copy moved elsewhere, as the waypoint's is, is checked again)
+  const cityFixSpot = (key, o) => { if (o && genLive() && cityGenStale()) cityGenEnsure(); if (!o || !genLive() || !rooms[key] || !genWorldCell(key) || !cityGenPlan(key)) return o; const tag = String(state && state.seed) + ':' + key, mark = () => tag + '@' + Math.round(o.x) + ',' + Math.round(o.y); if (o.cityClear === mark()) return o; // (Round 473: the mark holds the spot it was checked at: a copy moved elsewhere, as the waypoint's is, is checked again)
     const fk = tag + ':' + Math.round(o.x) + ',' + Math.round(o.y), hit = cityFixCache[fk]; if (hit) { o.x = hit[0]; o.y = hit[1]; o.cityClear = mark(); return o; } // (some callers build a new object every time: the answer is kept by spot)
     // the rule in order of what gives way when a room has little open ground: first the HUD and the room's margin, then
     // the patrols' distance, last the street; never a sprite, never ground that can't be reached
@@ -157,24 +168,28 @@ function cityRoomWalk(key, x, y) {
     cityFixCache[fk] = [o.x, o.y]; o.cityClear = mark(); return o; };
   // "beside the street" in the city means: on open ground joined to the streets, off the street itself, clear of every sprite
   const besideStreetBeforeCity = organicBesideStreet;
-  organicBesideStreet = function (key, p) { if (activeRegion === 'city' && rooms[key] && neonWorldCell(key) && cityGenPlan(key)) return walkable(key, p.x, p.y) && !cityItemOnStreet(key, p.x, p.y) && cityItemSpotClear(key, p.x, p.y, p) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, p)); return besideStreetBeforeCity.apply(this, arguments); };
-  if (typeof worldPOIs === 'function') { const worldPOIsBefore = worldPOIs; worldPOIs = function () { const t = worldPOIsBefore.apply(this, arguments); if (activeRegion === 'city' && t) for (const k of Object.keys(t)) cityFixSpot(t[k].key || k, t[k]); return t; }; } // (the table itself, for whoever reads it whole)
+  organicBesideStreet = function (key, p) { if (genLive() && rooms[key] && genWorldCell(key) && cityGenPlan(key)) return walkable(key, p.x, p.y) && !cityItemOnStreet(key, p.x, p.y) && cityItemSpotClear(key, p.x, p.y, p) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, p)); return besideStreetBeforeCity.apply(this, arguments); };
+  if (typeof worldPOIs === 'function') { const worldPOIsBefore = worldPOIs; worldPOIs = function () { const t = worldPOIsBefore.apply(this, arguments); if (genLive() && t) for (const k of Object.keys(t)) cityFixSpot(t[k].key || k, t[k]); return t; }; } // (the table itself, for whoever reads it whole)
   if (typeof cityNightsItems === 'function') { const nightsBefore = cityNightsItems; cityNightsItems = function (key = state && state.room) { return nightsBefore.apply(this, arguments).map(it => cityFixSpot(it.key || key, it)); }; } // Round 473: the Wanted Board, the breakers and the vault too
   const poiAtBeforeCityClear = poiAt; poiAt = function (key) { return cityFixSpot(key, poiAtBeforeCityClear.apply(this, arguments)); };
   if (typeof chestFor === 'function') { const chestForBefore = chestFor; chestFor = function (key) { return cityFixSpot(key, chestForBefore.apply(this, arguments)); }; }
   if (typeof cardsmithFor === 'function') { const cardsmithForBefore = cardsmithFor; cardsmithFor = function () { const c = cardsmithForBefore.apply(this, arguments); return c && c.key ? cityFixSpot(c.key, c) : c; }; }
   if (typeof merchantRoom === 'function') { const merchantRoomBefore = merchantRoom; merchantRoom = function () { const m = merchantRoomBefore.apply(this, arguments); return m && m.key ? cityFixSpot(m.key, m) : m; }; }
   if (typeof ROOM_SPOT_FIXES !== 'undefined') delete ROOM_SPOT_FIXES.city;
-  if (typeof organicDef === 'function') { const defBefore = organicDef; organicDef = function () { if (activeRegion === 'city') cityGenEnsure(); return defBefore.apply(this, arguments); }; }
+  if (typeof organicDef === 'function') { const defBefore = organicDef; organicDef = function () { if (genLive()) cityGenEnsure(); return defBefore.apply(this, arguments); }; }
   const configureBefore = configureRegion;
-  configureRegion = function (region) { if (region === 'city') cityGenEnsure(); return configureBefore.apply(this, arguments); };
+  configureRegion = function (region) { if (genLive(region)) { const was = activeRegion; activeRegion = region; try { cityGenEnsure(); } finally { activeRegion = was; } }
+    const out = configureBefore.apply(this, arguments);
+    // Round 486: the generated Solaris has no diagonal roads (its rooms stay joined through their straight doors)
+    if (region === 'elaris' && genLive('elaris')) for (const k of Object.keys(rooms)) for (const d of Object.keys(rooms[k].exits || {})) if (d.length > 1) delete rooms[k].exits[d];
+    return out; };
   // A position off the generated roads (an older save, or a fall-back spot) moves to the room's hub.
   const renderBefore = renderWorld;
   renderWorld = function () {
-    if (state && activeRegion === 'city' && !state.battle && state.pos && rooms[state.room] && !walkable(state.room, state.pos.x, state.pos.y)) { const p = cityGenPlan(state.room); if (p) state.pos = { x: p.hub[0], y: p.hub[1] }; }
+    if (state && genLive() && !state.battle && state.pos && rooms[state.room] && !walkable(state.room, state.pos.x, state.pos.y)) { const p = cityGenPlan(state.room); if (p) state.pos = { x: p.hub[0], y: p.hub[1] }; }
     const out = renderBefore.apply(this, arguments);
     // Round 441 (owner: "reduce interactable object size, increase building size"): smaller objects in the top-down city
-    const w = document.getElementById('world'); if (w) w.classList.toggle('td-city', activeRegion === 'city' && typeof GEN_THEMES !== 'undefined');
+    const w = document.getElementById('world'); if (w) w.classList.toggle('td-city', genLive() && typeof GEN_THEMES !== 'undefined');
     return out;
   };
   const saveBefore = save;
@@ -183,7 +198,7 @@ function cityRoomWalk(key, x, y) {
   // it used to be put right when the room was first drawn, after the tutorial.
   const newGameBeforeCity = newGame;
   newGame = function () { const out = newGameBeforeCity.apply(this, arguments);
-    if (state && activeRegion === 'city' && rooms[state.room] && state.pos) { cityGenEnsure(); const p = cityGenPlan(state.room); if (p && !cityRoomWalk(state.room, state.pos.x, state.pos.y)) state.pos = { x: p.hub[0], y: p.hub[1] }; }
+    if (state && genLive() && rooms[state.room] && state.pos) { cityGenEnsure(); const p = cityGenPlan(state.room); if (p && !cityRoomWalk(state.room, state.pos.x, state.pos.y)) state.pos = { x: p.hub[0], y: p.hub[1] }; }
     return out; };
 }
 // Patrols keep 120px from every door's landing spot in the generated city (walking in never starts a fight); a patrol that
@@ -192,18 +207,18 @@ function cityRoomWalk(key, x, y) {
   const roomSpawnsBeforeCity = roomSpawns;
   roomSpawns = function (key) {
     const list = roomSpawnsBeforeCity.apply(this, arguments);
-    if (activeRegion !== 'city' || !Array.isArray(list) || list.cityDoorsChecked || !rooms[key]) return list;
+    if (!genLive() || !Array.isArray(list) || list.cityDoorsChecked || !rooms[key]) return list;
     const doors = ['n', 's', 'e', 'w'].map(d => rooms[key].exits[d] && organicDoor(key, d)).filter(Boolean).map(d => d.inward);
     const far = (x, y) => Math.min(Infinity, ...doors.map(d => Math.hypot(x - d.x, y - d.y)));
     // Round 417: a patrol (or boss) stands only where its whole sprite is clear of objects; else the nearest such spot on the road
-    if (GEN_THEMES.city.topdown) for (const s of list) { if (cityEnemyOk(key, s.x, s.y)) continue; const pts = organicGrid(key); let best = null;
+    if (GEN_THEMES[genTheme()].topdown) for (const s of list) { if (cityEnemyOk(key, s.x, s.y)) continue; const pts = organicGrid(key); let best = null;
       for (let i = 0; i < pts.length; i += 2) { const x = pts[i], y = pts[i + 1]; if (!cityEnemyOk(key, x, y) || (!s.boss && far(x, y) < 120) || list.some(o => o !== s && Math.hypot(o.x - x, o.y - y) < 90)) continue; const d = Math.hypot(x - s.x, y - s.y); if (!best || d < best.d) best = { x, y, d }; }
       if (best) { s.x = best.x; s.y = best.y; } }
     for (const s of list) {
       if (s.boss || far(s.x, s.y) >= 120) continue;
       const others = list.filter(o => o !== s);
       const q = typeof organicSpot === 'function' && (organicSpot(key, s.x, s.y, doors.concat(others), 125) || organicSpot(key, s.x, s.y, doors, 125));
-      const eok = (x, y) => !GEN_THEMES.city.topdown || cityEnemyOk(key, x, y);
+      const eok = (x, y) => !GEN_THEMES[genTheme()].topdown || cityEnemyOk(key, x, y);
       if (q && far(q.x, q.y) >= 120 && eok(q.x, q.y)) { s.x = q.x; s.y = q.y; continue; }
       let best = null; const pts = organicGrid(key);
       for (let i = 0; i < pts.length; i += 2) { const d = far(pts[i], pts[i + 1]); if (others.every(o => Math.hypot(o.x - pts[i], o.y - pts[i + 1]) > 90) && eok(pts[i], pts[i + 1]) && (!best || d > best.d)) best = { x: pts[i], y: pts[i + 1], d }; }
@@ -213,3 +228,14 @@ function cityRoomWalk(key, x, y) {
     return list;
   };
 }
+// Round 486: Solaris in play on the generator. Its ground is painted by the generator, its organic walk area reads the
+// generated walk mask, and it has no diagonal roads (worldDiagTable answers none; configureRegion drops those exits).
+{
+  if (typeof paintSolaris === 'function') { const paintSolarisBefore = paintSolaris; paintSolaris = function (canvas, key) { if (activeRegion === 'elaris' && genLive('elaris') && rooms[key]) { cityGenEnsure(); return genWith('solaris', () => paintChronoRoom(canvas, key)); } return paintSolarisBefore.apply(this, arguments); }; }
+  if (typeof ORGANIC_AREAS !== 'undefined' && ORGANIC_AREAS['world:elaris']) { const A = ORGANIC_AREAS['world:elaris'], atBefore = A.at;
+    A.at = function (o, ax, ay) { if (!genLive('elaris')) return atBefore.apply(this, arguments); if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return cityGenWalk(o.area.left * 800 + ax, o.area.top * 500 + ay); }; }
+  if (typeof worldDiagTable === 'function') { const diagBefore = worldDiagTable; worldDiagTable = function () { return activeRegion === 'elaris' && genLive('elaris') ? {} : diagBefore.apply(this, arguments); }; }
+}
+// Objects in the generated Solaris are placed as in the city (open ground beside the streets, clear of every sprite), not
+// on the old tile world's "ground 22-40px inside its edge" (Round 212).
+if (typeof itemsOnGround === 'function') { const onGroundBefore = itemsOnGround; itemsOnGround = function () { return activeRegion === 'elaris' && genLive('elaris') ? false : onGroundBefore.apply(this, arguments); }; }

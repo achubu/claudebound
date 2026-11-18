@@ -414,7 +414,7 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
   mains: seed => { const T = GEN_THEMES.solaris, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':sol-mains:' + t);
     return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
   alley: (key, d) => { const T = GEN_THEMES.solaris, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); },
-  hole: () => false, mall: false, mainsCache: null, oasis: true, lampGlow: .1, parkDim: 'rgba(0,10,8,.08)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 360, landmarkSpan: 420, noLanes: true, roadDim: 'rgba(120,70,20,.16)', groundDim: 'rgba(90,50,10,.06)', pavingDim: 'rgba(90,50,10,.06)',
+  hole: () => false, mall: false, mainsCache: null, alleyVerge: true, oasis: true, lampGlow: .1, parkDim: 'rgba(0,10,8,.08)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 360, landmarkSpan: 420, noLanes: true, roadDim: 'rgba(120,70,20,.16)', groundDim: 'rgba(90,50,10,.06)', pavingDim: 'rgba(90,50,10,.06)',
   tex: { pipes: 'surfaces/park/oasis-grass', chasm: 'surfaces/water/oasis-water', overgrowth: 'surfaces/park/oasis-grass', water: 'surfaces/water/oasis-water', sand: 'surfaces/sand/sand', floor: 'surfaces/plaza/plaza', 'road-wet': 'surfaces/sand/sand' /* Round 485 (owner: "roads need to be sand") */, gravel: 'surfaces/plaza/plaza', yard: 'surfaces/lot/lot', 'pavement-old': 'surfaces/sand/sand', ground: 'surfaces/sand/sand', 'rubble-big': 'surfaces/sand/sand' },
   legacy: null, mix: [{ on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 9 }] /* (only so the road texture loads: the top-down painter mixes nothing) */,
   texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.4, plaza: 0.35, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4 },
@@ -476,7 +476,7 @@ function genWorld(seed) {
   // never built on, so buildings stand back from the main roads and lamps, lights and signs have somewhere to stand.
   // Alleys have none: buildings stand right on them.
   if (GEN.topdown) { const walk = []; for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) { if (cell[y * CW + x] !== 1) continue;
-      let m = false; for (let b = -1; b <= 1 && !m; b++) for (let a = -1; a <= 1; a++) { const nx = x + a, ny = y + b; if (nx >= 0 && ny >= 0 && nx < CW && ny < CH && cell[ny * CW + nx] === 2 && mainCell[ny * CW + nx]) { m = true; break; } }
+      let m = false; for (let b = -1; b <= 1 && !m; b++) for (let a = -1; a <= 1; a++) { const nx = x + a, ny = y + b; if (nx >= 0 && ny >= 0 && nx < CW && ny < CH && cell[ny * CW + nx] === 2 && (mainCell[ny * CW + nx] || GEN.alleyVerge)) { m = true; break; } } // Round 486: Solaris's alleys have a sand verge too (an alley with a house on each side left the hero no way through)
       if (m) walk.push(y * CW + x); } for (const i of walk) cell[i] = 4; }
   const open = v => v === 1 || v === 4;
   // blocks: the open ground the streets enclose (4-connected)

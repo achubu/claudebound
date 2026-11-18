@@ -98,7 +98,7 @@ const only = process.argv[2];
           const d = Math.hypot(state.pos.x - it.x, state.pos.y - it.y);
           if (!res.ok || (!res.opened && d > reach)) P('item out of reach', key, kind + ' from ' + via + ': ' + (res.ok ? 'ends ' + Math.round(d) + 'px away' : res.why));
           if (testedItems.has(key + kind)) continue; testedItems.add(key + kind);
-          if (walkable(key, it.x, it.y) && !(activeRegion === 'city' && typeof cityItemOnStreet === 'function' && !cityItemOnStreet(key, it.x, it.y)) /* Round 457: in the city objects stand on open ground, off the street */ && !(typeof itemsOnGround === 'function' && itemsOnGround()) && !(typeof isPlazaSpot === 'function' && isPlazaSpot(key, it))) P('item on the path', key, kind); // Round 212: Solaris and the Sky Isles put items on the ground; Round 232: open squares are walkable
+          if (walkable(key, it.x, it.y) && !((activeRegion === 'city' || (typeof genLive === 'function' && genLive())) && typeof cityItemOnStreet === 'function' && !cityItemOnStreet(key, it.x, it.y)) /* Round 486: and the generated Solaris */ /* Round 457: in the city objects stand on open ground, off the street */ && !(typeof itemsOnGround === 'function' && itemsOnGround()) && !(typeof isPlazaSpot === 'function' && isPlazaSpot(key, it))) P('item on the path', key, kind); // Round 212: Solaris and the Sky Isles put items on the ground; Round 232: open squares are walkable
           for (const [k2, it2] of items(key)) if (k2 !== kind && Math.hypot(it.x - it2.x, it.y - it2.y) < 34) P('items overlap', key, kind + ' + ' + k2);
           for (const s of roomSpawns(key)) if (Math.hypot(it.x - s.x, it.y - s.y) < 60) P('item next to a patrol', key, kind + ' and ' + s.type + ' ' + Math.round(Math.hypot(it.x - s.x, it.y - s.y)) + 'px');
           if (portalTarget && (() => { const old = state.room; state.room = key; const t = portalTarget(); state.room = old; return t; })() && it.x > 330 && it.x < 470 && it.y > 300 && it.y < 480) P('portal covers item', key, kind);
@@ -112,7 +112,7 @@ const only = process.argv[2];
           const raw = rooms[key].exits[d]; if (!raw) continue;
           state.room = key; state.pos = { ...pos };
           // Round 377: a door that is not at the middle of its edge (the generated Chronospire) is tapped where it is, like its exit label.
-          const od = door[d] && typeof chronoPlan === 'function' && (activeRegion === 'chronospire' || activeRegion === 'city') && organicDoor(key, d);
+          const od = door[d] && typeof chronoPlan === 'function' && (activeRegion === 'chronospire' || activeRegion === 'city' || (typeof genLive === 'function' && genLive())) && organicDoor(key, d);
           const res = walkTo(od ? { x: Math.max(15, Math.min(785, od.edge.x)), y: Math.max(15, Math.min(485, od.edge.y)) } : door[d] || solarisDiagDoor(key, d), { key, dir: d });
           if (!res.ok) { P('door unreachable', key, d + ' from ' + via + ': ' + res.why); continue; }
           if (!res.crossed) { P('route ends without crossing', key, d + ' from ' + via + ' (stopped at ' + Math.round(state.pos.x) + ',' + Math.round(state.pos.y) + ')'); continue; }
