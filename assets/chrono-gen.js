@@ -431,7 +431,7 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
     curb: ['kerb-sandstone'], 'park-edge': ['oasis-rim'], sidewalk: ['sand'] /* the ground between everything is sand */, park: ['oasis-grass'], 'waterfront-edge': [],
     'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': [], 'prop-ac': [], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
     'prop-vent': ['chimney'], 'prop-tank': ['tank'], 'prop-stairs': ['windcatcher'], 'prop-solar': ['mirror'],
-    car: ['rover', 'skiff'], tree: ['tree-palm'], lamp: ['lamp'], 'sign-traffic': ['banner'], cargo: ['jars', 'camel'], clutter: ['plant-succulent'],
+    car: ['rover', 'skiff'], tree: ['tree-palm'], lamp: [] /* Round 484 (owner: "no lamps in desert") */, 'sign-traffic': ['banner'], cargo: ['jars', 'camel'], clutter: ['plant-succulent'],
     landmark: ['pyramid', 'obelisk', 'sphinx', 'fountain'] },
   districtArt: { market: { wall: 'market-wall', roof: 'market-roof', shop: 'market-shop' }, homes: { wall: 'home-wall', roof: 'home-roof', shop: 'home-shop' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' } },
   roofKit: { 'roof-gravel': ['prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'], 'roof-sandstone': ['prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'] },
