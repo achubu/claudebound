@@ -4,7 +4,7 @@ process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`JSON.stringify((() => {
-  newGame(); state.region = 'elaris'; configureRegion('elaris'); startBattle = function(){};
+  GEN_SOLARIS_LIVE = false; /* Round 486: this checks the tile-built Solaris's diagonal roads (the generated one has none) */ newGame(); state.region = 'elaris'; configureRegion('elaris'); startBattle = function(){};
   const out = { rooms: Object.keys(rooms).length, cut: SOLARIS_CUT.filter(k => rooms[k]), links: [], trips: [], strayExits: [] };
   for (const k of Object.keys(rooms)) for (const t of Object.values(rooms[k].exits)) { const to = typeof t === 'string' ? t : t.to; if (!rooms[to]) out.strayExits.push(k + '->' + to); }
   for (const [k, doors] of Object.entries(SOLARIS_DIAG)) for (const [dir, d] of Object.entries(doors)) {
