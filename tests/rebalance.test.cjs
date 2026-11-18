@@ -151,22 +151,22 @@ assert(Math.max(...Object.values(totals))-Math.min(...Object.values(totals))<=4,
 newGame();configureRegion('city');
 assert(regionDistanceFrac('1,5')<regionDistanceFrac('8,4'),'distance fraction is higher near the map edge than near the start');
 // deterministic large-sample check of the actual elite rate by distance band
-function eliteRateAt(minD,maxD,samples){
+// Round 488: the expected rate, from each room's elite chance (roomSpawns: .04 + distance fraction x .32) weighted by its
+// patrols, instead of 600 fresh journeys (each one generates a whole city: this alone ran past 25 minutes).
+function eliteRateAt(minD,maxD){
  let elite=0,total=0;
- for(let i=0;i<samples;i++){
-  newGame();configureRegion('city');
-  for(const key of Object.keys(rooms)){
-   const d=regionDistance(key);
-   if(d<minD||d>maxD)continue;
-   for(const s of roomSpawns(key)){if(s.boss)continue;total++;if(s.elite)elite++}
-  }
+ newGame();configureRegion('city');
+ for(const key of Object.keys(rooms)){
+  const d=regionDistance(key);
+  if(d<minD||d>maxD)continue;
+  for(const s of roomSpawns(key)){if(s.boss)continue;total++;elite+=.04+regionDistanceFrac(key)*.32}
  }
  return elite/total;
 }
 // Far range shifted from 4-5 to 6-7: the Round 26 city's max distance is
 // now 7 (was 6), so the proportionally-far band moved with it.
 // Far range shifted again: Round 29's maze has max distance 12 (was 7).
-const eliteNear=eliteRateAt(0,1,300),eliteFar=eliteRateAt(10,12,300);
+const eliteNear=eliteRateAt(0,1),eliteFar=eliteRateAt(10,12);
 assert(eliteNear<0.15,'elites should be rare near the start (got '+(eliteNear*100).toFixed(1)+'%)');
 assert(eliteFar>0.25,'elites should be common near the map edge (got '+(eliteFar*100).toFixed(1)+'%)');
 assert(eliteFar>eliteNear*2,'elite rate should be meaningfully higher far from the start than near it');

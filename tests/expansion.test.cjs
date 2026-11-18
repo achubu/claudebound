@@ -10,6 +10,9 @@ const context=vm.createContext({console,assert,Image:process.env.AETHERCEDE_REND
 // Round 253: enemy tempers and attack rolls (enemy-temper.js) are random, so tests run without them
 // unless TEMPER=1 (the Difficulty lab scripts set it). Round 265: likewise enemy traits and species patterns
 // (enemy-traits.js) unless TRAITS=1. Round 281: and the merchant/Cardsmith greetings (npc-greetings.js) unless NPC_GREET=1.
+// Round 488: every journey in the harness has the same seed unless RANDOM_SEEDS=1, so each generated world (the city, Solaris)
+// is built once and its plans and placements are reused: a fresh seed cost ~4s per newGame() and made the suite crawl.
+if(!process.env.RANDOM_SEEDS)context.FIXED_SEED=process.env.SEED?(isNaN(+process.env.SEED)?process.env.SEED:+process.env.SEED):77;
 if(!process.env.TEMPER)context.NO_TEMPER=1;if(!process.env.TRAITS)context.NO_TRAITS=1;if(!process.env.NPC_GREET)context.NO_NPC_GREET=1;if(!process.env.BOSS_TWISTS)context.NO_BOSS_TWISTS=1;
 // Round 91: page scripts loaded once by this harness are skipped if a test loads them again.
 const loadedScripts=new Set();

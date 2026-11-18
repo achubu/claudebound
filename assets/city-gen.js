@@ -16,23 +16,34 @@ const CITY_GEN_VERSION = 1;
 // world grid (the city's keys run from row 4, Solaris's from row 0).
 let GEN_SOLARIS_LIVE = true;
 const GEN_REGIONS = { city: { id: 'city', theme: 'city', dy: 4 }, elaris: { id: 'elaris', theme: 'solaris', dy: 0, live: () => GEN_SOLARIS_LIVE } };
-function genRegion(region) { const r = GEN_REGIONS[region === undefined ? (typeof activeRegion !== 'undefined' ? activeRegion : 'city') : region]; return r && (!r.live || r.live()) ? r : null; }
+// Round 488: these run for every walk test (millions while a journey is placed), so the current region's answer is kept
+// until the region or the Solaris switch changes.
+let genRegionMemo = { reg: undefined, live: undefined, r: null };
+function genRegion(region) {
+  if (region === undefined) { const reg = typeof activeRegion !== 'undefined' ? activeRegion : 'city', m = genRegionMemo; if (m.reg === reg && m.live === GEN_SOLARIS_LIVE) return m.r;
+    const r = GEN_REGIONS[reg], out = r && (!r.live || r.live()) ? r : null; genRegionMemo = { reg, live: GEN_SOLARIS_LIVE, r: out }; return out; }
+  const r = GEN_REGIONS[region]; return r && (!r.live || r.live()) ? r : null; }
 function genLive(region) { return !!genRegion(region); }
 function genTheme() { const r = genRegion(); return r ? r.theme : 'city'; }
 function genDy() { const r = genRegion(); return r ? r.dy : 4; }
 function genWorldCell(key) { const r = genLive() && rooms[key]; return r && r.world ? r.world : null; }
 let cityGenSeed = null, cityGenKey = null;
+// Round 488: a world's caches are flushed only when its own seed changes. Going from the city to Solaris and back with the
+// same seed (a portal, or the tests' many journeys) used to flush and re-place everything each way, ~4s a switch.
+const cityGenSeedOf = {};
 function cityGenEnsure() {
-  const s = chronoSeed(), k = genTheme() + ':' + s; if (k === cityGenKey) return;
-  cityGenKey = k; cityGenSeed = s; chronoFlushCaches((genRegion() || GEN_REGIONS.city).id);
+  const s = chronoSeed(), th = genTheme(), k = th + ':' + s; if (k === cityGenKey) return;
+  cityGenKey = k; cityGenSeed = s; if (cityGenSeedOf[th] !== s) { cityGenSeedOf[th] = s; chronoFlushCaches((genRegion() || GEN_REGIONS.city).id); }
 }
-function cityGenStale() { return typeof state !== 'undefined' && state && state.seed != null && genTheme() + ':' + String(state.seed) !== cityGenKey; }
+let cityStaleMemo = { seed: undefined, reg: undefined, key: undefined };
+function cityGenStale() { if (typeof state === 'undefined' || !state || state.seed == null) return false; const m = cityStaleMemo; if (m.seed === state.seed && m.reg === activeRegion && m.key === cityGenKey) return false;
+  if (genTheme() + ':' + String(state.seed) !== cityGenKey) return true; cityStaleMemo = { seed: state.seed, reg: activeRegion, key: cityGenKey }; return false; }
 function cityGenPlan(key) { cityGenEnsure(); return genPlan(genTheme(), key, cityGenSeed); }
 // The walk mask, a cell at a time (8px cells judged at their centres, like the old traced mask).
 // Each room's floor as a 100x63 grid of 8px cells, built once per seed.
-let cityMaskSeed = null, cityMasks = {};
+const cityMasksBy = {}; let cityMasks = {}; // Round 488: kept per theme and seed
 function cityRoomMask(cx, cy) {
-  if (cityMaskSeed !== cityGenKey) { cityMaskSeed = cityGenKey; cityMasks = {}; }
+  cityMasks = cityMasksBy[cityGenKey] || (cityMasksBy[cityGenKey] = {}); for (const ck of Object.keys(cityMasksBy)) if (ck !== cityGenKey && ck.split(':')[0] === cityGenKey.split(':')[0]) delete cityMasksBy[ck];
   const k = cx + ',' + (cy + genDy()); if (k in cityMasks) return cityMasks[k];
   const p = cityGenPlan(k); if (!p) return cityMasks[k] = null;
   const m = new Uint8Array(100 * 63);
@@ -64,9 +75,9 @@ function cityRoomMask(cx, cy) {
 // Round 417 (owner: "make sure enemy pathing is only allowed on texture tiles and not object sprites"): an enemy is a
 // sprite about 40px wide standing on its foot (y + 22), so where it may stand is checked for its whole body: its box
 // (x +-20, y - 24 .. y + 24) must touch no building, car, tree or sea, and its foot must be on walkable ground.
-let cityEnemySeed = null, cityEnemyBlock = {};
+const cityEnemyBlockBy = {}; let cityEnemyBlock = {};
 function cityEnemyOk(key, x, y) {
-  if (cityEnemySeed !== cityGenKey) { cityEnemySeed = cityGenKey; cityEnemyBlock = {}; }
+  cityEnemyBlock = cityEnemyBlockBy[cityGenKey] || (cityEnemyBlockBy[cityGenKey] = {}); for (const ck of Object.keys(cityEnemyBlockBy)) if (ck !== cityGenKey && ck.split(':')[0] === cityGenKey.split(':')[0]) delete cityEnemyBlockBy[ck];
   if (!cityRoomWalk(key, x, y)) return false;
   if (x < 20 || x > 780 || y < 24 || y > 476) return false;
   let b = cityEnemyBlock[key]; if (!b) { const p = cityGenPlan(key); b = cityEnemyBlock[key] = p ? genWith(genTheme(), () => cityBlockers(cityGenSeed, key, p)) : { rects: [], circles: [] }; }
@@ -84,8 +95,10 @@ function cityGenWalk(wx, wy) {
 // A fast path for the city's rooms (not during the organic engine's patrol pass, where any spot in the room counts), the same answer the organic engine gives (a room's foot point is y+22, read no lower
 // than 495; standing is allowed 12px in from the room's sides), without its per-call lookups: new journeys re-plan the
 // city, and placement asks hundreds of thousands of these.
+const cityKeyMasksBy = new Map(); let cityKeyMasks = new Map(), cityKeyMasksFor = null; // Round 488: each room's mask by its key, for this theme and seed
 function cityRoomWalk(key, x, y) {
-  const c = key.indexOf(','), cx = +key.slice(0, c), cy = +key.slice(c + 1) - genDy(), m = cityRoomMask(cx, cy); if (!m) return false;
+  if (cityKeyMasksFor !== cityGenKey) { cityKeyMasksFor = cityGenKey; cityKeyMasks = cityKeyMasksBy.get(cityGenKey) || new Map(); cityKeyMasksBy.set(cityGenKey, cityKeyMasks); for (const ck of [...cityKeyMasksBy.keys()]) if (ck !== cityGenKey && ck.split(':')[0] === cityGenKey.split(':')[0]) cityKeyMasksBy.delete(ck); }
+  let m = cityKeyMasks.get(key); if (m === undefined) { const c = key.indexOf(','), cx = +key.slice(0, c), cy = +key.slice(c + 1) - genDy(); m = cityRoomMask(cx, cy); cityKeyMasks.set(key, m); } if (!m) return false;
   const X = Math.max(0, Math.min(799, x)), Y = Math.min(495, Math.max(0, Math.min(499, y + 22)));
   return m[Math.floor(Y / 8) * 100 + Math.floor(X / 8)] === 1;
 }
