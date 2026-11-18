@@ -38,3 +38,14 @@ for (const [sd, o] of Object.entries(r.seeds)) {
   assert(o.maxFloors <= 2 && o.minFloors >= 1, 'seed ' + sd + ': low houses, 1-2 floors');
 }
 console.log('PASS: Solaris on the generator: ' + Object.entries(r.seeds).map(([s, o]) => 'seed ' + s + ' ' + o.planned + ' rooms, ' + o.landmarks.length + ' monuments, ' + o.oases + ' oases').join('; '));
+// Round 486: the generated Solaris is the one played. Its rooms walk on the generated mask, have no diagonal exits, every
+// door's inward spot can be stood on, and the start room's hub is walkable.
+{ const p = JSON.parse(run(`(() => { newGame(); state.seed = 9; state.region = 'elaris'; configureRegion('elaris'); cityGenEnsure();
+    const keys = Object.keys(rooms), out = { live: genLive('elaris'), theme: genTheme(), diag: keys.filter(k => Object.keys(rooms[k].exits).some(d => d.length > 1)), badDoors: [] };
+    for (const k of keys) for (const d of ['n', 's', 'e', 'w']) { if (!rooms[k].exits[d]) continue; const o = organicDoor(k, d); if (!o || !walkable(k, o.inward.x, o.inward.y)) out.badDoors.push(k + d); }
+    const h = cityGenPlan('0,5').hub; out.hub = walkable('0,5', h[0], h[1]); out.mask = keys.every(k => cityGenPlan(k)); return JSON.stringify(out); })()`));
+  assert(p.live && p.theme === 'solaris', 'Solaris plays on the generator');
+  assert.deepStrictEqual(p.diag, [], 'no diagonal exits in the generated Solaris');
+  assert.deepStrictEqual(p.badDoors, [], 'every door in the generated Solaris can be stood in');
+  assert(p.hub && p.mask, 'the start room\'s hub is walkable; every room planned');
+  console.log('PASS: Solaris is played on the generator (doors, walk mask, no diagonals).'); }
