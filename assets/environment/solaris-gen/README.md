@@ -6,5 +6,6 @@ edges) and `props/<slot>/` (keyed objects, 256px on the long side). Not yet used
 generator (`GEN_THEMES`) comes next.
 
 Not used from the sheets: the thatched and canvas roofs (each drawn as one hut roof or one sheet, not a repeating
-surface) and the oasis rim (drawn with a curve in its middle, so it can't run along an edge). The clay, sandstone and
+surface). The oasis rim was redrawn as a straight strip (Round 482, `src/oasis-rim.jpeg`) and cut on one whole repeat
+into `surfaces/park-edge/oasis-rim.webp`, so it tiles without a seam. The clay, sandstone and
 gravel roofs were drawn inside a raised frame; they are cut inside it.

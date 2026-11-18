@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 482: the oasis rim
+
+The owner redrew the oasis rim as a straight strip (the first one curved in its middle, so it couldn't run along an
+edge). It is cut on one whole repeat of its pattern (2034px of the 4128px source, brass posts once per repeat) and
+scaled to 128px tall: `assets/environment/solaris-gen/surfaces/park-edge/oasis-rim.webp`, so it tiles along an oasis's
+edge with no seam. The source is kept in `src/oasis-rim.jpeg`. Still art only: the Solaris generator theme comes next.
+
 ## Round 481: Solaris generator art prepared
 
 The owner's four Solaris sheets (ground and edges, walls and shop fronts, roofs and rooftop kit, landmarks, vehicles,
