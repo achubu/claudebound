@@ -394,6 +394,50 @@ const GEN_THEMES = {
     storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 , 'laundromat': 1.6, 'pharmacy': 1.6, 'karaoke-bar': 1.6, 'food-court': 1.44, 'walkup-flats': 1.6, 'boarding-house': 1.6, 'shanty-block': 1.6, 'data-relay': 1.44, 'robotics-workshop': 0.83, 'bathhouse': 1.25, 'temple-hall': 1.39},
     lamp: '120,230,255', vignette: '2,6,14' }
 };
+// =====================================================================
+// Round 483 (owner: "can we apply the same world generation algorithm to solaris but instead of city buildings we will
+// want to have pyramids, huts and buildings that fit the techno desert theme"). Solaris on the city's generator, from
+// the owner's four sheets (assets/environment/solaris-gen/). Its room map (SOLARIS_LAYOUT: 9x6, three corners cut), room
+// names, bosses and events stay; the streets, lots, buildings, oases and landmarks are generated. No sea: the ground
+// between everything is sand. Its four quarters: the bazaar (sandstone, spice stalls, clay roofs), the mud-brick homes
+// (adobe and huts, woven roofs), the solar works (solar walls and roofs, tech fronts) and the water quarter (sandstone,
+// water sellers, copper domes). Oases are the parks: oasis grass, palms, the oasis rim. A preview only for now: Solaris
+// is still played on its tile world until the owner has seen it.
+// =====================================================================
+GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'assets/environment/solaris-gen/', version: () => '483',
+  exits: key => { const r = typeof SOLARIS_LAYOUT !== 'undefined' && SOLARIS_LAYOUT[key]; return r ? Object.assign({}, r.exits) : null; },
+  world: key => key.split(',').map(Number),
+  bossRooms: () => ['5,2', '8,0', '8,5'].filter(k => typeof SOLARIS_LAYOUT !== 'undefined' && SOLARIS_LAYOUT[k]),
+  landing: () => ['0,5', ...GEN_THEMES.solaris.bossRooms()],
+  keys: () => Object.keys(SOLARIS_LAYOUT), startKey: '0,5',
+  span: (wx, wy, seed) => typeof SOLARIS_LAYOUT !== 'undefined' && SOLARIS_LAYOUT[wx + ',' + wy] ? genPlan('solaris', wx + ',' + wy, seed) : null,
+  mains: seed => { const T = GEN_THEMES.solaris, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':sol-mains:' + t);
+    return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
+  alley: (key, d) => { const T = GEN_THEMES.solaris, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); },
+  hole: () => false, mall: false, mainsCache: null, oasis: true, lampGlow: .1, parkDim: 'rgba(0,10,8,.08)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 280, roadDim: 'rgba(60,30,5,.12)', groundDim: 'rgba(90,50,10,.06)', pavingDim: 'rgba(90,50,10,.06)',
+  tex: { pipes: 'surfaces/park/oasis-grass', chasm: 'surfaces/water/oasis-water', overgrowth: 'surfaces/park/oasis-grass', water: 'surfaces/water/oasis-water', sand: 'surfaces/sand/sand', floor: 'surfaces/plaza/plaza', 'road-wet': 'surfaces/road/road', gravel: 'surfaces/plaza/plaza', yard: 'surfaces/lot/lot', 'pavement-old': 'surfaces/sand/sand', ground: 'surfaces/sand/sand', 'rubble-big': 'surfaces/sand/sand' },
+  legacy: null, mix: [{ on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 9 }] /* (only so the road texture loads: the top-down painter mixes nothing) */,
+  texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.4, plaza: 0.35, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4 },
+  kerb: ['#3a2410', '#e2c48c', '#8a6236'], yardRim: ['#3a2410', '#d8b47a'], groundShade: 'rgba(60,30,0,.08)', lamp: '255,214,140', vignette: '40,20,0',
+  districtNames: ['market', 'homes', 'tech', 'garden'],
+  surfaceSlots: new Set(['road', 'sidewalk', 'plaza', 'sand', 'lot', 'park', 'water', 'market-floor', 'roof', 'curb', 'desert-edge', 'yard-edge', 'park-edge', 'wall', 'shop', 'waterfront-edge',
+    'market-wall', 'market-roof', 'market-shop', 'home-wall', 'home-roof', 'home-shop', 'tech-wall', 'tech-roof', 'tech-shop', 'garden-wall', 'garden-roof', 'garden-shop', 'mall-wall', 'mall-roof', 'mall-shop', 'ruin-wall']),
+  slotDir: { sidewalk: 'sand', 'market-wall': 'wall', 'market-roof': 'roof', 'market-shop': 'shop', 'home-wall': 'wall', 'home-roof': 'roof', 'home-shop': 'shop', 'tech-wall': 'wall', 'tech-roof': 'roof', 'tech-shop': 'shop', 'garden-wall': 'wall', 'garden-roof': 'roof', 'garden-shop': 'shop' },
+  tdArt: { wall: ['wall-sandstone', 'wall-adobe'], roof: ['roof-gravel', 'roof-sandstone', 'roof-clay'], shop: ['shop-spice', 'shop-water'],
+    'market-wall': ['wall-sandstone'], 'market-roof': ['roof-clay', 'roof-sandstone', 'roof-gravel'], 'market-shop': ['shop-spice'],
+    'home-wall': ['wall-adobe', 'wall-mudbrick'], 'home-roof': ['roof-woven', 'roof-clay', 'roof-gravel'], 'home-shop': ['wall-hutdoor'],
+    'tech-wall': ['wall-solar'], 'tech-roof': ['roof-solar', 'roof-copper', 'roof-gravel'], 'tech-shop': ['shop-tech'],
+    'garden-wall': ['wall-sandstone', 'wall-adobe'], 'garden-roof': ['roof-copper', 'roof-sandstone', 'roof-gravel'], 'garden-shop': ['shop-water'],
+    curb: ['kerb-sandstone'], 'park-edge': ['oasis-rim'], sidewalk: ['sand'] /* the ground between everything is sand */, park: ['oasis-grass'], 'waterfront-edge': [],
+    'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': [], 'prop-ac': [], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
+    'prop-vent': ['chimney'], 'prop-tank': ['tank'], 'prop-stairs': ['windcatcher'], 'prop-solar': ['mirror'],
+    car: ['rover', 'skiff'], tree: ['tree-palm'], lamp: ['lamp'], 'sign-traffic': ['banner'], cargo: ['jars', 'camel'], clutter: ['plant-succulent'],
+    landmark: ['pyramid', 'obelisk', 'sphinx', 'fountain'] },
+  districtArt: { market: { wall: 'market-wall', roof: 'market-roof', shop: 'market-shop' }, homes: { wall: 'home-wall', roof: 'home-roof', shop: 'home-shop' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' } },
+  roofKit: { 'roof-gravel': ['prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'], 'roof-sandstone': ['prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'] },
+  landmarkAspect: { pyramid: 1.14, obelisk: 0.43, sphinx: 1.15, fountain: 1.24 },
+  cargoSize: { jars: [70, 1.19], camel: [90, 1.21] },
+  clutterH: { 'plant-succulent': 34 }, doorWalls: ['wall-hutdoor'] });
 let GEN = GEN_THEMES.chronospire;
 function genWith(id, fn) { const was = GEN; GEN = GEN_THEMES[id]; try { return fn(); } finally { GEN = was; } }
 // A themed world's room plans, kept per seed (the Chronospire keeps its own, with its room map).
@@ -648,8 +692,8 @@ function genWorld(seed) {
   // again until every other has been, and then as far from its last place as can be: a room is "the one with the statue".
   if (GEN.topdown && CITY_HAS('landmark')) { const names = CITY_TD_ART.landmark, placed = [];
     for (const k of keys.slice().sort((a, b) => chronoHash(seed + ':lm:' + a) - chronoHash(seed + ':lm:' + b))) { if (placed.length >= 12) break; if (placed.some(q => Math.abs(q[3] - pos[k][0]) <= 1 && Math.abs(q[4] - pos[k][1]) <= 1)) continue; /* Round 448: twelve a city, never in rooms side by side (a chance per room gave some cities two) */ const ox = pos[k][0] * 800, oy = pos[k][1] * 500;
-      const c = lotsPx.filter(l => l.use === 'roof' && !l.mall && !l.small && (l.south || l.front) && (l.r[0] + l.r[2]) / 2 >= ox + 90 && (l.r[0] + l.r[2]) / 2 <= ox + 710 && (l.r[1] + l.r[3]) / 2 >= oy + 110 && (l.r[1] + l.r[3]) / 2 <= oy + 400 && l.r[2] - l.r[0] >= 125 && l.r[2] - l.r[0] <= 275)
-        .sort((a, b) => (b.south - a.south) || (a.r[2] - a.r[0]) * (a.r[3] - a.r[1]) - (b.r[2] - b.r[0]) * (b.r[3] - b.r[1]) || a.seed - b.seed)[0]; if (!c) continue; // on a street (one to its south first), the smallest such lot
+      const c = lotsPx.filter(l => l.use === 'roof' && !l.mall && !l.small && (l.south || l.front) && (l.r[0] + l.r[2]) / 2 >= ox + 90 && (l.r[0] + l.r[2]) / 2 <= ox + 710 && (l.r[1] + l.r[3]) / 2 >= oy + 110 && (l.r[1] + l.r[3]) / 2 <= oy + 400 && l.r[2] - l.r[0] >= 125 && l.r[2] - l.r[0] <= (GEN.landmarkLot || 275))
+        .sort((a, b) => (b.south - a.south) || ((a.r[2] - a.r[0]) * (a.r[3] - a.r[1]) - (b.r[2] - b.r[0]) * (b.r[3] - b.r[1])) * (GEN.landmarkLot ? -1 : 1) /* Round 483: Solaris's monuments take the largest such lot */ || a.seed - b.seed)[0]; if (!c) continue; // on a street (one to its south first), the smallest such lot
       const cx = (c.r[0] + c.r[2]) / 2, cy = (c.r[1] + c.r[3]) / 2, far = n => Math.min(1e9, ...placed.filter(q => q[2] === n).map(q => Math.hypot(q[0] - cx, q[1] - cy))), uses = n => placed.filter(q => q[2] === n).length;
       const n = names.map((_, i) => i).sort((a, b) => uses(a) - uses(b) || far(b) - far(a) || a - b)[0];
       c.use = 'landmark'; c.landmark = names[n]; placed.push([cx, cy, n, pos[k][0], pos[k][1]]); } }
@@ -683,7 +727,13 @@ function genWorld(seed) {
 // tall); car (seen from above, facing east); tree (seen from above); sidewalk (Round 407: seamless paving; the first is
 // the city's main paving, the rest by block); edge (Round 409: a border strip run round parks, outer side at the top);
 // trim (Round 410: a border strip framing the squares where objects stand). Prompts: tools/art-refresh/city-topdown-prompts.md.
-const CITY_TD_ART = { 'market-wall': ['market-flats'], 'mall-wall': ['mall-glass-cyan', 'mall-glass-magenta'], 'mall-roof': ['mall-skylights'], 'mall-shop': ['mall-entrance'], 'waterfront-edge': [], curb: ['curb-stone', 'curb-granite', 'curb-concrete'], 'park-edge': ['edge-granite', 'edge-kerb', 'edge-grass', 'edge-railing'], sidewalk: ['walk-slabs', 'walk-plates', 'walk-runbond', 'walk-hex', 'walk-poured'], roof: ['roof-tar', 'roof-plate', 'roof-slab', 'roof-finegravel', 'roof-bitumen', 'roof-tarchip', 'roof-seam', 'roof-rubber'], wall: ['wall-concrete', 'wall-panel', 'wall-porthole'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3', 'ac-twin'], 'prop-vent': ['vent-1', 'vent-3', 'vent-mesh'], 'prop-tank': ['tank-1', 'tank-sphere', 'tank-cylinder'], 'prop-stairs': ['stairs-1', 'stairs-hut', 'stairs-pod'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-grid'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange', 'sign-h-zigzag', 'sign-h-rings', 'sign-h-bulbs', 'sign-h-spiral'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red', 'sign-v-tubes', 'sign-v-awning', 'sign-v-bulbs'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-wreck', 'truck-wreck'], tree: ['tree-1', 'tree-2', 'tree-3', 'tree-oak', 'tree-cypress', 'tree-dead', 'tree-glow', 'bush-flower', 'grass-reeds', 'brambles'], park: ['park-clover', 'park-cracked', 'park-gravel', 'park-leaves', 'park-turf'], 'roof-hole': ['hole-crack', 'hole-double', 'hole-tear'], 'ruin-wall': ['ruin-concrete', 'ruin-cladding', 'ruin-panel', 'ruin-panel-blown', 'ruin-girder'], rubble: ['rubble-slabs', 'rubble-rebar', 'rubble-masonry', 'rubble-trolley', 'rubble-barrel', 'rubble-glass', 'rubble-cornice', 'rubble-panels'], lamp: ['lamp-arm', 'lamp-twin', 'lamp-led'], 'traffic-light': ['light-signal'], 'sign-traffic': ['sign-noentry', 'sign-holo'], cargo: ['container-red', 'container-blue', 'container-stack', 'drums', 'pods', 'hover-pallet', 'cable-drum', 'loader'], 'home-wall': ['home-shanty', 'home-pods'], 'home-roof': [], 'prop-heater': [], 'tech-wall': ['tech-megablock', 'tech-glass', 'tech-vents'], 'tech-roof': ['tech-led-plates', 'tech-glass-grid', 'tech-solar'], 'tech-shop': ['tech-lobby', 'tech-revolving'], 'garden-wall': ['garden-greenhouse', 'garden-planters', 'garden-moss'], 'garden-roof': ['garden-glass', 'garden-hydro'], 'garden-shop': ['garden-flowers', 'garden-plantshop'], 'market-roof': ['market-cables'], 'market-shop': ['market-food', 'market-screens', 'market-pawn', 'market-tech'], clutter: ['dumpster', 'bags', 'vending', 'barricade', 'barrier', 'tyres', 'bench-led', 'recycler', 'pay-bollard'], landmark: ['fountain', 'billboard', 'hovercar', 'sculpture', 'metro', 'holo-stage', 'mech', 'pylon', 'holo-beam'] };
+// Round 483: the city's art tables belong to the theme in use. A theme with its own table (GEN.tdArt, GEN.districtArt, ...)
+// is read through these names while it is GEN; every other theme reads the city's.
+function genThemed(name, base) { const t = () => (typeof GEN !== 'undefined' && GEN && GEN[name]) || base;
+  return new Proxy(base, { get: (_, k) => Reflect.get(t(), k), set: (_, k, v) => Reflect.set(t(), k, v), has: (_, k) => Reflect.has(t(), k), deleteProperty: (_, k) => Reflect.deleteProperty(t(), k),
+    ownKeys: () => Reflect.ownKeys(t()), getOwnPropertyDescriptor: (_, k) => { const d = Reflect.getOwnPropertyDescriptor(t(), k); if (d) d.configurable = true; return d; } }); }
+const CITY_TD_ART_BASE = { 'market-wall': ['market-flats'], 'mall-wall': ['mall-glass-cyan', 'mall-glass-magenta'], 'mall-roof': ['mall-skylights'], 'mall-shop': ['mall-entrance'], 'waterfront-edge': [], curb: ['curb-stone', 'curb-granite', 'curb-concrete'], 'park-edge': ['edge-granite', 'edge-kerb', 'edge-grass', 'edge-railing'], sidewalk: ['walk-slabs', 'walk-plates', 'walk-runbond', 'walk-hex', 'walk-poured'], roof: ['roof-tar', 'roof-plate', 'roof-slab', 'roof-finegravel', 'roof-bitumen', 'roof-tarchip', 'roof-seam', 'roof-rubber'], wall: ['wall-concrete', 'wall-panel', 'wall-porthole'], shop: ['shop-noodle', 'shop-repair', 'shop-shutters'], 'prop-ac': ['ac-1', 'ac-2', 'ac-3', 'ac-twin'], 'prop-vent': ['vent-1', 'vent-3', 'vent-mesh'], 'prop-tank': ['tank-1', 'tank-sphere', 'tank-cylinder'], 'prop-stairs': ['stairs-1', 'stairs-hut', 'stairs-pod'], 'prop-solar': ['solar-1', 'solar-2'], 'prop-skylight': ['skylight-1', 'skylight-grid'], 'sign-h': ['sign-h-pink', 'sign-h-mixed', 'sign-h-pink2', 'sign-h-orange', 'sign-h-zigzag', 'sign-h-rings', 'sign-h-bulbs', 'sign-h-spiral'], 'sign-v': ['sign-v-cyan', 'sign-v-teal', 'sign-v-purple', 'sign-v-red', 'sign-v-tubes', 'sign-v-awning', 'sign-v-bulbs'], car: ['car-pickup', 'car-swat', 'car-forklift', 'car-digger', 'car-buggy', 'car-camper', 'car-trike', 'car-armour', 'car-crawler', 'car-sport', 'car-van', 'car-cargo', 'car-wreck', 'truck-wreck'], tree: ['tree-1', 'tree-2', 'tree-3', 'tree-oak', 'tree-cypress', 'tree-dead', 'tree-glow', 'bush-flower', 'grass-reeds', 'brambles'], park: ['park-clover', 'park-cracked', 'park-gravel', 'park-leaves', 'park-turf'], 'roof-hole': ['hole-crack', 'hole-double', 'hole-tear'], 'ruin-wall': ['ruin-concrete', 'ruin-cladding', 'ruin-panel', 'ruin-panel-blown', 'ruin-girder'], rubble: ['rubble-slabs', 'rubble-rebar', 'rubble-masonry', 'rubble-trolley', 'rubble-barrel', 'rubble-glass', 'rubble-cornice', 'rubble-panels'], lamp: ['lamp-arm', 'lamp-twin', 'lamp-led'], 'traffic-light': ['light-signal'], 'sign-traffic': ['sign-noentry', 'sign-holo'], cargo: ['container-red', 'container-blue', 'container-stack', 'drums', 'pods', 'hover-pallet', 'cable-drum', 'loader'], 'home-wall': ['home-shanty', 'home-pods'], 'home-roof': [], 'prop-heater': [], 'tech-wall': ['tech-megablock', 'tech-glass', 'tech-vents'], 'tech-roof': ['tech-led-plates', 'tech-glass-grid', 'tech-solar'], 'tech-shop': ['tech-lobby', 'tech-revolving'], 'garden-wall': ['garden-greenhouse', 'garden-planters', 'garden-moss'], 'garden-roof': ['garden-glass', 'garden-hydro'], 'garden-shop': ['garden-flowers', 'garden-plantshop'], 'market-roof': ['market-cables'], 'market-shop': ['market-food', 'market-screens', 'market-pawn', 'market-tech'], clutter: ['dumpster', 'bags', 'vending', 'barricade', 'barrier', 'tyres', 'bench-led', 'recycler', 'pay-bollard'], landmark: ['fountain', 'billboard', 'hovercar', 'sculpture', 'metro', 'holo-stage', 'mech', 'pylon', 'holo-beam'] };
+const CITY_TD_ART = genThemed('tdArt', CITY_TD_ART_BASE);
 // Round 415: for each wall and shopfront strip, the columns (image px) of plain wall between windows (tools/prepare_city_art.py).
 // Round 459: the gaps of the walls from the Round 452-454 sheets were marked by hand (a ruler over each picture: pillars,
 // seams and plain wall between window bays); the measuring tool took the flat insides of dark or lit windows for plain wall
@@ -728,7 +778,7 @@ const CITY_SURFACES = [
   { key: 'ruin-wall', label: 'Destroyed buildings (burnt-out wall, one floor)', kind: 'building', walk: false, slot: 'ruin-wall', rule: 'A ruin\'s walls, floor by floor between window holes. Round 445: ruins gather in blast zones (the 18% of the city where a smooth noise runs highest): about 6 in 10 buildings there, 1 in 50 elsewhere. A ruin has an ordinary roof and parapet with a large hole in it (props/roof-hole/), no rooftop kit, no shopfront and no signs.' }
 ];
 const CITY_SURFACE_SLOTS = new Set(CITY_SURFACES.map(x => x.slot).filter(Boolean));
-function cityArtPath(slot, n) { return (CITY_SURFACE_SLOTS.has(slot) ? 'surfaces/' : 'props/') + slot + '/' + n; }
+function cityArtPath(slot, n) { const sl = GEN.surfaceSlots || CITY_SURFACE_SLOTS; return (sl.has(slot) ? 'surfaces/' : 'props/') + ((GEN.slotDir && GEN.slotDir[slot]) || slot) + '/' + n; }
 function cityTdArtNames() { return Object.entries(CITY_TD_ART).flatMap(([slot, l]) => l.map(n => cityArtPath(slot, n))); }
 // Round 413 (owner: "the edges dont have rounded corner which is a problem, we need edges that can be curved and used at
 // 90 degree angles"): a border strip laid along any outline, as spline and path tools in 2D editors bend a strip. The
@@ -822,7 +872,9 @@ function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy) {
       ctx.save(); ctx.translate(cx * K, cy * K); ctx.rotate(ang); ctx.drawImage(art, sx, 0, sw, art.height, (-L / 2 - 0.6) * K, 0, sw / k * K, T * K); ctx.restore(); } }
 }
 // Round 415: where a park's trees stand and where cars park, shared by the painter and the walk mask.
-function cityParkTrees(rr, bx, bw, bh) { const out = [], n = Math.min(4 + Math.floor(rr() * 5), Math.max(1, Math.round(bw * bh / 3500))); /* Round 445: fewer in a pocket park */ for (let i = 0; i < n; i++) out.push([bx[0] + 14 + rr() * (bw - 28), bx[1] + 14 + rr() * (bh - 28), 12 + rr() * 12]); return out; }
+function cityParkTrees(rr, bx, bw, bh) { const out = [], n = Math.min(4 + Math.floor(rr() * 5), Math.max(1, Math.round(bw * bh / 3500))); /* Round 445: fewer in a pocket park */ for (let i = 0; i < n; i++) out.push([bx[0] + 14 + rr() * (bw - 28), bx[1] + 14 + rr() * (bh - 28), 12 + rr() * 12]); const pool = cityOasisPool(bx, bw, bh); return pool ? out.filter(([x, y, r]) => x + r * 0.6 < pool[0] || x - r * 0.6 > pool[2] || y + r * 0.6 < pool[1] || y - r * 0.6 > pool[3]) : out; }
+// Round 483: an oasis (a park in Solaris, GEN.oasis) has a pool of water in its middle, with a stone lip; palms stand round it.
+function cityOasisPool(bx, bw, bh) { if (!GEN.oasis || bw < 100 || bh < 90) return null; const mx = Math.max(26, bw * 0.24), my = Math.max(24, bh * 0.26); return [bx[0] + mx, bx[1] + my, bx[2] - mx, bx[3] - my]; }
 function cityParkedCars(seed, plan) { const out = [];
   for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + plan.key + ':' + rd.pts.join());
     for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
@@ -847,11 +899,11 @@ const CITY_HAS = slot => typeof CITY_TD_ART !== 'undefined' && (CITY_TD_ART[slot
 // Round 436 (owner's Sheet E): about half the building lots on the docks are cargo yards: open ground edged by a kerb,
 // with containers, pallets, drums, crates, a forklift or rope standing on it. Each piece blocks the way (its box, the
 // lower part of its picture); the ground between them is open. Needs art in props/cargo/ and a lot at least 4 cells each way.
-const CITY_CARGO_SIZE = { 'container-red': [150, 1.09], 'container-blue': [150, 1.09], 'container-stack': [150, 0.85], drums: [66, 1.07], pods: [84, 1.07], 'hover-pallet': [76, 1.14], 'cable-drum': [62, 0.94], loader: [72, 1.09] } /* Round 452: the futuristic cargo (the wooden crates, pallets, rope and forklift are gone) */;
+const CITY_CARGO_SIZE = genThemed('cargoSize', { 'container-red': [150, 1.09], 'container-blue': [150, 1.09], 'container-stack': [150, 0.85], drums: [66, 1.07], pods: [84, 1.07], 'hover-pallet': [76, 1.14], 'cable-drum': [62, 0.94], loader: [72, 1.09] }) /* Round 452: the futuristic cargo (the wooden crates, pallets, rope and forklift are gone) */;
 // Round 447: where a landmark stands in its square (r: the lot in room px, less its 4px footing): centred, up to 170px
 // across, at its picture's own proportions (CITY_LANDMARK_ASPECT: width over height).
-const CITY_LANDMARK_ASPECT = { fountain: 1.24, billboard: 1.11, 'holo-stage': 1.26, pylon: 0.38, 'holo-beam': 0.82, mech: 1.11, hovercar: 1.26, sculpture: 1.12, metro: 1.01 };
-function cityLandmarkBox(l, r) { const asp = CITY_LANDMARK_ASPECT[l.landmark] || 1, bw = r[2] - r[0], bh = r[3] - r[1], w = Math.min(170, bw - 30, (bh - 40) * asp), h = w / asp;
+const CITY_LANDMARK_ASPECT = genThemed('landmarkAspect', { fountain: 1.24, billboard: 1.11, 'holo-stage': 1.26, pylon: 0.38, 'holo-beam': 0.82, mech: 1.11, hovercar: 1.26, sculpture: 1.12, metro: 1.01 });
+function cityLandmarkBox(l, r) { const asp = CITY_LANDMARK_ASPECT[l.landmark] || 1, bw = r[2] - r[0], bh = r[3] - r[1], w = Math.min(GEN.landmarkW || 170, bw - 30, (bh - 40) * asp), h = w / asp;
   return { x: (r[0] + r[2]) / 2 - w / 2, y: (r[1] + r[3]) / 2 - h / 2, w, h }; }
 // Round 445: a yard is its own kind of lot (genWorld: lots too small for a building at full scale, and half the building
 // lots on the docks). What stands in it: cargo on the docks; rubble in a blast zone; parked vehicles elsewhere (they are
@@ -892,7 +944,7 @@ function cityLotSlots(l) { const DA = CITY_DISTRICT_ART[l.district], ruin = city
 // depth (its roof keeps 40px), and never under 42px: lots too shallow for that are not buildings (genWorld).
 const CITY_STOREY = 50;
 // Round 459: wall pictures with doors in them; the painter lays them only as a building's ground floor
-const CITY_DOOR_WALLS = ['home-pods'];
+const CITY_DOOR_WALLS = genThemed('doorWalls', ['home-pods']);
 // Round 446 (owner: "certain roof textures clash with certain roof objects"): what may stand on each roof. A roof that is
 // already a thing in itself takes nothing (a glass roof, vegetable beds: a tank on a greenhouse made no sense); a roof with
 // its own lights or drain takes only small kit. Roofs not listed take everything.
@@ -900,10 +952,10 @@ const CITY_DOOR_WALLS = ['home-pods'];
 // kit stands only on the plain roofs listed here; every other roof (glass, gardens, plates, seams, cables, solar, skylights,
 // lit panels, a roof with its own drain or windows) takes nothing.
 const CITY_ROOF_KIT_ALL = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'prop-heater'];
-const CITY_ROOF_KIT = { 'roof-finegravel': CITY_ROOF_KIT_ALL, 'roof-bitumen': CITY_ROOF_KIT_ALL, 'roof-tarchip': CITY_ROOF_KIT_ALL, 'roof-rubber': CITY_ROOF_KIT_ALL };
-function cityLotFloors(l, floors0) { const bh = l.r[3] - l.r[1] - 8, share = l.district === 'tech' ? 0.82 : 0.66 /* Round 448: downtown is towers: more wall, less roof */, fmax = Math.max(3, Math.floor(bh * share / CITY_STOREY)), floors = Math.max(3, Math.min(floors0, fmax)), dz = Math.min(floors * CITY_STOREY, bh - 40);
+const CITY_ROOF_KIT = genThemed('roofKit', { 'roof-finegravel': CITY_ROOF_KIT_ALL, 'roof-bitumen': CITY_ROOF_KIT_ALL, 'roof-tarchip': CITY_ROOF_KIT_ALL, 'roof-rubber': CITY_ROOF_KIT_ALL });
+function cityLotFloors(l, floors0) { const bh = l.r[3] - l.r[1] - 8, share = l.district === 'tech' ? 0.82 : 0.66 /* Round 448: downtown is towers: more wall, less roof */, fmax = Math.max(3, Math.floor(bh * share / CITY_STOREY)), floors = GEN.floorRange ? Math.max(1, Math.min(fmax, GEN.floorRange[0] + floors0 % (GEN.floorRange[1] - GEN.floorRange[0] + 1))) /* Round 483: Solaris's low houses */ : Math.max(3, Math.min(floors0, fmax)), dz = Math.min(floors * CITY_STOREY, bh - 40);
   return { floors, dz, storey: dz / floors }; }
-const CITY_DISTRICT_ART = { homes: { wall: 'home-wall' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' }, market: { wall: 'market-wall', roof: 'market-roof', shop: 'market-shop' } };
+const CITY_DISTRICT_ART = genThemed('districtArt', { homes: { wall: 'home-wall' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' }, market: { wall: 'market-wall', roof: 'market-roof', shop: 'market-shop' } });
 function cityIsRuin(l) { return l.use === 'roof' && CITY_HAS('ruin-wall') && (l.ruin !== undefined ? l.ruin : chronoHash('ruin:' + l.seed) % 8 === 0); } // Round 445: in blast zones (genWorld)
 // rubble lying in a park (bx: the park's box in room px): 2 to 4 pieces, each its own circle clear of the trees and of each other
 function cityParkRubble(seed, l, bx, trees) { if (!CITY_HAS('rubble')) return []; const rr = chronoRng(seed + ':rubble:' + l.seed), out = [], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
@@ -915,7 +967,7 @@ function cityParkRubble(seed, l, bx, trees) { if (!CITY_HAS('rubble')) return []
 // street furniture in a room (room px): lamps along both kerbs of the main roads, traffic lights on the corners of real
 // crossings (three or more main roads), a traffic sign where an alley meets a main road. Each is { slot, x, y, h, artR, flip }:
 // (x, y) is the foot of its post, h its drawn height (the picture keeps its own proportions); its post blocks the way.
-const CITY_CLUTTER_H = { dumpster: 40, bags: 24, vending: 46, recycler: 34, barricade: 34, barrier: 26, tyres: 24, 'bench-led': 28, 'pay-bollard': 30 }; // Round 447
+const CITY_CLUTTER_H = genThemed('clutterH', { dumpster: 40, bags: 24, vending: 46, recycler: 34, barricade: 34, barrier: 26, tyres: 24, 'bench-led': 28, 'pay-bollard': 30 }); // Round 447
 const CITY_FURNITURE_H = { lamp: 80, 'traffic-light': 70, 'sign-traffic': 48, clutter: 30 }; // Round 425: beside the 60px hero
 function cityStreetFurniture(seed, plan) {
   if (!['lamp', 'traffic-light', 'sign-traffic', 'clutter'].some(CITY_HAS)) return [];
@@ -981,7 +1033,7 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
     if (l.use === 'landmark') { const b = cityLandmarkBox(l, r); add(b.x, b.y, b.x + b.w, b.y + b.h, 'landmark'); }
     else if (cityIsYard(l)) { for (const c of cityYardPieces(seed, l, r)) add(c.x, c.y, c.x + c.w, c.y + c.h, 'yard:' + c.slot); }
     else if (l.use === 'roof') add(r[0], r[1], r[2], r[3], 'building');
-    else if (l.use === 'park') { const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) add(tx - tr, ty - tr, tx + tr, ty + tr, 'tree');
+    else if (l.use === 'park') { const pool = cityOasisPool(r, r[2] - r[0], r[3] - r[1]); if (pool) add(pool[0], pool[1], pool[2], pool[3], 'pool'); const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) add(tx - tr, ty - tr, tx + tr, ty + tr, 'tree');
       for (const b of cityParkRubble(seed, l, r, trees)) add(b.x - b.L / 2, b.y - b.L / 2, b.x + b.L / 2, b.y + b.L / 2, 'rubble'); } }
   for (const f of cityStreetFurniture(seed, plan)) { const hw = f.slot === 'clutter' ? f.h * 0.6 : f.h * 0.2; add(f.x - hw, f.y - f.h, f.x + hw, f.y, f.slot); }
   for (const c of cityParkedCars(seed, plan)) add(c.px - 31, c.py - 20, c.px + 31, c.py + 20, 'car');
@@ -1003,7 +1055,7 @@ function cityBlockers(seed, key, plan) {
     if (l.use === 'landmark') { const b = cityLandmarkBox(l, r); rects.push([b.x + b.w * 0.1, b.y + b.h * 0.35, b.x + b.w * 0.9, b.y + b.h * 0.95]); } // Round 447: the landmark blocks; its square is open
     else if (cityIsYard(l)) { for (const c of cityYardPieces(seed, l, r)) rects.push(c.block); } // Round 436: a yard's ground is open, its cargo is not
     else if (l.use === 'roof') rects.push([r[0] - 4, r[1] - 4, r[2] + 4, r[3] + 4]); // Round 445: the whole lot, footing and all: two buildings side by side used to leave an 8px slit between them that counted as open ground
-    else if (l.use === 'park') { const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) circles.push([tx, ty, tr * 0.75]);
+    else if (l.use === 'park') { const pool = cityOasisPool(r, r[2] - r[0], r[3] - r[1]); if (pool) rects.push([...pool, 'water']); const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) circles.push([tx, ty, tr * 0.75]);
       for (const b of cityParkRubble(seed, l, r, trees)) circles.push([b.x, b.y, b.L * 0.4]); } } // Round 424: rubble blocks too
   for (const f of cityStreetFurniture(seed, plan)) circles.push([f.x, f.y, 8]); // Round 424: a lamp, light or sign post
   for (const c of cityParkedCars(seed, plan)) rects.push([c.px - 29, c.py - 15, c.px + 29, c.py + 14]); // Round 425: the larger cars; Round 442: 15% smaller
@@ -1084,8 +1136,10 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
             gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.55, 'rgba(255,255,255,.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); mg.fillStyle = gr; mg.fillRect(0, 0, m.width, m.height); }
           mg.globalCompositeOperation = 'source-in'; const pat = mg.createPattern(g2, 'repeat'), k = 140 * K / g2.height; if (pat.setTransform) pat.setTransform(new DOMMatrix().scale(k)); mg.fillStyle = pat; mg.fillRect(0, 0, m.width, m.height);
           ctx.drawImage(m, S(bx[0]), S(bx[1])); } }
-      ctx.fillStyle = 'rgba(0,10,8,.35)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh));
-      const trees = cityParkTrees(rr, bx, bw, bh);
+      ctx.fillStyle = GEN.parkDim || 'rgba(0,10,8,.35)'; ctx.fillRect(S(bx[0]), S(bx[1]), S(bw), S(bh));
+      const trees = cityParkTrees(rr, bx, bw, bh), pool = cityOasisPool(bx, bw, bh);
+      if (pool) { const pw = pool[2] - pool[0], ph = pool[3] - pool[1], rad = Math.min(16, pw / 3, ph / 3); ctx.save(); ctx.beginPath(); ctx.roundRect(S(pool[0]), S(pool[1]), S(pw), S(ph), S(rad)); ctx.save(); ctx.clip(); fill(ctx, imgs.chasm); ctx.restore();
+        ctx.lineWidth = S(5); ctx.strokeStyle = GEN.kerb[1]; ctx.stroke(); ctx.lineWidth = S(1.2); ctx.strokeStyle = GEN.kerb[0]; ctx.beginPath(); ctx.roundRect(S(pool[0] - 2.5), S(pool[1] - 2.5), S(pw + 5), S(ph + 5), S(rad + 2.5)); ctx.stroke(); ctx.beginPath(); ctx.roundRect(S(pool[0] + 2.5), S(pool[1] + 2.5), S(pw - 5), S(ph - 5), S(Math.max(0, rad - 2.5))); ctx.stroke(); ctx.restore(); } // Round 483: the oasis pool, a drawn stone lip between water and grass
       for (const b of cityParkRubble(seed, l, bx, trees)) { const ru = A('rubble'), art = ru && ru[Math.floor(b.artR * ru.length)]; if (!art) continue; const k = b.L / Math.max(art.width, art.height), dw = art.width * k, dh = art.height * k;
         ctx.save(); ctx.translate(S(b.x), S(b.y)); if (b.rot) ctx.scale(-1, 1); ctx.drawImage(art, S(-dw / 2), S(-dh / 2), S(dw), S(dh)); ctx.restore(); }
       // Round 447: a worn, darker rim inside the kerb fading toward the middle, so the grass has depth (as the shallows give the sea)
@@ -1516,7 +1570,7 @@ function paintChronoRoom(canvas, key) {
   const sized = img => { const k = GEN.texScale && GEN.texScale[Object.keys(imgs).find(n => imgs[n] === img)]; if (!k || k === 1) return img;
     const ck = img.src + '@' + k; if (!chronoScaled[ck]) { const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k); const cg = c.getContext('2d'); cg.imageSmoothingQuality = 'high'; cg.drawImage(img, 0, 0, c.width, c.height); chronoScaled[ck] = c; } return chronoScaled[ck]; };
   const fill = (g, img) => { g.save(); g.translate(-offX, -offY); g.fillStyle = g.createPattern(sized(img), 'repeat'); g.fillRect(offX, offY, W, H); g.restore(); };
-  if (GEN.topdown) { fill(ctx, imgs['pavement-old']); ctx.fillStyle = 'rgba(8,12,24,.5)'; ctx.fillRect(0, 0, W, H); } else fill(ctx, imgs.ground);
+  if (GEN.topdown) { fill(ctx, imgs['pavement-old']); ctx.fillStyle = GEN.groundDim || 'rgba(8,12,24,.5)'; /* Round 483: a theme's own light (Solaris is day) */ ctx.fillRect(0, 0, W, H); } else fill(ctx, imgs.ground);
   // Round 389 (owner: "use all the assets for neon aftermath, the rubble the puddles, the grass, everything should be
   // mixed"): a theme may lay a second texture over a first in soft patches from world-wide noise (GEN.mix: which
   // texture, over what, how much). Applied to the ground here and to the road and pavement below.
@@ -1539,7 +1593,7 @@ function paintChronoRoom(canvas, key) {
     // Round 445 (owner: "textures clashing"): one paving for the whole city, picked by the journey's seed. A paving per
     // block (Round 408) put a pale paving beside a dark one across every alley.
     if (sw.length) { fill(ctx, imgs[sw[chronoHash(chronoSeed() + ':paving') % sw.length]]);
-      ctx.fillStyle = 'rgba(8,12,24,.38)'; ctx.fillRect(0, 0, W, H); } } // the machinery sits back, so the roads read at a glance
+      ctx.fillStyle = GEN.pavingDim || 'rgba(8,12,24,.38)'; ctx.fillRect(0, 0, W, H); } } // the machinery sits back, so the roads read at a glance
   const layer = (grid, img, radius) => {
     const shape = chronoShape(grid, K, radius), c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; fill(g, img);
@@ -1840,7 +1894,7 @@ function paintChronoRoom(canvas, key) {
         else { ag.lineWidth = sh.w * K; ag.beginPath(); sh.pts.forEach(([x, y], i) => i ? ag.lineTo(x * K, y * K) : ag.moveTo(x * K, y * K)); ag.stroke(); } }
       ag.globalCompositeOperation = 'destination-in'; ag.drawImage(rm, 0, 0); ag.globalCompositeOperation = 'source-in'; fill(ag, imgs.gravel);
       rg.globalCompositeOperation = 'source-atop'; rg.drawImage(am, 0, 0); }
-    if (GEN.topdown) { rg.globalCompositeOperation = 'source-atop'; rg.fillStyle = 'rgba(4,6,12,.56)'; rg.fillRect(0, 0, W, H); }
+    if (GEN.topdown) { rg.globalCompositeOperation = 'source-atop'; rg.fillStyle = GEN.roadDim || 'rgba(4,6,12,.56)'; rg.fillRect(0, 0, W, H); }
     ctx.drawImage(rm, 0, 0);
     if (GEN.topdown) { // Round 447 (owner: "what you did with the water is great, can you similarly improve other textures and edges?"):
       // a road has depth like the water: a dark, damp gutter along both kerbs fading toward the crown of the road
@@ -1903,7 +1957,7 @@ function paintChronoRoom(canvas, key) {
   for (const p of GEN.topdown ? [] : props) {
     const img = imgs[p.name];
     // Round 391 (owner: "remove shadows from images used in procedural room generation, they look wrong"): no drawn shadow under scenery.
-    if (p.kind === 'lamp') { const lg = ctx.createRadialGradient(p.x * K, (p.y - p.h * 0.78) * K, 2, p.x * K, (p.y - p.h * 0.78) * K, 70 * K); lg.addColorStop(0, 'rgba(' + GEN.lamp + ',.38)'); lg.addColorStop(1, 'rgba(' + GEN.lamp + ',0)'); ctx.fillStyle = lg; ctx.fillRect((p.x - 70) * K, (p.y - p.h * 0.78 - 70) * K, 140 * K, 140 * K); }
+    if (p.kind === 'lamp') { const lg = ctx.createRadialGradient(p.x * K, (p.y - p.h * 0.78) * K, 2, p.x * K, (p.y - p.h * 0.78) * K, 70 * K); lg.addColorStop(0, 'rgba(' + GEN.lamp + ',' + (GEN.lampGlow != null ? GEN.lampGlow : .38) + ')'); lg.addColorStop(1, 'rgba(' + GEN.lamp + ',0)'); ctx.fillStyle = lg; ctx.fillRect((p.x - 70) * K, (p.y - p.h * 0.78 - 70) * K, 140 * K, 140 * K); }
     ctx.drawImage(img, (p.x - p.w / 2) * K, (p.y - p.h) * K, p.w * K, p.h * K);
   }
   // The room's corners fall away into the dark.
