@@ -3496,6 +3496,29 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 487: Paradox Edge, Noon Peal, Noon Blaze and Lightning Rod card art
+
+The owner's paintings for Paradox Edge, Noon Peal, Noon Blaze and Lightning Rod, levels 0-3, at
+`assets/cards/level*/<card>.webp` (512px, from the 1254px sources; `refreshedCardArt`, the card-art test, `cards.js?v=round487`).
+
+## Round 486: Solaris is played on the generator
+
+Owner: "Not seeing these changes live", then "continue". The generated Solaris (Rounds 483-485) is now the Solaris you play.
+
+- `assets/city-gen.js` answers for the generated region you are in, not just the city: `GEN_REGIONS` (the city, and Solaris as
+  region `elaris` with theme `solaris` while `GEN_SOLARIS_LIVE`), `genLive()`, `genTheme()`, `genDy()` (the city's room keys
+  run from row 4, Solaris's from row 0), `genWorldCell()`; its caches are keyed by theme and seed (`cityGenKey`,
+  `cityGenStale()`). The walk mask, doors, object placement (clear of every sprite, off the streets), patrols, the Map screen's
+  roads and tiles (`assets/map-terrain.js`) and room preloading (`assets/room-preload.js`) all follow.
+- Solaris's ground is painted by the generator (`paintSolaris`), its organic walk area reads the generated mask, objects are
+  placed as in the city (`itemsOnGround()` is off there), and it has **no diagonal roads**: `worldDiagTable()` answers none and
+  `configureRegion` drops those exits. The rooms stay joined through their straight doors (checked).
+- Alleys get a one-cell sand verge in Solaris (`GEN.alleyVerge`): an alley with a house on each side left the hero no way
+  through (doors with no route on seed 9). Making every street a full road (tried first) thinned the town out too much.
+- Tests: `tests/solaris-gen.test.cjs` checks that Solaris is played on the generator (every door can be stood in, no diagonal
+  exits); `item-placement` and `tests/playtest-walk.cjs` treat the generated Solaris like the city; `map-diagonals` checks the
+  Sky Isles only. `SEED=1/9/77 node tests/playtest-walk.cjs elaris`: all 51 rooms, every door and object reachable, no errors.
+
 ## Round 485: bigger monuments, sand roads
 
 Owner, on the Solaris preview: "Bigger monuments, roads need to be sand, density is okay".

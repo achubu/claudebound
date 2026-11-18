@@ -13,7 +13,7 @@ const strokes = []; let stroking = null;
 const ctx2d = () => new Proxy({}, { get: (t, k) => k === 'moveTo' ? (x, y) => { stroking = [[x, y]]; } : k === 'lineTo' ? (x, y) => { stroking && stroking.push([x, y]); } : k === 'stroke' ? () => { if (stroking) strokes.push(stroking); } : k === 'canvas' ? undefined : deep(), set: () => true });
 const fakeCanvas = () => ({ width: 0, height: 0, style: {}, className: '', isConnected: true, setAttribute() {}, getContext: () => ctx2d(), toDataURL: () => '' });
 const realCreate = document.createElement; document.createElement = tag => tag === 'canvas' ? fakeCanvas() : realCreate(tag);
-for (const region of ['elaris', 'sky']) {
+for (const region of ['sky']) { // Round 486: the generated Solaris has no diagonal roads (tests/solaris-gen.test.cjs checks that)
   configureRegion(region); state.visited = Object.keys(rooms); state.room = regionStartRoom();
   const t = worldDiagTable(); let pairs = 0;
   for (const [key, dirs] of Object.entries(t)) for (const [dir, d] of Object.entries(dirs)) {
