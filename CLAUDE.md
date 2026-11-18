@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 487) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 488) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -254,7 +254,10 @@ change set.
   its own checks. `run(code)` returns the value of the code it runs. It turns enemy tempers off
   unless `TEMPER=1` (Round 253), so tests see exact numbers; Difficulty lab runs should set it. Enemy traits and species patterns
   (Round 265) are off the same way unless `TRAITS=1`, and so are the merchant/Cardsmith greetings (Round 281) unless `NPC_GREET=1`.
-- Run everything (takes several minutes):
+- Round 488: the harness gives every journey the same seed (`FIXED_SEED`: 77, or `SEED=<n>`; `RANDOM_SEEDS=1` for fresh
+  ones), so each generated world is built once per test file. A new seed costs seconds (a whole city or Solaris): in a test,
+  sweep a few seeds at most, and vary `Math.random` instead of the journey seed when only a roll should change.
+- Run everything (about 40 minutes; every test should finish well inside its 300s):
   `for t in tests/*.test.cjs; do timeout 300 node $t || echo FAIL $t; done`
 - Key suites:
   - `neon-world`, `neon-world-pathing` (crossings, tap routes, fuzz; ~1 min)
