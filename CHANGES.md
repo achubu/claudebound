@@ -3496,6 +3496,27 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 488: the test suite runs again; faster new journeys and world switches
+
+Owner: "fix it and make sure it doesn't take so long moving forward". `tests/rebalance.test.cjs` never finished (past 25
+minutes, on `main` too). Since Round 448 every journey has a random seed, so every `newGame()` generated a whole city
+(~6s), and the suite starts journeys by the hundred (600 for one elite-rate check alone).
+
+- **The harness fixes the seed** (`tests/expansion.test.cjs`: `FIXED_SEED`, 77 or `SEED=<n>`; `RANDOM_SEEDS=1` for fresh ones,
+  read by `newGame()` in `assets/expansion.js`). Each world is generated once per test file and reused.
+- **Switching worlds keeps each world's caches** (`assets/city-gen.js`): they are flushed only when that world's own seed
+  changes (`cityGenSeedOf`), and the walk masks are kept per world and seed. A city-to-Solaris round trip (a portal) went from
+  ~8s to ~0.15s.
+- **New journeys start faster**: the region lookups behind every walk test are kept until the region changes (`genRegion`,
+  `cityGenStale`), each room's mask is found by its key (`cityRoomWalk`), and the merchant's room is the first in a
+  seed-drawn order that has a spot (`findMerchantRoom`), not a spot found in every room first. ~3.2s instead of ~7s in the
+  harness. The merchant may stand in a different room in a journey already under way.
+- `rebalance`: the elite-rate check reads each room's elite chance instead of 600 journeys; the mini-boss crystal check varies
+  the loot roll, not the journey seed (60 cities); two crash sweeps use 4 and 5 seeds (were 7 and 15). 146s, was endless.
+- `crystals-touch-boss` walked from fixed spots on the old tile Solaris's streets; it now starts at the generated rooms' doors
+  (it passed only on seeds whose street happened to be there).
+- The whole suite with `timeout 300` per test: every test passes, the slowest 144s (`rebalance`), ~39 minutes in all.
+
 ## Round 487: Paradox Edge, Noon Peal, Noon Blaze and Lightning Rod card art
 
 The owner's paintings for Paradox Edge, Noon Peal, Noon Blaze and Lightning Rod, levels 0-3, at

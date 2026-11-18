@@ -114,11 +114,13 @@ function merchantRoom() {
   return merchantCache[ck] = findMerchantRoom();
 }
 function findMerchantRoom() {
-  const pois = worldPOIs(), keys = Object.keys(rooms).filter(k => poiEligible(k) && !pois[k] && poiSpot(k)).sort();
+  // Round 488: the rooms are tried in an order drawn from the journey's seed and the first with a spot is taken. Finding a
+  // spot in every room first (to pick from those) took most of a new journey's start in the generated worlds.
+  const pois = worldPOIs(), tag = state.seed + activeRegion + 'merchant' + state.poi.merchantMoves;
+  const keys = Object.keys(rooms).filter(k => poiEligible(k) && !pois[k]).sort((a, b) => hashSeed(tag + ':' + a) - hashSeed(tag + ':' + b) || (a < b ? -1 : 1));
+  for (const key of keys) { const spot = poiSpot(key); if (spot) return { key, x: spot[0], y: spot[1], type: 'merchant', id: activeRegion + ':merchant:' + state.poi.merchantMoves }; }
   // Every world always has a store: if no ordinary room is free, the merchant sets up at the safe start room.
-  if (!keys.length) { const start = Object.keys(rooms).find(isStartRoom); return { key: start, x: 560, y: 250, type: 'merchant', id: activeRegion + ':merchant:' + state.poi.merchantMoves }; }
-  const key = keys[hashSeed(state.seed + activeRegion + 'merchant' + state.poi.merchantMoves) % keys.length], spot = poiSpot(key);
-  return { key, x: spot[0], y: spot[1], type: 'merchant', id: activeRegion + ':merchant:' + state.poi.merchantMoves };
+  const start = Object.keys(rooms).find(isStartRoom); return { key: start, x: 560, y: 250, type: 'merchant', id: activeRegion + ':merchant:' + state.poi.merchantMoves };
 }
 function merchantStock() {
   const rand = seeded(hashSeed(state.seed + activeRegion + 'stock' + state.poi.merchantMoves));

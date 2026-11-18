@@ -26,10 +26,10 @@ finishBattle();assert.equal(portalTarget().region,'sky');travelPortal();assert.e
 save();state=null;assert(load());assert.equal(state.region,'sky');validateImport(JSON.parse(JSON.stringify(state)));travelPortal();assert.equal(state.region,'elaris');assert.equal(state.room,SOLARIS_BOSS_ROOM);
 {const saved=state.room;state.region='vespera';configureRegion('vespera');state.room=TILE_REGIONS.vespera.start;assert.equal(Object.keys(rooms).length,51,'Vespera is a 51-room tile world (Round 179; Round 227 cut three for its piers)');assert.equal(joinedArea().cells.length,1,'no joined districts');assert.equal(portalTarget().region,'wilds','Vespera returns to Elaris');state.region='elaris';configureRegion('elaris');state.room=saved;}
 // Touch route crosses joined room seams using normal collision and movement.
-closeMenu();state.room='1,0';state.pos={x:740,y:230};state.battle=null;keys={};assert(setTouchDestination({x:860,y:230})); // on the Solaris street (Round 149)
+closeMenu();state.room='1,0';state.battle=null;keys={};{const d=organicDoor('1,0','e');state.pos={x:d.inward.x-40,y:d.inward.y};const w=organicDoor('2,0','w');assert(setTouchDestination({x:800+w.inward.x+10,y:w.inward.y}));} // on the Solaris street (Round 149; Round 488: at the generated room's east door)
 for(let i=0;i<200&&touchRoute;i++)move(.033);
 assert.equal(state.room,'2,0');assert(state.pos.x<120,'arrives at the west edge of the next room'); // finer touch grid on painted pathsassert(!touchRoute);
-state.room='5,4';state.pos={x:400,y:440};assert(setTouchDestination({x:400,y:560}));for(let i=0;i<250&&touchRoute;i++)move(.033);assert.equal(state.room,'5,5');assert(!touchRoute);
+state.room='5,4';{const d=organicDoor('5,4','s');state.pos={x:d.inward.x,y:d.inward.y-30};const n=organicDoor('5,5','n');assert(setTouchDestination({x:n.inward.x,y:500+n.inward.y+10}));} // Round 488: at the generated room's south doorfor(let i=0;i<250&&touchRoute;i++)move(.033);assert.equal(state.room,'5,5');assert(!touchRoute);
 assert(setTouchDestination({x:400,y:150}));keys={ArrowLeft:true};move(.033);assert.equal(touchRoute,null);keys={};
 console.log('PASS: bounded crystal rarities, counter reservation/timing/status prevention, Lightning disruption, boss unlock, third-region saves, touch seams and manual override.');
 }
