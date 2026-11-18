@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 483: Solaris on the city's generator (a preview)
+
+Owner: "can we apply the same world generation algorithm to solaris but instead of city buildings we will want to have
+pyramids, huts and buildings that fit the techno desert theme". First step: the generator can build Solaris from the
+owner's Round 481 sheets. **Not switched on**: Solaris is still played on its tile world until the owner has seen it.
+
+- The city's art tables (`CITY_TD_ART`, `CITY_DISTRICT_ART`, `CITY_ROOF_KIT`, `CITY_LANDMARK_ASPECT`, `CITY_CARGO_SIZE`,
+  `CITY_CLUTTER_H`, `CITY_DOOR_WALLS`) now read the theme in use (`genThemed`): a theme with its own table (`GEN.tdArt`,
+  `GEN.districtArt`, ...) gets it while it is `GEN`; the city keeps its own. `cityArtPath` follows a theme's folders
+  (`GEN.surfaceSlots`, `GEN.slotDir`).
+- `GEN_THEMES.solaris`: Solaris's room map (`SOLARIS_LAYOUT`, 9x6, three corners cut), its seed-picked main roads, no sea,
+  sand between everything. Four quarters: the bazaar (sandstone, spice stalls, clay roofs), the mud-brick homes (adobe,
+  hut doors, woven roofs), the solar works (solar walls and roofs, tech fronts) and the water quarter (copper roofs, water
+  sellers). Houses are 1-2 floors (`GEN.floorRange`). Rooftop kit (chimneys, tanks, windcatchers, mirrors) only on the
+  plain gravel and sandstone roofs. Monuments (pyramid, obelisk, sphinx, fountain) take the largest street-front lot
+  (`GEN.landmarkLot`, `GEN.landmarkW`). Parks are oases: oasis grass, palms, the oasis rim and a pool of water with a
+  drawn stone lip in the middle (`cityOasisPool`; the pool blocks walking and objects). Daylight: the city's night dimming
+  of ground, roads, parks and lamps is a theme setting (`groundDim`, `pavingDim`, `roadDim`, `parkDim`, `lampGlow`).
+- `THEME=solaris node tests/city-atlas.cjs [seed] [out.png]` paints the generated Solaris for checking by eye.
+- `tests/solaris-gen.test.cjs`: every room planned, every picture on disk, the city's tables untouched, monuments of all
+  four kinds, oases with pools, houses of 1-2 floors, on three seeds.
+
+Next (after the owner's look): wiring it into play (walk mask, objects, doors, the Map screen), as `assets/city-gen.js`
+does for the city, and the diagonal roads between the cut corners.
+
 ## Round 482: the oasis rim
 
 The owner redrew the oasis rim as a straight strip (the first one curved in its middle, so it couldn't run along an
