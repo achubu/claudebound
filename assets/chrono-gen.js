@@ -414,8 +414,8 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
   mains: seed => { const T = GEN_THEMES.solaris, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':sol-mains:' + t);
     return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
   alley: (key, d) => { const T = GEN_THEMES.solaris, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); },
-  hole: () => false, mall: false, mainsCache: null, oasis: true, lampGlow: .1, parkDim: 'rgba(0,10,8,.08)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 280, roadDim: 'rgba(60,30,5,.12)', groundDim: 'rgba(90,50,10,.06)', pavingDim: 'rgba(90,50,10,.06)',
-  tex: { pipes: 'surfaces/park/oasis-grass', chasm: 'surfaces/water/oasis-water', overgrowth: 'surfaces/park/oasis-grass', water: 'surfaces/water/oasis-water', sand: 'surfaces/sand/sand', floor: 'surfaces/plaza/plaza', 'road-wet': 'surfaces/road/road', gravel: 'surfaces/plaza/plaza', yard: 'surfaces/lot/lot', 'pavement-old': 'surfaces/sand/sand', ground: 'surfaces/sand/sand', 'rubble-big': 'surfaces/sand/sand' },
+  hole: () => false, mall: false, mainsCache: null, oasis: true, lampGlow: .1, parkDim: 'rgba(0,10,8,.08)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 360, landmarkSpan: 420, noLanes: true, roadDim: 'rgba(120,70,20,.16)', groundDim: 'rgba(90,50,10,.06)', pavingDim: 'rgba(90,50,10,.06)',
+  tex: { pipes: 'surfaces/park/oasis-grass', chasm: 'surfaces/water/oasis-water', overgrowth: 'surfaces/park/oasis-grass', water: 'surfaces/water/oasis-water', sand: 'surfaces/sand/sand', floor: 'surfaces/plaza/plaza', 'road-wet': 'surfaces/sand/sand' /* Round 485 (owner: "roads need to be sand") */, gravel: 'surfaces/plaza/plaza', yard: 'surfaces/lot/lot', 'pavement-old': 'surfaces/sand/sand', ground: 'surfaces/sand/sand', 'rubble-big': 'surfaces/sand/sand' },
   legacy: null, mix: [{ on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 9 }] /* (only so the road texture loads: the top-down painter mixes nothing) */,
   texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.4, plaza: 0.35, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4 },
   kerb: ['#3a2410', '#e2c48c', '#8a6236'], yardRim: ['#3a2410', '#d8b47a'], groundShade: 'rgba(60,30,0,.08)', lamp: '255,214,140', vignette: '40,20,0',
@@ -691,11 +691,24 @@ function genWorld(seed) {
   // square (the city's own paving, so no new border) with a landmark standing in it. The same landmark is never used
   // again until every other has been, and then as far from its last place as can be: a room is "the one with the statue".
   if (GEN.topdown && CITY_HAS('landmark')) { const names = CITY_TD_ART.landmark, placed = [];
+    // Round 485 (owner: "bigger monuments"): with GEN.landmarkSpan a monument's square also takes the building lots beside it
+    // in the same row (same top and bottom), up to that width; the lot is chosen for the largest monument it then holds,
+    // and the larger squares go to the broad monuments (pyramid, sphinx) first.
+    const growOf = c => { let r = c.r.slice(); const took = [];
+      if (GEN.landmarkSpan) for (let grew = true; grew && r[2] - r[0] < GEN.landmarkSpan;) { grew = false;
+        const ox = Math.floor((c.r[0] + c.r[2]) / 2 / 800) * 800, nb = lotsPx.filter(l => l !== c && !took.includes(l) && l.use === 'roof' && !l.mall && (c.south ? l.r[3] === r[3] : l.r[1] === r[1]) && Math.min(r[3], l.r[3]) - Math.max(r[1], l.r[1]) >= 175 && (l.r[0] === r[2] || l.r[2] === r[0]) && Math.max(r[2], l.r[2]) - Math.min(r[0], l.r[0]) <= GEN.landmarkSpan + 60)
+          .sort((a, b) => Math.abs((a.r[0] + a.r[2]) / 2 - (ox + 400)) - Math.abs((b.r[0] + b.r[2]) / 2 - (ox + 400)))[0];
+        if (nb) { r = [Math.min(r[0], nb.r[0]), Math.max(r[1], nb.r[1]), Math.max(r[2], nb.r[2]), Math.min(r[3], nb.r[3])]; took.push(nb); grew = true; } } // (sharing the street front; the square keeps the shallower depth and the rest of a deeper lot is open sand)
+      return { r, took, w: Math.min(GEN.landmarkW || 170, r[2] - r[0] - 38, (r[3] - r[1] - 48) * 1.15) }; };
     for (const k of keys.slice().sort((a, b) => chronoHash(seed + ':lm:' + a) - chronoHash(seed + ':lm:' + b))) { if (placed.length >= 12) break; if (placed.some(q => Math.abs(q[3] - pos[k][0]) <= 1 && Math.abs(q[4] - pos[k][1]) <= 1)) continue; /* Round 448: twelve a city, never in rooms side by side (a chance per room gave some cities two) */ const ox = pos[k][0] * 800, oy = pos[k][1] * 500;
-      const c = lotsPx.filter(l => l.use === 'roof' && !l.mall && !l.small && (l.south || l.front) && (l.r[0] + l.r[2]) / 2 >= ox + 90 && (l.r[0] + l.r[2]) / 2 <= ox + 710 && (l.r[1] + l.r[3]) / 2 >= oy + 110 && (l.r[1] + l.r[3]) / 2 <= oy + 400 && l.r[2] - l.r[0] >= 125 && l.r[2] - l.r[0] <= (GEN.landmarkLot || 275))
-        .sort((a, b) => (b.south - a.south) || ((a.r[2] - a.r[0]) * (a.r[3] - a.r[1]) - (b.r[2] - b.r[0]) * (b.r[3] - b.r[1])) * (GEN.landmarkLot ? -1 : 1) /* Round 483: Solaris's monuments take the largest such lot */ || a.seed - b.seed)[0]; if (!c) continue; // on a street (one to its south first), the smallest such lot
+      const cand = lotsPx.filter(l => l.use === 'roof' && !l.mall && !l.small && (l.south || l.front) && (l.r[0] + l.r[2]) / 2 >= ox + 90 && (l.r[0] + l.r[2]) / 2 <= ox + 710 && (l.r[1] + l.r[3]) / 2 >= oy + 110 && (l.r[1] + l.r[3]) / 2 <= oy + 400 && l.r[2] - l.r[0] >= 125 && l.r[2] - l.r[0] <= (GEN.landmarkLot || 275));
+      const c = GEN.landmarkSpan ? cand.map(l => [l, growOf(l).w]).sort((a, b) => (b[0].south - a[0].south) || b[1] - a[1] || a[0].seed - b[0].seed).map(a => a[0])[0]
+        : cand.sort((a, b) => (b.south - a.south) || (a.r[2] - a.r[0]) * (a.r[3] - a.r[1]) - (b.r[2] - b.r[0]) * (b.r[3] - b.r[1]) || a.seed - b.seed)[0]; if (!c) continue;
+      if (GEN.landmarkSpan && growOf(c).w < 180 && placed.filter(q => (CITY_LANDMARK_ASPECT[names[q[2]]] || 1) < 1).length >= 3) continue; // Round 485: at most three small (tall) monuments; a room with no room for a big one keeps its houses // on a street (one to its south first), the smallest such lot
+      const g = GEN.landmarkSpan ? growOf(c) : null; if (g) { c.r = g.r; for (const t of g.took) { c.south = c.south || t.south; c.front = c.front || t.front; lotsPx.splice(lotsPx.indexOf(t), 1); } }
       const cx = (c.r[0] + c.r[2]) / 2, cy = (c.r[1] + c.r[3]) / 2, far = n => Math.min(1e9, ...placed.filter(q => q[2] === n).map(q => Math.hypot(q[0] - cx, q[1] - cy))), uses = n => placed.filter(q => q[2] === n).length;
-      const n = names.map((_, i) => i).sort((a, b) => uses(a) - uses(b) || far(b) - far(a) || a - b)[0];
+      const broad = n => g && (CITY_LANDMARK_ASPECT[names[n]] || 1) >= 1 && g.w >= 200 ? 0 : g && g.w < 200 && (CITY_LANDMARK_ASPECT[names[n]] || 1) < 1 ? 0 : 1; // big squares for the broad monuments, small ones for the tall
+      const n = names.map((_, i) => i).sort((a, b) => (g ? broad(a) - broad(b) : 0) || uses(a) - uses(b) || far(b) - far(a) || a - b)[0];
       c.use = 'landmark'; c.landmark = names[n]; placed.push([cx, cy, n, pos[k][0], pos[k][1]]); } }
   // the blast zones are the 18% of the city where that noise runs highest, so every journey's city has them, about as large
   if (GEN.topdown) { const bl = lotsPx.filter(l => l.use === 'roof').map(l => l.blast).sort((a, b) => a - b), T = bl.length ? bl[Math.floor(bl.length * 0.82)] : 1;
@@ -1912,7 +1925,7 @@ function paintChronoRoom(canvas, key) {
     if (GEN.topdown) { // Round 420 (owner: "add lanes to the road paths"): a dashed centre line down each main road (two lanes), stopping at the crossings
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H);
       for (const sh of plan.shapes) if (sh.t === 'poly' && !sh.pave) { const xs = sh.pts.map(q => q[0]), ys = sh.pts.map(q => q[1]); ctx.rect(Math.max(...xs) * K + 10 * K, (Math.min(...ys) - 10) * K, -(Math.max(...xs) - Math.min(...xs) + 20) * K, (Math.max(...ys) - Math.min(...ys) + 20) * K); }
-      ctx.clip('evenodd'); ctx.strokeStyle = 'rgba(232,226,196,.55)'; ctx.lineWidth = 2.5 * K; ctx.setLineDash([16 * K, 14 * K]); ctx.lineCap = 'butt';
+      ctx.clip('evenodd'); ctx.strokeStyle = GEN.noLanes ? 'rgba(0,0,0,0)' /* Round 485: sand tracks have no lane markings */ : 'rgba(232,226,196,.55)'; ctx.lineWidth = 2.5 * K; ctx.setLineDash([16 * K, 14 * K]); ctx.lineCap = 'butt';
       for (const sh of plan.shapes) { if (sh.t !== 'road' || sh.pave || sh.w < 90) continue; ctx.beginPath(); sh.pts.forEach(([x, y], i) => i ? ctx.lineTo(x * K, y * K) : ctx.moveTo(x * K, y * K)); ctx.stroke(); }
       // the door stubs carry the line to the room's edge
       for (const sh of plan.shapes) { if (sh.t !== 'rect' || sh.pave || sh.main === false || Math.max(sh.w, sh.h) < 90) continue; ctx.beginPath(); if (sh.x <= 0 || sh.x + sh.w >= 800) { /* an east or west door: the line runs across */ ctx.moveTo(sh.x * K, (sh.y + sh.h / 2) * K); ctx.lineTo((sh.x + sh.w) * K, (sh.y + sh.h / 2) * K); } else { ctx.moveTo((sh.x + sh.w / 2) * K, sh.y * K); ctx.lineTo((sh.x + sh.w / 2) * K, (sh.y + sh.h) * K); } ctx.stroke(); }

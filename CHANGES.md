@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 485: bigger monuments, sand roads
+
+Owner, on the Solaris preview: "Bigger monuments, roads need to be sand, density is okay".
+
+- Monuments: a monument's square takes the building lots beside it that share its street front (`GEN.landmarkSpan`, up
+  to 420px; the square keeps the shallower depth, the rest of a deeper lot is open sand), and each room's lot is chosen
+  for the largest monument it can then hold. Broad monuments (pyramid, sphinx, fountain) take the big squares, the
+  obelisk the narrow ones, at most three of those; a room with no room for a big monument keeps its houses. Up to 360px
+  across (`GEN.landmarkW`): pyramids and sphinxes now stand 200-280px wide, about twice the size before.
+- Roads: Solaris's roads and alleys are the sand texture, a shade darker (`roadDim`), with their sandstone kerbs and no
+  lane markings (`GEN.noLanes`).
+- `tests/solaris-gen.test.cjs`: roads are sand, broad monuments at least 200px wide.
+
 ## Round 484: no lamps in the desert
 
 Owner, on the Solaris preview: "No lamps in desert". Solaris's lamp slot is empty (`GEN_THEMES.solaris.tdArt.lamp`), so the
