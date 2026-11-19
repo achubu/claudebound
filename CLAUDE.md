@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 507) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 508) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -165,7 +165,7 @@ change set.
   building (or any art) to make it fit; scale it by one factor for both sides, or don't place it.** `tests/city-buildings.test.cjs`.
   Round 505: the owner's kerb (`kerb-neon`) and yard railing (`rim-rail`). Round 506: the beach's edge is the owner's sea wall strip
   (`surfaces/waterfront-edge/seawall`, `GEN.coastWall`; without the art, the Round 461 drawn lip). Round 507: the wall
-  stands on the grid: a straight-edged beach (`sandReach`) and the 3x3 bitmask (`cityGridKerb`), never a strip bent round a curve.
+  stands on the grid: a straight-edged beach (`sandReach`) and the 3x3 bitmask (`cityGridKerb`), never a strip bent round a curve. Round 508: no paving finger one or two cells wide into the sand.
   Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).

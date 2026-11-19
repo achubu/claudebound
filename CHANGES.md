@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 508: no thin fingers in the sea wall
+
+Owner: "fix the single cell issue". Where the sand's 50px cells left a strip of paving one or two cells wide between sand on
+two opposite sides, the sea wall ran a narrow U round it. `sandReach` now turns such strips to sand (and a one-cell slit of
+sand between paving to paving), so the wall runs straight past. Checked on seeds 2 and 9; seam-check city 9: 0 cut stretches.
+Tests: city-surfaces, city-layout, city-buildings.
+
 ## Round 507: the sea wall on the grid
 
 Owner: "that beach curb looks real bad, are you using the proper edge techniques?" No: Round 506 bent the strip round the
