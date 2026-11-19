@@ -388,7 +388,7 @@ const GEN_THEMES = {
     mains: seed => { const T = GEN_THEMES.city, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':mains:' + t);
       return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
     alley: (key, d) => { const T = GEN_THEMES.city, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
-    worldLots: true, topdown: true, tilt: 30, mall: false /* Round 501: the mall is a generated building */, spriteWorld: true /* Round 501 (owner) */, noParks: true /* Round 498 (owner) */, coastCrisp: true, coastLip: true /* Round 461 (owner chose C) */, coastWall: true /* Round 506 */, gridKerb: true /* Round 464 (owner: "switch it on") */, noShadows: true /* Round 468 (owner: "lets remove all shadows they dont look right") */, startKey: '0,5', alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
+    worldLots: true, topdown: true, tilt: 30, mall: false /* Round 501: the mall is a generated building */, spriteWorld: true /* Round 501 (owner) */, noParks: true /* Round 498 (owner) */, coastCrisp: true, coastLip: true /* Round 461 (owner chose C) */, coastWall: true /* Round 506 */, wallMinRun: 4 /* Round 510 (owner: increase it) */, beachMin: 2 /* Round 509 (owner): the sea wall's shortest run and the beach's narrowest width, in 25px cells */, beachWide: 100, beachWobble: 40 /* Round 510 (owner): the beach's depth in px on average, and how far its water's edge wanders */, coastWalk: 2, coastLotGap: 1 /* Round 510 (owner): the walkway before the sea wall, and paving between any lot and the sand, in cells */, gridKerb: true /* Round 464 (owner: "switch it on") */, noShadows: true /* Round 468 (owner: "lets remove all shadows they dont look right") */, startKey: '0,5', alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
     maxH: 300, // Round 394 (owner: "buildings should probably be around 3 times bigger")
     storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 , 'laundromat': 1.6, 'pharmacy': 1.6, 'karaoke-bar': 1.6, 'food-court': 1.44, 'walkup-flats': 1.6, 'boarding-house': 1.6, 'shanty-block': 1.6, 'data-relay': 1.44, 'robotics-workshop': 0.83, 'bathhouse': 1.25, 'temple-hall': 1.39},
@@ -1730,6 +1730,44 @@ function chronoTint(shape, fill) {
 // The last few rooms painted are kept, so drawing the world again (it is redrawn on many events) is one copy.
 const chronoPainted = new Map();
 const chronoScaled = {};
+// Round 507-509: the city's beach in 25px cells, worked out once for the whole world (Round 509: per room it disagreed at the
+// seams): the sand is the beach's cells that reach the water without crossing a street (a sliver trapped behind a street is
+// paving, or the sea wall loops round it); then the minimum wall run and beach width below. The wall and the drawn sand
+// both read this.
+const genCoastSandCache = {};
+function genCoastSand(seed) { const ck = GEN.id + ':' + seed; if (genCoastSandCache[ck]) return genCoastSandCache[ck];
+  for (const k of Object.keys(genCoastSandCache)) if (k.startsWith(GEN.id + ':')) delete genCoastSandCache[k];
+  return genCoastSandCache[ck] = (() => { const wl = genWorld(seed), M = 8, gx = 0, gy = 0, NX = wl.CW + 2 * M, NY = wl.CH + 2 * M, wm = {};
+      const W50 = (x, y) => { const k = x + ',' + y; if (k in wm) return wm[k]; return wm[k] = GEN.hole ? !!GEN.hole(seed, x, y) : chronoNoise(seed, 'chasm', x, y, 6) > 0.66; };
+      const wat = (X, Y) => W50(Math.floor(X / 2), Math.floor(Y / 2)), sandy = (X, Y) => { if (X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 3) return true; /* (the plan's own beach band: Round 510) */ const x = Math.floor(X / 2), y = Math.floor(Y / 2); if (W50(x, y)) return true; for (let b = -1; b <= 1; b++) for (let a = -1; a <= 1; a++) if (W50(x + a, y + b)) return true; return false; };
+      const street = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2;
+      const ok = new Uint8Array(NX * NY), q2 = []; for (let y = 0; y < NY; y++) for (let x = 0; x < NX; x++) if (wat(gx - M + x, gy - M + y) && !street(gx - M + x, gy - M + y)) { ok[y * NX + x] = 1; q2.push(y * NX + x); }
+      while (q2.length) { const i = q2.pop(), x = i % NX, y = (i - x) / NX; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const u = x + a, v = y + b; if (u < 0 || v < 0 || u >= NX || v >= NY || ok[v * NX + u]) continue;
+        const X = gx - M + u, Y = gy - M + v; if (sandy(X, Y) && !street(X, Y)) { ok[v * NX + u] = 1; q2.push(v * NX + u); } } }
+      // Round 509 (owner: "we need a minimum curb size, then a minimum beach size as part of the algorithm"): the shortest wall
+      // run and (below, against the water as drawn) the narrowest beach; Round 510 settled how.
+      const KQ = GEN.wallMinRun || 4, SW = GEN.coastWalk || 2, LG = GEN.coastLotGap || 1, N = NX * NY;
+      // Round 510 (owner: "the strip of walkway before the beach curb here is too small ... needs a min size", "too many edges
+      // coming together in one place", "we should never have overlapping edges", "need rule for no buildings overlapping sand
+      // and beach", "need min curb size to increase", "i like it straight"). What must be paving: every street and the walkway
+      // SW cells round it (so the wall stands clear of a street's kerb and corners), every lot and LG cells round it (no
+      // building, yard or rim meets the sand), and all ground that isn't beach. The coast is then decided in blocks of KQ x KQ
+      // cells on the world's grid: a block holding anything that must be paving is paving, any other block is sand. So every
+      // side of the wall lies on the block grid: straight runs of whole blocks, never shorter than KQ cells (100px), and the
+      // walkway is SW to SW + KQ - 1 cells wide. Sand left cut off from the water is paving.
+      const must = new Uint8Array(N); for (let i = 0; i < N; i++) if (!ok[i]) must[i] = 1;
+      const mark = (X0, Y0, X1, Y1) => { for (let Y = Y0; Y < Y1; Y++) for (let X = X0; X < X1; X++) { const u = X - gx + M, v = Y - gy + M; if (u >= 0 && v >= 0 && u < NX && v < NY) must[v * NX + u] = 1; } };
+      for (let Y = 0; Y < wl.CH; Y++) for (let X = 0; X < wl.CW; X++) if (wl.cell[Y * wl.CW + X] === 2) mark(X - SW, Y - SW, X + SW + 1, Y + SW + 1);
+      for (const l of wl.lotsPx || []) mark(Math.floor(l.r[0] / FG_CELL) - LG, Math.floor(l.r[1] / FG_CELL) - LG, Math.ceil(l.r[2] / FG_CELL) + LG, Math.ceil(l.r[3] / FG_CELL) + LG);
+      const blk = new Map(), bkey = (X, Y) => Math.floor(X / KQ) + ',' + Math.floor(Y / KQ);
+      for (let v = 0; v < NY; v++) for (let u = 0; u < NX; u++) if (must[v * NX + u]) blk.set(bkey(gx - M + u, gy - M + v), 1);
+      for (let v = 0; v < NY; v++) for (let u = 0; u < NX; u++) ok[v * NX + u] = blk.has(bkey(gx - M + u, gy - M + v)) ? 0 : 1;
+      { const seen = new Uint8Array(N), st = []; for (let v = 0; v < NY; v++) for (let u = 0; u < NX; u++) { const i = v * NX + u; if (ok[i] && wat(gx - M + u, gy - M + v)) { seen[i] = 1; st.push(i); } }
+        while (st.length) { const i = st.pop(), x = i % NX, y = (i - x) / NX; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const u = x + a, v = y + b; if (u < 0 || v < 0 || u >= NX || v >= NY) continue; const q = v * NX + u; if (ok[q] && !seen[q]) { seen[q] = 1; st.push(q); } } }
+        for (let i = 0; i < N; i++) if (ok[i] && !seen[i]) ok[i] = 0; }
+      return (X, Y) => { const u = X - gx + M, v = Y - gy + M; return u >= 0 && v >= 0 && u < NX && v < NY ? !!ok[v * NX + u] : sandy(X, Y) && !street(X, Y); }; })();
+}
+
 function paintChronoRoom(canvas, key) {
   const theme = GEN.id, seed = theme === 'chronospire' ? null : chronoSeed(), plan = theme === 'chronospire' ? chronoPlan(key) : genPlan(theme, key, seed); if (!plan || typeof document === 'undefined') return false;
   const paintKey = theme + ':' + (theme === 'chronospire' ? chronoSeedNow : seed) + '#' + key;
@@ -1890,24 +1928,7 @@ function paintChronoRoom(canvas, key) {
     // grid: water cells, then a band of sand exactly one cell wide, with a shoreline strip (CITY_TD_ART.shore: concrete
     // crumbling into the sand) laid along every straight edge where the sand meets the paving, and a foam line along the water.
     const T = CG_CELL, W8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], isW = (x, y) => terrain.chasm(x, y), isS = (x, y) => !isW(x, y) && W8.some(([a, b]) => isW(x + a, y + b));
-    // Round 507: with the sea wall, the sand is the beach's 25px cells that reach the water without crossing a street (a sliver
-    // trapped behind a street is paving, or the wall loops round it); the wall and the drawn sand both read this
-    const sandReach = (() => { if (!(GEN.coastWall && GEN.worldLots)) return null; const wl = genWorld(chronoSeed()), [q, r] = GEN.world(key), gx = q * FG_COLS, gy = r * FG_ROWS, M = 12, NX = FG_COLS + 2 * M, NY = FG_ROWS + 2 * M;
-      const wat = (X, Y) => isW(Math.floor((X - gx) / 2), Math.floor((Y - gy) / 2)), sandy = (X, Y) => { const cx = Math.floor((X - gx) / 2), cy = Math.floor((Y - gy) / 2); return isW(cx, cy) || isS(cx, cy); };
-      const street = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2 && roadDrawnCell(X, Y);
-      const ok = new Uint8Array(NX * NY), q2 = []; for (let y = 0; y < NY; y++) for (let x = 0; x < NX; x++) if (wat(gx - M + x, gy - M + y) && !street(gx - M + x, gy - M + y)) { ok[y * NX + x] = 1; q2.push(y * NX + x); }
-      while (q2.length) { const i = q2.pop(), x = i % NX, y = (i - x) / NX; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const u = x + a, v = y + b; if (u < 0 || v < 0 || u >= NX || v >= NY || ok[v * NX + u]) continue;
-        const X = gx - M + u, Y = gy - M + v; if (sandy(X, Y) && !street(X, Y)) { ok[v * NX + u] = 1; q2.push(v * NX + u); } } }
-      // (owner: "fix the single cell issue") no thin strips: paving one or two cells wide between sand on two opposite sides is sand,
-      // a cell of sand between paving (or street) on two opposite sides is paving, so the wall never runs a U round one cell
-      for (let pass = 0; pass < 4; pass++) { let changed = 0;
-        for (let v = 1; v < NY - 1; v++) for (let u = 1; u < NX - 1; u++) { const i = v * NX + u, X = gx - M + u, Y = gy - M + v; if (street(X, Y) || wat(X, Y)) continue;
-          const me = ok[i], l = ok[i - 1], r = ok[i + 1], t = ok[i - NX], b = ok[i + NX], at = (du, dv) => { const uu = u + du, vv = v + dv; return uu >= 0 && vv >= 0 && uu < NX && vv < NY && ok[vv * NX + uu]; };
-          // (a finger of paving up to two cells wide too: one 50px cell of the coast)
-          if (!me && ((l && (r || at(2, 0))) || (r && at(-2, 0)) || (t && (b || at(0, 2))) || (b && at(0, -2)))) { ok[i] = 1; changed++; }
-          else if (me && ((!l && !r) || (!t && !b))) { ok[i] = 0; changed++; } }
-        if (!changed) break; }
-      return (X, Y) => { const u = X - gx + M, v = Y - gy + M; return u >= 0 && v >= 0 && u < NX && v < NY ? !!ok[v * NX + u] : sandy(X, Y) && !street(X, Y); }; })();
+    const sandReach = GEN.coastWall && GEN.worldLots ? genCoastSand(chronoSeed()) : null; // Round 509: one answer for the whole city
     // Round 423 (owner: "our water texture needs improvement, it repeats too much"): the water is drawn larger, and a second
     // copy, turned a quarter and mirrored and shifted, is laid over it in soft patches from world-wide noise, so the
     // picture's repeat no longer lines up into a visible grid.
@@ -1987,6 +2008,25 @@ function paintChronoRoom(canvas, key) {
           while (qh < qt) { const i = qq[qh++], x = i % 801; for (const j of [i - 1, i + 1, i - 801, i + 801]) { if (j < 0 || j >= N || Math.abs((j % 801) - x) > 1) continue; const jx = j % 801, jy = (j - jx) / 801;
             if (VF[j] >= 0.5 && !st(Math.min(jx, 799), Math.min(jy, 499))) wet = true; if (sd2[j] && !sn[j]) { sn[j] = 1; qq[qt++] = j; } } }
           if (!wet) for (let n = 0; n < qt; n++) SF[qq[n]] = Math.min(SF[qq[n]], 0.3); } }
+      // Round 509: the minimum beach holds against the water as drawn (the smooth shoreline can lie past the sea's cells): the
+      // sea field is held under the shoreline within GEN.beachMin cells of any paving, so the sand in front of the sea wall is
+      // never narrower than that; the water's edge stays smooth (distance to the paving cells, not to a staircase)
+      // Round 510 (owner: "i do want the sand to be uneven", "the sand should be wider or further out"): the beach in front of
+      // the wall is GEN.beachWide px deep on average, its water's edge wobbling by up to GEN.beachWobble px either way (world
+      // noise, so it runs on across rooms), never under GEN.beachMin cells. The distance to the paving is worked out on a 5px
+      // grid and read between.
+      if (sandReach && GEN.beachMin) { const BW = GEN.beachWide || GEN.beachMin * FG_CELL, WB = GEN.beachWobble || 0, BMn = GEN.beachMin * FG_CELL, RC = Math.ceil((BW + WB) / FG_CELL) + 1;
+        const [bq, br] = GEN.world(key), bx0 = bq * FG_COLS, by0 = br * FG_ROWS, PW = FG_COLS + 2 * RC, PH = FG_ROWS + 2 * RC, pav = new Uint8Array(PW * PH), pl = [];
+        for (let v = 0; v < PH; v++) for (let u = 0; u < PW; u++) if (!sandReach(bx0 + u - RC, by0 + v - RC)) { pav[v * PW + u] = 1; }
+        const DG = 5, dw = 800 / DG + 1, dh = 500 / DG + 1, D = new Float32Array(dw * dh);
+        for (let gy = 0; gy < dh; gy++) for (let gx = 0; gx < dw; gx++) { const x = gx * DG, y = gy * DG, cx = Math.floor(Math.min(x, 799) / FG_CELL), cy = Math.floor(Math.min(y, 499) / FG_CELL); let d = 1e9;
+          for (let b = -RC; b <= RC; b++) for (let a = -RC; a <= RC; a++) { const u = cx + a + RC, v = cy + b + RC; if (u < 0 || v < 0 || u >= PW || v >= PH || !pav[v * PW + u]) continue;
+            const X0 = (cx + a) * FG_CELL, Y0 = (cy + b) * FG_CELL, dx = Math.max(X0 - x, 0, x - X0 - FG_CELL), dy = Math.max(Y0 - y, 0, y - Y0 - FG_CELL), dd = dx * dx + dy * dy; if (dd < d) d = dd; }
+          D[gy * dw + gx] = d < 1e9 ? Math.sqrt(d) : 1e4; }
+        const dAt = (x, y) => { const fx = x / DG, fy = y / DG, x0 = Math.min(dw - 2, Math.floor(fx)), y0 = Math.min(dh - 2, Math.floor(fy)), tx = fx - x0, ty = fy - y0, k = y0 * dw + x0; return (D[k] * (1 - tx) + D[k + 1] * tx) * (1 - ty) + (D[k + dw] * (1 - tx) + D[k + dw + 1] * tx) * ty; };
+        for (let y = 0; y <= 500; y++) for (let x = 0; x <= 800; x++) { const d = dAt(x, y); if (d > BW + WB + 40) continue; const i = y * 801 + x;
+          const reach = Math.max(BMn, BW + WB * 2 * lerp(n1, Math.min(x, 799), Math.min(y, 499)) + WB * 0.6 * lerp(n2, Math.min(x, 799), Math.min(y, 499)));
+          VF[i] = Math.min(VF[i], 0.5 + (d - reach) / 30); } }
       const bil = (F, x, y) => { const x0 = Math.floor(x), y0 = Math.floor(y), tx = x - x0, ty = y - y0, i = y0 * 801 + x0; return (F[i] * (1 - tx) + F[i + 1] * tx) * (1 - ty) + (F[i + 801] * (1 - tx) + F[i + 802] * tx) * ty; };
       const cellAt = (x, y) => { if (sandReach) { const [q, r] = GEN.world(key); return sandReach(q * FG_COLS + Math.floor(x / FG_CELL), r * FG_ROWS + Math.floor(y / FG_CELL)) ? 1 : 0; } const cy = Math.floor(y / T), cx = Math.floor(x / T); return cellS[(cy - c0 + Math.floor(P / T) * 0 + 0) * cw + cx - c0] ; };
       const sea = mk(), beach = mk(), shallow = mk(), deep = mk(), wet = mk(), foam = mk(), cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
