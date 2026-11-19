@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 491: building massing, a prototype (off)
+
+Owner: "our building generation algorithm is complete junk, the buildings are ugly and basic, any way you can find a new
+technique for this?", then "go ahead" on a prototype. A CityEngine-style massing step for the city's buildings, behind
+`GEN_THEMES.<theme>.massing` (off; `CITY_FLAGS='{"massing":true}' node tests/city-atlas.cjs` paints it): each building lot is
+split into volumes before drawing (one block, a podium with a tower set back on it, a setback, two wings at different
+heights, an L), drawn back to front, each with its own roof, parapet and floor-by-floor south wall; a tower may rise over the
+building behind it (only a building, never a street, yard or park: `GEN_MASS_OVER`, 125px), since a lot alone holds about
+three floors. Placement, overlap rules and walk masks are unchanged (everything is the lot's own box, plus the overhang).
+
+Result, judged against the current city on the same seed: more variety of height and shape, but not a clear improvement with
+the art in the game. A tower over the building behind reads as a box laid on it, and the large flat roof textures and strip
+walls, which make the buildings look basic, are still what you see most. Left off; the next step is the owner's call (art in
+kit form for roofs and facades, or a different projection with real height cues).
+
 ## Round 490: palms never stand in the pool
 
 Owner: "Palms should never start in the pool". Round 489 kept a tree's middle out of the pool, but a palm's trunk meets the

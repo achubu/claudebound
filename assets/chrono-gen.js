@@ -890,6 +890,7 @@ function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy) {
 // city's parks). Now the whole canopy (1.3 x the radius) stands inside the park and clear of its rim (16px); a tree that
 // doesn't fit is made smaller, or left out under 8px. The same draws are taken, so the park's other choices stay.
 const CITY_TREE_INSET = 16;
+const GEN_MASS_OVER = 125; // Round 491: how far a tower may rise over the building behind it (massing prototype)
 function cityParkTrees(rr, bx, bw, bh) { const out = [], n = Math.min(4 + Math.floor(rr() * 5), Math.max(1, Math.round(bw * bh / 3500))); /* Round 445: fewer in a pocket park */
   for (let i = 0; i < n; i++) { const a = rr(), b = rr(); let r = 12 + rr() * 12; r = Math.min(r, (bw / 2 - CITY_TREE_INSET) / 1.3, (bh / 2 - CITY_TREE_INSET) / 1.3); if (r < 8) continue;
     const m = 1.3 * r + CITY_TREE_INSET; out.push([bx[0] + m + a * (bw - 2 * m), bx[1] + m + b * (bh - 2 * m), r]); } const pool = cityOasisPool(bx, bw, bh); if (!pool) return out;
@@ -1126,7 +1127,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     ctx.save(); ctx.fillStyle = p; ctx.fillRect(x * K, y * K, w * K, h * K); ctx.restore(); return g0; };
   const seed = chronoSeed(), wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500;
   const S = v => v * K, isRoad = (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && plan.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)] === 1;
-  const lots = wl.lotsPx.filter(l => l.r[2] > ox && l.r[0] < ox + 800 && l.r[3] > oy && l.r[1] < oy + 500).map(l => ({ ...l, r: [l.r[0] - ox, l.r[1] - oy, l.r[2] - ox, l.r[3] - oy] })).sort((a, b) => a.r[3] - b.r[3]);
+  const lots = wl.lotsPx.filter(l => l.r[2] > ox && l.r[0] < ox + 800 && l.r[3] > oy && (l.r[1] < oy + 500 || (GEN.massing && l.use === 'roof' && l.r[1] < oy + 500 + GEN_MASS_OVER))).map(l => ({ ...l, r: [l.r[0] - ox, l.r[1] - oy, l.r[2] - ox, l.r[3] - oy] })).sort((a, b) => a.r[3] - b.r[3]);
   const SIN = Math.sin((GEN.tilt || 0) * Math.PI / 180), roomDistrict = chronoDistrict(seed, key);
   const ROOF = ['#2b303b', '#34302d', '#2a333b', '#3b3538', '#262b34', '#30363a', '#3a3a33'], NEON = ['#ff3b6b', '#36f1ff', '#ff9f1c', '#b85cff', '#4dff8a', '#ff4fd8'];
   // street lights: soft pools along the streets
@@ -1205,6 +1206,70 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     const district = l.district || roomDistrict, SL = cityLotSlots({ ...l, district }), dRoof = SL.roof, home = SL.home; // Round 436: the homes quarter: 3-4 floors, no shops or signs
     // Round 445: the street side and the quarter come from the city's plan (l.south, l.district), the same in every room a
     // building reaches into; its storeys from cityLotFloors (three at least, 42 to 50px each)
+    // =====================================================================
+    // Round 491 (owner: "our building generation algorithm is complete junk ... find a new technique"): massing, after
+    // CityEngine-style shape grammars. A lot is split into volumes at different heights before anything is drawn: one block,
+    // a podium with a tower set back on it, a setback (the upper floors stepped back from the street), two wings side by side
+    // at different heights, or an L (a low front wing and a tall back wing). Seen tilted, a volume with ground footprint
+    // f and height z shows its roof f shifted up by z and its south wall from f's south edge up by z; volumes are drawn from
+    // the back, a tower after the podium it stands on, so nearer parts cover farther ones. Everything stays inside the lot,
+    // so placement, overlap rules and walk masks are as before. A prototype (GEN.massing), with the art already in the game.
+    // =====================================================================
+    if (GEN.massing && !l.mall && !ruin && bw >= 70 && bh >= 120) {
+      // how far a part may rise over the lot behind it: only over another building (never a street, yard or park), in 25px rows
+      const overAt = (xa, xb) => { let k = 0; for (; k < GEN_MASS_OVER / 25; k++) { const y = l.r[1] + oy - 12 - k * 25; let ok = true;
+          for (let x = xa + ox + 6; x <= xb + ox - 6; x += 20) if (!wl.lotsPx.some(o => o !== l && o.use === 'roof' && !o.mall && x >= o.r[0] && x < o.r[2] && y >= o.r[1] + 8 && y < o.r[3])) { ok = false; break; } if (!ok) break; } return k * 25; };
+      const X0 = bx[0], Y0 = bx[1], X1 = bx[2], Y1 = bx[3], D = Y1 - Y0, ST = GEN.massStorey || 46, southSt2 = !!l.south;
+      const maxZ = (minRoof, front) => Math.max(ST, D - minRoof - front); // a volume's height with at least minRoof of roof showing
+      const fl = z => Math.max(1, Math.round(z / ST)), zOf = f => f * ST;
+      const kinds = bw >= 110 && D >= 170 ? ['tower', 'tower', 'tower', 'setback', 'wings', 'L'] : bw >= 110 ? ['wings', 'wings', 'setback', 'block'] : D >= 170 ? ['setback', 'tower', 'block'] : ['block', 'setback'];
+      const kind = kinds[Math.floor(rr() * kinds.length)], vols = [];
+      const LF2 = cityLotFloors(l, home ? 3 + Math.floor(rr() * 2) : 4 + Math.floor(rr() * 3) + (district === 'tech' ? 1 : 0)), base = Math.max(GEN.floorRange ? 1 : 2, Math.min(LF2.floors, fl(maxZ(50, 0)))); // the building's own height (cityLotFloors), as before
+      if (kind === 'block') { const f = base; vols.push({ x0: X0, x1: X1, y1: Y1, z0: 0, z1: zOf(f), ground: true }); }
+      else if (kind === 'tower' || kind === 'setback') { // a podium the whole lot, and a taller part on it, set back from the street
+        const zp = zOf(kind === 'tower' ? 1 + Math.floor(rr() * 2) : Math.max(1, base - 2)), d = 14 + Math.floor(rr() * 18);
+        const tw = kind === 'setback' ? bw - 16 : Math.max(60, bw * (0.42 + rr() * 0.28)), tx0 = kind === 'setback' ? X0 + 8 : X0 + 8 + rr() * (bw - 16 - tw), over = kind === 'tower' ? overAt(tx0, tx0 + tw) : 0;
+        const zt = Math.min(maxZ(64, d) + over, zOf(base + (kind === 'tower' ? 2 + Math.floor(rr() * 4) : 1 + Math.floor(rr() * 2))));
+        vols.push({ x0: X0, x1: X1, y1: Y1, z0: 0, z1: zp, ground: true });
+        if (zt < zp + ST) vols[vols.length - 1].z1 = zOf(base); // (no room for the upper part: an ordinary block)
+        else vols.push({ x0: tx0, x1: tx0 + tw, y1: Y1 - d, z0: zp, z1: zt, upper: true, back: kind === 'tower' ? 10 + Math.floor(rr() * 14) : 0, over: Math.max(0, zt - maxZ(64, d)) }); }
+      else if (kind === 'wings') { const m = X0 + bw * (0.35 + rr() * 0.3), za = zOf(Math.max(2, base - 1 - Math.floor(rr() * 2))), zb = Math.min(maxZ(46, 0), zOf(base + Math.floor(rr() * 2)));
+        const tallLeft = rr() < 0.5; vols.push({ x0: X0, x1: m, y1: Y1, z0: 0, z1: tallLeft ? zb : za, ground: true }, { x0: m, x1: X1, y1: Y1, z0: 0, z1: tallLeft ? za : zb, ground: true }); }
+      else if (kind === 'L') { const zf = zOf(Math.max(1, base - 2)), ym = Y1 - (50 + rr() * 30), w2 = bw * (0.45 + rr() * 0.25), left = rr() < 0.5, bx0 = left ? X0 : X1 - w2;
+        const zb = Math.min(ym - Y0 - 46, zf + zOf(2 + Math.floor(rr() * 3)));
+        if (zb > zf) vols.push({ x0: bx0, x1: bx0 + w2, y1: ym, z0: 0, z1: zb, ground: false, back: true }); vols.push({ x0: X0, x1: X1, y1: Y1, z0: 0, z1: zf, ground: true }); }
+      // draw: back to front (south edge), a part standing on another after it
+      vols.sort((a, b) => (a.y1 - b.y1) || (a.z0 - b.z0));
+      let biggest = null;
+      vols.forEach((v, vi) => { const w = v.x1 - v.x0, roofY0 = Y0 + (v.over ? 0 : (v.back || 0)) - (v.over || 0), roofY1 = v.y1 - v.z1, rh = roofY1 - roofY0; if (w < 20 || rh < 10) return;
+        const col = ROOF[Math.floor(rr() * ROOF.length)], roofList = A(dRoof), roofArt = roofList ? roofList[((l.roofN || 0) + vi) % roofList.length] : null; ra();
+        ctx.save(); ctx.beginPath(); ctx.rect(S(v.x0), S(roofY0), S(w), S(rh)); ctx.clip(); ctx.fillStyle = col; ctx.fillRect(S(v.x0), S(roofY0), S(w), S(rh));
+        if (roofArt) tile(roofArt, v.x0, roofY0, w, rh, 160); if (v.upper) { ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(S(v.x0), S(roofY0), S(w), S(rh)); } ctx.restore();
+        { const P = 4; ctx.save(); for (let i = 0; i < 6; i++) { ctx.strokeStyle = 'rgba(0,0,0,' + (0.3 - i * 0.05) + ')'; ctx.lineWidth = S(2); ctx.strokeRect(S(v.x0 + P + 1 + i * 1.6), S(roofY0 + P + 1 + i * 1.6), S(w - 2 * (P + 1 + i * 1.6)), S(rh - 2 * (P + 1 + i * 1.6))); }
+          ctx.strokeStyle = '#4b525c'; ctx.lineWidth = S(P); ctx.strokeRect(S(v.x0 + P / 2), S(roofY0 + P / 2), S(w - P), S(rh - P)); ctx.strokeStyle = 'rgba(205,214,226,.25)'; ctx.lineWidth = S(1); ctx.strokeRect(S(v.x0 + 1), S(roofY0 + 1), S(w - 2), S(rh - 2)); ctx.restore(); }
+        if (roofArt && CITY_ROOF_KIT[nameOf.get(roofArt)] && (!biggest || w * rh > biggest.a)) biggest = { a: w * rh, q: [v.x0, roofY0, v.x1, roofY1], roofArt };
+        // the south wall, floor by floor, from the top of the wall down
+        const wy0 = v.y1 - v.z1, wy1 = v.y1 - v.z0, nf = Math.max(1, Math.round((wy1 - wy0) / ST)), rowH = (wy1 - wy0) / nf;
+        const wallList = A(SL.wall), wallArt = wallList ? wallList[((l.wallN || 0) + (v.upper ? 1 : 0)) % wallList.length] : null, isDoor = a => !!a && CITY_DOOR_WALLS.includes(nameOf.get(a));
+        const noDoor = [...(wallList || []), ...(A('wall') || [])].filter(a => !isDoor(a)), doorWall = home && (wallList || []).find(isDoor);
+        ctx.save(); ctx.fillStyle = '#2a2e37'; ctx.fillRect(S(v.x0), S(wy0), S(w), S(wy1 - wy0));
+        let prevG = null; const shop = v.ground && southSt2 && !home && v.y1 === Y1 && nf > 1;
+        for (let f = 0; f < nf; f++) { const fy = wy0 + f * rowH, groundRow = v.ground && f === nf - 1;
+          if (groundRow && shop) { const sa = pick(SL.shop, ra); if (sa && fitRow(sa, v.x0, fy, w, rowH, rr) === null) { fitRow.force = true; fitRow(sa, v.x0, fy, w, rowH, rr); fitRow.force = false; } continue; }
+          const art = groundRow && doorWall ? doorWall : (isDoor(wallArt) ? noDoor[0] : wallArt); if (!art) continue;
+          let g = fitRow(art, v.x0, fy, w, rowH, rr, prevG); if (g === null) { fitRow.force = true; g = fitRow(art, v.x0, fy, w, rowH, rr, null); fitRow.force = false; } prevG = g;
+          ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(S(v.x0), S(fy + rowH - 1.5), S(w), S(1.5)); }
+        ctx.fillStyle = 'rgba(190,198,210,.35)'; ctx.fillRect(S(v.x0 - 1), S(wy0), S(w + 2), S(2.5)); // the cornice at the wall's top
+        if (v.upper) { ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(S(v.x0), S(wy0), S(w), S(wy1 - wy0)); } // (a part set back reads as further away)
+        ctx.restore();
+        ctx.save(); ctx.strokeStyle = '#000'; ctx.lineWidth = S(1); ctx.strokeRect(S(v.x0 + 0.5), S(roofY0 + 0.5), S(w - 1), S(wy1 - roofY0 - 1)); ctx.restore(); });
+      if (biggest) { const [qx0, qy0, qx1, qy1] = biggest.q, w = qx1 - qx0, h = qy1 - qy0, n = 1 + Math.floor(rr() * 3), placed = [];
+        for (let i = 0; i < n * 3 && placed.length < n; i++) { const kind2 = Math.floor(rr() * 7), slot = ['prop-ac', 'prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar', 'prop-skylight', 'prop-heater'][kind2];
+          const ok = (CITY_ROOF_KIT[nameOf.get(biggest.roofArt)] || []).includes(slot), art = ok ? pick(slot, ra) : (ra(), null), L = [36, 28, 50, 56, 64, 44, 40][kind2]; if (!art) continue;
+          const k3 = L / Math.max(art.width, art.height), iw = art.width * k3, ih = art.height * k3, EM = 24; if (w < iw + 2 * EM || h < ih + 2 * EM) continue;
+          const ix = qx0 + EM + rr() * (w - 2 * EM - iw), iy = qy0 + EM + rr() * (h - 2 * EM - ih); if (placed.some(p => ix < p[2] + 10 && ix + iw > p[0] - 10 && iy < p[3] + 10 && iy + ih > p[1] - 10)) continue;
+          placed.push([ix, iy, ix + iw, iy + ih]); ctx.drawImage(art, S(ix), S(iy), S(iw), S(ih)); } }
+      continue; }
     let blade = false; const southSt = !!l.south, floors0 = l.mall ? 3 : home ? 3 + Math.floor(rr() * 2) : (southSt ? 4 + Math.floor(rr() * 4) : 4 + Math.floor(rr() * 2)) + (district === 'tech' ? 1 : 0), LF = cityLotFloors(l, floors0), floors = LF.floors, dz = LF.dz, wallTop = bx[3] - dz;
     const rb = [bx[0], bx[1], bx[2], wallTop]; bx[3] = wallTop; const bh0 = bh;
     // a roof, sometimes in two parts of different heights

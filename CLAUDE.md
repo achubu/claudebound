@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 490) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 491) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -154,6 +154,8 @@ change set.
   draws its neighbours' street furniture that reaches into it** (`cityFurnitureNear`); **one answer to where the road is painted**
   (`roadDrawnCell`), used by the coast. Anything drawn near a room's edge must be drawn by every room it reaches into; check with
   `node tests/seam-check.cjs [city|elaris] [seed] [dir]` (a stretch it lists may be an edge that just falls on the seam).
+  Round 491: a **massing prototype** for buildings (podium + tower, setbacks, wings, L; towers over the building behind), off
+  (`GEN.massing`; `CITY_FLAGS='{"massing":true}'` with `tests/city-atlas.cjs` to see it); not an improvement with the current art.
   Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).
