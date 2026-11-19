@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 511) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 512) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -170,7 +170,8 @@ change set.
   round every street and `coastLotGap` round every lot stay paving; the coast is decided in world blocks of `wallMinRun` (4) cells,
   so the wall is straight (owner: "i like it straight") with runs of 100px+ and never meets another edge; the beach is
   `beachWide` px deep with an uneven water's edge (`beachWobble`). Never overlap edges. Round 511: the walk mask's sea is the sea as
-  drawn (`genSeaDrawn`, shared by the painter and `cityBlockers`): never draw ground where you can't walk, or sea where you can.
+  drawn (`genSeaDrawn`, shared by the painter and `cityBlockers`): never draw ground where you can't walk, or sea where you can. Round 512: kerbs are
+  stamped again over yard and park ground (`cityKerbLayer`), so a yard's ground never cuts a kerb where a railing meets it.
   Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from
   `sprites/manifest.json`; after adding art run `node tools/build-sprites-manifest.cjs` (`tests/sprites-page.test.cjs` checks it).

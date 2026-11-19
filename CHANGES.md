@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 512: the kerb runs whole past yards
+
+Owner (a picture of a yard's railing meeting a street's kerb): "any way to fix this edge issue that occurs when edges meet".
+A yard or park beside a street painted its ground over the inner half of the street's kerb, so the kerb looked cut off and a
+dark square showed where the railing began. The street kerbs are now drawn into a layer of their own too (`cityKerbLayer`) and
+stamped again over yard and park ground only, before the rims: the kerb runs on whole and the railing's open end meets its
+inner face (Round 471). Seam-check city 9: 0. Tests: city-surfaces, city-layout, city-furniture, city-buildings, coast-wall.
+
 ## Round 511: the beach can be walked on again
 
 Owner: "can't walk on the beach anymore? lots of pathing issues now". Round 510 drew the wider beach (and in places the
