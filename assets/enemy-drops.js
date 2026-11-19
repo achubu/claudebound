@@ -76,10 +76,30 @@ function worldChestCard(world = activeRegion) {
 const checkWorldInteractionsBeforeEnemyDrops = checkWorldInteractions;
 checkWorldInteractions = function () {
   const had = state && Array.isArray(state.chests) ? state.chests.length : 0, room = state && state.room, world = activeRegion;
+  const mat0 = state && typeof materials === 'function' ? materials() : 0, pot0 = state ? state.potions || 0 : 0;
   const out = checkWorldInteractionsBeforeEnemyDrops.apply(this, arguments);
   if (state && Array.isArray(state.chests) && state.chests.length > had && activeRegion === world && state.room === room) {
-    const id = worldChestCard(world);
-    if (id) { const c = make(id); c.soulbound = false; state.pool.push(c); save(); toast('The chest also held a card: ' + stat(c).name + ' (in your collection).'); }
+    const id = worldChestCard(world); let card = null;
+    if (id) { card = make(id); card.soulbound = false; state.pool.push(card); save(); }
+    showChestRewards(materials() - mat0, (state.potions || 0) - pot0, card);
   }
   return out;
 };
+// Round 513 (owner: "chests in the world dont show the rewards as a pop up"): a hidden chest's rewards (its crystal or potion,
+// and its loot card) were only toasts at the foot of the screen, easy to miss. Now one pop-up shows all of it, each as a
+// picture, as the victory screen does (Round 125); it replaces the crystal-only pop-up and the toasts.
+function showChestRewards(crystals, potions, card) {
+  if (typeof openMenu !== 'function' || typeof document === 'undefined' || !document.createElement) return;
+  const tiles = [];
+  if (potions > 0 && typeof lootTileHTML === 'function') tiles.push(lootTileHTML('potion', potions > 1 ? potions + ' Healing Potions' : 'Healing Potion', 'You have ' + state.potions));
+  const crystal = crystals > 0 && typeof upgradeCrystalHTML === 'function' ? upgradeCrystalHTML(crystals) : '';
+  keys = {};
+  openMenu('<div class="eyebrow">HIDDEN CHEST</div><h2>🎁 You found</h2>' + crystal + (tiles.length ? '<div class="loot-tiles">' + tiles.join('') + '</div>' : '')
+    + (card ? '<div id="chestCardHost" class="cards chest-card"></div><p class="muted">' + stat(card).name + ' is in your collection.</p>' : '')
+    + (!crystal && !tiles.length && !card ? '<p class="muted">The chest was empty.</p>' : '') + '<p><button id="chestOk" class="primary">Continue</button></p>');
+  const host = typeof $ === 'function' && $('chestCardHost'); if (host && card && typeof cardElement === 'function') host.append(cardElement(card, () => {}, true));
+  const ok = typeof $ === 'function' && $('chestOk'); if (ok) ok.onclick = closeMenu;
+  const t = typeof $ === 'function' && $('toast'); if (t && t.classList) t.classList.add('hidden');
+}
+{ const st = typeof document !== 'undefined' && document.createElement && document.createElement('style');
+  if (st && document.head) { st.textContent = '.chest-card{display:flex;justify-content:center;margin:8px 0}'; document.head.append(st); } }

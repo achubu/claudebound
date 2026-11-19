@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 513: a hidden chest shows its rewards in a pop-up
+
+Owner: "chests in the world dont show the rewards as a pop up". A hidden chest's rewards (its potion or Upgrade Crystal, and
+the loot card it draws, Round 380) were only toasts at the foot of the screen, easy to miss. Now one pop-up (`showChestRewards`
+in `assets/enemy-drops.js`) shows all of it as pictures, as the victory screen does: the crystal, a potion tile, and the card
+itself, with Continue. It replaces the crystal-only pop-up and the toasts. `tests/chest-popup.test.cjs`; checked in the browser.
+
 ## Round 512: the kerb runs whole past yards
 
 Owner (a picture of a yard's railing meeting a street's kerb): "any way to fix this edge issue that occurs when edges meet".
