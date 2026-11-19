@@ -166,19 +166,9 @@
        "scale": null,
        "files": [
         {
-         "name": "curb-concrete",
-         "src": "assets/environment/city-gen/surfaces/curb/curb-concrete.webp",
-         "bytes": 16450
-        },
-        {
-         "name": "curb-granite",
-         "src": "assets/environment/city-gen/surfaces/curb/curb-granite.webp",
-         "bytes": 26884
-        },
-        {
-         "name": "curb-stone",
-         "src": "assets/environment/city-gen/surfaces/curb/curb-stone.webp",
-         "bytes": 42138
+         "name": "kerb-neon",
+         "src": "assets/environment/city-gen/surfaces/curb/kerb-neon.webp",
+         "bytes": 7066
         }
        ]
       },
@@ -191,35 +181,26 @@
        "scale": null,
        "files": [
         {
-         "name": "edge-granite",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-granite.webp",
-         "bytes": 11872
-        },
-        {
-         "name": "edge-grass",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-grass.webp",
-         "bytes": 59632
-        },
-        {
-         "name": "edge-kerb",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-kerb.webp",
-         "bytes": 42138
-        },
-        {
-         "name": "edge-railing",
-         "src": "assets/environment/city-gen/surfaces/park-edge/edge-railing.webp",
-         "bytes": 34146
+         "name": "rim-rail",
+         "src": "assets/environment/city-gen/surfaces/park-edge/rim-rail.webp",
+         "bytes": 13748
         }
        ]
       },
       {
        "key": "waterfront-edge",
-       "label": "Waterfront edge (concrete lip)",
-       "rule": "Round 461 (owner chose it): no strip art; the paving ends in a concrete lip drawn by the painter (GEN.coastLip) at full resolution along the sand, with a soft shadow on the sand. A strip bent round the curving coast broke into slices.",
+       "label": "Waterfront edge (sea wall)",
+       "rule": "Round 506 (owner): the owner's sea wall strip laid along the beach (GEN.coastWall), coping against the paving, placed by world position; without it, Round 461: no strip art; the paving ends in a concrete lip drawn by the painter (GEN.coastLip) at full resolution along the sand, with a soft shadow on the sand. A strip bent round the curving coast broke into slices.",
        "walk": true,
        "folder": "city-gen/surfaces/waterfront-edge/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "seawall",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/seawall.webp",
+         "bytes": 15826
+        }
+       ]
       }
      ]
     },
