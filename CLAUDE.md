@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 493) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 494) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -314,5 +314,7 @@ A playtest flagged these and the owner confirmed they are intended:
   Aethercede.
 - Art comes from the owner's image generator (Gemini). When integrating, skip
   `.DS_Store` files and duplicate top-level folders.
+- **Image prompts (owner, Round 494): every prompt is complete on its own.** Never split prompts into a shared part and
+  per-sheet parts: repeat the shared text inside each prompt, so the owner can copy one whole block per image.
 - Painted dead ends at room edges are intentional. A street that ends at an
   edge with no matching street on the other side is not a crossing.
