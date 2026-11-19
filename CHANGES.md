@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 497: prompts for Solaris's buildings
+
+Owner: "give me prompts for solaris next, buildings, desert huts, pyramids, all desert themed".
+`tools/art-refresh/solaris-building-prompts.md`: two complete prompts, 16 buildings each, the city's layout (4 x 4, wide and narrow
+in every row, one scale), a row per Solaris quarter (bazaar, mud-brick homes, solar works, water quarter and temples), 1-2
+floors, daylight; huts, domes, stepped pyramids and an obelisk gate among them.
+
 ## Round 496: the owner's buildings in the city
 
 Owner: the two sheets of whole buildings (Archive_19), "please never distort buildings to make them fit. you can increase or
