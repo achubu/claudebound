@@ -59,9 +59,9 @@
        "scale": 0.45,
        "files": [
         {
-         "name": "road-wet",
-         "src": "assets/environment/city-gen/surfaces/road/road-wet.webp",
-         "bytes": 101854,
+         "name": "asphalt",
+         "src": "assets/environment/city-gen/surfaces/road/asphalt.webp",
+         "bytes": 4052,
          "role": "base texture"
         }
        ]
@@ -75,9 +75,9 @@
        "scale": null,
        "files": [
         {
-         "name": "water-ripple",
-         "src": "assets/environment/city-gen/surfaces/sea/water-ripple.webp",
-         "bytes": 21920,
+         "name": "sea-night",
+         "src": "assets/environment/city-gen/surfaces/sea/sea-night.webp",
+         "bytes": 12412,
          "role": "base texture"
         }
        ]
@@ -91,35 +91,20 @@
        "scale": 0.22,
        "files": [
         {
-         "name": "pavement-old",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/pavement-old.webp",
-         "bytes": 125294,
+         "name": "paving-hex",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/paving-hex.webp",
+         "bytes": 18124
+        },
+        {
+         "name": "paving-slabs",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/paving-slabs.webp",
+         "bytes": 12092,
          "role": "base texture"
         },
         {
-         "name": "walk-hex",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-hex.webp",
-         "bytes": 20690
-        },
-        {
-         "name": "walk-plates",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-plates.webp",
-         "bytes": 17814
-        },
-        {
-         "name": "walk-poured",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-poured.webp",
-         "bytes": 5336
-        },
-        {
-         "name": "walk-runbond",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-runbond.webp",
-         "bytes": 12908
-        },
-        {
-         "name": "walk-slabs",
-         "src": "assets/environment/city-gen/surfaces/sidewalk/walk-slabs.webp",
-         "bytes": 16838
+         "name": "paving-slabs",
+         "src": "assets/environment/city-gen/surfaces/sidewalk/paving-slabs.webp",
+         "bytes": 12092
         }
        ]
       },
@@ -132,9 +117,21 @@
        "scale": 0.3,
        "files": [
         {
-         "name": "yard",
-         "src": "assets/environment/city-gen/surfaces/lot/yard.webp",
-         "bytes": 23860,
+         "name": "deck-plates",
+         "src": "assets/environment/city-gen/surfaces/lot/deck-plates.webp",
+         "bytes": 13504,
+         "role": "base texture"
+        },
+        {
+         "name": "parking",
+         "src": "assets/environment/city-gen/surfaces/lot/parking.webp",
+         "bytes": 10676,
+         "role": "base texture"
+        },
+        {
+         "name": "rubble-ground",
+         "src": "assets/environment/city-gen/surfaces/lot/rubble-ground.webp",
+         "bytes": 23958,
          "role": "base texture"
         }
        ]
@@ -148,9 +145,9 @@
        "scale": null,
        "files": [
         {
-         "name": "sand",
-         "src": "assets/environment/city-gen/surfaces/waterfront/sand.webp",
-         "bytes": 37134,
+         "name": "sand-pale",
+         "src": "assets/environment/city-gen/surfaces/waterfront/sand-pale.webp",
+         "bytes": 23494,
          "role": "base texture"
         }
        ]

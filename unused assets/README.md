@@ -59,3 +59,6 @@ read them from their old paths; move them back with `git mv` to use those tools.
 obvious repeat when tiled (owner: "eliminate any texture that doesn't tile well from the game and from the sprites page").
 They are 2 sidewalks, 15 roofs, park-mud, ruin-ash, ruin-slab, home-gravel, home-tin and edge-planter.
 `tools/tile_check.py` scores the ones still in the game.
+
+- Round 504: the city's old ground textures (`surfaces/sidewalk/walk-*`, `pavement-old`, `road/road-wet`, `lot/yard`,
+  `waterfront/sand`, `sea/water-ripple`), replaced by the owner's ground sheet in the buildings' style.
