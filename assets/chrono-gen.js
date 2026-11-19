@@ -1884,12 +1884,21 @@ function paintChronoRoom(canvas, key) {
     if (!plan.floor[cy * FG_COLS + cx]) return false;
     if (!roadDrawnMemo) { const fs = drawFloor(0), vec = GEN.square ? closed(fs, GEN.cornerR || GEN.pavement + 30) : fs; roadDrawnMemo = vec.getContext('2d').getImageData(0, 0, W, H).data; }
     return roadDrawnMemo[(Math.round((cy + 0.5) * FG_CELL * K) * W + Math.round((cx + 0.5) * FG_CELL * K)) * 4 + 3] > 127; };
-  let coastBeachMask = null, coastLipDraw = null; // (Round 461) for the streets drawn later: their kerbs stop at the sand, the lip runs on along them
+  let coastBeachMask = null, coastLipDraw = null, coastWallDraw = null, coastSandCell = null; // (Round 461) for the streets drawn later: their kerbs stop at the sand, the lip runs on along them
   if (any(terrain.chasm) && GEN.beach && GEN.topdown) {
     // Round 412 (owner: "sand and grass tiles still do not transition well"): as in autotiled games, the coast keeps to the
     // grid: water cells, then a band of sand exactly one cell wide, with a shoreline strip (CITY_TD_ART.shore: concrete
     // crumbling into the sand) laid along every straight edge where the sand meets the paving, and a foam line along the water.
     const T = CG_CELL, W8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], isW = (x, y) => terrain.chasm(x, y), isS = (x, y) => !isW(x, y) && W8.some(([a, b]) => isW(x + a, y + b));
+    // Round 507: with the sea wall, the sand is the beach's 25px cells that reach the water without crossing a street (a sliver
+    // trapped behind a street is paving, or the wall loops round it); the wall and the drawn sand both read this
+    const sandReach = (() => { if (!(GEN.coastWall && GEN.worldLots)) return null; const wl = genWorld(chronoSeed()), [q, r] = GEN.world(key), gx = q * FG_COLS, gy = r * FG_ROWS, M = 12, NX = FG_COLS + 2 * M, NY = FG_ROWS + 2 * M;
+      const wat = (X, Y) => isW(Math.floor((X - gx) / 2), Math.floor((Y - gy) / 2)), sandy = (X, Y) => { const cx = Math.floor((X - gx) / 2), cy = Math.floor((Y - gy) / 2); return isW(cx, cy) || isS(cx, cy); };
+      const street = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2 && roadDrawnCell(X, Y);
+      const ok = new Uint8Array(NX * NY), q2 = []; for (let y = 0; y < NY; y++) for (let x = 0; x < NX; x++) if (wat(gx - M + x, gy - M + y) && !street(gx - M + x, gy - M + y)) { ok[y * NX + x] = 1; q2.push(y * NX + x); }
+      while (q2.length) { const i = q2.pop(), x = i % NX, y = (i - x) / NX; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const u = x + a, v = y + b; if (u < 0 || v < 0 || u >= NX || v >= NY || ok[v * NX + u]) continue;
+        const X = gx - M + u, Y = gy - M + v; if (sandy(X, Y) && !street(X, Y)) { ok[v * NX + u] = 1; q2.push(v * NX + u); } } }
+      return (X, Y) => { const u = X - gx + M, v = Y - gy + M; return u >= 0 && v >= 0 && u < NX && v < NY ? !!ok[v * NX + u] : sandy(X, Y) && !street(X, Y); }; })();
     // Round 423 (owner: "our water texture needs improvement, it repeats too much"): the water is drawn larger, and a second
     // copy, turned a quarter and mirrored and shifted, is laid over it in soft patches from world-wide noise, so the
     // picture's repeat no longer lines up into a visible grid.
@@ -1970,9 +1979,9 @@ function paintChronoRoom(canvas, key) {
             if (VF[j] >= 0.5 && !st(Math.min(jx, 799), Math.min(jy, 499))) wet = true; if (sd2[j] && !sn[j]) { sn[j] = 1; qq[qt++] = j; } } }
           if (!wet) for (let n = 0; n < qt; n++) SF[qq[n]] = Math.min(SF[qq[n]], 0.3); } }
       const bil = (F, x, y) => { const x0 = Math.floor(x), y0 = Math.floor(y), tx = x - x0, ty = y - y0, i = y0 * 801 + x0; return (F[i] * (1 - tx) + F[i + 1] * tx) * (1 - ty) + (F[i + 801] * (1 - tx) + F[i + 802] * tx) * ty; };
-      const cellAt = (x, y) => { const cy = Math.floor(y / T), cx = Math.floor(x / T); return cellS[(cy - c0 + Math.floor(P / T) * 0 + 0) * cw + cx - c0] ; };
+      const cellAt = (x, y) => { if (sandReach) { const [q, r] = GEN.world(key); return sandReach(q * FG_COLS + Math.floor(x / FG_CELL), r * FG_ROWS + Math.floor(y / FG_CELL)) ? 1 : 0; } const cy = Math.floor(y / T), cx = Math.floor(x / T); return cellS[(cy - c0 + Math.floor(P / T) * 0 + 0) * cw + cx - c0] ; };
       const sea = mk(), beach = mk(), shallow = mk(), deep = mk(), wet = mk(), foam = mk(), cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
-      const straight = !!GEN.coastStraight, sharp = 50 * sK;
+      const straight = !!(GEN.coastStraight || GEN.coastWall) /* Round 507: the sea wall stands on the cells' straight edges */, sharp = 50 * sK;
       for (let Y = 0; Y < MH; Y++) for (let X = 0; X < MW; X++) { const x = sK > 1 ? Math.min(799.999, Math.max(0, (X + 0.5) / sK - 0.5)) : X, y = sK > 1 ? Math.min(499.999, Math.max(0, (Y + 0.5) / sK - 0.5)) : Y /* (off: the same room px as before) */, v = bil(VF, Math.max(0, x), Math.max(0, y)), sv = bil(SF, Math.max(0, x), Math.max(0, y)), i = (Y * MW + X) * 4;
         // (Round 461, straight) the paving ends on the cells' own straight edges, as a sea wall: the beach is the sea's cells and the ring round them
         const inSea = cl((v - 0.5) * sharp + 0.5), inBeach = Math.max(inSea, straight ? (cellAt(x + 0.0001, y + 0.0001) ? 1 : 0) : Math.max(cl((sv - 0.5) * sharp + 0.5), cl((bil(PF, x, y) - 0.5) * 2 * sK + 0.5)));
@@ -2012,15 +2021,20 @@ function paintChronoRoom(canvas, key) {
           const fn2 = (X, Y) => fn(X, Y) && roadDrawnCell(X, Y);
           g.drawImage(cityGridRoad(fn2, x0g, y0g, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, W, H), 0, 0); }
         else for (let cy = 0; cy < FG_ROWS; cy++) for (let cx = 0; cx < FG_COLS; cx++) if (wl2.cell[(qy2 * FG_ROWS + cy) * wl2.CW + qx2 * FG_COLS + cx] === 2 && plan.floor[cy * FG_COLS + cx]) g.fillRect(cx * FG_CELL * K, cy * FG_CELL * K, FG_CELL * K, FG_CELL * K); } return c; })();
-      // Round 506 (owner: "a good seawall curb"): with GEN.coastWall the edge on the beach is the owner's sea wall strip (plain
-      // blocks, a grate, teal lights and bollards in turn, placed by world position so it runs on across rooms), laid along
-      // the beach's outline with its coping against the paving and its face going down to the sand
-      const WT = 20, wallAlong = (mask, near) => { const c = cv(); cityEdgeAlong(c.getContext('2d'), mask, 0, 0, K, shoreArt, WT, wx0, wy0);
-        if (near) { const g = c.getContext('2d'); g.globalCompositeOperation = 'destination-in'; g.drawImage(grow(near, (WT + 2) * K), 0, 0); }
-        ctx.drawImage(c, 0, 0); if (cityEdgeMask) cityEdgeMask.getContext('2d').drawImage(c, 0, 0); };
-      if (GEN.coastWall && shoreArt) wallAlong(shown, null); else lipWith(shown, null);
+      const WT = 20; // Round 506: the owner's sea wall strip, 20px deep
+      // Round 507 (owner: "that beach curb looks real bad, are you using the proper edge techniques?"): no. A strip bent round
+      // the curving outline breaks into slices (why Round 461 dropped it). The wall now stands on the grid like every other
+      // edge: the beach is the sea's 50px cells and the ring round them (straight), and the wall is laid by the 3x3 bitmask
+      // (cityGridKerb: one piece per straight run, an arc per corner) along the seam between paving or street and sand,
+      // centred on the seam like a kerb, drawn after the streets (coastWallDraw); the streets' kerbs leave that seam to it
+      const [gq, gr] = GEN.world(key), gx = gq * FG_COLS, gy = gr * FG_ROWS, wl3 = genWorld(chronoSeed());
+      const streetC = (X, Y) => X >= 0 && Y >= 0 && X < wl3.CW && Y < wl3.CH && wl3.cell[Y * wl3.CW + X] === 2 && roadDrawnCell(X, Y);
+      const beachC = (X, Y) => { const cx = Math.floor((X - gx) / 2), cy = Math.floor((Y - gy) / 2); return isW(cx, cy) || isS(cx, cy); };
+      const pavedC = (X, Y) => sandReach ? !sandReach(X, Y) : !beachC(X, Y) || streetC(X, Y);
+      if (GEN.coastWall && shoreArt) { coastSandCell = (X, Y) => !pavedC(X, Y); coastWallDraw = () => { for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, pavedC, gx, gy, FG_COLS, FG_ROWS, FG_CELL, 14, K, shoreArt, WT, gq * 800, gr * 500); }; }
+      else lipWith(shown, null);
       // (the streets are drawn later, over the sand where they reach it: their edge against the sand gets the same lip, on the street's side)
-      coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(shown, 0, 0); /* (Round 479: only the beach that shows) */ sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); if (GEN.coastWall && shoreArt) wallAlong(sand, road); else lipWith(sand, road); return grow(sand, 10 * K); }; }
+      coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(shown, 0, 0); /* (Round 479: only the beach that shows) */ sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); if (!(GEN.coastWall && shoreArt)) lipWith(sand, road); /* (Round 507: the grid wall already runs round the streets) */ return grow(sand, 10 * K); }; }
     else if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
   } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
@@ -2114,11 +2128,12 @@ function paintChronoRoom(canvas, key) {
     if (curbArt) { // Round 420: the curb, a kerb-stone strip along every road edge, on the sidewalk side (the road mask turned inside out)
       const inv = document.createElement('canvas'); inv.width = W; inv.height = H; const ig = inv.getContext('2d'); ig.fillStyle = '#fff'; ig.fillRect(0, 0, W, H); ig.globalCompositeOperation = 'destination-out'; ig.drawImage(f.shape, 0, 0);
       const [cwx, cwy] = GEN.world(key);
-      if (gridRoad) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, curbArt, 7, gridRoad.ox, gridRoad.oy); // Round 463 trial: the bitmasked kerb, centred on the road's edge, on sand too
+      if (gridRoad) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, curbArt, 7, gridRoad.ox, gridRoad.oy, coastSandCell ? (X, Y, NX, NY) => !coastSandCell(NX, NY) : undefined); /* Round 507: a seam onto the sand is the sea wall's */ // Round 463 trial: the bitmasked kerb, centred on the road's edge, on sand too
       else if (coastBeachMask) { // Round 461 (owner: "need to fix these edges too"): no kerb strip on the sand where a street meets the beach; the beach's concrete lip runs along the street there instead
         const cl = document.createElement('canvas'); cl.width = W; cl.height = H; const cg = cl.getContext('2d'); cityEdgeAlong(cg, inv, 0, 0, K, curbArt, 7, cwx, cwy);
         const near = coastLipDraw(f.shape); cg.globalCompositeOperation = 'destination-out'; cg.drawImage(near, 0, 0); ctx.drawImage(cl, 0, 0); } // Round 462 (owner: "you put an edge over an edge"): the kerb stops where the lip begins, never on it or across it
       else cityEdgeAlong(ctx, inv, 0, 0, K, curbArt, 7, cwx, cwy); }
+    if (coastWallDraw) coastWallDraw(); // Round 507: the sea wall, after the streets and their kerbs
     if (GEN.topdown) { // Round 420 (owner: "add lanes to the road paths"): a dashed centre line down each main road (two lanes), stopping at the crossings
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H);
       for (const sh of plan.shapes) if (sh.t === 'poly' && !sh.pave) { const xs = sh.pts.map(q => q[0]), ys = sh.pts.map(q => q[1]); ctx.rect(Math.max(...xs) * K + 10 * K, (Math.min(...ys) - 10) * K, -(Math.max(...xs) - Math.min(...xs) + 20) * K, (Math.max(...ys) - Math.min(...ys) + 20) * K); }

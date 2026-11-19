@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 507: the sea wall on the grid
+
+Owner: "that beach curb looks real bad, are you using the proper edge techniques?" No: Round 506 bent the strip round the
+coast's smooth outline (`cityEdgeAlong`), which breaks it into slices on every curve, the reason Round 461 dropped strips there.
+
+- With `GEN.coastWall` the beach is straight-edged on the grid: the sea's 50px cells and the ring round them, counted only where
+  they reach the water without crossing a street (`sandReach`; a sliver trapped behind a street is paving, or the wall looped
+  round it). The water's own edge stays smooth.
+- The wall is laid like every other edge, by the 3x3 bitmask (`cityGridKerb`: one piece per straight run, an arc per corner),
+  centred on the seam between paving or street and sand, drawn after the streets (`coastWallDraw`). The streets' kerbs leave
+  any seam onto the sand to it (one edge per seam).
+- Checked on seeds 1 and 9 by eye; seam-check city 9: 0 cut stretches. Tests: city-surfaces, city-layout, city-buildings,
+  sprites-page.
+
 ## Round 506: the owner's sea wall along the beach
 
 The owner's sea wall sheet (from the Round 505 prompt; kept as `assets/environment/city-gen/src-edges/seawall-sheet.jpeg`), cut
