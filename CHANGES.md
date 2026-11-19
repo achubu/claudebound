@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 511: the beach can be walked on again
+
+Owner: "can't walk on the beach anymore? lots of pathing issues now". Round 510 drew the wider beach (and in places the
+walkway's paving) over some of the sea's cells, but the walk mask still blocked every sea cell, so ground that looked like
+beach or paving could not be walked on. Now the sea that blocks is the sea as drawn: `cityBlockers` blocks a sea cell's 25px
+quarters only where `genSeaDrawn` says the sea shows (a sea cell that is neither paving nor within the beach's reach of the
+paving, `genCoastReach` / `genPavingDist`, the painter's own rule).
+
+- `tests/coast-wall.test.cjs`: no drawn sea can be walked on; at least 95% of the drawn beach can (seed 9: 2422 of 2494
+  cells; the rest are behind lots or at room edges). `tests/city-surfaces.test.cjs` counts the sea as drawn.
+- Playtest walk (every door and item by tap route): seeds 9 and 1, no problems. Tests: city-surfaces, city-layout,
+  city-buildings, city-fill, city-furniture, solaris-gen, item-placement.
+
 ## Round 510: a walkway, room for buildings, straight runs and a wide uneven beach
 
 Owner: "need rule for no buildings overlapping sand and beach, need min curb size to increase, the strip of sidewalk by the

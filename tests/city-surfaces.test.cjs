@@ -16,7 +16,7 @@ const r = JSON.parse(run(`(() => { newGame(); state.seed = 77; configureRegion('
   // (the terrain is read inside genWith('city'): it asks the active theme where the water is)
   for (const k of Object.keys(CITY_ROOMS)) genWith('city', () => { const p = cityGenPlan(k), tr = chronoTerrain(chronoSeed(), k);
     hubs++; if (walkable(k, p.hub[0], p.hub[1])) hubOpen++;
-    for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (tr.chasm(x, y) && !p.floor[(y * 2 + 1) * FG_COLS + x * 2 + 1]) { seas++; if (cityRoomWalk(k, x * 50 + 25, y * 50 + 25 - 22)) seaOpen++; } });
+    for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (tr.chasm(x, y) && !p.floor[(y * 2 + 1) * FG_COLS + x * 2 + 1] && (!GEN_THEMES.city.coastWall || genWith('city', () => { const [qx, qy] = GEN.world(k); return genSeaDrawn(chronoSeed(), qx * 800 + x * 50 + 37.5, qy * 500 + y * 50 + 37.5); }))) { seas++; /* (Round 511: the sea as drawn; the beach reaches over some sea cells) */ if (cityRoomWalk(k, x * 50 + 37, y * 50 + 37 - 22)) seaOpen++; } });
   out.walk = { roofs, roofOpen, seas, seaOpen, hubs, hubOpen };
   return JSON.stringify(out); })()`));
 const keys = r.surfaces.map(s => s.key);

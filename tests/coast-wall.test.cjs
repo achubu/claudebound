@@ -31,3 +31,17 @@ for (const [sd, o] of Object.entries(r)) {
   assert.strictEqual(o.short, 0, 'seed ' + sd + ': sea wall runs shorter than wallMinRun: ' + o.list.join(' '));
 }
 console.log('PASS: the sea wall: ' + Object.entries(r).map(([s, o]) => 'seed ' + s + ' ' + o.runs + ' runs, ' + o.short + ' short').join('; '));
+// Round 511 (owner: "can't walk on the beach anymore?"): what is drawn as beach can be walked on, and what is drawn as sea
+// can't. The walk mask asks genSeaDrawn, the painter's rule; sampled at each 25px cell's centre in the rooms, away from the
+// room's edge strips (where only streets count, Round 449).
+{ const w = JSON.parse(run(`(() => { newGame(); state.seed = 9; state.region = 'city'; configureRegion('city'); cityGenEnsure();
+    return JSON.stringify(genWith('city', () => { const seed = chronoSeed(), f = genCoastSand(seed); let sand = 0, sandBad = 0, sea = 0, seaBad = 0;
+      for (const key of Object.keys(rooms)) { const [qx, qy] = GEN.world(key);
+        for (let cy = 2; cy < FG_ROWS - 1; cy++) for (let cx = 1; cx < FG_COLS - 1; cx++) { const X = qx * FG_COLS + cx, Y = qy * FG_ROWS + cy; if (!f(X, Y)) continue;
+          const x = cx * FG_CELL + 12, y = cy * FG_CELL + 12, drawnSea = genSeaDrawn(seed, qx * 800 + x + 0.5, qy * 500 + y + 0.5), walk = cityRoomWalk(key, x, y - 22);
+          if (drawnSea) { sea++; if (walk) { seaBad++; (globalThis.BADS = globalThis.BADS || []).push(key + ' ' + x + ',' + y + ' road=' + cityGenPlan(key).floor[cy * FG_COLS + cx]); } } else { sand++; if (!walk) sandBad++; } } }
+      return { sand, sandBad, sea, seaBad, bads: globalThis.BADS }; })); })()`));
+  assert(w.sand > 200 && w.sea > 200, 'the city has beach and sea (' + w.sand + ', ' + w.sea + ')');
+  assert.strictEqual(w.seaBad, 0, 'no drawn sea can be walked on: ' + (w.bads || []).join('; '));
+  assert(w.sandBad <= w.sand * 0.05, 'the drawn beach can be walked on: ' + w.sandBad + ' of ' + w.sand + ' beach cells blocked');
+  console.log('PASS: beach walkable (' + (w.sand - w.sandBad) + ' of ' + w.sand + ' cells), sea not (' + w.sea + ').'); }
