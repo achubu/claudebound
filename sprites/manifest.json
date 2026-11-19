@@ -189,12 +189,18 @@
       },
       {
        "key": "waterfront-edge",
-       "label": "Waterfront edge (concrete lip)",
-       "rule": "Round 461 (owner chose it): no strip art; the paving ends in a concrete lip drawn by the painter (GEN.coastLip) at full resolution along the sand, with a soft shadow on the sand. A strip bent round the curving coast broke into slices.",
+       "label": "Waterfront edge (sea wall)",
+       "rule": "Round 506 (owner): the owner's sea wall strip laid along the beach (GEN.coastWall), coping against the paving, placed by world position; without it, Round 461: no strip art; the paving ends in a concrete lip drawn by the painter (GEN.coastLip) at full resolution along the sand, with a soft shadow on the sand. A strip bent round the curving coast broke into slices.",
        "walk": true,
        "folder": "city-gen/surfaces/waterfront-edge/",
        "scale": null,
-       "files": []
+       "files": [
+        {
+         "name": "seawall",
+         "src": "assets/environment/city-gen/surfaces/waterfront-edge/seawall.webp",
+         "bytes": 15826
+        }
+       ]
       }
      ]
     },

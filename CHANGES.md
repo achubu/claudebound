@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 506: the owner's sea wall along the beach
+
+The owner's sea wall sheet (from the Round 505 prompt; kept as `assets/environment/city-gen/src-edges/seawall-sheet.jpeg`), cut
+at its block joints into one seamless strip (`surfaces/waterfront-edge/seawall.webp`: plain blocks, a grate, more plain blocks,
+then the teal-lit blocks with bollards), keyed off green, one scale both ways.
+
+- With `GEN.coastWall` (on in the city) the paving's edge on the beach is this strip, laid along the beach's outline by
+  `cityEdgeAlong` (20px, coping against the paving, its face going down to the sand, placed by world position so it runs on
+  across rooms). Streets meeting the sand get it too, only next to the road. Without the art it falls back to the Round 461
+  drawn lip. The owner asked to push it and judge it in game; the turns of the coast show the strip as short straight runs.
+- `CITY_SURFACES` waterfront-edge rule updated; sprites manifest rebuilt. Tests: city-surfaces, sprites-page, city-buildings.
+
+## Round 505: the owner's kerb and yard railing
+
+From the owner's edge sheet (`src-edges/sheet-1.jpeg`): the street kerb is `surfaces/curb/kerb-neon` and the rim round yards
+and parks `surfaces/park-edge/rim-rail` (its solid lower part kept, so the railing has no holes). The old kerb and rim art moved
+to `unused assets/`. Shown to the owner before and after; the owner asked to push it to test in game.
+
 ## Round 504: ground textures in the buildings' style
 
 The owner's ground sheet (from the Round 503 prompt; kept as `assets/environment/city-gen/src-ground-1.jpeg`). Each tile cut
