@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 495: a second building sheet prompt
+
+Owner: "lets make another 16 buildings for variety". Sheet 2 in `tools/art-refresh/city-building-prompts.md`: the same layout
+and scale as sheet 1, 16 different buildings (four per quarter), complete on its own.
+
 ## Round 494: every image prompt is complete on its own
 
 Owner: "please never separate the prompts with a shared part and an individual part, each prompt should always contain the
