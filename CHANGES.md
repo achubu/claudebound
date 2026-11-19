@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 489: no cut-off trees, lamps or beach squares in the first two worlds
+
+Owner: "go through the first 2 world looking for missing edges and cut off textures if you can, find why and add rules to keep
+it from happening again".
+
+- **How it was looked for**: `node tests/seam-check.cjs [city|elaris] [seed] [crops-dir]` (new; needs the page on :8123) paints
+  every room and compares the pixels on both sides of every room seam: something drawn in one room and not the next shows as a
+  run of sharp changes. Seams were nearly clean on seeds 1, 9 and 77 in both worlds (the stretches it lists now are edges that
+  happen to fall on a seam, such as a glass roof's frame or a pool's lip ending 1px above it: look at its crops). The rest was
+  found by eye on close-up atlases of both worlds.
+- **Trees sliced by their park's outline** (palms in Solaris's oases, trees in the city's parks): a tree is drawn 2.6 x its
+  radius across, inside the park's outline, but was placed only 14px from the park's edge. Rule: the whole canopy (1.3 x the
+  radius) stands inside the park and clear of its rim (`CITY_TREE_INSET`, 16px); a tree that doesn't fit is smaller, or left
+  out under 8px (`cityParkTrees`). Oases keep their palms: the pool is a little smaller (`cityOasisPool`) and palms stand in the
+  ring round it, in its corners and halfway along long sides; a narrow oasis is a palm grove without a pool.
+- **Lamps cut at room seams**: a lamp's light reaches 80px, and a post near a room's top edge stands over it, but a room drew
+  only its own furniture. Rule: a room draws its eight neighbours' street furniture that reaches into it, light and picture
+  (`cityFurnitureNear`); objects keep clear of those too (`citySpriteBoxes`).
+- **A square of bare paving framed by the beach's lip** (the leftover from Round 462): a street stub one cell deep is never
+  painted as road (the road painter lays road only where the plan's own drawing covers a cell's middle), but the coast treated
+  it as street and left no sand there. Rule: one answer to "is this street painted as road here" (`roadDrawnCell` in
+  `paintChronoRoom`), used by the coast's sand and by the cut under the road; a stub that isn't painted is shore by the sea.
+- `tests/solaris-gen.test.cjs`: every tree in both worlds stands wholly inside its park; rooms draw their neighbours' furniture.
+
 ## Round 488: the test suite runs again; faster new journeys and world switches
 
 Owner: "fix it and make sure it doesn't take so long moving forward". `tests/rebalance.test.cjs` never finished (past 25

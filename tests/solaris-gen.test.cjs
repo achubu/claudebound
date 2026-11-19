@@ -49,3 +49,18 @@ console.log('PASS: Solaris on the generator: ' + Object.entries(r.seeds).map(([s
   assert.deepStrictEqual(p.badDoors, [], 'every door in the generated Solaris can be stood in');
   assert(p.hub && p.mask, 'the start room\'s hub is walkable; every room planned');
   console.log('PASS: Solaris is played on the generator (doors, walk mask, no diagonals).'); }
+// Round 489 (owner: "missing edges and cut off textures"): in both generated worlds every tree's whole canopy (1.3 x its radius)
+// stands inside its park and clear of the rim, so the park's outline never slices it; and a room draws its neighbours' street
+// furniture that reaches into it (a lamp's light, a post over the edge), so nothing stops at a seam.
+{ const q = JSON.parse(run(`(() => { const out = {};
+    for (const [region, theme] of [['city', 'city'], ['elaris', 'solaris']]) { newGame(); state.region = region; configureRegion(region); cityGenEnsure();
+      out[theme] = genWith(theme, () => { const wl = genWorld(chronoSeed()); let trees = 0, bad = [];
+        for (const l of wl.lotsPx) { if (l.use !== 'park') continue; const bx = [l.r[0] + 4, l.r[1] + 4, l.r[2] - 4, l.r[3] - 4];
+          for (const [x, y, r] of cityParkTrees(chronoRng('t:' + l.seed), bx, bx[2] - bx[0], bx[3] - bx[1])) { trees++; const m = 1.3 * r + CITY_TREE_INSET - 0.01;
+            if (x - m < bx[0] || x + m > bx[2] || y - m < bx[1] || y + m > bx[3]) bad.push(l.seed); } }
+        let foreign = 0; for (const k of Object.keys(rooms)) foreign += cityFurnitureNear(chronoSeed(), cityGenPlan(k)).filter(f => f.foreign).length;
+        return { trees, bad: bad.length, foreign }; }); }
+    return JSON.stringify(out); })()`));
+  for (const [t, o] of Object.entries(q)) { assert(o.trees > 20, t + ': parks have trees (' + o.trees + ')'); assert.strictEqual(o.bad, 0, t + ': every tree stands wholly inside its park'); }
+  assert(q.city.foreign > 0, 'city rooms draw their neighbours\' lamps and posts that reach into them');
+  console.log('PASS: trees inside their parks (city ' + q.city.trees + ', Solaris ' + q.solaris.trees + '); neighbours\' furniture drawn (' + q.city.foreign + ' in the city).'); }

@@ -885,9 +885,23 @@ function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy) {
       ctx.save(); ctx.translate(cx * K, cy * K); ctx.rotate(ang); ctx.drawImage(art, sx, 0, sw, art.height, (-L / 2 - 0.6) * K, 0, sw / k * K, T * K); ctx.restore(); } }
 }
 // Round 415: where a park's trees stand and where cars park, shared by the painter and the walk mask.
-function cityParkTrees(rr, bx, bw, bh) { const out = [], n = Math.min(4 + Math.floor(rr() * 5), Math.max(1, Math.round(bw * bh / 3500))); /* Round 445: fewer in a pocket park */ for (let i = 0; i < n; i++) out.push([bx[0] + 14 + rr() * (bw - 28), bx[1] + 14 + rr() * (bh - 28), 12 + rr() * 12]); const pool = cityOasisPool(bx, bw, bh); return pool ? out.filter(([x, y, r]) => x + r * 0.6 < pool[0] || x - r * 0.6 > pool[2] || y + r * 0.6 < pool[1] || y - r * 0.6 > pool[3]) : out; }
+// Round 489 (owner: "cut off textures"): a tree is drawn 2.6 x its radius across, inside its park's outline, and was placed
+// only 14px from the park's edge: a canopy near the edge was sliced flat by the outline (palms in Solaris's oases, trees in the
+// city's parks). Now the whole canopy (1.3 x the radius) stands inside the park and clear of its rim (16px); a tree that
+// doesn't fit is made smaller, or left out under 8px. The same draws are taken, so the park's other choices stay.
+const CITY_TREE_INSET = 16;
+function cityParkTrees(rr, bx, bw, bh) { const out = [], n = Math.min(4 + Math.floor(rr() * 5), Math.max(1, Math.round(bw * bh / 3500))); /* Round 445: fewer in a pocket park */
+  for (let i = 0; i < n; i++) { const a = rr(), b = rr(); let r = 12 + rr() * 12; r = Math.min(r, (bw / 2 - CITY_TREE_INSET) / 1.3, (bh / 2 - CITY_TREE_INSET) / 1.3); if (r < 8) continue;
+    const m = 1.3 * r + CITY_TREE_INSET; out.push([bx[0] + m + a * (bw - 2 * m), bx[1] + m + b * (bh - 2 * m), r]); } const pool = cityOasisPool(bx, bw, bh); if (!pool) return out;
+  const kept = out.filter(([x, y, r]) => x + r * 0.6 < pool[0] || x - r * 0.6 > pool[2] || y + r * 0.6 < pool[1] || y - r * 0.6 > pool[3]);
+  // Round 489: palms round the pool: in each corner of the ring between the pool and the rim, and halfway along a long side
+  const r = Math.min(13, (pool[0] - bx[0] - CITY_TREE_INSET) / 1.9, (pool[1] - bx[1] - CITY_TREE_INSET) / 1.9); if (r < 8) return kept; const m = 1.3 * r + CITY_TREE_INSET;
+  const spots = [[bx[0] + m, bx[1] + m], [bx[2] - m, bx[1] + m], [bx[0] + m, bx[3] - m], [bx[2] - m, bx[3] - m]];
+  if (bw > 220) spots.push([(bx[0] + bx[2]) / 2, bx[1] + m], [(bx[0] + bx[2]) / 2, bx[3] - m]); if (bh > 200) spots.push([bx[0] + m, (bx[1] + bx[3]) / 2], [bx[2] - m, (bx[1] + bx[3]) / 2]);
+  for (const [x, y] of spots) { const rr2 = r * (0.85 + rr() * 0.15); if (!kept.some(t => Math.hypot(t[0] - x, t[1] - y) < (t[2] + rr2) * 1.1)) kept.push([x, y, rr2]); }
+  return kept; }
 // Round 483: an oasis (a park in Solaris, GEN.oasis) has a pool of water in its middle, with a stone lip; palms stand round it.
-function cityOasisPool(bx, bw, bh) { if (!GEN.oasis || bw < 100 || bh < 90) return null; const mx = Math.max(26, bw * 0.24), my = Math.max(24, bh * 0.26); return [bx[0] + mx, bx[1] + my, bx[2] - mx, bx[3] - my]; }
+function cityOasisPool(bx, bw, bh) { if (!GEN.oasis || bw < 120 || bh < 110) return null; const mx = Math.max(40, bw * 0.28), my = Math.max(38, bh * 0.28); /* Round 489: a ring round the pool wide enough for its palms */ return [bx[0] + mx, bx[1] + my, bx[2] - mx, bx[3] - my]; }
 function cityParkedCars(seed, plan) { const out = [];
   for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + plan.key + ':' + rd.pts.join());
     for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
@@ -982,6 +996,13 @@ function cityParkRubble(seed, l, bx, trees) { if (!CITY_HAS('rubble')) return []
 // (x, y) is the foot of its post, h its drawn height (the picture keeps its own proportions); its post blocks the way.
 const CITY_CLUTTER_H = genThemed('clutterH', { dumpster: 40, bags: 24, vending: 46, recycler: 34, barricade: 34, barrier: 26, tyres: 24, 'bench-led': 28, 'pay-bollard': 30 }); // Round 447
 const CITY_FURNITURE_H = { lamp: 80, 'traffic-light': 70, 'sign-traffic': 48, clutter: 30 }; // Round 425: beside the 60px hero
+// Round 489 (owner: "missing edges and cut off textures"): street furniture (lamps, lights, signs, clutter) belongs to the room
+// it stands in, but a lamp's light reaches 80px and a post near a room's edge stands over it: the room beside cut them at the
+// seam. This room's furniture and its eight neighbours' that reach into it, in this room's coordinates, nearest last.
+function cityFurnitureNear(seed, plan) { const out = cityStreetFurniture(seed, plan).slice(), [wx, wy] = GEN.world(plan.key);
+  if (GEN.span) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const np = GEN.span(wx + dx, wy + dy, seed); if (!np) continue;
+    for (const f of cityStreetFurniture(seed, np)) { const x = f.x + dx * 800, y = f.y + dy * 500, reach = 90; if (x > -reach && x < 800 + reach && y > -reach && y < 500 + reach + (f.h || 0)) out.push(Object.assign({}, f, { x, y, foreign: true })); } }
+  return out.sort((a, b) => a.y - b.y); }
 function cityStreetFurniture(seed, plan) {
   if (!['lamp', 'traffic-light', 'sign-traffic', 'clutter'].some(CITY_HAS)) return [];
   const wl = genWorld(seed), [wx, wy] = GEN.world(plan.key), ox = wx * 800, oy = wy * 500, terrain = chronoTerrain(seed, plan.key), out = [], rr = chronoRng(seed + ':furniture:' + plan.key);
@@ -1048,7 +1069,7 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
     else if (l.use === 'roof') add(r[0], r[1], r[2], r[3], 'building');
     else if (l.use === 'park') { const pool = cityOasisPool(r, r[2] - r[0], r[3] - r[1]); if (pool) add(pool[0], pool[1], pool[2], pool[3], 'pool'); const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) add(tx - tr, ty - tr, tx + tr, ty + tr, 'tree');
       for (const b of cityParkRubble(seed, l, r, trees)) add(b.x - b.L / 2, b.y - b.L / 2, b.x + b.L / 2, b.y + b.L / 2, 'rubble'); } }
-  for (const f of cityStreetFurniture(seed, plan)) { const hw = f.slot === 'clutter' ? f.h * 0.6 : f.h * 0.2; add(f.x - hw, f.y - f.h, f.x + hw, f.y, f.slot); }
+  for (const f of cityFurnitureNear(seed, plan)) { const hw = f.slot === 'clutter' ? f.h * 0.6 : f.h * 0.2; add(f.x - hw, f.y - f.h, f.x + hw, f.y, f.slot); } // Round 489: a neighbour's post over the edge counts too
   for (const c of cityParkedCars(seed, plan)) add(c.px - 31, c.py - 20, c.px + 31, c.py + 20, 'car');
   return out; }
 // Round 473 (owner: "scale interactable objects to be scaled to the main character sprite"): each kind of object has its own
@@ -1106,7 +1127,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
   const ROOF = ['#2b303b', '#34302d', '#2a333b', '#3b3538', '#262b34', '#30363a', '#3a3a33'], NEON = ['#ff3b6b', '#36f1ff', '#ff9f1c', '#b85cff', '#4dff8a', '#ff4fd8'];
   // street lights: soft pools along the streets
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  const lamps = cityStreetFurniture(seed, plan).filter(f => f.slot === 'lamp'); // Round 424: with lamp art, the pools lie under the lamps
+  const lamps = cityFurnitureNear(seed, plan).filter(f => f.slot === 'lamp'); // Round 424: with lamp art, the pools lie under the lamps (Round 489: the neighbours' too)
   if (lamps.length) for (const f of lamps) { const c = chronoHash(seed + ':lamp:' + key + ':' + f.x + ',' + f.y), col = c % 3 ? '255,214,150' : '150,210,255', g = ctx.createRadialGradient(S(f.x), S(f.y), 0, S(f.x), S(f.y), S(80)); g.addColorStop(0, 'rgba(' + col + ',.2)'); g.addColorStop(1, 'rgba(' + col + ',0)'); ctx.fillStyle = g; ctx.fillRect(S(f.x - 80), S(f.y - 80), S(160), S(160)); }
   // (Round 445: no pools without lamps. Rooms with no main road used to get the old stand-in pools in pink and cyan, which read as stains on the paving.)
   ctx.restore();
@@ -1266,7 +1287,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     if (cars) { const carArt = cars[Math.floor(c.artR * cars.length)], L2 = 61, T2 = L2 * carArt.height / carArt.width; /* Round 425: 56 -> 72; Round 442 (owner: "reduce car size 15%"): 61 */ // painted at the 3/4 angle, so stood upright; half face the other way
       ctx.save(); ctx.translate(S(px), S(py)); if (c.flip) ctx.scale(-1, 1); ctx.drawImage(carArt, S(-L2 / 2), S(-T2 * 0.6), S(L2), S(T2)); ctx.restore(); } } // no picture, no car drawn
   // Round 424: street lights, traffic lights and traffic signs, stood upright on their post's foot, nearest last
-  for (const f of cityStreetFurniture(seed, plan)) { const l = A(f.slot), art = l && l[Math.floor(f.artR * l.length)]; if (!art) continue; const dh = f.h, dw = art.width * dh / art.height;
+  for (const f of cityFurnitureNear(seed, plan)) { const l = A(f.slot), art = l && l[Math.floor(f.artR * l.length)]; if (!art) continue; const dh = f.h, dw = art.width * dh / art.height; if (f.foreign && (f.x + dw / 2 < 0 || f.x - dw / 2 > 800 || f.y < 0 || f.y - dh > 500)) continue; // Round 489: and the neighbours' that stand over the edge
     ctx.save(); ctx.translate(S(f.x), S(f.y)); if (f.flip) ctx.scale(-1, 1); ctx.drawImage(art, S(-dw / 2), S(-dh), S(dw), S(dh)); ctx.restore(); }
 }
 function chronoDistrict(seed, key) {
@@ -1672,6 +1693,43 @@ function paintChronoRoom(canvas, key) {
     else { ring(chronoTint(s.shape, GEN.bedRim[0]), 5); ring(chronoTint(s.shape, GEN.bedRim[1]), 2); ctx.drawImage(s.art, 0, 0); }
   }
   cityEdgeMask = GEN.topdown ? (() => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; })() : null;
+  // (Round 489: defined before the coast, which cuts the sand under the road exactly as the road will be drawn)
+  const drawFloor = (grow0) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4; let grow = grow0, G = grow * K;
+    // A theme with `round` (the city: "make the roads look more like roads, they are too sharp") turns every corner on an
+    // arc: road bends, and the corners of hubs and squares.
+    const R = (GEN.round || 0) * K, turn = (pts, close) => { g.beginPath(); const n = pts.length, P = i => pts[((i % n) + n) % n];
+      if (!R) { pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); if (close) g.closePath(); return; }
+      if (close) { const a = P(-1), b = P(0); g.moveTo((a[0] + b[0]) / 2 * K, (a[1] + b[1]) / 2 * K); for (let i = 0; i < n; i++) { const c = P(i), d = P(i + 1); g.arcTo(c[0] * K, c[1] * K, (c[0] + d[0]) / 2 * K, (c[1] + d[1]) / 2 * K, Math.min(R, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.closePath(); }
+      else { g.moveTo(pts[0][0] * K, pts[0][1] * K); for (let i = 1; i < n - 1; i++) { const a = pts[i - 1], c = pts[i], d = pts[i + 1]; g.arcTo(c[0] * K, c[1] * K, d[0] * K, d[1] * K, Math.min(R * 1.6, Math.hypot(c[0] - a[0], c[1] - a[1]) * K / 2, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.lineTo(pts[n - 1][0] * K, pts[n - 1][1] * K); } };
+    if (R) { g.lineCap = 'round'; g.lineJoin = 'round'; }
+    const box = (x0, y0, x1, y1, r) => { const rr = (r + grow) * K, a = x0 * K - G, b = y0 * K - G, c2 = x1 * K + G, d = y1 * K + G; g.beginPath(); g.moveTo(a + rr, b);
+      g.arcTo(c2, b, c2, d, rr); g.arcTo(c2, d, a, d, rr); g.arcTo(a, d, a, b, rr); g.arcTo(a, b, c2, b, rr); g.closePath(); g.fill(); };
+    for (const sh of plan.shapes) {
+      if (sh.pave) continue;
+      grow = grow0 && GEN.alley && sh.main === false ? Math.min(grow0, GEN.alleyPave || 0) : grow0; G = grow * K; // an alley has a narrow kerb, not a pavement
+      if (sh.t === 'rect' && GEN.square) { // a door's stub: run on past the room's edge, so its rounded ends fall outside the room
+        const e = 3 * grow + 60, x0 = sh.x <= 0 ? -e : sh.x, y0 = sh.y <= 0 ? -e : sh.y, x1 = sh.x + sh.w >= 800 ? 800 + e : sh.x + sh.w, y1 = sh.y + sh.h >= 500 ? 500 + e : sh.y + sh.h; box(x0, y0, x1, y1, 0); }
+      else if (sh.t === 'rect') g.fillRect(sh.x * K - G, sh.y * K - G, sh.w * K + 2 * G, sh.h * K + 2 * G);
+      else if (sh.t === 'poly' && GEN.square) { // Round 393 (owner: "just go to straight roads, 90 degree angle corners ... don't have any odd shapes"): a hub is its box
+        // Round 394 (owner: "round the curb corners more"): its corners turn on an arc, and the pavement's on the same centre
+        // an arc wider, so the curb keeps one width round the corner.
+        const xs = sh.pts.map(p => p[0]), ys = sh.pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys), x1 = Math.max(...xs), y1 = Math.max(...ys);
+        box(x0, y0, x1, y1, GEN.cornerR ? Math.min(GEN.cornerR, (x1 - x0) / 4, (y1 - y0) / 4) : Math.min(50, (x1 - x0) / 2, (y1 - y0) / 2)); } // Round 445: the city's crossings, squares and dead ends turn on the same modest radius as its street corners (a dead-end alley ended in a pill, a boss's square in a blob)
+      else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); if (G) { g.lineWidth = 2 * G; g.stroke(); } }
+      else if (GEN.square) { g.save(); g.lineCap = GEN.alley ? 'butt' : 'round'; g.lineJoin = 'round'; /* Round 417: flat road ends; the crossing and door stubs cover the joins */ g.lineWidth = sh.w * K + 2 * G; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); g.restore(); }
+      else { g.lineWidth = sh.w * K + 2 * G; turn(sh.pts, false); g.stroke(); }
+    }
+    return c; };
+  // Round 489: whether a street cell of the world is painted as road in this room. The road painter lays road only where the
+  // plan's own drawing covers a cell's middle, so a stub one cell deep is never painted; the coast below used to treat it as
+  // street all the same (no sand there), leaving a square of bare paving framed by the beach's lip. Every part that needs to
+  // know where the road is (the coast's sand, the cut under the road) asks this, the one answer.
+  let roadDrawnMemo = null;
+  const roadDrawnCell = (X, Y) => { const [qx, qy] = GEN.world(key), cx = X - qx * FG_COLS, cy = Y - qy * FG_ROWS; if (cx < 0 || cy < 0 || cx >= FG_COLS || cy >= FG_ROWS) return true;
+    if (!plan.floor[cy * FG_COLS + cx]) return false;
+    if (!roadDrawnMemo) { const fs = drawFloor(0), vec = GEN.square ? closed(fs, GEN.cornerR || GEN.pavement + 30) : fs; roadDrawnMemo = vec.getContext('2d').getImageData(0, 0, W, H).data; }
+    return roadDrawnMemo[(Math.round((cy + 0.5) * FG_CELL * K) * W + Math.round((cx + 0.5) * FG_CELL * K)) * 4 + 3] > 127; };
   let coastBeachMask = null, coastLipDraw = null; // (Round 461) for the streets drawn later: their kerbs stop at the sand, the lip runs on along them
   if (any(terrain.chasm) && GEN.beach && GEN.topdown) {
     // Round 412 (owner: "sand and grass tiles still do not transition well"): as in autotiled games, the coast keeps to the
@@ -1711,7 +1769,8 @@ function paintChronoRoom(canvas, key) {
       // 6000 px² (a bump between the beach and the road) becomes sand, grown 6px under the sand's edge so the beach's
       // wobble leaves no sliver; larger stretches stay paving (promenades, squares). Found over the room and 66px round it.
       const pocket = new Uint8Array(w * h), dry = new Uint8Array(w * h); /* dry: Round 479, no beach or sea here whatever the noise adds later */ if (GEN.coastCrisp && GEN.worldLots) { const wl = genWorld(chronoSeed()), [qx, qy] = GEN.world(key), FC = FG_CELL;
-        const kind = (x, y) => { const X = qx * 800 + x - P, Y = qy * 500 + y - P, cx = Math.floor(X / FC), cy = Math.floor(Y / FC); if (cx < 0 || cy < 0 || cx >= wl.CW || cy >= wl.CH) return 9; return wl.cell[cy * wl.CW + cx]; };
+        const kind = (x, y) => { const X = qx * 800 + x - P, Y = qy * 500 + y - P, cx = Math.floor(X / FC), cy = Math.floor(Y / FC); if (cx < 0 || cy < 0 || cx >= wl.CW || cy >= wl.CH) return 9; const v = wl.cell[cy * wl.CW + cx];
+          if (v === 2 && !roadDrawnCell(cx, cy)) return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => wl.cell[(cy + b) * wl.CW + cx + a] === 3) ? 3 : 1; return v; }; // (Round 489: a street the road doesn't paint is shore by the sea, ground elsewhere)
         // Round 479: sand cut off from the water by a street (a street along the coast covers the sea's first cells, and the band
         // of sand round them then lay on its far side, inside the block) is paving: a stretch of sand not touching visible water
         // without crossing a street is dropped
@@ -1793,7 +1852,12 @@ function paintChronoRoom(canvas, key) {
       // Round 479: the lip runs only round what shows: beach (sand and sea) under a street is left out, or the sea a coastal
       // street covers got a lip drawn round it, out into the block
       const shown = (() => { const c = cv(), g = c.getContext('2d'); g.drawImage(beach, 0, 0); if (GEN.worldLots) { const wl2 = genWorld(chronoSeed()), [qx2, qy2] = GEN.world(key); g.globalCompositeOperation = 'destination-out';
-        for (let cy = 0; cy < FG_ROWS; cy++) for (let cx = 0; cx < FG_COLS; cx++) if (wl2.cell[(qy2 * FG_ROWS + cy) * wl2.CW + qx2 * FG_COLS + cx] === 2 && plan.floor[cy * FG_COLS + cx]) g.fillRect(cx * FG_CELL * K, cy * FG_CELL * K, FG_CELL * K, FG_CELL * K); } return c; })();
+        // Round 489: the road exactly as it will be drawn (the grid road leaves out a stub only one cell deep), so no street cell
+        // the road doesn't paint is cut out of the sand and left showing bare paving framed by the lip
+        if (GEN.gridKerb) { const x0g = qx2 * FG_COLS, y0g = qy2 * FG_ROWS, fn = (X, Y) => X >= 0 && Y >= 0 && X < wl2.CW && Y < wl2.CH && wl2.cell[Y * wl2.CW + X] === 2 && (X < x0g || Y < y0g || X >= x0g + FG_COLS || Y >= y0g + FG_ROWS || !!plan.floor[(Y - y0g) * FG_COLS + X - x0g]);
+          const fn2 = (X, Y) => fn(X, Y) && roadDrawnCell(X, Y);
+          g.drawImage(cityGridRoad(fn2, x0g, y0g, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, W, H), 0, 0); }
+        else for (let cy = 0; cy < FG_ROWS; cy++) for (let cx = 0; cx < FG_COLS; cx++) if (wl2.cell[(qy2 * FG_ROWS + cy) * wl2.CW + qx2 * FG_COLS + cx] === 2 && plan.floor[cy * FG_COLS + cx]) g.fillRect(cx * FG_CELL * K, cy * FG_CELL * K, FG_CELL * K, FG_CELL * K); } return c; })();
       lipWith(shown, null);
       // (the streets are drawn later, over the sand where they reach it: their edge against the sand gets the same lip, on the street's side)
       coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(shown, 0, 0); /* (Round 479: only the beach that shows) */ sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); lipWith(sand, road); return grow(sand, 10 * K); }; }
@@ -1837,33 +1901,6 @@ function paintChronoRoom(canvas, key) {
   }
   // The floor is drawn from the room's shapes: straight-edged roads with mitred corners and 45-degree legs, eight-sided hubs and squares.
   // `grow` px wider on every side gives the pavement's outline from the same shapes, drawn as clean vectors (Round 393).
-  const drawFloor = (grow0) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-    g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4; let grow = grow0, G = grow * K;
-    // A theme with `round` (the city: "make the roads look more like roads, they are too sharp") turns every corner on an
-    // arc: road bends, and the corners of hubs and squares.
-    const R = (GEN.round || 0) * K, turn = (pts, close) => { g.beginPath(); const n = pts.length, P = i => pts[((i % n) + n) % n];
-      if (!R) { pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); if (close) g.closePath(); return; }
-      if (close) { const a = P(-1), b = P(0); g.moveTo((a[0] + b[0]) / 2 * K, (a[1] + b[1]) / 2 * K); for (let i = 0; i < n; i++) { const c = P(i), d = P(i + 1); g.arcTo(c[0] * K, c[1] * K, (c[0] + d[0]) / 2 * K, (c[1] + d[1]) / 2 * K, Math.min(R, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.closePath(); }
-      else { g.moveTo(pts[0][0] * K, pts[0][1] * K); for (let i = 1; i < n - 1; i++) { const a = pts[i - 1], c = pts[i], d = pts[i + 1]; g.arcTo(c[0] * K, c[1] * K, d[0] * K, d[1] * K, Math.min(R * 1.6, Math.hypot(c[0] - a[0], c[1] - a[1]) * K / 2, Math.hypot(d[0] - c[0], d[1] - c[1]) * K / 2)); } g.lineTo(pts[n - 1][0] * K, pts[n - 1][1] * K); } };
-    if (R) { g.lineCap = 'round'; g.lineJoin = 'round'; }
-    const box = (x0, y0, x1, y1, r) => { const rr = (r + grow) * K, a = x0 * K - G, b = y0 * K - G, c2 = x1 * K + G, d = y1 * K + G; g.beginPath(); g.moveTo(a + rr, b);
-      g.arcTo(c2, b, c2, d, rr); g.arcTo(c2, d, a, d, rr); g.arcTo(a, d, a, b, rr); g.arcTo(a, b, c2, b, rr); g.closePath(); g.fill(); };
-    for (const sh of plan.shapes) {
-      if (sh.pave) continue;
-      grow = grow0 && GEN.alley && sh.main === false ? Math.min(grow0, GEN.alleyPave || 0) : grow0; G = grow * K; // an alley has a narrow kerb, not a pavement
-      if (sh.t === 'rect' && GEN.square) { // a door's stub: run on past the room's edge, so its rounded ends fall outside the room
-        const e = 3 * grow + 60, x0 = sh.x <= 0 ? -e : sh.x, y0 = sh.y <= 0 ? -e : sh.y, x1 = sh.x + sh.w >= 800 ? 800 + e : sh.x + sh.w, y1 = sh.y + sh.h >= 500 ? 500 + e : sh.y + sh.h; box(x0, y0, x1, y1, 0); }
-      else if (sh.t === 'rect') g.fillRect(sh.x * K - G, sh.y * K - G, sh.w * K + 2 * G, sh.h * K + 2 * G);
-      else if (sh.t === 'poly' && GEN.square) { // Round 393 (owner: "just go to straight roads, 90 degree angle corners ... don't have any odd shapes"): a hub is its box
-        // Round 394 (owner: "round the curb corners more"): its corners turn on an arc, and the pavement's on the same centre
-        // an arc wider, so the curb keeps one width round the corner.
-        const xs = sh.pts.map(p => p[0]), ys = sh.pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys), x1 = Math.max(...xs), y1 = Math.max(...ys);
-        box(x0, y0, x1, y1, GEN.cornerR ? Math.min(GEN.cornerR, (x1 - x0) / 4, (y1 - y0) / 4) : Math.min(50, (x1 - x0) / 2, (y1 - y0) / 2)); } // Round 445: the city's crossings, squares and dead ends turn on the same modest radius as its street corners (a dead-end alley ended in a pill, a boss's square in a blob)
-      else if (sh.t === 'poly') { turn(sh.pts, true); g.fill(); if (G) { g.lineWidth = 2 * G; g.stroke(); } }
-      else if (GEN.square) { g.save(); g.lineCap = GEN.alley ? 'butt' : 'round'; g.lineJoin = 'round'; /* Round 417: flat road ends; the crossing and door stubs cover the joins */ g.lineWidth = sh.w * K + 2 * G; g.beginPath(); sh.pts.forEach(([x, y], i) => i ? g.lineTo(x * K, y * K) : g.moveTo(x * K, y * K)); g.stroke(); g.restore(); }
-      else { g.lineWidth = sh.w * K + 2 * G; turn(sh.pts, false); g.stroke(); }
-    }
-    return c; };
   const floorShape = drawFloor(0);
   if (!GEN.square) { // close hairline gaps where two shapes pass within a few pixels of each other
     const copy = document.createElement('canvas'); copy.width = W; copy.height = H; copy.getContext('2d').drawImage(floorShape, 0, 0);
