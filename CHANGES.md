@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 496: the owner's buildings in the city
+
+Owner: the two sheets of whole buildings (Archive_19), "please never distort buildings to make them fit. you can increase or
+decrease the size but never distort".
+
+- `tools/cut_building_sheet.py` keys the green out, finds each building as one piece (green shut inside one, like greenhouse
+  glass, is kept) and cuts the 32 buildings to `assets/environment/city-gen/props/building-<quarter>/` (market, homes, tech,
+  garden; the sheets are kept as `src-buildings-1.jpeg` and `src-buildings-2.jpeg`). `CITY_BUILDING_PX` gives each one's size in
+  the game at its sheet's scale (sheet 1 about 200px tall, sheet 2 about 180px, so floors match the generated buildings).
+- `cityLotSprite`: a building lot shows one of its quarter's pictures when one fits its box (the lot less its 8px padding)
+  **at one scale for both sides** (0.75-1.25 of its size, never stretched or squeezed) and fills at least 80% of the box's
+  width and 75% of its depth; it stands on the lot's front edge, centred. Lots within 40px of each other never show the same
+  picture; when every fitting picture is already next door, the lot keeps a generated building. Choices are made once for the
+  city in the lots' own order, so a building across a room's edge is the same in both rooms. Ruins, the mall and lots nothing
+  fits keep generated buildings. Placement, overlap rules and walk masks are unchanged (the whole lot still blocks).
+- About 80% of building lots now use the pictures (seed 77: 179 of 223). `tests/city-buildings.test.cjs` checks the rule on
+  three seeds (undistorted, 0.75-1.25, inside its lot, of its quarter, no twins side by side, every picture on disk).
+
 ## Round 495: a second building sheet prompt
 
 Owner: "lets make another 16 buildings for variety". Sheet 2 in `tools/art-refresh/city-building-prompts.md`: the same layout

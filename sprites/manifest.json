@@ -665,6 +665,206 @@
        ]
       },
       {
+       "key": "building-garden",
+       "label": "building-garden",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/building-garden/",
+       "scale": null,
+       "files": [
+        {
+         "name": "bathhouse",
+         "src": "assets/environment/city-gen/props/building-garden/bathhouse.webp",
+         "bytes": 30840
+        },
+        {
+         "name": "flower-shop",
+         "src": "assets/environment/city-gen/props/building-garden/flower-shop.webp",
+         "bytes": 39282
+        },
+        {
+         "name": "greenhouse",
+         "src": "assets/environment/city-gen/props/building-garden/greenhouse.webp",
+         "bytes": 61964
+        },
+        {
+         "name": "hydro-farm",
+         "src": "assets/environment/city-gen/props/building-garden/hydro-farm.webp",
+         "bytes": 28352
+        },
+        {
+         "name": "lantern-court",
+         "src": "assets/environment/city-gen/props/building-garden/lantern-court.webp",
+         "bytes": 46216
+        },
+        {
+         "name": "shrine-hall",
+         "src": "assets/environment/city-gen/props/building-garden/shrine-hall.webp",
+         "bytes": 49846
+        },
+        {
+         "name": "tea-house",
+         "src": "assets/environment/city-gen/props/building-garden/tea-house.webp",
+         "bytes": 45732
+        },
+        {
+         "name": "temple-hall",
+         "src": "assets/environment/city-gen/props/building-garden/temple-hall.webp",
+         "bytes": 54304
+        }
+       ]
+      },
+      {
+       "key": "building-homes",
+       "label": "building-homes",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/building-homes/",
+       "scale": null,
+       "files": [
+        {
+         "name": "boarding-house",
+         "src": "assets/environment/city-gen/props/building-homes/boarding-house.webp",
+         "bytes": 31608
+        },
+        {
+         "name": "container-block",
+         "src": "assets/environment/city-gen/props/building-homes/container-block.webp",
+         "bytes": 28962
+        },
+        {
+         "name": "micro-tower",
+         "src": "assets/environment/city-gen/props/building-homes/micro-tower.webp",
+         "bytes": 21650
+        },
+        {
+         "name": "pod-block",
+         "src": "assets/environment/city-gen/props/building-homes/pod-block.webp",
+         "bytes": 28492
+        },
+        {
+         "name": "roof-garden-block",
+         "src": "assets/environment/city-gen/props/building-homes/roof-garden-block.webp",
+         "bytes": 44408
+        },
+        {
+         "name": "shanty-block",
+         "src": "assets/environment/city-gen/props/building-homes/shanty-block.webp",
+         "bytes": 20110
+        },
+        {
+         "name": "tenement",
+         "src": "assets/environment/city-gen/props/building-homes/tenement.webp",
+         "bytes": 34294
+        },
+        {
+         "name": "walkup-flats",
+         "src": "assets/environment/city-gen/props/building-homes/walkup-flats.webp",
+         "bytes": 42656
+        }
+       ]
+      },
+      {
+       "key": "building-market",
+       "label": "building-market",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/building-market/",
+       "scale": null,
+       "files": [
+        {
+         "name": "arcade",
+         "src": "assets/environment/city-gen/props/building-market/arcade.webp",
+         "bytes": 30670
+        },
+        {
+         "name": "capsule-hotel",
+         "src": "assets/environment/city-gen/props/building-market/capsule-hotel.webp",
+         "bytes": 22278
+        },
+        {
+         "name": "cyber-repair",
+         "src": "assets/environment/city-gen/props/building-market/cyber-repair.webp",
+         "bytes": 25586
+        },
+        {
+         "name": "food-court",
+         "src": "assets/environment/city-gen/props/building-market/food-court.webp",
+         "bytes": 35572
+        },
+        {
+         "name": "karaoke-bar",
+         "src": "assets/environment/city-gen/props/building-market/karaoke-bar.webp",
+         "bytes": 34008
+        },
+        {
+         "name": "noodle-bar",
+         "src": "assets/environment/city-gen/props/building-market/noodle-bar.webp",
+         "bytes": 36040
+        },
+        {
+         "name": "pawn-shop",
+         "src": "assets/environment/city-gen/props/building-market/pawn-shop.webp",
+         "bytes": 23290
+        },
+        {
+         "name": "tattoo-parlour",
+         "src": "assets/environment/city-gen/props/building-market/tattoo-parlour.webp",
+         "bytes": 20264
+        }
+       ]
+      },
+      {
+       "key": "building-tech",
+       "label": "building-tech",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/building-tech/",
+       "scale": null,
+       "files": [
+        {
+         "name": "battery-depot",
+         "src": "assets/environment/city-gen/props/building-tech/battery-depot.webp",
+         "bytes": 25214
+        },
+        {
+         "name": "data-relay",
+         "src": "assets/environment/city-gen/props/building-tech/data-relay.webp",
+         "bytes": 18034
+        },
+        {
+         "name": "drone-hangar",
+         "src": "assets/environment/city-gen/props/building-tech/drone-hangar.webp",
+         "bytes": 18692
+        },
+        {
+         "name": "glass-office",
+         "src": "assets/environment/city-gen/props/building-tech/glass-office.webp",
+         "bytes": 20872
+        },
+        {
+         "name": "research-lab",
+         "src": "assets/environment/city-gen/props/building-tech/research-lab.webp",
+         "bytes": 21284
+        },
+        {
+         "name": "robotics-workshop",
+         "src": "assets/environment/city-gen/props/building-tech/robotics-workshop.webp",
+         "bytes": 23740
+        },
+        {
+         "name": "server-block",
+         "src": "assets/environment/city-gen/props/building-tech/server-block.webp",
+         "bytes": 29880
+        },
+        {
+         "name": "substation",
+         "src": "assets/environment/city-gen/props/building-tech/substation.webp",
+         "bytes": 20084
+        }
+       ]
+      },
+      {
        "key": "cargo",
        "label": "Cargo (dock yards)",
        "rule": "Only on the front of a building whose street is in front; never stretched.",
