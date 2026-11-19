@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 499: the owner's desert buildings in Solaris
+
+The two Solaris building sheets (Archive_20). They share many buildings; 23 different ones are cut to
+`assets/environment/solaris-gen/props/building-<quarter>/` (the sheets kept in `src/buildings-1.jpeg`, `src/buildings-2.jpeg`):
+the bazaar's spice shop, bazaar hall, crystal and fruit stalls; adobe, terrace, beehive, thatch and wind-catcher houses; the
+solar hall, skiff hangar, battery tower, relay house, pyramid power station and observatory; the well house, domed bathhouse,
+water shop, cistern house, pyramid shrine, sun temple, obelisk gate and oasis garden house. They stand on Solaris's building
+lots by the city's rules (`cityLotSprite`: never distorted, 0.75-1.25, of the lot's quarter, no twins side by side): about 80%
+of them. `tools/cut_building_sheet.py` now gives every piece in a grid cell to that cell's building (rugs, pots and baskets
+standing apart on the green stay with their stall), and skips cells named null (buildings already cut from another sheet).
+`tests/city-buildings.test.cjs` checks Solaris too.
+
 ## Round 498: no grass parks in the city
 
 Owner: "i think we need to remove all the park/grass areas and just place sprites in their place as well, they look weird".
