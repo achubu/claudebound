@@ -1898,6 +1898,15 @@ function paintChronoRoom(canvas, key) {
       const ok = new Uint8Array(NX * NY), q2 = []; for (let y = 0; y < NY; y++) for (let x = 0; x < NX; x++) if (wat(gx - M + x, gy - M + y) && !street(gx - M + x, gy - M + y)) { ok[y * NX + x] = 1; q2.push(y * NX + x); }
       while (q2.length) { const i = q2.pop(), x = i % NX, y = (i - x) / NX; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const u = x + a, v = y + b; if (u < 0 || v < 0 || u >= NX || v >= NY || ok[v * NX + u]) continue;
         const X = gx - M + u, Y = gy - M + v; if (sandy(X, Y) && !street(X, Y)) { ok[v * NX + u] = 1; q2.push(v * NX + u); } } }
+      // (owner: "fix the single cell issue") no thin strips: paving one or two cells wide between sand on two opposite sides is sand,
+      // a cell of sand between paving (or street) on two opposite sides is paving, so the wall never runs a U round one cell
+      for (let pass = 0; pass < 4; pass++) { let changed = 0;
+        for (let v = 1; v < NY - 1; v++) for (let u = 1; u < NX - 1; u++) { const i = v * NX + u, X = gx - M + u, Y = gy - M + v; if (street(X, Y) || wat(X, Y)) continue;
+          const me = ok[i], l = ok[i - 1], r = ok[i + 1], t = ok[i - NX], b = ok[i + NX], at = (du, dv) => { const uu = u + du, vv = v + dv; return uu >= 0 && vv >= 0 && uu < NX && vv < NY && ok[vv * NX + uu]; };
+          // (a finger of paving up to two cells wide too: one 50px cell of the coast)
+          if (!me && ((l && (r || at(2, 0))) || (r && at(-2, 0)) || (t && (b || at(0, 2))) || (b && at(0, -2)))) { ok[i] = 1; changed++; }
+          else if (me && ((!l && !r) || (!t && !b))) { ok[i] = 0; changed++; } }
+        if (!changed) break; }
       return (X, Y) => { const u = X - gx + M, v = Y - gy + M; return u >= 0 && v >= 0 && u < NX && v < NY ? !!ok[v * NX + u] : sandy(X, Y) && !street(X, Y); }; })();
     // Round 423 (owner: "our water texture needs improvement, it repeats too much"): the water is drawn larger, and a second
     // copy, turned a quarter and mirrored and shifted, is laid over it in soft patches from world-wide noise, so the
