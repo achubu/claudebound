@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 493: one prompt for all the city's buildings
+
+Owner: "can this be done in a single prompt to make multiple buildings at a time please? i want at least 4 buildings per sheet
+per area". `tools/art-refresh/city-building-prompts.md` is now one self-contained prompt: a 4 x 4 sheet, a row per quarter
+(market, homes, tech, garden), two wide and two narrow buildings in each, all 3 floors at one scale. Run it again for more.
+
 ## Round 492: prompts for whole-building sprites
 
 Owner: "lets get a prompt to generate buildings then we only place them where they fit and leave procedurally generated
