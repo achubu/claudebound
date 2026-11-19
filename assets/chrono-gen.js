@@ -388,7 +388,7 @@ const GEN_THEMES = {
     mains: seed => { const T = GEN_THEMES.city, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':mains:' + t);
       return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
     alley: (key, d) => { const T = GEN_THEMES.city, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); }, alleyPave: 34, // Round 396 (owner: "standardize curb size"): the same curb and pavement as a main road
-    worldLots: true, topdown: true, tilt: 30, mall: true, noParks: true /* Round 498 (owner) */, coastCrisp: true, coastLip: true /* Round 461 (owner chose C) */, gridKerb: true /* Round 464 (owner: "switch it on") */, noShadows: true /* Round 468 (owner: "lets remove all shadows they dont look right") */, startKey: '0,5', alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
+    worldLots: true, topdown: true, tilt: 30, mall: false /* Round 501: the mall is a generated building */, spriteWorld: true /* Round 501 (owner) */, noParks: true /* Round 498 (owner) */, coastCrisp: true, coastLip: true /* Round 461 (owner chose C) */, gridKerb: true /* Round 464 (owner: "switch it on") */, noShadows: true /* Round 468 (owner: "lets remove all shadows they dont look right") */, startKey: '0,5', alleys: 0.35, cornerR: 22, keys: () => Object.keys(CITY_ROOMS),
     span: (wx, wy, seed) => typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[wx + ',' + (wy + 4)] ? genPlan('city', wx + ',' + (wy + 4), seed) : null,
     maxH: 300, // Round 394 (owner: "buildings should probably be around 3 times bigger")
     storey: { 'noodle-bar': 0.75, arcade: 0.88, 'pawn-shop': 0.75, 'capsule-hotel': 1.07, 'neon-tower': 1.56, 'corner-store': 0.94, 'ramen-stall': 0.7, 'repair-shop': 0.83, 'tattoo-parlour': 0.83, cinema: 0.83, tenement: 1.6, 'garden-block': 1.36, 'container-home': 1.36, 'clinic-block': 1.6, apartment: 1.5, 'scrap-shop': 0.94, 'ac-tower': 1.6, 'scrap-shack': 1.25, 'courtyard-block': 1.6, 'collapsed-block': 1.36, 'server-block': 1.19, substation: 1.67, 'parking-garage': 1.32, 'relay-hut': 1.25, 'coolant-tower': 1.25, 'drone-hangar': 1.36, 'battery-depot': 1.15, 'conveyor-factory': 1.07, pagoda: 0.94, 'shrine-gate': 0.75, 'tea-house': 0.7, 'lantern-court': 0.7, 'bell-pavilion': 0.7, greenhouse: 0.7, 'bridge-house': 1.07, 'tea-terrace': 0.75 , 'laundromat': 1.6, 'pharmacy': 1.6, 'karaoke-bar': 1.6, 'food-court': 1.44, 'walkup-flats': 1.6, 'boarding-house': 1.6, 'shanty-block': 1.6, 'data-relay': 1.44, 'robotics-workshop': 0.83, 'bathhouse': 1.25, 'temple-hall': 1.39},
@@ -714,6 +714,37 @@ function genWorld(seed) {
   // the blast zones are the 18% of the city where that noise runs highest, so every journey's city has them, about as large
   if (GEN.topdown) { const bl = lotsPx.filter(l => l.use === 'roof').map(l => l.blast).sort((a, b) => a - b), T = bl.length ? bl[Math.floor(bl.length * 0.82)] : 1;
     for (const l of lotsPx) { l.zone = l.blast >= T; l.ruin = !l.mall && (l.seed % 1000) / 1000 < (l.zone ? 0.6 : 0.02); } }
+  // =====================================================================
+  // Round 501 (owner: "can we redesign the algorithm to build a world out to fit these pre drawn sprite buildings? I do not want
+  // any procedurally generated buildings in the game"): with GEN.spriteWorld every building lot is built around one of the
+  // owner's pictures, chosen here once for the world. Its own quarter's pictures first, any quarter's when none of those fits;
+  // one scale for both sides, 0.75-1.25 (never distorted), the one that fills the lot best among the few best, not one a lot
+  // within 40px already has where another fits. The lot then shrinks to the picture: its footprint is the picture plus the
+  // 8px padding, on the 25px grid, on the lot's front (south) edge and centred; what is left over becomes a yard where it is
+  // 3x3 cells or more, else open paving. A lot nothing fits is a yard. Ruins are rubble yards in their blast zones (until
+  // ruin pictures come), and the mall is off (GEN.mall) since it is a generated building.
+  // =====================================================================
+  if (GEN.spriteWorld && GEN.topdown) {
+    const slotsAll = Object.keys(CITY_TD_ART).filter(k => k.startsWith('building-') && (CITY_TD_ART[k] || []).length), F = CITY_BUILDING_FIT, picked = [];
+    const fits = (slots, bw, bh) => { const out = []; for (const slot of slots) for (const n of CITY_TD_ART[slot]) { const d = CITY_BUILDING_PX[n]; if (!d) continue; const sc = Math.min(bw / d[0], bh / d[1], F.max);
+      if (sc >= F.min) out.push({ slot, n, s: sc, w: d[0] * sc, h: d[1] * sc, fill: (d[0] * sc * d[1] * sc) / (bw * bh) }); } return out.sort((x, y) => y.fill - x.fill || (x.n < y.n ? -1 : 1)); };
+    const extra = [];
+    for (const l of lotsPx) {
+      if (l.use === 'roof' && l.ruin) { l.use = 'yard'; l.ruin = false; l.small = true; continue; } // (a rubble yard: cityYardKind picks rubble in a zone)
+      if (l.use !== 'roof' || l.mall) continue;
+      const bw = l.r[2] - l.r[0] - 16, bh = l.r[3] - l.r[1] - 16, own = fits(['building-' + l.district].filter(k => slotsAll.includes(k)), bw, bh), all = own.length ? own : fits(slotsAll, bw, bh);
+      if (!all.length) { l.use = 'yard'; l.small = true; continue; }
+      const near = new Set(picked.filter(o => o.r[0] < l.r[2] + 40 && o.r[2] > l.r[0] - 40 && o.r[1] < l.r[3] + 40 && o.r[3] > l.r[1] - 40).map(o => o.sprite.n));
+      const top = all.slice(0, 3), st = chronoHash('bsprite:' + l.seed); let sp = null;
+      for (let k = 0; k < top.length && !sp; k++) { const c = top[(st + k) % top.length]; if (!near.has(c.n)) sp = c; }
+      if (!sp) sp = all.find(c => !near.has(c.n)) || (own.length ? fits(slotsAll, bw, bh).find(c => !near.has(c.n)) : null) || all[0]; // (another quarter's picture before a twin)
+      const needW = Math.min(l.r[2] - l.r[0], Math.ceil((sp.w + 16) / C) * C), needD = Math.min(l.r[3] - l.r[1], Math.ceil((sp.h + 16) / C) * C);
+      const x0 = l.r[0] + Math.floor(((l.r[2] - l.r[0]) - needW) / 2 / C) * C, top0 = l.r[3] - needD, old = l.r.slice();
+      l.r = [x0, top0, x0 + needW, old[3]]; l.sprite = { slot: sp.slot, n: sp.n, s: sp.s, w: sp.w, h: sp.h }; l.front = front(l.r.map(v => v / C)); picked.push(l);
+      for (const [k, q] of [[1, [old[0], old[1], old[2], top0]], [2, [old[0], top0, x0, old[3]]], [3, [x0 + needW, top0, old[2], old[3]]]]) {
+        if (q[2] - q[0] < 3 * C || q[3] - q[1] < 3 * C) continue;
+        extra.push(Object.assign({}, l, { r: q, use: 'yard', small: true, seed: (l.seed * 31 + k * 7919) >>> 0, sprite: null, front: front(q.map(v => v / C)), south: false })); } }
+    for (const e of extra) lotsPx.push(e); }
   // Round 445 (owner, Round 393: "shouldn't allow the same building more than once"): neighbours never share a wall or a
   // roof where the art allows. Each building takes numbers for its wall and roof pictures that no building beside or behind it has taken
   // (out of its own slot's list); the painter uses them in place of a random pick.
@@ -765,7 +796,7 @@ function cityLotSpriteFits(l, bw, bh) { if (!GEN.topdown || l.use !== 'roof' || 
   return ok; }
 // No two lots within 40px of each other (side by side, back to back or across a narrow street) show the same picture: the
 // city's choices are made once, in the lots' own order, each avoiding those already made around it.
-function cityLotSprite(l) { const wl = genWorld(chronoSeed());
+function cityLotSprite(l) { const wl = genWorld(chronoSeed()); if (GEN.spriteWorld) { const own = wl.lotsPx.find(q => q.seed === l.seed); return own && own.sprite || null; } // Round 501: chosen when the world was built
   if (!wl.spritePick) { const pick = wl.spritePick = new Map(), L = wl.lotsPx;
     L.forEach((q, i) => { const c = cityLotSpriteFits(q, q.r[2] - q.r[0] - 16, q.r[3] - q.r[1] - 16); if (!c.length) return; const near = new Set();
       for (let j = 0; j < i; j++) { const o = L[j]; if (o.r[0] < q.r[2] + 40 && o.r[2] > q.r[0] - 40 && o.r[1] < q.r[3] + 40 && o.r[3] > q.r[1] - 40) { const p = pick.get(o.seed); if (p) near.add(p.n); } }

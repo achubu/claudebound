@@ -29,6 +29,6 @@ assert(r.n['traffic-light'] > 2, 'traffic lights at the crossings: ' + JSON.stri
 assert(r.n['sign-traffic'] > 4, 'traffic signs at alley mouths: ' + JSON.stringify(r.n));
 const total = Object.values(r.n).reduce((a, b) => a + b, 0);
 assert.strictEqual(r.blocked, total, 'every post blocks the way');
-assert(r.ruins > r.roofs * 0.07 && r.ruins < r.roofs * 0.2, 'about one building in eight is a ruin: ' + r.ruins + ' of ' + r.roofs);
+if (JSON.parse(run('JSON.stringify(!!GEN_THEMES.city.spriteWorld)'))) assert.strictEqual(r.ruins, 0, 'no generated ruins in a city built from pictures (Round 501)'); else assert(r.ruins > r.roofs * 0.07 && r.ruins < r.roofs * 0.2, 'about one building in eight is a ruin: ' + r.ruins + ' of ' + r.roofs);
 assert(r.rubble === 0, 'the city has no parks (Round 498), so no park rubble: ' + r.rubble);
 console.log('PASS: ' + JSON.stringify(r.n) + ', ' + r.ruins + ' ruins of ' + r.roofs + ' buildings, ' + r.rubble + ' pieces of park rubble; none without art.');
