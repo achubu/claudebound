@@ -1180,7 +1180,15 @@ function cityBlockers(seed, key, plan) {
       for (const b of cityParkRubble(seed, l, r, trees)) circles.push([b.x, b.y, b.L * 0.4]); } } // Round 424: rubble blocks too
   for (const f of cityStreetFurniture(seed, plan)) circles.push([f.x, f.y, 8]); // Round 424: a lamp, light or sign post
   for (const c of cityParkedCars(seed, plan)) rects.push([c.px - 29, c.py - 15, c.px + 29, c.py + 14]); // Round 425: the larger cars; Round 442: 15% smaller
-  const t = chronoTerrain(seed, key); for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (t.chasm(x, y)) rects.push([x * CG_CELL, y * CG_CELL, (x + 1) * CG_CELL, (y + 1) * CG_CELL, 'water']);
+  const t = chronoTerrain(seed, key);
+  // Round 511 (owner: "can't walk on the beach anymore? lots of pathing issues now"): with the sea wall (Round 510) the beach
+  // and the walkway are drawn over some of the sea's cells, so the sea that blocks is the sea as drawn: a sea cell's 25px
+  // quarters block only where they are neither paving nor within the beach's reach of it (genSeaDrawn, the painter's rule)
+  if (GEN.coastWall && GEN.worldLots && GEN.topdown) { const [qx, qy] = GEN.world(key);
+    for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) { if (!t.chasm(x, y)) continue;
+      for (const [a, b] of [[0, 0], [1, 0], [0, 1], [1, 1]]) { const X0 = x * CG_CELL + a * FG_CELL, Y0 = y * CG_CELL + b * FG_CELL;
+        if (genSeaDrawn(seed, qx * 800 + X0 + FG_CELL / 2, qy * 500 + Y0 + FG_CELL / 2)) rects.push([X0, Y0, X0 + FG_CELL, Y0 + FG_CELL, 'water']); } } }
+  else for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) if (t.chasm(x, y)) rects.push([x * CG_CELL, y * CG_CELL, (x + 1) * CG_CELL, (y + 1) * CG_CELL, 'water']);
   return { rects, circles };
 }
 function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
@@ -1734,6 +1742,17 @@ const chronoScaled = {};
 // seams): the sand is the beach's cells that reach the water without crossing a street (a sliver trapped behind a street is
 // paving, or the sea wall loops round it); then the minimum wall run and beach width below. The wall and the drawn sand
 // both read this.
+// Round 511: how far the beach reaches out from the paving at world px (X, Y), and whether the sea is drawn there: the
+// painter (the coast block in paintChronoRoom) and the walk mask (cityBlockers) both use these, so what looks like sea is
+// exactly what blocks
+function genCoastReach(seed, X, Y) { const BW = GEN.beachWide || GEN.beachMin * FG_CELL, WB = GEN.beachWobble || 0;
+  return Math.max(GEN.beachMin * FG_CELL, BW + WB * 2 * (chronoNoise(seed, 'coast', X, Y, 90) - 0.5) + WB * 0.6 * (chronoNoise(seed, 'coast2', X, Y, 26) - 0.5)); }
+function genPavingDist(seed, X, Y, R) { const f = genCoastSand(seed), cx = Math.floor(X / FG_CELL), cy = Math.floor(Y / FG_CELL); let d = 1e9;
+  for (let b = -R; b <= R; b++) for (let a = -R; a <= R; a++) { if (f(cx + a, cy + b)) continue; const X0 = (cx + a) * FG_CELL, Y0 = (cy + b) * FG_CELL, dx = Math.max(X0 - X, 0, X - X0 - FG_CELL), dy = Math.max(Y0 - Y, 0, Y - Y0 - FG_CELL), dd = dx * dx + dy * dy; if (dd < d) d = dd; }
+  return Math.sqrt(d); }
+function genSeaDrawn(seed, X, Y) { const f = genCoastSand(seed); if (!f(Math.floor(X / FG_CELL), Math.floor(Y / FG_CELL))) return false;
+  const gx = Math.floor(X / CG_CELL), gy = Math.floor(Y / CG_CELL); if (!(GEN.hole ? GEN.hole(seed, gx, gy) : chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66)) return false; // (only the sea's own cells)
+  const reach = genCoastReach(seed, X, Y), R = Math.ceil(reach / FG_CELL) + 1; return genPavingDist(seed, X, Y, R) > reach; }
 const genCoastSandCache = {};
 function genCoastSand(seed) { const ck = GEN.id + ':' + seed; if (genCoastSandCache[ck]) return genCoastSandCache[ck];
   for (const k of Object.keys(genCoastSandCache)) if (k.startsWith(GEN.id + ':')) delete genCoastSandCache[k];
