@@ -30,5 +30,5 @@ assert(r.n['sign-traffic'] > 4, 'traffic signs at alley mouths: ' + JSON.stringi
 const total = Object.values(r.n).reduce((a, b) => a + b, 0);
 assert.strictEqual(r.blocked, total, 'every post blocks the way');
 assert(r.ruins > r.roofs * 0.07 && r.ruins < r.roofs * 0.2, 'about one building in eight is a ruin: ' + r.ruins + ' of ' + r.roofs);
-assert(r.rubble > 5, 'rubble lies in the parks: ' + r.rubble);
+assert(r.rubble === 0, 'the city has no parks (Round 498), so no park rubble: ' + r.rubble);
 console.log('PASS: ' + JSON.stringify(r.n) + ', ' + r.ruins + ' ruins of ' + r.roofs + ' buildings, ' + r.rubble + ' pieces of park rubble; none without art.');
