@@ -1006,7 +1006,7 @@ function cityParkedCars(seed, plan) { const out = [];
 // Round 467 (owner: "shadows should only drop on walkable tiles, not on anything else"; "dont drop it on edges either"):
 // every edge drawn in a room (kerbs, park and yard rims, the beach's lip) is drawn into this mask too, and building shadows
 // are cut out of it, out of every lot but the building's own, and out of every building.
-let cityEdgeMask = null;
+let cityEdgeMask = null, cityKerbLayer = null; // (Round 512: the street kerbs alone, stamped again over yard ground)
 const CITY_HAS = slot => typeof CITY_TD_ART !== 'undefined' && (CITY_TD_ART[slot] || []).length > 0;
 // a ruin: about 1 lot in 8, a fixed hash of the lot, once both ruin slots have art
 // Round 436 (owner's Sheet E): about half the building lots on the docks are cargo yards: open ground edged by a kerb,
@@ -1438,6 +1438,13 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
         if (dw > 30) ctx.drawImage(hArt, S(sx), S(bx[3] - dh / 2 - 2), S(dw), S(dh)); } }
     // Round 470 (owner: "can we add a 1px black border to all buildings as well?"): round the whole building, roof and front wall
     ctx.save(); ctx.strokeStyle = '#000'; ctx.lineWidth = S(1); ctx.strokeRect(S(bx[0] + 0.5), S(bx[1] + 0.5), S(bw - 1), S(bh0 - 1)); ctx.restore(); }
+  // Round 512 (owner: "any way to fix this edge issue that occurs when edges meet"): a yard or park beside a street painted its
+  // ground over the inner half of the street's kerb, so the kerb looked cut off and a dark square showed where the yard's
+  // railing began. The kerbs are stamped again over yard and park ground (only there), before the rims, so the kerb runs on
+  // whole and the railing's open end meets its inner face (Round 471).
+  if (cityKerbLayer) { ctx.save(); ctx.beginPath(); let any = false;
+    for (const l of lots) if (l.use === 'park' || l.use === 'yard' || l.use === 'parkpic' || (l.use === 'roof' && cityIsYard(l))) { ctx.rect(S(l.r[0] - 1), S(l.r[1] - 1), S(l.r[2] - l.r[0] + 2), S(l.r[3] - l.r[1] + 2)); any = true; }
+    if (any) { ctx.clip(); ctx.drawImage(cityKerbLayer, 0, 0); } ctx.restore(); }
   for (const f of rimQueue) f(); // Round 480: the yard and park rims, over all the ground
   { // Round 467: the shadows fall only on walkable ground: never on a building (its own included), another lot, or an edge
     shG.save(); shG.globalCompositeOperation = 'destination-out'; shG.fillStyle = '#000';
@@ -1903,7 +1910,7 @@ function paintChronoRoom(canvas, key) {
     if (GEN.feather) { const m = ragged(terrain.pipes, 'grass', { blur: 30, amp: 0.8, sharp: 9 }), g = m.getContext('2d'); g.globalCompositeOperation = 'source-in'; fill(g, imgs.pipes); ctx.drawImage(m, 0, 0); }
     else { ring(chronoTint(s.shape, GEN.bedRim[0]), 5); ring(chronoTint(s.shape, GEN.bedRim[1]), 2); ctx.drawImage(s.art, 0, 0); }
   }
-  cityEdgeMask = GEN.topdown ? (() => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; })() : null;
+  cityEdgeMask = GEN.topdown ? (() => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; })() : null; cityKerbLayer = null;
   // (Round 489: defined before the coast, which cuts the sand under the road exactly as the road will be drawn)
   const drawFloor = (grow0) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
     g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4; let grow = grow0, G = grow * K;
@@ -2196,7 +2203,8 @@ function paintChronoRoom(canvas, key) {
     if (curbArt) { // Round 420: the curb, a kerb-stone strip along every road edge, on the sidewalk side (the road mask turned inside out)
       const inv = document.createElement('canvas'); inv.width = W; inv.height = H; const ig = inv.getContext('2d'); ig.fillStyle = '#fff'; ig.fillRect(0, 0, W, H); ig.globalCompositeOperation = 'destination-out'; ig.drawImage(f.shape, 0, 0);
       const [cwx, cwy] = GEN.world(key);
-      if (gridRoad) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, curbArt, 7, gridRoad.ox, gridRoad.oy, coastSandCell ? (X, Y, NX, NY) => !coastSandCell(NX, NY) : undefined); /* Round 507: a seam onto the sand is the sea wall's */ // Round 463 trial: the bitmasked kerb, centred on the road's edge, on sand too
+      if (gridRoad && GEN.topdown) { cityKerbLayer = document.createElement('canvas'); cityKerbLayer.width = W; cityKerbLayer.height = H; }
+      if (gridRoad) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d'), cityKerbLayer && cityKerbLayer.getContext('2d')]) if (cx2) cityGridKerb(cx2, gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, curbArt, 7, gridRoad.ox, gridRoad.oy, coastSandCell ? (X, Y, NX, NY) => !coastSandCell(NX, NY) : undefined); /* Round 507: a seam onto the sand is the sea wall's */ // Round 463 trial: the bitmasked kerb, centred on the road's edge, on sand too
       else if (coastBeachMask) { // Round 461 (owner: "need to fix these edges too"): no kerb strip on the sand where a street meets the beach; the beach's concrete lip runs along the street there instead
         const cl = document.createElement('canvas'); cl.width = W; cl.height = H; const cg = cl.getContext('2d'); cityEdgeAlong(cg, inv, 0, 0, K, curbArt, 7, cwx, cwy);
         const near = coastLipDraw(f.shape); cg.globalCompositeOperation = 'destination-out'; cg.drawImage(near, 0, 0); ctx.drawImage(cl, 0, 0); } // Round 462 (owner: "you put an edge over an edge"): the kerb stops where the lip begins, never on it or across it
