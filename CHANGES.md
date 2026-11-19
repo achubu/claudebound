@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 503: prompts for ground textures and edges that match the buildings
+
+Owner: "can we get matching texture tiles that fit in better with the aesthetic of the buildings?".
+`tools/art-refresh/city-texture-prompts.md`: two complete prompts in the buildings' clean, outlined style: 9 seamless ground
+tiles (paving, plaza, road, parking and cargo yards, rubble, sand, sea, alley setts) and 4 seamless edge strips (kerb, yard
+rim, park kerb, beach lip). New edges are shown to the owner before they go in.
+
 ## Round 502: the owner's ruins and walkable parks in the city
 
 The ruin and park sheets (Archive_21), 16 each, cut with `tools/cut_building_sheet.py` (now `SLOT_PREFIX` for the folder, and
