@@ -3496,6 +3496,30 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 510: a walkway, room for buildings, straight runs and a wide uneven beach
+
+Owner: "need rule for no buildings overlapping sand and beach, need min curb size to increase, the strip of sidewalk by the
+beach is too narrow", "the entire corner is a fiasco, too many edges coming together in one place", "we should never have
+overlapping edges", "i like it straight", "i do want the sand to be uneven", "the sand should be wider or further out".
+
+- What must be paving (`genCoastSand`): every street and a walkway `GEN.coastWalk` = 2 cells (50px) round it, every lot
+  (building, yard, park, landmark) and `GEN.coastLotGap` = 1 cell round it, and all ground that isn't beach (the plan's own
+  beach band now counts as beach: it was left as bare paving).
+- The coast is decided in world-aligned blocks of `GEN.wallMinRun` = 4 cells: a block holding anything that must be paving is
+  paving, any other is sand. So the wall runs straight along the block grid, every run at least 100px, the walkway 2-5 cells
+  wide, and no wall strip can meet a kerb, a rim or a building (it stands at least a cell clear of each). This replaces the
+  Round 509 smoothing passes, which chased each other.
+- The beach in front of the wall is `GEN.beachWide` = 100px deep on average, its water's edge wandering up to
+  `GEN.beachWobble` = 40px either way (world noise, so it runs on across rooms), never under `GEN.beachMin` cells.
+- `tests/coast-wall.test.cjs` (seeds 77 and 9): walkway width, lot gap, no wall run under 100px. Seam-check unchanged from
+  before (city 1: 4, 9: 0, 77: 8; Solaris 9: 2). Tests: city-surfaces, city-layout, city-buildings, city-fill, solaris-gen.
+
+## Round 509: the beach worked out once for the whole city
+
+Owner: "we need a minimum curb size, then a minimum beach size as part of the algorithm". The sand is now worked out once for
+the whole city (`genCoastSand`) rather than per room, which disagreed at seams. The drawn sea is held back from the paving by
+the minimum beach (the smooth shoreline could reach past the sea's cells). A sea cell reaching a street's sidewalk is paving.
+
 ## Round 508: no thin fingers in the sea wall
 
 Owner: "fix the single cell issue". Where the sand's 50px cells left a strip of paving one or two cells wide between sand on
