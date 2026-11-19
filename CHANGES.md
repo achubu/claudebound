@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 504: ground textures in the buildings' style
+
+The owner's ground sheet (from the Round 503 prompt; kept as `assets/environment/city-gen/src-ground-1.jpeg`). Each tile cut
+inside its green frame (the parking tile inside its own drawn frame); tiles with a grid of joints (slabs, hex paving, deck
+plates) cut to a whole number of their repeats so the joints meet across every seam, the others cross-faded at their edges;
+each kept at its own proportions (one scale both ways, never distorted). The alley setts tile is not used (it reads as brick,
+and every road and alley is the one road texture).
+
+- Sidewalk paving: `paving-slabs` or `paving-hex` (one per city, as before), road and alleys `asphalt`, beach `sand-pale`, sea
+  `sea-night`, and each yard its own ground: parking yards `parking`, cargo yards `deck-plates`, rubble yards `rubble-ground`
+  (tex keys `yard-cargo`, `yard-rubble`, chosen by `cityYardKind`).
+- The old textures moved to `unused assets/environment/city-gen/surfaces/`. Tests: city-surfaces, sprites-page, city-layout,
+  city-fill, solaris-gen pass.
+
 ## Round 503: prompts for ground textures and edges that match the buildings
 
 Owner: "can we get matching texture tiles that fit in better with the aesthetic of the buildings?".
