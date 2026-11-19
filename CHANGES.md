@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 500: prompts for walkable parks and ruined buildings
+
+Owner: "lets get prompts for walkable park areas, also unwalkable ruins and destroyed buildings". `tools/art-refresh/city-park-ruin-prompts.md`:
+two complete prompts in the building sheets' layout: 16 small parks (whole rectangles of walkable ground with their own kerb and
+a front entrance, low things only, open middles, a row per quarter) and 16 ruins (destroyed buildings inside their own outline,
+the last row a blast zone). Placing them comes when the sheets arrive.
+
 ## Round 499: the owner's desert buildings in Solaris
 
 The two Solaris building sheets (Archive_20). They share many buildings; 23 different ones are cut to
