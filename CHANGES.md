@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 501: the world is built around the owner's buildings; no generated buildings
+
+Owner: "can we redesign the algorithm to build a world out to fit these pre drawn sprite buildings? I do not want any
+procedurally generated buildings in the game". `GEN.spriteWorld` (on in the city and Solaris), a pass in `genWorld` after the
+lots are cut and their uses set:
+
+- Every building lot is built around one of the owner's pictures, chosen once for the world: its own quarter's first, another
+  quarter's only where none of its own fits (or where every one that fits is already next door), one scale for both sides,
+  0.75-1.25 (never distorted), the best fill among the top three, never one a lot within 40px already has where another fits.
+- The lot shrinks to the picture: footprint = picture + 8px padding, on the 25px grid, on the lot's front edge and centred.
+  What is left over is a yard (with its rim, cars, cargo or rubble) when 3x3 cells or more, else open paving. A lot no picture
+  fits is a yard. `cityLotSprite` reads the world's choice.
+- No generated buildings remain: ruins are rubble yards in their blast zones until the ruin sheet comes (prompt in Round 500),
+  and the mall is off (`GEN.mall`), since it was a generated building.
+- Every building lot in both worlds has a picture (city 222-241, Solaris 233-258 on seeds 1, 9, 77). Tests: `city-buildings`
+  (every building lot pictured; at most 10% from another quarter), `city-layout` and `city-furniture` (the generated-building
+  checks only without `spriteWorld`: storeys, wall variety, ruins, mall). `SEED=9 node tests/playtest-walk.cjs` clean in both.
+
 ## Round 500: prompts for walkable parks and ruined buildings
 
 Owner: "lets get prompts for walkable park areas, also unwalkable ruins and destroyed buildings". `tools/art-refresh/city-park-ruin-prompts.md`:

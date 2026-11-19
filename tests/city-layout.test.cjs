@@ -14,6 +14,9 @@
 //   - all ground that can be walked on is joined to the room's streets (no walled-in pockets).
 process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
+// Round 501: with GEN_THEMES.city.spriteWorld every building is one of the owner's pictures (their own floors), ruins are rubble
+// yards and there is no mall, so the checks of generated buildings apply only without it.
+let SW = null;
 const { run } = require('./expansion.test.cjs');
 for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose walk-throughs found the Round 448 bugs)
   const r = JSON.parse(run(`(() => { newGame(); state.seed = ${seed}; configureRegion('city'); cityGenEnsure(); const o = genWith('city', () => { const sd = chronoSeed(), wl = genWorld(sd), L = wl.lotsPx, keys = Object.keys(CITY_ROOMS), o = { lots: L.length };
@@ -63,15 +66,16 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) { // (1 and 2: the seeds whose wal
   assert.strictEqual(r.overlaps, 0, 'no two lots overlap; ' + at);
   assert.strictEqual(r.offGround, 0, 'lots stand only on buildable ground; ' + at);
   assert(r.buildings > 180, 'the city is built up; ' + at); // Round 450: 180 (the mall and its parking stand where about thirty buildings would)
-  assert(r.floorsMin >= 3 && r.storeyMin >= 41.9 && r.storeyMax <= 50.01, 'three floors at least, storeys 42 to 50px; ' + at);
+  if (SW === null) SW = !!JSON.parse(run('JSON.stringify(!!GEN_THEMES.city.spriteWorld)'));
+  if (!SW) assert(r.floorsMin >= 3 && r.storeyMin >= 41.9 && r.storeyMax <= 50.01, 'three floors at least, storeys 42 to 50px; ' + at);
   assert.strictEqual(r.small, 0, 'no building on a lot too small for one; ' + at);
   assert(r.planned, 'every building has its street side, quarter, wall and roof from the plan; ' + at);
-  assert(r.sameWall <= r.pairs * 0.04 /* Round 450: 4% (the general wall list has three pictures; a building with three neighbours behind it can't differ from all) */, 'neighbours do not share a wall; ' + at);
-  assert(r.ruins >= r.buildings * 0.08 && r.ruins <= r.buildings * 0.17 && r.ruinsInZone >= r.ruins * 0.75, 'ruins gather in blast zones; ' + at);
+  if (!SW) assert(r.sameWall <= r.pairs * 0.04 /* Round 450: 4% (the general wall list has three pictures; a building with three neighbours behind it can't differ from all) */, 'neighbours do not share a wall; ' + at);
+  if (SW) assert.strictEqual(r.ruins, 0, 'no generated ruins in a city built from pictures; ' + at); else assert(r.ruins >= r.buildings * 0.08 && r.ruins <= r.buildings * 0.17 && r.ruinsInZone >= r.ruins * 0.75, 'ruins gather in blast zones; ' + at);
   assert(r.cars > 5 && r.carsAcross === 0, 'vehicles park along east-west streets only; ' + at);
   assert.strictEqual(r.courts, 0, 'a waypoint room has a plain crossing; ' + at);
   assert(r.bare.worst <= 0.1 && r.bare.mean <= 0.04, 'little ground is left bare; ' + at);
-  assert(r.mall.n === 1 && r.mall.art /* Round 453: its own walls, roof and street floor */ && r.mall.w >= 500 && r.mall.ok && r.mall.parking >= 3 && r.mall.parkingOk && r.mall.cars >= 30 && r.mall.spanX <= 1700 && r.mall.spanY <= 1100 && r.mall.atStart === 0, 'one mall: a wide three-storey building with its front on its parking, inside four rooms, away from the start; ' + at);
+  if (SW) assert.strictEqual(r.mall.n, 0, 'no generated mall in a city built from pictures; ' + at); else assert(r.mall.n === 1 && r.mall.art /* Round 453: its own walls, roof and street floor */ && r.mall.w >= 500 && r.mall.ok && r.mall.parking >= 3 && r.mall.parkingOk && r.mall.cars >= 30 && r.mall.spanX <= 1700 && r.mall.spanY <= 1100 && r.mall.atStart === 0, 'one mall: a wide three-storey building with its front on its parking, inside four rooms, away from the start; ' + at);
   assert(r.landmarks >= 3 && r.landmarkKinds >= Math.min(5, r.landmarks) && r.landmarkRepeatNear === 0, 'landmarks: several, different, never the same one close by; ' + at);
   assert(r.clutterOnBuilding === 0, 'no street clutter drawn over a building (Round 474); ' + at);
   assert(r.clutter >= 8 && r.clutterBad === 0, 'street clutter stands on the sidewalks; ' + at);
