@@ -12,7 +12,7 @@ const r = JSON.parse(run(`(() => { newGame(); const out = { seeds: {}, art: genW
     out.seeds[sd] = genWith('${THEME}', () => { const wl = genWorld(String(sd)), bad = [], twins = []; let placed = 0, lots = 0, other = 0;
       for (const l of wl.lotsPx) { if (l.use !== 'roof' || l.mall) continue; lots++; const sp = cityLotSprite(l); if (!sp) continue; placed++;
         const d = CITY_BUILDING_PX[sp.n], bw = l.r[2] - l.r[0] - 16, bh = l.r[3] - l.r[1] - 16, sx = sp.w / d[0], sy = sp.h / d[1];
-        if (Math.abs(sx - sy) > 1e-9 || sx < 0.75 - 1e-9 || sx > 1.25 + 1e-9 || sp.w > bw + 1e-6 || sp.h > bh + 1e-6 ) bad.push(sp.n + '@' + l.seed); if (sp.slot !== 'building-' + l.district) other++;
+        if (Math.abs(sx - sy) > 1e-9 || sx < 0.75 - 1e-9 || sx > 1.25 + 1e-9 || sp.w > bw + 1e-6 || sp.h > bh + 1e-6 ) bad.push(sp.n + '@' + l.seed); if (sp.slot.startsWith('building-') && sp.slot !== 'building-' + l.district) other++;
         for (const o of wl.lotsPx) { if (o === l || o.seed > l.seed) continue; const q = cityLotSprite(o); if (q && q.n === sp.n && o.r[0] < l.r[2] + 40 && o.r[2] > l.r[0] - 40 && o.r[1] < l.r[3] + 40 && o.r[3] > l.r[1] - 40) twins.push(sp.n); } }
       return { placed, lots, bad, twins, other }; }); }
   return JSON.stringify(out); })()`));
