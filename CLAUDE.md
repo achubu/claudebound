@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 497) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 498) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -157,7 +157,8 @@ change set.
   Round 491: a **massing prototype** for buildings (podium + tower, setbacks, wings, L; towers over the building behind), off
   (`GEN.massing`; `CITY_FLAGS='{"massing":true}'` with `tests/city-atlas.cjs` to see it); not an improvement with the current art.
   Round 496: **the owner's whole buildings** (`props/building-<quarter>/`, `CITY_BUILDING_PX`, `cityLotSprite`, cut with
-  `tools/cut_building_sheet.py`) stand on the building lots they fit; the rest stay generated. **Owner rule: never distort a
+  `tools/cut_building_sheet.py`) stand on the building lots they fit; the rest stay generated. Round 498 (owner): **no grass parks in the
+  city** (`GEN.noParks`; Solaris keeps its oases). **Owner rule: never distort a
   building (or any art) to make it fit; scale it by one factor for both sides, or don't place it.** `tests/city-buildings.test.cjs`.
   Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from

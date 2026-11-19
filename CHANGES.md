@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 498: no grass parks in the city
+
+Owner: "i think we need to remove all the park/grass areas and just place sprites in their place as well, they look weird".
+`GEN.noParks` (on for the city, off for Solaris, whose oases stay): a lot that was a pocket park is a building lot when it is
+big enough (one of the owner's buildings where one fits, else a generated one) and a yard (cars, cargo or rubble) when small.
+No grass, trees or park rubble in the city. `city-furniture` and `solaris-gen` tests updated (no park rubble or trees in the city);
+`SEED=1` and `SEED=9 node tests/playtest-walk.cjs city`: every door and object reachable.
+
 ## Round 497: prompts for Solaris's buildings
 
 Owner: "give me prompts for solaris next, buildings, desert huts, pyramids, all desert themed".

@@ -62,6 +62,6 @@ console.log('PASS: Solaris on the generator: ' + Object.entries(r.seeds).map(([s
         let foreign = 0; for (const k of Object.keys(rooms)) foreign += cityFurnitureNear(chronoSeed(), cityGenPlan(k)).filter(f => f.foreign).length;
         return { trees, bad: bad.length, wet: wet.length, foreign }; }); }
     return JSON.stringify(out); })()`));
-  for (const [t, o] of Object.entries(q)) { assert(o.trees > 20, t + ': parks have trees (' + o.trees + ')'); assert.strictEqual(o.bad, 0, t + ': every tree stands wholly inside its park'); assert.strictEqual(o.wet, 0, t + ': no palm stands in its pool (Round 490)'); }
+  for (const [t, o] of Object.entries(q)) { assert(t === 'city' ? o.trees === 0 : o.trees > 20, t + ': ' + (t === 'city' ? 'no parks in the city (Round 498)' : 'oases have palms') + ' (' + o.trees + ')'); assert.strictEqual(o.bad, 0, t + ': every tree stands wholly inside its park'); assert.strictEqual(o.wet, 0, t + ': no palm stands in its pool (Round 490)'); }
   assert(q.city.foreign > 0, 'city rooms draw their neighbours\' lamps and posts that reach into them');
   console.log('PASS: trees inside their parks (city ' + q.city.trees + ', Solaris ' + q.solaris.trees + '); neighbours\' furniture drawn (' + q.city.foreign + ' in the city).'); }
