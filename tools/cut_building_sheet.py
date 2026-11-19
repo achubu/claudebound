@@ -25,8 +25,12 @@ for ri in range(4):
         al = np.where(m, np.maximum(alpha, ndimage.binary_erosion(m, iterations=3).astype(np.float32)), 0) * 1.0
         al = al * ndimage.binary_dilation(m, iterations=1)
         g2 = np.minimum(g, np.maximum(r, b) + 12) * (al < 0.99) + g * (al >= 0.99)
-        rgba = np.dstack([r, g2, b, al * 255]).clip(0, 255).astype(np.uint8)[y0:y1 + 1, x0:x1 + 1]
+        rr_, gg_, bb_ = r, g2, b
+        if os.environ.get('ENCLOSED') == 'dark':  # Round 502: green shut inside a ruin (a hole, a broken window) is its dark inside, not green
+            hole = m & (alpha < 0.5); dk = np.array([26, 28, 34], np.float32); rr_ = np.where(hole, dk[0], r); gg_ = np.where(hole, dk[1], g2); bb_ = np.where(hole, dk[2], b)
+            edge = m & (alpha >= 0.5) & (alpha < 0.95); gg_ = np.where(edge, np.minimum(gg_, np.maximum(rr_, bb_)), gg_)
+        rgba = np.dstack([rr_, gg_, bb_, al * 255]).clip(0, 255).astype(np.uint8)[y0:y1 + 1, x0:x1 + 1]
         o_im = Image.fromarray(rgba, 'RGBA'); k2 = min(1, 480 / max(o_im.size)); o_im = o_im.resize((round(o_im.width * k2), round(o_im.height * k2)), Image.LANCZOS)
-        d = os.path.join(outroot, 'building-' + q); os.makedirs(d, exist_ok=True); o_im.save(os.path.join(d, nm + '.webp'), quality=90)
+        d = os.path.join(outroot, os.environ.get('SLOT_PREFIX', 'building-') + q); os.makedirs(d, exist_ok=True); o_im.save(os.path.join(d, nm + '.webp'), quality=90)
         out[nm] = [q, int(x1 - x0 + 1), int(y1 - y0 + 1)]
 print(json.dumps(out))

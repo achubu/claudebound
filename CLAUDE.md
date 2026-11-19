@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 501) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 502) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -160,8 +160,8 @@ change set.
   `tools/cut_building_sheet.py`) stand on the building lots they fit; the rest stay generated. Round 498 (owner): **no grass parks in the
   city** (`GEN.noParks`; Solaris keeps its oases). Round 499: Solaris has the owner's desert buildings the same way.
   **Round 501 (owner): no generated buildings** (`GEN.spriteWorld`): every building lot is built around one of the owner's pictures
-  (chosen in `genWorld`, the lot shrunk to it, leftovers yards or paving); ruins are rubble yards and the mall is off until there is
-  art for them. New building art goes in `building-<quarter>` slots with its size in `CITY_BUILDING_PX`. **Owner rule: never distort a
+  (chosen in `genWorld`, the lot shrunk to it, leftovers yards or paving); the mall is off until there is art for it. Round 502: ruins are the owner's
+  ruin pictures (`ruinpic-*`, `l.ruinPic`) and about one lot in twelve is a walkable park picture (`use: 'parkpic'`, `parkpic-*`). New building art goes in `building-<quarter>` slots with its size in `CITY_BUILDING_PX`. **Owner rule: never distort a
   building (or any art) to make it fit; scale it by one factor for both sides, or don't place it.** `tests/city-buildings.test.cjs`.
   Round 468 (owner): **no shadows** in the city (`GEN.noShadows`): don't add cast shadows, gutters or dark halos.
   Round 421: the **Textures page** (`sprites/index.html`, aethercede.com/sprites) lists all of it by category from

@@ -1074,6 +1074,126 @@
        ]
       },
       {
+       "key": "parkpic-garden",
+       "label": "parkpic-garden",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/parkpic-garden/",
+       "scale": null,
+       "files": [
+        {
+         "name": "bamboo-grove",
+         "src": "assets/environment/city-gen/props/parkpic-garden/bamboo-grove.webp",
+         "bytes": 35858
+        },
+        {
+         "name": "koi-garden",
+         "src": "assets/environment/city-gen/props/parkpic-garden/koi-garden.webp",
+         "bytes": 34060
+        },
+        {
+         "name": "moss-lantern-garden",
+         "src": "assets/environment/city-gen/props/parkpic-garden/moss-lantern-garden.webp",
+         "bytes": 25480
+        },
+        {
+         "name": "shrine-garden",
+         "src": "assets/environment/city-gen/props/parkpic-garden/shrine-garden.webp",
+         "bytes": 45570
+        }
+       ]
+      },
+      {
+       "key": "parkpic-homes",
+       "label": "parkpic-homes",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/parkpic-homes/",
+       "scale": null,
+       "files": [
+        {
+         "name": "basketball-court",
+         "src": "assets/environment/city-gen/props/parkpic-homes/basketball-court.webp",
+         "bytes": 17448
+        },
+        {
+         "name": "laundry-garden",
+         "src": "assets/environment/city-gen/props/parkpic-homes/laundry-garden.webp",
+         "bytes": 21000
+        },
+        {
+         "name": "playground",
+         "src": "assets/environment/city-gen/props/parkpic-homes/playground.webp",
+         "bytes": 27024
+        },
+        {
+         "name": "veg-garden",
+         "src": "assets/environment/city-gen/props/parkpic-homes/veg-garden.webp",
+         "bytes": 57382
+        }
+       ]
+      },
+      {
+       "key": "parkpic-market",
+       "label": "parkpic-market",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/parkpic-market/",
+       "scale": null,
+       "files": [
+        {
+         "name": "hologram-square",
+         "src": "assets/environment/city-gen/props/parkpic-market/hologram-square.webp",
+         "bytes": 24230
+        },
+        {
+         "name": "night-market-square",
+         "src": "assets/environment/city-gen/props/parkpic-market/night-market-square.webp",
+         "bytes": 47120
+        },
+        {
+         "name": "seating-court",
+         "src": "assets/environment/city-gen/props/parkpic-market/seating-court.webp",
+         "bytes": 26996
+        },
+        {
+         "name": "vending-alley",
+         "src": "assets/environment/city-gen/props/parkpic-market/vending-alley.webp",
+         "bytes": 26752
+        }
+       ]
+      },
+      {
+       "key": "parkpic-tech",
+       "label": "parkpic-tech",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/parkpic-tech/",
+       "scale": null,
+       "files": [
+        {
+         "name": "drone-pad-garden",
+         "src": "assets/environment/city-gen/props/parkpic-tech/drone-pad-garden.webp",
+         "bytes": 25342
+        },
+        {
+         "name": "glow-plaza",
+         "src": "assets/environment/city-gen/props/parkpic-tech/glow-plaza.webp",
+         "bytes": 31444
+        },
+        {
+         "name": "solar-shade-court",
+         "src": "assets/environment/city-gen/props/parkpic-tech/solar-shade-court.webp",
+         "bytes": 25604
+        },
+        {
+         "name": "zen-data-garden",
+         "src": "assets/environment/city-gen/props/parkpic-tech/zen-data-garden.webp",
+         "bytes": 61364
+        }
+       ]
+      },
+      {
        "key": "roof-hole",
        "label": "Roof holes (destroyed buildings)",
        "rule": "Only on the front of a building whose street is in front; never stretched.",
@@ -1145,6 +1265,126 @@
          "name": "rubble-trolley",
          "src": "assets/environment/city-gen/props/rubble/rubble-trolley.webp",
          "bytes": 34126
+        }
+       ]
+      },
+      {
+       "key": "ruinpic-blast",
+       "label": "ruinpic-blast",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/ruinpic-blast/",
+       "scale": null,
+       "files": [
+        {
+         "name": "crater-block",
+         "src": "assets/environment/city-gen/props/ruinpic-blast/crater-block.webp",
+         "bytes": 44100
+        },
+        {
+         "name": "fallen-pile",
+         "src": "assets/environment/city-gen/props/ruinpic-blast/fallen-pile.webp",
+         "bytes": 34640
+        },
+        {
+         "name": "gutted-front",
+         "src": "assets/environment/city-gen/props/ruinpic-blast/gutted-front.webp",
+         "bytes": 37372
+        },
+        {
+         "name": "halved-building",
+         "src": "assets/environment/city-gen/props/ruinpic-blast/halved-building.webp",
+         "bytes": 18530
+        }
+       ]
+      },
+      {
+       "key": "ruinpic-homes",
+       "label": "ruinpic-homes",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/ruinpic-homes/",
+       "scale": null,
+       "files": [
+        {
+         "name": "burned-shanty",
+         "src": "assets/environment/city-gen/props/ruinpic-homes/burned-shanty.webp",
+         "bytes": 30274
+        },
+        {
+         "name": "collapsed-tenement",
+         "src": "assets/environment/city-gen/props/ruinpic-homes/collapsed-tenement.webp",
+         "bytes": 40424
+        },
+        {
+         "name": "crushed-containers",
+         "src": "assets/environment/city-gen/props/ruinpic-homes/crushed-containers.webp",
+         "bytes": 57102
+        },
+        {
+         "name": "snapped-tower",
+         "src": "assets/environment/city-gen/props/ruinpic-homes/snapped-tower.webp",
+         "bytes": 25218
+        }
+       ]
+      },
+      {
+       "key": "ruinpic-market",
+       "label": "ruinpic-market",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/ruinpic-market/",
+       "scale": null,
+       "files": [
+        {
+         "name": "burned-noodle-bar",
+         "src": "assets/environment/city-gen/props/ruinpic-market/burned-noodle-bar.webp",
+         "bytes": 40872
+        },
+        {
+         "name": "collapsed-arcade",
+         "src": "assets/environment/city-gen/props/ruinpic-market/collapsed-arcade.webp",
+         "bytes": 46958
+        },
+        {
+         "name": "gutted-pawn-shop",
+         "src": "assets/environment/city-gen/props/ruinpic-market/gutted-pawn-shop.webp",
+         "bytes": 25424
+        },
+        {
+         "name": "spilled-capsule-hotel",
+         "src": "assets/environment/city-gen/props/ruinpic-market/spilled-capsule-hotel.webp",
+         "bytes": 22520
+        }
+       ]
+      },
+      {
+       "key": "ruinpic-tech",
+       "label": "ruinpic-tech",
+       "rule": "Only on the front of a building whose street is in front; never stretched.",
+       "walk": false,
+       "folder": "city-gen/props/ruinpic-tech/",
+       "scale": null,
+       "files": [
+        {
+         "name": "blown-server-block",
+         "src": "assets/environment/city-gen/props/ruinpic-tech/blown-server-block.webp",
+         "bytes": 40334
+        },
+        {
+         "name": "shattered-office",
+         "src": "assets/environment/city-gen/props/ruinpic-tech/shattered-office.webp",
+         "bytes": 38322
+        },
+        {
+         "name": "toppled-relay",
+         "src": "assets/environment/city-gen/props/ruinpic-tech/toppled-relay.webp",
+         "bytes": 20688
+        },
+        {
+         "name": "wrecked-substation",
+         "src": "assets/environment/city-gen/props/ruinpic-tech/wrecked-substation.webp",
+         "bytes": 28012
         }
        ]
       },

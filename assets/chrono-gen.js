@@ -728,10 +728,28 @@ function genWorld(seed) {
     const slotsAll = Object.keys(CITY_TD_ART).filter(k => k.startsWith('building-') && (CITY_TD_ART[k] || []).length), F = CITY_BUILDING_FIT, picked = [];
     const fits = (slots, bw, bh) => { const out = []; for (const slot of slots) for (const n of CITY_TD_ART[slot]) { const d = CITY_BUILDING_PX[n]; if (!d) continue; const sc = Math.min(bw / d[0], bh / d[1], F.max);
       if (sc >= F.min) out.push({ slot, n, s: sc, w: d[0] * sc, h: d[1] * sc, fill: (d[0] * sc * d[1] * sc) / (bw * bh) }); } return out.sort((x, y) => y.fill - x.fill || (x.n < y.n ? -1 : 1)); };
-    const extra = [];
+    const extra = [], has = k => (CITY_TD_ART[k] || []).length > 0;
+    // Round 502: the same placing for the owner's ruins (a blast-zone lot: its quarter's ruins and the blast zone's) and walkable
+    // parks (a yard lot: its quarter's parks, which must fill 60% of its width and depth; what is left is paving)
+    const place = (l, ownSlots, anySlots, minFill, leftYards) => {
+      const bw = l.r[2] - l.r[0] - 16, bh = l.r[3] - l.r[1] - 16, ok = c => !minFill || (c.w >= bw * minFill && c.h >= bh * minFill);
+      const own = fits(ownSlots.filter(has), bw, bh).filter(ok), all = own.length ? own : fits(anySlots.filter(has), bw, bh).filter(ok);
+      if (!all.length) return false;
+      const near = new Set(picked.filter(o => o.r[0] < l.r[2] + 40 && o.r[2] > l.r[0] - 40 && o.r[1] < l.r[3] + 40 && o.r[3] > l.r[1] - 40).map(o => o.sprite.n));
+      const top = all.slice(0, 3), st = chronoHash('bsprite:' + l.seed); let sp = null;
+      for (let k = 0; k < top.length && !sp; k++) { const c = top[(st + k) % top.length]; if (!near.has(c.n)) sp = c; }
+      if (!sp) sp = all.find(c => !near.has(c.n)) || (own.length ? fits(anySlots.filter(has), bw, bh).filter(ok).find(c => !near.has(c.n)) : null) || all[0];
+      const needW = Math.min(l.r[2] - l.r[0], Math.ceil((sp.w + 16) / C) * C), needD = Math.min(l.r[3] - l.r[1], Math.ceil((sp.h + 16) / C) * C);
+      const x0 = l.r[0] + Math.floor(((l.r[2] - l.r[0]) - needW) / 2 / C) * C, top0 = l.r[3] - needD, old = l.r.slice();
+      l.r = [x0, top0, x0 + needW, old[3]]; l.sprite = { slot: sp.slot, n: sp.n, s: sp.s, w: sp.w, h: sp.h }; l.front = front(l.r.map(v => v / C)); picked.push(l);
+      if (leftYards) for (const [k, q] of [[1, [old[0], old[1], old[2], top0]], [2, [old[0], top0, x0, old[3]]], [3, [x0 + needW, top0, old[2], old[3]]]]) {
+        if (q[2] - q[0] < 3 * C || q[3] - q[1] < 3 * C) continue;
+        extra.push(Object.assign({}, l, { r: q, use: 'yard', small: true, seed: (l.seed * 31 + k * 7919) >>> 0, sprite: null, ruin: false, ruinPic: false, front: front(q.map(v => v / C)), south: false })); }
+      return true; };
     for (const l of lotsPx) {
-      if (l.use === 'roof' && l.ruin) { l.use = 'yard'; l.ruin = false; l.small = true; continue; } // (a rubble yard: cityYardKind picks rubble in a zone)
+      if (l.use === 'roof' && l.ruin) { l.ruin = false; if (place(l, ['ruinpic-' + l.district, 'ruinpic-blast'], Object.keys(CITY_TD_ART).filter(k => k.startsWith('ruinpic-')), 0, true)) l.ruinPic = true; else { l.use = 'yard'; l.small = true; } continue; } // (no ruin picture fits: a rubble yard; cityYardKind picks rubble in a zone)
       if (l.use !== 'roof' || l.mall) continue;
+      if (chronoHash('parklot:' + l.seed) % 100 < 8 && !l.dock && !l.zone && place(l, ['parkpic-' + l.district], Object.keys(CITY_TD_ART).filter(k => k.startsWith('parkpic-')), 0.6, true)) { l.use = 'parkpic'; continue; } // Round 502: about one building lot in twelve is a walkable park (where the old grass parks were ~6%)
       const bw = l.r[2] - l.r[0] - 16, bh = l.r[3] - l.r[1] - 16, own = fits(['building-' + l.district].filter(k => slotsAll.includes(k)), bw, bh), all = own.length ? own : fits(slotsAll, bw, bh);
       if (!all.length) { l.use = 'yard'; l.small = true; continue; }
       const near = new Set(picked.filter(o => o.r[0] < l.r[2] + 40 && o.r[2] > l.r[0] - 40 && o.r[1] < l.r[3] + 40 && o.r[3] > l.r[1] - 40).map(o => o.sprite.n));
@@ -744,7 +762,11 @@ function genWorld(seed) {
       for (const [k, q] of [[1, [old[0], old[1], old[2], top0]], [2, [old[0], top0, x0, old[3]]], [3, [x0 + needW, top0, old[2], old[3]]]]) {
         if (q[2] - q[0] < 3 * C || q[3] - q[1] < 3 * C) continue;
         extra.push(Object.assign({}, l, { r: q, use: 'yard', small: true, seed: (l.seed * 31 + k * 7919) >>> 0, sprite: null, front: front(q.map(v => v / C)), south: false })); } }
-    for (const e of extra) lotsPx.push(e); }
+    for (const e of extra) lotsPx.push(e);
+    // walkable parks on about half the yards (not the docks' cargo yards or the blast zones' rubble), where one fills the yard
+    const parkSlots = Object.keys(CITY_TD_ART).filter(k => k.startsWith('parkpic-') && has(k));
+    if (parkSlots.length) for (const l of lotsPx) { if (l.use !== 'yard' || l.mall || l.dock || l.zone || chronoHash('parkpic:' + l.seed) % 100 >= 50) continue;
+      if (place(l, ['parkpic-' + l.district], parkSlots, 0.6, false)) l.use = 'parkpic'; } }
   // Round 445 (owner, Round 393: "shouldn't allow the same building more than once"): neighbours never share a wall or a
   // roof where the art allows. Each building takes numbers for its wall and roof pictures that no building beside or behind it has taken
   // (out of its own slot's list); the painter uses them in place of a random pick.
@@ -785,6 +807,8 @@ Object.assign(CITY_TD_ART_BASE, {"building-market": ["noodle-bar", "arcade", "pa
 // each picture's size in the game at its sheet's scale (its floors as tall as a generated building's), width x height.
 const CITY_BUILDING_PX = {"noodle-bar": [184, 193], "arcade": [193, 185], "pawn-shop": [109, 190], "capsule-hotel": [90, 185], "tenement": [178, 216], "container-block": [206, 210], "pod-block": [110, 202], "shanty-block": [99, 197], "glass-office": [167, 198], "server-block": [194, 205], "substation": [99, 200], "data-relay": [81, 211], "greenhouse": [176, 200], "tea-house": [199, 204], "hydro-farm": [103, 200], "bathhouse": [104, 201], "karaoke-bar": [254, 179], "food-court": [256, 176], "tattoo-parlour": [148, 162], "cyber-repair": [146, 183], "walkup-flats": [241, 187], "boarding-house": [250, 186], "roof-garden-block": [172, 186], "micro-tower": [94, 194], "drone-hangar": [229, 180], "battery-depot": [251, 179], "robotics-workshop": [174, 170], "research-lab": [132, 184], "shrine-hall": [248, 188], "temple-hall": [247, 187], "flower-shop": [157, 175], "lantern-court": [149, 185]};
 Object.assign(CITY_BUILDING_PX, {"spice-shop": [188, 186], "bazaar-hall": [170, 195], "crystal-stall": [100, 191], "fruit-stall": [110, 188], "adobe-house": [174, 193], "terrace-house": [181, 192], "beehive-hut": [104, 136], "windcatcher-house": [104, 204], "solar-hall": [177, 172], "skiff-hangar": [200, 193], "battery-tower": [83, 179], "relay-house": [112, 199], "well-house": [182, 187], "domed-bathhouse": [181, 191], "water-shop": [88, 172], "cistern-house": [130, 204], "thatch-hut": [171, 192], "pyramid-station": [177, 197], "observatory": [83, 198], "pyramid-shrine": [180, 195], "sun-temple": [181, 183], "obelisk-gate": [69, 197], "oasis-house": [130, 204]}); // Round 499: Solaris's buildings (one sheet scale: a two-floor house about 190px tall)
+Object.assign(CITY_TD_ART_BASE, {"ruinpic-market": ["burned-noodle-bar", "collapsed-arcade", "gutted-pawn-shop", "spilled-capsule-hotel"], "ruinpic-homes": ["collapsed-tenement", "crushed-containers", "burned-shanty", "snapped-tower"], "ruinpic-tech": ["shattered-office", "blown-server-block", "wrecked-substation", "toppled-relay"], "ruinpic-blast": ["crater-block", "gutted-front", "halved-building", "fallen-pile"], "parkpic-market": ["night-market-square", "seating-court", "hologram-square", "vending-alley"], "parkpic-homes": ["veg-garden", "playground", "basketball-court", "laundry-garden"], "parkpic-tech": ["glow-plaza", "zen-data-garden", "solar-shade-court", "drone-pad-garden"], "parkpic-garden": ["koi-garden", "shrine-garden", "bamboo-grove", "moss-lantern-garden"]}); // Round 502: the owner's ruins (by quarter, and the blast zone's) and walkable parks
+Object.assign(CITY_BUILDING_PX, {"burned-noodle-bar": [193, 187], "collapsed-arcade": [191, 187], "gutted-pawn-shop": [106, 187], "spilled-capsule-hotel": [103, 187], "collapsed-tenement": [193, 195], "crushed-containers": [191, 180], "burned-shanty": [106, 185], "snapped-tower": [103, 191], "shattered-office": [192, 198], "blown-server-block": [192, 194], "wrecked-substation": [106, 183], "toppled-relay": [103, 199], "crater-block": [192, 192], "gutted-front": [191, 199], "halved-building": [105, 200], "fallen-pile": [116, 179], "night-market-square": [175, 175], "seating-court": [174, 153], "hologram-square": [96, 153], "vending-alley": [93, 162], "veg-garden": [175, 175], "playground": [174, 156], "basketball-court": [96, 174], "laundry-garden": [94, 173], "glow-plaza": [175, 170], "zen-data-garden": [174, 177], "solar-shade-court": [96, 172], "drone-pad-garden": [93, 163], "koi-garden": [174, 163], "shrine-garden": [174, 175], "bamboo-grove": [103, 190], "moss-lantern-garden": [94, 157]});
 const CITY_BUILDING_FIT = { min: 0.75, max: 1.25, fillW: 0.8, fillH: 0.75 };
 // Which picture (if any) stands on a building lot: one of the lot's own quarter that fits its box (bx: the lot less its 8px
 // padding) at one scale for both sides, 0.75-1.25 of its size, and fills at least 80% of the box's width and 75% of its depth.
@@ -885,7 +909,7 @@ function cityRimKeep(l) { const wl = genWorld(chronoSeed()), C = FG_CELL;
     wl.rimLead = wl.lotsPx.map((q, i) => find(i)); }
   const idx = wl.lotsPx.indexOf(l) >= 0 ? wl.lotsPx.indexOf(l) : wl.lotsPx.findIndex(q => q.seed === l.seed), me = wl.rimLead[idx];
   const fn = (X, Y, NX, NY) => { if (NX < 0 || NY < 0 || NX >= wl.CW || NY >= wl.CH) return true; const c = wl.cell[NY * wl.CW + NX]; if (c === 2) return false;
-    const o = wl.lotIndex[NY * wl.CW + NX]; if (o < 0) return true; const lo = wl.rimLead[o]; if (lo === me) return false; const ol = wl.lotsPx[o]; if (ol.use === 'roof' || ol.use === 'landmark' || ol.use === 'plaza') return true; return me < lo; };
+    const o = wl.lotIndex[NY * wl.CW + NX]; if (o < 0) return true; const lo = wl.rimLead[o]; if (lo === me) return false; const ol = wl.lotsPx[o]; if (ol.use === 'roof' || ol.use === 'landmark' || ol.use === 'plaza' || ol.use === 'parkpic' /* Round 502: a park picture has its own kerb */) return true; return me < lo; };
   fn.lead = idx === me; fn.me = me; fn.inArea = (X, Y) => { if (X < 0 || Y < 0 || X >= wl.CW || Y >= wl.CH) return false; const o = wl.lotIndex[Y * wl.CW + X]; return o >= 0 && wl.rimLead[o] === me; };
   { const q = wl.lotsPx[idx].r, x0 = q[0] / C, y0 = q[1] / C, x1 = q[2] / C - 1, y1 = q[3] / C - 1; // which of the lot's corners the rim turns round (else the ground runs square to the corner)
     fn.corners = [fn(x0, y0, x0, y0 - 1) && fn(x0, y0, x0 - 1, y0), fn(x1, y0, x1, y0 - 1) && fn(x1, y0, x1 + 1, y0), fn(x1, y1, x1, y1 + 1) && fn(x1, y1, x1 + 1, y1), fn(x0, y1, x0, y1 + 1) && fn(x0, y1, x0 - 1, y1)]; } fn.street = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2; return fn; } // Round 469: a building no longer borders its lot's edge (it stands 8px in, Round 466), so a rim is drawn against it; only a street (its kerb) or a neighbouring yard/park that draws the shared rim takes it over
@@ -1127,6 +1151,7 @@ function cityStreetFurniture(seed, plan) {
 function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, out = [], add = (x0, y0, x1, y1, kind) => out.push({ x0, y0, x1, y1, kind });
   for (const l of wl.lotsPx) { const r = [l.r[0] - ox + 4, l.r[1] - oy + 4, l.r[2] - ox - 4, l.r[3] - oy - 4]; if (r[2] < 0 || r[0] > 800 || r[3] < 0 || r[1] > 500) continue;
     if (l.use === 'landmark') { const b = cityLandmarkBox(l, r); add(b.x, b.y, b.x + b.w, b.y + b.h, 'landmark'); }
+    if (l.use === 'parkpic' && l.sprite) { const cx = (r[0] + r[2]) / 2; add(cx - l.sprite.w / 2, r[3] - l.sprite.h, cx + l.sprite.w / 2, r[3], 'park'); } // Round 502: objects keep clear of a park's picture
     else if (cityIsYard(l)) { for (const c of cityYardPieces(seed, l, r)) add(c.x, c.y, c.x + c.w, c.y + c.h, 'yard:' + c.slot); }
     else if (l.use === 'roof') add(r[0], r[1], r[2], r[3], 'building');
     else if (l.use === 'park') { const pool = cityOasisPool(r, r[2] - r[0], r[3] - r[1]); if (pool) add(pool[0], pool[1], pool[2], pool[3], 'pool'); const trees = cityParkTrees(chronoRng(seed + ':roof:' + l.seed), r, r[2] - r[0], r[3] - r[1]); for (const [tx, ty, tr] of trees) add(tx - tr, ty - tr, tx + tr, ty + tr, 'tree');
@@ -1209,6 +1234,7 @@ function paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill) {
     else if (ctx.roundRect) ctx.roundRect(S(bx[0]), S(bx[1]), S(bw), S(bh), S(fallbackR)); else ctx.rect(S(bx[0]), S(bx[1]), S(bw), S(bh)); };
   for (const l of lots) { const ra = chronoRng(seed + ':art:' + l.seed), rr = chronoRng(seed + ':roof:' + l.seed), [x0, y0, x1, y1] = l.r, I = l.use === 'roof' ? 8 : 4 /* Round 466 (owner: "a few pixels of padding between buildings and edges"): a building stands 8px in from its lot (was 4), so 4px or more of paving shows between it and a kerb, a rim or the next building */, bx = [x0 + I, y0 + I, x1 - I, y1 - I], bw = bx[2] - bx[0], bh = bx[3] - bx[1];
     if (l.use === 'plaza') continue;
+    if (l.use === 'parkpic') { const sp = l.sprite, art = sp && imgs[cityArtPath(sp.slot, sp.n)]; if (art && art.naturalWidth) ctx.drawImage(art, S((bx[0] + bx[2]) / 2 - sp.w / 2), S(bx[3] - sp.h), S(sp.w), S(sp.h)); continue; } // Round 502: a walkable park, its picture
     if (l.use === 'landmark') { // Round 447: an open square on the city's own paving, a pool of light, the landmark in the middle
       const b = cityLandmarkBox(l, bx), art = imgs[cityArtPath('landmark', l.landmark)], mx = b.x + b.w / 2, my = b.y + b.h * 0.6, R2 = Math.max(bw, bh) * 0.6;
       void R2; // Round 478 (owner: "the area around the statue is a different color ... it should be the same color"): no pool of light round a landmark (it was clipped to the lot, so it showed as a pale rectangle); its square is the city's paving like any other

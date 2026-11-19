@@ -3496,6 +3496,22 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 502: the owner's ruins and walkable parks in the city
+
+The ruin and park sheets (Archive_21), 16 each, cut with `tools/cut_building_sheet.py` (now `SLOT_PREFIX` for the folder, and
+`ENCLOSED=dark` for ruins: green showing through a hole or broken window is the ruin's dark inside, not kept as green) to
+`props/ruinpic-<market|homes|tech|blast>/` and `props/parkpic-<quarter>/` (sheets kept as `src-ruins-1.jpeg`, `src-parks-1.jpeg`).
+
+- Ruins: a blast-zone lot that was a ruin is built around a ruin picture (its quarter's, or the blast zone's row), by the
+  buildings' rules (one scale, 0.75-1.25, the lot shrunk to it, no twins side by side; `l.ruinPic`). It blocks like a building.
+  Where none fits it is a rubble yard as before. 25-40 per city.
+- Parks: about one building lot in twelve (not on the docks or in a blast zone), and about half the yards, become a walkable
+  park picture (`use: 'parkpic'`) where one fills at least 60% of the lot; the lot shrinks to it. A park blocks nothing (it is
+  ground; its kerb is drawn in), objects keep clear of its picture (`citySpriteBoxes`), and a yard beside one keeps its own rim
+  (`cityRimKeep`). 16-24 per city.
+- Tests pass (city-buildings, city-layout, city-furniture, city-fill, city-surfaces, solaris-gen, item-placement, sprites-page);
+  `SEED=9 node tests/playtest-walk.cjs city` clean.
+
 ## Round 501: the world is built around the owner's buildings; no generated buildings
 
 Owner: "can we redesign the algorithm to build a world out to fit these pre drawn sprite buildings? I do not want any
