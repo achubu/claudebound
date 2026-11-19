@@ -54,13 +54,14 @@ console.log('PASS: Solaris on the generator: ' + Object.entries(r.seeds).map(([s
 // furniture that reaches into it (a lamp's light, a post over the edge), so nothing stops at a seam.
 { const q = JSON.parse(run(`(() => { const out = {};
     for (const [region, theme] of [['city', 'city'], ['elaris', 'solaris']]) { newGame(); state.region = region; configureRegion(region); cityGenEnsure();
-      out[theme] = genWith(theme, () => { const wl = genWorld(chronoSeed()); let trees = 0, bad = [];
+      out[theme] = genWith(theme, () => { const wl = genWorld(chronoSeed()); let trees = 0, bad = [], wet = [];
         for (const l of wl.lotsPx) { if (l.use !== 'park') continue; const bx = [l.r[0] + 4, l.r[1] + 4, l.r[2] - 4, l.r[3] - 4];
           for (const [x, y, r] of cityParkTrees(chronoRng('t:' + l.seed), bx, bx[2] - bx[0], bx[3] - bx[1])) { trees++; const m = 1.3 * r + CITY_TREE_INSET - 0.01;
-            if (x - m < bx[0] || x + m > bx[2] || y - m < bx[1] || y + m > bx[3]) bad.push(l.seed); } }
+            if (x - m < bx[0] || x + m > bx[2] || y - m < bx[1] || y + m > bx[3]) bad.push(l.seed);
+            const pool = cityOasisPool(bx, bx[2] - bx[0], bx[3] - bx[1]); if (pool && cityTreeFootInPool([x, y, r], pool)) wet.push(l.seed); } } // Round 490: no trunk in the pool
         let foreign = 0; for (const k of Object.keys(rooms)) foreign += cityFurnitureNear(chronoSeed(), cityGenPlan(k)).filter(f => f.foreign).length;
-        return { trees, bad: bad.length, foreign }; }); }
+        return { trees, bad: bad.length, wet: wet.length, foreign }; }); }
     return JSON.stringify(out); })()`));
-  for (const [t, o] of Object.entries(q)) { assert(o.trees > 20, t + ': parks have trees (' + o.trees + ')'); assert.strictEqual(o.bad, 0, t + ': every tree stands wholly inside its park'); }
+  for (const [t, o] of Object.entries(q)) { assert(o.trees > 20, t + ': parks have trees (' + o.trees + ')'); assert.strictEqual(o.bad, 0, t + ': every tree stands wholly inside its park'); assert.strictEqual(o.wet, 0, t + ': no palm stands in its pool (Round 490)'); }
   assert(q.city.foreign > 0, 'city rooms draw their neighbours\' lamps and posts that reach into them');
   console.log('PASS: trees inside their parks (city ' + q.city.trees + ', Solaris ' + q.solaris.trees + '); neighbours\' furniture drawn (' + q.city.foreign + ' in the city).'); }

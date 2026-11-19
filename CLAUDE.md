@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 489) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 490) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -150,7 +150,7 @@ change set.
   played yet): the city's art tables read the theme in use (`genThemed`: `GEN.tdArt`, `GEN.districtArt`, ...); oases with pools
   (`cityOasisPool`); `THEME=solaris node tests/city-atlas.cjs` paints it; `tests/solaris-gen.test.cjs`. Round 484 (owner): no lamps in the desert. Round 485 (owner): sand roads, monuments on merged lots (`GEN.landmarkSpan`); density is right. Round 486: **Solaris is played on the generator** (`GEN_REGIONS` / `genLive()` / `genTheme()` in `assets/city-gen.js`;
   no diagonal roads; alleys with a sand verge, `GEN.alleyVerge`); check it with `SEED=<n> node tests/playtest-walk.cjs elaris`.
-  Round 489 (owner: missing edges, cut-off textures): **a tree's whole canopy stands inside its park** (`CITY_TREE_INSET`); **a room
+  Round 489 (owner: missing edges, cut-off textures): **a tree's whole canopy stands inside its park** (`CITY_TREE_INSET`), and (Round 490, owner) **no palm's trunk in a pool** (`cityTreeFootInPool`); **a room
   draws its neighbours' street furniture that reaches into it** (`cityFurnitureNear`); **one answer to where the road is painted**
   (`roadDrawnCell`), used by the coast. Anything drawn near a room's edge must be drawn by every room it reaches into; check with
   `node tests/seam-check.cjs [city|elaris] [seed] [dir]` (a stretch it lists may be an edge that just falls on the seam).
