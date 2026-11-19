@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 492: prompts for whole-building sprites
+
+Owner: "lets get a prompt to generate buildings then we only place them where they fit and leave procedurally generated
+buildings everywhere else for now". `tools/art-refresh/city-building-prompts.md`: a shared prompt and one part per city
+quarter (market, homes, tech, garden). Each sheet: 4 x 2 equal cells on pure green, a row of 4 wide buildings (~150 x 200 in the
+game) and a row of 4 narrow ones (~100 x 180), all with exactly 3 floors at one scale, seen at the game's 30-degree tilt (roof
+and front wall only), no ground, no shadows, no text. Sized from the city's lots (building boxes mostly 100-150 wide, 150-210
+deep). Placing them (only on lots they fit, 0.85-1.15 scale at most; the rest stay generated) comes when the sheets arrive.
+
 ## Round 491: building massing, a prototype (off)
 
 Owner: "our building generation algorithm is complete junk, the buildings are ugly and basic, any way you can find a new
