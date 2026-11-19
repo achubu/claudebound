@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 490: palms never stand in the pool
+
+Owner: "Palms should never start in the pool". Round 489 kept a tree's middle out of the pool, but a palm's trunk meets the
+ground at the bottom of its picture (1.3 x its radius below its middle), so a palm north of the pool could stand with its
+foot in the water. Rule: the trunk's base (0.4 x the radius wide, at the picture's bottom) stands 4px or more clear of the
+pool (`cityTreeFootInPool`); the canopy may hang over the water. Every palm is checked, the scattered ones and the ring round
+the pool. The pool sits lower in its oasis (54px or 32% from the north rim, 30px or 20% from the south), so the palms on the
+north bank have room; an oasis under 130px deep is a palm grove. `tests/solaris-gen.test.cjs` checks no trunk is in a pool.
+
 ## Round 489: no cut-off trees, lamps or beach squares in the first two worlds
 
 Owner: "go through the first 2 world looking for missing edges and cut off textures if you can, find why and add rules to keep

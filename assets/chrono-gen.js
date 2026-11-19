@@ -893,15 +893,19 @@ const CITY_TREE_INSET = 16;
 function cityParkTrees(rr, bx, bw, bh) { const out = [], n = Math.min(4 + Math.floor(rr() * 5), Math.max(1, Math.round(bw * bh / 3500))); /* Round 445: fewer in a pocket park */
   for (let i = 0; i < n; i++) { const a = rr(), b = rr(); let r = 12 + rr() * 12; r = Math.min(r, (bw / 2 - CITY_TREE_INSET) / 1.3, (bh / 2 - CITY_TREE_INSET) / 1.3); if (r < 8) continue;
     const m = 1.3 * r + CITY_TREE_INSET; out.push([bx[0] + m + a * (bw - 2 * m), bx[1] + m + b * (bh - 2 * m), r]); } const pool = cityOasisPool(bx, bw, bh); if (!pool) return out;
-  const kept = out.filter(([x, y, r]) => x + r * 0.6 < pool[0] || x - r * 0.6 > pool[2] || y + r * 0.6 < pool[1] || y - r * 0.6 > pool[3]);
+  // Round 490 (owner: "palms should never start in the pool"): a tree's trunk meets the ground at the bottom of its picture
+  // (1.3 x its radius below its middle, 0.4 x its radius wide): that base stands 4px or more clear of the water. The canopy
+  // may hang over the pool.
+  const kept = out.filter(t => !cityTreeFootInPool(t, pool));
   // Round 489: palms round the pool: in each corner of the ring between the pool and the rim, and halfway along a long side
   const r = Math.min(13, (pool[0] - bx[0] - CITY_TREE_INSET) / 1.9, (pool[1] - bx[1] - CITY_TREE_INSET) / 1.9); if (r < 8) return kept; const m = 1.3 * r + CITY_TREE_INSET;
   const spots = [[bx[0] + m, bx[1] + m], [bx[2] - m, bx[1] + m], [bx[0] + m, bx[3] - m], [bx[2] - m, bx[3] - m]];
   if (bw > 220) spots.push([(bx[0] + bx[2]) / 2, bx[1] + m], [(bx[0] + bx[2]) / 2, bx[3] - m]); if (bh > 200) spots.push([bx[0] + m, (bx[1] + bx[3]) / 2], [bx[2] - m, (bx[1] + bx[3]) / 2]);
-  for (const [x, y] of spots) { const rr2 = r * (0.85 + rr() * 0.15); if (!kept.some(t => Math.hypot(t[0] - x, t[1] - y) < (t[2] + rr2) * 1.1)) kept.push([x, y, rr2]); }
+  for (const [x, y] of spots) { const rr2 = r * (0.85 + rr() * 0.15); if (!kept.some(t => Math.hypot(t[0] - x, t[1] - y) < (t[2] + rr2) * 1.1) && !cityTreeFootInPool([x, y, rr2], pool)) kept.push([x, y, rr2]); }
   return kept; }
 // Round 483: an oasis (a park in Solaris, GEN.oasis) has a pool of water in its middle, with a stone lip; palms stand round it.
-function cityOasisPool(bx, bw, bh) { if (!GEN.oasis || bw < 120 || bh < 110) return null; const mx = Math.max(40, bw * 0.28), my = Math.max(38, bh * 0.28); /* Round 489: a ring round the pool wide enough for its palms */ return [bx[0] + mx, bx[1] + my, bx[2] - mx, bx[3] - my]; }
+function cityTreeFootInPool([x, y, r], pool) { const P = 4; return x + 0.2 * r > pool[0] - P && x - 0.2 * r < pool[2] + P && y + 1.3 * r > pool[1] - P && y + 1.1 * r < pool[3] + P; }
+function cityOasisPool(bx, bw, bh) { if (!GEN.oasis || bw < 120 || bh < 130) return null; const mx = Math.max(40, bw * 0.28), myT = Math.max(54, bh * 0.32), myB = Math.max(30, bh * 0.2); /* Round 489: a ring round the pool wide enough for its palms; Round 490: deeper on the north side, where a palm's trunk stands below its canopy */ return [bx[0] + mx, bx[1] + myT, bx[2] - mx, bx[3] - myB]; }
 function cityParkedCars(seed, plan) { const out = [];
   for (const rd of plan.shapes) { if (rd.t !== 'road' || rd.pave || rd.w < 90) continue; const rr = chronoRng(seed + ':cars:' + plan.key + ':' + rd.pts.join());
     for (let i = 1; i < rd.pts.length; i++) { const a = rd.pts[i - 1], b = rd.pts[i], L = Math.hypot(b[0] - a[0], b[1] - a[1]), hz = Math.abs(b[1] - a[1]) < 1;
