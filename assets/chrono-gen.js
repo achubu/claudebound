@@ -414,8 +414,23 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
   mains: seed => { const T = GEN_THEMES.solaris, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':sol-mains:' + t);
     return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; },
   alley: (key, d) => { const T = GEN_THEMES.solaris, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); },
-  hole: () => false, mall: false, noParks: false /* (Solaris keeps its oases) */, mainsCache: null, alleyVerge: true, oasis: true, lampGlow: .1, parkDim: 'rgba(0,10,8,.08)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 360, landmarkSpan: 420, noLanes: true, roadDim: 'rgba(120,70,20,.16)', groundDim: 'rgba(90,50,10,.06)', pavingDim: 'rgba(90,50,10,.06)',
-  tex: { pipes: 'surfaces/park/oasis-grass', chasm: 'surfaces/water/oasis-water', overgrowth: 'surfaces/park/oasis-grass', water: 'surfaces/water/oasis-water', sand: 'surfaces/sand/sand', floor: 'surfaces/plaza/plaza', 'road-wet': 'surfaces/sand/sand' /* Round 485 (owner: "roads need to be sand") */, gravel: 'surfaces/plaza/plaza', yard: 'surfaces/lot/lot', 'pavement-old': 'surfaces/sand/sand', ground: 'surfaces/sand/sand', 'rubble-big': 'surfaces/sand/sand' },
+  // Round 514 (owner: "can we add rivers"): a river winds from the north edge to the south, and a smaller one runs in
+  // from the east or west to meet it, both from the journey's seed (50px world cells, the sea's machinery: the water
+  // blocks, nothing is built on its banks, and a road crossing it stays as a bridge)
+  hole: (seed, gx, gy) => GEN_THEMES.solaris.rivers(seed).has(gx + ',' + gy), riverCache: null,
+  rivers: seed => { const T = GEN_THEMES.solaris, ck = String(seed); if (T.riverCache && T.riverCache.ck === ck) return T.riverCache.set;
+    const keys = typeof SOLARIS_LAYOUT !== 'undefined' ? Object.keys(SOLARIS_LAYOUT) : [], set = new Set(), h = t => chronoHash(ck + ':river:' + t) / 4294967296;
+    let mx = 0, my = 0; for (const k of keys) { const [x, y] = k.split(',').map(Number); mx = Math.max(mx, x); my = Math.max(my, y); }
+    const NXc = (mx + 1) * CG_COLS, NYc = (my + 1) * CG_ROWS, X0 = NXc * (0.3 + 0.4 * h('x')), p1 = 6.283 * h('p1'), p2 = 6.283 * h('p2'), p3 = 6.283 * h('p3');
+    const mainX = y => X0 + 7 * Math.sin(y / 8 + p1) + 3 * Math.sin(y / 3.3 + p2);
+    for (let y = -3; y < NYc + 3; y++) { const c = mainX(y), hw = 1.15 + 0.35 * Math.sin(y / 5 + p3); for (let x = Math.floor(c - hw - 1); x <= Math.ceil(c + hw + 1); x++) if (Math.abs(x + 0.5 - c) <= hw) set.add(x + ',' + y); }
+    const Y0 = NYc * (0.3 + 0.4 * h('y')), west = h('side') < 0.5, q1 = 6.283 * h('q1'), q2 = 6.283 * h('q2');
+    for (let x = west ? -3 : NXc + 2; west ? x < NXc : x >= 0; x += west ? 1 : -1) { const c = Y0 + 4 * Math.sin(x / 7 + q1) + 1.5 * Math.sin(x / 2.9 + q2), hw = 0.9;
+      for (let y = Math.floor(c - hw - 1); y <= Math.ceil(c + hw + 1); y++) if (Math.abs(y + 0.5 - c) <= hw) set.add(x + ',' + y);
+      if (Math.abs(x + 0.5 - mainX(c)) < 1.5) break; } // (it ends where it meets the main river)
+    T.riverCache = { ck, set }; return set; },
+  mall: false, coastWall: false, coastLip: false, softBanks: true /* Round 514: the rivers' banks are plain sand, no sea wall or lip */, noParks: false /* (Solaris keeps its oases) */, mainsCache: null, alleyVerge: true, oasis: true, lampGlow: .1, parkDim: 'rgba(0,10,8,.08)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 360, landmarkSpan: 420, noLanes: true, roadDim: 'rgba(120,70,20,.16)', groundDim: 'rgba(90,50,10,.06)', pavingDim: 'rgba(90,50,10,.06)',
+  tex: { pipes: 'surfaces/park/oasis-grass', chasm: 'surfaces/water/oasis-water', overgrowth: 'surfaces/park/oasis-grass', water: 'surfaces/water/oasis-water', sand: 'surfaces/sand/sand', floor: 'surfaces/plaza/plaza', 'road-wet': 'surfaces/sidewalk/sidewalk' /* Round 485 (owner: "roads need to be sand"); Round 514 (owner: "make sure road tiles are different from ground tiles"): sand-coloured sandstone paving, never the ground's own sand */, gravel: 'surfaces/plaza/plaza', yard: 'surfaces/lot/lot', 'pavement-old': 'surfaces/sand/sand', ground: 'surfaces/sand/sand', 'rubble-big': 'surfaces/sand/sand' },
   legacy: null, mix: [{ on: 'road', tex: 'road-wet', tag: 'wet', period: 6, cut: 9 }] /* (only so the road texture loads: the top-down painter mixes nothing) */,
   texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.4, plaza: 0.35, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4 },
   kerb: ['#3a2410', '#e2c48c', '#8a6236'], yardRim: ['#3a2410', '#d8b47a'], groundShade: 'rgba(60,30,0,.08)', lamp: '255,214,140', vignette: '40,20,0',
@@ -2000,7 +2015,7 @@ function paintChronoRoom(canvas, key) {
           for (let s0 = 0; s0 < w * h; s0++) { if (!wet0[s0] || seenW[s0]) continue; let qh = 0, qt = 0, open = false; qw[qt++] = s0; seenW[s0] = 1;
             while (qh < qt) { const i = qw[qh++], x = i % w, y = (i - x) / w; if (x === 0 || y === 0 || x === w - 1 || y === h - 1) open = true;
               for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < w * h && Math.abs((j % w) - x) <= 1 && wet0[j] && !seenW[j]) { seenW[j] = 1; qw[qt++] = j; } }
-            if (!open) for (let n = 0; n < qt; n++) { V[qw[n]] = 0.2; SV[qw[n]] = 0.2; dry[qw[n]] = 1; } } }
+            if (!open && !GEN.softBanks) for (let n = 0; n < qt; n++) { V[qw[n]] = 0.2; SV[qw[n]] = 0.2; dry[qw[n]] = 1; } } } // (Round 514: not a river: roads cross it on bridges, every stretch stays water)
         { const sand = new Uint8Array(w * h), seen2 = new Uint8Array(w * h), q2 = new Int32Array(w * h);
           for (let i = 0; i < w * h; i++) { const x = i % w, y = (i - x) / w; sand[i] = SV[i] >= 0.5 && V[i] < 0.5 && kind(x, y) !== 2 ? 1 : 0; }
           for (let s0 = 0; s0 < w * h; s0++) { if (!sand[s0] || seen2[s0]) continue; let qh = 0, qt = 0, wet = false; q2[qt++] = s0; seen2[s0] = 1;
@@ -2110,7 +2125,7 @@ function paintChronoRoom(canvas, key) {
       else lipWith(shown, null);
       // (the streets are drawn later, over the sand where they reach it: their edge against the sand gets the same lip, on the street's side)
       coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(shown, 0, 0); /* (Round 479: only the beach that shows) */ sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); if (!(GEN.coastWall && shoreArt)) lipWith(sand, road); /* (Round 507: the grid wall already runs round the streets) */ return grow(sand, 10 * K); }; }
-    else if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else { ring(chronoTint(beach, '#0b0e14'), 3); }
+    else if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else if (!GEN.softBanks) { ring(chronoTint(beach, '#0b0e14'), 3); } // (Round 514: a desert river's sandy bank meets the sand with no edge)
   } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
