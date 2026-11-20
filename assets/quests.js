@@ -1,3 +1,13 @@
+// Round 522 (owner, with a picture: "can you do something more like this one"): the quest mark is a drawn gold "!": a chunky
+// bar that narrows to the bottom with rounded ends, a hexagon dot under it, a darker gold outline and a pale highlight inside
+function questMarkSVG() {
+  return '<svg viewBox="0 0 40 66" width="28" height="46" aria-hidden="true"><defs><linearGradient id="qmG" x1="0" y1="0" x2="1" y2="1">'
+    + '<stop offset="0" stop-color="#fff27a"/><stop offset=".55" stop-color="#ffd21f"/><stop offset="1" stop-color="#e9a800"/></linearGradient></defs>'
+    + '<path d="M9 3.5 Q9 1.5 11.5 1.5 H28.5 Q31 1.5 31 3.5 L25.8 40 Q25.4 43 22.4 43 H17.6 Q14.6 43 14.2 40 Z" fill="url(#qmG)" stroke="#8a5a00" stroke-width="2.6" stroke-linejoin="round"/>'
+    + '<path d="M13.5 5.5 H26.5 L22.6 36 Q22.4 37.5 21 37.5 H19 Q17.6 37.5 17.4 36 Z" fill="#fff8b8" opacity=".55"/>'
+    + '<polygon points="20,48 27,52 27,60 20,64 13,60 13,52" fill="url(#qmG)" stroke="#8a5a00" stroke-width="2.6" stroke-linejoin="round"/>'
+    + '<polygon points="20,51 24,53.5 24,57 20,55 16,57 16,53.5" fill="#fff8b8" opacity=".55"/></svg>';
+}
 'use strict';
 // =====================================================================
 // Round 287 (owner request): quests for XP. In each world three points of interest also hand out a quest
@@ -115,7 +125,7 @@ checkWorldInteractions = function () {
 const poiNodeBeforeQuests = poiNode;
 poiNode = function (p) {
   const node = poiNodeBeforeQuests.apply(this, arguments);
-  if (node && node.append && questOffer(p)) { const m = document.createElement('span'); m.className = 'quest-mark'; m.textContent = '!'; node.append(m); node.classList.remove('used'); node.dataset.name = (node.dataset.name || '').replace(' · used', '') + ' · quest'; }
+  if (node && node.append && questOffer(p)) { const m = document.createElement('span'); m.className = 'quest-mark'; m.innerHTML = questMarkSVG(); node.append(m); node.classList.remove('used'); node.dataset.name = (node.dataset.name || '').replace(' · used', '') + ' · quest'; }
   return node;
 };
 // --- The Quests screen ---
