@@ -388,7 +388,7 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 /* Round 475 (owner: "sometimes the game gets blurred when i move and stop moving"): the hero's idle "breathe" was a scale
    animation, so the browser drew it at low quality whenever the hero stood still; no animation now: a still hero is crisp */
 #world #player:not(.walking) .hero-sprite,#player:not(.walking) .hero-sprite{animation:none!important}
-/* Round 521 (owner: "make the quest exclamation point gold and bigger"): a bold gold "!" (the ❗ emoji is red and can't be
-   recoloured), about twice the old size, with a dark brown outline and a soft gold glow so it reads on any ground */
-#world#world#world .poi-node .quest-mark{font:900 42px/1 Georgia,'Times New Roman',serif!important;color:#ffd23f;-webkit-text-stroke:2px #5a3a00;
-  text-shadow:0 2px 0 #7a4f00,0 0 8px #ffcf5acc;top:-46px;letter-spacing:0}
+/* Round 521 (owner: "make the quest exclamation point gold and bigger"); Round 522 (owner's example picture): a drawn gold "!"
+   (questMarkSVG in quests.js), 28 x 46px, with a soft gold glow so it reads on any ground */
+#world#world#world .poi-node .quest-mark{font-size:0!important;line-height:0;top:-40px;width:28px;height:46px;filter:drop-shadow(0 0 5px #ffd23fb0) drop-shadow(0 1px 1px #0008)}
+#world#world#world .poi-node .quest-mark svg{display:block;width:28px;height:46px}

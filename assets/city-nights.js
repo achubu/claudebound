@@ -127,7 +127,7 @@ poiNode = function (p) {
   if (p.type === 'breaker' && n && n.breakers.includes(p.index)) { node.classList.add('used'); node.dataset.name = 'Breaker Box · on'; }
   if (p.type === 'vault') { const open = n && n.breakers.length >= 3; node.querySelector('.poi-glyph').textContent = n.vault ? '🔓' : open ? '🔓' : '🔒'; node.dataset.name = 'Afterlight Vault · ' + (n.vault ? 'emptied' : open ? 'powered' : n.breakers.length + '/3 power'); if (n.vault) node.classList.add('used'); }
   if (p.type === 'wantedBoard') { const left = CITY_WANTED.filter(w => !n.caught.includes(w.id)).length, open = wantedAvailable().length; node.dataset.name = 'Wanted Board' + (open ? ' · ' + open + ' contract' + (open > 1 ? 's' : '') : left ? ' · ' + left + ' at large' : ' · all caught');
-    if (open && node.append && document.createElement) { const m = document.createElement('span'); m.className = 'quest-mark'; m.textContent = '!'; node.append(m); } } // Round 347: ❗ while contracts are open
+    if (open && node.append && document.createElement) { const m = document.createElement('span'); m.className = 'quest-mark'; m.innerHTML = typeof questMarkSVG === 'function' ? questMarkSVG() : '!'; node.append(m); } } // Round 347: ❗ while contracts are open
   node.classList.add('poi-nights');
   return node;
 };
