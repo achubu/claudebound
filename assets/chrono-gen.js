@@ -971,6 +971,35 @@ function cityGridKerb(ctx, road, x0, y0, nx, ny, C, r, K, art, T, wx0, wy0, keep
         const tan = [-Math.sin(tm) * Math.sign(sweep), Math.cos(tm) * Math.sign(sweep)], P0 = [cen[0] + Math.cos(tm) * rr, cen[1] + Math.sin(tm) * rr], toRoad = convex ? [-Math.cos(tm), -Math.sin(tm)] : [Math.cos(tm), Math.sin(tm)];
         ctx.translate(P0[0] * K, P0[1] * K); ctx.rotate(Math.atan2(tan[1], tan[0])); if (toRoad[0] * -tan[1] + toRoad[1] * tan[0] > 0) ctx.scale(1, -1); // (the strip's top on the road's side, running away from the road)
         ctx.translate(-T * K, 0); strip(q * 1.3, 2 * T); ctx.restore(); } } } }
+// Round 517: a world's bridges near a room (world 25px cells x0..x0+32, y0..y0+20, with a margin): each group of road cells
+// over a river, its box stretched to the road's full width and one cell onto land at both ends along the crossing.
+function cityBridgeSpans(road, river, x0, y0) { const M = 8, seen = new Set(), out = [];
+  for (let Y = y0 - M; Y < y0 + FG_ROWS + M; Y++) for (let X = x0 - M; X < x0 + FG_COLS + M; X++) { const k = X + ',' + Y; if (seen.has(k) || !road(X, Y) || !river(X, Y)) continue;
+    const q = [[X, Y]], cells = []; seen.add(k);
+    while (q.length) { const [a, b] = q.pop(); cells.push([a, b]); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nk = (a + dx) + ',' + (b + dy); if (!seen.has(nk) && road(a + dx, b + dy) && river(a + dx, b + dy)) { seen.add(nk); q.push([a + dx, b + dy]); } } }
+    let bx0 = Math.min(...cells.map(c => c[0])), bx1 = Math.max(...cells.map(c => c[0])) + 1, by0 = Math.min(...cells.map(c => c[1])), by1 = Math.max(...cells.map(c => c[1])) + 1;
+    // the crossing runs the way the road goes on past the water: road cells beyond the box's left and right, or above and below
+    const run = (xa, ya, dx, dy, n) => { let c = 0; for (let t = 0; t < n; t++) if (road(xa + dx * t, ya + dy * t)) c++; return c; };
+    let h = 0, v = 0; for (let y = by0; y < by1; y++) { if (road(bx0 - 1, y)) h++; if (road(bx1, y)) h++; } for (let x = bx0; x < bx1; x++) { if (road(x, by0 - 1)) v++; if (road(x, by1)) v++; } void run;
+    const horiz = h >= v;
+    if (horiz) { while (road(bx0, by0 - 1) && by0 > y0 - M - 8) by0--; while (road(bx0, by1) && by1 < y0 + FG_ROWS + M + 8) by1++; // the road's full width
+      // (the road's width is where it runs on past the water, measured one cell beyond the deck)
+      let t0 = by0, t1 = by1; for (let y = by0 - 6; y < by1 + 6; y++) if (road(bx0 - 1, y) && road(bx1, y)) { t0 = Math.min(t0, y); t1 = Math.max(t1, y + 1); } by0 = t0; by1 = t1; bx0 -= 1; bx1 += 1; }
+    else { let t0 = bx0, t1 = bx1; for (let x = bx0 - 6; x < bx1 + 6; x++) if (road(x, by0 - 1) && road(x, by1)) { t0 = Math.min(t0, x); t1 = Math.max(t1, x + 1); } bx0 = t0; bx1 = t1; by0 -= 1; by1 += 1; }
+    if (!out.some(o => o.x0 === bx0 && o.y0 === by0)) out.push({ x0: bx0, y0: by0, x1: bx1, y1: by1, horiz }); }
+  return out; }
+// Round 517: one bridge: the parapet strip down both long sides of the deck (its outer face outward, world-anchored along its
+// length so it meets itself across a room's edge) and a square pier block at each of the four corners
+function cityBridgeDraw(ctx, b, ox, oy, K, art) { const C = FG_CELL, T = 16, x0 = b.x0 * C - ox, y0 = b.y0 * C - oy, x1 = b.x1 * C - ox, y1 = b.y1 * C - oy;
+  const k = art.height / T, AW = art.width / k;
+  const strip = (len, phase) => { let x = 0, sx = ((phase % AW) + AW) % AW; while (x < len - 0.01) { const piece = Math.min(AW - sx, len - x); ctx.drawImage(art, sx * k, 0, Math.max(0.5, piece * k), art.height, x * K, 0, piece * K + 0.6, T * K); x += piece; sx = 0; } };
+  const side = (ax, ay, dir, outward, len, phase) => { ctx.save(); ctx.translate(ax * K, ay * K); ctx.rotate(dir); if (outward) { ctx.scale(1, -1); ctx.translate(0, -T * K); } strip(len, phase); ctx.restore(); };
+  if (b.horiz) { side(x0, y0, 0, true, x1 - x0, b.x0 * C); side(x0, y1 - T, 0, false, x1 - x0, b.x0 * C); }
+  else { side(x0 + T, y0, Math.PI / 2, false, y1 - y0, b.y0 * C); side(x1, y0, Math.PI / 2, true, y1 - y0, b.y0 * C); }
+  // piers: a block a little wider than the parapet at each corner, cut from the strip's own cap so it matches
+  const P = T + 6; for (const [px, py] of [[x0, y0], [x1 - P, y0], [x0, y1 - P], [x1 - P, y1 - P]]) {
+    ctx.save(); ctx.beginPath(); ctx.rect(px * K, py * K, P * K, P * K); ctx.clip(); ctx.drawImage(art, 0, 0, art.height * 0.9, art.height * 0.9, px * K, py * K, P * K, P * K);
+    ctx.lineWidth = Math.max(1, K); ctx.strokeStyle = 'rgba(60,40,20,.85)'; ctx.strokeRect((px + 0.5) * K, (py + 0.5) * K, (P - 1) * K, (P - 1) * K); ctx.restore(); } }
 function cityEdgeAlong(ctx, mask, ox, oy, K, art, T, wx, wy) {
   const g = mask.getContext && mask.getContext('2d'); if (!g || !g.getImageData || !art || !art.naturalWidth) return;
   const mw = mask.width, mh = mask.height, D = g.getImageData(0, 0, mw, mh).data, st = 4, nx = Math.floor(mw / (st * K)), ny = Math.floor(mh / (st * K));
@@ -2182,6 +2211,7 @@ function paintChronoRoom(canvas, key) {
   const bridgeArt = typeof CITY_TD_ART !== 'undefined' && GEN.topdown ? (CITY_TD_ART['bridge-edge'] || []).map(n => imgs[cityArtPath('bridge-edge', n)]).find(i => i && i.naturalWidth) : null; // Round 516
   const riverAt = (X, Y) => !!(GEN.hole && GEN.hole(chronoSeed(), Math.floor(X / 2), Math.floor(Y / 2))); // a 25px world cell on a river's (50px) cell
   const gridRoad = GEN.gridKerb && GEN.worldLots ? (() => { const wl = genWorld(chronoSeed()), [qx, qy] = GEN.world(key), x0g = qx * FG_COLS, y0g = qy * FG_ROWS, fn = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2 && (X < x0g || Y < y0g || X >= x0g + FG_COLS || Y >= y0g + FG_ROWS || !!plan.floor[(Y - y0g) * FG_COLS + X - x0g]); /* (in the room, only where its plan lays road: a stub the plan trims stays trimmed) */ return { fn, x0: qx * FG_COLS, y0: qy * FG_ROWS, ox: qx * 800, oy: qy * 500 }; })() : null;
+  const bridgeSpans = bridgeArt && gridRoad ? cityBridgeSpans(gridRoad.fn, riverAt, gridRoad.x0, gridRoad.y0) : []; // Round 517
   const vecShape = GEN.square ? closed(floorShape, GEN.cornerR || GEN.pavement + 30) : floorShape;
   if (gridRoad) { const d = vecShape.getContext('2d').getImageData(0, 0, W, H).data, base = gridRoad.fn; // (in the room, a cell is road only where the plan's own drawing has road at its middle)
     gridRoad.fn = (X, Y) => { const cx = X - gridRoad.x0, cy = Y - gridRoad.y0; if (cx < 0 || cy < 0 || cx >= FG_COLS || cy >= FG_ROWS) return base(X, Y); return base(X, Y) && d[(Math.round((cy + 0.5) * FG_CELL * K) * W + Math.round((cx + 0.5) * FG_CELL * K)) * 4 + 3] > 127; }; }
@@ -2230,16 +2260,19 @@ function paintChronoRoom(canvas, key) {
       const inv = document.createElement('canvas'); inv.width = W; inv.height = H; const ig = inv.getContext('2d'); ig.fillStyle = '#fff'; ig.fillRect(0, 0, W, H); ig.globalCompositeOperation = 'destination-out'; ig.drawImage(f.shape, 0, 0);
       const [cwx, cwy] = GEN.world(key);
       if (gridRoad && GEN.topdown) { cityKerbLayer = document.createElement('canvas'); cityKerbLayer.width = W; cityKerbLayer.height = H; }
-      if (gridRoad) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d'), cityKerbLayer && cityKerbLayer.getContext('2d')]) if (cx2) cityGridKerb(cx2, gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, curbArt, 7, gridRoad.ox, gridRoad.oy, coastSandCell || bridgeArt ? (X, Y, NX, NY) => !(coastSandCell && coastSandCell(NX, NY)) && !(bridgeArt && riverAt(X, Y) && riverAt(NX, NY)) : undefined); /* Round 507: a seam onto the sand is the sea wall's */ // Round 463 trial: the bitmasked kerb, centred on the road's edge, on sand too
+      if (gridRoad) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d'), cityKerbLayer && cityKerbLayer.getContext('2d')]) if (cx2) cityGridKerb(cx2, gridRoad.fn, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, GEN.gridR || 12, K, curbArt, 7, gridRoad.ox, gridRoad.oy, coastSandCell || (bridgeArt && bridgeSpans.length) ? (X, Y, NX, NY) => !(coastSandCell && coastSandCell(NX, NY)) && !(bridgeArt && bridgeSpans.some(b => X >= b.x0 && X < b.x1 && Y >= b.y0 && Y < b.y1)) : undefined); /* Round 507: a seam onto the sand is the sea wall's */ // Round 463 trial: the bitmasked kerb, centred on the road's edge, on sand too
       else if (coastBeachMask) { // Round 461 (owner: "need to fix these edges too"): no kerb strip on the sand where a street meets the beach; the beach's concrete lip runs along the street there instead
         const cl = document.createElement('canvas'); cl.width = W; cl.height = H; const cg = cl.getContext('2d'); cityEdgeAlong(cg, inv, 0, 0, K, curbArt, 7, cwx, cwy);
         const near = coastLipDraw(f.shape); cg.globalCompositeOperation = 'destination-out'; cg.drawImage(near, 0, 0); ctx.drawImage(cl, 0, 0); } // Round 462 (owner: "you put an edge over an edge"): the kerb stops where the lip begins, never on it or across it
       else cityEdgeAlong(ctx, inv, 0, 0, K, curbArt, 7, cwx, cwy); }
     if (coastWallDraw) coastWallDraw(); // Round 507: the sea wall, after the streets and their kerbs
-    // Round 516 (the owner's edge sheet): a road across a river is a bridge: its sides over the water carry the sandstone
-    // parapet (bitmasked like a kerb, one piece per run), and the street's kerb leaves those seams to it (one edge per seam)
-    if (bridgeArt && gridRoad) { const onBridge = (X, Y) => gridRoad.fn(X, Y) && riverAt(X, Y);
-      for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, onBridge, gridRoad.x0, gridRoad.y0, FG_COLS, FG_ROWS, FG_CELL, 4, K, bridgeArt, 18, gridRoad.ox, gridRoad.oy, (X, Y, NX, NY) => riverAt(NX, NY) && !gridRoad.fn(NX, NY)); }
+    // Round 517 (owner: "not loving the look of the bridges, can you find the best algorithm for this online"): bridges built the
+    // way road generators place them (Galin et al., "Procedural Generation of Roads": a crossing is one straight span, no turns
+    // on the bridge) and tile games draw them (a deck with an abutment on each bank): each stretch of road over a river is one
+    // straight deck from bank to bank plus one cell onto land at each end, with the parapet down both of its sides the whole
+    // way, and a pier block at each corner. Spans come from world cells, so a bridge across a room's edge is drawn the same in
+    // both rooms; the kerb leaves the deck's sides to the parapet (one edge per seam).
+    if (bridgeArt && bridgeSpans.length) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) for (const b of bridgeSpans) cityBridgeDraw(cx2, b, gridRoad.ox, gridRoad.oy, K, bridgeArt);
     if (GEN.topdown) { // Round 420 (owner: "add lanes to the road paths"): a dashed centre line down each main road (two lanes), stopping at the crossings
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H);
       for (const sh of plan.shapes) if (sh.t === 'poly' && !sh.pave) { const xs = sh.pts.map(q => q[0]), ys = sh.pts.map(q => q[1]); ctx.rect(Math.max(...xs) * K + 10 * K, (Math.min(...ys) - 10) * K, -(Math.max(...xs) - Math.min(...xs) + 20) * K, (Math.max(...ys) - Math.min(...ys) + 20) * K); }

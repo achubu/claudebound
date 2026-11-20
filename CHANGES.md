@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 517: bridges built as spans
+
+Owner: "not loving the look of the bridges, can you find the best algorithm for this online and implement it". Round 516 laid
+the parapet only on 25px seams where both cells were river, so a bridge was a few short broken stubs. Following how road
+generators place crossings (Galin et al., "Procedural Generation of Roads": a crossing is one straight span with no turns on
+it) and how tile games draw them (a deck with an abutment on each bank), each stretch of road over a river is now one straight
+deck (`cityBridgeSpans`): the road's full width, from bank to bank plus one cell onto land at each end. `cityBridgeDraw` lays the
+parapet down both sides the whole way (outer face outward, world-anchored, so a bridge across a room's edge matches) and a pier
+block at each corner; the kerb leaves the deck's sides to the parapet (one edge per seam). Tests: solaris-gen, city-surfaces;
+playtest walk Solaris 9: no problems; seam-check unchanged (14, yard walls on seams).
+
 ## Round 516: the owner's Solaris ground, edges, props, ruins and gardens
 
 The owner's four sheets from the Round 515 prompts (kept in `assets/environment/solaris-gen/src/`: ground, edge, props,
