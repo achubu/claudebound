@@ -1227,6 +1227,17 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
       for (const b of cityParkRubble(seed, l, r, trees)) add(b.x - b.L / 2, b.y - b.L / 2, b.x + b.L / 2, b.y + b.L / 2, 'rubble'); } }
   for (const f of cityFurnitureNear(seed, plan)) { const hw = f.slot === 'clutter' ? f.h * 0.6 : f.h * 0.2; add(f.x - hw, f.y - f.h, f.x + hw, f.y, f.slot); } // Round 489: a neighbour's post over the edge counts too
   for (const c of cityParkedCars(seed, plan)) add(c.px - 31, c.py - 20, c.px + 31, c.py + 20, 'car');
+  // Round 525 (owner: "keep a buffer between interactable objects and edges as well"): every drawn edge's strip counts too:
+  // the street kerbs (centred on a street's seam, 4px either side), yard and park rims (the outer 14px of the lot) and the sea
+  // wall (centred on the paving's seam with the sand, 10px either side), one box per 25px stretch
+  { const C = FG_CELL, x0 = wx * FG_COLS, y0 = wy * FG_ROWS, at = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH ? wl.cell[Y * wl.CW + X] : 0, seam = (X, Y, dx, dy, h, kind) => {
+      const sx = (dx === 1 ? X + 1 : X) * C - ox, sy = (dy === 1 ? Y + 1 : Y) * C - oy; if (dx) add(sx - h, Y * C - oy, sx + h, (Y + 1) * C - oy, kind); else add(X * C - ox, sy - h, (X + 1) * C - ox, sy + h, kind); };
+    const sand = GEN.coastWall && GEN.worldLots ? genCoastSand(seed) : null;
+    for (let Y = y0 - 1; Y <= y0 + FG_ROWS; Y++) for (let X = x0 - 1; X <= x0 + FG_COLS; X++) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      if (at(X, Y) === 2 && at(X + dx, Y + dy) !== 2) seam(X, Y, dx, dy, 4, 'edge:kerb');
+      if (sand && !sand(X, Y) && sand(X + dx, Y + dy)) seam(X, Y, dx, dy, 10, 'edge:sea-wall'); }
+    for (const l of wl.lotsPx) { if (!(cityIsYard(l) || l.use === 'park')) continue; const r = [l.r[0] - ox, l.r[1] - oy, l.r[2] - ox, l.r[3] - oy], R = 14; if (r[2] < -20 || r[0] > 820 || r[3] < -20 || r[1] > 520) continue;
+      add(r[0], r[1], r[2], r[1] + R, 'edge:rim'); add(r[0], r[3] - R, r[2], r[3], 'edge:rim'); add(r[0], r[1], r[0] + R, r[3], 'edge:rim'); add(r[2] - R, r[1], r[2], r[3], 'edge:rim'); } }
   // Round 520: a grand bridge's picture (Round 519): its deck and the gate towers that stand out past the road on both banks
   if (GEN.hole && CITY_HAS('bridge')) { const x0 = wx * FG_COLS, y0 = wy * FG_ROWS, road = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2, river = (X, Y) => !!GEN.hole(seed, Math.floor(X / 2), Math.floor(Y / 2));
     for (const b of cityBridgeSpans(road, river, x0, y0)) { const wide = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * FG_CELL, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), over = CITY_BRIDGE_DECK[0] * k;

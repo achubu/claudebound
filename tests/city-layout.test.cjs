@@ -97,9 +97,11 @@ for (const seed of [77, 4242, 2026, 9, 1, 2]) {
   const bad = JSON.parse(run(`(() => { newGame(); state.seed = ${seed}; configureRegion('city'); state.region = 'city'; cityGenEnsure(); const items = [];
     for (const k of Object.keys(rooms)) { const p = poiAt(k); if (p) items.push([k, p.type, p]); const c = chestFor(k); if (c) items.push([k, 'chest', c]); const r = rooms[k].relic; if (r) items.push([k, 'relic', { x: r[3], y: r[4] }]); }
     const m = merchantRoom(); if (m) items.push([m.key, 'merchant', m]); if (typeof cityNightsItems === 'function') for (const k of Object.keys(rooms)) for (const it of cityNightsItems(k)) items.push([k, it.type, it]); // Round 473: the night objects too const cs = typeof cardsmithFor === 'function' && cardsmithFor(); if (cs) items.push([cs.key, 'cardsmith', cs]);
-    const bad = [], G = CITY_ITEM_GAP; genWith('city', () => { for (const [k, t, p] of items) { const B = cityItemBox(p, t); for (const sp of citySpriteBoxes(chronoSeed(), k, cityGenPlan(k))) if (B.x0 - G < sp.x1 && B.x1 + G > sp.x0 && B.y0 - G < sp.y1 && B.y1 + G > sp.y0) bad.push(k + ' ' + t + ' within ' + G + 'px of ' + sp.kind);
+    const bad = [], edge = [], G = CITY_ITEM_GAP; genWith('city', () => { for (const [k, t, p] of items) { const B = cityItemBox(p, t); for (const sp of citySpriteBoxes(chronoSeed(), k, cityGenPlan(k))) if (B.x0 - G < sp.x1 && B.x1 + G > sp.x0 && B.y0 - G < sp.y1 && B.y1 + G > sp.y0) (sp.kind.startsWith('edge:') ? edge : bad).push(k + ' ' + t + ' within ' + G + 'px of ' + sp.kind);
       for (const [k2, t2, p2] of items) { if (k2 !== k || p2 === p) continue; const C = cityItemBox(p2, t2); if (B.x0 - G < C.x1 && B.x1 + G > C.x0 && B.y0 - G < C.y1 && B.y1 + G > C.y0) bad.push(k + ' ' + t + ' within ' + G + 'px of ' + t2); } } }); // Round 520 (owner): a 5px buffer round every object, against sprites and other objects
-    return JSON.stringify({ n: items.length, bad }); })()`));
+    return JSON.stringify({ n: items.length, bad, edge: [...new Set(edge.map(e => e.split(' within')[0]))] }); })()`));
+  if (bad.edge.length) console.log('  seed ' + seed + ': objects touching an edge (no spot clear of edges in their room): ' + bad.edge.join(', '));
+  assert(bad.edge.length <= 2, 'Round 525: objects keep 5px from edges (kerbs, rims, sea wall); seed ' + seed + ': ' + bad.edge.join(', '));
   assert(bad.n >= 20 && bad.bad.length === 0, 'no object overlaps a building, a car, a sign or any other sprite; seed ' + seed + ': ' + bad.bad.join(', '));
 }
 // Round 469 (owner: "the edging around some areas has disappeared ... address it with a rule so it doesn't happen again"):

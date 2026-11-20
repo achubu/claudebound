@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 525: objects keep clear of edges; the quest mark smaller again
+
+- Owner: "keep a buffer between interactable objects and edges as well". The drawn edges count in `citySpriteBoxes` now (kinds
+  `edge:kerb`, a street's kerb, 4px either side of its seam; `edge:rim`, the outer 14px of a yard or park; `edge:sea-wall`,
+  10px either side of the paving's seam with the sand), so an object keeps its 5px (`CITY_ITEM_GAP`) from them too. Sprites
+  stay absolute; edges give way only in a room with no spot clear of them (a large object in a tight room): `cityFixSpot` and
+  `organicItemSpot` try each step of their order (clear of the HUD and margin, then not, then the street) with the edges kept
+  before relaxing them (`cityEdgesSoft`), and an object's whole picture, not only its spot, keeps clear of the HUD and minimap.
+  Tests: `city-layout` (six seeds; at most two large objects touch an edge: seed 1's waypoint and vault, seed 2026's merchant),
+  `solaris-gen` (one: seed 1's merchant), `item-placement` (sprites; `cityItemSpriteClear`). Playtest walks city 1 and Solaris 9:
+  no problems.
+- Owner: "make the exclamation point another 30% smaller": the quest mark is 11 x 18px.
+
 ## Round 524: the quest mark 30% smaller again
 
 Owner: "make the quest exclamation another 30% smaller". 21 x 35px to 15 x 25px, nearer its object, a slightly smaller glow
