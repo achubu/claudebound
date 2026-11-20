@@ -143,7 +143,8 @@ function cityRoomWalk(key, x, y) {
   // and clear of whatever the caller keeps a gap from. (The old fallback, "just off the path", is a building here.)
   const CITY_ITEM_PAD = CITY_ITEM_GAP /* Round 520 (owner): at least 5px between an object and anything else */, cityItemClear = (key, x, y, boxes, o) => { // Round 473: the object's own box (CITY_ITEM_PX) with a 3px margin; with no object given, a 64px one
     const b = o && typeof o === 'object' ? cityItemBox({ x, y, type: o.type || 'chest', event: o.event }, o.type || 'chest') : { x0: x - 32, y0: y - 51, x1: x + 32, y1: y + 14 }, B = [b.x0 - CITY_ITEM_PAD, b.y0 - CITY_ITEM_PAD, b.x1 + CITY_ITEM_PAD, b.y1 + CITY_ITEM_PAD];
-    return !boxes.some(b => B[0] < b.x1 && B[2] > b.x0 && B[1] < b.y1 && B[3] > b.y0); };
+    return !boxes.some(b => (!cityEdgesSoft || !b.kind.startsWith('edge:')) && B[0] < b.x1 && B[2] > b.x0 && B[1] < b.y1 && B[3] > b.y0); };
+  let cityEdgesSoft = false; // Round 525: set only while a room has no spot clear of its edges as well
   const cityItemBoxesCache = {};
   { // Round 473: the objects' sizes on screen in the city, from CITY_ITEM_PX
     const css = Object.entries(CITY_ITEM_PX).map(([k, w]) => { const sel = k === 'chest' ? '.map-chest' : k === 'relic' ? '.relic:not(.hidden-crystal):not(.gear-relic)' : k.startsWith('event:') ? '.poi-node.poi-event[style*="events/' + k.slice(6) + '"]' : '.poi-node.poi-' + k;
@@ -155,15 +156,17 @@ function cityRoomWalk(key, x, y) {
     return [[0, 22], [-16, 22], [16, 22], [0, 10], [0, 30]].some(([dx, dy]) => road(x + dx, y + dy)); };
   const cityItemSpotClear = globalThis.cityItemSpotClear = function (key, x, y, o) { if (cityGenStale()) cityGenEnsure(); // (Round 473: never against the last journey's city: its plans and boxes could be cached under the new seed)
     const sd = genWith(genTheme(), () => chronoSeed()), ck = sd + ':' + key, boxes = cityItemBoxesCache[ck] || (cityItemBoxesCache[ck] = genWith(genTheme(), () => citySpriteBoxes(sd, key, cityGenPlan(key)))); return cityItemClear(key, x, y, boxes, o); };
+  globalThis.cityItemSpriteClear = (key, x, y, o) => { cityEdgesSoft = true; try { return cityItemSpotClear(key, x, y, o); } finally { cityEdgesSoft = false; } }; // Round 525: clear of every sprite (edges aside)
   const itemSpotBefore = organicItemSpot;
   organicItemSpot = function (key, x, y, avoid = [], gap = 0) {
     const p = itemSpotBefore.apply(this, arguments);
     if (!genLive() || !genWorldCell(key) || !cityGenPlan(key)) return p;
-    const ok = (cx, cy) => cx >= 60 && cx <= 740 && cy >= 70 && cy <= 440 && walkable(key, cx, cy) && !cityItemOnStreet(key, cx, cy) && cityItemSpotClear(key, cx, cy) && !(typeof screenCovered === 'function' && screenCovered(cx, cy))
+    const ok = (cx, cy) => cx >= 60 && cx <= 740 && cy >= 70 && cy <= 440 && walkable(key, cx, cy) && !cityItemOnStreet(key, cx, cy) && cityItemSpotClear(key, cx, cy) && !(typeof screenCovered === 'function' && [[0, 0], [-12, -12], [12, -12], [-12, 24], [12, 24]].some(([a, b]) => screenCovered(cx + a, cy + b))) /* Round 525: the picture, not only its spot, clear of the HUD and minimap */
       && !avoid.some(a => Math.hypot(a.x - cx, a.y - cy) < gap) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, { x: cx, y: cy }));
     if (p && ok(p.x, p.y)) return p;
     const from = p || { x, y }; let best = null, bd = Infinity;
     for (let cy = 72; cy <= 440; cy += 8) for (let cx = 60; cx <= 740; cx += 8) { const d = Math.hypot(cx - from.x, cy - from.y); if (d < bd && ok(cx, cy)) { bd = d; best = { x: cx, y: cy }; } }
+    if (!best) { cityEdgesSoft = true; try { for (let cy = 72; cy <= 440; cy += 8) for (let cx = 60; cx <= 740; cx += 8) { const d = Math.hypot(cx - from.x, cy - from.y); if (d < bd && ok(cx, cy)) { bd = d; best = { x: cx, y: cy }; } } } finally { cityEdgesSoft = false; } } // Round 525: as in cityFixSpot
     return best || p;
   };
   // The same rule for spots that don't come through organicItemSpot (a point of interest's own spot table, the start
@@ -174,9 +177,14 @@ function cityRoomWalk(key, x, y) {
     // the rule in order of what gives way when a room has little open ground: first the HUD and the room's margin, then
     // the patrols' distance, last the street; never a sprite, never ground that can't be reached
     const ok = (cx, cy, tier) => cx >= (tier ? 40 : 60) && cx <= (tier ? 760 : 740) && cy >= (tier ? 56 : 70) && cy <= (tier ? 456 : 440) && walkable(key, cx, cy) && (tier > 1 || !cityItemOnStreet(key, cx, cy)) && cityItemSpotClear(key, cx, cy, o.type ? o : { type: 'chest' })
-      && (tier > 0 || !(typeof screenCovered === 'function' && screenCovered(cx, cy))) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, { x: cx, y: cy }));
+      && (tier > 0 || !(typeof screenCovered === 'function' && [[0, 0], [-12, -12], [12, -12], [-12, 24], [12, 24]].some(([a, b]) => screenCovered(cx + a, cy + b))) /* Round 525: the picture, not only its spot, clear of the HUD and minimap */) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, { x: cx, y: cy }));
     if (!ok(o.x, o.y, 0)) { let best = null, bd = Infinity, sp = []; try { sp = cityFixBusy ? [] : (cityFixBusy = true, roomSpawns(key) || []); } catch (e) { sp = []; } cityFixBusy = false;
-      for (const [tier, far] of [[0, 152], [1, 152], [0, 70], [1, 70], [0, 0], [1, 0], [2, 152], [2, 70], [2, 0]]) /* 150px from patrols first (a point of interest's own rule), then 70, then any */ { if (best) break; for (let cy = 56; cy <= 456; cy += 8) for (let cx = 40; cx <= 760; cx += 8) { const d = Math.hypot(cx - o.x, cy - o.y); if (d < bd && ok(cx, cy, tier) && !sp.some(q => Math.hypot(q.x - cx, q.y - cy) < far)) { bd = d; best = [cx, cy]; } } }
+      // Round 525: each step of the old order is tried with the edges' 5px kept, then relaxed, before the next step: clear of the
+      // HUD and margin, then not, then on the street
+      const pass = (soft, list) => { if (best) return; cityEdgesSoft = soft; try { for (const [tier, far] of list) { if (best) break; for (let cy = 56; cy <= 456; cy += 8) for (let cx = 40; cx <= 760; cx += 8) { const d = Math.hypot(cx - o.x, cy - o.y); if (d < bd && ok(cx, cy, tier) && !sp.some(q => Math.hypot(q.x - cx, q.y - cy) < far)) { bd = d; best = [cx, cy]; } } } } finally { cityEdgesSoft = false; } };
+      // (150px from patrols first, a point of interest's own rule, then 70, then any; clear of the HUD before clear of edges)
+      pass(false, [[0, 152], [0, 70], [0, 0]]); pass(true, [[0, 152], [0, 70], [0, 0]]); pass(false, [[1, 152], [1, 70], [1, 0]]); pass(true, [[1, 152], [1, 70], [1, 0]]);
+      pass(false, [[2, 152], [2, 70], [2, 0]]); pass(true, [[2, 152], [2, 70], [2, 0]]);
       if (best) { o.x = best[0]; o.y = best[1]; } else return o; } // (Round 473: nothing found, as while the region is still being set up and no ground counts as reachable yet: not remembered, so it is tried again)
     cityFixCache[fk] = [o.x, o.y]; o.cityClear = mark(); return o; };
   // "beside the street" in the city means: on open ground joined to the streets, off the street itself, clear of every sprite
