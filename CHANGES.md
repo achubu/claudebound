@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 518: a prompt for a grand Solaris bridge
+
+Owner: "lets just generate an over the top bridge graphic we can use for bridges instead that matches the aesthetic". One
+complete prompt in `tools/art-refresh/solaris-bridge-prompt.md`: a monumental sandstone bridge seen straight down (so it can be
+turned for north-south roads), drawn whole and cut into a west end, a seamless middle section and an east end, so it fits any
+road width and river width at one scale. No code changed.
+
 ## Round 517: bridges built as spans
 
 Owner: "not loving the look of the bridges, can you find the best algorithm for this online and implement it". Round 516 laid
