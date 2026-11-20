@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 514: rivers in Solaris, and roads that aren't the ground
+
+Owner: "can we add rivers and make sure road tiles are different from ground tiles?"
+
+- **Rivers** (`GEN_THEMES.solaris.hole` / `.rivers(seed)`): a river winds from Solaris's north edge to its south (about two
+  cells, 100-150px, wide), and a narrower one runs in from the east or west to meet it, both from the journey's seed on
+  50px world cells. They use the sea's machinery: the water blocks, nothing is built within its shore band, and a road across
+  a river stays walkable (a bridge). Solaris turns off the city's sea wall, lip and wide beach (`coastWall`, `coastLip`:
+  false) and draws plain sandy banks with no edge (`softBanks`); the city's rule that dries a patch of sea cut off by streets
+  is off for rivers (a road would have dried every stretch it crosses).
+- **Roads**: Solaris's roads were the ground's own sand (Round 485). They are now its sand-coloured sandstone paving
+  (`surfaces/sidewalk/sidewalk`), so a road reads as a road; the ground and verges stay sand.
+- `tests/solaris-gen.test.cjs`: roads differ from the ground; rivers exist, none of their water can be walked on, roads cross
+  them. Playtest walk, Solaris seeds 9 and 1: no problems. Seam-check Solaris 9: 1 (was 2). City tests unchanged.
+
 ## Round 513: a hidden chest shows its rewards in a pop-up
 
 Owner: "chests in the world dont show the rewards as a pop up". A hidden chest's rewards (its potion or Upgrade Crystal, and

@@ -13,7 +13,7 @@ const r = JSON.parse(run(`(() => { newGame(); const out = { seeds: {} };
   out.cityRoof = CITY_TD_ART.roof.slice(); out.cityKit = Object.keys(CITY_ROOF_KIT);
   out.paths = genWith('solaris', () => cityTdArtNames()); out.tex = Object.values(GEN_THEMES.solaris.tex);
   out.solRoof = genWith('solaris', () => CITY_TD_ART.roof.slice()); out.solKit = genWith('solaris', () => Object.keys(CITY_ROOF_KIT));
-  out.cityRoofAfter = CITY_TD_ART.roof.slice(); out.roadTex = GEN_THEMES.solaris.tex['road-wet']; out.solLamps = genWith('solaris', () => CITY_HAS('lamp')); // Round 484
+  out.cityRoofAfter = CITY_TD_ART.roof.slice(); out.roadTex = GEN_THEMES.solaris.tex['road-wet']; out.groundTex = GEN_THEMES.solaris.tex.sand; out.sideTex = GEN_THEMES.solaris.tex['pavement-old']; out.solLamps = genWith('solaris', () => CITY_HAS('lamp')); // Round 484
   state.seed = 9; out.lampsPlaced = genWith('solaris', () => Object.keys(SOLARIS_LAYOUT).reduce((n, k) => n + cityStreetFurniture('9', genPlan('solaris', k, '9')).filter(f => f.kind === 'lamp').length, 0));
   for (const sd of ${JSON.stringify(seeds)}) { state.seed = sd; const keys = Object.keys(SOLARIS_LAYOUT);
     const o = genWith('solaris', () => { const wl = genWorld(String(sd)), L = wl.lotsPx; let floors = [];
@@ -27,7 +27,7 @@ for (const p of r.tex) assert(fs.existsSync(path.join(DIR, p + '.webp')), 'Solar
 assert(!r.cityRoof.some(n => r.solRoof.includes(n)), 'the city and Solaris roofs are separate tables');
 assert.deepStrictEqual(r.cityRoof, r.cityRoofAfter, 'the city reads its own art again once Solaris is done');
 assert(!r.solLamps && r.lampsPlaced === 0, 'no lamps in the desert (owner, Round 484)');
-assert(/sand/.test(r.roadTex), 'Solaris roads are sand (owner, Round 485)');
+assert(r.roadTex !== r.groundTex && r.roadTex !== r.sideTex, 'Solaris roads differ from the ground (owner, Round 514): ' + r.roadTex);
 assert(r.solKit.every(k => r.solRoof.includes(k)), 'Solaris rooftop kit only on its own roofs');
 for (const [sd, o] of Object.entries(r.seeds)) {
   assert.strictEqual(o.planned, o.rooms, 'seed ' + sd + ': every Solaris room is planned');
@@ -65,3 +65,15 @@ console.log('PASS: Solaris on the generator: ' + Object.entries(r.seeds).map(([s
   for (const [t, o] of Object.entries(q)) { assert(t === 'city' ? o.trees === 0 : o.trees > 20, t + ': ' + (t === 'city' ? 'no parks in the city (Round 498)' : 'oases have palms') + ' (' + o.trees + ')'); assert.strictEqual(o.bad, 0, t + ': every tree stands wholly inside its park'); assert.strictEqual(o.wet, 0, t + ': no palm stands in its pool (Round 490)'); }
   assert(q.city.foreign > 0, 'city rooms draw their neighbours\' lamps and posts that reach into them');
   console.log('PASS: trees inside their parks (city ' + q.city.trees + ', Solaris ' + q.solaris.trees + '); neighbours\' furniture drawn (' + q.city.foreign + ' in the city).'); }
+// Round 514 (owner: "can we add rivers"): Solaris has a river from its north edge to its south and a branch joining it, and
+// nobody can walk on the water (a road across it stays walkable: a bridge).
+{ const v = JSON.parse(run(`(() => { newGame(); state.seed = 9; state.region = 'elaris'; configureRegion('elaris'); cityGenEnsure();
+    const set = GEN_THEMES.solaris.rivers(chronoSeed()); let water = 0, wet = 0, bridge = 0;
+    for (const k of Object.keys(rooms)) { const p = cityGenPlan(k), wetCell = genWith('solaris', () => { const t = chronoTerrain(chronoSeed(), k), o = []; for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) o.push(t.chasm(x, y)); return o; }); // (read inside the theme: the terrain asks it)
+      for (let y = 0; y < CG_ROWS; y++) for (let x = 0; x < CG_COLS; x++) { if (!wetCell[y * CG_COLS + x]) continue; const road = p.floor[(y * 2 + 1) * FG_COLS + x * 2 + 1];
+        if (road) { bridge++; continue; } water++; if (cityRoomWalk(k, x * 50 + 37, y * 50 + 37 - 22)) wet++; } }
+    return JSON.stringify({ cells: set.size, water, wet, bridge }); })()`));
+  assert(v.cells > 100 && v.water > 50, 'Solaris has rivers (' + v.cells + ' cells, ' + v.water + ' in rooms)');
+  assert.strictEqual(v.wet, 0, 'nobody walks on a river');
+  assert(v.bridge > 0, 'roads cross the rivers');
+  console.log('PASS: Solaris rivers: ' + v.water + ' water cells, ' + v.bridge + ' bridge cells, none walkable.'); }
