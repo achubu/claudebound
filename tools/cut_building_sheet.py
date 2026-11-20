@@ -26,6 +26,8 @@ for ri in range(4):
         al = al * ndimage.binary_dilation(m, iterations=1)
         g2 = np.minimum(g, np.maximum(r, b) + 12) * (al < 0.99) + g * (al >= 0.99)
         rr_, gg_, bb_ = r, g2, b
+        if os.environ.get('ENCLOSED') == 'clear':  # Round 516: green shut inside an object (a wheel's spokes, a rack, a tent's frame) is see-through
+            al = np.where(m, alpha, 0) * ndimage.binary_dilation(m, iterations=1); g2 = np.minimum(g, np.maximum(r, b) + 12) * (al < 0.99) + g * (al >= 0.99); rr_, gg_, bb_ = r, g2, b
         if os.environ.get('ENCLOSED') == 'dark':  # Round 502: green shut inside a ruin (a hole, a broken window) is its dark inside, not green
             hole = m & (alpha < 0.5); dk = np.array([26, 28, 34], np.float32); rr_ = np.where(hole, dk[0], r); gg_ = np.where(hole, dk[1], g2); bb_ = np.where(hole, dk[2], b)
             edge = m & (alpha >= 0.5) & (alpha < 0.95); gg_ = np.where(edge, np.minimum(gg_, np.maximum(rr_, bb_)), gg_)
