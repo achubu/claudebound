@@ -995,7 +995,7 @@ function cityBridgeSpans(road, river, x0, y0) { const M = 8, seen = new Set(), o
 // across the water, the last copy cut short. A bridge shorter than its two ends is lengthened along the road, centred. North
 // to south it is the same picture turned 90 degrees (it is drawn straight down). World positions, so both rooms at a seam
 // draw the same bridge.
-const CITY_BRIDGE_DECK = [100, 452];
+const CITY_BRIDGE_DECK = [100, 452]; const CITY_BRIDGE_PIECES = [322, 494, 322]; // (the west, middle and east pieces' widths in their own px)
 function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, horiz = b.horiz;
   const wide = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k;
   let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C; const need = ew + eeW + mw * 0.5; if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
@@ -1227,7 +1227,15 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
       for (const b of cityParkRubble(seed, l, r, trees)) add(b.x - b.L / 2, b.y - b.L / 2, b.x + b.L / 2, b.y + b.L / 2, 'rubble'); } }
   for (const f of cityFurnitureNear(seed, plan)) { const hw = f.slot === 'clutter' ? f.h * 0.6 : f.h * 0.2; add(f.x - hw, f.y - f.h, f.x + hw, f.y, f.slot); } // Round 489: a neighbour's post over the edge counts too
   for (const c of cityParkedCars(seed, plan)) add(c.px - 31, c.py - 20, c.px + 31, c.py + 20, 'car');
+  // Round 520: a grand bridge's picture (Round 519): its deck and the gate towers that stand out past the road on both banks
+  if (GEN.hole && CITY_HAS('bridge')) { const x0 = wx * FG_COLS, y0 = wy * FG_ROWS, road = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2, river = (X, Y) => !!GEN.hole(seed, Math.floor(X / 2), Math.floor(Y / 2));
+    for (const b of cityBridgeSpans(road, river, x0, y0)) { const wide = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * FG_CELL, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), over = CITY_BRIDGE_DECK[0] * k;
+      const X0 = b.x0 * FG_CELL - ox, Y0 = b.y0 * FG_CELL - oy, X1 = b.x1 * FG_CELL - ox, Y1 = b.y1 * FG_CELL - oy, need = 0.5 * Math.max(0, (CITY_BRIDGE_PIECES[0] + CITY_BRIDGE_PIECES[2] + CITY_BRIDGE_PIECES[1] * 0.5) * k - (b.horiz ? X1 - X0 : Y1 - Y0)); // (the same lengthening as cityBridgeGrand)
+      if (b.horiz) add(X0 - need, Y0 - over, X1 + need, Y1 + over, 'bridge'); else add(X0 - over, Y0 - need, X1 + over, Y1 + need, 'bridge'); } }
   return out; }
+// Round 520 (owner: "they should have at least a 5px buffer between anything else next to them"): the clear space round every
+// interactable object's picture, against every sprite (citySpriteBoxes) and every other object in its room
+const CITY_ITEM_GAP = 5;
 // Round 473 (owner: "scale interactable objects to be scaled to the main character sprite"): each kind of object has its own
 // size, in room px, set against the hero (about 60px tall: a person): things a person stands at (terminals, machines, boards,
 // the merchant) about the hero's height, waist-high things (chests, caches, a campfire) about two thirds of it, the waypoint

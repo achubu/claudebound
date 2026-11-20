@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 520: 5px clear round every interactable object
+
+Owner: "when placing interactable objects in game could you make sure they have no object or buildings touching them, they
+should have at least a 5px buffer between anything else next to them". The Round 457 rule kept an object's picture off every
+sprite's picture with a 3px margin; it is now `CITY_ITEM_GAP` = 5px, and the grand bridges (deck and the gate towers that stand
+past the road) count as sprites too (`citySpriteBoxes`). The tests hold the 5px against every sprite and every other object in
+the same room: `tests/city-layout.test.cjs` (city, six seeds) and `tests/solaris-gen.test.cjs` (Solaris, seeds 9 and 1).
+Playtest walks city 9 and Solaris 9: no problems. Tests: item-placement, city-surfaces, coast-wall, exploration.
+
 ## Round 519: the owner's grand bridge
 
 The owner's bridge sheet (from the Round 518 prompt; `assets/environment/solaris-gen/src/bridge-sheet.jpeg`) cut into its three

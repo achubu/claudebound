@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 519) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 520) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -128,7 +128,8 @@ change set.
   and parking lots with aisles (`l.mall === 'parking'`, `cityYardPieces`); its streets stay as planned. Round 453: its own art in the slots `mall-wall`, `mall-roof`, `mall-shop` (`cityLotSlots`).
   Round 457 (owner): **an interactable object's picture never overlaps a building or any other sprite** (cars, signs, lamps,
   clutter, landmarks, yard pieces): `citySpriteBoxes` / `cityItemBox`, enforced in `assets/city-gen.js` (`cityFixSpot`), which
-  also keeps objects off the street; every room gets a square. Add new sprite kinds to `citySpriteBoxes`.
+  also keeps objects off the street; every room gets a square. Add new sprite kinds to `citySpriteBoxes`. Round 520 (owner): at least
+  5px clear round every object (`CITY_ITEM_GAP`), from sprites and from other objects.
   Round 459: wall pictures with doors
   (`CITY_DOOR_WALLS`) only on the ground floor; a new wall needs its gaps (`CITY_TD_GAPS`) checked by eye over a ruler, as the
   tool's measure misreads dark or lit windows; floors step their windows (`fitRow`'s `prev`).
