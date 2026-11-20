@@ -389,6 +389,6 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
    animation, so the browser drew it at low quality whenever the hero stood still; no animation now: a still hero is crisp */
 #world #player:not(.walking) .hero-sprite,#player:not(.walking) .hero-sprite{animation:none!important}
 /* Round 521 (owner: "make the quest exclamation point gold and bigger"); Round 522 (owner's example picture): a drawn gold "!"
-   (questMarkSVG in quests.js), 21 x 35px (owner: "25% smaller"), with a soft gold glow so it reads on any ground */
-#world#world#world .poi-node .quest-mark{font-size:0!important;line-height:0;top:-31px;width:21px;height:35px;filter:drop-shadow(0 0 4px #ffd23fb0) drop-shadow(0 1px 1px #0008)}
-#world#world#world .poi-node .quest-mark svg{display:block;width:21px;height:35px}
+   (questMarkSVG in quests.js), 15 x 25px (owner: "25% smaller", then "another 30% smaller"), with a soft gold glow so it reads on any ground */
+#world#world#world .poi-node .quest-mark{font-size:0!important;line-height:0;top:-22px;width:15px;height:25px;filter:drop-shadow(0 0 4px #ffd23fb0) drop-shadow(0 1px 1px #0008)}
+#world#world#world .poi-node .quest-mark svg{display:block;width:15px;height:25px}
