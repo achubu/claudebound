@@ -3500,8 +3500,8 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 
 Owner (a picture of a chunky gold exclamation mark): "can you do something more like this one". The quest mark is now a small
 drawing (`questMarkSVG` in `quests.js`, used by `city-nights.js` too): a gold bar that narrows toward the bottom with rounded
-ends, a hexagon dot, a darker gold outline, a pale highlight inside each, and a soft gold glow (`layout-polish.css`). Checked in
-the browser. Tests: quests, city-nights, item-names.
+ends, a hexagon dot, a darker gold outline, a pale highlight inside each, and a soft gold glow (`layout-polish.css`), 21 x 35px (owner: "25% smaller"). Checked
+in the browser. Tests: quests, city-nights, item-names.
 
 ## Round 521: a gold quest mark
 
