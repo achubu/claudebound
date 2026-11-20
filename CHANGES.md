@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 515: prompts for Solaris's ground, edges, yards and ruins
+
+Owner: "give me a prompt to improve on solaris graphics as you deem necessary". Four prompts, each complete on its own, in
+`tools/art-refresh/solaris-ground-prompts.md`: nine seamless desert ground tiles with no direction (sand, packed earth,
+sandstone road, market tiles, caravan yard, threshing floor, river bank, river water, garden gravel); five edge strips (sandstone
+kerb, mud-brick yard wall, oasis stone rim, a bridge parapet for the river crossings, garden tile edge); sixteen yard pieces and
+desert clutter (tents, carts, crates, camel, stalls, rugs, a well, straw, jars, pottery, potted palm, banner, rocks, shrub,
+cactus, bones); eight ruins and eight walkable oasis gardens in the building sheets' layout. No code changed.
+
 ## Round 514: rivers in Solaris, and roads that aren't the ground
 
 Owner: "can we add rivers and make sure road tiles are different from ground tiles?"
