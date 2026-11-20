@@ -446,7 +446,7 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
     'home-wall': ['wall-adobe', 'wall-mudbrick'], 'home-roof': ['roof-woven', 'roof-clay', 'roof-gravel'], 'home-shop': ['wall-hutdoor'],
     'tech-wall': ['wall-solar'], 'tech-roof': ['roof-solar', 'roof-copper', 'roof-gravel'], 'tech-shop': ['shop-tech'],
     'garden-wall': ['wall-sandstone', 'wall-adobe'], 'garden-roof': ['roof-copper', 'roof-sandstone', 'roof-gravel'], 'garden-shop': ['shop-water'],
-    curb: ['kerb-blocks'], 'park-edge': ['stone-rim'], 'yard-edge': ['mudbrick-wall'], 'bridge-edge': ['parapet'] /* Round 516: the owner's edge sheet */, sidewalk: ['packed-earth'] /* Round 516: packed earth beside the roads */, park: ['oasis-grass'], 'waterfront-edge': [],
+    curb: ['kerb-blocks'], 'park-edge': ['stone-rim'], 'yard-edge': ['mudbrick-wall'], 'bridge-edge': ['parapet'] /* Round 516: the owner's edge sheet */, bridge: ['west', 'mid', 'east'] /* Round 519: the owner's grand bridge */, sidewalk: ['packed-earth'] /* Round 516: packed earth beside the roads */, park: ['oasis-grass'], 'waterfront-edge': [],
     'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': [], 'prop-ac': [], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
     'prop-vent': ['chimney'], 'prop-tank': ['tank'], 'prop-stairs': ['windcatcher'], 'prop-solar': ['mirror'],
     car: ['rover', 'skiff'], tree: ['tree-palm'], lamp: [] /* Round 484 (owner: "no lamps in desert") */, 'sign-traffic': ['cloth-banner'], cargo: ['tent', 'cart', 'crates', 'camel-rest', 'straw', 'stall', 'rug-rack', 'well'], clutter: ['water-jars', 'pottery', 'potted-palm', 'rocks', 'dry-shrub', 'cactus', 'bones'] /* Round 516: the owner's props sheet */,
@@ -986,8 +986,24 @@ function cityBridgeSpans(road, river, x0, y0) { const M = 8, seen = new Set(), o
       // (the road's width is where it runs on past the water, measured one cell beyond the deck)
       let t0 = by0, t1 = by1; for (let y = by0 - 6; y < by1 + 6; y++) if (road(bx0 - 1, y) && road(bx1, y)) { t0 = Math.min(t0, y); t1 = Math.max(t1, y + 1); } by0 = t0; by1 = t1; bx0 -= 1; bx1 += 1; }
     else { let t0 = bx0, t1 = bx1; for (let x = bx0 - 6; x < bx1 + 6; x++) if (road(x, by0 - 1) && road(x, by1)) { t0 = Math.min(t0, x); t1 = Math.max(t1, x + 1); } bx0 = t0; bx1 = t1; by0 -= 1; by1 += 1; }
+    const across = horiz ? by1 - by0 : bx1 - bx0, along = horiz ? bx1 - bx0 : by1 - by0; if (across > 6 || along > 20 || along < 3) continue; // Round 519: only a true crossing (a road running along a river is not a bridge)
     if (!out.some(o => o.x0 === bx0 && o.y0 === by0)) out.push({ x0: bx0, y0: by0, x1: bx1, y1: by1, horiz }); }
   return out; }
+// Round 519 (owner: "lets just generate an over the top bridge graphic"): the owner's grand bridge in three pieces (src/bridge-sheet.jpeg):
+// gate towers at each end and a middle section that repeats. Every piece is scaled by one factor so the deck between its
+// balustrades (rows 100-452 of the 506px-tall pieces) is the road's width; the ends stand on the banks and the middle repeats
+// across the water, the last copy cut short. A bridge shorter than its two ends is lengthened along the road, centred. North
+// to south it is the same picture turned 90 degrees (it is drawn straight down). World positions, so both rooms at a seam
+// draw the same bridge.
+const CITY_BRIDGE_DECK = [100, 452];
+function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, horiz = b.horiz;
+  const wide = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k;
+  let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C; const need = ew + eeW + mw * 0.5; if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
+  const L = a1 - a0, top = -CITY_BRIDGE_DECK[0] * k; ctx.save();
+  if (horiz) ctx.translate((a0 - ox) * K, (b.y0 * C - oy) * K); else { ctx.translate((b.x1 * C - ox) * K, (a0 - oy) * K); ctx.rotate(Math.PI / 2); }
+  // (turned, the deck's top edge lies on the east side: local v runs from x1 back to x0)
+  for (let u = ew; u < L - eeW; u += mw) { const w = Math.min(mw, L - eeW - u); ctx.drawImage(M, 0, 0, w / k, M.height, u * K, top * K, w * K + 0.6, ph * K); }
+  ctx.drawImage(W, 0, top * K, ew * K, ph * K); ctx.drawImage(E, (L - eeW) * K, top * K, eeW * K, ph * K); ctx.restore(); }
 // Round 517: one bridge: the parapet strip down both long sides of the deck (its outer face outward, world-anchored along its
 // length so it meets itself across a room's edge) and a square pier block at each of the four corners
 function cityBridgeDraw(ctx, b, ox, oy, K, art) { const C = FG_CELL, T = 16, x0 = b.x0 * C - ox, y0 = b.y0 * C - oy, x1 = b.x1 * C - ox, y1 = b.y1 * C - oy;
@@ -2272,7 +2288,8 @@ function paintChronoRoom(canvas, key) {
     // straight deck from bank to bank plus one cell onto land at each end, with the parapet down both of its sides the whole
     // way, and a pier block at each corner. Spans come from world cells, so a bridge across a room's edge is drawn the same in
     // both rooms; the kerb leaves the deck's sides to the parapet (one edge per seam).
-    if (bridgeArt && bridgeSpans.length) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) for (const b of bridgeSpans) cityBridgeDraw(cx2, b, gridRoad.ox, gridRoad.oy, K, bridgeArt);
+    const grand = ['west', 'mid', 'east'].map(n => CITY_HAS('bridge') && imgs[cityArtPath('bridge', n)]); // Round 519
+    if (bridgeArt && bridgeSpans.length) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) for (const b of bridgeSpans) { if (grand.every(i => i && i.naturalWidth)) cityBridgeGrand(cx2, b, gridRoad.ox, gridRoad.oy, K, grand); else cityBridgeDraw(cx2, b, gridRoad.ox, gridRoad.oy, K, bridgeArt); }
     if (GEN.topdown) { // Round 420 (owner: "add lanes to the road paths"): a dashed centre line down each main road (two lanes), stopping at the crossings
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H);
       for (const sh of plan.shapes) if (sh.t === 'poly' && !sh.pave) { const xs = sh.pts.map(q => q[0]), ys = sh.pts.map(q => q[1]); ctx.rect(Math.max(...xs) * K + 10 * K, (Math.min(...ys) - 10) * K, -(Math.max(...xs) - Math.min(...xs) + 20) * K, (Math.max(...ys) - Math.min(...ys) + 20) * K); }

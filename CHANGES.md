@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 519: the owner's grand bridge
+
+The owner's bridge sheet (from the Round 518 prompt; `assets/environment/solaris-gen/src/bridge-sheet.jpeg`) cut into its three
+pieces (`props/bridge/west`, `mid`, `east`; the middle repeats seamlessly, 3px trimmed off each cut). `cityBridgeGrand` scales
+all three by one factor so the deck between the balustrades is the road's width, stands the gate towers on the banks, repeats
+the middle across the water (the last copy cut short) and lengthens a short bridge along the road; north to south it is the
+same picture turned 90 degrees. Only true crossings are bridges (deck at most 6 cells across, 3-20 long): a road running along
+a river is not. Without the art, the Round 517 parapet. Tests: solaris-gen, city-surfaces, sprites-page; playtest walk Solaris
+9: no problems.
+
 ## Round 518: a prompt for a grand Solaris bridge
 
 Owner: "lets just generate an over the top bridge graphic we can use for bridges instead that matches the aesthetic". One
