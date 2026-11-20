@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 523: Sapling Strike and Riptide card art
+
+The owner's paintings for Sapling Strike and Riptide, levels 0-3, at `assets/cards/level*/<card>.webp` (512px, from the 1254px
+sources; `refreshedCardArt`, the card-art test, `cards.js?v=round523` in `index.html` and `compendium.html`).
+
 ## Round 522: the quest mark drawn like the owner's example
 
 Owner (a picture of a chunky gold exclamation mark): "can you do something more like this one". The quest mark is now a small
