@@ -77,3 +77,16 @@ console.log('PASS: Solaris on the generator: ' + Object.entries(r.seeds).map(([s
   assert.strictEqual(v.wet, 0, 'nobody walks on a river');
   assert(v.bridge > 0, 'roads cross the rivers');
   console.log('PASS: Solaris rivers: ' + v.water + ' water cells, ' + v.bridge + ' bridge cells, none walkable.'); }
+// Round 520 (owner: "when placing interactable objects ... at least a 5px buffer between anything else next to them"): in
+// Solaris too (buildings, ruins, gardens, yard pieces, clutter, the grand bridges), and between the objects of one room.
+for (const seed of [9, 1]) {
+  const r2 = JSON.parse(run(`(() => { newGame(); state.seed = ${seed}; state.region = 'elaris'; configureRegion('elaris'); cityGenEnsure(); const items = [];
+    for (const k of Object.keys(rooms)) { const p = poiAt(k); if (p) items.push([k, p.type, p]); const c = chestFor(k); if (c) items.push([k, 'chest', c]); const r = rooms[k].relic; if (r) items.push([k, 'relic', { x: r[3], y: r[4] }]); }
+    const m = merchantRoom(); if (m) items.push([m.key, 'merchant', m]);
+    const bad = [], G = CITY_ITEM_GAP; genWith('solaris', () => { for (const [k, t, p] of items) { const B = cityItemBox(p, t);
+      for (const sp of citySpriteBoxes(chronoSeed(), k, cityGenPlan(k))) if (B.x0 - G < sp.x1 && B.x1 + G > sp.x0 && B.y0 - G < sp.y1 && B.y1 + G > sp.y0) bad.push(k + ' ' + t + ' within ' + G + 'px of ' + sp.kind);
+      for (const [k2, t2, p2] of items) { if (k2 !== k || p2 === p) continue; const C = cityItemBox(p2, t2); if (B.x0 - G < C.x1 && B.x1 + G > C.x0 && B.y0 - G < C.y1 && B.y1 + G > C.y0) bad.push(k + ' ' + t + ' within ' + G + 'px of ' + t2); } } });
+    return JSON.stringify({ n: items.length, bad }); })()`));
+  assert(r2.n >= 15 && r2.bad.length === 0, 'Solaris seed ' + seed + ': every object has 5px clear round it: ' + r2.bad.join(', '));
+  console.log('PASS: Solaris seed ' + seed + ': ' + r2.n + ' objects, each with 5px clear round it.');
+}

@@ -141,7 +141,7 @@ function cityRoomWalk(key, x, y) {
   // (citySpriteBoxes: buildings, landmarks, yard pieces, trees, rubble, cars, lamps, lights, signs, clutter). A spot that
   // isn't is moved to the nearest ground that is: walkable, joined to the streets, 60px inside the room, clear of the HUD,
   // and clear of whatever the caller keeps a gap from. (The old fallback, "just off the path", is a building here.)
-  const CITY_ITEM_PAD = 3, cityItemClear = (key, x, y, boxes, o) => { // Round 473: the object's own box (CITY_ITEM_PX) with a 3px margin; with no object given, a 64px one
+  const CITY_ITEM_PAD = CITY_ITEM_GAP /* Round 520 (owner): at least 5px between an object and anything else */, cityItemClear = (key, x, y, boxes, o) => { // Round 473: the object's own box (CITY_ITEM_PX) with a 3px margin; with no object given, a 64px one
     const b = o && typeof o === 'object' ? cityItemBox({ x, y, type: o.type || 'chest', event: o.event }, o.type || 'chest') : { x0: x - 32, y0: y - 51, x1: x + 32, y1: y + 14 }, B = [b.x0 - CITY_ITEM_PAD, b.y0 - CITY_ITEM_PAD, b.x1 + CITY_ITEM_PAD, b.y1 + CITY_ITEM_PAD];
     return !boxes.some(b => B[0] < b.x1 && B[2] > b.x0 && B[1] < b.y1 && B[3] > b.y0); };
   const cityItemBoxesCache = {};
