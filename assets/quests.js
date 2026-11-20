@@ -115,7 +115,7 @@ checkWorldInteractions = function () {
 const poiNodeBeforeQuests = poiNode;
 poiNode = function (p) {
   const node = poiNodeBeforeQuests.apply(this, arguments);
-  if (node && node.append && questOffer(p)) { const m = document.createElement('span'); m.className = 'quest-mark'; m.textContent = '❗'; node.append(m); node.classList.remove('used'); node.dataset.name = (node.dataset.name || '').replace(' · used', '') + ' · quest'; }
+  if (node && node.append && questOffer(p)) { const m = document.createElement('span'); m.className = 'quest-mark'; m.textContent = '!'; node.append(m); node.classList.remove('used'); node.dataset.name = (node.dataset.name || '').replace(' · used', '') + ' · quest'; }
   return node;
 };
 // --- The Quests screen ---

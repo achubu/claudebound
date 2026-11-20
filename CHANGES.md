@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 521: a gold quest mark
+
+Owner: "make the quest exclamation point gold and bigger". The quest mark over an object with a quest to give was the red ❗
+emoji (which can't be recoloured), 14-18px. It is now a bold gold "!" in text (`quests.js`, `city-nights.js`), 42px, with a
+dark brown outline and a soft gold glow so it reads on any ground (`layout-polish.css`). Checked in the browser. Tests: quests,
+city-nights, item-names.
+
 ## Round 520: 5px clear round every interactable object
 
 Owner: "when placing interactable objects in game could you make sure they have no object or buildings touching them, they
