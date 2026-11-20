@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 516: the owner's Solaris ground, edges, props, ruins and gardens
+
+The owner's four sheets from the Round 515 prompts (kept in `assets/environment/solaris-gen/src/`: ground, edge, props,
+ruins-gardens). Every piece kept at its own proportions (one scale both ways).
+
+- **Ground** (each tile cut inside its green frame, slow light drifts taken out, cross-faded at the edges; the market tiles cut
+  to three whole repeats instead): open ground `dunes`, the ground beside roads `packed-earth`, river banks `riverbank`, the
+  rivers `river-water`, squares and market yards `market-tiles`, caravan yards `threshing-floor`, paths `garden-gravel`. Roads
+  stay the sandstone slabs (Round 514).
+- **Edges** (cut on one repeat): kerb `kerb-blocks`, yard wall `mudbrick-wall` (a new `yard-edge` slot the yard rim reads first;
+  the city has none, so its railing is unchanged), oasis rim `stone-rim`, and a **bridge parapet** (`bridge-edge`) along both
+  sides of every road crossing a river, bitmasked like a kerb, the kerb leaving those seams to it (one edge per seam).
+- **Yards**: no more car parks in Solaris. A yard is a caravan yard (tent, cart, crates, a resting camel, straw) or a market
+  yard (stalls, a rug rack, a well) on its own floor (`GEN.yardKind`, `GEN.yardSets`). Touching yards are one area (Round 475)
+  and take one kind, so two floors never meet without a border.
+- **Clutter**: water jars, pottery, a potted palm, rocks, a dry shrub, a cactus and bones along the roads; a cloth banner as the
+  sign. None stands within 28px of a river.
+- **Ruins and gardens**: eight ruins (`ruinpic-*`) and eight walkable oasis gardens (`parkpic-*`), placed like the city's
+  (Round 502).
+- The old stand-ins moved to `unused assets/environment/solaris-gen/`. `tools/cut_building_sheet.py` takes `ENCLOSED=clear`
+  (green inside an object, between a wheel's spokes, is see-through). Sprites manifest rebuilt.
+- Playtest walk, Solaris seeds 9 and 1: no problems. Seam-check Solaris 9 lists 14 stretches; the ones looked at are yard walls
+  and a ruin's edge lying exactly on a room seam, not cuts. Tests: solaris-gen, city-surfaces, sprites-page, city-buildings,
+  city-layout, coast-wall.
+
 ## Round 515: prompts for Solaris's ground, edges, yards and ruins
 
 Owner: "give me a prompt to improve on solaris graphics as you deem necessary". Four prompts, each complete on its own, in
