@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 533: five enemy-trait bugs fixed
+
+A review (passed on by the owner to check) reported five trait bugs; each was reproduced with the real-script harness, then fixed
+in `assets/enemy-traits.js`:
+
+1. **Twin strike** read Freeze after the turn had spent it and took its extra hit straight off HP. Freeze is now read before the
+   turn, and the extra hit meets whatever Block the main hit left (frozen: 6 → 0; 100 Block: 6 → 0; open: still hits).
+2. **Phasing / Resistant on a lethal hit**: the reduction ran after the win. A card's hit is now remembered (`traitHit`), and
+   `winBattle` first gives back what the trait would have (`traitLethalSave`): an enemy whose reduction keeps it up fights on.
+3. **Trait effects of a card weren't saved** (the card saved first, then Phasing / Thorns / Brittle / Static field changed things):
+   the wrapper saves after them.
+4. **Purging on a pair's partner** did nothing (it required the targeted enemy); the partner halves its own Poison and Burn
+   (`b.pair.other`).
+5. **Bloodthirst** healed from every HP you lost that turn (Bleed, the partner's hit); it heals only from what its own hit got
+   through, after the Block that was up.
+
+`tests/enemy-traits-bugs.test.cjs` pins all five. Tests: enemy-traits, save-roundtrip, enemy-pairs, enemy-armor, enemy-temper,
+boss-twists, expansion.
+
 ## Round 532: Oath of the First Star redesigned
 
 The owner's Oath of the First Star redesign, levels 0-3 (a star-crested shield over a dais in a sky temple; replaces the old

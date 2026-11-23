@@ -142,19 +142,28 @@ playCard = function (i) {
   const b = state && state.battle, c = b && b.hand && b.hand[i];
   if (!b || b.phase !== 'fight' || !c) return playCardBeforeTraits.apply(this, arguments);
   const e = b.enemy, t = traitOf(e), d = statBeforeTraits(c), hp = e.hp, wasStatic = staticFieldOn(b);
-  const r = playCardBeforeTraits.apply(this, arguments);
+  traitHit = { e, t, hp, elemental: !!(d && ['fire', 'earth', 'air', 'water', 'ice', 'lightning'].includes(d.element)), done: false };
+  let r; try { r = playCardBeforeTraits.apply(this, arguments); } finally { var hitDone = traitHit && traitHit.done; traitHit = null; }
   if (state.battle !== b || b.hand.includes(c)) return r;
   if (wasStatic) b.staticTurn = b.turn;
   const dealt = hp - e.hp;
-  if (t && dealt > 0 && e.hp > 0) {
+  if (t && dealt > 0 && e.hp > 0 && !hitDone) {
     if (t === 'phasing' && b.phaseTurn !== b.turn) { const back = Math.floor(dealt * .3); e.hp = Math.min(e.maxHp, e.hp + back); b.phaseTurn = b.turn; b.logs.push('👻 Phasing: ' + back + ' of that hit passes through.'); }
     if (t === 'resistant' && !(d && ['fire', 'earth', 'air', 'water', 'ice', 'lightning'].includes(d.element))) { const back = Math.floor(dealt * .25); if (back) { e.hp = Math.min(e.maxHp, e.hp + back); b.logs.push('🛡 Resistant: ' + back + ' shrugged off.'); } }
     if (t === 'thorns') { const hurt = Math.max(1, Math.round((e.baseAttack || e.attack) * .12)); state.hp = Math.max(1, state.hp - hurt); b.logs.push('🌵 Thorns: you take ' + hurt + '.'); }
     if (t === 'brittle' && e.armor > 0) { e.armor--; b.cracked = (b.cracked || 0) + 1; b.logs.push('🧊 Brittle: 1 Armor cracks.'); }
   }
-  if (b.phase === 'fight') renderBattle();
+  if (b.phase === 'fight') { save(); renderBattle(); } // Round 533: what the traits changed is saved (the card's own save came first)
   return r;
 };
+// Round 533: a lethal hit still meets Phasing and Resistant. winBattle runs inside the card's play, before the reduction above
+// could apply, so the reduction is applied here: if what it gives back keeps the enemy up, the fight goes on.
+let traitHit = null;
+function traitLethalSave(b) { const h = traitHit; if (!h || h.done || h.e !== b.enemy || b.enemy.hp > 0) return false;
+  const dealt = h.hp, back = h.t === 'phasing' && b.phaseTurn !== b.turn ? Math.floor(dealt * .3) : h.t === 'resistant' && !h.elemental ? Math.floor(dealt * .25) : 0;
+  if (back <= 0) return false; h.done = true; b.enemy.hp = Math.min(b.enemy.maxHp, back);
+  if (h.t === 'phasing') { b.phaseTurn = b.turn; b.logs.push('👻 Phasing: ' + back + ' of that hit passes through.'); } else b.logs.push('🛡 Resistant: ' + back + ' shrugged off.');
+  return true; }
 // Its turn: Twin strike, Bloodthirst, Aether drain, Frenzy, Stoneskin, Regeneration, Purging, Brittle's
 // Armor growing back. Each enemy of a pair applies its own trait.
 function traitEnemies(b) { const out = [[b.enemy, false]]; if (b.pair && b.pair.other && b.pair.other.enemy && b.pair.other.enemy.hp > 0) out.push([b.pair.other.enemy, true]); return out; }
@@ -163,21 +172,28 @@ endTurn = function () {
   const b = state && state.battle;
   if (!b || b.phase !== 'fight') return endTurnBeforeTraits.apply(this, arguments);
   const plans = traitEnemies(b).map(([e, mate]) => [e, mate ? (typeof withPairMate === 'function' ? withPairMate(b, () => enemyPlan(b)) : null) : enemyPlan(b)]);
-  const hp0 = state.hp, turn = b.turn;
+  const hp0 = state.hp, turn = b.turn, block0 = b.block || 0, frozen0 = [b.freeze || 0, b.pair && b.pair.other ? b.pair.other.freeze || 0 : 0]; // Round 533: before the turn spends them
   b.enemyActing = true;
   let r; try { r = endTurnBeforeTraits.apply(this, arguments); } finally { b.enemyActing = false; }
   if (state.battle !== b || b.phase !== 'fight' || b.turn <= turn) return r;
   const lost = Math.max(0, hp0 - state.hp);
+  // Round 533: the Block that was up when the enemies struck, spent hit by hit, so Twin strike's extra hit meets what is left
+  // and Bloodthirst heals only from what its own hit got through (never Bleed, Burn or the partner's hit)
+  let blockLeft = block0; const plating = scaledRank('plating');
   for (const [e, plan] of plans) {
-    const t = traitOf(e); if (!t || !(e.hp > 0)) continue;
-    const attacked = !!(plan && plan.damage > 0 && !['charge', 'guard', 'silenced'].includes(plan.kind)) && !(b.freeze > 0);
-    if (t === 'twinStrike' && attacked && plan.kind === 'attack') { const hit = Math.max(0, Math.round(plan.damage * .3) - scaledRank('plating')); state.hp = Math.max(0, state.hp - hit); b.logs.push('⚔ Twin strike: ' + hit + ' more.'); }
-    if (t === 'bloodthirst' && lost > 0) { const heal = Math.ceil(lost / 2); e.hp = Math.min(e.maxHp, e.hp + heal); b.logs.push('🩸 Bloodthirst: it heals ' + heal + '.'); }
+    const t = traitOf(e), mate = e !== b.enemy, frozen = frozen0[mate ? 1 : 0] > 0;
+    const attacked = !!(plan && plan.damage > 0 && !['charge', 'guard', 'silenced'].includes(plan.kind)) && !frozen;
+    const raw = attacked ? Math.max(0, plan.damage - plating) : 0, own = Math.max(0, raw - blockLeft); blockLeft = Math.max(0, blockLeft - raw);
+    if (!t || !(e.hp > 0)) continue;
+    if (t === 'twinStrike' && attacked && plan.kind === 'attack') { const extra = Math.max(0, Math.round(plan.damage * .3) - plating), hit = Math.max(0, extra - blockLeft); blockLeft = Math.max(0, blockLeft - extra); state.hp = Math.max(0, state.hp - hit); b.logs.push('⚔ Twin strike: ' + hit + ' more.'); }
+    const mine = Math.min(lost, own);
+    if (t === 'bloodthirst' && mine > 0) { const heal = Math.ceil(mine / 2); e.hp = Math.min(e.maxHp, e.hp + heal); b.logs.push('🩸 Bloodthirst: it heals ' + heal + '.'); }
     if (t === 'aetherDrain' && attacked && lost > 0 && b.aether > 0) { const n = Math.min(2, b.aether); b.aether -= n; b.logs.push('🌀 Aether drain: −' + n + ' Aether.'); }
     if (t === 'frenzy' && attacked) { const up = Math.max(1, Math.round((e.baseAttack || e.attack) * .08)); e.attack += up; b.logs.push('😤 Frenzy: its attack rises by ' + up + '.'); }
     if (t === 'stoneskin') { const g = Math.round(e.attack * .12); e.guard = (e.guard || 0) + g; b.logs.push('🪨 Stoneskin: +' + g + ' Block.'); }
     if (t === 'regen' && e.hp < e.maxHp) { const h = Math.max(1, Math.round(e.maxHp * .02)); e.hp = Math.min(e.maxHp, e.hp + h); b.logs.push('💚 Regeneration: +' + h + ' HP.'); }
-    if (t === 'purging' && e === b.enemy && (b.poison > 0 || b.burn > 0)) { b.poison = Math.floor((b.poison || 0) / 2); b.burn = Math.floor((b.burn || 0) / 2); b.logs.push('🫧 Purging: its Poison and Burn are halved.'); }
+    { const f = mate ? b.pair.other : b; // Round 533: a pair's partner keeps its own Poison and Burn (b.pair.other)
+      if (t === 'purging' && (f.poison > 0 || f.burn > 0)) { f.poison = Math.floor((f.poison || 0) / 2); f.burn = Math.floor((f.burn || 0) / 2); b.logs.push('🫧 Purging: its Poison and Burn are halved.'); } }
     if (t === 'brittle' && b.cracked) { e.armor += b.cracked; b.cracked = 0; }
   }
   if (state.hp <= 0 && typeof loseBattle === 'function') loseBattle();
@@ -188,6 +204,7 @@ endTurn = function () {
 const winBattleBeforeTraits = winBattle;
 winBattle = function () {
   const b = state && state.battle;
+  if (b && b.phase === 'fight' && traitLethalSave(b)) return; // Round 533
   if (b && b.phase === 'fight' && hasTrait(b, 'undying') && !b.enemy.undyingUsed && !(b.enemy.hp > 0)) {
     b.enemy.undyingUsed = true; b.enemy.hp = Math.max(1, Math.round(b.enemy.maxHp * .2)); b.logs.push('💀 Undying: ' + b.enemy.name + ' gets back up.');
     save(); renderBattle(); return;
