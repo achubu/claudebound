@@ -446,7 +446,7 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
     'home-wall': ['wall-adobe', 'wall-mudbrick'], 'home-roof': ['roof-woven', 'roof-clay', 'roof-gravel'], 'home-shop': ['wall-hutdoor'],
     'tech-wall': ['wall-solar'], 'tech-roof': ['roof-solar', 'roof-copper', 'roof-gravel'], 'tech-shop': ['shop-tech'],
     'garden-wall': ['wall-sandstone', 'wall-adobe'], 'garden-roof': ['roof-copper', 'roof-sandstone', 'roof-gravel'], 'garden-shop': ['shop-water'],
-    curb: ['kerb-blocks'], 'park-edge': ['stone-rim'], 'yard-edge': ['mudbrick-wall'], 'bridge-edge': ['parapet'] /* Round 516: the owner's edge sheet */, bridge: ['west', 'mid', 'east'] /* Round 519: the owner's grand bridge */, sidewalk: ['packed-earth'] /* Round 516: packed earth beside the roads */, park: ['oasis-grass'], 'waterfront-edge': [],
+    curb: ['kerb-blocks'], 'park-edge': ['stone-rim'], 'yard-edge': ['mudbrick-wall'], 'bridge-edge': ['parapet'] /* Round 516: the owner's edge sheet */, bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'] /* Round 519: the owner's grand bridge; Round 528: its north-south pieces */, sidewalk: ['packed-earth'] /* Round 516: packed earth beside the roads */, park: ['oasis-grass'], 'waterfront-edge': [],
     'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': [], 'prop-ac': [], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
     'prop-vent': ['chimney'], 'prop-tank': ['tank'], 'prop-stairs': ['windcatcher'], 'prop-solar': ['mirror'],
     car: ['rover', 'skiff'], tree: ['tree-palm'], lamp: [] /* Round 484 (owner: "no lamps in desert") */, 'sign-traffic': ['cloth-banner'], cargo: ['tent', 'cart', 'crates', 'camel-rest', 'straw', 'stall', 'rug-rack', 'well'], clutter: ['water-jars', 'pottery', 'potted-palm', 'rocks', 'dry-shrub', 'cactus', 'bones'] /* Round 516: the owner's props sheet */,
@@ -997,6 +997,22 @@ function cityBridgeSpans(road, river, x0, y0) { const M = 8, seen = new Set(), o
 // draw the same bridge.
 const CITY_BRIDGE_DECK = [100, 452], CITY_BRIDGE_COVER = 1.3; /* Round 526 (owner: "make the bridge bigger so it covers the road underneath better"): the deck between the balustrades is 1.3 x the road's width, centred on it */
 const CITY_BRIDGE_PIECES = [322, 494, 322]; // (the west, middle and east pieces' widths in their own px)
+// Round 528 (the owner's north-south sheet, src/bridge-vertical-sheet.jpeg): the same bridge running top to bottom, drawn tilted
+// like the buildings (towers upright). Measured in each piece's own px: the deck between the balustrades' outer edges starts
+// at x deckL and is 450 wide (the south piece 445: it has its own scale); the north piece's deck starts at y 194 and its cut is
+// its bottom (489); the middle's deck runs from cut 31 to cut 435 (it repeats every 404); the south piece's top cut is at 35 and
+// its deck ends at 689 (its towers hang below, the front of them showing).
+const CITY_BRIDGE_V = { north: { deckL: 49, w: 450, start: 194, cut: 489 }, mid: { deckL: 42, w: 450, top: 31, bottom: 435 }, south: { deckL: 46, w: 445, top: 35, end: 689 } };
+function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V = CITY_BRIDGE_V;
+  const road = (b.x1 - b.x0) * C, wide = road * CITY_BRIDGE_COVER, k = wide / V.north.w, kS = wide / V.south.w, deckX = b.x0 * C - (wide - road) / 2 - ox;
+  let a0 = b.y0 * C, a1 = b.y1 * C; const need = (V.north.cut - V.north.start) * k + (V.south.end - V.south.top) * kS + (V.mid.bottom - V.mid.top) * k * 0.5;
+  if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
+  const nCut = a0 + (V.north.cut - V.north.start) * k, sTop = a1 - V.south.end * kS, sCut = sTop + V.south.top * kS, step = (V.mid.bottom - V.mid.top) * k;
+  const D = (img, x, y, kk) => ctx.drawImage(img, x * K, (y - oy) * K, img.width * kk * K, img.height * kk * K);
+  D(N, deckX - V.north.deckL * k, a0 - V.north.start * k, k);
+  ctx.save(); ctx.beginPath(); ctx.rect(-1e4, -1e4, 2e4, (sCut - oy) * K + 1e4); ctx.clip(); // (the last middle copy is cut short where the south end begins)
+  for (let u = nCut; u < sCut; u += step) D(M, deckX - V.mid.deckL * k, u - V.mid.top * k, k);
+  ctx.restore(); D(S, deckX - V.south.deckL * kS, sTop, kS); }
 function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, horiz = b.horiz;
   const road = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C, wide = road * CITY_BRIDGE_COVER, grow = (wide - road) / 2, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k;
   let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C; const need = ew + eeW + mw * 0.5; if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
@@ -2318,8 +2334,8 @@ function paintChronoRoom(canvas, key) {
       ctx.restore(); }
     if (GEN.topdown) paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill);
     // Round 526 (owner: "it needs to be the top texture"): the bridges are drawn last, over the buildings, yards, lamps and clutter
-    const grand = ['west', 'mid', 'east'].map(n => CITY_HAS('bridge') && imgs[cityArtPath('bridge', n)]); // Round 519
-    if (bridgeArt && bridgeSpans.length) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) for (const b of bridgeSpans) { if (grand.every(i => i && i.naturalWidth)) cityBridgeGrand(cx2, b, gridRoad.ox, gridRoad.oy, K, grand); else cityBridgeDraw(cx2, b, gridRoad.ox, gridRoad.oy, K, bridgeArt); }
+    const grand = ['west', 'mid', 'east'].map(n => CITY_HAS('bridge') && imgs[cityArtPath('bridge', n)]), grandV = ['north', 'vmid', 'south'].map(n => CITY_HAS('bridge') && imgs[cityArtPath('bridge', n)]); // Rounds 519, 528
+    if (bridgeArt && bridgeSpans.length) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) for (const b of bridgeSpans) { if (!b.horiz && grandV.every(i => i && i.naturalWidth)) cityBridgeGrandV(cx2, b, gridRoad.ox, gridRoad.oy, K, grandV); else if (grand.every(i => i && i.naturalWidth)) cityBridgeGrand(cx2, b, gridRoad.ox, gridRoad.oy, K, grand); else cityBridgeDraw(cx2, b, gridRoad.ox, gridRoad.oy, K, bridgeArt); }
   } else {
   if (GEN.pavement) { // a strip of pavement down both sides of every road
     // Owner (Round 393): "clean half circle edges ... and a corner cut at 90 degrees": the pavement is the same shapes drawn
