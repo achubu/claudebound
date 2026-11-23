@@ -3496,6 +3496,17 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 528: the north-south bridge
+
+The owner's north-south bridge sheet (from the Round 526 prompt; `assets/environment/solaris-gen/src/bridge-vertical-sheet.jpeg`)
+cut into its north end, repeating middle and south end (`props/bridge/north`, `vmid`, `south`). `cityBridgeGrandV` draws a
+north-south crossing with them, tilted like the buildings so the towers stand upright: each piece scaled by one factor so the
+deck between the balustrades is 1.3 x the road's width (the south piece is 1% narrower on the sheet and has its own factor),
+the north end's deck starting on the north bank, the middle repeating every 404px of the sheet down to the south end (the
+last copy cut short), the south end's deck ending on the south bank with its towers hanging below. Measurements in
+`CITY_BRIDGE_V`. East-west crossings keep Round 519's pieces. Tests: solaris-gen, city-surfaces, sprites-page,
+item-placement; playtest walk Solaris 9: no problems.
+
 ## Round 527: Packet Sniff, Logic Bomb and Cinder Capacitor card art
 
 The owner's paintings for Packet Sniff, Logic Bomb and Cinder Capacitor, levels 0-3, at `assets/cards/level*/<card>.webp` (512px,
