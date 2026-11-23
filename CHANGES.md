@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 531: Rewind Mend redesigned
+
+The owner's Rewind Mend redesign, levels 0-3 (an emerald heart in a brass orrery on a clockwork plinth; replaces the paintings whose
+open gauntlet had an extra finger, flagged in the art review), 512px webp from the 1254px sources, `cards.js?v=round531`.
+
 ## Round 530: Verdant Pact redesigned
 
 The owner's Verdant Pact redesign, levels 0-3 (a vine-wrapped spring and sprouting seed; replaces the paintings whose gauntlets had
