@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 534: enemy sprite report
+
+Owner: "generate a report ... of all the enemies that need animations or sprites improved. chatgpt will generate new ones".
+`tools/art-refresh/enemy-sprite-report.md`: all 56 enemies checked (sheets viewed side by side; `tools/sprite_audit.py` finds no
+broken sheets). Four bosses use another enemy's art (the Sun Pharaoh is the forest Bloom Tyrant); eleven enemies, two of them world
+bosses, are recolours of an earlier world's creature; sixteen walk cycles barely move; six change size between frames; and every
+enemy but the Sunwrapped Revenant lacks attack and hurt poses. The report opens with the sheet format so new art drops straight in.
+No code changed.
+
 ## Round 533: five enemy-trait bugs fixed
 
 A review (passed on by the owner to check) reported five trait bugs; each was reproduced with the real-script harness, then fixed
