@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 532: Oath of the First Star redesigned
+
+The owner's Oath of the First Star redesign, levels 0-3 (a star-crested shield over a dais in a sky temple; replaces the old
+paintings, whose level 3 robot bishop had four arms), 512px webp from the 1254px sources, added to `refreshedCardArt`,
+`cards.js?v=round532`. The old pngs stay in place, unused.
+
 ## Round 531: Rewind Mend redesigned
 
 The owner's Rewind Mend redesign, levels 0-3 (an emerald heart in a brass orrery on a clockwork plinth; replaces the paintings whose
