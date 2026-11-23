@@ -20,15 +20,20 @@ function itemPadsFor(key) {
   if (itemPadCache[ck]) return itemPadCache[ck];
   const pads = [], add = (p, reach) => { if (p && typeof p.x === 'number' && typeof p.y === 'number') pads.push({ x: p.x, y: p.y, r: reach + ITEM_PAD_EXTRA }); };
   add(poiAt(key), 40);
-  if (typeof chestFor === 'function') add(chestFor(key), 38);
+  if (typeof chestFor === 'function') { const c = chestFor(key), n = pads.length; add(c, 38); if (c && c.id && pads.length > n) pads[n].chest = c.id; } // (Round 535: an opened chest's pad is skipped, itemPadAt)
   const relic = rooms[key].relic; if (relic) add({ x: relic[3], y: relic[4] }, 48);
   const shop = typeof merchantRoom === 'function' && merchantRoom(); if (shop && shop.key === key) add(shop, 40);
   const smith = typeof cardsmithFor === 'function' && cardsmithFor(); if (smith && smith.key === key) add(smith, 40);
   return itemPadCache[ck] = pads;
 }
+// Round 535: no pads in the generated worlds (the city and Solaris, genLive()): their objects already stand on open walkable
+// ground, and a pad there reached onto buildings and the sea, where a closed menu then sent the hero back to the hub. Nor
+// round a chest already opened: nothing is left to walk to.
 function itemPadAt(key, x, y) {
   if (x < 12 || x > 788 || y < 12 || y > 488) return false;
-  return itemPadsFor(key).some(p => Math.hypot(x - p.x, y - p.y) < p.r);
+  if (typeof genLive === 'function' && genLive()) return false;
+  const opened = state && Array.isArray(state.chests) ? state.chests : [];
+  return itemPadsFor(key).some(p => !(p.chest && opened.includes(p.chest)) && Math.hypot(x - p.x, y - p.y) < p.r);
 }
 const collidesBeforeItemPads = collides;
 collides = function (x, y) { return collidesBeforeItemPads(x, y) && !itemPadAt(state.room, x, y); };
