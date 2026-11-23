@@ -628,9 +628,10 @@ endTurn = function () {
 };
 const playCardBeforeBounty = playCard;
 playCard = function (i) {
-  const b = state && state.battle, hp = b && b.enemy ? b.enemy.hp + (b.enemy.guard || 0) + (b.enemy.barrier || 0) : 0;
+  // The enemy hit, kept by reference: if a pair's target falls, b.enemy becomes its partner (enemy-pairs.js).
+  const b = state && state.battle, e = b && b.enemy, hp = e ? e.hp + (e.guard || 0) + (e.barrier || 0) : 0;
   const r = playCardBeforeBounty(i);
-  if (b && b.enemy) { const dealt = hp - (b.enemy.hp + (b.enemy.guard || 0) + (b.enemy.barrier || 0)); if (dealt > (b.bountyBigHit || 0)) b.bountyBigHit = dealt; }
+  if (e) { const dealt = hp - (Math.max(0, e.hp) + (e.guard || 0) + (e.barrier || 0)); if (dealt > (b.bountyBigHit || 0)) b.bountyBigHit = dealt; }
   return r;
 };
 const playSideCardBeforeBounty = playSideCard;

@@ -35,12 +35,14 @@ enemyPlan = function (b = state.battle, turn = b?.turn) {
 // Count damage dealt and Block gained by cards played this turn (hand and side deck alike).
 function pressureTrack(before) {
   return function () {
-    const b = state && state.battle, hp = b && b.enemy.hp + (b.enemy.guard || 0), block = b && b.block;
+    // The enemy the card hits, kept by reference: if it falls, a pair's partner takes its place in b.enemy (enemy-pairs.js),
+    // and Pressure is kept per enemy (pressureTurn / pressureDmg are pair fields).
+    const b = state && state.battle, e = b && b.enemy, hp = b && e.hp + (e.guard || 0), block = b && b.block;
     const r = before.apply(this, arguments);
     if (b && state.battle === b) {
       if (b.block > block) b.guardTurn = b.turn;
-      const dealt = hp - Math.max(0, b.enemy.hp) - (b.enemy.guard || 0);
-      if (dealt > 0) { if (b.pressureTurn !== b.turn) { b.pressureTurn = b.turn; b.pressureDmg = 0; } b.pressureDmg += dealt; }
+      const dealt = hp - Math.max(0, e.hp) - (e.guard || 0), f = e === b.enemy || !(b.pair && b.pair.other && b.pair.other.enemy === e) ? b : b.pair.other;
+      if (dealt > 0) { if (f.pressureTurn !== b.turn) { f.pressureTurn = b.turn; f.pressureDmg = 0; } f.pressureDmg += dealt; }
       if (b.phase === 'fight' && (dealt > 0 || b.block > block)) renderBattle();
     }
     return r;
