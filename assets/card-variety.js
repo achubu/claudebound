@@ -126,16 +126,24 @@ enemyPlan = function (b = state.battle, turn = b?.turn) {
   if (!b || !b.bind || !(plan.damage > 0)) return plan;
   let first = b.turn; while (first < turn && !(enemyPlanBeforeVariety(b, first).damage > 0)) first++;
   if (first !== turn) return plan;
-  return { ...plan, damage: Math.max(0, plan.damage - b.bind), bound: b.bind };
+  // Rootbind comes off the whole attack: a multi-hit attack loses its share on each hit.
+  const per = plan.hits > 1 ? Math.ceil(b.bind / plan.hits) : b.bind;
+  return { ...plan, damage: Math.max(0, plan.damage - per), bound: b.bind };
 };
 const endTurnBeforeVariety = endTurn;
 endTurn = function () {
   const b = state.battle; if (!b || b.phase !== 'fight') return;
   const plan = enemyPlan(b), plating = scaledRank('plating');
   const hitsOn = !(b.freeze > 0) && plan.kind !== 'silenced' && plan.damage > 0;
-  const incoming = hitsOn ? Math.max(0, (b.disrupted ? Math.ceil(plan.damage / 2) : plan.damage) - plating) * (plan.hits || 1) : 0;
-  const stopped = b.mirrorBlock ? Math.min(b.block, incoming) : 0;
-  const bound = plan.bound && hitsOn;
+  // The strike lands only if it isn't countered and the enemy survives its Burn / Poison.
+  const dot = (b.poison || 0) + (b.burnTurns > 0 ? (b.burn || 0) : 0);
+  const countered = plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter;
+  const lands = hitsOn && !countered && dot < b.enemy.hp;
+  const incoming = lands ? Math.max(0, (b.disrupted ? Math.ceil(plan.damage / 2) : plan.damage) - plating) * (plan.hits || 1) : 0;
+  // Mirrorguard reflects only Block that is still there when the hit arrives (Rend halves it first).
+  const blockAtHit = plan.rider === 'rend' && !b.rendProof ? (b.block || 0) - Math.ceil((b.block || 0) / 2) : (b.block || 0);
+  const stopped = b.mirrorBlock ? Math.min(blockAtHit, incoming) : 0;
+  const bound = plan.bound && lands;
   const turn = b.turn, extra = b.drawNext || 0;
   endTurnBeforeVariety();
   if (state.battle !== b) return;
@@ -203,13 +211,16 @@ cardHTML = function (c) {
 // Round 51: arriving in Elaris for the first time, choose one Elaris card,
 // so the first fights aren't played with a city-only deck.
 const ELARIS_ARRIVAL_POOL = ['cinder', 'venom', 'gale', 'thornlash', 'wildfire', 'rootbind', 'tidecall', 'verdantPact'];
+// Open while the pick is on screen: the world's mechanic intro waits for it (world-mechanics.js).
+let arrivalPickOpen = false;
 function offerArrivalCard() {
+  arrivalPickOpen = true;
   const pool = [...ELARIS_ARRIVAL_POOL], offers = [];
   while (offers.length < 3) offers.push(make(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]));
   keys = {};
   openMenu('<div class="eyebrow">SOLARIS ATTUNEMENT</div><h2>Choose an Solaris card</h2><p>The wilds answer your arrival. Take one card attuned to this world — it joins your collection; open <b>Deck</b> to add it.</p><div class="cards" id="arrivalCards"></div>');
   const host = $('arrivalCards');
-  if (host && host.append) offers.forEach(c => host.append(cardElement(c, () => { state.pool.push(c); save(); toast(stat(c).name + ' joins your collection. Open Deck to add it.'); closeMenu(); })));
+  if (host && host.append) offers.forEach(c => host.append(cardElement(c, () => { state.pool.push(c); save(); toast(stat(c).name + ' joins your collection. Open Deck to add it.'); arrivalPickOpen = false; closeMenu(); if (typeof showPendingMechIntro === 'function') showPendingMechIntro(); })));
   return offers;
 }
 const travelPortalBeforeVariety = travelPortal;

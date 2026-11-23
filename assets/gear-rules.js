@@ -52,13 +52,16 @@ const endTurnBeforeGearRules = endTurn;
 endTurn = function () {
   const b = state && state.battle;
   if (!b || b.phase !== 'fight' || !wornGear().length) return endTurnBeforeGearRules.apply(this, arguments);
-  b.gearHpBefore = state.hp; const turn = b.turn, hp0 = state.hp, block0 = b.block || 0, plan = enemyPlan(b), spare = Math.min(1, Math.max(0, b.energy || 0));
-  const halve = gearRule('cloudstepBoots') && !b.gearCloudUsed && plan && plan.damage > 0 && !['guard', 'charge'].includes(plan.kind);
+  if (!b.gearHpPreset) b.gearHpBefore = state.hp; b.gearHpPreset = false; /* a pair's partner may already have struck: enemy-pairs.js records the HP first */ const turn = b.turn, hp0 = state.hp, block0 = b.block || 0, plan = enemyPlan(b), spare = Math.min(1, Math.max(0, b.energy || 0));
+  // Read before the turn spends them: a frozen, countered or silenced enemy makes no hit (Cloudstep and Riot Guard wait for one).
+  const strikes = !!(plan && plan.damage > 0 && !['guard', 'charge', 'silenced'].includes(plan.kind) && !(b.freeze > 0)
+    && !(plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter));
+  const halve = gearRule('cloudstepBoots') && !b.gearCloudUsed && strikes;
   if (halve) b.gearCloudBlock = Math.ceil(plan.damage / 2), b.block = block0 + b.gearCloudBlock; // half the hit is soaked up as Block
   const r = endTurnBeforeGearRules.apply(this, arguments);
   if (state.battle !== b) return r;
   if (halve) { b.gearCloudUsed = true; gearRuleLog(b, 'cloudstepBoots', 'the first hit is halved.'); }
-  const hitLanded = plan && plan.damage > 0 && !['guard', 'charge'].includes(plan.kind) && !(b.freeze > 0);
+  const hitLanded = strikes;
   if (gearRule('boots') && hitLanded && block0 > 0 && state.hp >= hp0 && b.enemy.hp > 0) { const hit = Math.min(3, b.enemy.hp); b.enemy.hp -= hit; gearRuleLog(b, 'boots', 'the enemy takes ' + hit + '.'); if (!b.enemy.hp && typeof winBattle === 'function') { winBattle(); return r; } }
   if (b.phase === 'fight' && b.turn > turn) {
     if (gearRule('mossweavePants') && state.hp < state.maxHp && (b.gearMoss || 0) < 6) { const h = 1; b.gearMoss = (b.gearMoss || 0) + h; state.hp += h; gearRuleLog(b, 'mossweavePants', '+' + h + ' HP.'); }

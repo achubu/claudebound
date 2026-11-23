@@ -16,9 +16,9 @@ const itemsIn = () => { const items = [];
 const approach = (p, rad, x, y) => { for (let t = 0; t < 240; t++) { const dx = Math.sign(Math.round((p.x - x) / 6)), dy = Math.sign(Math.round((p.y - y) / 6)); if (!dx && !dy) break;
   const l = Math.hypot(dx, dy), st = 175 / 60, nx = x + dx / l * st, ny = y + dy / l * st; if (!collides(nx, y)) x = nx; if (!collides(x, ny)) y = ny;
   if (Math.hypot(x - p.x, y - p.y) < rad) return 0; } return Math.hypot(x - p.x, y - p.y); };
-for (const region of WORLD_ORDER) { configureRegion(region); state.region = region; const w = out.worlds[region] = { items: 0, padless: [], tries: 0, near: 0 };
+for (const region of WORLD_ORDER) { configureRegion(region); state.region = region; const w = out.worlds[region] = { items: 0, padless: [], tries: 0, near: 0, gen: typeof genLive === 'function' && genLive() };
   for (const [k, t, p, rad] of itemsIn()) { w.items++; state.room = k;
-    if (!itemPadAt(k, p.x, p.y)) w.padless.push(k + ' ' + t);
+    if (!w.gen && !itemPadAt(k, p.x, p.y)) w.padless.push(k + ' ' + t); // (Round 535: the generated worlds have no pads: their objects stand on open walkable ground)
     const reach = organicReachable(k), pts = organicGrid(k);
     for (let i = 0; i < pts.length; i += 6) { const px = pts[i], py = pts[i + 1], d = Math.hypot(px - p.x, py - p.y);
       if (d < rad || d > 140 || (reach && !reach.has(px + ',' + py))) continue;
@@ -27,10 +27,10 @@ out.typing = [typingKey({ target: { tagName: 'INPUT' } }), typingKey({ target: {
 return JSON.stringify(out); })()`));
 for (const [region, w] of Object.entries(r.worlds)) {
   assert(w.items >= 20, region + ' has its interactables');
-  assert.deepStrictEqual(w.padless, [], region + ': every item has a walkable pad');
+  assert.deepStrictEqual(w.padless, [], region + ': every item has a walkable pad'); // (none needed in the generated city and Solaris, whose objects stand on walkable ground)
   const pct = 100 * w.near / w.tries;
   // Before Round 275: Elaris 36%, Vespera 41%, Neon Aftermath 9%. What is left is mostly across water or a wall.
   assert(pct < 14, region + ': ' + pct.toFixed(1) + '% of straight approaches stall just short of an item');
 }
 assert.deepStrictEqual(r.typing, [true, true, true, false], 'text boxes keep their keys');
-console.log('PASS: every interactable in all six worlds has a walkable pad, straight approaches reach it, and text boxes keep W/A/S/D/M and the arrows.');
+console.log('PASS: every interactable in the painted and tile worlds has a walkable pad (the generated ones need none), straight approaches reach it, and text boxes keep W/A/S/D/M and the arrows.');

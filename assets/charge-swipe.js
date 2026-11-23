@@ -19,7 +19,9 @@ endTurn = function () {
   const b = state && state.battle;
   if (!b || b.phase !== 'fight') return endTurnBeforeSwipe.apply(this, arguments);
   const plan = enemyPlan(b), turn = b.turn;
-  const swipes = plan.kind === 'charge' && plan.swipe > 0 && !(b.freeze > 0) && !b.enemy.silenced && b.silenceTurn !== turn;
+  // An enemy that dies to Burn / Poison this end of turn never swipes (same check as aether-deck.js).
+  const dot = (b.poison || 0) + (b.burnTurns > 0 ? (b.burn || 0) : 0);
+  const swipes = plan.kind === 'charge' && plan.swipe > 0 && !(b.freeze > 0) && !b.enemy.silenced && b.silenceTurn !== turn && dot < b.enemy.hp;
   if (swipes) {
     const net = Math.max(0, plan.swipe - scaledRank('plating')), soak = Math.min(b.block || 0, net), hurt = net - soak;
     b.block = (b.block || 0) - soak; state.hp = Math.max(0, state.hp - hurt);

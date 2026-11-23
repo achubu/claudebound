@@ -1785,6 +1785,18 @@ Object.defineProperty(TILE_WORLD_DATA.chronospire, 'plazas', { get() { chronoEns
   configureRegion = function () { const was = chronoApplying; chronoApplying = true; try { chronoEnsure(); } finally { chronoApplying = was; } return configureBefore.apply(this, arguments); };
   const newGameBeforeChrono = newGame;
   newGame = function () { const out = newGameBeforeChrono.apply(this, arguments); chronoEnsure(); return out; };
+  // A save is checked against its own seed's room map (its rooms can lie past the old 6x9 grid), built before the check.
+  const validateBeforeChrono = validateImport;
+  validateImport = function (s) {
+    if (s && typeof s === 'object') {
+      const sd = s.seed != null ? String(s.seed) : 'aethercede';
+      if (sd + '|' + (typeof FIRST_WAYPOINT_ROOMS !== 'undefined') !== chronoSeedNow) chronoBuild(sd);
+      // An older generator's room map: restoreGame sends the save to the gate, so check that room.
+      if (s.region === 'chronospire' && s.chronoGen !== CHRONO_GEN_VERSION) { s.room = chronoGraph(sd).roles.start; s.pos = { x: 400, y: 300 }; }
+    }
+    // A save that fails the check leaves the current journey's map in place.
+    try { return validateBeforeChrono.apply(this, arguments); } catch (e) { if (typeof state !== 'undefined' && state) chronoEnsure(); throw e; }
+  };
   // A save made on an older layout (the stand-in tiles, or an earlier generator) resumes at its room's hub.
   const restoreBeforeChrono = restoreGame;
   restoreGame = function (s) {
