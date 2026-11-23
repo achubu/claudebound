@@ -995,12 +995,13 @@ function cityBridgeSpans(road, river, x0, y0) { const M = 8, seen = new Set(), o
 // across the water, the last copy cut short. A bridge shorter than its two ends is lengthened along the road, centred. North
 // to south it is the same picture turned 90 degrees (it is drawn straight down). World positions, so both rooms at a seam
 // draw the same bridge.
-const CITY_BRIDGE_DECK = [100, 452]; const CITY_BRIDGE_PIECES = [322, 494, 322]; // (the west, middle and east pieces' widths in their own px)
+const CITY_BRIDGE_DECK = [100, 452], CITY_BRIDGE_COVER = 1.3; /* Round 526 (owner: "make the bridge bigger so it covers the road underneath better"): the deck between the balustrades is 1.3 x the road's width, centred on it */
+const CITY_BRIDGE_PIECES = [322, 494, 322]; // (the west, middle and east pieces' widths in their own px)
 function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, horiz = b.horiz;
-  const wide = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k;
+  const road = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C, wide = road * CITY_BRIDGE_COVER, grow = (wide - road) / 2, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k;
   let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C; const need = ew + eeW + mw * 0.5; if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
   const L = a1 - a0, top = -CITY_BRIDGE_DECK[0] * k; ctx.save();
-  if (horiz) ctx.translate((a0 - ox) * K, (b.y0 * C - oy) * K); else { ctx.translate((b.x1 * C - ox) * K, (a0 - oy) * K); ctx.rotate(Math.PI / 2); }
+  if (horiz) ctx.translate((a0 - ox) * K, (b.y0 * C - grow - oy) * K); else { ctx.translate((b.x1 * C + grow - ox) * K, (a0 - oy) * K); ctx.rotate(Math.PI / 2); }
   // (turned, the deck's top edge lies on the east side: local v runs from x1 back to x0)
   for (let u = ew; u < L - eeW; u += mw) { const w = Math.min(mw, L - eeW - u); ctx.drawImage(M, 0, 0, w / k, M.height, u * K, top * K, w * K + 0.6, ph * K); }
   ctx.drawImage(W, 0, top * K, ew * K, ph * K); ctx.drawImage(E, (L - eeW) * K, top * K, eeW * K, ph * K); ctx.restore(); }
@@ -1240,7 +1241,7 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
       add(r[0], r[1], r[2], r[1] + R, 'edge:rim'); add(r[0], r[3] - R, r[2], r[3], 'edge:rim'); add(r[0], r[1], r[0] + R, r[3], 'edge:rim'); add(r[2] - R, r[1], r[2], r[3], 'edge:rim'); } }
   // Round 520: a grand bridge's picture (Round 519): its deck and the gate towers that stand out past the road on both banks
   if (GEN.hole && CITY_HAS('bridge')) { const x0 = wx * FG_COLS, y0 = wy * FG_ROWS, road = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2, river = (X, Y) => !!GEN.hole(seed, Math.floor(X / 2), Math.floor(Y / 2));
-    for (const b of cityBridgeSpans(road, river, x0, y0)) { const wide = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * FG_CELL, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), over = CITY_BRIDGE_DECK[0] * k;
+    for (const b of cityBridgeSpans(road, river, x0, y0)) { const road = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * FG_CELL, wide = road * CITY_BRIDGE_COVER, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), over = CITY_BRIDGE_DECK[0] * k + (wide - road) / 2;
       const X0 = b.x0 * FG_CELL - ox, Y0 = b.y0 * FG_CELL - oy, X1 = b.x1 * FG_CELL - ox, Y1 = b.y1 * FG_CELL - oy, need = 0.5 * Math.max(0, (CITY_BRIDGE_PIECES[0] + CITY_BRIDGE_PIECES[2] + CITY_BRIDGE_PIECES[1] * 0.5) * k - (b.horiz ? X1 - X0 : Y1 - Y0)); // (the same lengthening as cityBridgeGrand)
       if (b.horiz) add(X0 - need, Y0 - over, X1 + need, Y1 + over, 'bridge'); else add(X0 - over, Y0 - need, X1 + over, Y1 + need, 'bridge'); } }
   return out; }
@@ -2307,8 +2308,6 @@ function paintChronoRoom(canvas, key) {
     // straight deck from bank to bank plus one cell onto land at each end, with the parapet down both of its sides the whole
     // way, and a pier block at each corner. Spans come from world cells, so a bridge across a room's edge is drawn the same in
     // both rooms; the kerb leaves the deck's sides to the parapet (one edge per seam).
-    const grand = ['west', 'mid', 'east'].map(n => CITY_HAS('bridge') && imgs[cityArtPath('bridge', n)]); // Round 519
-    if (bridgeArt && bridgeSpans.length) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) for (const b of bridgeSpans) { if (grand.every(i => i && i.naturalWidth)) cityBridgeGrand(cx2, b, gridRoad.ox, gridRoad.oy, K, grand); else cityBridgeDraw(cx2, b, gridRoad.ox, gridRoad.oy, K, bridgeArt); }
     if (GEN.topdown) { // Round 420 (owner: "add lanes to the road paths"): a dashed centre line down each main road (two lanes), stopping at the crossings
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H);
       for (const sh of plan.shapes) if (sh.t === 'poly' && !sh.pave) { const xs = sh.pts.map(q => q[0]), ys = sh.pts.map(q => q[1]); ctx.rect(Math.max(...xs) * K + 10 * K, (Math.min(...ys) - 10) * K, -(Math.max(...xs) - Math.min(...xs) + 20) * K, (Math.max(...ys) - Math.min(...ys) + 20) * K); }
@@ -2318,6 +2317,9 @@ function paintChronoRoom(canvas, key) {
       for (const sh of plan.shapes) { if (sh.t !== 'rect' || sh.pave || sh.main === false || Math.max(sh.w, sh.h) < 90) continue; ctx.beginPath(); if (sh.x <= 0 || sh.x + sh.w >= 800) { /* an east or west door: the line runs across */ ctx.moveTo(sh.x * K, (sh.y + sh.h / 2) * K); ctx.lineTo((sh.x + sh.w) * K, (sh.y + sh.h / 2) * K); } else { ctx.moveTo((sh.x + sh.w / 2) * K, sh.y * K); ctx.lineTo((sh.x + sh.w / 2) * K, (sh.y + sh.h) * K); } ctx.stroke(); }
       ctx.restore(); }
     if (GEN.topdown) paintTopdownCity(ctx, plan, key, W, H, K, imgs, fill);
+    // Round 526 (owner: "it needs to be the top texture"): the bridges are drawn last, over the buildings, yards, lamps and clutter
+    const grand = ['west', 'mid', 'east'].map(n => CITY_HAS('bridge') && imgs[cityArtPath('bridge', n)]); // Round 519
+    if (bridgeArt && bridgeSpans.length) for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) for (const b of bridgeSpans) { if (grand.every(i => i && i.naturalWidth)) cityBridgeGrand(cx2, b, gridRoad.ox, gridRoad.oy, K, grand); else cityBridgeDraw(cx2, b, gridRoad.ox, gridRoad.oy, K, bridgeArt); }
   } else {
   if (GEN.pavement) { // a strip of pavement down both sides of every road
     // Owner (Round 393): "clean half circle edges ... and a corner cut at 90 degrees": the pavement is the same shapes drawn
