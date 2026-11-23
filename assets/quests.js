@@ -52,6 +52,18 @@ function questGivers(region = activeRegion) {
   const out = {}; QUEST_ORDER.forEach((kind, i) => { if (order[i]) out[order[i].id] = kind; });
   return out;
 }
+// The species that really patrol this world (and the partners that join them): a species quest only targets one of these.
+let questSpeciesCache = { key: null, set: null };
+function questSpeciesHere() {
+  const key = activeRegion + '|' + (state && state.seed);
+  if (questSpeciesCache.key === key) return questSpeciesCache.set;
+  const set = new Set();
+  for (const k of Object.keys(rooms)) for (const s of roomSpawns(k)) {
+    if (s.boss) continue; set.add(s.type);
+    const mate = typeof pairMateFor === 'function' ? pairMateFor(k, s) : null; if (mate) set.add(mate);
+  }
+  questSpeciesCache = { key, set }; return set;
+}
 // The quest this giver would hand out now, or null (already taken, or nothing left to defeat).
 function questOffer(p) {
   if (!state || !p) return null; ensureQuests();
@@ -62,7 +74,7 @@ function questOffer(p) {
   if (kind === 'hunt') return { id, kind, world, need: K.need, have: 0, xp: K.xp, card: loot, text: 'Defeat ' + K.need + ' enemies in ' + questWorldName(world) };
   if (kind === 'elite') return { id, kind, world, need: K.need, have: 0, xp: K.xp, card: loot, text: 'Defeat ' + K.need + ' elite enemies (★) in ' + questWorldName(world) };
   if (kind === 'species') {
-    const sp = typeof enemyDropSpecies === 'function' ? enemyDropSpecies(world) : []; if (!sp.length) return null;
+    const here = questSpeciesHere(), sp = (typeof enemyDropSpecies === 'function' ? enemyDropSpecies(world) : []).filter(t => here.has(t)); if (!sp.length) return null;
     const target = sp[hashSeed(state.seed + id) % sp.length];
     return { id, kind, world, target, need: K.need, have: 0, xp: K.xp, card: loot, text: 'Defeat ' + K.need + ' ' + enemies[target].name + (/s$/.test(enemies[target].name) ? '' : 's') };
   }

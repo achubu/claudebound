@@ -133,11 +133,14 @@ const scaledRankBeforeGear = scaledRank;
 scaledRank = function (id) { return scaledRankBeforeGear(id) + (id === 'plating' ? gearStat('armor') : 0); };
 const syncTalentVitalsBeforeGear = syncTalentVitals;
 syncTalentVitals = function (heal = false) {
-  const bonus = state ? gearStat('health') : 0, had = state ? state.gearHp || 0 : 0;
+  const bonus = state ? gearStat('health') : 0, had = state ? state.gearHp || 0 : 0, hpWas = state ? state.hp : 0;
   syncTalentVitalsBeforeGear(heal);
   if (!state) return;
+  // The talent sync clamps HP to the maximum without gear: start again from the HP before it, plus any healing it gave.
+  // Taking a health piece off takes its HP away again (never below 1), so swapping it off and on heals nothing.
+  const healed = Math.max(0, state.hp - hpWas);
   state.maxHp += bonus; state.gearHp = bonus;
-  state.hp = Math.min(state.maxHp, state.hp + Math.max(0, bonus - had));
+  state.hp = Math.min(state.maxHp, Math.max(1, hpWas + healed + bonus - had));
 };
 
 // One free Purifying Light per fight for each cleanse point worn.
