@@ -306,8 +306,14 @@ const travelPortalBeforeMechanics = travelPortal;
 travelPortal = function () {
   const from = state && state.region;
   travelPortalBeforeMechanics();
-  if (state && state.region !== from && !state.battle) mechanicGift(state.region);
+  // Solaris's arrival card pick is on screen: the intro waits until a card is picked (showPendingMechIntro).
+  const picking = typeof arrivalPickOpen !== 'undefined' && arrivalPickOpen;
+  if (state && state.region !== from && !state.battle) mechanicGift(state.region, !picking);
 };
+function showPendingMechIntro() {
+  const p = state && !state.battle && state.pendingMechIntro;
+  if (p) { state.pendingMechIntro = null; save(); mechanicIntro(p.region, p.placed); }
+}
 // Neon Aftermath: the Hack cards come with your first win.
 const winBattleBeforeMechanics = winBattle;
 winBattle = function () {

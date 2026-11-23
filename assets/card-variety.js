@@ -211,13 +211,16 @@ cardHTML = function (c) {
 // Round 51: arriving in Elaris for the first time, choose one Elaris card,
 // so the first fights aren't played with a city-only deck.
 const ELARIS_ARRIVAL_POOL = ['cinder', 'venom', 'gale', 'thornlash', 'wildfire', 'rootbind', 'tidecall', 'verdantPact'];
+// Open while the pick is on screen: the world's mechanic intro waits for it (world-mechanics.js).
+let arrivalPickOpen = false;
 function offerArrivalCard() {
+  arrivalPickOpen = true;
   const pool = [...ELARIS_ARRIVAL_POOL], offers = [];
   while (offers.length < 3) offers.push(make(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]));
   keys = {};
   openMenu('<div class="eyebrow">SOLARIS ATTUNEMENT</div><h2>Choose an Solaris card</h2><p>The wilds answer your arrival. Take one card attuned to this world — it joins your collection; open <b>Deck</b> to add it.</p><div class="cards" id="arrivalCards"></div>');
   const host = $('arrivalCards');
-  if (host && host.append) offers.forEach(c => host.append(cardElement(c, () => { state.pool.push(c); save(); toast(stat(c).name + ' joins your collection. Open Deck to add it.'); closeMenu(); })));
+  if (host && host.append) offers.forEach(c => host.append(cardElement(c, () => { state.pool.push(c); save(); toast(stat(c).name + ' joins your collection. Open Deck to add it.'); arrivalPickOpen = false; closeMenu(); if (typeof showPendingMechIntro === 'function') showPendingMechIntro(); })));
   return offers;
 }
 const travelPortalBeforeVariety = travelPortal;
