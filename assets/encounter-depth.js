@@ -96,7 +96,7 @@ endTurn=function(){
  const b=state.battle;if(!b||b.phase!=='fight')return;
  const plan=enemyPlan(b),dot=b.poison+(b.burnTurns>0?b.burn:0);
  b.enemy.hp=Math.max(0,b.enemy.hp-dot);if(dot)b.logs.push('Burn / poison: '+dot+' damage.');if(b.burnTurns>0)b.burnTurns--;
- if(!b.enemy.hp){winBattle();save();renderBattle();return}
+ if(!b.enemy.hp){if(state.hp<=0)loseBattle();else winBattle();save();renderBattle();return}
  b.enemy.guard=0;
  if(b.freeze>0){b.freeze--;b.logs.push('Frozen: enemy action skipped.')}
  else if(plan.kind==='charge'){b.logs.push(plan.name+'. A charged strike is coming—reserve or arm your counter.')}

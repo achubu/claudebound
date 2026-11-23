@@ -126,16 +126,24 @@ enemyPlan = function (b = state.battle, turn = b?.turn) {
   if (!b || !b.bind || !(plan.damage > 0)) return plan;
   let first = b.turn; while (first < turn && !(enemyPlanBeforeVariety(b, first).damage > 0)) first++;
   if (first !== turn) return plan;
-  return { ...plan, damage: Math.max(0, plan.damage - b.bind), bound: b.bind };
+  // Rootbind comes off the whole attack: a multi-hit attack loses its share on each hit.
+  const per = plan.hits > 1 ? Math.ceil(b.bind / plan.hits) : b.bind;
+  return { ...plan, damage: Math.max(0, plan.damage - per), bound: b.bind };
 };
 const endTurnBeforeVariety = endTurn;
 endTurn = function () {
   const b = state.battle; if (!b || b.phase !== 'fight') return;
   const plan = enemyPlan(b), plating = scaledRank('plating');
   const hitsOn = !(b.freeze > 0) && plan.kind !== 'silenced' && plan.damage > 0;
-  const incoming = hitsOn ? Math.max(0, (b.disrupted ? Math.ceil(plan.damage / 2) : plan.damage) - plating) * (plan.hits || 1) : 0;
-  const stopped = b.mirrorBlock ? Math.min(b.block, incoming) : 0;
-  const bound = plan.bound && hitsOn;
+  // The strike lands only if it isn't countered and the enemy survives its Burn / Poison.
+  const dot = (b.poison || 0) + (b.burnTurns > 0 ? (b.burn || 0) : 0);
+  const countered = plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter;
+  const lands = hitsOn && !countered && dot < b.enemy.hp;
+  const incoming = lands ? Math.max(0, (b.disrupted ? Math.ceil(plan.damage / 2) : plan.damage) - plating) * (plan.hits || 1) : 0;
+  // Mirrorguard reflects only Block that is still there when the hit arrives (Rend halves it first).
+  const blockAtHit = plan.rider === 'rend' && !b.rendProof ? (b.block || 0) - Math.ceil((b.block || 0) / 2) : (b.block || 0);
+  const stopped = b.mirrorBlock ? Math.min(blockAtHit, incoming) : 0;
+  const bound = plan.bound && lands;
   const turn = b.turn, extra = b.drawNext || 0;
   endTurnBeforeVariety();
   if (state.battle !== b) return;

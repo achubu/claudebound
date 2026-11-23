@@ -355,7 +355,8 @@ endTurn = function () {
     if (rider === 'rend') { if (b.rendProof) b.logs.push('Aegis Ward holds against Rend.'); else { const cut = Math.ceil(b.block / 2); b.block -= cut; if (cut) b.logs.push('Rend: cuts through ' + cut + ' of your Block.'); } }
     if (rider === 'barrage' && plan.damage > 0) {
       let extra = 0;
-      for (let k = 0; k < 2; k++) { const net = Math.max(0, plan.damage - plating), soak = Math.min(b.block, net); b.block -= soak; extra += net - soak; }
+      const per = b.disrupted ? Math.ceil(plan.damage / 2) : plan.damage; // Lightning Disrupt halves every hit
+      for (let k = 0; k < 2; k++) { const net = Math.max(0, per - plating), soak = Math.min(b.block, net); b.block -= soak; extra += net - soak; }
       state.hp = Math.max(0, state.hp - extra); b.logs.push('Barrage: first two hits deal ' + extra + '.');
       siphon += extra;
     }

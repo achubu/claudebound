@@ -495,7 +495,7 @@ function cardEffect(c,empowered,doubleAttack){
  if(d.block)b.block+=d.block+deviceBonus('aegis')+boost+(tm?tm.blockBonus(c,d,b):0);
  if(d.heal)state.hp=Math.min(state.maxHp,state.hp+d.heal+boost);
  b.energy+=d.energy||0;if(d.draw)drawCards(d.draw);if(d.freeze)b.freeze=Math.max(b.freeze,d.freeze);
- if(d.burn){b.burn=d.burn+(tm?tm.dotBonus():0);b.burnTurns=2}if(d.poison)b.poison+=d.poison+(tm?tm.dotBonus():0);
+ if(d.burn){const nb=d.burn+(tm?tm.dotBonus():0);b.burn=b.burnTurns>0?Math.max(b.burn||0,nb):nb;b.burnTurns=2}if(d.poison)b.poison+=d.poison+(tm?tm.dotBonus():0);
  if(d.counter){b.counter=d.counter===true?(COUNTERS[b.enemy.element]||null):d.counter;b.logs.push(b.counter?'Prismatic Counter armed for '+b.counter+'.':'No elemental attack to counter.')}
  b.logs.push(d.name+(preArmor?(armorBlocked?' · '+preArmor+' dmg − '+armorBlocked+' armor = '+damage+' dealt':' · '+damage+' damage'):''));
  if(tm)tm.afterCard(c,d,b,damage);
