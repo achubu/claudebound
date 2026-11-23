@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 527: Packet Sniff, Logic Bomb and Cinder Capacitor card art
+
+The owner's paintings for Packet Sniff, Logic Bomb and Cinder Capacitor, levels 0-3, at `assets/cards/level*/<card>.webp` (512px,
+from the 1254px sources; `refreshedCardArt`, the card-art test, `cards.js?v=round527`).
+
 ## Round 526: bigger bridges, on top; a prompt for a north-south bridge
 
 - Owner: "make the bridge bigger so it covers the road underneath better": the deck between the balustrades is 1.3 x the road's
