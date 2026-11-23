@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 530: Verdant Pact redesigned
+
+The owner's Verdant Pact redesign, levels 0-3 (a vine-wrapped spring and sprouting seed; replaces the paintings whose gauntlets had
+no fingers, flagged in the art review), 512px webp from the 1254px sources, `cards.js?v=round530`.
+
 ## Round 529: Elder Root redesigned
 
 The owner's Elder Root redesign for levels 1-3 (512px webp from the 1254px sources). The zip's level-0 file is a moth creature
