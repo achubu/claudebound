@@ -3496,6 +3496,44 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 535: bug hunt fixes (26 bugs)
+
+Owner: "Can you find more bugs?" Four reviews (saves and progression, enemies and pairs, battle, world) reproduced 26 bugs;
+each fix has a regression check that fails on Round 534 and passes now (`tests/save-progress-bugs`, `pair-gear-bugs`,
+`battle-core-bugs`, `world-bugs`).
+
+**Saves and progression** (a save that fails validation loses the journey):
+- Soulbinding a card with more uses than its mastery cap made the save unloadable: uses are clamped on soulbind, and the
+  validator clamps instead of rejecting.
+- Decks over 30 cards (legal up to 35) were rejected: `maxLegalDeckSize()`.
+- Chronospire saves in rooms past the old 6x9 grid failed on a fresh page: the save's own seed map is built before the
+  room check (`chrono-gen.js` `validateImport` wrapper).
+- Reloading on a card-choice screen gave duplicate card ids: `nextUidAfter()` counts the battle's offers and piles too.
+- Taking a health gear piece off and on healed you each time: gear HP is now removed on unequip.
+- The Solaris arrival card pick was hidden behind the Heat intro: the intro waits until the pick closes.
+- Species quests could target a species that never spawns: targets come from the world's patrols and their partners.
+
+**Pair fights and gear:**
+- When the target died during the enemy turn, the turn froze and the survivor could act twice: the turn now ends properly
+  (`stepIn` in `encounter-depth.js`).
+- Second Chance judged lethal partner hits on stale HP.
+- Phase Veil, Mirror Sigil, Null Anchor and Rootbind were never used up by the partner; the partner's guard never reset.
+- Pressure is per enemy; quest kills count both enemies of a pair; the overkill bounty measures the enemy hit.
+- Riot Guard and Cloudstep no longer react to a frozen, countered or silenced enemy's skipped strike.
+
+**Battle core:**
+- Swipe no longer hits from an enemy dying to poison/burn, and you can't win at 0 HP.
+- Mirrorguard reflects only Block that actually stopped a landed strike (not countered, after Rend).
+- Lightning Disrupt halves all three Barrage hits; Rootbind is spread across Barrage's hits and kept when the strike is countered.
+- Cinder Lance keeps a larger Burn already on the enemy.
+
+**World:**
+- No walkable item pads in the generated worlds (the hero could walk onto buildings or sea and be teleported); opened
+  chests lose their pads elsewhere.
+- Object-placement caches are keyed by theme, so city and Solaris rooms with the same key no longer mix.
+- Objects keep away from patrols (70px where the room allows; Solaris seed 21 room 5,5's chest sits 64px away, the best
+  off-street spot that small room has).
+
 ## Round 534: enemy sprite report
 
 Owner: "generate a report ... of all the enemies that need animations or sprites improved. chatgpt will generate new ones".
