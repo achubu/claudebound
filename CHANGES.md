@@ -3496,6 +3496,12 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 529: Elder Root redesigned
+
+The owner's Elder Root redesign for levels 1-3 (512px webp from the 1254px sources). The zip's level-0 file is a moth creature
+sprite sheet, not this card, so it was left out: level 0 shows the level-1 painting (`refreshedCardArt.elderRoot = [1, 2, 3]`;
+`cardArtPath` falls back to the first painted level) until the right one comes. The card-art test, `cards.js?v=round529`.
+
 ## Round 528: the north-south bridge
 
 The owner's north-south bridge sheet (from the Round 526 prompt; `assets/environment/solaris-gen/src/bridge-vertical-sheet.jpeg`)
