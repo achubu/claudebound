@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 526: bigger bridges, on top; a prompt for a north-south bridge
+
+- Owner: "make the bridge bigger so it covers the road underneath better": the deck between the balustrades is 1.3 x the road's
+  width, centred on it (`CITY_BRIDGE_COVER`), so the balustrades sit outside the road's edges; the objects' clear space round it
+  grows with it (`citySpriteBoxes`).
+- Owner: "it needs to be the top texture": the bridges are drawn last, over the buildings, yards, lamps and clutter.
+- Owner: "we need a seperate graphic for a vertical bridge": one complete prompt, `tools/art-refresh/solaris-bridge-vertical-prompt.md`,
+  for the same bridge running top to bottom, drawn like the buildings (tilted 30 degrees, towers standing up), in three pieces
+  (north end, a middle that repeats downward, south end). Until it comes, north-south bridges use the turned picture.
+
 ## Round 525: objects keep clear of edges; the quest mark smaller again
 
 - Owner: "keep a buffer between interactable objects and edges as well". The drawn edges count in `citySpriteBoxes` now (kinds

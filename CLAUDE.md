@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 525) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 526) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -153,7 +153,7 @@ change set.
   (`cityOasisPool`); `THEME=solaris node tests/city-atlas.cjs` paints it; `tests/solaris-gen.test.cjs`. Round 484 (owner): no lamps in the desert. Round 485 (owner): sand roads, monuments on merged lots (`GEN.landmarkSpan`); density is right. Round 514 (owner): rivers (`GEN_THEMES.solaris.rivers`, the sea's machinery, sandy banks, `softBanks`) and
   roads paved in sandstone, never the ground's sand. Round 516: the owner's desert ground, edges (`yard-edge` mud-brick wall, `bridge-edge`
   parapet on river crossings), caravan and market yards (`GEN.yardKind`; no car parks), clutter, ruins and gardens. Round 517: a bridge is one straight
-  deck bank to bank with the parapet down both sides and corner piers (`cityBridgeSpans`, `cityBridgeDraw`). Round 519: the owner's grand bridge (`props/bridge/`, `cityBridgeGrand`). Round 486: **Solaris is played on the generator** (`GEN_REGIONS` / `genLive()` / `genTheme()` in `assets/city-gen.js`;
+  deck bank to bank with the parapet down both sides and corner piers (`cityBridgeSpans`, `cityBridgeDraw`). Round 519: the owner's grand bridge (`props/bridge/`, `cityBridgeGrand`). Round 526: 1.3 x the road's width (`CITY_BRIDGE_COVER`), drawn last (on top). Round 486: **Solaris is played on the generator** (`GEN_REGIONS` / `genLive()` / `genTheme()` in `assets/city-gen.js`;
   no diagonal roads; alleys with a sand verge, `GEN.alleyVerge`); check it with `SEED=<n> node tests/playtest-walk.cjs elaris`.
   Round 489 (owner: missing edges, cut-off textures): **a tree's whole canopy stands inside its park** (`CITY_TREE_INSET`), and (Round 490, owner) **no palm's trunk in a pool** (`cityTreeFootInPool`); **a room
   draws its neighbours' street furniture that reaches into it** (`cityFurnitureNear`); **one answer to where the road is painted**
