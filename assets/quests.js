@@ -93,8 +93,10 @@ winBattle = function () {
   const r = winBattleBeforeQuests.apply(this, arguments);
   if (b.phase !== 'reward') return r;
   ensureQuests();
+  // Every enemy beaten counts: a pair's first to fall waits in b.pair.other (enemy-pairs.js).
+  const fallen = [[b.id, b.enemy]]; if (b.pair && b.pair.other && b.pair.other.id) fallen.push([b.pair.other.id, b.pair.other.enemy]);
   for (const q of Object.values(state.quests.taken)) {
-    if (q.kind === 'hunt' ? q.world === activeRegion : q.kind === 'elite' ? q.world === activeRegion && b.enemy && b.enemy.elite && !b.enemy.boss : q.target === b.id) q.have = Math.min(q.need, (q.have || 0) + 1);
+    for (const [id, e] of fallen) if (q.kind === 'hunt' ? q.world === activeRegion : q.kind === 'elite' ? q.world === activeRegion && e && e.elite && !e.boss : q.target === id) q.have = Math.min(q.need, (q.have || 0) + 1);
     if (q.have >= q.need) finishQuest(q, b);
   }
   save(); return r;

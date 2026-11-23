@@ -19,7 +19,7 @@ const PAIR_WORLDS = ['sky', 'wilds', 'vespera', 'chronospire'];
 const PAIR = { chance: 0.7, hp: 0.72, attack: 0.8, xp: 1.5, world: { sky: [0.7, 0.78], wilds: [0.72, 0.8], vespera: [0.82, 0.87], chronospire: [0.72, 0.8] } }; // tuned with the Difficulty lab (CHANGES.md)
 // Each world's pair strength (share of a lone enemy's HP and attack), as [hp, attack]; others use PAIR.hp/attack.
 function pairScale(region = activeRegion) { const w = PAIR.world[region]; return w ? { hp: w[0], attack: w[1] } : { hp: PAIR.hp, attack: PAIR.attack }; }
-const PAIR_FIELDS = ['enemy', 'id', 'patternShift', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn'];
+const PAIR_FIELDS = ['enemy', 'id', 'patternShift', 'freeze', 'enemyDebuff', 'burn', 'burnTurns', 'poison', 'glitch', 'patch', 'crashes', 'empower', 'disrupted', 'silenceTurn', 'bind', 'staggerLock', 'dazeTurn', 'pressureTurn', 'pressureDmg'];
 const PAIR_ZONES = () => ({ sky: typeof SKY_ZONE_ENEMY !== 'undefined' && SKY_ZONE_ENEMY, wilds: typeof WILDS_ZONE_ENEMY !== 'undefined' && WILDS_ZONE_ENEMY,
   vespera: typeof VESPERA_ZONE_ENEMY !== 'undefined' && VESPERA_ZONE_ENEMY, chronospire: typeof CHRONO_ZONE_ENEMY !== 'undefined' && CHRONO_ZONE_ENEMY });
 
@@ -99,17 +99,18 @@ function pairMateActs(b) {
     if (dot) { e.hp = Math.max(0, e.hp - dot); b.logs.push(e.name + ': Burn / poison ' + dot + '.'); }
     if (b.burnTurns > 0) b.burnTurns--;
     if (!(e.hp > 0)) { b.logs.push(e.name + ' falls.'); return; }
+    e.guard = 0; // its Block lasts one of your turns, as the target's does (encounter-depth.js)
     if (b.freeze > 0) { b.freeze--; b.logs.push(e.name + ' is frozen and skips its move.'); return; }
-    const plan = enemyPlan(b), shear = !!plan.shear, armor = shear ? 0 : scaledRank('plating');
+    let countered = false; const plan = enemyPlan(b), shear = !!plan.shear, armor = shear ? 0 : scaledRank('plating');
     const hit = per => { const net = Math.max(0, per - armor), soak = Math.min(b.block || 0, net); b.block = (b.block || 0) - soak; return net - soak; };
     if (plan.kind === 'silenced') b.logs.push(e.name + ' is silenced.');
     else if (plan.kind === 'charge') {
       b.logs.push(e.name + ': ' + plan.name + '. A charged strike is coming.');
       if (plan.swipe) { const l = hit(plan.swipe); lost += l; swipe = true; b.swipeBy = { name: e.name, hurt: l }; b.logs.push('🗡 ' + e.name + ' swipes: ' + l + ' HP.'); }
     } else if (plan.kind === 'guard') { e.guard = 5; b.logs.push(e.name + ': Block 5 from next turn.'); }
-    else if (plan.damage > 0) {
-      if (plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter) { e.hp = Math.max(0, e.hp - 6); b.counter = null; b.logs.push('Prismatic Counter cancels ' + e.name + '\'s charged strike. 6 damage returned.'); }
-      else {
+    else if (plan.damage > 0 || plan.veiled) {
+      if (plan.kind === 'elemental' && b.counter && COUNTERS[plan.element] === b.counter) { countered = true; e.hp = Math.max(0, e.hp - 6); b.counter = null; b.logs.push('Prismatic Counter cancels ' + e.name + '\'s charged strike. 6 damage returned.'); }
+      else if (plan.damage > 0) {
         if (plan.rider === 'rend' && !b.rendProof) b.block = Math.floor((b.block || 0) / 2);
         let l = 0; for (let k = 0; k < (plan.hits || 1); k++) l += hit(plan.damage);
         lost += l; b.logs.push(e.name + ': ' + plan.name + ', ' + l + ' HP.');
@@ -122,6 +123,13 @@ function pairMateActs(b) {
         }
       }
     }
+    // Rootbind, Phase Veil, Mirror Sigil and Null Anchor are spent on the hit they work on (as aether-deck.js does for the target)
+    if (plan.kind !== 'silenced' && !countered) {
+      if (plan.bound) b.bind = 0; // Rootbind softened this hit and is spent (card-variety.js does the same for the target)
+      if (plan.anchored) { b.anchor = false; b.logs.push('Null Anchor: ' + AFFLICTIONS[plan.anchored].name + ' is prevented.'); }
+      if (plan.veiled) { b.veil = false; b.logs.push('Phase Veil: ' + plan.veiled + ' damage passes through you.'); }
+      if (plan.mirrored) { b.mirror = false; e.hp = Math.max(0, e.hp - plan.mirrored); b.logs.push('Mirror Sigil: ' + plan.mirrored + ' damage reflected.'); }
+    }
     if (plan.rider && AFFLICTIONS[plan.rider] && AFFLICTIONS[plan.rider].type === 'hex' && plan.kind !== 'silenced') applyHex(b, plan.rider);
     b.enemyDebuff = 0;
   });
@@ -132,9 +140,18 @@ const endTurnBeforePairs = endTurn;
 endTurn = function () {
   const b = state && state.battle;
   if (!pairOn(b) || b.phase !== 'fight') return endTurnBeforePairs.apply(this, arguments);
+  // Second Chance (gear-rules.js) judges a lethal hit on your HP when the enemies' turn began, the partner's hit included.
+  b.gearHpBefore = state.hp; b.gearHpPreset = true;
   const turn = b.turn, { swipe } = pairMateActs(b);
   if (!(b.pair.other.enemy.hp > 0)) b.logs.push('One down: ' + b.enemy.name + ' fights on alone.');
-  if (!state.hp) { loseBattle(); save(); renderBattle(); return; }
+  if (!state.hp) {
+    // The partner's hit was lethal: your turn ends here (Block gone, hand discarded but for a reserved counter), so if
+    // Second Chance holds you on at 1 HP the next turn starts cleanly.
+    b.gearHpPreset = false; b.block = 0;
+    const keep = b.hand.filter(c => c.uid === b.savedUid && (hasTalent('retainCore') || stat(c).counter)).slice(0, 1);
+    b.discard.push(...b.hand.filter(c => !keep.includes(c))); b.hand = keep; b.savedUid = null;
+    loseBattle(); save(); renderBattle(); return;
+  }
   const r = endTurnBeforePairs.apply(this, arguments);
   if (swipe && state.battle === b && b.phase === 'fight' && b.turn > turn && b.hand.length) {
     b.siftPick = (b.siftPick || 0) + 1; b.siftDrawn = []; b.siftReason = 'swipe'; save(); renderBattle(); if (typeof swipePopup === 'function') swipePopup(b);
