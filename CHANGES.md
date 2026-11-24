@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 550: Elaris's edges
+
+The owner's redrawn edge sheet (five long strips on magenta, `assets/environment/wilds-gen/src/edge-sheet-2.jpg`) is cut into
+`wilds-gen/surfaces/`: a mossy stone kerb, a woven willow fence (yards), a flowering hedge (gardens), a rope rail on posts with
+lanterns (bridges) and a reed bank (the lake shore). Each strip is cut on its own repeat (autocorrelation), two or three periods,
+at the start where its ends match best, so it tiles without a seam; magenta fringe is held back; 128px tall like the other
+worlds' edges. Not in play yet: the owner sees them first (edges are shown to the owner before they go live, Round 460), and the
+Elaris theme on the generator comes next.
+
 ## Round 549: the old guide lines off the map; Elaris's generator art
 
 **The map** (owner: "the world maps seem to have the old road lines, we need to remove those"): the dotted guide lines drawn from
