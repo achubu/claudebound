@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 537: who does what; pair-fight drops checked
+
+Owner: "chat gpt will handle fixing the sprite animations, you handle everything non graphical". Written into CLAUDE.md
+(Working conventions).
+
+The Round 535 pair-fight review noted a won pair fight with no card offered. Checked: that chest had rolled empty, one of the
+chest's ordinary outcomes (`rollLootChest`). When the chest rolls a card, a pair fight offers the card of the enemy that fell
+last, one chest a fight, as a single fight does. A check for it is in `tests/pair-gear-bugs.test.cjs`.
+
 ## Round 536: worldgen review fixes (travel stall, failed art, placement report)
 
 Owner: Codex's gameplay and worldgen review (reviewed at Round 534). Its findings, one by one:
