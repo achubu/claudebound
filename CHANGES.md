@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 547: the Sky Isles' glass plaza
+
+The owner's replacement plaza tile (the hexagonal one couldn't tile): a 10 x 10 grid of identical square glass panes in pale
+cyan and lavender (`assets/environment/sky-gen/src/plaza-sheet.jpeg`). Its outer border differs from the frames inside, so the
+texture is cut between two inner frame lines eight panes apart (seam scores 1.8 and 1.1, under the 2.8 limit; checked tiled
+3 x 3 by eye) into `surfaces/plaza/glass-panes.webp`. Not used by the game yet (the Sky Isles theme comes next).
+
 ## Round 546: the Sky Isles' east-west bridge
 
 The owner's east-west bridge (`assets/environment/sky-gen/src/bridge-sheet.jpg`). It is drawn tilted like the north-south one,

@@ -5,7 +5,7 @@ like Solaris's art and sorted by slot. Not used by the game yet: the Sky Isles t
 next.
 
 - `surfaces/`: square ground textures (512px, tiled): `ground/deck` (open deck), `sidewalk/glass-tiles` (walkway edge),
-  `road/glass-walk` (walkways), `plaza/mosaic` and `plaza/pavers` (squares, garden paths), `lot/cargo-plates` (cargo decks),
+  `road/glass-walk` (walkways), `plaza/mosaic`, `plaza/pavers` and `plaza/glass-panes` (squares, garden paths; glass panes: Round 547, eight panes of the owner's 10 x 10 grid cut between inner frame lines, `src/plaza-sheet.jpeg`), `lot/cargo-plates` (cargo decks),
   `sand/grating` (deck beside open sky), `water/clouds` (open sky, the "water" of this world). Deck, cargo plates and glass
   tiles had their large soft shading evened out so they don't show a grid of blotches; the hexagonal glass plaza was left out
   (its pattern isn't regular, so it can't tile). Edge strips (128px tall, cut on one repeat of their own, the dark background
