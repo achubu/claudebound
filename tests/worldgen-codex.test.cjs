@@ -40,9 +40,10 @@ const r = JSON.parse(run(`(() => { newGame(); const out = {};
   // (3) shuffles
   const seq = s => { const r = seeded(s); return () => r(); };
   out.shuffle = { a: seededShuffle([1, 2, 3, 4, 5, 6, 7, 8], seq(42)).join(''), b: seededShuffle([1, 2, 3, 4, 5, 6, 7, 8], seq(42)).join(''), sorted: seededShuffle([1, 2, 3, 4, 5, 6, 7, 8], seq(42)).slice().sort().join('') };
-  out.newJourney = state.shuffleV === undefined ? 'new' : state.shuffleV;
+  out.newJourney = state.shuffleV === 2 ? 'new' : state.shuffleV;
   const old = JSON.parse(JSON.stringify(state)); delete old.shuffleV; restoreGame(old); out.legacy = state.shuffleV;
   const nowSaved = JSON.parse(JSON.stringify(state)); restoreGame(nowSaved); out.legacyKept = state.shuffleV;
+  newGame(); const fresh = JSON.parse(JSON.stringify(state)); restoreGame(fresh); out.freshKept = state.shuffleV;
   return JSON.stringify(out); })()`));
 for (const W of ['city', 'elaris']) {
   const o = r[W];
@@ -64,6 +65,7 @@ assert.notStrictEqual(r.shuffle.a, '12345678', 'and moves them');
 assert.strictEqual(r.newJourney, 'new', 'a new journey uses the seeded shuffle');
 assert.strictEqual(r.legacy, 1, 'a journey saved before Round 540 keeps the old order');
 assert.strictEqual(r.legacyKept, 1, 'and keeps it through another save and load');
+assert.strictEqual(r.freshKept, 2, 'a new journey keeps the seeded shuffle when its save is loaded (Round 548)');
 // (7) the Map screen (Round 540): Solaris and the Chronospire in the city's style, in their own colours; small room names
 const src = require('fs').readFileSync(require('path').join(__dirname, '../assets/chrono-gen.js'), 'utf8'), css = require('fs').readFileSync(require('path').join(__dirname, '../assets/layout-polish.css'), 'utf8');
 assert(/const MAP_LOOK = \{[\s\S]*solaris:[\s\S]*chronospire:/.test(src) && !/MAP_LOOK = \{[^}]*\bcity:/.test(src), 'flat map colours for Solaris and the Chronospire; the city keeps its look');
