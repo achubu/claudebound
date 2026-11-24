@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 539: Codex procedural-generation review notes
+
+Owner: review the first two worlds and create a notes file for Claude in the repo.
+`CODEX-NOTES.md` records a review of Round 538 across six seeds in Neon Aftermath and Solaris.
+It proposes final-scene coverage scoring, measured navigation/placement optimizations, earlier gameplay-anchor
+reservations, visible-neighborhood art diversity, role-aware landmarks and stable seeded shuffles.
+The notes distinguish measured results from proposals and preserve the existing art, road and edge rules.
+No game code or assets changed. Validation: six-seed plan/placement scan, city-buildings test, one CPU profile,
+and live God Mode visual inspection. The full suite was not rerun for this documentation change.
+
 ## Round 538: notes for ChatGPT
 
 Owner: "if you find that chatgpt is making mistakes and you want to let it know, feel free to provide a file for it to learn
