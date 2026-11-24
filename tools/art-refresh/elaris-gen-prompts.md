@@ -271,6 +271,9 @@ no people; no glow spilling onto the magenta background; nothing floating betwee
 A sprite sheet of one grand wooden boardwalk bridge for a top-down 2D game, matching an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), drawn in clean, crisp game art
 with dark outlines. On a flat solid pure magenta background (#FF00FF), with no gradient, pattern or texture in the background.
 
+THE BRIDGE RUNS HORIZONTALLY, FROM THE LEFT OF THE IMAGE TO THE RIGHT: its two long sides, with the railings, are its top
+and bottom edges; its two ends are on the left and the right.
+
 THE BRIDGE: an over-the-top, monumental wooden boardwalk bridge for a path crossing a lake: a wide deck of honey-brown planks with a
 border of darker beams along both edges; tall carved wooden railings with posts topped by small carved leaves along both
 sides; at each end a pair of carved wooden gate posts wrapped in ivy, each with a glowing blue lantern on top, standing on the
@@ -280,7 +283,8 @@ LAYOUT: two rows, with clear magenta space between every piece and round the edg
 text anywhere.
 ROW 1: the whole bridge, about 4 times as long as it is wide, centred.
 ROW 2: the same bridge cut into three separate pieces, side by side with magenta space between them, all at exactly the same
-scale and the same width (top edge to bottom edge) as the bridge in row 1:
+scale and EXACTLY the same depth (top edge to bottom edge) as the bridge in row 1, the middle section included: one row of
+deck planks across, never two:
   PIECE 1, the WEST END: the left gate posts and the first part of the deck; its right edge is a straight vertical cut
   through the deck.
   PIECE 2, the MIDDLE SECTION: a square length of deck with railings, one lantern pole on each side in its middle; its left
