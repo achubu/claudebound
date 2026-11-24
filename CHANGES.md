@@ -3496,6 +3496,10 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 551: equipped cyberpunk belt handoff for Claude
+
+Owner requested that the approved cyberpunk belt appear on the protagonist when equipped as gear. CODEX-NOTES.md now records equipped-state behavior, the three existing belt IDs and proposed shared visual mapping, the 36-frame overlay contract, the reusable fitting kit, unfinished art/calibration and acceptance checks. Includes the offline fitting kit and belt concept/four-view drafts in tools/art-refresh/wearable-belt, and starts a matching cyberpunk boots concept. No runtime code, stats, saves or live wiring of provisional artwork. Existing generator review retained. Validation: reviewed note against current assets/gear.js; documentation diff only.
+
 ## Round 550: Elaris's edges
 
 The owner's redrawn edge sheet (five long strips on magenta, `assets/environment/wilds-gen/src/edge-sheet-2.jpg`) is cut into
