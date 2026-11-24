@@ -172,6 +172,9 @@ function cityRoomWalk(key, x, y) {
   // The same rule for spots that don't come through organicItemSpot (a point of interest's own spot table, the start
   // room's waypoint, the city's night objects, chests, the merchant): each is checked once per journey and moved if needed.
   const cityFixCache = {}; let cityFixBusy = false;
+  // Round 536: objects placed by relaxing a rule, by theme, seed and room: cityPlacementReport() lists the current world's
+  const cityPlacementLog = globalThis.cityPlacementLog = {};
+  globalThis.cityPlacementReport = () => { const pre = genTheme() + ':' + String(state && state.seed) + ':'; return Object.keys(cityPlacementLog).filter(k => k.startsWith(pre)).map(k => cityPlacementLog[k]); };
   const cityFixSpot = (key, o) => { if (o && genLive() && cityGenStale()) cityGenEnsure(); if (!o || !genLive() || !rooms[key] || !genWorldCell(key) || !cityGenPlan(key)) return o; const tag = genTheme() + ':' + String(state && state.seed) + ':' + key /* (the theme too: room keys exist in the city and in Solaris; the mark and the cache both carry it) */, mark = () => tag + '@' + Math.round(o.x) + ',' + Math.round(o.y); if (o.cityClear === mark()) return o; // (Round 473: the mark holds the spot it was checked at: a copy moved elsewhere, as the waypoint's is, is checked again)
     const fk = tag + ':' + Math.round(o.x) + ',' + Math.round(o.y), hit = cityFixCache[fk]; if (hit) { o.x = hit[0]; o.y = hit[1]; o.cityClear = mark(); return o; } // (some callers build a new object every time: the answer is kept by spot)
     // the rule in order of what gives way when a room has little open ground: first the HUD and the room's margin, then
@@ -188,7 +191,7 @@ function cityRoomWalk(key, x, y) {
     if (!ok(o.x, o.y, 0) || near(o.x, o.y, 70)) { let best = null, bd = Infinity;
       // Round 525: each step of the old order is tried with the edges' 5px kept, then relaxed, before the next step: clear of the
       // HUD and margin, then not, then on the street
-      const pass = (soft, list) => { if (best) return; cityEdgesSoft = soft; try { for (const [tier, far] of list) { if (best) break; for (let cy = 56; cy <= 456; cy += 8) for (let cx = 40; cx <= 760; cx += 8) { const d = Math.hypot(cx - o.x, cy - o.y); if (d < bd && ok(cx, cy, tier) && !near(cx, cy, far)) { bd = d; best = [cx, cy]; } } } } finally { cityEdgesSoft = false; } };
+      let how = null; const pass = (soft, list) => { if (best) return; cityEdgesSoft = soft; try { for (const [tier, far] of list) { if (best) break; for (let cy = 56; cy <= 456; cy += 8) for (let cx = 40; cx <= 760; cx += 8) { const d = Math.hypot(cx - o.x, cy - o.y); if (d < bd && ok(cx, cy, tier) && !near(cx, cy, far)) { bd = d; best = [cx, cy]; } } if (best) how = { tier, far, soft }; } } finally { cityEdgesSoft = false; } };
       // (150px from patrols first, a point of interest's own rule, then 70; clear of the HUD before clear of edges. Round 535:
       // off the street an object keeps 70px from the patrols; it used to take the nearest spot at any distance first, and a
       // chest stood 22px from a patrol)
@@ -197,7 +200,12 @@ function cityRoomWalk(key, x, y) {
       // under a patrol)
       pass(false, [[0, 60], [1, 60]]); pass(true, [[0, 60], [1, 60]]); pass(false, [[2, 152], [2, 70]]); pass(true, [[2, 152], [2, 70]]);
       for (const t of [0, 1, 2]) { pass(false, [[t, 0]]); pass(true, [[t, 0]]); }
-      if (best) { o.x = best[0]; o.y = best[1]; } else return o; } // (Round 473: nothing found, as while the region is still being set up and no ground counts as reachable yet: not remembered, so it is tried again)
+      if (best) { o.x = best[0]; o.y = best[1];
+        // Round 536: a spot that only some of the rules allowed is written down, with which ones gave way, for QA
+        // (cityPlacementReport()); a clean one (off the street, clear of the HUD and the edges, 70px from patrols) isn't
+        if (how && (how.tier || how.soft || how.far < 70) && !skipped) cityPlacementLog[tag + ':' + (o.type || o.id || 'object')] = { room: key, type: o.type || o.id || 'object', at: [o.x, o.y],
+          gave: [how.tier > 1 ? 'on the street' : '', how.tier > 0 ? 'HUD and margin' : '', how.soft ? 'edge gap' : '', how.far < 70 ? 'patrols ' + (how.far || 'any') + 'px' : ''].filter(Boolean) };
+      } else return o; } // (Round 473: nothing found, as while the region is still being set up and no ground counts as reachable yet: not remembered, so it is tried again)
     if (skipped) return o;
     cityFixCache[fk] = [o.x, o.y]; o.cityClear = mark(); return o; };
   // "beside the street" in the city means: on open ground joined to the streets, off the street itself, clear of every sprite

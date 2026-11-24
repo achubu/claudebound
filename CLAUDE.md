@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 535) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 536) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -60,7 +60,7 @@ change set.
     stay as built; each room's roads, squares and buildings come from the journey's seed on a 16x10 grid of 50px
     cells, read by the walk mask (`chronoWalk`) and `plazas`; rooms are planned on first use. `paintChronoRoom()` draws it from three
     seamless textures and sixteen props (`assets/environment/chronospire/gen/`, `tools/prepare_chrono_gen.py`; bump
-    `CHRONO_ART_VERSION` when they change). A seed change rebuilds it and `chronoFlushCaches()` clears the caches that
+    `CHRONO_ART_VERSION` when they change; Round 536: a picture that fails to load is drawn empty, never waited on for ever). A seed change rebuilds it and `chronoFlushCaches()` clears the caches that
     don't carry the seed: add any new world-and-room cache there. Bump `CHRONO_GEN_VERSION` when the generator changes
     layouts (saves then restart the Chronospire at its gate). Round 378: pipe beds and chasms from world-wide noise
     (`chronoTerrain`), floor inlays, large set pieces.
