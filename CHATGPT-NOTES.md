@@ -3,7 +3,7 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
-## Art request: city landmarks at a higher resolution (Round 541)
+## Art request: city landmarks at a higher resolution (Round 541; done in Round 543, the owner generated them)
 
 The owner saw a blurry fountain in Solaris: a picture drawn larger than its own pixels. Solaris's four landmarks were re-cut
 at full size from the owner's sheet (Round 541) and now never draw larger than their pictures. The city's landmarks came

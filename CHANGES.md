@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 543: the city's landmarks at a higher resolution
+
+The owner generated the Round 542 prompt (`assets/environment/city-gen/src/landmarks-hires-round543.jpg`). The five landmarks
+that were drawn larger than their pictures were cut from it (`tools/key_object.py --max=512`; the hologram stage with
+`--clear-enclosed`, for the green inside its wireframe diamond): pylon 155x470, sculpture 512x334, holo-beam 407x434, mech
+461x445, holo-stage 495x438 (were 84-256 px wide). The new drawings are the same objects with slightly different proportions,
+so every city landmark's aspect ratio is now its picture's exact one, and the city has `landmarkPx` like Solaris: a landmark
+is never drawn wider than half its picture (the room canvas is 2x). At seed 77 no landmark in either world is drawn larger
+than its picture (the pylon exactly at its size). The four older 256px landmarks (fountain, billboard, hovercar, metro) are
+capped at 128 room px wide too, so on some seeds they draw a little smaller than before. The city's art version is bumped.
+
+Tests: `worldgen-codex` (now for the city too), `city-layout`, `city-buildings`, `city-surfaces`, `city-fill`,
+`item-placement`, `sprites-page`; browser walks on city seeds 1 and 77.
+
 ## Round 542: prompt for the city's landmarks at a higher resolution
 
 Owner: "give me a prompt to generate whatever you need to fix it, i can generate that". Five city landmarks are drawn larger

@@ -363,7 +363,8 @@ const GEN_THEMES = {
     bossRooms: () => { const R = TILE_WORLD_DATA.chronospire.roles; return [R.boss, R.boss1, R.boss2, R.mini1, R.mini2]; }, landing: null,
     districtNames: ['clock', 'foundry', 'homes', 'ruins'], districts: CHRONO_DISTRICTS, landmarks: CHRONO_LANDMARKS, furniture: CHRONO_FURNITURE, clutter: CHRONO_CLUTTER, scale: CHRONO_SCENERY_SCALE, inlays: CHRONO_INLAYS,
     tex: {}, kerb: ['#1c1206', '#b88a3c', '#5a3f18'], holeRim: ['#8a6c3a', '#17100a'], bedRim: ['#07060f', '#4a3a2a'], yardRim: ['#14101f', '#6f6a86'], groundShade: 'rgba(8,6,24,.28)', lamp: '255,196,96', vignette: '6,4,18' },
-  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '480',
+  city: { id: 'city', art: 'assets/environment/city-gen/', version: () => '543' /* Round 543: landmarks at a higher resolution */,
+    landmarkPx: { billboard: 256, fountain: 256, 'holo-beam': 407, 'holo-stage': 495, hovercar: 256, mech: 461, metro: 256, pylon: 155, sculpture: 512 } /* Round 543: the landmark pictures' widths: never drawn wider than half (the room canvas is 2x) */,
     exits: key => { const r = typeof CITY_ROOMS !== 'undefined' && CITY_ROOMS[key]; if (!r) return null; const out = {}; for (const [d, v] of Object.entries(r.exits)) if (d.length === 1) out[d] = typeof v === 'string' ? v : v.to; return out; },
     world: key => { const [x, y] = key.split(',').map(Number); return [x, y - 4]; },
     bossRooms: () => Object.keys(CITY_ROOMS).filter(k => CITY_ROOMS[k].enemy && enemies[CITY_ROOMS[k].enemy[0]] && enemies[CITY_ROOMS[k].enemy[0]].boss),
@@ -1133,7 +1134,7 @@ const CITY_HAS = slot => typeof CITY_TD_ART !== 'undefined' && (CITY_TD_ART[slot
 const CITY_CARGO_SIZE = genThemed('cargoSize', { 'container-red': [150, 1.09], 'container-blue': [150, 1.09], 'container-stack': [150, 0.85], drums: [66, 1.07], pods: [84, 1.07], 'hover-pallet': [76, 1.14], 'cable-drum': [62, 0.94], loader: [72, 1.09] }) /* Round 452: the futuristic cargo (the wooden crates, pallets, rope and forklift are gone) */;
 // Round 447: where a landmark stands in its square (r: the lot in room px, less its 4px footing): centred, up to 170px
 // across, at its picture's own proportions (CITY_LANDMARK_ASPECT: width over height).
-const CITY_LANDMARK_ASPECT = genThemed('landmarkAspect', { fountain: 1.24, billboard: 1.11, 'holo-stage': 1.26, pylon: 0.38, 'holo-beam': 0.82, mech: 1.11, hovercar: 1.26, sculpture: 1.12, metro: 1.01 });
+const CITY_LANDMARK_ASPECT = genThemed('landmarkAspect', { fountain: 1.2367, billboard: 1.1082, 'holo-stage': 1.1301, pylon: 0.3298, 'holo-beam': 0.9378, mech: 1.0360, hovercar: 1.2611, sculpture: 1.5329, metro: 1.0119 }); // Round 543: the pictures' exact proportions
 function cityLandmarkBox(l, r) { const asp = CITY_LANDMARK_ASPECT[l.landmark] || 1, bw = r[2] - r[0], bh = r[3] - r[1], nat = GEN.landmarkPx && GEN.landmarkPx[l.landmark], w = Math.min(GEN.landmarkW || 170, bw - 30, (bh - 40) * asp, nat ? nat / 2 : Infinity), h = w / asp;
   return { x: (r[0] + r[2]) / 2 - w / 2, y: (r[1] + r[3]) / 2 - h / 2, w, h }; }
 // Round 445: a yard is its own kind of lot (genWorld: lots too small for a building at full scale, and half the building
