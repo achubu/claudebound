@@ -42,6 +42,17 @@ function cityGenPlan(key) { cityGenEnsure(); return genPlan(genTheme(), key, cit
 // The walk mask, a cell at a time (8px cells judged at their centres, like the old traced mask).
 // Each room's floor as a 100x63 grid of 8px cells, built once per seed.
 const cityMasksBy = {}; let cityMasks = {}; // Round 488: kept per theme and seed
+// Round 540: the 8px cells (100x63) a room's blockers stand on, a cell judged at its centre; a water rect leaves road cells
+// open (a road over the water). Each blocker marks only the cells it covers.
+function cityMaskBlocked(p, b) {
+  const blk = new Uint8Array(100 * 63), cellsIn = (lo, hi) => [Math.max(0, Math.ceil((lo - 4) / 8)), Math.min(99, Math.ceil((hi - 4) / 8) - 1)];
+    for (const r of b.rects) { const [x0, x1] = cellsIn(r[0], r[2]), [y0, y1] = cellsIn(r[1], r[3]), water = r[4] === 'water';
+      for (let my = y0; my <= Math.min(62, y1); my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = x0; mx <= x1; mx++) { const i = my * 100 + mx; if (blk[i]) continue;
+        if (water && p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor((mx * 8 + 4) / FG_CELL)]) continue; blk[i] = 1; } } }
+    for (const c of b.circles) { const [x0, x1] = cellsIn(c[0] - c[2], c[0] + c[2] + 1), [y0, y1] = cellsIn(c[1] - c[2], c[1] + c[2] + 1);
+      for (let my = y0; my <= Math.min(62, y1); my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = x0; mx <= x1; mx++) if (Math.hypot(mx * 8 + 4 - c[0], y - c[1]) < c[2]) blk[my * 100 + mx] = 1; } }
+  return blk;
+}
 function cityRoomMask(cx, cy) {
   cityMasks = cityMasksBy[cityGenKey] || (cityMasksBy[cityGenKey] = {}); for (const ck of Object.keys(cityMasksBy)) if (ck !== cityGenKey && ck.split(':')[0] === cityGenKey.split(':')[0]) delete cityMasksBy[ck];
   const k = cx + ',' + (cy + genDy()); if (k in cityMasks) return cityMasks[k];
@@ -51,9 +62,10 @@ function cityRoomMask(cx, cy) {
   // Round 415 (owner: a texture tile can be walked on unless a building, car or other sprite stands on it): in the top-down
   // city all ground can be walked; buildings, parked cars, park trees and the sea (a road over the water stays) cannot.
   if (GEN_THEMES[genTheme()].topdown) { const b = genWith(genTheme(), () => cityBlockers(cityGenSeed, k, p));
-    for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) { const x = mx * 8 + 4, road = p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)];
-      let ok = !b.rects.some(r => x >= r[0] && x < r[2] && y >= r[1] && y < r[3] && !(road && r[4] === 'water')) && !b.circles.some(c => Math.hypot(x - c[0], y - c[1]) < c[2]);
-      m[my * 100 + mx] = ok ? 1 : 0; } }
+    // Round 540 (Codex's review): each blocker marks only the cells whose centres it covers, instead of every cell testing
+    // every blocker; the same cells as before (tests/city-mask-raster.test.cjs compares the two)
+    const blk = cityMaskBlocked(p, b);
+    for (let my = 0; my < 63; my++) { const y = my * 8 + 4; if (y >= 500) continue; for (let mx = 0; mx < 100; mx++) m[my * 100 + mx] = blk[my * 100 + mx] ? 0 : 1; }
     // Round 445: only ground joined to the room's streets counts. A yard or a strip of paving walled in by buildings is
     // not somewhere to stand: nothing is placed there and nobody can be set down there with no way out.
     // Round 449: a room's edge is crossed only on a street. The game takes each door from the widest walkable stretch along
@@ -75,13 +87,15 @@ function cityRoomMask(cx, cy) {
 // Round 417 (owner: "make sure enemy pathing is only allowed on texture tiles and not object sprites"): an enemy is a
 // sprite about 40px wide standing on its foot (y + 22), so where it may stand is checked for its whole body: its box
 // (x +-20, y - 24 .. y + 24) must touch no building, car, tree or sea, and its foot must be on walkable ground.
-const cityEnemyBlockBy = {}; let cityEnemyBlock = {};
+const cityEnemyBlockBy = {}; let cityEnemyBlock = {}, cityEnemyBlockFor = null;
 function cityEnemyOk(key, x, y) {
-  cityEnemyBlock = cityEnemyBlockBy[cityGenKey] || (cityEnemyBlockBy[cityGenKey] = {}); for (const ck of Object.keys(cityEnemyBlockBy)) if (ck !== cityGenKey && ck.split(':')[0] === cityGenKey.split(':')[0]) delete cityEnemyBlockBy[ck];
+  // (Round 540, Codex's review: the old seeds' tables are swept when the seed or world changes, not on every call, and each
+  // room keeps its floor beside its blockers; patrol placement calls this thousands of times)
+  if (cityEnemyBlockFor !== cityGenKey) { cityEnemyBlockFor = cityGenKey; cityEnemyBlock = cityEnemyBlockBy[cityGenKey] || (cityEnemyBlockBy[cityGenKey] = {}); for (const ck of Object.keys(cityEnemyBlockBy)) if (ck !== cityGenKey && ck.split(':')[0] === cityGenKey.split(':')[0]) delete cityEnemyBlockBy[ck]; }
   if (!cityRoomWalk(key, x, y)) return false;
   if (x < 20 || x > 780 || y < 24 || y > 476) return false;
-  let b = cityEnemyBlock[key]; if (!b) { const p = cityGenPlan(key); b = cityEnemyBlock[key] = p ? genWith(genTheme(), () => cityBlockers(cityGenSeed, key, p)) : { rects: [], circles: [] }; }
-  const bx0 = x - 20, bx1 = x + 20, by0 = y - 24, by1 = y + 24, f = cityGenPlan(key).floor;
+  let b = cityEnemyBlock[key]; if (!b) { const p = cityGenPlan(key); b = cityEnemyBlock[key] = p ? genWith(genTheme(), () => cityBlockers(cityGenSeed, key, p)) : { rects: [], circles: [] }; b.floor = p ? p.floor : null; }
+  const bx0 = x - 20, bx1 = x + 20, by0 = y - 24, by1 = y + 24, f = b.floor;
   for (const r of b.rects) { if (bx0 < r[2] && bx1 > r[0] && by0 < r[3] && by1 > r[1]) { if (r[4] === 'water' && f[Math.floor(Math.min(495, y + 22) / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)]) continue; return false; } }
   for (const c of b.circles) { const nx = Math.max(bx0, Math.min(c[0], bx1)), ny = Math.max(by0, Math.min(c[1], by1)); if (Math.hypot(nx - c[0], ny - c[1]) < c[2]) return false; }
   return true;
@@ -157,6 +171,17 @@ function cityRoomWalk(key, x, y) {
   const cityItemSpotClear = globalThis.cityItemSpotClear = function (key, x, y, o) { if (cityGenStale()) cityGenEnsure(); // (Round 473: never against the last journey's city: its plans and boxes could be cached under the new seed)
     const sd = genWith(genTheme(), () => chronoSeed()), ck = genTheme() + ':' + sd + ':' + key /* (the theme too: room keys exist in the city and in Solaris) */, boxes = cityItemBoxesCache[ck] || (cityItemBoxesCache[ck] = genWith(genTheme(), () => citySpriteBoxes(sd, key, cityGenPlan(key)))); return cityItemClear(key, x, y, boxes, o); };
   globalThis.cityItemSpriteClear = (key, x, y, o) => { cityEdgesSoft = true; try { return cityItemSpotClear(key, x, y, o); } finally { cityEdgesSoft = false; } }; // Round 525: clear of every sprite (edges aside)
+  // Round 540 (Codex's review): a room's 8px walk grid (organic-paths.js) read straight from the room's mask in the generated
+  // worlds: the same points walkable() gives there (12..788 x 14..486, the mask at the foot), without ~5,800 trips through
+  // walkable()'s wrappers per room
+  if (typeof organicGrid === 'function') { const organicGridBeforeCity = organicGrid;
+    organicGrid = function (key) {
+      if (!genLive() || !rooms[key] || (typeof organicSpawnPass !== 'undefined' && organicSpawnPass)) return organicGridBeforeCity.apply(this, arguments);
+      if (cityGenStale()) cityGenEnsure();
+      const o = typeof organicDef === 'function' ? organicDef(key) : null, ck = activeRegion + ':' + key + ':' + (o ? o.def.src : '-');
+      if (organicPoints[ck]) return organicPoints[ck];
+      const pts = []; for (let py = 14; py <= 486; py += 8) for (let px = 12; px <= 788; px += 8) if (cityRoomWalk(key, px, py)) pts.push(px, py);
+      return organicPoints[ck] = pts; }; }
   const itemSpotBefore = organicItemSpot;
   organicItemSpot = function (key, x, y, avoid = [], gap = 0) {
     const p = itemSpotBefore.apply(this, arguments);
@@ -180,7 +205,10 @@ function cityRoomWalk(key, x, y) {
     // the rule in order of what gives way when a room has little open ground: first the HUD and the room's margin, then
     // the patrols' distance down to 60px, then the street, last the patrols' distance; never a sprite, never ground that
     // can't be reached
-    const ok = (cx, cy, tier) => cx >= (tier ? 40 : 60) && cx <= (tier ? 760 : 740) && cy >= (tier ? 56 : 70) && cy <= (tier ? 456 : 440) && walkable(key, cx, cy) && (tier > 1 || !cityItemOnStreet(key, cx, cy)) && cityItemSpotClear(key, cx, cy, o.type ? o : { type: 'chest' })
+    // Round 540 (Codex's review): the fallback passes below test the same grid points again and again (up to 18 passes);
+    // each answer is kept for this call, by point, tier and whether edges are relaxed
+    const okMemo = new Map(), ok = (cx, cy, tier) => { const mk = (cx * 512 + cy) * 8 + tier * 2 + (cityEdgesSoft ? 1 : 0); let v = okMemo.get(mk); if (v === undefined) { v = okRaw(cx, cy, tier); okMemo.set(mk, v); } return v; };
+    const okRaw = (cx, cy, tier) => cx >= (tier ? 40 : 60) && cx <= (tier ? 760 : 740) && cy >= (tier ? 56 : 70) && cy <= (tier ? 456 : 440) && walkable(key, cx, cy) && (tier > 1 || !cityItemOnStreet(key, cx, cy)) && cityItemSpotClear(key, cx, cy, o.type ? o : { type: 'chest' })
       && (tier > 0 || !(typeof screenCovered === 'function' && [[0, 0], [-12, -12], [12, -12], [-12, 24], [12, 24]].some(([a, b]) => screenCovered(cx + a, cy + b))) /* Round 525: the picture, not only its spot, clear of the HUD and minimap */) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, { x: cx, y: cy }));
     // the patrols' spots (Round 535: also for the spot the object comes with). Asked from inside roomSpawns (a patrol being
     // placed asks where the objects are), the list can't be had: the answer is then neither cached nor marked, so the object

@@ -3496,6 +3496,41 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 540: Codex's generation review, first steps
+
+Owner: "review chatgpt notes and implement fixes as necessary". `CODEX-NOTES.md` (Round 539) made six proposals for the
+city and Solaris. Taken up:
+
+- **Faster room masks and walk grids (proposal 2).** Each blocker marks only the 8px cells it covers (`cityMaskBlocked`),
+  instead of every cell testing every blocker. A room's walk grid (`organicGrid`) is read from its mask in the generated
+  worlds, instead of ~5,800 trips through `walkable()`'s wrappers per room. `cityEnemyOk` sweeps old seeds' tables only
+  when the seed or world changes. Masks, objects and patrols come out identical on seeds 1 and 4242 (compared before and
+  after); a new journey plus both worlds runs about 17% faster in the harness (9.4s to 7.8s).
+- **Seeded shuffles (proposal 6).** `sort(() => rand() - .5)` asks a sort to order things with a comparator that contradicts
+  itself. Browsers sort differently, so the same seed could lay a world out differently in Chrome and Safari (a save moved
+  between them). There were six (the generator's squares and lot order; the points of interest, guaranteed objects,
+  blessings and events). They use `seededShuffle` (Fisher-Yates). This changes new journeys' layouts. A save from before
+  this round is marked `shuffleV: 1` when loaded and keeps the old order, so nobody's world changes mid-journey.
+- **Building variety over the visible neighbourhood (proposal 4).** Among the few best-fitting pictures for a lot, one not
+  already standing within 360px (`CITY_BUILDING_SPREAD`, about half a room) comes first; the 40px rule, district preference
+  and fallbacks are as before. Over seeds 1, 2, 9, 21, 77 and 4242, same-picture pairs within 400px fell by about 20-35% per
+  world (e.g. city seed 9: 60 to 41; Solaris seed 1: 35 to 22). Cross-district picks and picture scale are unchanged
+  (34 against 36 cross-district picks; mean scale within 0.005).
+- **Final coverage (proposal 1).** `genFinalCoverage(theme, seed)` sorts every cell of the finished world, per room, into
+  street, sidewalk, sea, building, ruin, landmark, yard, park, square and residual ground, with the largest residual patch.
+  Seed 77: about 12% residual in both worlds, 21-23% in the worst room. A diagnostic only; open ground isn't a fault in
+  itself.
+
+Not taken up yet (design changes for the owner to decide): reserving space for objects before scenery is placed (3), and
+tying landmarks and compositions to room roles (5).
+
+Also: `tests/auto-mastery.test.cjs` still expected a save with too many mastery uses to be refused; Round 535 clamps it
+instead (so a journey isn't lost), and that round ran only the related suites. The test expects the clamp now.
+
+Tests: `tests/worldgen-codex.test.cjs` (blocked cells exactly as the old loop, room by room; the walk grid as `walkable()`
+gives it; the shuffle and its save versioning; no twin pictures within 40px; coverage shares add up). The full suite and
+browser walks on city seeds 1, 2 and 77 and Solaris seeds 9 and 21.
+
 ## Round 539: Codex procedural-generation review notes
 
 Owner: review the first two worlds and create a notes file for Claude in the repo.
