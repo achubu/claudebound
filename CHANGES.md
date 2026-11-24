@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 545: the Sky Isles' generator art; Elaris's prompts
+
+The owner's eight Sky Isles sheets (Archive_23, from `tools/art-refresh/sky-gen-prompts.md`) cut into
+`assets/environment/sky-gen/` (96 pictures; sources in `src/`, see its README): eight ground textures (the hexagonal plaza
+left out: its pattern isn't regular, so no cut of it tiles), five edge strips cut on their own repeat, 32 buildings, 8 wrecks,
+8 walkable roof gardens (sizes in `building-px.json`, each sheet scaled so its middle building is 200px tall, as Round 496),
+yard pieces, clutter, four landmarks, vehicles, trees, rooftop kit, posts, and the north-south bridge's three pieces. Sheet
+frames drawn in dark green were painted out before cutting, and green shut inside an object (an awning, a bench's slats, a
+water tower's legs) is see-through. Missing: the east-west bridge (prompt 8); turning the north-south one would lay its pylons
+on their side. Not used by the game yet: the Sky Isles theme for the generator comes next, shown to the owner as a preview
+before the Sky Isles switch over (as Solaris, Rounds 483-486).
+
+`tools/key_object.py` and the city's art tools are unchanged; the cutting was done with `tools/cut_building_sheet.py`
+(`SLOT_PREFIX`, `ENCLOSED`) and `prepare_city_art.py`'s texture blending.
+
+Also: `tools/art-refresh/elaris-gen-prompts.md`, the nine prompts for Elaris (the forest), the next world after the Sky Isles,
+in the same layouts (its lakes take the place of Solaris's rivers, crossed by wooden boardwalk bridges).
+
 ## Round 544: one contract for every generated world; the Sky Isles' art prompts
 
 Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm, if you require
