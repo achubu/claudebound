@@ -395,8 +395,9 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 
 /* Round 540 (owner: "room names can be made very small, barely visible on the map"): every world's Map screen shows a room's
    name and state as small faint text with no box; the room you are in and boss rooms keep their frames; object badges stay. */
-.map-canvas .panel { min-width: 0 !important; min-height: 0 !important; padding: 1px 4px !important; }
+.map-canvas .panel { min-width: 0 !important; min-height: 0 !important; width: auto !important; height: auto !important; padding: 1px 4px !important; } /* (Round 540: the box is the text, so it can sit beside a road) */
 .map-canvas .panel:not(.current-room):not(.boss-room) { background: none !important; border-color: transparent !important; box-shadow: none !important; }
 .map-canvas .panel.current-room, .map-canvas .panel.boss-room { background: rgba(8, 14, 22, .55) !important; }
 .map-canvas .panel b { font-size: 6.5px !important; font-weight: 600 !important; opacity: .6; text-shadow: 0 0 3px #000, 0 0 2px #000 !important; }
 .map-canvas .panel small { font-size: 5px !important; opacity: .5; letter-spacing: .3px !important; }
+.map-canvas .panel .lock-hint { position: absolute !important; top: 100% !important; left: 50% !important; transform: translateX(-50%) !important; white-space: nowrap !important; font-size: 5.5px !important; opacity: .75; } /* Round 540: the lock note hangs under the name, so the label stays the name's size */

@@ -3534,6 +3534,12 @@ city and Solaris. Taken up:
   the city keeps its tiles.
 - **Room names on the map** (owner: "very small, barely visible"): 6.5px and faint, status 5px, no box, in every world;
   the room you are in and boss rooms keep their frames; object badges are unchanged.
+- **Room names beside the roads** (owner: "make sure the room text is not over the road, have it above a road in all
+  rooms"): labels were centred on each room's crossing, on the road. `placeMapLabels` (`assets/map-terrain.js`) moves each
+  to the nearest spot near the crossing whose whole box is off the road with a road just below it (beside one, where a room's
+  roads only run north-south), reading the room's floor in the generated worlds and the map's road paths elsewhere. A lock
+  note hangs under the name instead of widening the label, and labels scale with the map's zoom, so the spot holds at every
+  zoom. `tests/map-labels.cjs` (browser): every label in all six worlds is placed and off the road, at 100% and 60%.
 
 Not taken up yet (design changes for the owner to decide): reserving space for objects before scenery is placed (3), and
 tying landmarks and compositions to room roles (5).
