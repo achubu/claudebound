@@ -7,7 +7,7 @@ gallery; `arena.html` is a standalone prototype and is left untouched.
 **`CODEX-NOTES.md`** records Codex's generation review and recommendations for Claude; check its pinned baseline before acting.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 543) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 544) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -155,7 +155,7 @@ change set.
   (`cityOasisPool`); `THEME=solaris node tests/city-atlas.cjs` paints it; `tests/solaris-gen.test.cjs`. Round 484 (owner): no lamps in the desert. Round 485 (owner): sand roads, monuments on merged lots (`GEN.landmarkSpan`); density is right. Round 541 (owner: blurry when drawn too large): landmarks re-cut at full size; never drawn wider than half their picture (`landmarkPx`; the city too since Round 543, with its five enlarged landmarks redrawn at a higher resolution). Round 514 (owner): rivers (`GEN_THEMES.solaris.rivers`, the sea's machinery, sandy banks, `softBanks`) and
   roads paved in sandstone, never the ground's sand. Round 516: the owner's desert ground, edges (`yard-edge` mud-brick wall, `bridge-edge`
   parapet on river crossings), caravan and market yards (`GEN.yardKind`; no car parks), clutter, ruins and gardens. Round 517: a bridge is one straight
-  deck bank to bank with the parapet down both sides and corner piers (`cityBridgeSpans`, `cityBridgeDraw`). Round 519: the owner's grand bridge (`props/bridge/`, `cityBridgeGrand`). Round 526: 1.3 x the road's width (`CITY_BRIDGE_COVER`), drawn last (on top). Round 528: north-south bridges have their own tilted pieces (`cityBridgeGrandV`, `CITY_BRIDGE_V`). Round 486: **Solaris is played on the generator** (`GEN_REGIONS` / `genLive()` / `genTheme()` in `assets/city-gen.js`;
+  deck bank to bank with the parapet down both sides and corner piers (`cityBridgeSpans`, `cityBridgeDraw`). Round 519: the owner's grand bridge (`props/bridge/`, `cityBridgeGrand`). Round 526: 1.3 x the road's width (`CITY_BRIDGE_COVER`), drawn last (on top). Round 528: north-south bridges have their own tilted pieces (`cityBridgeGrandV`, `CITY_BRIDGE_V`). Round 544: **every world on the generator passes one contract** (`tests/gen-theme-contract.test.cjs`); the Sky Isles are next (art prompts in `tools/art-refresh/sky-gen-prompts.md`). Round 486: **Solaris is played on the generator** (`GEN_REGIONS` / `genLive()` / `genTheme()` in `assets/city-gen.js`;
   no diagonal roads; alleys with a sand verge, `GEN.alleyVerge`); check it with `SEED=<n> node tests/playtest-walk.cjs elaris`.
   Round 489 (owner: missing edges, cut-off textures): **a tree's whole canopy stands inside its park** (`CITY_TREE_INSET`), and (Round 490, owner) **no palm's trunk in a pool** (`cityTreeFootInPool`); **a room
   draws its neighbours' street furniture that reaches into it** (`cityFurnitureNear`); **one answer to where the road is painted**
