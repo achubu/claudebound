@@ -2,6 +2,50 @@
 
 Codex maintains this handoff file. Claude owns code and non-graphical changes; Codex owns sprite and art corrections. These are review findings and implementation proposals, not changes already made.
 
+## Owner request: cyberpunk belt visible when equipped (November 24, 2026)
+
+Owner: "add a note for claude to implement this as the belt item when equiped as gear".
+
+**Requested implementation, not completed:** show the approved gunmetal/cyan cyberpunk belt on the protagonist when a belt is equipped through Gear. Codex supplies artwork; Claude implements game behavior. This handoff adds notes and offline art/tool sources only; it does not wire artwork into the live game.
+
+### Gear mapping and behavior
+
+- Read the equipped belt from `state.gear.belt` after `ensureGear`, not merely ownership in `state.relics`. Acquiring an item while another belt is worn must not replace the worn appearance.
+- Current belt IDs at baseline `4e75f32f83472caaff587e539d7b57431d9df270` (Round 549): `scarabBelt`, `stormglassBelt`, `hourglassBelt`. No new gear ID, rewards, balance, stats, ownership or progression changes are requested.
+- The owner has not selected a single one of those three IDs for this design. Proposed initial mapping: one shared cyberpunk visual for equipped belt-slot items, via an explicit item-ID-to-visual registry so distinct designs can be added later. Treat that mapping as a proposal, not a previously approved specific item assignment.
+- Equip/swap/unequip must immediately refresh the hero's appearance. Unequip restores the original base appearance. Apply on automatic equip, save restoration/import, region changes and world rerender as well. Keep the existing mid-fight equipment restriction.
+- Never redraw/re-generate the character on equip. Preserve his identity, poses, scale, position and movement timing; the Aetherlink stays on his anatomical LEFT arm and remains independent of belt/glove visuals.
+
+### Artwork and tool status — release gate
+
+The owner approved the cyberpunk belt look and four angle fitting drafts. **Those drafts are full-character previews, not calibrated overlay sheets.** Red/colored fringes remain on some drafts; the clean right-facing retry has an opaque background.
+
+Codex created **Aethercede-Belt-Template-Kit.zip**, containing the standalone `Aethercede-Belt-Fitter.html`, editable source, README and offline logic checks:
+https://chatgpt.com/library?file_id=libfile_58f582d4a3d881918ca2ed1ae3e6cb50&account_id=bb3643bb-6c30-409d-871d-6ef2035b06ec
+
+This is an owner-access download, not a public runtime asset URL. The kit and all four belt fitting drafts plus the concept are checked into `tools/art-refresh/wearable-belt/` by this handoff. Start with that folder's README and included ZIP; Claude does not need Library access. Never ship a Library URL in the game.
+
+The workbench preserves the original hero sheet and supports 36 fits, per-view artwork, x/y/width/height/rotation, brush-painted foreground masks, four walk previews, portable JSON projects, transparent belt-only PNG export and equipped-hero PNG export. **Initial anchors are estimates. Side/back concept crops are placeholders; fitting, real directional artwork and in-motion visual calibration remain unfinished.** JavaScript syntax and simulated-canvas logic checks passed. Browser visual/download verification was blocked by a local connection failure; production suitability is not established.
+
+Codex should finalize the overlay art. Claude can prepare a registry/compositor with a safe base-art fallback, but do not release provisional art as finished. Keep generated character drafts as references only, not replacement animation sheets.
+
+### Integration contract
+
+- Base: `assets/characters/protagonist-walk9.png`, 2304 × 1024 RGBA; four rows front/down, left, right, back/up; nine 256 × 256 cells per row; column 0 idle, columns 1–8 walking. Recheck against latest main before integrating.
+- Overlay must have identical dimensions and per-cell registration, transparent everywhere except visible belt pixels, with foreground arm/pouch occlusion removed from overlay alpha. Do not independently crop/recenter hero or overlay frames.
+- Draw the base first and belt overlay second, with foreground protection baked into overlay alpha. The old brown belt/pouch is baked into the base; the replacement must cover the old belt, or Codex must provide a cleaned base. A transparent cutout does not remove old clothing.
+- Prefer composing once per equipment change into a cached sheet, then keep the current animation renderer and shared frame index/direction. Cache by equipped visual IDs and art version; bound the cache. Handle async outfit races and failed artwork loads without a blank hero or stale outfit.
+- Front buckle remains at anatomical front; back view shows rear strap. Do not mirror asymmetric character frames to synthesize the other direction. No added scale/bob animations.
+- Add finished assets under a clearly named wearable-art directory and bump the appropriate art cache version. Inventory icons remain separate from animated wearable sheets.
+
+### Acceptance checks for Claude
+
+1. Equip each supported owned belt, swap, unequip, acquire with empty/occupied slot, save/reload/import and change region: appearance matches equipped state; no stats/reward changes.
+2. All four directions: idle plus eight walking frames retain original frame coordinates, baseline and timing. No belt sliding, visible duplicate belt, fringe, clipped pouch or belt painted over foreground hands.
+3. Equip other slots without losing the belt or moving the left-arm Aetherlink. Missing/unloaded art falls back cleanly; rapid changes never apply a stale outfit.
+4. Inspect at actual game scale on desktop and mobile. Use the same composition for any Gear preview.
+5. Run meaningful gear/save/hero-rendering checks appropriate to the implementation, then follow the repo's normal release workflow only after final art has passed visual review.
+
 ## Latest review: first two generated worlds
 
 Reviewed November 23, 2026 against main `99f5712e332b9760f40dfa7fbc81f457e4714e2d` (Round 538). Read CHATGPT-NOTES.md and the current owner constraints in CLAUDE.md first. Fetch main before treating anything here as still open.
