@@ -404,7 +404,7 @@ const GEN_THEMES = {
 // water sellers, copper domes). Oases are the parks: oasis grass, palms, the oasis rim. A preview only for now: Solaris
 // is still played on its tile world until the owner has seen it.
 // =====================================================================
-GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'assets/environment/solaris-gen/', version: () => '483',
+GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'assets/environment/solaris-gen/', version: () => '541' /* Round 541: landmarks re-cut at full size */,
   exits: key => { const r = typeof SOLARIS_LAYOUT !== 'undefined' && SOLARIS_LAYOUT[key]; return r ? Object.assign({}, r.exits) : null; },
   world: key => key.split(',').map(Number),
   bossRooms: () => ['5,2', '8,0', '8,5'].filter(k => typeof SOLARIS_LAYOUT !== 'undefined' && SOLARIS_LAYOUT[k]),
@@ -456,7 +456,8 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
     "building-market": ["spice-shop", "bazaar-hall", "crystal-stall", "fruit-stall"], "building-homes": ["adobe-house", "terrace-house", "beehive-hut", "windcatcher-house", "thatch-hut"], "building-tech": ["solar-hall", "skiff-hangar", "battery-tower", "relay-house", "pyramid-station", "observatory"], "building-garden": ["well-house", "domed-bathhouse", "water-shop", "cistern-house", "pyramid-shrine", "sun-temple", "obelisk-gate", "oasis-house"] /* Round 499: the owner's desert buildings (props/building-<quarter>/) */ },
   districtArt: { market: { wall: 'market-wall', roof: 'market-roof', shop: 'market-shop' }, homes: { wall: 'home-wall', roof: 'home-roof', shop: 'home-shop' }, tech: { wall: 'tech-wall', roof: 'tech-roof', shop: 'tech-shop' }, garden: { wall: 'garden-wall', roof: 'garden-roof', shop: 'garden-shop' } },
   roofKit: { 'roof-gravel': ['prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'], 'roof-sandstone': ['prop-vent', 'prop-tank', 'prop-stairs', 'prop-solar'] },
-  landmarkAspect: { pyramid: 1.14, obelisk: 0.43, sphinx: 1.15, fountain: 1.24 },
+  landmarkAspect: { pyramid: 1.1378, obelisk: 0.4258, sphinx: 1.1480, fountain: 1.2340 },
+  landmarkPx: { pyramid: 512, obelisk: 218, sphinx: 512, fountain: 406 } /* Round 541: the pictures' widths (re-cut at full size); a landmark is never drawn wider than half of it (the room canvas is 2x), so never enlarged */,
   cargoSize: { tent: [92, 1.1], cart: [84, 1.2], crates: [74, 1.15], 'camel-rest': [92, 1.48], straw: [68, 1.11], stall: [80, 0.92], 'rug-rack': [84, 1.37], well: [62, 0.91] } /* Round 516: [longer side px, width / height] against the ~60px hero */,
   yardSets: { cargo: ['tent', 'cart', 'crates', 'camel-rest', 'straw'], market: ['stall', 'rug-rack', 'well'] }, yardKind: l => { const wl = genWorld(chronoSeed()); if (!wl.rimLead) cityRimKeep(l); const i0 = wl.lotsPx.indexOf(l), i = i0 >= 0 ? i0 : wl.lotsPx.findIndex(q => q.seed === l.seed), lead = i >= 0 ? wl.lotsPx[wl.rimLead[i]] : l; return lead.seed % 3 === 0 ? 'market' : 'cargo'; } /* Round 516: caravan yards and market yards, never car parks; touching yards are one area (Round 475) and take its lead lot's kind, so two floors never meet without a border */,
   clutterH: { 'water-jars': 36, pottery: 26, 'potted-palm': 50, rocks: 30, 'dry-shrub': 32, cactus: 50, bones: 22 }, doorWalls: ['wall-hutdoor'] });
@@ -1133,7 +1134,7 @@ const CITY_CARGO_SIZE = genThemed('cargoSize', { 'container-red': [150, 1.09], '
 // Round 447: where a landmark stands in its square (r: the lot in room px, less its 4px footing): centred, up to 170px
 // across, at its picture's own proportions (CITY_LANDMARK_ASPECT: width over height).
 const CITY_LANDMARK_ASPECT = genThemed('landmarkAspect', { fountain: 1.24, billboard: 1.11, 'holo-stage': 1.26, pylon: 0.38, 'holo-beam': 0.82, mech: 1.11, hovercar: 1.26, sculpture: 1.12, metro: 1.01 });
-function cityLandmarkBox(l, r) { const asp = CITY_LANDMARK_ASPECT[l.landmark] || 1, bw = r[2] - r[0], bh = r[3] - r[1], w = Math.min(GEN.landmarkW || 170, bw - 30, (bh - 40) * asp), h = w / asp;
+function cityLandmarkBox(l, r) { const asp = CITY_LANDMARK_ASPECT[l.landmark] || 1, bw = r[2] - r[0], bh = r[3] - r[1], nat = GEN.landmarkPx && GEN.landmarkPx[l.landmark], w = Math.min(GEN.landmarkW || 170, bw - 30, (bh - 40) * asp, nat ? nat / 2 : Infinity), h = w / asp;
   return { x: (r[0] + r[2]) / 2 - w / 2, y: (r[1] + r[3]) / 2 - h / 2, w, h }; }
 // Round 445: a yard is its own kind of lot (genWorld: lots too small for a building at full scale, and half the building
 // lots on the docks). What stands in it: cargo on the docks; rubble in a blast zone; parked vehicles elsewhere (they are

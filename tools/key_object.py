@@ -1,5 +1,5 @@
 # Key a painted map object off a bright green background (Rounds 307-333).
-# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--keep-green [--despill-circle=x,y,r]] [--clear-enclosed] [--warm-olive]   (greenness fades from opaque at lo to clear at hi; default 90 170)
+# Usage: python3 tools/key_object.py source.jpg out.webp [lo hi] [--max=N] [--keep-green [--despill-circle=x,y,r]] [--clear-enclosed] [--warm-olive]   (greenness fades from opaque at lo to clear at hi; default 90 170)
 # Green is capped at max(red, blue) everywhere (despill), green patches the background does not reach stay opaque
 # when their colour differs from the background (Round 317: holes in the art, same colour as the background, still clear;
 # Round 318: judged by median colour, patches of 200px or more),
@@ -8,9 +8,10 @@ import sys
 from PIL import Image
 import numpy as np
 from scipy import ndimage
-keep_green = '--keep-green' in sys.argv; circle = None; clear_enclosed = False; warm_olive = False; args = []
+keep_green = '--keep-green' in sys.argv; circle = None; max_side = 256; clear_enclosed = False; warm_olive = False; args = []
 for x in sys.argv[1:]:
     if x == '--keep-green': continue
+    if x.startswith('--max='): max_side = int(x.split('=', 1)[1]); continue  # Round 541: a larger size for art drawn big (never enlarged)
     if x == '--clear-enclosed': clear_enclosed = True; continue
     if x == '--warm-olive': warm_olive = True; continue
     if x.startswith('--despill-circle='): circle = [float(v) for v in x.split('=', 1)[1].split(',')]; continue
@@ -38,7 +39,7 @@ print('enclosed green px kept:', int(grown.sum()))
 alpha = np.where(grown, 1, alpha); g2 = np.where(grown, g, g2)
 o = Image.fromarray(np.dstack([r, g2, b, alpha * 255]).clip(0, 255).astype(np.uint8), 'RGBA')
 bb = o.getchannel('A').point(lambda v: 255 if v > 60 else 0).getbbox(); o = o.crop(bb)
-w, h = o.size; s = 256 / max(w, h); o = o.resize((round(w * s), round(h * s)), Image.LANCZOS)
+w, h = o.size; s = min(1.0, max_side / max(w, h)); o = o.resize((round(w * s), round(h * s)), Image.LANCZOS)
 if warm_olive:  # Round 333: translucent parts painted over green key to olive; shift them to warm amber at the same brightness
     q = np.asarray(o).astype(np.float32); qr, qg, qb = q[..., 0], q[..., 1], q[..., 2]
     ol = np.clip((qg - qb - 25) / 30, 0, 1) * np.clip(1 - (qr - qg) / 28, 0, 1) * np.clip(1 - (qg - qr) / 40, 0, 1)

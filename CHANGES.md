@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 541: Solaris landmarks at full resolution
+
+Owner: "it's not that its stretched, it's blurry due to being made too large, maybe we need to generate a higher resolution
+image". The fountain's picture was 256px wide and Solaris drew it 260 room pixels across (520 canvas pixels: 2x enlarged);
+the pyramid and sphinx were the same. The owner's sheet (`solaris-gen/src/Gemini_..._s9rmk...`) holds all four landmarks at
+260-583px, but they had been cut and then shrunk to 256px. Re-cut at full size (`tools/key_object.py` takes `--max=N` now;
+it never enlarges): pyramid 512, sphinx 512, fountain 406, obelisk 218 px wide. Their aspect ratios in `landmarkAspect` are
+now the pictures' exact ones. A Solaris landmark is never drawn wider than half its picture (`landmarkPx`; the room canvas
+is 2x), so the fountain draws at most 203 room pixels across instead of 260, sharp. Solaris's art version is bumped.
+
+The city's landmarks (from Archive_5, not in the repo) are still drawn 1.1-2.1x their pictures (the pylon most): a request
+for 512px versions is in `CHATGPT-NOTES.md`.
+
+Tests: `tests/worldgen-codex.test.cjs` (no landmark drawn larger than its picture).
+
 ## Round 540: Codex's generation review, first steps; portal placement; one map style
 
 Owner: "review chatgpt notes and implement fixes as necessary". `CODEX-NOTES.md` (Round 539) made six proposals for the
