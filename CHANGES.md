@@ -3496,6 +3496,28 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 544: one contract for every generated world; the Sky Isles' art prompts
+
+Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm, if you require
+new art for that just send the prompts".
+
+Checked first: art drawn larger than its pixels (the Round 541 blur) across both generated worlds. A browser audit of every
+picture drawn while painting a third of each world's rooms found 6 of 146 enlarged, the worst 1.19x (a city shrine hall); the
+rest, textures included, are at or under their pixels. Left as it is: capping buildings at their pixels would shrink them and
+change how full every block is, which the owner approved.
+
+What does make the worlds consistent is building every world with the one generator. Only the city and Solaris use it; the
+Chronospire runs an older version, and the Sky Isles, Elaris and Vespera are hand-tiled paintings. Two steps:
+- **The contract** (`tests/gen-theme-contract.test.cjs`): every world on the generator is checked the same way: its room map
+  hooks; four quarters, each with its own building pictures; every picture its tables name on disk; every building, ruin and
+  park size keeping its picture's proportions (3%); every landmark's aspect its picture's (1%) and `landmarkPx` its width; a
+  size for every cargo piece and a height for every clutter piece. The city and Solaris pass; a new world must too.
+- **The Sky Isles' art set** (`tools/art-refresh/sky-gen-prompts.md`): nine prompts, each complete, in the layouts the tools
+  already cut for Solaris: ground textures, edges, two building sheets, yard pieces and clutter, ruins and roof gardens,
+  landmarks/vehicles/trees/rooftop kit (landmarks at high resolution), and the bridge both ways. The look is the Sky Isles'
+  own (pastel cyberpunk city above the clouds, glass deck); open sky takes the place of Solaris's rivers, crossed by glass
+  bridges. When the sheets arrive the Sky Isles get a theme and move onto the generator.
+
 ## Round 543: the city's landmarks at a higher resolution
 
 The owner generated the Round 542 prompt (`assets/environment/city-gen/src/landmarks-hires-round543.jpg`). The five landmarks
