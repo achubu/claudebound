@@ -3496,6 +3496,18 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 538: notes for ChatGPT
+
+Owner: "if you find that chatgpt is making mistakes and you want to let it know, feel free to provide a file for it to learn
+from your notes". `CHATGPT-NOTES.md` (repo root):
+- what went wrong: the worldgen review read an older commit, so its top finding had already been fixed;
+- how to avoid it: random outcomes aren't bugs (fix `Math.random` to test them), give world, seed and room in every report,
+  and say when something was seen only in God Mode;
+- the sprite-sheet hand-over rules;
+- what went well.
+
+CLAUDE.md says to add to it when ChatGPT makes a mistake.
+
 ## Round 537: who does what; pair-fight drops checked
 
 Owner: "chat gpt will handle fixing the sprite animations, you handle everything non graphical". Written into CLAUDE.md
