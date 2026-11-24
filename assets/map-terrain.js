@@ -388,9 +388,16 @@ function drawMapTerrain(canvasEl, tileW, bounds) {
   const W = Math.round(cols * TW), H = Math.round(rows * TH), theme = MAP_THEME[activeRegion] || MAP_THEME.city;
   canvasEl.width = W; canvasEl.height = H;
   const ctx = canvasEl.getContext('2d'); if (!ctx) return;
-  const redraw = () => { if (canvasEl.isConnected) drawMapTerrain(canvasEl, tileW, bounds); };
+  // Round 536: tiles that finish loading ask for a redraw; a burst of them (a whole world's tiles arriving at once) is one
+  // redraw on the next frame, not one full redraw per tile
+  const redraw = () => { if (canvasEl.mapRedrawQueued) return; canvasEl.mapRedrawQueued = true;
+    const go = () => { canvasEl.mapRedrawQueued = false; if (canvasEl.isConnected) drawMapTerrain(canvasEl, tileW, bounds); };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(go); else setTimeout(go, 16); };
   const at = (x, y) => [(x - minX + 0.4) * TW, (y - minY + 0.4) * TH];
-  const explored = new Set(Object.keys(rooms).filter(k => state.visited.includes(k)));
+  // Round 536: only the rooms in the window (and one beyond, for the seams): the minimap shows 3x3 rooms, and it used to
+  // build every explored room's tile in the world (all 51 in God Mode), which stalled the first frame in a new world
+  const inView = k => { const [x, y] = k.split(',').map(Number); return x >= minX - 1 && x <= maxX + 1 && y >= minY - 1 && y <= maxY + 1; };
+  const explored = new Set(Object.keys(rooms).filter(k => state.visited.includes(k) && inView(k)));
   const K = (x, y) => x + ',' + y, XY = k => k.split(',').map(Number);
   const sameArea = (a, b) => { const A = joinedArea(a); return A.cells.length > 1 && A.cells.includes(b); };
   // Each explored cell's art (a whole room tile, or its slice of a district painting).

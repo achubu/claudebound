@@ -1829,7 +1829,11 @@ Object.defineProperty(TILE_WORLD_DATA.chronospire, 'plazas', { get() { chronoEns
 const chronoImages = {};
 function chronoArtImage(name) {
   const src = GEN.art + ((GEN.tex && GEN.tex[name]) || (GEN.legacy && name.indexOf('/') < 0 ? GEN.legacy + name : name)) + '.webp?v=' + GEN.version();
-  let img = chronoImages[src]; if (!img) { img = new Image(); img.src = src; chronoImages[src] = img; }
+  let img = chronoImages[src]; if (!img) { img = new Image(); chronoImages[src] = img;
+    // Round 536: a picture that fails to load is marked, so a room's paint doesn't wait for it for ever (it is drawn
+    // without it), and forgotten after a while, so a later room asks for it again
+    if (img.addEventListener) img.addEventListener('error', () => { img.chronoFailed = true; setTimeout(() => { if (chronoImages[src] === img) delete chronoImages[src]; }, 20000); }, { once: true });
+    img.src = src; }
   return img;
 }
 // The shape of a grid as a white picture, K canvas pixels per room pixel, each corner rounded the dual-grid way: an
@@ -1923,12 +1927,18 @@ function paintChronoRoom(canvas, key) {
   const props = chronoRoomProps(theme === 'chronospire' ? chronoSeed() : seed, plan);
   const names = ['ground', 'floor', 'pipes', 'chasm', 'yard', ...(GEN.tex && GEN.tex['yard-cargo'] ? ['yard-cargo', 'yard-rubble'] : []), ...(GEN.tex && GEN.tex['yard-market'] ? ['yard-market'] : []), ...(GEN.plazaTex ? [GEN.plazaTex] : []), ...(GEN.beach ? ['sand'] : []), ...(GEN.topdown ? ['pavement-old', ...cityTdArtNames()] : []), ...(GEN.mix || []).map(m => m.tex), ...new Set((GEN.topdown ? [] : props.map(p => p.name)).concat(plan.inlays.map(i => i.name)))], imgs = {};
   for (const n of names) imgs[n] = chronoArtImage(n);
-  const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth));
+  const waiting = names.map(n => imgs[n]).find(i => !(i.complete && i.naturalWidth) && !i.chronoFailed);
   if (waiting) {
     if (canvas.dataset) canvas.dataset.pending = '1'; canvas.pendingImage = waiting;
-    if (waiting.addEventListener) waiting.addEventListener('load', () => { if (canvas.isConnected) genWith(theme, () => paintChronoRoom(canvas, key)); }, { once: true });
+    // Round 536: on error too (it used to listen for load only, so one missing picture held the room unpainted)
+    const again = () => { if (canvas.isConnected && canvas.pendingImage === waiting) genWith(theme, () => paintChronoRoom(canvas, key)); };
+    if (waiting.addEventListener) { waiting.addEventListener('load', again, { once: true }); waiting.addEventListener('error', again, { once: true }); }
     return false;
   }
+  // a picture that failed stands in as an empty one (drawing a broken image would throw); the room isn't kept as finished,
+  // so it is painted again, with the picture, once it loads
+  let missing = false;
+  for (const n of names) if (imgs[n].chronoFailed) { missing = true; const e = document.createElement('canvas'); e.width = e.height = 64; e.naturalWidth = e.naturalHeight = 64; /* (64: textures drawn at a fraction of their size still keep a pixel) */ e.complete = true; imgs[n] = e; }
   const K = 2, W = 800 * K, H = 500 * K; canvas.width = W; canvas.height = H;
   if (canvas.style) { canvas.style.imageRendering = 'auto'; canvas.style.filter = 'none'; }
   const ctx = canvas.getContext('2d'); if (!ctx) return false;
@@ -2394,7 +2404,7 @@ function paintChronoRoom(canvas, key) {
   const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.62); v.addColorStop(0, 'rgba(' + GEN.vignette + ',0)'); v.addColorStop(1, 'rgba(' + GEN.vignette + ',.42)');
   ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
   const keep = document.createElement('canvas'); keep.width = W; keep.height = H; keep.getContext('2d').drawImage(canvas, 0, 0);
-  chronoPainted.set(paintKey, keep); while (chronoPainted.size > 6) chronoPainted.delete(chronoPainted.keys().next().value);
+  if (!missing) chronoPainted.set(paintKey, keep); while (chronoPainted.size > 6) chronoPainted.delete(chronoPainted.keys().next().value);
   if (canvas.dataset) delete canvas.dataset.pending; canvas.pendingImage = null;
   return true;
 }

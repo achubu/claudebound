@@ -3496,6 +3496,34 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 536: worldgen review fixes (travel stall, failed art, placement report)
+
+Owner: Codex's gameplay and worldgen review (reviewed at Round 534). Its findings, one by one:
+
+1. **City and Solaris placement caches mixed** (high): already fixed in Round 535 (the theme is in every cache key and
+   mark). Checked again with the review's own repro (seed 9, room 4,4): the clearance answers are now the same whichever
+   world is visited first.
+2. **Solaris waypoint travel stalled the browser** (high; seen in God Mode). Profiled: the minimap drew *every explored
+   room in the world*, not only the 3x3 rooms it shows. In God Mode every room is explored, so arriving in Solaris built
+   all 51 map tiles, and each tile that finished loading asked for a full redraw, which built and drew them all again:
+   the work grew with the square of the rooms. Now `drawMapTerrain` uses only the rooms in its window plus one ring (for
+   the seams), and redraws asked for by arriving tiles are merged into one per frame. God Mode travel to Brass Yards: 3
+   redraws and 24 tiles (was 51 tiles redrawn on every arrival); travel itself 1.5s instead of 2.5s in a headless browser,
+   now about the same as in a normal journey.
+3. **A room's paint waited for every picture and listened for `load` only** (medium): one picture that failed to load
+   held the room unpainted for ever. `chronoArtImage` marks a failed picture (and forgets it after 20s, so it is asked for
+   again); `paintChronoRoom` also wakes on `error`, draws a failed picture as an empty one, and doesn't keep such a room as
+   finished, so it is painted again with the picture later.
+4. **Relaxed placements weren't visible** (medium): `cityFixSpot` writes down every object it could only place by relaxing
+   a rule (on the street, the HUD and margin, the edge gap, the patrols' distance); `cityPlacementReport()` lists the current
+   world's. Seed 1: the city's 4,5 waypoint and 1,4 vault and Solaris's 6,4 merchant (the review's example), all for the
+   edge gap only.
+
+The review's sprite notes (Ember Jackal's uneven walk, Dust Devil's red fringe) are Codex's to redraw.
+
+Tests: `tests/placement-report.test.cjs` (harness), `tests/travel-stall.cjs` (browser: God Mode travel builds at most 25
+tiles in a few redraws; a room whose ground art is refused is still painted).
+
 ## Round 535: bug hunt fixes (26 bugs)
 
 Owner: "Can you find more bugs?" Four reviews (saves and progression, enemies and pairs, battle, world) reproduced 26 bugs;
