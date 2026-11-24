@@ -1,7 +1,7 @@
 # Elaris (the forest) generator art (Round 549)
 
 The owner's nine Elaris sheets (`src/`, from `tools/art-refresh/elaris-gen-prompts.md`, on magenta: `tools/cut_building_sheet.py`
-takes `KEY=magenta` since Round 549), cut like the Sky Isles' art. Not used by the game yet (the Elaris theme is next).
+takes `KEY=magenta` since Round 549), cut like the Sky Isles' art. Played since Round 551 (`GEN_THEMES.wilds` in `assets/chrono-gen.js`).
 
 - Edges (Round 550, `src/edge-sheet-2.jpg`, the redrawn sheet on magenta): `surfaces/curb/stone-kerb`, `yard-edge/willow-fence`,
   `park-edge/flower-hedge`, `bridge-edge/rope-rail`, `waterfront-edge/reed-bank`; each cut on its own repeat (two or three
@@ -18,3 +18,14 @@ takes `KEY=magenta` since Round 549), cut like the Sky Isles' art. Not used by t
   four landmarks, a handcart and a rowing boat, two trees, rooftop kit and posts.
 - `props/bridge/`: the boardwalk bridge, `west`/`mid`/`east` (row 2's pieces, the same depth this time) and
   `north`/`vmid`/`south`.
+
+## Round 551: in play
+
+- `surfaces/sidewalk/forest-floor` (a copy of `ground/forest-floor`: the generator fills the ground between the roads from the
+  sidewalk slot) and `surfaces/park/moss` (a copy of `market-floor/market-green`, the groves' ground).
+- `props/bridge/`: the north piece's far railing and the south piece's near railing were taken out (made see-through), so a
+  north-south boardwalk is open where it meets the road; the middle piece is cut to the deck between its two cross railings;
+  the west and east pieces are cut to the gate pillars and one railing panel (each cut beside a post), so a short crossing isn't
+  stretched to 900px. The pieces as first cut are in the sheet (`src/`).
+- The reed bank (`surfaces/waterfront-edge/reed-bank`) is not used yet: the lakes' banks are plain mud, like Solaris's rivers
+  (a strip bent round a curving shore breaks up, Round 507).

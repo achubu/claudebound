@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
   await page.goto('http://localhost:8123/index.html?x=' + Date.now()); await page.waitForTimeout(1200);
   const data = await page.evaluate(async ({ seed, x0, y0, cols, rows, scale, flags, theme }) => {
     newGame(); state.seed = seed; state.region = 'city'; configureRegion('city'); cityGenEnsure();
-    const sol = theme !== 'city', has = k => theme === 'sky' ? !!TILE_WORLD_DATA.sky.layout[k] : sol ? !!SOLARIS_LAYOUT[k] : !!CITY_ROOMS[k]; // (Round 548: THEME=sky too)
+    const sol = theme !== 'city', has = k => theme === 'sky' || theme === 'wilds' ? !!TILE_WORLD_DATA[theme].layout[k] : sol ? !!SOLARIS_LAYOUT[k] : !!CITY_ROOMS[k]; // (Round 548: THEME=sky too; Round 551: THEME=wilds)
     if (flags) { const T = GEN_THEMES[theme]; for (const [k, v] of Object.entries(flags)) if (k.startsWith('tex.')) (T.texScale = T.texScale || {})[k.slice(4)] = v; else T[k] = v; } // (Round 461) CITY_FLAGS='{"coastCrisp":true}' tries a theme setting
     const big = document.createElement('canvas'); big.width = Math.round(cols * 800 * scale); big.height = Math.round(rows * 500 * scale); const g = big.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, big.width, big.height); g.imageSmoothingQuality = 'high';
     for (let ry = 0; ry < rows; ry++) for (let rx = 0; rx < cols; rx++) { const key = (x0 + rx) + ',' + (y0 + ry + (sol ? 0 : 4)); if (!has(key)) continue;

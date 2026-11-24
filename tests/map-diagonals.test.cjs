@@ -13,7 +13,7 @@ const strokes = []; let stroking = null;
 const ctx2d = () => new Proxy({}, { get: (t, k) => k === 'moveTo' ? (x, y) => { stroking = [[x, y]]; } : k === 'lineTo' ? (x, y) => { stroking && stroking.push([x, y]); } : k === 'stroke' ? () => { if (stroking) strokes.push(stroking); } : k === 'canvas' ? undefined : deep(), set: () => true });
 const fakeCanvas = () => ({ width: 0, height: 0, style: {}, className: '', isConnected: true, setAttribute() {}, getContext: () => ctx2d(), toDataURL: () => '' });
 const realCreate = document.createElement; document.createElement = tag => tag === 'canvas' ? fakeCanvas() : realCreate(tag);
-for (const region of ['wilds', 'vespera'].filter(w => TILE_WORLD_DATA[w] && Object.keys(TILE_WORLD_DATA[w].diag || {}).length >= 2)) { // Round 486: the generated Solaris has no diagonal roads; Round 548: nor the generated Sky Isles (tests/sky-diagonals.test.cjs)
+for (const region of ['wilds', 'vespera'].filter(w => TILE_WORLD_DATA[w] && Object.keys(TILE_WORLD_DATA[w].diag || {}).length >= 2 && !(typeof genLive === 'function' && genLive(w)))) { // (Round 551: the generated Elaris has none either, tests/wilds-gen.test.cjs) // Round 486: the generated Solaris has no diagonal roads; Round 548: nor the generated Sky Isles (tests/sky-diagonals.test.cjs)
   configureRegion(region); state.visited = Object.keys(rooms); state.room = regionStartRoom();
   const t = worldDiagTable(); let pairs = 0;
   for (const [key, dirs] of Object.entries(t)) for (const [dir, d] of Object.entries(dirs)) {

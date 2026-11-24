@@ -463,6 +463,18 @@ GEN_THEMES.solaris = Object.assign({}, GEN_THEMES.city, { id: 'solaris', art: 'a
   yardSets: { cargo: ['tent', 'cart', 'crates', 'camel-rest', 'straw'], market: ['stall', 'rug-rack', 'well'] }, yardKind: l => { const wl = genWorld(chronoSeed()); if (!wl.rimLead) cityRimKeep(l); const i0 = wl.lotsPx.indexOf(l), i = i0 >= 0 ? i0 : wl.lotsPx.findIndex(q => q.seed === l.seed), lead = i >= 0 ? wl.lotsPx[wl.rimLead[i]] : l; return lead.seed % 3 === 0 ? 'market' : 'cargo'; } /* Round 516: caravan yards and market yards, never car parks; touching yards are one area (Round 475) and take its lead lot's kind, so two floors never meet without a border */,
   clutterH: { 'water-jars': 36, pottery: 26, 'potted-palm': 50, rocks: 30, 'dry-shrub': 32, cactus: 50, bones: 22 }, doorWalls: ['wall-hutdoor'] });
 
+// Round 551: the straight links that stand in for a tile world's diagonal walkways (the generated worlds have none): where
+// dropping one would cut rooms off from the start, a straight link round the corner takes its place, both ways (Round 548's
+// Sky Isles code, shared with Elaris)
+function genTileExtraLinks(id) { const T = GEN_THEMES[id]; if (T.linksCache) return T.linksCache; const L = TILE_WORLD_DATA[id].layout, links = [], OPP = { n: 's', s: 'n', e: 'w', w: 'e' };
+  const has = (a, d) => (L[a].exits[d] && d.length === 1) || links.some(([x, y]) => x === a && y === d);
+  const reach = () => { const seen = new Set([T.startKey]), q = [T.startKey]; while (q.length) { const k = q.pop(); const ex = Object.entries(L[k].exits).filter(([d]) => d.length === 1).map(([, t]) => t).concat(links.filter(l => l[0] === k).map(l => l[2])); for (const t of ex) if (L[t] && !seen.has(t)) { seen.add(t); q.push(t); } } return seen; };
+  for (const a of Object.keys(L)) for (const [d, b] of Object.entries(L[a].exits)) { if (d.length === 1 || !L[b] || reach().has(a) === reach().has(b)) continue;
+    const [ax, ay] = a.split(',').map(Number), [bx, by] = b.split(',').map(Number);
+    for (const c of [bx + ',' + ay, ax + ',' + by]) { if (!L[c]) continue;
+      const dir = (p, q) => { const [px, py] = p.split(',').map(Number), [qx, qy] = q.split(',').map(Number); return qx > px ? 'e' : qx < px ? 'w' : qy > py ? 's' : 'n'; };
+      for (const [p, q] of [[a, c], [c, b]]) { const d1 = dir(p, q); if (!has(p, d1)) { links.push([p, d1, q]); links.push([q, OPP[d1], p]); } } break; } }
+  return T.linksCache = links; }
 // =====================================================================
 // Round 548 (owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm"):
 // the Sky Isles on the generator, Solaris's theme with the Sky Isles' own rooms (TILE_WORLD_DATA.sky.layout) and art
@@ -474,15 +486,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   // the generated Sky Isles have no diagonal walkways; where dropping one would cut rooms off from the start (1,5 to 2,4 joins
   // the second mini-boss's corner), a straight link round the corner takes its place, both ways
-  extraLinks: () => { const T = GEN_THEMES.sky; if (T.linksCache) return T.linksCache; const L = TILE_WORLD_DATA.sky.layout, links = [], OPP = { n: 's', s: 'n', e: 'w', w: 'e' };
-    const has = (a, d) => (L[a].exits[d] && d.length === 1) || links.some(([x, y]) => x === a && y === d);
-    const reach = () => { const seen = new Set([T.startKey]), q = [T.startKey]; while (q.length) { const k = q.pop(); const ex = Object.entries(L[k].exits).filter(([d]) => d.length === 1).map(([, t]) => t).concat(links.filter(l => l[0] === k).map(l => l[2])); for (const t of ex) if (L[t] && !seen.has(t)) { seen.add(t); q.push(t); } } return seen; };
-    for (const a of Object.keys(L)) for (const [d, b] of Object.entries(L[a].exits)) { if (d.length === 1 || !L[b] || reach().has(a) === reach().has(b)) continue;
-      const [ax, ay] = a.split(',').map(Number), [bx, by] = b.split(',').map(Number);
-      for (const c of [bx + ',' + ay, ax + ',' + by]) { if (!L[c]) continue; const [cx, cy] = c.split(',').map(Number);
-        const dir = (p, q) => { const [px, py] = p.split(',').map(Number), [qx, qy] = q.split(',').map(Number); return qx > px ? 'e' : qx < px ? 'w' : qy > py ? 's' : 'n'; };
-        for (const [p, q] of [[a, c], [c, b]]) { const d1 = dir(p, q); if (!has(p, d1)) { links.push([p, d1, q]); links.push([q, OPP[d1], p]); } } void cx; void cy; break; } }
-    return T.linksCache = links; }, linksCache: null,
+  extraLinks: () => genTileExtraLinks('sky'), linksCache: null,
   world: key => key.split(',').map(Number),
   bossRooms: () => { const R = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.sky ? TILE_WORLD_DATA.sky.roles : {}; return [R.boss, R.mini1, R.mini2].filter(Boolean); },
   landing: () => [GEN_THEMES.sky.startKey, ...GEN_THEMES.sky.bossRooms()],
@@ -525,6 +529,85 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
   clutterH: { 'planter-cluster': 34, 'curved-bench': 26, 'glow-lamp': 48, 'recycle-bin': 30, 'crate-pile': 28, 'potted-blossom': 46, 'mini-dish': 34, 'glow-bollard': 26 },
   // the glass bridges (Rounds 545-546), measured in each piece's own px like Solaris's (CITY_BRIDGE_DECK, CITY_BRIDGE_V)
   bridgeDeck: [62, 257], bridgeV: { north: { deckL: 6, w: 452, start: 168, cut: 765 }, mid: { deckL: 4, w: 456, top: 25, bottom: 913 }, south: { deckL: 6, w: 452, top: 28, end: 1120 } } });
+// =====================================================================
+// Round 551 (owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm"):
+// Elaris, the forest, on the generator: the Sky Isles' room hooks on Elaris's own rooms (TILE_WORLD_DATA.wilds.layout) and the
+// owner's forest art (assets/environment/wilds-gen/, Rounds 549-550). Three lakes from the journey's seed take the place of the
+// rivers (the same machinery: nothing is built on their muddy banks, a road crossing one is the boardwalk bridge).
+// =====================================================================
+GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '551',
+  exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds && TILE_WORLD_DATA.wilds.layout[key]; if (!r) return null;
+    const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.wilds.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
+  extraLinks: () => genTileExtraLinks('wilds'), linksCache: null,
+  bossRooms: () => { const R = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds ? TILE_WORLD_DATA.wilds.roles : {}; return [R.boss, R.mini1, R.mini2].filter(Boolean); },
+  landing: () => [GEN_THEMES.wilds.startKey, ...GEN_THEMES.wilds.bossRooms()],
+  keys: () => Object.keys(TILE_WORLD_DATA.wilds.layout), startKey: '8,4',
+  span: (wx, wy, seed) => typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds && TILE_WORLD_DATA.wilds.layout[wx + ',' + wy] ? genPlan('wilds', wx + ',' + wy, seed) : null,
+  mains: seed => { const T = GEN_THEMES.wilds, ck = String(seed); if (T.mainsCache && T.mainsCache.ck === ck) return T.mainsCache; const h = t => chronoHash(ck + ':wilds-mains:' + t);
+    return T.mainsCache = { ck, rows: [1 + h('r1') % 2, 3 + h('r2') % 2], cols: [h('c1') % 3, 3 + h('c2') % 3, 6 + h('c3') % 3] }; }, mainsCache: null,
+  alley: (key, d) => { const T = GEN_THEMES.wilds, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); },
+  // three lakes (50px world cells), one in each third of the forest from west to east, each a rounded shape with a wavy
+  // shore, kept small enough that a road crossing one is a bridge (cityBridgeSpans takes crossings of up to 20 cells of 25px)
+  hole: (seed, gx, gy) => GEN_THEMES.wilds.rivers(seed).has(gx + ',' + gy), riverCache: null,
+  rivers: seed => { const T = GEN_THEMES.wilds, ck = String(seed); if (T.riverCache && T.riverCache.ck === ck) return T.riverCache.set;
+    const keys = T.keys(), set = new Set(), rnd = chronoRng(ck + ':lakes'); // (seeded: chronoHash of keys that differ only in their last letter comes out almost the same)
+    let mx = 0, my = 0; for (const k of keys) { const [x, y] = k.split(',').map(Number); mx = Math.max(mx, x); my = Math.max(my, y); }
+    const NXc = (mx + 1) * CG_COLS, NYc = (my + 1) * CG_ROWS;
+    // the roads come first (a room's roads never read the terrain): a lake is kept only where every road over it is a
+    // straight crossing a bridge can carry (no junction or bend on the water), clear of the middle of the start and boss rooms
+    const plans = {}, road = (X, Y) => { const k = Math.floor(X / FG_COLS) + ',' + Math.floor(Y / FG_ROWS); if (!(k in plans)) plans[k] = keys.includes(k) ? genWith('wilds', () => chronoRoomPlan(seed, k, { roadsOnly: true })) : null;
+      const pl = plans[k]; return !!(pl && pl.floor[(Y - Math.floor(Y / FG_ROWS) * FG_ROWS) * FG_COLS + X - Math.floor(X / FG_COLS) * FG_COLS]); };
+    const keep = T.landing().map(k => k.split(',').map(Number)).map(([x, y]) => [x * CG_COLS + 4, y * CG_ROWS + 2, x * CG_COLS + 12, y * CG_ROWS + 8]);
+    const taken = new Set(), fits = cells => { if (cells.some(c => taken.has(c[0] + ',' + c[1]) || keep.some(r => c[0] >= r[0] && c[0] < r[2] && c[1] >= r[1] && c[1] < r[3]) || !keys.includes(Math.floor(c[0] / CG_COLS) + ',' + Math.floor(c[1] / CG_ROWS)))) return false;
+      const wet = new Set(); for (const [x, y] of cells) for (let b = 0; b < 2; b++) for (let a = 0; a < 2; a++) if (road(x * 2 + a, y * 2 + b)) wet.add((x * 2 + a) + ',' + (y * 2 + b));
+      const seen = new Set(), boxes = []; for (const k0 of wet) { if (seen.has(k0)) continue; const q = [k0], g = []; seen.add(k0);
+        while (q.length) { const k = q.pop(), [x, y] = k.split(',').map(Number); g.push([x, y]); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = (x + dx) + ',' + (y + dy); if (wet.has(n) && !seen.has(n)) { seen.add(n); q.push(n); } } }
+        const x0 = Math.min(...g.map(c => c[0])), x1 = Math.max(...g.map(c => c[0])), y0 = Math.min(...g.map(c => c[1])), y1 = Math.max(...g.map(c => c[1])), w = x1 - x0 + 1, h = y1 - y0 + 1;
+        if (Math.min(w, h) > 4 || Math.max(w, h) > 18) return false;
+        // the road goes on past the water at both ends (a road that stops in the lake would leave a bridge to nowhere)
+        const on = (x, y) => road(x, y) && !wet.has(x + ',' + y);
+        // a crossing covers the road's whole width: dry road touches it only at its two ends, all at one side pair (a road that
+        // only grazes the shore, or meets another on the water, has dry road beside it too)
+        const sides = { ew: 0, ns: 0 }; for (const [x, y] of g) { if (on(x - 1, y) || on(x + 1, y)) sides.ew++; if (on(x, y - 1) || on(x, y + 1)) sides.ns++; }
+        if (sides.ew && sides.ns) return false;
+        const ends = sides.ew ? [x0 - 1, x1 + 1].map(x => g.some(([, y]) => on(x, y))) : [y0 - 1, y1 + 1].map(y => g.some(([x]) => on(x, y)));
+        if (!ends.every(Boolean)) return false;
+        // and two crossings never meet (no bridge corner)
+        if (boxes.some(b => x0 <= b[2] + 6 && x1 >= b[0] - 6 && y0 <= b[3] + 6 && y1 >= b[1] - 6)) return false; boxes.push([x0, y0, x1, y1]); }
+      return boxes.length + 1; }; // (1 + its crossings; false where it doesn't fit)
+    const lake = [];
+    for (let i = 0; i < 3; i++) { for (let t = 0; t < 40; t++) { const cx = NXc * (i + 0.1 + 0.8 * rnd()) / 3, cy = NYc * (0.15 + 0.7 * rnd()), rx = 3 + 0.8 * rnd(), ry = 3 + 0.8 * rnd(), p = 6.283 * rnd(), q = 6.283 * rnd(), cells = [];
+      for (let y = Math.floor(cy - ry * 1.4); y <= Math.ceil(cy + ry * 1.4); y++) for (let x = Math.floor(cx - rx * 1.4); x <= Math.ceil(cx + rx * 1.4); x++) {
+        const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry, ang = Math.atan2(dy, dx), wob = 1 + 0.16 * Math.sin(3 * ang + p) + 0.08 * Math.sin(5 * ang + q);
+        if (Math.hypot(dx, dy) <= wob) cells.push([x, y]); }
+      const f = fits(cells); if (f && !lake[i]) lake[i] = cells; if (f > 1) { lake[i] = cells; break; } } // (a lake with a boardwalk over it first, as Elaris's lakes always had)
+      if (lake[i]) for (const [x, y] of lake[i]) for (let b = -2; b <= 2; b++) for (let a = -2; a <= 2; a++) taken.add((x + a) + ',' + (y + b)); }
+    for (const cells of lake) if (cells) for (const [x, y] of cells) set.add(x + ',' + y);
+    T.riverCache = { ck, set }; return set; },
+  noParks: false /* (groves of oaks and pines in mossy parks) */, squareCells: 5, oasis: false, alleyVerge: false, lampGlow: .05, parkDim: 'rgba(0,20,0,.06)', floorRange: [1, 2], landmarkLot: 380, landmarkW: 320,
+  roadDim: 'rgba(60,40,10,.12)', groundDim: 'rgba(10,30,5,.06)', pavingDim: 'rgba(10,30,5,.06)',
+  tex: { pipes: 'surfaces/park/moss', chasm: 'surfaces/water/lake', overgrowth: 'surfaces/park/moss', water: 'surfaces/water/lake', sand: 'surfaces/sand/shore-mud', floor: 'surfaces/plaza/flagstones', 'road-wet': 'surfaces/road/dirt', gravel: 'surfaces/plaza/gravel', yard: 'surfaces/lot/woodchips', 'yard-cargo': 'surfaces/lot/woodchips', 'yard-rubble': 'surfaces/lot/woodchips', 'yard-market': 'surfaces/market-floor/market-green', 'pavement-old': 'surfaces/ground/forest-floor', ground: 'surfaces/ground/forest-floor', 'rubble-big': 'surfaces/ground/forest-floor' },
+  texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.4, 'pavement-old': 0.35, plaza: 0.35, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4 },
+  kerb: ['#2a2014', '#d8c8a0', '#7a6a48'], yardRim: ['#2a2014', '#cbb68a'], groundShade: 'rgba(10,40,10,.05)', lamp: '255,220,150', vignette: '10,30,10',
+  tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
+    curb: ['stone-kerb'], 'park-edge': ['flower-hedge'], 'yard-edge': ['willow-fence'], 'bridge-edge': ['rope-rail'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['forest-floor'] /* (the ground between the roads) */, park: ['moss'], 'waterfront-edge': [] /* (the reed bank waits: a strip bent round a lake's curve breaks up, Round 507) */,
+    'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': ['rune-marker'], 'prop-ac': [], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
+    'prop-vent': ['stone-chimney'], 'prop-tank': ['beehive'], 'prop-stairs': ['bird-box'], 'prop-solar': ['herb-pot'],
+    car: ['handcart'], tree: ['oak', 'pine'], lamp: ['lantern-post'], 'sign-traffic': ['signpost'], cargo: ['axe-stump', 'firewood-cart', 'hay-bales', 'log-stack', 'sawhorse', 'herb-stall', 'veg-stall', 'roofed-well'], clutter: ['barrel', 'blue-lantern', 'fern', 'flower-pots', 'mossy-log', 'mossy-rocks', 'mushroom-ring', 'short-stump', 'wood-bench'],
+    'ruinpic-garden': ['broken-forest-gate', 'root-split-shrine', 'ruined-temple'], 'ruinpic-homes': ['broken-cottage'], 'ruinpic-tech': ['ruined-mill', 'tower-stump'], 'ruinpic-market': ['collapsed-hall', 'overgrown-market'],
+    'parkpic-garden': ['fairy-glade', 'stepping-stones'], 'parkpic-homes': ['flower-meadow', 'flower-path', 'herb-garden-plot'], 'parkpic-market': ['fountain-glade', 'lantern-grove'], 'parkpic-tech': ['picnic-lawn'],
+    landmark: ['antler-guardian', 'hollow-stump', 'standing-stones', 'stone-fountain'],
+    'building-market': ['herbalist', 'timber-market', 'potion-stall', 'bakery', 'forest-teahouse', 'mushroom-stall', 'candle-shop'], 'building-homes': ['timber-cottage', 'turf-cottage', 'stump-hut', 'ivy-tower', 'porch-longhouse', 'herb-roof-cottage', 'hill-home', 'treehouse'],
+    'building-tech': ['moonstone-workshop', 'mage-tower', 'crystal-well', 'rune-house', 'alchemist-lab', 'timber-observatory', 'crystal-spire', 'lantern-maker'], 'building-garden': ['moss-shrine', 'druid-longhouse', 'stone-belltower', 'wood-greenhouse', 'moss-temple', 'great-tree-pavilion', 'forest-gatehouse', 'waterwheel-mill'] },
+  roofKit: {}, doorWalls: [],
+  landmarkAspect: { 'antler-guardian': 0.4337, 'hollow-stump': 0.9393, 'standing-stones': 1.0023, 'stone-fountain': 0.9474 }, landmarkPx: { 'antler-guardian': 193, 'hollow-stump': 402, 'standing-stones': 439, 'stone-fountain': 360 },
+  cargoSize: { 'axe-stump': [56, 0.92], 'firewood-cart': [84, 1.23], 'hay-bales': [76, 1.13], 'log-stack': [80, 1.26], sawhorse: [64, 1.28], 'herb-stall': [84, 1.18], 'veg-stall': [84, 0.96], 'roofed-well': [72, 0.64] } /* [longer side px, width / height] against the ~60px hero */,
+  yardSets: { cargo: ['axe-stump', 'firewood-cart', 'hay-bales', 'log-stack', 'sawhorse'], market: ['herb-stall', 'veg-stall', 'roofed-well'] },
+  clutterH: { barrel: 34, 'blue-lantern': 48, fern: 30, 'flower-pots': 28, 'mossy-log': 24, 'mossy-rocks': 26, 'mushroom-ring': 20, 'short-stump': 20, 'wood-bench': 26 },
+  // the boardwalk bridge (Rounds 549-550), measured in each piece's own px: the plank deck between the railings, rows 244-468 of
+  // the east-west pieces; north to south, the deck between the side railings' outer edges (the north piece's far railing and the
+  // south piece's near one were taken out in Round 551, so the bridge is open where it meets the road)
+  bridgeDeck: [244, 468], bridgeV: { north: { deckL: 30, w: 602, start: 197, cut: 804 }, mid: { deckL: 6, w: 602, top: 0, bottom: 583 }, south: { deckL: 26, w: 603, top: 0, end: 755 } } });
 let GEN = GEN_THEMES.chronospire;
 function genWith(id, fn) { const was = GEN; GEN = GEN_THEMES[id]; try { return fn(); } finally { GEN = was; } }
 // A themed world's room plans, kept per seed (the Chronospire keeps its own, with its room map).
@@ -668,7 +751,7 @@ function genWorld(seed) {
   const plazas = {}, used = new Set(), holes = {}; // Round 400: a square is cut out of its lot (holes); the rest stays built
   // A square: 5x5 cells inside a street-front lot, against the side the street runs along, joined to the street by a short
   // run of paving; it lies wholly in one room (the lot may not).
-  const S5 = GEN.topdown ? 4 : 5 /* Round 445: 100px squares in the top-down city (its objects are 42px, Round 441) */, squareFor = (r, room) => { const [ox, oy] = room;
+  const S5 = GEN.topdown ? (GEN.squareCells || 4) : 5 /* Round 445: 100px squares in the top-down city (its objects are 42px, Round 441); Round 551: a theme's own (Elaris 125px: the Cardsmith is 88px since Round 473) */, squareFor = (r, room) => { const [ox, oy] = room;
     for (const [a, b] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) { const cx = Math.round((r[0] + r[2] - S5) / 2), cy = Math.round((r[1] + r[3] - S5) / 2);
       let q = a ? (a < 0 ? [r[0], cy, r[0] + S5, cy + S5] : [r[2] - S5, cy, r[2], cy + S5]) : (b < 0 ? [cx, r[1], cx + S5, r[1] + S5] : [cx, r[3] - S5, cx + S5, r[3]]);
       let ext = 0; for (; ext <= 3; ext++) { const probe = a ? [a < 0 ? q[0] - 1 - ext : q[2] + ext, q[1] + 2] : [q[0] + 2, b < 0 ? q[1] - 1 - ext : q[3] + ext]; if (at(probe[0], probe[1]) === 2) break; }
@@ -901,6 +984,7 @@ const CITY_BUILDING_PX_SOL_RP = {"toppled-temple": [187, 207], "sunken-bathhouse
 const CITY_BUILDING_PX = {"noodle-bar": [184, 193], "arcade": [193, 185], "pawn-shop": [109, 190], "capsule-hotel": [90, 185], "tenement": [178, 216], "container-block": [206, 210], "pod-block": [110, 202], "shanty-block": [99, 197], "glass-office": [167, 198], "server-block": [194, 205], "substation": [99, 200], "data-relay": [81, 211], "greenhouse": [176, 200], "tea-house": [199, 204], "hydro-farm": [103, 200], "bathhouse": [104, 201], "karaoke-bar": [254, 179], "food-court": [256, 176], "tattoo-parlour": [148, 162], "cyber-repair": [146, 183], "walkup-flats": [241, 187], "boarding-house": [250, 186], "roof-garden-block": [172, 186], "micro-tower": [94, 194], "drone-hangar": [229, 180], "battery-depot": [251, 179], "robotics-workshop": [174, 170], "research-lab": [132, 184], "shrine-hall": [248, 188], "temple-hall": [247, 187], "flower-shop": [157, 175], "lantern-court": [149, 185]};
 Object.assign(CITY_BUILDING_PX, CITY_BUILDING_PX_SOL_RP);
 Object.assign(CITY_BUILDING_PX, {"holo-shop": [172, 209], "glass-market": [186, 212], "drone-stall": [111, 168], "tea-bar": [100, 162], "balcony-block": [138, 221], "garden-terrace": [141, 204], "dome-pod": [138, 143], "bay-tower": [71, 205], "crystal-hall": [170, 180], "dock-tower": [131, 207], "data-spire": [73, 208], "antenna-house": [57, 200], "glass-greenhouse": [168, 177], "tea-pavilion": [174, 174], "hydro-house": [133, 173], "bell-tower": [87, 200], "boutique": [209, 199], "courier-depot": [184, 172], "sky-arcade": [141, 174], "lantern-shop": [86, 175], "townhouses": [236, 218], "courtyard-apts": [206, 201], "pod-cluster": [193, 216], "round-window-apt": [109, 333], "turbine-hall": [219, 197], "weather-station": [203, 211], "crystal-battery": [66, 212], "beacon-house": [59, 193], "cloud-temple": [205, 220], "blossom-pavilion": [251, 158], "sky-observatory": [79, 204], "shrine-gate": [220, 107], "wrecked-hall": [196, 219], "shattered-greenhouse": [208, 192], "broken-block": [145, 246], "snapped-antenna": [92, 208], "burnt-arcade": [193, 186], "crashed-gondola": [209, 211], "cracked-pod": [159, 149], "broken-skygate": [121, 131], "blossom-court": [159, 210], "tea-garden": [170, 198], "lantern-garden": [124, 198], "garden-path": [131, 208], "fountain-court": [159, 200], "flower-beds": [171, 200], "cushion-terrace": [124, 200], "stream-garden": [117, 200]}); // Round 548: the Sky Isles' buildings, wrecks and roof gardens (sky-gen/building-px.json)
+Object.assign(CITY_BUILDING_PX, {"herbalist": [217, 228], "timber-market": [219, 165], "potion-stall": [139, 198], "bakery": [166, 198], "timber-cottage": [208, 224], "turf-cottage": [184, 210], "stump-hut": [199, 173], "ivy-tower": [106, 228], "moonstone-workshop": [200, 190], "mage-tower": [100, 233], "crystal-well": [132, 144], "rune-house": [139, 205], "moss-shrine": [164, 195], "druid-longhouse": [228, 180], "stone-belltower": [71, 219], "wood-greenhouse": [149, 202], "forest-teahouse": [219, 188], "mushroom-stall": [134, 207], "candle-shop": [138, 211], "porch-longhouse": [220, 191], "herb-roof-cottage": [208, 166], "hill-home": [221, 156], "treehouse": [185, 221], "alchemist-lab": [205, 174], "timber-observatory": [155, 196], "crystal-spire": [91, 201], "lantern-maker": [145, 199], "moss-temple": [200, 206], "great-tree-pavilion": [218, 216], "forest-gatehouse": [171, 205], "waterwheel-mill": [179, 213], "ruined-temple": [242, 212], "collapsed-hall": [250, 202], "broken-cottage": [152, 183], "tower-stump": [143, 191], "overgrown-market": [257, 207], "root-split-shrine": [155, 214], "ruined-mill": [176, 198], "broken-forest-gate": [201, 144], "fairy-glade": [315, 200], "herb-garden-plot": [316, 200], "lantern-grove": [221, 210], "flower-path": [273, 198], "fountain-glade": [315, 199], "flower-meadow": [317, 199], "picnic-lawn": [216, 229], "stepping-stones": [273, 203]}); // Round 551: Elaris (assets/environment/wilds-gen/building-px.json)
 
 Object.assign(CITY_BUILDING_PX, {"spice-shop": [188, 186], "bazaar-hall": [170, 195], "crystal-stall": [100, 191], "fruit-stall": [110, 188], "adobe-house": [174, 193], "terrace-house": [181, 192], "beehive-hut": [104, 136], "windcatcher-house": [104, 204], "solar-hall": [177, 172], "skiff-hangar": [200, 193], "battery-tower": [83, 179], "relay-house": [112, 199], "well-house": [182, 187], "domed-bathhouse": [181, 191], "water-shop": [88, 172], "cistern-house": [130, 204], "thatch-hut": [171, 192], "pyramid-station": [177, 197], "observatory": [83, 198], "pyramid-shrine": [180, 195], "sun-temple": [181, 183], "obelisk-gate": [69, 197], "oasis-house": [130, 204]}); // Round 499: Solaris's buildings (one sheet scale: a two-floor house about 190px tall)
 Object.assign(CITY_TD_ART_BASE, {"ruinpic-market": ["burned-noodle-bar", "collapsed-arcade", "gutted-pawn-shop", "spilled-capsule-hotel"], "ruinpic-homes": ["collapsed-tenement", "crushed-containers", "burned-shanty", "snapped-tower"], "ruinpic-tech": ["shattered-office", "blown-server-block", "wrecked-substation", "toppled-relay"], "ruinpic-blast": ["crater-block", "gutted-front", "halved-building", "fallen-pile"], "parkpic-market": ["night-market-square", "seating-court", "hologram-square", "vending-alley"], "parkpic-homes": ["veg-garden", "playground", "basketball-court", "laundry-garden"], "parkpic-tech": ["glow-plaza", "zen-data-garden", "solar-shade-court", "drone-pad-garden"], "parkpic-garden": ["koi-garden", "shrine-garden", "bamboo-grove", "moss-lantern-garden"]}); // Round 502: the owner's ruins (by quarter, and the blast zone's) and walkable parks
@@ -2513,6 +2597,7 @@ function paintChronoRoom(canvas, key) {
 // Round 540: the Map screen's colours for the generated worlds drawn in the city's map style (the city itself keeps its
 // textured tiles): ground, the faint blocks on it, road, and the kerb's dark and light lines
 const MAP_LOOK = {
+  wilds: { ground: '#0e140c', block: 'rgba(200,255,190,.035)', road: '#a08c66', kerb: ['#070a05', '#e4dcb8'] },
   sky: { ground: '#120e1c', block: 'rgba(220,200,255,.035)', road: '#8f86a8', kerb: ['#08060e', '#e6dcff'] },
   solaris: { ground: '#17110b', block: 'rgba(255,214,150,.035)', road: '#9e8a66', kerb: ['#0c0804', '#ecd6a6'] },
   chronospire: { ground: '#120e0a', block: 'rgba(255,200,120,.035)', road: '#937a4a', kerb: ['#0a0705', '#e6c274'] },

@@ -1,10 +1,10 @@
 {
- "chronospire": {
-  "rooms": 54,
+ "wilds": {
+  "rooms": 51,
   "fights": 0,
-  "crossings": 302,
-  "arrivals": 121,
-  "itemRoutes": 60,
+  "crossings": 353,
+  "arrivals": 127,
+  "itemRoutes": 56,
   "problems": [],
   "interruptions": {},
   "unvisited": [],

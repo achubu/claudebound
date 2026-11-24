@@ -3496,6 +3496,35 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 551: Elaris on the generator
+
+(Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm".) Elaris, the
+forest (region `wilds`), is now built by the generator from the journey's seed, like the city, Solaris and the Sky Isles:
+`GEN_THEMES.wilds` in `assets/chrono-gen.js`, `GEN_REGIONS.wilds` / `GEN_WILDS_LIVE` in `assets/city-gen.js`. Its room map,
+names, levels, enemies, bosses, gear and events stay; its rooms' roads, lots, buildings and scenery come from the seed.
+
+- **Rooms:** Elaris's 51 rooms (`TILE_WORLD_DATA.wilds.layout`), straight exits only. The Sky Isles' code that puts a straight
+  link round the corner where dropping a diagonal would cut rooms off is shared (`genTileExtraLinks`; Elaris gets 2,1 to 1,1).
+  The Sky Isles come out the same as before (checked against a fingerprint of their seed-77 world).
+- **Lakes:** three, one in each third of the forest, from a seeded random stream (`chronoRng`: `chronoHash` of keys that differ
+  only in their last letter gave three lakes in the same place). The roads are planned first (they never read the terrain), so
+  a lake is kept only where every road over it is a clean crossing: it covers the road's whole width, the road goes on past the
+  water at both ends, and no two crossings are within 6 cells (a road grazing the shore made two little bridges side by side,
+  and a road bending at the shore made a corner of bridges). Each lake tries 40 spots and takes the first with a boardwalk, as
+  Elaris's lakes always had; the middle of the start and boss rooms stays dry. Banks are plain mud.
+- **Art** (Rounds 549-550): the forest floor between the roads, dirt roads, mossy groves of oaks and pines with the flowering
+  hedge round them, woodchip yards with the willow fence, the stone kerb, lantern posts, the owner's 31 buildings, 8 ruins, 8
+  gardens and four landmarks, and a map in forest colours (`MAP_LOOK.wilds`). The boardwalk's north and south end pieces had
+  a railing across the deck: taken out, so the boardwalk is open where it meets the road; the east and west ends are cut to the
+  gate pillars and one panel, so a short crossing isn't stretched to 900px.
+- **Object squares** are 125px in Elaris (`squareCells: 5`; 100px elsewhere): the 100px square was sized for 42px objects, and
+  the Cardsmith (88px since Round 473) didn't fit one with a building behind it, so on seed 77 it stood on the street.
+
+Tests: `tests/wilds-gen.test.cjs` (seeds 77, 1, 9: no diagonals, every room reached, two or three lakes, dry landing rooms,
+every road on the water under a bridge, no two bridges meeting); `worldgen-codex` checks Elaris too; `world-bugs` checks
+pads on Vespera (still a tile world) and Elaris among the generated worlds; `map-diagonals` skips generated worlds.
+`THEME=wilds node tests/city-atlas.cjs` paints the whole forest. Browser walks: `SEED=<n> node tests/playtest-walk.cjs wilds`.
+
 ## Round 550: Elaris's edges
 
 The owner's redrawn edge sheet (five long strips on magenta, `assets/environment/wilds-gen/src/edge-sheet-2.jpg`) is cut into
