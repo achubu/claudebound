@@ -1,0 +1,190 @@
+{
+"herbalist": [
+217,
+228
+],
+"timber-market": [
+219,
+165
+],
+"potion-stall": [
+139,
+198
+],
+"bakery": [
+166,
+198
+],
+"timber-cottage": [
+208,
+224
+],
+"turf-cottage": [
+184,
+210
+],
+"stump-hut": [
+199,
+173
+],
+"ivy-tower": [
+106,
+228
+],
+"moonstone-workshop": [
+200,
+190
+],
+"mage-tower": [
+100,
+233
+],
+"crystal-well": [
+132,
+144
+],
+"rune-house": [
+139,
+205
+],
+"moss-shrine": [
+164,
+195
+],
+"druid-longhouse": [
+228,
+180
+],
+"stone-belltower": [
+71,
+219
+],
+"wood-greenhouse": [
+149,
+202
+],
+"forest-teahouse": [
+219,
+188
+],
+"mushroom-stall": [
+134,
+207
+],
+"candle-shop": [
+138,
+211
+],
+"porch-longhouse": [
+220,
+191
+],
+"herb-roof-cottage": [
+208,
+166
+],
+"hill-home": [
+221,
+156
+],
+"treehouse": [
+185,
+221
+],
+"alchemist-lab": [
+205,
+174
+],
+"timber-observatory": [
+155,
+196
+],
+"crystal-spire": [
+91,
+201
+],
+"lantern-maker": [
+145,
+199
+],
+"moss-temple": [
+200,
+206
+],
+"great-tree-pavilion": [
+218,
+216
+],
+"forest-gatehouse": [
+171,
+205
+],
+"waterwheel-mill": [
+179,
+213
+],
+"ruined-temple": [
+242,
+212
+],
+"collapsed-hall": [
+250,
+202
+],
+"broken-cottage": [
+152,
+183
+],
+"tower-stump": [
+143,
+191
+],
+"overgrown-market": [
+257,
+207
+],
+"root-split-shrine": [
+155,
+214
+],
+"ruined-mill": [
+176,
+198
+],
+"broken-forest-gate": [
+201,
+144
+],
+"fairy-glade": [
+315,
+200
+],
+"herb-garden-plot": [
+316,
+200
+],
+"lantern-grove": [
+221,
+210
+],
+"flower-path": [
+273,
+198
+],
+"fountain-glade": [
+315,
+199
+],
+"flower-meadow": [
+317,
+199
+],
+"picnic-lawn": [
+216,
+229
+],
+"stepping-stones": [
+273,
+203
+]
+}

@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 549: the old guide lines off the map; Elaris's generator art
+
+**The map** (owner: "the world maps seem to have the old road lines, we need to remove those"): the dotted guide lines drawn from
+room centre to room centre (and their stubs) are hidden in every world (`assets/layout-polish.css`). They came from before the
+maps drew each room's own roads, and in the generated worlds they cut across buildings. The roads drawn on the map are the
+routes; a locked door still shows its 🔒 note on the room's label. (The white dashes inside the tile worlds' road drawing are its
+centre line, from the owner's Round 343 example, and stay.)
+
+**Elaris's art** (the owner's nine sheets, `assets/environment/wilds-gen/`, see its README): 31 buildings, 8 overgrown ruins, 8
+walkable gardens, yard pieces, clutter, four landmarks, trees, rooftop kit, posts, the boardwalk bridge both ways, and eight
+ground textures. The sheets are on magenta (Elaris's art is green), so `tools/cut_building_sheet.py` takes `KEY=magenta`: it keys
+magenta, makes magenta shut inside a picture see-through, and holds back magenta fringe. The sheets' black cell frames and the
+ruins sheet's captions were painted out before cutting. The edge sheet came back as short scenes on grass instead of long
+strips on magenta, so Elaris waits for redrawn edges before it goes onto the generator.
+
 ## Round 548: the Sky Isles on the generator
 
 Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm" (and "let me know

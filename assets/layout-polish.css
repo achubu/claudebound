@@ -401,3 +401,7 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
 .map-canvas .panel b { font-size: 6.5px !important; font-weight: 600 !important; opacity: .6; text-shadow: 0 0 3px #000, 0 0 2px #000 !important; }
 .map-canvas .panel small { font-size: 5px !important; opacity: .5; letter-spacing: .3px !important; }
 .map-canvas .panel .lock-hint { position: absolute !important; top: 100% !important; left: 50% !important; transform: translateX(-50%) !important; white-space: nowrap !important; font-size: 5.5px !important; opacity: .75; } /* Round 540: the lock note hangs under the name, so the label stays the name's size */
+/* Round 549 (owner: "the world maps seem to have the old road lines, we need to remove those"): the dotted guide lines drawn
+   from room centre to room centre (and their stubs) are gone in every world; the roads drawn on the map are the routes, and a
+   locked door still shows its 🔒 note on the room's label. */
+.map-canvas .map-link, .map-canvas .map-links .map-link { display: none !important; }

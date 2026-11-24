@@ -5,7 +5,9 @@ Owner: "give me the prompts one at a time please starting with the next world th
 `assets/environment/wilds/`): an enchanted forest of huge round canopies, mossy ancient stone ruins and plazas, sandy dirt
 paths, glowing blue flowers, and lakes crossed by boardwalks. On the generator its lakes take the place of Solaris's rivers,
 crossed by wooden boardwalk bridges. Nine prompts, each complete on its own, in the same layouts as Solaris's and the Sky
-Isles' sheets (so the same tools cut them); buildings are 1-2 floors, like Solaris's.
+Isles' sheets (so the same tools cut them); buildings are 1-2 floors, like Solaris's. Prompts 2-9 use a flat magenta
+background (#FF00FF), not green: Elaris's art is full of moss, grass and leaves, which a green key would cut away (as the
+city's trees, Round 435). Prompt 1 keeps green, as it only fills the thin gaps between tiles.
 
 ## 1. Ground textures (9 seamless tiles)
 
@@ -44,7 +46,7 @@ A sprite sheet of 5 seamless horizontal edge strips for a top-down 2D game, matc
 with dark outlines.
 
 LAYOUT: 5 long horizontal strips stacked one above the other, each strip 8 times as long as it is tall, filling the width of
-the sheet, with a thin flat pure green (#00FF00) gap between strips and round the edge of the sheet. No labels, numbers,
+the sheet, with a thin flat pure magenta (#FF00FF) gap between strips and round the edge of the sheet. No labels, numbers,
 letters or text anywhere.
 
 EVERY STRIP IS SEAMLESS ALONG ITS LENGTH: its left end continues exactly into its right end, so it repeats sideways with no
@@ -68,11 +70,11 @@ NOT IN THE PICTURE: no objects, no buildings, no people, no shadows, no glow spi
 ## 3. Buildings, sheet 1
 
 ```
-A sprite sheet of 16 separate buildings for a top-down 2D game, on a flat solid pure green background (#00FF00), with no
+A sprite sheet of 16 separate buildings for a top-down 2D game, on a flat solid pure magenta background (#FF00FF), with no
 gradient, pattern or texture in the background.
 
 LAYOUT: an invisible grid of 4 columns by 4 rows of equal cells; each cell is a tall rectangle, 3 units wide by 4 units tall.
-Exactly one building in each cell, centred, with clear green space between every building and on every side. Nothing crosses
+Exactly one building in each cell, centred, with clear magenta space between every building and on every side. Nothing crosses
 from one cell into another. No labels, numbers, letters or text anywhere.
 
 In every row, columns 1 and 2 are WIDE buildings and columns 3 and 4 are NARROW buildings:
@@ -113,11 +115,11 @@ people or animals; nothing floating between the buildings.
 ## 4. Buildings, sheet 2
 
 ```
-A sprite sheet of 16 separate buildings for a top-down 2D game, on a flat solid pure green background (#00FF00), with no
+A sprite sheet of 16 separate buildings for a top-down 2D game, on a flat solid pure magenta background (#FF00FF), with no
 gradient, pattern or texture in the background.
 
 LAYOUT: an invisible grid of 4 columns by 4 rows of equal cells; each cell is a tall rectangle, 3 units wide by 4 units tall.
-Exactly one building in each cell, centred, with clear green space between every building and on every side. Nothing crosses
+Exactly one building in each cell, centred, with clear magenta space between every building and on every side. Nothing crosses
 from one cell into another. No labels, numbers, letters or text anywhere.
 
 In every row, columns 1 and 2 are WIDE buildings and columns 3 and 4 are NARROW buildings:
@@ -158,11 +160,11 @@ people or animals; nothing floating between the buildings.
 ## 5. Yard pieces and clutter (16 objects)
 
 ```
-A sprite sheet of 16 separate objects for a top-down 2D game set in an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), on a flat solid pure green background
-(#00FF00), with no gradient, pattern or texture in the background.
+A sprite sheet of 16 separate objects for a top-down 2D game set in an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), on a flat solid pure magenta background
+(#FF00FF), with no gradient, pattern or texture in the background.
 
 LAYOUT: an invisible grid of 4 columns by 4 rows of equal SQUARE cells. Exactly one object in each cell, centred, with clear
-green space between every object and on every side. Nothing crosses from one cell into another. No labels, numbers, letters
+magenta space between every object and on every side. Nothing crosses from one cell into another. No labels, numbers, letters
 or text anywhere.
 
 ONE SCALE FOR ALL 16: a person would stand as tall as the market stall's counter is wide. Rows 1 and 2 are large pieces that
@@ -188,12 +190,12 @@ background; nothing floating between the objects.
 ## 6. Ruins (blocked) and walkable gardens (16 pictures)
 
 ```
-A sprite sheet of 16 separate pictures for a top-down 2D game set in an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), on a flat solid pure green background
-(#00FF00), with no gradient, pattern or texture in the background: rows 1 and 2 are ruined, overgrown buildings, rows 3 and 4
+A sprite sheet of 16 separate pictures for a top-down 2D game set in an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), on a flat solid pure magenta background
+(#FF00FF), with no gradient, pattern or texture in the background: rows 1 and 2 are ruined, overgrown buildings, rows 3 and 4
 are small walkable gardens.
 
 LAYOUT: an invisible grid of 4 columns by 4 rows of equal cells; each cell is a tall rectangle, 3 units wide by 4 units tall.
-Exactly one picture in each cell, centred, with clear green space between every picture and on every side. Nothing crosses
+Exactly one picture in each cell, centred, with clear magenta space between every picture and on every side. Nothing crosses
 from one cell into another. No labels, numbers, letters or text anywhere.
 
 In every row, columns 1 and 2 are WIDE and columns 3 and 4 are NARROW:
@@ -233,11 +235,11 @@ spilling onto the background; nothing floating between the pictures.
 ## 7. Landmarks, vehicles, trees and rooftop kit (16 objects)
 
 ```
-A sprite sheet of 16 separate objects for a top-down 2D game set in an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), on a flat solid pure green background
-(#00FF00), with no gradient, pattern or texture in the background.
+A sprite sheet of 16 separate objects for a top-down 2D game set in an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), on a flat solid pure magenta background
+(#FF00FF), with no gradient, pattern or texture in the background.
 
 LAYOUT: the sheet is a large square image. An invisible grid of 4 columns by 4 rows of equal SQUARE cells. Exactly one object
-in each cell, centred, with clear green space between every object and on every side. Nothing crosses from one cell into
+in each cell, centred, with clear magenta space between every object and on every side. Nothing crosses from one cell into
 another. No labels, numbers, letters or text anywhere.
 
 HIGH DETAIL: each object fills most of its cell, drawn at high resolution with crisp, clean line work, so it stays sharp when
@@ -246,7 +248,7 @@ shown large.
 ROW 1, LANDMARKS (large monuments, each nearly filling its cell): a ring of tall ancient standing stones with glowing blue
 runes; a giant hollow ancient tree stump with a door and lanterns; a mossy stone statue of an antlered forest guardian on a
 square pedestal; a round stone fountain with three tiers and clear water.
-ROW 2, VEHICLES AND TREES: a small wooden cart pulled by nothing, facing right (parked); a small rowing boat on a stand,
+ROW 2, VEHICLES AND TREES: a small parked wooden handcart with no animal, facing right; a small rowing boat on a stand,
 facing right; a large round oak tree seen from above; a tall pine tree seen from above.
 ROW 3, ROOFTOP KIT (small, about half the height of their cell): a stone chimney; a beehive; a bird box on a pole; a small
 pot of herbs.
@@ -260,25 +262,29 @@ dark outline round its whole shape.
 STYLE: detailed 2D game art, crisp clean shapes and thin dark line work, flat colours with light, simple shading. Fresh forest greens, moss, warm sandy earth, weathered pale stone and honey-brown wood, with small glowing blue and cyan magic accents.
 
 NOT IN THE PICTURE: no ground, no grass patch under the objects (except each object's own pedestal or base); no cast shadows;
-no people; no glow spilling onto the green background; nothing floating between the objects.
+no people; no glow spilling onto the magenta background; nothing floating between the objects.
 ```
 
 ## 8. The bridge, east to west
 
 ```
 A sprite sheet of one grand wooden boardwalk bridge for a top-down 2D game, matching an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), drawn in clean, crisp game art
-with dark outlines. On a flat solid pure green background (#00FF00), with no gradient, pattern or texture in the background.
+with dark outlines. On a flat solid pure magenta background (#FF00FF), with no gradient, pattern or texture in the background.
+
+THE BRIDGE RUNS HORIZONTALLY, FROM THE LEFT OF THE IMAGE TO THE RIGHT: its two long sides, with the railings, are its top
+and bottom edges; its two ends are on the left and the right.
 
 THE BRIDGE: an over-the-top, monumental wooden boardwalk bridge for a path crossing a lake: a wide deck of honey-brown planks with a
 border of darker beams along both edges; tall carved wooden railings with posts topped by small carved leaves along both
 sides; at each end a pair of carved wooden gate posts wrapped in ivy, each with a glowing blue lantern on top, standing on the
 corners of the deck; tall lantern poles with glowing blue lanterns and a few hanging flower garlands along the railings. The deck runs left to right; its two long sides are the top and bottom edges.
 
-LAYOUT: two rows, with clear green space between every piece and round the edge of the sheet. No labels, numbers, letters or
+LAYOUT: two rows, with clear magenta space between every piece and round the edge of the sheet. No labels, numbers, letters or
 text anywhere.
 ROW 1: the whole bridge, about 4 times as long as it is wide, centred.
-ROW 2: the same bridge cut into three separate pieces, side by side with green space between them, all at exactly the same
-scale and the same width (top edge to bottom edge) as the bridge in row 1:
+ROW 2: the same bridge cut into three separate pieces, side by side with magenta space between them, all at exactly the same
+scale and EXACTLY the same depth (top edge to bottom edge) as the bridge in row 1, the middle section included: one row of
+deck planks across, never two:
   PIECE 1, the WEST END: the left gate posts and the first part of the deck; its right edge is a straight vertical cut
   through the deck.
   PIECE 2, the MIDDLE SECTION: a square length of deck with railings, one lantern pole on each side in its middle; its left
@@ -294,14 +300,14 @@ STYLE: detailed 2D game art, crisp clean shapes and thin dark line work, flat co
 dark outline round each piece. Fresh forest greens, moss, warm sandy earth, weathered pale stone and honey-brown wood, with small glowing blue and cyan magic accents.
 
 NOT IN THE PICTURE: no water, no lake, no banks, no ground, no path beyond the bridge; no cast shadows; no glow spilling onto
-the green background; no people or animals; nothing floating between the pieces.
+the magenta background; no people or animals; nothing floating between the pieces.
 ```
 
 ## 9. The bridge, north to south
 
 ```
 A sprite sheet of one grand wooden boardwalk bridge for a top-down 2D game, matching an enchanted forest village (huge round tree canopies, mossy ancient stone ruins and plazas, sandy dirt paths through moss and grass, glowing blue flowers, clear lakes crossed by wooden boardwalks), drawn in clean, crisp game art
-with dark outlines. On a flat solid pure green background (#00FF00), with no gradient, pattern or texture in the background.
+with dark outlines. On a flat solid pure magenta background (#FF00FF), with no gradient, pattern or texture in the background.
 
 THE BRIDGE: an over-the-top, monumental wooden boardwalk bridge for a path crossing a lake: a wide deck of honey-brown planks with a
 border of darker beams along both edges; tall carved wooden railings with posts topped by small carved leaves along both
@@ -309,11 +315,11 @@ sides; at each end a pair of carved wooden gate posts wrapped in ivy, each with 
 corners of the deck; tall lantern poles with glowing blue lanterns and a few hanging flower garlands along the railings. THE DECK RUNS FROM THE TOP OF THE IMAGE TO THE BOTTOM: its two long sides, with the railings, are its left
 and right edges.
 
-LAYOUT: three columns, with clear green space between every piece and round the edge of the sheet. No labels, numbers, letters
+LAYOUT: three columns, with clear magenta space between every piece and round the edge of the sheet. No labels, numbers, letters
 or text anywhere.
 COLUMN 1: the whole bridge, about 4 times as tall as it is wide, centred.
 COLUMNS 2 AND 3: the same bridge cut into three separate pieces, at exactly the same scale and the same width (left edge to
-right edge) as the bridge in column 1, one above another in column 2 and column 3 with green space between them:
+right edge) as the bridge in column 1, one above another in column 2 and column 3 with magenta space between them:
   PIECE 1 (top of column 2), the NORTH END: the top pair of gate posts and the first part of the deck; its bottom edge is a
   straight horizontal cut through the deck.
   PIECE 2 (bottom of column 2), the MIDDLE SECTION: a square length of deck with railings, one lantern pole on each side in
@@ -330,6 +336,6 @@ STYLE: detailed 2D game art, crisp clean shapes and thin dark line work, flat co
 dark outline round each piece. Fresh forest greens, moss, warm sandy earth, weathered pale stone and honey-brown wood, with small glowing blue and cyan magic accents.
 
 NOT IN THE PICTURE: no water, no lake, no banks, no ground, no path beyond the bridge; no cast shadows; no glow spilling onto
-the green background; no people or animals; nothing floating between the pieces.
+the magenta background; no people or animals; nothing floating between the pieces.
 ```
 
