@@ -248,7 +248,7 @@ shown large.
 ROW 1, LANDMARKS (large monuments, each nearly filling its cell): a ring of tall ancient standing stones with glowing blue
 runes; a giant hollow ancient tree stump with a door and lanterns; a mossy stone statue of an antlered forest guardian on a
 square pedestal; a round stone fountain with three tiers and clear water.
-ROW 2, VEHICLES AND TREES: a small wooden cart pulled by nothing, facing right (parked); a small rowing boat on a stand,
+ROW 2, VEHICLES AND TREES: a small parked wooden handcart with no animal, facing right; a small rowing boat on a stand,
 facing right; a large round oak tree seen from above; a tall pine tree seen from above.
 ROW 3, ROOFTOP KIT (small, about half the height of their cell): a stone chimney; a beehive; a bird box on a pole; a small
 pot of herbs.
