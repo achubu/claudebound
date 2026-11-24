@@ -31,6 +31,9 @@ const r = JSON.parse(run(`(() => { newGame(); const out = {};
     o.buildings = bl.length; o.twin40 = twin40; o.spread = typeof CITY_BUILDING_SPREAD === 'number' ? CITY_BUILDING_SPREAD : null;
     // (6) the portal (Round 540): in the start room and the boss room it stands by the objects' rule
     o.portal = [regionStartRoom(), WORLD_BOSS_ROOMS[W][0]].map(k => { const q = cityPortalSpot(k); return q && { k, ok: walkable(k, q.x, q.y) && !cityItemOnStreet(k, q.x, q.y) && cityItemSpriteClear(k, q.x, q.y, { type: 'portal' }) }; });
+    // (8) Round 541: a landmark with its picture's width in landmarkPx is never drawn wider than half of it (the room canvas is 2x)
+    o.landmarkBig = wl.lotsPx.filter(l => l.use === 'landmark').map(l => { const px = genWith(th, () => GEN.landmarkPx && GEN.landmarkPx[l.landmark]), b = genWith(th, () => cityLandmarkBox(l, [0, 0, l.r[2] - l.r[0], l.r[3] - l.r[1]])); return px && b.w * 2 > px + 0.5 ? l.landmark + ':' + Math.round(b.w * 2) + '>' + px : null; }).filter(Boolean);
+    o.landmarkPx = !!genWith(th, () => GEN.landmarkPx);
     // (5) coverage
     const cov = genFinalCoverage(th); o.covSum = Object.values(cov.totals).reduce((a, v) => a + v, 0); o.covRooms = Object.keys(cov.rooms).length;
     o.covRoomSums = Object.values(cov.rooms).every(x => Math.abs(Object.values(x.share).reduce((a, v) => a + v, 0) - 1) < 1e-9); o.residual = cov.totals.residual; }
@@ -51,6 +54,8 @@ for (const W of ['city', 'elaris']) {
   assert(Math.abs(o.covSum - 1) < 1e-9 && o.covRoomSums && o.covRooms === o.rooms, W + ': coverage shares add up, room by room');
   assert(o.residual > 0 && o.residual < 0.3, W + ': residual ground reported ' + o.residual);
   assert(o.portal.every(q => q && q.ok), W + ': the portal stands off the street, clear of sprites, on walkable ground ' + JSON.stringify(o.portal));
+  assert.deepStrictEqual(o.landmarkBig, [], W + ': no landmark drawn larger than its picture');
+  if (W === 'elaris') assert(o.landmarkPx, 'Solaris lists its landmark pictures\' widths');
   console.log(W + ': ' + o.rooms + ' rooms; ' + o.buildings + ' buildings; residual ground ' + (o.residual * 100).toFixed(1) + '%');
 }
 assert.strictEqual(r.shuffle.a, r.shuffle.b, 'the same seed shuffles the same way');
