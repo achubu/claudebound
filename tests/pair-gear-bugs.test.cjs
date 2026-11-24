@@ -68,6 +68,10 @@ b = solo(); state.relics = (state.relics || []).concat(['boots']); state.gear = 
 b = solo(); state.relics = (state.relics || []).concat(['boots']); state.gear = { boots: 'boots' }; atk(b); b.block = 999; b.hand = []; eh = b.enemy.hp; endTurn(); o.riotHit = eh - b.enemy.hp;
 b = solo(); state.relics = (state.relics || []).concat(['cloudstepBoots']); state.gear = { boots: 'cloudstepBoots' }; atk(b); b.freeze = 1; b.block = 0; b.hand = []; endTurn();
 o.cloudFrozen = !!b.gearCloudUsed; atk(b); b.block = 0; { const p = enemyPlan(b), hp = state.hp; endTurn(); o.cloudNext = { plan: p.damage, lost: hp - state.hp, used: !!b.gearCloudUsed }; }
+// Round 537: a won pair fight's chest, when it rolls a card, offers the card of the enemy that fell last (one chest a fight)
+b = pairSetup(); { const R = Math.random; Math.random = () => 0.999; try { const mate = b.pair.other.id;
+  b.enemy.hp = 1; b.hand = [make('strike')]; b.energy = 3; playCard(0); b.enemy.hp = 1; b.hand = [make('strike')]; b.energy = 3; playCard(0);
+  o.drop = { phase: b.phase, offers: (b.offers || []).map(c => c.id), want: ENEMY_CARD[mate] }; } finally { Math.random = R; } }
 return JSON.stringify(o); })()`));
 
 assert.deepStrictEqual(r.dot, { turn: 1, phase: 'fight', energy: r.dot.energy, hand: r.dot.hand }, 'target killed by Poison: the turn advances ' + JSON.stringify(r.dot));
@@ -90,4 +94,5 @@ assert.strictEqual(r.riotFrozen, 0, 'Riot Guard: no damage to a frozen enemy tha
 assert(r.riotHit > 0, 'Riot Guard still answers a blocked hit');
 assert.strictEqual(r.cloudFrozen, false, 'Cloudstep is not used up by a frozen enemy');
 assert(r.cloudNext.used && r.cloudNext.lost < r.cloudNext.plan, 'Cloudstep halves the next real hit ' + JSON.stringify(r.cloudNext));
+assert(r.drop.phase === 'reward' && r.drop.offers.length === 1 && r.drop.offers[0] === r.drop.want, 'a pair fight drops the last enemy’s card ' + JSON.stringify(r.drop));
 console.log('pair-gear-bugs ok');
