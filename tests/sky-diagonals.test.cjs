@@ -1,5 +1,21 @@
+// Round 548: the Sky Isles are generated now (GEN_THEMES.sky). The generator has no diagonal walkways (as Solaris); the
+// one from 1,5 to 2,4 was all that joined the second mini-boss's corner, so a straight link round the corner (1,4 to 2,4)
+// takes its place (GEN_THEMES.sky.extraLinks). While GEN_SKY_LIVE, this checks that instead of the painted tile world's
+// diagonals below.
+{ process.env.HARNESS_ONLY = '1'; const assert = require('assert'); const { run } = require('./expansion.test.cjs');
+  const g = JSON.parse(run(`(() => { newGame(); state.region = 'sky'; configureRegion('sky'); if (!genLive('sky')) return JSON.stringify({ live: false });
+    const diag = Object.keys(rooms).filter(k => Object.keys(rooms[k].exits).some(d => d.length > 1));
+    const seen = new Set([regionStartRoom()]), q = [regionStartRoom()]; while (q.length) { const k = q.pop(); for (const e of Object.values(rooms[k].exits)) { const t = typeof e === 'string' ? e : e.to; if (rooms[t] && !seen.has(t)) { seen.add(t); q.push(t); } } }
+    return JSON.stringify({ live: true, diag, reach: seen.size, rooms: Object.keys(rooms).length, link: rooms['1,4'].exits.e, back: rooms['2,4'].exits.w, cut: TILE_WORLD_DATA.sky.cut.filter(k => rooms[k]) }); })()`));
+  if (g.live) {
+    assert.deepStrictEqual(g.diag, [], 'the generated Sky Isles have no diagonal exits');
+    assert.strictEqual(g.reach, g.rooms, 'every room can be reached from the start (' + g.reach + '/' + g.rooms + ')');
+    assert(g.link === '2,4' && g.back === '1,4', 'the straight link 1,4 - 2,4 replaces the lost diagonal');
+    assert.deepStrictEqual(g.cut, [], 'the three cut corner rooms stay cut');
+    console.log('sky-diagonals ok (generated: ' + g.rooms + ' rooms, all reachable)'); process.exit(0); } }
 // Round 197: the Sky Isles are painted from the owner's top-down tiles. Three edge rooms are cut
 // and the rooms beside each are joined by a diagonal walkway (the tile world's 'diag' table).
+/* (below: the painted tile world, when GEN_SKY_LIVE is off) */
 process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const fs = require('fs'), path = require('path');

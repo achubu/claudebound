@@ -366,7 +366,7 @@ const loseBattleBeforeExplore = loseBattle;
 loseBattle = function () { const r = loseBattleBeforeExplore(); if (state.battle && state.battle.phase === 'lost') { ensureExplore(); state.poi.merchantMoves++; } return r; };
 
 const newGameBeforeExplore = newGame;
-newGame = function () { newGameBeforeExplore(); ensureExplore(); save(); };
+newGame = function () { newGameBeforeExplore(); ensureExplore(); if (state) state.shuffleV = 2; /* Round 548: a new journey says it uses seeded shuffles (Round 540), so loading its save doesn't take it for an old one */ save(); };
 const restoreGameBeforeExplore = restoreGame;
 restoreGame = function (s) { ensureExplore(s); if (s && s.shuffleV == null) s.shuffleV = 1; /* Round 540: saved before seeded shuffles */ return restoreGameBeforeExplore(s); };
 const validateImportBeforeExplore = validateImport;
@@ -403,7 +403,7 @@ const QUIET_ROOMS = {
 // Chrome and Safari (a save moved between them). New journeys shuffle with Fisher-Yates; a journey saved before this
 // (state.shuffleV 1) keeps the old order, so its rooms don't change under it.
 function seededShuffle(arr, rnd) {
-  if (typeof state !== 'undefined' && state && state.shuffleV === 1) return arr.sort(() => rnd() - .5);
+  if (typeof state !== 'undefined' && state && state.shuffleV === 1) return arr.sort(() => rnd() - .5); // (2 or none: Fisher-Yates)
   for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
   return arr;
 }

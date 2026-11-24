@@ -3517,6 +3517,16 @@ landmarks, yards and street furniture.
   (`itemsOnGround` off). The Map screen uses `MAP_LOOK.sky` (dark violet ground, pale lavender walkways). `tests/city-atlas.cjs`
   takes `THEME=sky`.
 
+**A bug from Round 540, found by the full suite:** a new journey didn't record that it uses the seeded shuffle, so loading its
+save took it for an old one (`shuffleV: 1`) and its points of interest and events could move after the first reload. New
+journeys now say `shuffleV: 2` from the start (`exploration.js`'s `newGame`). Journeys begun since Round 540 reshuffle once more
+on their next load and keep that order from then on; older journeys are untouched. `tests/worldgen-codex.test.cjs` checks it.
+
+Tests updated for the generated Sky Isles: `sky-diagonals` (no diagonal exits, every room reachable, the straight link in
+place), `map-diagonals` (diagonal roads on the map are checked in Elaris and Vespera, which keep theirs), `plazas` (in the
+generated worlds every object stands on reachable ground and three in four in a square), `world-bugs` (chest pads checked in
+Elaris, a tile world).
+
 Checked: all 51 rooms planned, every hub and door landing walkable, all 51 reachable from the start; browser walks of every door
 and object on seeds 77 and 1 with no problems and no page errors; the contract (`tests/gen-theme-contract.test.cjs`) now covers
 the Sky Isles too.
