@@ -362,3 +362,11 @@ dark outline round each piece. Pastel pinks, violets, pale cyan glass, silver an
 NOT IN THE PICTURE: no clouds, no sky, no islands, no ground, no walkway beyond the bridge; no cast shadows; no glow spilling
 onto the green background; no people or vehicles; nothing floating between the pieces.
 ```
+
+## Fixes after the first sheets (Round 546)
+
+The first east-west bridge came back running north-south; the second (`src/bridge-sheet.jpg`) is drawn tilted like the
+north-south one and its row-2 middle piece is two panes deep against the ends' one, so the pieces were cut from row 1's whole
+bridge instead (west end, a 2-pane middle that repeats, east end). The hexagonal plaza's pattern isn't regular, so a
+replacement plaza tile was asked for: a strict 8 x 8 checkerboard of square glass panes, seamless (optional; the mosaic and
+pavers stand in).

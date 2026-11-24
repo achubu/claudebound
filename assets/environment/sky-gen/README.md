@@ -17,5 +17,5 @@ next.
   size in the game: each sheet scaled so its middle building is 200px tall (as Round 496).
 - `props/cargo`, `clutter`, `landmark`, `car`, `tree`, `prop-*`, `lamp`, `sign-traffic`, `traffic-light`: yard pieces,
   clutter, four landmarks, two vehicles, two trees, rooftop kit and posts.
-- `props/bridge/`: the north-south bridge's `north` end, `vmid` section (repeats) and `south` end. The east-west bridge (prompt
-  8) hasn't arrived; turning this one would lay its pylons on their side (the owner turned that down for Solaris, Round 526).
+- `props/bridge/`: the north-south bridge's `north` end, `vmid` section (repeats) and `south` end; the east-west bridge's
+  `west` end, `mid` section (repeats) and `east` end (Round 546, cut from the whole bridge in `src/bridge-sheet.jpg`).
