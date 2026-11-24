@@ -1,5 +1,5 @@
 'use strict';
-// Round 551: Elaris (the forest, region 'wilds') on the generator, theme GEN_THEMES.wilds. On a few seeds:
+// Round 552: Elaris (the forest, region 'wilds') on the generator, theme GEN_THEMES.wilds. On a few seeds:
 //  1. no diagonal exits; every room is reached from the start through the straight exits (and the links that stand in for
 //     a dropped diagonal);
 //  2. up to three lakes, apart from each other, none over the middle of the start room or a boss room;

@@ -3496,7 +3496,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
-## Round 551: Elaris on the generator
+## Round 552: Elaris on the generator
 
 (Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm".) Elaris, the
 forest (region `wilds`), is now built by the generator from the journey's seed, like the city, Solaris and the Sky Isles:
@@ -3524,6 +3524,9 @@ Tests: `tests/wilds-gen.test.cjs` (seeds 77, 1, 9: no diagonals, every room reac
 every road on the water under a bridge, no two bridges meeting); `worldgen-codex` checks Elaris too; `world-bugs` checks
 pads on Vespera (still a tile world) and Elaris among the generated worlds; `map-diagonals` skips generated worlds.
 `THEME=wilds node tests/city-atlas.cjs` paints the whole forest. Browser walks: `SEED=<n> node tests/playtest-walk.cjs wilds`.
+## Round 551: equipped cyberpunk belt handoff for Claude
+
+Owner requested that the approved cyberpunk belt appear on the protagonist when equipped as gear. CODEX-NOTES.md now records equipped-state behavior, the three existing belt IDs and proposed shared visual mapping, the 36-frame overlay contract, the reusable fitting kit, unfinished art/calibration and acceptance checks. Includes the offline fitting kit and belt concept/four-view drafts in tools/art-refresh/wearable-belt, and starts a matching cyberpunk boots concept. No runtime code, stats, saves or live wiring of provisional artwork. Existing generator review retained. Validation: reviewed note against current assets/gear.js; documentation diff only.
 
 ## Round 550: Elaris's edges
 

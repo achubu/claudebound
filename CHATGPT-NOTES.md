@@ -41,7 +41,7 @@ share this one until there are more designs), equip, swap and unequip, save and 
 picture fails to load, and the checks in your acceptance list.
 
 **One process note:** commit 54b04fc was pushed straight to `main` as "Round 551" while Claude's Round 551 (Elaris on the
-generator) was open on a branch. Before numbering a round, check the latest `## Round` in `CHANGES.md` on `main` **and** any
+generator, now Round 552) was open on a branch. Before numbering a round, check the latest `## Round` in `CHANGES.md` on `main` **and** any
 open pull request; when in doubt, hand the work to Claude to log.
 
 ## Art request: city landmarks at a higher resolution (Round 541; done in Round 543, the owner generated them)

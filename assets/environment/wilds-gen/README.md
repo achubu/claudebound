@@ -1,7 +1,7 @@
 # Elaris (the forest) generator art (Round 549)
 
 The owner's nine Elaris sheets (`src/`, from `tools/art-refresh/elaris-gen-prompts.md`, on magenta: `tools/cut_building_sheet.py`
-takes `KEY=magenta` since Round 549), cut like the Sky Isles' art. Played since Round 551 (`GEN_THEMES.wilds` in `assets/chrono-gen.js`).
+takes `KEY=magenta` since Round 549), cut like the Sky Isles' art. Played since Round 552 (`GEN_THEMES.wilds` in `assets/chrono-gen.js`).
 
 - Edges (Round 550, `src/edge-sheet-2.jpg`, the redrawn sheet on magenta): `surfaces/curb/stone-kerb`, `yard-edge/willow-fence`,
   `park-edge/flower-hedge`, `bridge-edge/rope-rail`, `waterfront-edge/reed-bank`; each cut on its own repeat (two or three
@@ -19,7 +19,7 @@ takes `KEY=magenta` since Round 549), cut like the Sky Isles' art. Played since 
 - `props/bridge/`: the boardwalk bridge, `west`/`mid`/`east` (row 2's pieces, the same depth this time) and
   `north`/`vmid`/`south`.
 
-## Round 551: in play
+## Round 552: in play
 
 - `surfaces/sidewalk/forest-floor` (a copy of `ground/forest-floor`: the generator fills the ground between the roads from the
   sidewalk slot) and `surfaces/park/moss` (a copy of `market-floor/market-green`, the groves' ground).

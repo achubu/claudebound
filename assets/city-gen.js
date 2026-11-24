@@ -16,7 +16,7 @@ const CITY_GEN_VERSION = 1;
 // world grid (the city's keys run from row 4, Solaris's from row 0).
 let GEN_SOLARIS_LIVE = true;
 let GEN_SKY_LIVE = true; // Round 548: the Sky Isles on the generator (theme GEN_THEMES.sky)
-let GEN_WILDS_LIVE = true; // Round 551: Elaris, the forest, on the generator (theme GEN_THEMES.wilds)
+let GEN_WILDS_LIVE = true; // Round 552: Elaris, the forest, on the generator (theme GEN_THEMES.wilds)
 const GEN_REGIONS = { city: { id: 'city', theme: 'city', dy: 4 }, elaris: { id: 'elaris', theme: 'solaris', dy: 0, live: () => GEN_SOLARIS_LIVE }, sky: { id: 'sky', theme: 'sky', dy: 0, live: () => GEN_SKY_LIVE }, wilds: { id: 'wilds', theme: 'wilds', dy: 0, live: () => GEN_WILDS_LIVE } };
 // Round 488: these run for every walk test (millions while a journey is placed), so the current region's answer is kept
 // until the region or the Solaris switch changes.
@@ -319,7 +319,7 @@ function cityRoomWalk(key, x, y) {
     A.at = function (o, ax, ay) { if (!genLive('elaris')) return atBefore.apply(this, arguments); if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return cityGenWalk(o.area.left * 800 + ax, o.area.top * 500 + ay); }; }
   if (typeof worldDiagTable === 'function') { const diagBefore = worldDiagTable; worldDiagTable = function () { return (activeRegion === 'elaris' || activeRegion === 'sky' || activeRegion === 'wilds') && genLive(activeRegion) ? {} : diagBefore.apply(this, arguments); }; }
   // Round 548: the Sky Isles the same way: painted by the generator, walked on its mask, no diagonal walkways
-  if (typeof paintTileWorld === 'function') { const paintTileBefore = paintTileWorld; paintTileWorld = function (canvas, id, key) { if ((id === 'sky' || id === 'wilds') && genLive(id) && rooms[key]) { cityGenEnsure(); return genWith(id, () => paintChronoRoom(canvas, key)); } /* (Round 551: Elaris too) */ return paintTileBefore.apply(this, arguments); }; }
+  if (typeof paintTileWorld === 'function') { const paintTileBefore = paintTileWorld; paintTileWorld = function (canvas, id, key) { if ((id === 'sky' || id === 'wilds') && genLive(id) && rooms[key]) { cityGenEnsure(); return genWith(id, () => paintChronoRoom(canvas, key)); } /* (Round 552: Elaris too) */ return paintTileBefore.apply(this, arguments); }; }
   for (const W of ['sky', 'wilds']) if (typeof ORGANIC_AREAS !== 'undefined' && ORGANIC_AREAS['world:' + W]) { const A = ORGANIC_AREAS['world:' + W], atBefore = A.at;
     A.at = function (o, ax, ay) { if (!genLive(W)) return atBefore.apply(this, arguments); if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return cityGenWalk(o.area.left * 800 + ax, o.area.top * 500 + ay); }; }
 }

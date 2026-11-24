@@ -11,7 +11,7 @@ process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); const out = {};
-  for (const [W, th] of [['city', 'city'], ['elaris', 'solaris'], ['wilds', 'wilds'] /* Round 551 */]) { state.region = W; configureRegion(W); cityGenEnsure(); const o = out[W] = { maskBad: [], gridBad: [], rooms: 0 };
+  for (const [W, th] of [['city', 'city'], ['elaris', 'solaris'], ['wilds', 'wilds'] /* Round 552 */]) { state.region = W; configureRegion(W); cityGenEnsure(); const o = out[W] = { maskBad: [], gridBad: [], rooms: 0 };
     for (const key of Object.keys(rooms)) { const [cx, cy0] = key.split(',').map(Number), cy = cy0 - genDy(), p = cityGenPlan(key); if (!p) continue; o.rooms++;
       // (1) the old blocker loop, as it was before Round 540, on the room's floor and blockers
       const b = genWith(th, () => cityBlockers(cityGenSeed, key, p)), ref = new Uint8Array(100 * 63);
