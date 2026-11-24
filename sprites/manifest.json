@@ -922,12 +922,12 @@
         {
          "name": "holo-beam",
          "src": "assets/environment/city-gen/props/landmark/holo-beam.webp",
-         "bytes": 13564
+         "bytes": 24462
         },
         {
          "name": "holo-stage",
          "src": "assets/environment/city-gen/props/landmark/holo-stage.webp",
-         "bytes": 19748
+         "bytes": 49616
         },
         {
          "name": "hovercar",
@@ -937,7 +937,7 @@
         {
          "name": "mech",
          "src": "assets/environment/city-gen/props/landmark/mech.webp",
-         "bytes": 17708
+         "bytes": 36126
         },
         {
          "name": "metro",
@@ -947,12 +947,12 @@
         {
          "name": "pylon",
          "src": "assets/environment/city-gen/props/landmark/pylon.webp",
-         "bytes": 8956
+         "bytes": 13058
         },
         {
          "name": "sculpture",
          "src": "assets/environment/city-gen/props/landmark/sculpture.webp",
-         "bytes": 18276
+         "bytes": 38426
         }
        ]
       },
