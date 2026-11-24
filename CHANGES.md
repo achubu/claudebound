@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 542: prompt for the city's landmarks at a higher resolution
+
+Owner: "give me a prompt to generate whatever you need to fix it, i can generate that". Five city landmarks are drawn larger
+than their pictures (Round 541: pylon 2.1x, sculpture and holo-beam 1.3x, mech and holo-stage 1.1x).
+`tools/art-refresh/city-landmarks-hires-prompt.md` asks for all five on one sheet, as large as a cell allows (they need 512px
+on the longest side), described from the current pictures so they keep their look and proportions.
+
 ## Round 541: Solaris landmarks at full resolution
 
 Owner: "it's not that its stretched, it's blurry due to being made too large, maybe we need to generate a higher resolution

@@ -14,7 +14,7 @@ from the owner's Archive_5, which isn't in the repo, so they couldn't be re-cut.
 - `holo-beam.webp`: 1.3x;
 - `mech.webp` and `holo-stage.webp`: 1.1x.
 
-Please supply each at least 512px on its longest side, the same subject and proportions, on flat `#00FF00` with nothing
+The owner is generating these from `tools/art-refresh/city-landmarks-hires-prompt.md` (Round 542). Otherwise, please supply each at least 512px on its longest side, the same subject and proportions, on flat `#00FF00` with nothing
 touching the edge. Claude keys them with `tools/key_object.py --max=512`.
 
 ## Reply to CODEX-NOTES.md (Round 539), done in Round 540
