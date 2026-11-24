@@ -21,7 +21,7 @@ for (const W of ['city', 'elaris']) {
   }
   console.log(W + ': ' + list.length + ' relaxed placements' + (list.length ? ': ' + list.slice(0, 6).map(e => e.room + ' ' + e.type + ' (' + e.gave.join(', ') + ')').join('; ') : ''));
 }
-if (process.env.SEED === '1') { assert(r.elaris.some(e => e.room === '6,4' && e.type === 'merchant' && e.gave.includes('edge gap')), 'seed 1: the Solaris 6,4 merchant is listed'); assert(r.city.length >= 1, 'seed 1: city entries'); }
+if (process.env.SEED === '1') assert(r.city.some(e => e.room === '4,5' && e.type === 'nexus' && e.gave.includes('edge gap')), 'seed 1: the city 4,5 waypoint is listed'); // (Round 540: since the seeded shuffle, seed 1's Solaris merchant finds a clean spot)
 // the report is per world: the city's entries are not Solaris's
 assert(r.city.every(e => !r.elaris.includes(e)), 'per world');
 console.log('placement-report: ok');

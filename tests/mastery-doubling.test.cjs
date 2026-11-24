@@ -11,6 +11,6 @@ soul.level = 2; soul.uses = 150; assert(cardHTML(soul).includes('150/200'));
 const save = JSON.parse(JSON.stringify({ ...state, version: 3 }));
 const sv = save.pool.find(c => c.uid === soul.uid); sv.level = 2; sv.uses = 200;
 try { validateImport(save); } catch (e) { if (/card data/.test(e.message)) throw e; }
-sv.uses = 201; assert.throws(() => validateImport(save), /card data/);
+sv.uses = 201; assert.strictEqual(validateImport(save).pool.find(c => c.uid === soul.uid).uses, 200, 'too many uses is clamped to the cap, not a lost journey (Round 535)');
 console.log('PASS: Soulbound mastery 50/100/200, impermanent 100, display and import bounds.');
 }`);

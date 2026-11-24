@@ -392,3 +392,11 @@ body.hint-learned #game .hint,body.hint-learned .hint{display:none!important}
    (questMarkSVG in quests.js), 11 x 18px (owner: "25% smaller", then "another 30% smaller" twice), with a soft gold glow so it reads on any ground */
 #world#world#world .poi-node .quest-mark{font-size:0!important;line-height:0;top:-16px;width:11px;height:18px;filter:drop-shadow(0 0 3px #ffd23fb0) drop-shadow(0 1px 1px #0008)}
 #world#world#world .poi-node .quest-mark svg{display:block;width:11px;height:18px}
+
+/* Round 540 (owner: "room names can be made very small, barely visible on the map"): every world's Map screen shows a room's
+   name and state as small faint text with no box; the room you are in and boss rooms keep their frames; object badges stay. */
+.map-canvas .panel { min-width: 0 !important; min-height: 0 !important; padding: 1px 4px !important; }
+.map-canvas .panel:not(.current-room):not(.boss-room) { background: none !important; border-color: transparent !important; box-shadow: none !important; }
+.map-canvas .panel.current-room, .map-canvas .panel.boss-room { background: rgba(8, 14, 22, .55) !important; }
+.map-canvas .panel b { font-size: 6.5px !important; font-weight: 600 !important; opacity: .6; text-shadow: 0 0 3px #000, 0 0 2px #000 !important; }
+.map-canvas .panel small { font-size: 5px !important; opacity: .5; letter-spacing: .3px !important; }

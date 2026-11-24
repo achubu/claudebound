@@ -241,6 +241,16 @@ function cityRoomWalk(key, x, y) {
   organicBesideStreet = function (key, p) { if (genLive() && rooms[key] && genWorldCell(key) && cityGenPlan(key)) return walkable(key, p.x, p.y) && !cityItemOnStreet(key, p.x, p.y) && cityItemSpotClear(key, p.x, p.y, p) && (typeof organicReachableAt !== 'function' || organicReachableAt(key, p)); return besideStreetBeforeCity.apply(this, arguments); };
   if (typeof worldPOIs === 'function') { const worldPOIsBefore = worldPOIs; worldPOIs = function () { const t = worldPOIsBefore.apply(this, arguments); if (genLive() && t) for (const k of Object.keys(t)) cityFixSpot(t[k].key || k, t[k]); return t; }; } // (the table itself, for whoever reads it whole)
   if (typeof cityNightsItems === 'function') { const nightsBefore = cityNightsItems; cityNightsItems = function (key = state && state.room) { return nightsBefore.apply(this, arguments).map(it => cityFixSpot(it.key || key, it)); }; } // Round 473: the Wanted Board, the breakers and the vault too
+  // Round 540 (owner: "the portal should be placed with the same rules as interactable objects, not overlapping the road and
+  // edges"): a world's portal had one fixed spot in every room; in the generated worlds it gets a spot from the objects' rule
+  // (off the street, 5px clear of sprites and edges, away from patrols and the HUD), its picture standing on it
+  globalThis.cityPortalSpot = key => { const o = cityFixSpot(key, { x: 400, y: 380, type: 'portal', id: 'portal' }); return o && { x: o.x, y: o.y }; };
+  if (typeof renderWorld === 'function') { const renderWorldBeforePortal = renderWorld;
+    renderWorld = function () { const out = renderWorldBeforePortal.apply(this, arguments);
+      const el = genLive() && typeof document !== 'undefined' && document.querySelector ? document.querySelector('#world .region-portal') : null;
+      if (el && state && rooms[state.room]) { const p = cityPortalSpot(state.room), art = el.querySelector('.portal-art');
+        if (p) { const ah = (art && art.offsetHeight) || 79; el.style.height = 'auto'; el.style.justifyContent = 'flex-start'; el.style.left = Math.round(p.x - 52) + 'px'; el.style.top = Math.round(p.y + 16 - ah) + 'px'; el.dataset.spot = Math.round(p.x) + ',' + Math.round(p.y); } }
+      return out; }; }
   const poiAtBeforeCityClear = poiAt; poiAt = function (key) { return cityFixSpot(key, poiAtBeforeCityClear.apply(this, arguments)); };
   if (typeof chestFor === 'function') { const chestForBefore = chestFor; chestFor = function (key) { return cityFixSpot(key, chestForBefore.apply(this, arguments)); }; }
   if (typeof cardsmithFor === 'function') { const cardsmithForBefore = cardsmithFor; cardsmithFor = function () { const c = cardsmithForBefore.apply(this, arguments); return c && c.key ? cityFixSpot(c.key, c) : c; }; }

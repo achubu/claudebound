@@ -29,6 +29,8 @@ const r = JSON.parse(run(`(() => { newGame(); const out = {};
     for (let i = 0; i < bl.length; i++) for (let j = i + 1; j < bl.length; j++) { const a = bl[i].r, c = bl[j].r;
       if (bl[i].sprite.n === bl[j].sprite.n && a[0] < c[2] + 40 && a[2] > c[0] - 40 && a[1] < c[3] + 40 && a[3] > c[1] - 40) twin40++; }
     o.buildings = bl.length; o.twin40 = twin40; o.spread = typeof CITY_BUILDING_SPREAD === 'number' ? CITY_BUILDING_SPREAD : null;
+    // (6) the portal (Round 540): in the start room and the boss room it stands by the objects' rule
+    o.portal = [regionStartRoom(), WORLD_BOSS_ROOMS[W][0]].map(k => { const q = cityPortalSpot(k); return q && { k, ok: walkable(k, q.x, q.y) && !cityItemOnStreet(k, q.x, q.y) && cityItemSpriteClear(k, q.x, q.y, { type: 'portal' }) }; });
     // (5) coverage
     const cov = genFinalCoverage(th); o.covSum = Object.values(cov.totals).reduce((a, v) => a + v, 0); o.covRooms = Object.keys(cov.rooms).length;
     o.covRoomSums = Object.values(cov.rooms).every(x => Math.abs(Object.values(x.share).reduce((a, v) => a + v, 0) - 1) < 1e-9); o.residual = cov.totals.residual; }
@@ -48,6 +50,7 @@ for (const W of ['city', 'elaris']) {
   assert.strictEqual(o.spread, 360, W + ': the spread rule is on');
   assert(Math.abs(o.covSum - 1) < 1e-9 && o.covRoomSums && o.covRooms === o.rooms, W + ': coverage shares add up, room by room');
   assert(o.residual > 0 && o.residual < 0.3, W + ': residual ground reported ' + o.residual);
+  assert(o.portal.every(q => q && q.ok), W + ': the portal stands off the street, clear of sprites, on walkable ground ' + JSON.stringify(o.portal));
   console.log(W + ': ' + o.rooms + ' rooms; ' + o.buildings + ' buildings; residual ground ' + (o.residual * 100).toFixed(1) + '%');
 }
 assert.strictEqual(r.shuffle.a, r.shuffle.b, 'the same seed shuffles the same way');
@@ -56,4 +59,8 @@ assert.notStrictEqual(r.shuffle.a, '12345678', 'and moves them');
 assert.strictEqual(r.newJourney, 'new', 'a new journey uses the seeded shuffle');
 assert.strictEqual(r.legacy, 1, 'a journey saved before Round 540 keeps the old order');
 assert.strictEqual(r.legacyKept, 1, 'and keeps it through another save and load');
+// (7) the Map screen (Round 540): Solaris and the Chronospire in the city's style, in their own colours; small room names
+const src = require('fs').readFileSync(require('path').join(__dirname, '../assets/chrono-gen.js'), 'utf8'), css = require('fs').readFileSync(require('path').join(__dirname, '../assets/layout-polish.css'), 'utf8');
+assert(/const MAP_LOOK = \{[\s\S]*solaris:[\s\S]*chronospire:/.test(src) && !/MAP_LOOK = \{[^}]*\bcity:/.test(src), 'flat map colours for Solaris and the Chronospire; the city keeps its look');
+assert(/\.map-canvas \.panel b \{ font-size: 6\.5px/.test(css), 'small room names on the map');
 console.log('worldgen-codex ok');

@@ -201,6 +201,8 @@ change set.
     paths (`mapRoadNet` / `mapRoadSvg` in `assets/map-terrain.js`): one road per exit at a 40px-snapped shared edge
     point, straight or with one 45° jog, meeting at the room's hub, drawn like the owner's example (asphalt, pale kerbs,
     dashed centre line, rounded turns). Objects show as small paintings beside the nearest road (`mapRoomObjects`).
+    Round 540 (owner): **one map style for every world**, the city's (dark ground, pale roads with a kerb, objects); colour
+    schemes may differ (`MAP_LOOK` in `assets/chrono-gen.js` for Solaris and the Chronospire); room names small and faint.
     Round 355: hubs are aligned across rooms (`mapRoadAlign`: one height per east-west chain, one column per north-south
     chain), so roads never jog at a seam.
   - Round 101+: each painted room also lists hand-checked open-ground spots

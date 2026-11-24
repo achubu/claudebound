@@ -1300,7 +1300,7 @@ const CITY_ITEM_GAP = 5;
 // the merchant) about the hero's height, waist-high things (chests, caches, a campfire) about two thirds of it, the waypoint
 // pad and the vault entrance larger. The painter's boxes (CSS, built from this table in city-gen.js), the overlap rule and
 // the tests all read it.
-const CITY_ITEM_PX = { nexus: 84, chest: 44, relic: 40, merchant: 96, cardsmith: 88, wantedBoard: 64, breaker: 60, vault: 92, lore: 58, shrine: 60, campfire: 46, cache: 46, sealed: 46,
+const CITY_ITEM_PX = { portal: 80 /* Round 540: the world portal (59x79 art) */, nexus: 84, chest: 44, relic: 40, merchant: 96, cardsmith: 88, wantedBoard: 64, breaker: 60, vault: 92, lore: 58, shrine: 60, campfire: 46, cache: 46, sealed: 46,
   'event:terminal': 58, 'event:medic': 76, 'event:vending': 60, 'event:courier': 44, 'event:arcade': 60, 'event:racer': 56, 'event:billboard': 62, 'event:toll': 80 };
 function cityItemPx(p, kind) { const k = kind || (p && p.type) || 'chest'; return CITY_ITEM_PX[k === 'event' && p && p.event ? 'event:' + p.event : k] || 48; }
 // an object's picture box at its spot (measured in the browser): standing on its spot, a little below it (the foot point);
@@ -2443,6 +2443,12 @@ function paintChronoRoom(canvas, key) {
 // Round 383 (owner: "since you are now creating the world procedurally, you should be able to make the map look similar
 // to the world"). A room's tile for the Map screen and the minimap: its own roads, hub, squares, loops and spurs drawn
 // from plan.shapes in the map's road style (pale kerb, dark asphalt), with the room's objects at the spots where they stand.
+// Round 540: the Map screen's colours for the generated worlds drawn in the city's map style (the city itself keeps its
+// textured tiles): ground, the faint blocks on it, road, and the kerb's dark and light lines
+const MAP_LOOK = {
+  solaris: { ground: '#17110b', block: 'rgba(255,214,150,.035)', road: '#9e8a66', kerb: ['#0c0804', '#ecd6a6'] },
+  chronospire: { ground: '#120e0a', block: 'rgba(255,200,120,.035)', road: '#937a4a', kerb: ['#0a0705', '#e6c274'] },
+};
 function chronoMapTile(key, onReady) {
   const plan = GEN.id === 'chronospire' ? chronoPlan(key) : genPlan(GEN.id, key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
   const objs = typeof mapRoomObjects === 'function' ? mapRoomObjects(key) : [], sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
@@ -2456,7 +2462,13 @@ function chronoMapTile(key, onReady) {
   const groundImg = tex('ground'), floorImg = tex('floor'); let complete = !!(groundImg && floorImg);
   const [mx, my] = GEN.world(key), offX = (((mx * 800) % 400) + 400) % 400, offY = (((my * 500) % 400) + 400) % 400;
   const paint = (g, img, flat) => { g.save(); if (img) { g.translate(-offX, -offY); g.scale(0.5, 0.5); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(0, 0, (W + offX) * 2, (H + offY) * 2); } else { g.fillStyle = flat; g.fillRect(0, 0, W, H); } g.restore(); };
-  paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H);
+  // Round 540 (owner: "solaris map looks weird with all that background, just draw roads and objects ... map drawing should be
+  // standardized for all worlds ... neon city's map looks great ... you can use different color schemes but don't drastically
+  // change the map from the neon city style"): a world with a MAP_LOOK is drawn the city's way in flat colours (dark ground,
+  // pale roads with a kerb, its objects) instead of its own textures; the city keeps its look
+  const look = MAP_LOOK[GEN.id];
+  if (look) { complete = true; paint(ctx, null, look.ground); ctx.fillStyle = look.block; for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28); }
+  else { paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H); }
   const shape = document.createElement('canvas'); shape.width = W; shape.height = H;
   { const g = shape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
     for (const sh of plan.shapes) {
@@ -2466,9 +2478,9 @@ function chronoMapTile(key, onReady) {
     } }
   const ring = (pic, r) => { for (let a = 0; a < 12; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 6) * r), Math.round(Math.sin(a * Math.PI / 6) * r)); };
   ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(shape, '#0a0714'), 0, 0); ctx.restore();
-  ring(chronoTint(shape, GEN.kerb[0]), 9); ring(chronoTint(shape, GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1]), 6);
-  { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, floorImg, '#b8923f'); ctx.drawImage(art, 0, 0); }
-  const style = { kerb: GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1] };
+  ring(chronoTint(shape, look ? look.kerb[0] : GEN.kerb[0]), 9); ring(chronoTint(shape, look ? look.kerb[1] : GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1]), 6);
+  { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, look ? null : floorImg, look ? look.road : '#b8923f'); ctx.drawImage(art, 0, 0); }
+  const style = { kerb: look ? look.kerb[1] : GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1] };
   // The room's objects where they stand (dimmed once used).
   const ICON = 104;
   for (const o of objs) {

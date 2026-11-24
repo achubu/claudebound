@@ -3496,7 +3496,7 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
-## Round 540: Codex's generation review, first steps
+## Round 540: Codex's generation review, first steps; portal placement; one map style
 
 Owner: "review chatgpt notes and implement fixes as necessary". `CODEX-NOTES.md` (Round 539) made six proposals for the
 city and Solaris. Taken up:
@@ -3520,6 +3520,20 @@ city and Solaris. Taken up:
   street, sidewalk, sea, building, ruin, landmark, yard, park, square and residual ground, with the largest residual patch.
   Seed 77: about 12% residual in both worlds, 21-23% in the worst room. A diagnostic only; open ground isn't a fault in
   itself.
+
+**Owner's requests during this round:**
+- **The portal** (owner: "the portal should be placed with the same rules as interactable objects, not overlapping the road
+  and edges"): it had one fixed spot (348,310 in a 104x165 box) in every room. In the city and Solaris it now gets its spot
+  from `cityFixSpot` like the objects (`cityPortalSpot`, `portal: 80` in `CITY_ITEM_PX`): off the street, 5px clear of
+  sprites and edges, away from patrols and the HUD, its picture standing on the spot.
+- **The Map screen** (owner: "solaris map looks weird with all that background, just draw roads and objects ...
+  standardized for all worlds ... neon city's map looks great ... you can use different color schemes but don't drastically
+  change the map"): the tile worlds already drew the city's style (dark ground, pale roads with a kerb, objects). The
+  generated worlds drew their own ground and road textures, which only looked right in the city. Solaris and the
+  Chronospire now draw it in flat colours (`MAP_LOOK`: warm dark ground and sandstone roads; dark ground and brass roads);
+  the city keeps its tiles.
+- **Room names on the map** (owner: "very small, barely visible"): 6.5px and faint, status 5px, no box, in every world;
+  the room you are in and boss rooms keep their frames; object badges are unchanged.
 
 Not taken up yet (design changes for the owner to decide): reserving space for objects before scenery is placed (3), and
 tying landmarks and compositions to room roles (5).
