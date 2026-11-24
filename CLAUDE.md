@@ -5,7 +5,7 @@ build step. Open `index.html` directly. `compendium.html` is the card
 gallery; `arena.html` is a standalone prototype and is left untouched.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 537) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 538) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -335,7 +335,8 @@ A playtest flagged these and the owner confirmed they are intended:
   Aethercede.
 - **Who does what (owner, Round 537): ChatGPT/Codex fixes sprite animations and redraws art; Claude handles everything
   non-graphical** (code, rules, generation, balance, tests, saves). Claude still integrates art the owner hands over and writes
-  prompts when asked.
+  prompts when asked. Round 538 (owner): when ChatGPT makes mistakes, write them in **`CHATGPT-NOTES.md`** (newest first, with
+  how to avoid them) for it to learn from.
 - Art comes from the owner's image generator (Gemini). When integrating, skip
   `.DS_Store` files and duplicate top-level folders.
 - **Image prompts (owner, Round 494): every prompt is complete on its own.** Never split prompts into a shared part and
