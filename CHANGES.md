@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 546: the Sky Isles' east-west bridge
+
+The owner's east-west bridge (`assets/environment/sky-gen/src/bridge-sheet.jpg`). It is drawn tilted like the north-south one,
+which suits it (each direction has its own pieces, nothing is turned), but its separate middle piece is two panes deep against
+the ends' one, so the three pieces were cut from the whole bridge in row 1: `props/bridge/west` (832px), `mid` (262px, two
+panes, the bridge's own repeat of 131px, lamp-free so it repeats cleanly) and `east` (527px), all 257px deep. Joined with the
+middle repeated they make one unbroken bridge. Not used by the game yet (the Sky Isles theme comes next).
+
 ## Round 545: the Sky Isles' generator art; Elaris's prompts
 
 The owner's eight Sky Isles sheets (Archive_23, from `tools/art-refresh/sky-gen-prompts.md`) cut into
