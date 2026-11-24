@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 548: the Sky Isles on the generator
+
+Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm" (and "let me know
+when its ready for me to test"). The Sky Isles are now built by the same generator as Neon Aftermath and Solaris, from the
+journey's seed, with the owner's art (Rounds 545-547). What stays: the Sky Isles' room map, names, levels, bosses, gear, events
+and quests (`TILE_WORLD_DATA.sky`). What is generated: every room's walkways, squares, buildings, roof gardens, wrecks,
+landmarks, yards and street furniture.
+- **The theme** (`GEN_THEMES.sky` in `assets/chrono-gen.js`): Solaris's, with the Sky Isles' rooms, start (8,1) and boss rooms,
+  their art and textures (glass walkways, pearl deck, glass-tile verges, glass-pane squares, cargo plates, mosaic market decks,
+  grating beside open sky), glass kerbs and railings, no grass parks (roof gardens are pictures), 2-3 floor buildings.
+- **Open sky** takes the place of Solaris's rivers (`GEN_THEMES.sky.rivers`, the same machinery from the seed: a long gap north
+  to south and a short one meeting it). Walkways cross it on the owner's glass bridges; the bridge code reads a theme's own
+  piece measurements now (`bridgeDeck`, `bridgeV`), as the Sky Isles' pieces differ from Solaris's.
+- **No diagonal walkways** on the generator (as Solaris). Dropping the one from 1,5 to 2,4 cut five rooms off, the second
+  mini-boss's (0,5) among them, so a straight link round the corner takes its place (1,4 to 2,4; `GEN_THEMES.sky.extraLinks`,
+  only where a diagonal's loss would cut rooms off).
+- **Hooked in** like Solaris (`assets/city-gen.js`): `GEN_REGIONS.sky` (switch `GEN_SKY_LIVE`), painted by the generator
+  (`paintTileWorld`), walked on its mask (`ORGANIC_AREAS['world:sky']`), objects placed by the city's rules
+  (`itemsOnGround` off). The Map screen uses `MAP_LOOK.sky` (dark violet ground, pale lavender walkways). `tests/city-atlas.cjs`
+  takes `THEME=sky`.
+
+Checked: all 51 rooms planned, every hub and door landing walkable, all 51 reachable from the start; browser walks of every door
+and object on seeds 77 and 1 with no problems and no page errors; the contract (`tests/gen-theme-contract.test.cjs`) now covers
+the Sky Isles too.
+
 ## Round 547: the Sky Isles' glass plaza
 
 The owner's replacement plaza tile (the hexagonal one couldn't tile): a 10 x 10 grid of identical square glass panes in pale
