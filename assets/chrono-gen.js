@@ -650,14 +650,14 @@ function genWorld(seed) {
         if (!open) continue; let touch = false; for (let t = 0; t < S5; t++) if (at(ox + x - 1, oy + y + t) === 2 || at(ox + x + S5, oy + y + t) === 2 || at(ox + x + t, oy + y - 1) === 2 || at(ox + x + t, oy + y + S5) === 2) touch = true;
         const mx = (x + S5 / 2) * FG_CELL, my = (y + S5 / 2) * FG_CELL - 22;
         if (touch && !lots.some(l => l.mall === 'building' && l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) && (loose || (doorClear(x, y, x + S5, y + S5) && !(typeof screenCovered === 'function' && [[0, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]].some(([dx, dy]) => screenCovered(mx + dx, my + dy)))))) spots.push([x, y]); } }
-      for (const [x, y] of spots.sort(() => rnd() - 0.5)) { if (got.length >= 2) break; if (got.some(g => Math.hypot(g.x0 - x, g.y0 - y) < 8)) continue;
+      for (const [x, y] of seededShuffle(spots, rnd)) { if (got.length >= 2) break; if (got.some(g => Math.hypot(g.x0 - x, g.y0 - y) < 8)) continue;
         got.push({ x0: x, y0: y, x1: x + S5, y1: y + S5 }); lots.forEach((l, i) => { if (l.r[0] < ox + x + S5 && l.r[2] > ox + x && l.r[1] < oy + y + S5 && l.r[3] > oy + y) { if (GEN.topdown) (holes[i] = holes[i] || []).push([ox + x, oy + y, ox + x + S5, oy + y + S5]); else used.add(i); } }); } }
     plazas[k] = got; }
   // one building per lot: the biggest painting that fits it, from the room's quarter (sometimes another), never twice in a
   // room and never within REPEAT px of the same one; a lot nothing fits is a park now and then, else open ground
   const REPEAT = 450, C = FG_CELL, buildings = [], parks = [], names = {};
   const sizeOf = (table, name) => { const [iw, ih] = table[name]; let k = GEN.scale.building * (GEN.storey && GEN.storey[name] || 1); if (GEN.maxH && ih * k > GEN.maxH) k = GEN.maxH / ih; return [iw * k, ih * k]; };
-  const order = lots.map((l, i) => i).filter(i => !used.has(i)).sort(() => rnd() - 0.5).sort((i, j) => lots[j].front - lots[i].front);
+  const order0 = lots.map((l, i) => i).filter(i => !used.has(i)); seededShuffle(order0, rnd); const order = order0.sort((i, j) => lots[j].front - lots[i].front);
   for (const i of order) { const { r } = lots[i], k = roomOf((r[0] + r[2]) >> 1, (r[1] + r[3]) >> 1); if (!k) continue;
     const district = chronoDistrict(seed, k), lw = (r[2] - r[0]) * C - 12, lh = (r[3] - r[1]) * C - 10, fx = (r[0] + r[2]) / 2 * C, fy = r[3] * C - 6;
     const pool = []; for (const [d, t] of Object.entries(GEN.districts)) for (const n of Object.keys(t)) { const [w, h] = sizeOf(t, n); if (w <= lw && h <= lh * 1.15) pool.push({ n, t, w, h, own: d === district }); }
@@ -750,14 +750,18 @@ function genWorld(seed) {
     const fits = (slots, bw, bh) => { const out = []; for (const slot of slots) for (const n of CITY_TD_ART[slot]) { const d = CITY_BUILDING_PX[n]; if (!d) continue; const sc = Math.min(bw / d[0], bh / d[1], F.max);
       if (sc >= F.min) out.push({ slot, n, s: sc, w: d[0] * sc, h: d[1] * sc, fill: (d[0] * sc * d[1] * sc) / (bw * bh) }); } return out.sort((x, y) => y.fill - x.fill || (x.n < y.n ? -1 : 1)); };
     const extra = [], has = k => (CITY_TD_ART[k] || []).length > 0;
+    // Round 540 (Codex's review: the same facade twice ~150px apart passed the 40px rule): among the best-fitting few, a
+    // picture not already standing within CITY_BUILDING_SPREAD px comes first; the 40px rule and the fallbacks are as before
+    const usedNear = (l, d) => new Set(picked.filter(o => o.r[0] < l.r[2] + d && o.r[2] > l.r[0] - d && o.r[1] < l.r[3] + d && o.r[3] > l.r[1] - d).map(o => o.sprite.n));
     // Round 502: the same placing for the owner's ruins (a blast-zone lot: its quarter's ruins and the blast zone's) and walkable
     // parks (a yard lot: its quarter's parks, which must fill 60% of its width and depth; what is left is paving)
     const place = (l, ownSlots, anySlots, minFill, leftYards) => {
       const bw = l.r[2] - l.r[0] - 16, bh = l.r[3] - l.r[1] - 16, ok = c => !minFill || (c.w >= bw * minFill && c.h >= bh * minFill);
       const own = fits(ownSlots.filter(has), bw, bh).filter(ok), all = own.length ? own : fits(anySlots.filter(has), bw, bh).filter(ok);
       if (!all.length) return false;
-      const near = new Set(picked.filter(o => o.r[0] < l.r[2] + 40 && o.r[2] > l.r[0] - 40 && o.r[1] < l.r[3] + 40 && o.r[3] > l.r[1] - 40).map(o => o.sprite.n));
+      const near = usedNear(l, 40), wide = usedNear(l, CITY_BUILDING_SPREAD);
       const top = all.slice(0, 3), st = chronoHash('bsprite:' + l.seed); let sp = null;
+      for (let k = 0; k < top.length && !sp; k++) { const c = top[(st + k) % top.length]; if (!wide.has(c.n)) sp = c; } // Round 540: one not used nearby on screen
       for (let k = 0; k < top.length && !sp; k++) { const c = top[(st + k) % top.length]; if (!near.has(c.n)) sp = c; }
       if (!sp) sp = all.find(c => !near.has(c.n)) || (own.length ? fits(anySlots.filter(has), bw, bh).filter(ok).find(c => !near.has(c.n)) : null) || all[0];
       const needW = Math.min(l.r[2] - l.r[0], Math.ceil((sp.w + 16) / C) * C), needD = Math.min(l.r[3] - l.r[1], Math.ceil((sp.h + 16) / C) * C);
@@ -773,8 +777,9 @@ function genWorld(seed) {
       if (chronoHash('parklot:' + l.seed) % 100 < 8 && !l.dock && !l.zone && place(l, ['parkpic-' + l.district], Object.keys(CITY_TD_ART).filter(k => k.startsWith('parkpic-')), 0.6, true)) { l.use = 'parkpic'; continue; } // Round 502: about one building lot in twelve is a walkable park (where the old grass parks were ~6%)
       const bw = l.r[2] - l.r[0] - 16, bh = l.r[3] - l.r[1] - 16, own = fits(['building-' + l.district].filter(k => slotsAll.includes(k)), bw, bh), all = own.length ? own : fits(slotsAll, bw, bh);
       if (!all.length) { l.use = 'yard'; l.small = true; continue; }
-      const near = new Set(picked.filter(o => o.r[0] < l.r[2] + 40 && o.r[2] > l.r[0] - 40 && o.r[1] < l.r[3] + 40 && o.r[3] > l.r[1] - 40).map(o => o.sprite.n));
+      const near = usedNear(l, 40), wide = usedNear(l, CITY_BUILDING_SPREAD);
       const top = all.slice(0, 3), st = chronoHash('bsprite:' + l.seed); let sp = null;
+      for (let k = 0; k < top.length && !sp; k++) { const c = top[(st + k) % top.length]; if (!wide.has(c.n)) sp = c; } // Round 540: one not used nearby on screen
       for (let k = 0; k < top.length && !sp; k++) { const c = top[(st + k) % top.length]; if (!near.has(c.n)) sp = c; }
       if (!sp) sp = all.find(c => !near.has(c.n)) || (own.length ? fits(slotsAll, bw, bh).find(c => !near.has(c.n)) : null) || all[0]; // (another quarter's picture before a twin)
       const needW = Math.min(l.r[2] - l.r[0], Math.ceil((sp.w + 16) / C) * C), needD = Math.min(l.r[3] - l.r[1], Math.ceil((sp.h + 16) / C) * C);
@@ -844,6 +849,32 @@ function cityLotSpriteFits(l, bw, bh) { if (!GEN.topdown || l.use !== 'roof' || 
   return ok; }
 // No two lots within 40px of each other (side by side, back to back or across a narrow street) show the same picture: the
 // city's choices are made once, in the lots' own order, each avoiding those already made around it.
+// Round 540 (Codex's review: the bare-ground score is taken before squares are cut, landmarks merged and lots shrunk to their
+// pictures, so it can't say what the finished room is made of): every cell of the finished world, per room, sorted into
+// street, sidewalk, sea and shore, building / ruin / landmark / yard / walkable park, the room's open square, and the
+// residual ground no rule claimed, with the largest residual patch (4-connected) per room. A diagnostic for comparing seeds:
+// open ground isn't a fault in itself.
+function genFinalCoverage(theme = GEN.id, seed = chronoSeed()) {
+  return genWith(theme, () => { const wl = genWorld(String(seed)), { CW, CH, cell } = wl, C = FG_CELL, tag = new Uint8Array(CW * CH);
+    const KIND = ['residual', 'street', 'sidewalk', 'sea', 'building', 'ruin', 'landmark', 'yard', 'park', 'square'], id = n => KIND.indexOf(n);
+    for (let i = 0; i < cell.length; i++) tag[i] = cell[i] === 2 ? id('street') : cell[i] === 4 ? id('sidewalk') : cell[i] === 3 ? id('sea') : 0;
+    for (const l of wl.lotsPx) { const k = l.use === 'landmark' ? 'landmark' : l.use === 'parkpic' ? 'park' : l.use === 'yard' ? 'yard' : l.ruinPic || l.ruin ? 'ruin' : 'building';
+      for (let y = Math.floor(l.r[1] / C); y < Math.ceil(l.r[3] / C); y++) for (let x = Math.floor(l.r[0] / C); x < Math.ceil(l.r[2] / C); x++) if (x >= 0 && y >= 0 && x < CW && y < CH && !tag[y * CW + x]) tag[y * CW + x] = id(k); }
+    const rooms = {}, total = {}; for (const n of KIND) total[n] = 0;
+    for (const k of Object.keys(wl.pos)) { const [wx, wy] = wl.pos[k], ox = wx * FG_COLS, oy = wy * FG_ROWS;
+      for (const q of (wl.plazas && wl.plazas[k]) || []) for (let y = q.y0; y < q.y1; y++) for (let x = q.x0; x < q.x1; x++) { const i = (oy + y) * CW + ox + x; if (!tag[i]) tag[i] = id('square'); }
+      const n = {}; for (const m of KIND) n[m] = 0; const seen = new Uint8Array(FG_COLS * FG_ROWS); let largest = 0;
+      for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) n[KIND[tag[(oy + y) * CW + ox + x]]]++;
+      for (let y = 0; y < FG_ROWS; y++) for (let x = 0; x < FG_COLS; x++) { if (seen[y * FG_COLS + x] || tag[(oy + y) * CW + ox + x]) continue;
+        let size = 0; const q = [[x, y]]; seen[y * FG_COLS + x] = 1;
+        while (q.length) { const [a, b] = q.pop(); size++; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = a + dx, ny = b + dy; if (nx < 0 || ny < 0 || nx >= FG_COLS || ny >= FG_ROWS || seen[ny * FG_COLS + nx] || tag[(oy + ny) * CW + ox + nx]) continue; seen[ny * FG_COLS + nx] = 1; q.push([nx, ny]); } }
+        largest = Math.max(largest, size); }
+      const all = FG_COLS * FG_ROWS, share = {}; for (const m of KIND) { share[m] = n[m] / all; total[m] += n[m]; }
+      rooms[k] = { share, largestResidual: largest }; }
+    const sum = Object.values(total).reduce((a, b) => a + b, 0), totals = {}; for (const m of KIND) totals[m] = total[m] / sum;
+    return { theme, seed: String(seed), kinds: KIND, rooms, totals, worstResidual: Math.max(...Object.values(rooms).map(r => r.share.residual)) }; });
+}
+const CITY_BUILDING_SPREAD = 360; // Round 540: px round a lot (about half a room) where the same building picture is avoided when another fits as well
 function cityLotSprite(l) { const wl = genWorld(chronoSeed()); if (GEN.spriteWorld) { const own = wl.lotsPx.find(q => q.seed === l.seed); return own && own.sprite || null; } // Round 501: chosen when the world was built
   if (!wl.spritePick) { const pick = wl.spritePick = new Map(), L = wl.lotsPx;
     L.forEach((q, i) => { const c = cityLotSpriteFits(q, q.r[2] - q.r[0] - 16, q.r[3] - q.r[1] - 16); if (!c.length) return; const near = new Set();
@@ -1269,7 +1300,7 @@ const CITY_ITEM_GAP = 5;
 // the merchant) about the hero's height, waist-high things (chests, caches, a campfire) about two thirds of it, the waypoint
 // pad and the vault entrance larger. The painter's boxes (CSS, built from this table in city-gen.js), the overlap rule and
 // the tests all read it.
-const CITY_ITEM_PX = { nexus: 84, chest: 44, relic: 40, merchant: 96, cardsmith: 88, wantedBoard: 64, breaker: 60, vault: 92, lore: 58, shrine: 60, campfire: 46, cache: 46, sealed: 46,
+const CITY_ITEM_PX = { portal: 80 /* Round 540: the world portal (59x79 art) */, nexus: 84, chest: 44, relic: 40, merchant: 96, cardsmith: 88, wantedBoard: 64, breaker: 60, vault: 92, lore: 58, shrine: 60, campfire: 46, cache: 46, sealed: 46,
   'event:terminal': 58, 'event:medic': 76, 'event:vending': 60, 'event:courier': 44, 'event:arcade': 60, 'event:racer': 56, 'event:billboard': 62, 'event:toll': 80 };
 function cityItemPx(p, kind) { const k = kind || (p && p.type) || 'chest'; return CITY_ITEM_PX[k === 'event' && p && p.event ? 'event:' + p.event : k] || 48; }
 // an object's picture box at its spot (measured in the browser): standing on its spot, a little below it (the foot point);
@@ -2412,6 +2443,12 @@ function paintChronoRoom(canvas, key) {
 // Round 383 (owner: "since you are now creating the world procedurally, you should be able to make the map look similar
 // to the world"). A room's tile for the Map screen and the minimap: its own roads, hub, squares, loops and spurs drawn
 // from plan.shapes in the map's road style (pale kerb, dark asphalt), with the room's objects at the spots where they stand.
+// Round 540: the Map screen's colours for the generated worlds drawn in the city's map style (the city itself keeps its
+// textured tiles): ground, the faint blocks on it, road, and the kerb's dark and light lines
+const MAP_LOOK = {
+  solaris: { ground: '#17110b', block: 'rgba(255,214,150,.035)', road: '#9e8a66', kerb: ['#0c0804', '#ecd6a6'] },
+  chronospire: { ground: '#120e0a', block: 'rgba(255,200,120,.035)', road: '#937a4a', kerb: ['#0a0705', '#e6c274'] },
+};
 function chronoMapTile(key, onReady) {
   const plan = GEN.id === 'chronospire' ? chronoPlan(key) : genPlan(GEN.id, key); if (!plan || typeof document === 'undefined' || !document.createElement) return null;
   const objs = typeof mapRoomObjects === 'function' ? mapRoomObjects(key) : [], sig = objs.map(o => (o.src || o.glyph) + (o.used ? '·u' : '')).join('|');
@@ -2425,7 +2462,13 @@ function chronoMapTile(key, onReady) {
   const groundImg = tex('ground'), floorImg = tex('floor'); let complete = !!(groundImg && floorImg);
   const [mx, my] = GEN.world(key), offX = (((mx * 800) % 400) + 400) % 400, offY = (((my * 500) % 400) + 400) % 400;
   const paint = (g, img, flat) => { g.save(); if (img) { g.translate(-offX, -offY); g.scale(0.5, 0.5); g.fillStyle = g.createPattern(img, 'repeat'); g.fillRect(0, 0, (W + offX) * 2, (H + offY) * 2); } else { g.fillStyle = flat; g.fillRect(0, 0, W, H); } g.restore(); };
-  paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H);
+  // Round 540 (owner: "solaris map looks weird with all that background, just draw roads and objects ... map drawing should be
+  // standardized for all worlds ... neon city's map looks great ... you can use different color schemes but don't drastically
+  // change the map from the neon city style"): a world with a MAP_LOOK is drawn the city's way in flat colours (dark ground,
+  // pale roads with a kerb, its objects) instead of its own textures; the city keeps its look
+  const look = MAP_LOOK[GEN.id];
+  if (look) { complete = true; paint(ctx, null, look.ground); ctx.fillStyle = look.block; for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) ctx.fillRect(x + 6, y + 6, 28, 28); }
+  else { paint(ctx, groundImg, '#1a1a3c'); ctx.fillStyle = 'rgba(8,6,24,.38)'; ctx.fillRect(0, 0, W, H); }
   const shape = document.createElement('canvas'); shape.width = W; shape.height = H;
   { const g = shape.getContext('2d'); g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = 'square'; g.lineJoin = 'miter'; g.miterLimit = 4;
     for (const sh of plan.shapes) {
@@ -2435,9 +2478,9 @@ function chronoMapTile(key, onReady) {
     } }
   const ring = (pic, r) => { for (let a = 0; a < 12; a++) ctx.drawImage(pic, Math.round(Math.cos(a * Math.PI / 6) * r), Math.round(Math.sin(a * Math.PI / 6) * r)); };
   ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 8; ctx.drawImage(chronoTint(shape, '#0a0714'), 0, 0); ctx.restore();
-  ring(chronoTint(shape, GEN.kerb[0]), 9); ring(chronoTint(shape, GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1]), 6);
-  { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, floorImg, '#b8923f'); ctx.drawImage(art, 0, 0); }
-  const style = { kerb: GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1] };
+  ring(chronoTint(shape, look ? look.kerb[0] : GEN.kerb[0]), 9); ring(chronoTint(shape, look ? look.kerb[1] : GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1]), 6);
+  { const art = document.createElement('canvas'); art.width = W; art.height = H; const g = art.getContext('2d'); g.drawImage(shape, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g, look ? null : floorImg, look ? look.road : '#b8923f'); ctx.drawImage(art, 0, 0); }
+  const style = { kerb: look ? look.kerb[1] : GEN.id === 'chronospire' ? '#d0a04a' : GEN.kerb[1] };
   // The room's objects where they stand (dimmed once used).
   const ICON = 104;
   for (const o of objs) {

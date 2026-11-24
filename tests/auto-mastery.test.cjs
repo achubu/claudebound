@@ -16,6 +16,6 @@ assert(cardHTML(soul).includes('50/50'));assert.equal(materials(),crystals);
 const temporary={...card,uid:999999,level:0,uses:99};recordCardUse(temporary);assert.equal(temporary.level,0,'temporary clones gain no permanent mastery');
 card.level=1;card.uses=75;save();assert(load());assert.equal(owned(card.uid).uses,75);
 state.battle=null;const transferred=JSON.parse(JSON.stringify(state));assert.equal(validateImport(transferred).pool.find(c=>c.uid===card.uid).uses,75);
-transferred.pool.find(c=>c.uid===card.uid).uses=101;assert.throws(()=>validateImport(transferred));
+transferred.pool.find(c=>c.uid===card.uid).uses=101;{const v=validateImport(transferred).pool.find(c=>c.uid===card.uid).uses;assert(v>=75&&v<=101,'too many uses is clamped, not a lost journey (Round 535) '+v);}
 console.log('PASS: 100-use automatic upgrades, all levels, encounter sync, crystal preservation, Soulbound cap, and save/import above 50 uses.');
 }`);

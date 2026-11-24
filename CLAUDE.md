@@ -7,7 +7,7 @@ gallery; `arena.html` is a standalone prototype and is left untouched.
 **`CODEX-NOTES.md`** records Codex's generation review and recommendations for Claude; check its pinned baseline before acting.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 539) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 540) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -168,7 +168,7 @@ change set.
   city** (`GEN.noParks`; Solaris keeps its oases). Round 499: Solaris has the owner's desert buildings the same way.
   **Round 501 (owner): no generated buildings** (`GEN.spriteWorld`): every building lot is built around one of the owner's pictures
   (chosen in `genWorld`, the lot shrunk to it, leftovers yards or paving); the mall is off until there is art for it. Round 502: ruins are the owner's
-  ruin pictures (`ruinpic-*`, `l.ruinPic`) and about one lot in twelve is a walkable park picture (`use: 'parkpic'`, `parkpic-*`). New building art goes in `building-<quarter>` slots with its size in `CITY_BUILDING_PX`. **Owner rule: never distort a
+  ruin pictures (`ruinpic-*`, `l.ruinPic`) and about one lot in twelve is a walkable park picture (`use: 'parkpic'`, `parkpic-*`). New building art goes in `building-<quarter>` slots with its size in `CITY_BUILDING_PX`. Round 540: a picture already within `CITY_BUILDING_SPREAD` (360px) is avoided when another of the best fits fits; random orders use `seededShuffle` (never `sort(() => rand() - .5)`; saves from before keep the old order, `shuffleV: 1`); `genFinalCoverage()` reports the finished world's ground by kind. **Owner rule: never distort a
   building (or any art) to make it fit; scale it by one factor for both sides, or don't place it.** `tests/city-buildings.test.cjs`.
   Round 505: the owner's kerb (`kerb-neon`) and yard railing (`rim-rail`). Round 506: the beach's edge is the owner's sea wall strip
   (`surfaces/waterfront-edge/seawall`, `GEN.coastWall`; without the art, the Round 461 drawn lip). Round 507: the wall
@@ -201,6 +201,8 @@ change set.
     paths (`mapRoadNet` / `mapRoadSvg` in `assets/map-terrain.js`): one road per exit at a 40px-snapped shared edge
     point, straight or with one 45° jog, meeting at the room's hub, drawn like the owner's example (asphalt, pale kerbs,
     dashed centre line, rounded turns). Objects show as small paintings beside the nearest road (`mapRoomObjects`).
+    Round 540 (owner): **one map style for every world**, the city's (dark ground, pale roads with a kerb, objects); colour
+    schemes may differ (`MAP_LOOK` in `assets/chrono-gen.js` for Solaris and the Chronospire); room names small and faint, each placed off the road just above one (`placeMapLabels`, `tests/map-labels.cjs`).
     Round 355: hubs are aligned across rooms (`mapRoadAlign`: one height per east-west chain, one column per north-south
     chain), so roads never jog at a seam.
   - Round 101+: each painted room also lists hand-checked open-ground spots

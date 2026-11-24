@@ -650,3 +650,53 @@ mapTerrainStyles.textContent = '.map-canvas.map-city{background:#070b10;min-widt
   + '.map-city .map-link.locked{stroke:#ff8a9a;stroke-dasharray:2px 4px}'
   + '.map-city .map-link.map-stub{opacity:.3;stroke:#bfe6ff}';
 document.head.append(mapTerrainStyles);
+
+// =====================================================================
+// Round 540 (owner: "make sure the room text is not over the road, have it above a road in all rooms"): after the Map
+// screen is drawn (and after each zoom, since the labels keep their size while the map scales), each room's label moves to
+// the nearest spot near the room's crossing where its whole box is off the road and a road runs just below it. Roads are
+// the room's floor in the generated worlds (the shapes their map tiles draw) and the map's road paths elsewhere.
+// =====================================================================
+function mapLabelRoad(key) {
+  let p = null;
+  try { if (activeRegion === 'chronospire' && typeof chronoPlan === 'function') p = chronoPlan(key); else if (typeof genLive === 'function' && genLive() && typeof cityGenPlan === 'function') p = cityGenPlan(key); } catch (e) { p = null; }
+  if (p && p.floor && typeof FG_CELL !== 'undefined') return { hub: p.hub ? [p.hub[0], p.hub[1]] : [400, 250], at: (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && !!p.floor[Math.floor(y / FG_CELL) * FG_COLS + Math.floor(x / FG_CELL)] };
+  const net = typeof mapRoadNet === 'function' ? mapRoadNet(key) : null; if (!net || !net.paths || !net.paths.length) return null;
+  const half = MAP_ROAD_W / 2 + 4, segs = []; for (const pts of net.paths) for (let i = 1; i < pts.length; i++) segs.push([pts[i - 1], pts[i]]);
+  const near = (x, y) => segs.some(([[ax, ay], [bx, by]]) => { const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L)) : 0; return Math.hypot(x - ax - dx * t, y - ay - dy * t) < half; });
+  return { hub: net.hub || [400, 250], at: (x, y) => x >= 0 && y >= 0 && x < 800 && y < 500 && near(x, y) };
+}
+// The label's centre in room pixels (800x500), for a label w x h room pixels: off the road, a road within 18px below it,
+// inside the room, as near as can be to a point just above the room's crossing. null when no such spot exists.
+function mapLabelSpot(key, w, h) {
+  const road = mapLabelRoad(key); if (!road) return null;
+  const [hx, hy] = road.hub, want = [hx, hy - 30 - h / 2];
+  const off = (cx, cy) => { for (let y = cy - h / 2; y <= cy + h / 2 + 0.1; y += Math.max(3, h / 4)) for (let x = cx - w / 2; x <= cx + w / 2 + 0.1; x += Math.max(4, w / 8)) if (road.at(x, y)) return false; return true; };
+  const above = (cx, cy) => { for (let g = 3; g <= 18; g += 3) for (const dx of [-w / 4, 0, w / 4]) if (road.at(cx + dx, cy + h / 2 + g)) return true; return false; };
+  let best = null, bd = Infinity;
+  for (let cy = Math.ceil(h / 2) + 2; cy <= 498 - h / 2; cy += 4) for (let cx = Math.ceil(w / 2) + 2; cx <= 798 - w / 2; cx += 6) {
+    const d = Math.hypot(cx - want[0], (cy - want[1]) * 1.5); if (d >= bd) continue;
+    if (off(cx, cy) && above(cx, cy)) { bd = d; best = [cx, cy]; } }
+  if (best) return best;
+  // (a room whose roads only run north-south has no road to stand above inside it: beside one, off it)
+  const beside = (cx, cy) => { for (let g = 3; g <= 18; g += 3) for (const [x, y] of [[cx - w / 2 - g, cy], [cx + w / 2 + g, cy], [cx, cy - h / 2 - g]]) if (road.at(x, y)) return true; return false; };
+  for (let cy = Math.ceil(h / 2) + 2; cy <= 498 - h / 2; cy += 4) for (let cx = Math.ceil(w / 2) + 2; cx <= 798 - w / 2; cx += 6) {
+    const d = Math.hypot(cx - want[0], (cy - want[1]) * 1.5); if (d >= bd) continue;
+    if (off(cx, cy) && beside(cx, cy)) { bd = d; best = [cx, cy]; } }
+  return best;
+}
+function placeMapLabels() {
+  const modal = typeof document !== 'undefined' && document.getElementById && document.getElementById('menuModal'); if (!modal || !state) return;
+  const panels = [...modal.querySelectorAll('.panel[data-cells]')]; if (!panels.length) return;
+  const { minX, maxX, minY, maxY } = mapBounds(), sx = 100 / (maxX - minX + 1.8), sy = 100 / (maxY - minY + 1.8);
+  for (const el of panels) { const cells = (el.dataset.cells || '').split(' ').filter(Boolean); if (cells.length !== 1 || !rooms[cells[0]]) continue;
+    const parent = el.parentElement; if (!parent || !parent.clientWidth) continue;
+    const key = cells[0], [kx, ky] = key.split(',').map(Number), cw = parent.clientWidth * sx / 100, ch = parent.clientHeight * sy / 100; if (!cw || !ch) continue;
+    const tw = Math.max(...[...el.querySelectorAll(':scope > b, :scope > small')].map(e => e.offsetWidth), 0) + 8 /* the name and state: badges and the lock note hang outside the text */;
+    // (the label scales with the map, so it covers the same part of a room at every zoom: offsetWidth is its size at 100%)
+    const z = (typeof mapZoom === 'number' && mapZoom > 0) ? mapZoom : 1; el.style.transform = 'translate(-50%,-50%) scale(' + z + ')';
+    const w = (tw > 8 ? tw : el.offsetWidth) * z / cw * 800, h = el.offsetHeight * z / ch * 500, at = mapLabelSpot(key, w + 6, h + 4); if (!at) continue;
+    el.style.left = (sx * 0.4 + sx * (kx - minX + at[0] / 800)) + '%'; el.style.top = (sy * 0.4 + sy * (ky - minY + at[1] / 500)) + '%'; el.dataset.labelSpot = Math.round(at[0]) + ',' + Math.round(at[1]); }
+}
+{ const showMapBeforeLabels = showMap; showMap = function () { const out = showMapBeforeLabels.apply(this, arguments); try { placeMapLabels(); } catch (e) { /* labels stay at the room's centre */ } return out; }; }
+if (typeof applyMapZoom === 'function') { const applyMapZoomBeforeLabels = applyMapZoom; applyMapZoom = function () { const out = applyMapZoomBeforeLabels.apply(this, arguments); try { placeMapLabels(); } catch (e) { /* as above */ } return out; }; }

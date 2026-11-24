@@ -83,7 +83,7 @@ function poiSpot(key) {
   const ck = state.seed + ':' + activeRegion + ':' + key;
   if (ck in spotCache) return spotCache[ck];
   const spawns = roomSpawns(key), rand = seeded(hashSeed(state.seed + activeRegion + key + 'poi-spot'));
-  const spots = [...POI_SPOTS].sort(() => rand() - .5);
+  const spots = seededShuffle([...POI_SPOTS], rand);
   return spotCache[ck] = spots.find(([x, y]) => walkable(key, x, y, 30) && spawns.every(s => Math.hypot(s.x - x, s.y - y) > 150)) || null;
 }
 function worldPOIs(region = activeRegion) {
@@ -92,7 +92,7 @@ function worldPOIs(region = activeRegion) {
   const keys = Object.keys(rooms).filter(poiEligible).sort();
   const rand = seeded(hashSeed(state.seed + region + 'poi'));
   const order = keys.map(k => [rand(), k]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
-  const out = {}; let lore = 0; const guaranteed = ['shrine', 'campfire', 'cache', 'sealed'].sort(() => rand() - .5);
+  const out = {}; let lore = 0; const guaranteed = seededShuffle(['shrine', 'campfire', 'cache', 'sealed'], rand);
   const target = Math.max(Math.round(keys.length * POI_SHARE), LORE_PER_WORLD + 4); // always room for all lore and one of each kind
   for (const key of order) {
     if (Object.keys(out).length >= target) break;
@@ -217,7 +217,7 @@ function openPOI(p) {
   const d = poiDisplay(p);
   if (poiUsed(p)) return poiMenu(d.icon + ' ' + d.name, '<p class="muted">' + (p.type === 'campfire' ? 'The campfire has burned out. Each campfire can be used once — to rest or to train one card.' : 'You have already used this.') + (p.type === 'lore' ? '</p><blockquote class="lore">' + LORE[activeRegion][p.loreIndex] + '</blockquote>' : '</p>'), [{ id: 'poiLeave', label: 'Leave', primary: true, onclick: closeMenu }]);
   if (p.type === 'shrine') {
-    const rand = seeded(hashSeed(p.id + state.seed)), offers = Object.keys(BLESSINGS).sort(() => rand() - .5).slice(0, 3);
+    const rand = seeded(hashSeed(p.id + state.seed)), offers = seededShuffle(Object.keys(BLESSINGS), rand).slice(0, 3);
     return poiMenu('⛩ Aether Shrine', '<p>The shrine offers one blessing for your next fight.' + (state.blessing ? ' It replaces <b>' + BLESSINGS[state.blessing].name + '</b>.' : '') + '</p>' + offers.map(id => '<p class="poi-option"><b>' + BLESSINGS[id].name + '</b> — ' + BLESSINGS[id].text() + '</p>').join(''),
       offers.map((id, i) => ({ id: 'bless' + i, label: BLESSINGS[id].name, primary: i === 0, onclick: () => { state.blessing = id; finishPOI(p, 'Blessing: ' + BLESSINGS[id].name + '. It lasts until your next fight.'); } })).concat([{ id: 'poiLeave', label: 'Leave', onclick: closeMenu }]));
   }
@@ -368,7 +368,7 @@ loseBattle = function () { const r = loseBattleBeforeExplore(); if (state.battle
 const newGameBeforeExplore = newGame;
 newGame = function () { newGameBeforeExplore(); ensureExplore(); save(); };
 const restoreGameBeforeExplore = restoreGame;
-restoreGame = function (s) { ensureExplore(s); return restoreGameBeforeExplore(s); };
+restoreGame = function (s) { ensureExplore(s); if (s && s.shuffleV == null) s.shuffleV = 1; /* Round 540: saved before seeded shuffles */ return restoreGameBeforeExplore(s); };
 const validateImportBeforeExplore = validateImport;
 validateImport = function (s) {
   if (s && s.shards !== undefined && (!Number.isInteger(s.shards) || s.shards < 0 || s.shards > 1e7)) throw Error('Invalid shards.');
@@ -398,6 +398,15 @@ const QUIET_ROOMS = {
   vespera: ['2,4', '6,4', '10,5']
 };
 // Round 73: Nexus Waypoints at the start and middle of every world (see below).
+// Round 540 (Codex's review): a seeded shuffle. "sort(() => rand() - .5)" asks a sort to order things with a comparator that
+// contradicts itself, and browsers' sorts call it in different orders, so the same seed could lay a world out differently in
+// Chrome and Safari (a save moved between them). New journeys shuffle with Fisher-Yates; a journey saved before this
+// (state.shuffleV 1) keeps the old order, so its rooms don't change under it.
+function seededShuffle(arr, rnd) {
+  if (typeof state !== 'undefined' && state && state.shuffleV === 1) return arr.sort(() => rnd() - .5);
+  for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+  return arr;
+}
 const NEXUS_POINTS = {
   city: { start: '0,5', mid: '4,5' }, // Round 91: Neon Square
   elaris: { start: '0,0', mid: '4,2' },
@@ -465,7 +474,7 @@ worldPOIs = function (region = activeRegion) {
   Object.defineProperty(out, '__pacing', { value: true, enumerable: false });
   const quiet = QUIET_ROOMS[region] || [], pool = EVENT_POOLS[region] || [];
   if (quiet.length) {
-    const rand = seeded(hashSeed(state.seed + region + 'events')), order = pool.slice().sort(() => rand() - .5);
+    const rand = seeded(hashSeed(state.seed + region + 'events')), order = seededShuffle(pool.slice(), rand);
     quiet.forEach((key, i) => { if (!rooms[key]) return; const spot = poiSpot(key) || [400, 250]; out[key] = { key, type: 'event', event: order[i % order.length], x: spot[0], y: spot[1], id: region + ':event:' + key }; });
   }
   const nx = NEXUS_POINTS[region];
