@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 569: built armor, filled with any texture
+
+(Owner: "I want to see if you can design armor that can be filled with texture".) `gearArmorRender` (`assets/gear-recipe.js`), used
+when a shirt recipe has `armor`: plates placed on the body in every frame from the shirt template's measurements (its top, its
+waist, the shoulder line and the torso's width below the sleeves), not traced from the shirt: a chest plate tapering from the
+shoulders to the waist (pointed at its foot facing toward or away from us), 0-3 belly plates narrowing to the waist, a collar, and
+pauldrons at the shoulders (one, at the near shoulder, in the side views) standing past the outline. Each plate is filled with the
+recipe's texture and tint and lit as its own hard surface (from the top left, a little of his shading), with a dark rim and a light
+inner edge; the rest of the shirt is an **undersuit** in a darker cloth of the same colour with his folds. His face, forearms and
+hands stay in front; the Aetherlink stays clear. Designer: Built armor, pauldron size, belly plates, collar, rim colour, undersuit.
+The Sunwoven Shirt is now **desert bronze plate armor** (bronze scales). First tries were checked frame by frame and corrected:
+pauldrons too big, the collar over his mouth (his shirt starts right under the chin), the torso measured across the sleeves.
+
 ## Round 568: the Sunwoven Shirt as a ribbed desert survival suit
 
 (Owner: "now change the shirt look to a body armor look out of dune for the desert".) An original design in that spirit (not a
