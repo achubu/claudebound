@@ -15,6 +15,6 @@ assert(m && Math.abs(+m[1] - 9 * 0.8 * 0.9) < 0.01, '90% of the old enemy label 
 assert(+m[2] >= 8, 'readable floor on small screens');
 const html = fs.readFileSync('index.html', 'utf8');
 assert(html.indexOf('world-font.js') > html.indexOf('item-names.js') && html.indexOf('world-font.js') < html.indexOf('god-mode.js'), 'load order');
-const r = JSON.parse(run(`(() => { newGame(); return JSON.stringify({ fit: typeof fitWorldText, wrapped: String(renderWorld).includes('fitWorldText'), n: fitWorldText() }); })()`));
+const r = JSON.parse(run(`(() => { newGame(); return JSON.stringify({ fit: typeof fitWorldText, n: fitWorldText(), wrapped: (() => { const was = fitWorldText; let calls = 0; fitWorldText = function () { calls++; return was.apply(this, arguments); }; try { renderWorld(); } catch (e) {} fitWorldText = was; return calls > 0; })() /* (Round 555: called on every render, whichever wrapper is outermost; hero-wear wraps renderWorld after it) */ }); })()`));
 assert.strictEqual(r.fit, 'function'); assert(r.wrapped, 'sizes are refreshed after every render'); assert.strictEqual(r.n, 0, 'harmless without a real page');
 console.log('world-font ok');

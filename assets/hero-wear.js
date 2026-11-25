@@ -43,4 +43,4 @@ function heroWearApply() {
 }
 if (typeof renderWorld === 'function') { const renderWorldBeforeWear = renderWorld; renderWorld = function () { const r = renderWorldBeforeWear.apply(this, arguments); heroWearApply(); return r; }; }
 if (typeof equipGear === 'function') { const equipGearBeforeWear = equipGear; equipGear = function () { const r = equipGearBeforeWear.apply(this, arguments); heroWearApply(); return r; }; }
-if (typeof collectRelic === 'function') { const collectRelicBeforeWear = collectRelic; collectRelic = function () { const r = collectRelicBeforeWear.apply(this, arguments); heroWearApply(); return r; }; }
+// (finding gear needs no hook: collectRelic redraws the world, and the renderWorld hook above applies the look)
