@@ -1,0 +1,18 @@
+{
+ "v": 1,
+ "slot": "belt",
+ "texture": "scales",
+ "scale": 0.4,
+ "tint": "#7e5a22",
+ "shade": 1.0,
+ "trim": {
+  "color": "#2e1c0c",
+  "width": 1
+ },
+ "seam": {
+  "color": "#33d1c0",
+  "width": 2,
+  "glow": true
+ },
+ "name": "Desert scarab belt"
+}

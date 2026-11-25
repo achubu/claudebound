@@ -145,3 +145,5 @@ Other commands: `python3 tools/wearable_add.py --check` (validate all looks, rea
 | `cyber-pants` | pants | galeweavePants, mossweavePants | no | 558 |
 | `cyber-chest` | shirt | sunwovenShirt, timewornShirt | no (armor over the shirt) | 558 |
 | `cyber-gloves` | gloves | ember, thornhideGloves, tempestGloves | no (fingerless, over the hands) | 560 |
+| recipe: desert scale armor | shirt | sunwovenShirt (in place of cyber-chest) | (designed, `gear/recipes/`) | 566 |
+| recipe: desert scarab belt | belt | scarabBelt (in place of cyber-belt) | (designed, `gear/recipes/`) | 566 |

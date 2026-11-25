@@ -81,7 +81,7 @@ console.log('hero-wear (harness) ok');
   finally { fs.rmSync(rfile); if (!hadDir) fs.rmSync(rdir, { recursive: true }); }
   // missing art falls back to the plain hero
   
-  await page.evaluate(() => { heroWearCache.clear(); heroWearKey = ''; HERO_WEAR_LOOKS['cyber-belt'].overlay = 'assets/characters/wearable/cyber-belt/missing.png'; state.relics.push('scarabBelt'); equipGear('belt', 'scarabBelt'); });
+  await page.evaluate(() => { heroWearCache.clear(); heroWearKey = ''; HERO_WEAR_LOOKS['cyber-belt'].overlay = 'assets/characters/wearable/cyber-belt/missing.png'; state.relics.push('stormglassBelt'); equipGear('belt', 'stormglassBelt'); /* (Round 566: a belt with no recipe; the Scarab Belt has one) */ });
   await page.waitForTimeout(1500); assert(/protagonist-walk9\.png/.test(await bg()), 'missing art: the plain hero, never a blank one');
   assert.deepStrictEqual(errors, [], 'no page errors');
   await browser.close(); console.log('hero-wear (browser) ok');
