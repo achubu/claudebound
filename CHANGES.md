@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 573: faceted armour, after the owner's line-art reference
+
+The owner sent a line-art sci-fi armoured hero ("Can you get to this level of detail"). The hero is drawn on 256px frames and
+shown at about 84px, so the reference's fine bevels can't survive; its design language can:
+
+- **Faceted armour** (`armor.style: 'faceted'` in `gearArmorRender`, `assets/gear-recipe.js`): angular six-sided pectoral plates
+  either side of a centre keel, a small diamond emblem, chevron belly segments split down the middle, an angular gorget, and
+  shoulder guards in three angular tiers. Side views get a profile chest plate and slanted segments. The rounded style stays
+  (`style: 'rounded'`, or no style).
+- **Highlight edges** (`gearPixelize`): a light line along the top of every panel, inside its black outline.
+- **Helmets**: a faceted shell (cut corners in place of the dome), brow and cheek-plate seams, and a V-shaped visor.
+- Gear Studio: the Designer has a "faceted" box (on by default); every armour set now uses the faceted style with three belly
+  segments.
+
 ## Round 572: twice the detail on designed gear; prompts for texture fills
 
 (Owner: "now double the complexity of each design, and give me prompts for texture fill".) `assets/gear-recipe.js`:

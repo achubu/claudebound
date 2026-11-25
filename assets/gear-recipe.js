@@ -100,6 +100,32 @@ function gearArmorRender(recipe, imgs) {
     const ts = [.68, .72, .76].map(f => extent(top + Math.round(Hh * f))).filter(e => e[0] >= 0), tl = Math.min(...ts.map(e => e[0])), tr = Math.max(...ts.map(e => e[1]));
     const cx = (tl + tr) / 2, w = tr - tl, sy = top + Hh * .21, [sl, sr] = extent(Math.round(sy)), side = r === 1 || r === 2, X = x => x0 + x, Y = y => y0 + y;
     const n = Math.max(0, Math.min(3, A.plates == null ? 2 : A.plates | 0)), chestBot = top + Hh * (n ? .6 : .9);
+    // Round 573 (owner, with a line-art armoured hero: "Can you get to this level of detail"): the faceted style: angular
+    // pectoral plates either side of a keel, chevron belly segments split down the middle, an angular gorget, shoulder guards in
+    // three angular tiers. Side views: a profile chest plate and slanted segments.
+    if (A.style === 'faceted') {
+      const poly = (id, pts) => plate(id, g => { pts.forEach(([px2, py2], j) => j ? g.lineTo(X(px2), Y(py2)) : g.moveTo(X(px2), Y(py2))); g.closePath(); });
+      const t = top + Hh * (side ? .14 : .1), mid = top + Hh * .42, l = cx - w / 2 - 2, rt = cx + w / 2 + 2, fwd = r === 1 ? -1 : 1, mir = pts => pts.map(([a, b2]) => [2 * cx - a, b2]);
+      const segs = Math.max(2, n || 3), v = Hh * .04;
+      if (!side) { const ul = Math.min(l, sl + w * .16), lp = [[cx - 2, t + 2], [ul + 3, t], [ul, t + Hh * .1], [l + 1, mid - Hh * .04], [cx - w * .12, mid + Hh * .03], [cx - 2, mid - Hh * .03]];
+        poly(20, lp); poly(21, mir(lp)); poly(23, [[cx, t - 1], [cx + w * .07, t + Hh * .1], [cx + w * .05, mid], [cx, mid + Hh * .07], [cx - w * .05, mid], [cx - w * .07, t + Hh * .1]]);
+        if (r === 0) plate(61, g => { const ey = t + Hh * .16, er = Math.max(2, w * .035); g.moveTo(X(cx), Y(ey - er)); g.lineTo(X(cx + er), Y(ey)); g.lineTo(X(cx), Y(ey + er)); g.lineTo(X(cx - er), Y(ey)); g.closePath(); });
+        for (let k = 0; k < segs; k++) { const y1 = mid + Hh * .07 + k * (bot - mid - Hh * .07) / segs, y2 = y1 + (bot - mid - Hh * .07) / segs - 2, hw = w * (.44 - .05 * k);
+          const lb = [[cx - 1, y1 + v], [cx - hw, y1], [cx - hw + 2, y2], [cx - 1, y2 + v]]; poly(10 + k, lb); poly(15 + k, mir(lb)); }
+        if (A.collar !== false) poly(30, [[cx - w * .26, top + Hh * .02], [cx + w * .26, top + Hh * .02], [cx + w * .17, top + Hh * .12], [cx - w * .17, top + Hh * .12]]); }
+      else { const front = cx + fwd * (w / 2 + 2), back = cx - fwd * w / 2;
+        poly(20, [[back, t + 4], [cx, t], [front - fwd * 3, t + Hh * .06], [front, mid - Hh * .06], [front - fwd * w * .15, mid + Hh * .04], [back, mid]]);
+        for (let k = 0; k < segs; k++) { const y1 = mid + Hh * .06 + k * (bot - mid - Hh * .06) / segs, y2 = y1 + (bot - mid - Hh * .06) / segs - 2;
+          poly(10 + k, [[back, y1], [front - fwd * k * 2, y1 + v], [front - fwd * k * 2, y2 + v], [back, y2]]); }
+        if (A.collar !== false) poly(30, [[back, top + Hh * .08], [front, top + Hh * .06], [front - fwd * 3, top + Hh * .16], [back + fwd * 2, top + Hh * .16]]); }
+      const ps = A.pauldrons == null ? 1 : +A.pauldrons;
+      if (ps > 0) { const rx = (w * (side ? .2 : .15) * ps + 2) * 1.15, ry = (Hh * .085 * ps + 2) * 1.15;
+        const at = side ? [[cx - fwd * w * .08, sy + 2, -fwd]] : [[Math.max(sl + 3, tl - 1), sy, -1], [Math.min(sr - 3, tr + 1), sy, 1]];
+        at.forEach(([ax, ay, sg], k) => { const P = (fx, fy) => [ax + sg * rx * fx, ay + ry * fy];
+          poly(46 + k, [P(-.2, .9), P(.95, 1.15), P(.8, 1.7), P(-.05, 1.55)]);
+          poly(44 + k, [P(-.5, .2), P(1.05, .5), P(.95, 1.2), P(-.3, 1.05)]);
+          poly(40 + k, [P(-.5, -1.1), P(.9, -.6), P(1.1, .3), P(.3, .5), P(-.8, .1)]); }); }
+      continue; }
     // belly plates, narrowing toward the waist
     for (let k = 0; k < n; k++) { const ya = chestBot + 1 + k * (bot - chestBot) / n, yb = chestBot + (k + 1) * (bot - chestBot) / n - 1, s2 = 1 - .06 * (k + 1);
       plate(10 + k, g => rrect(g, X(cx - w * s2 / 2 - 1), Y(ya), X(cx + w * s2 / 2 + 1), Y(yb), 3));
@@ -176,6 +202,7 @@ function gearPixelize(out, reg, acc, pal, W, H, noAccent, ink) { // (Round 572: 
     let c = v < .86 ? D : v > 1.16 ? L : B; if (under) c = v > 1.14 ? B : D;
     if (d[i] === 1 || (ink && ink[i])) c = K; else if (acc[i]) c = A; else if (d[i] === 3 && !under) c = A;
     else if (d[i] === 5 && !under && ((i % W) + Math.floor(i / W)) % 9 === 0) c = L; // (rivets along each panel's inner ring)
+    else if (d[i] === 2 && !under && d[i - W] === 1) c = L; // (Round 573: a highlight along each panel's top edge)
     out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = 255; } }
 // Round 571 (owner: "add helmet slot but use the design for your outlines of our armor vector graphics"): a helmet built over
 // his head in every frame, from the helmet template (his head above the shirt): a shell covering hair and face, and by style
@@ -195,11 +222,15 @@ function gearHelmetRender(recipe, imgs) {
     if (R < 0) continue; const h = B - T, w = R - L, cx = (L + R) / 2, X = x => x0 + x, Y = y => y0 + y, side = r === 1 || r === 2, fwd = r === 1 ? -1 : 1, eye = T + h * .5;
     // the shell: hair and face covered, its foot a little above the shirt's collar
     { const a = L - 2, z = R + 2, top = T - 2, bot = B + 1, mid = eye + h * .16, jaw = side ? w * .36 : w * .3, jx = side ? cx + fwd * w * .08 : cx; // (a dome, straight sides, a jaw guard tapering to the collar)
-      sg.beginPath(); sg.moveTo(X(a), Y(mid)); sg.lineTo(X(a), Y(top + h * .4)); sg.quadraticCurveTo(X(a), Y(top), X(cx), Y(top)); sg.quadraticCurveTo(X(z), Y(top), X(z), Y(top + h * .4));
-      sg.lineTo(X(z), Y(mid)); sg.lineTo(X(jx + jaw), Y(bot)); sg.lineTo(X(jx - jaw), Y(bot)); sg.closePath(); sg.fill(); }
+      sg.beginPath(); sg.moveTo(X(a), Y(mid)); sg.lineTo(X(a), Y(top + h * .3)); sg.lineTo(X(a + w * .2), Y(top)); sg.lineTo(X(z - w * .2), Y(top)); sg.lineTo(X(z), Y(top + h * .3)); // (Round 573: faceted)
+      sg.lineTo(X(z), Y(mid)); sg.lineTo(X(jx + jaw), Y(bot)); sg.lineTo(X(jx - jaw), Y(bot)); sg.closePath(); sg.fill();
+      // (seams: a brow line, cheek plates from the eyes to the jaw)
+      if (r !== 3) { ig.strokeStyle = '#fff'; ig.lineWidth = 1; ig.beginPath(); if (!side) { ig.moveTo(X(a + 3), Y(eye - h * .2)); ig.lineTo(X(cx), Y(eye - h * .13)); ig.lineTo(X(z - 3), Y(eye - h * .2));
+          ig.moveTo(X(L + w * .1), Y(eye + h * .08)); ig.lineTo(X(jx - jaw + 2), Y(bot - 2)); ig.moveTo(X(R - w * .1), Y(eye + h * .08)); ig.lineTo(X(jx + jaw - 2), Y(bot - 2)); }
+        else { ig.moveTo(X(cx - fwd * w * .1), Y(top + 3)); ig.lineTo(X(cx - fwd * w * .1), Y(bot - 3)); ig.moveTo(X(cx + fwd * w * .1), Y(eye + h * .1)); ig.lineTo(X(jx + fwd * jaw * .6), Y(bot - 1)); } ig.stroke(); } }
     lg.beginPath();
     if (r === 3) { if (style === 'knight' || style === 'visor') lg.rect(X(cx - 1.5), Y(T + 1), 3, h * .62); } // (behind: a crest line)
-    else if (style === 'visor') { if (side) lg.rect(fwd < 0 ? X(L - 1) : X(cx), Y(eye - h * .1), w / 2 + 1, h * .2); else lg.rect(X(L + w * .1), Y(eye - h * .1), w * .8, h * .2); }
+    else if (style === 'visor') { if (side) { lg.moveTo(X(cx), Y(eye - h * .1)); lg.lineTo(X(fwd < 0 ? L - 1 : R + 1), Y(eye - h * .04)); lg.lineTo(X(fwd < 0 ? L - 1 : R + 1), Y(eye + h * .08)); lg.lineTo(X(cx), Y(eye + h * .1)); lg.closePath(); } else { lg.moveTo(X(L + w * .08), Y(eye - h * .12)); lg.lineTo(X(cx), Y(eye - h * .03)); lg.lineTo(X(R - w * .08), Y(eye - h * .12)); lg.lineTo(X(R - w * .06), Y(eye + h * .04)); lg.lineTo(X(cx), Y(eye + h * .13)); lg.lineTo(X(L + w * .06), Y(eye + h * .04)); lg.closePath(); } } // (Round 573: a V visor)
     else if (style === 'mask') { const er = Math.max(3, w * .12); if (side) lg.ellipse(X(cx + fwd * w * .26), Y(eye), er, er * .8, 0, 0, 7); else { lg.ellipse(X(cx - w * .22), Y(eye), er, er * .8, 0, 0, 7); lg.moveTo(X(cx + w * .22 + er), Y(eye)); lg.ellipse(X(cx + w * .22), Y(eye), er, er * .8, 0, 0, 7);
         for (let k = -1; k <= 1; k++) { lg.moveTo(0, 0); lg.rect(X(cx + k * w * .1 - 1), Y(eye + h * .2), 2, h * .14); } } }
     else { lg.rect(side ? (fwd < 0 ? X(L - 1) : X(cx)) : X(L + w * .14), Y(eye - 1.5), side ? w / 2 + 1 : w * .72, 3); if (!side) lg.rect(X(cx - 1.5), Y(T + 1), 3, eye - T - 2); }
