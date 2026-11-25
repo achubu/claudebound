@@ -557,7 +557,15 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
       const dryRoad = (X, Y) => { if (at(X, Y)) return true; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { let t = 1; while (t < 6 && road(X + dx * t, Y + dy * t)) t++; const nx = X + dx * t, ny = Y + dy * t; if (t < 6 && at(nx, ny)) return true; } return false; };
       for (let y = 0; y < CH / 2; y++) for (let x = 0; x < CW / 2; x++) { let n = 0, dr = false;
         for (let b = 0; b < 2; b++) for (let a = 0; a < 2; a++) { const X = x * 2 + a, Y = y * 2 + b; if (road(X, Y)) { if (dryRoad(X, Y)) dr = true; } else if (at(X, Y)) n++; }
-        if (dr || n >= 2) land.add(x + ',' + y); } };
+        if (dr || n >= 2) land.add(x + ',' + y); }
+      // Round 556 (owner: the edges were "no good"): smooth the islands' outlines on their 50px cells, so the edge laid along
+      // them runs straight: a cell is land where most of its 3x3 neighbourhood is (two passes; notches fill, one-cell spurs and
+      // slivers go), always where a dry road crosses it, never where only sky-crossing road is (a bridge stays a bridge)
+      const roadIn = (x, y, dryOnly) => { for (let b = 0; b < 2; b++) for (let a = 0; a < 2; a++) { const X = x * 2 + a, Y = y * 2 + b; if (road(X, Y) && (!dryOnly || dryRoad(X, Y))) return true; } return false; };
+      for (let pass = 0; pass < 2; pass++) { const next = new Set();
+        for (let y = -1; y <= CH / 2; y++) for (let x = -1; x <= CW / 2; x++) { let n = 0; for (let b = -1; b <= 1; b++) for (let a = -1; a <= 1; a++) if (land.has((x + a) + ',' + (y + b))) n++;
+          const k = x + ',' + y; if (roadIn(x, y, true) || (n >= 5 && !(roadIn(x, y, false) && !land.has(k)))) next.add(k); }
+        land.clear(); for (const k of next) land.add(k); } };
     toLand(); T.isleStats = { first: land.size }; // (how much land the blocks gave, and after the stepping islands: for QA)
     // every road over the sky a clean crossing: where one isn't, a stepping island at its middle (or over its corner), again
     // until none is left
@@ -573,7 +581,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     T.isleStats.final = land.size; const set = new Set(); for (let y = -3; y < (my + 1) * CG_ROWS + 3; y++) for (let x = -3; x < (mx + 1) * CG_COLS + 3; x++) if (!land.has(x + ',' + y)) set.add(x + ',' + y);
     T.riverCache = { ck, set }; return set; },
   noParks: true, oasis: false, alleyVerge: false, lampGlow: .14, parkDim: 'rgba(10,0,20,.06)', floorRange: [2, 3], landmarkLot: 380, landmarkW: 300,
-  tex: { pipes: 'surfaces/plaza/pavers', chasm: 'surfaces/water/cloud-sea', overgrowth: 'surfaces/plaza/pavers', water: 'surfaces/water/cloud-sea', sand: 'surfaces/ground/deck', floor: 'surfaces/plaza/pavers', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/plaza/pavers', yard: 'surfaces/plaza/pavers', 'yard-cargo': 'surfaces/plaza/pavers', 'yard-rubble': 'surfaces/plaza/pavers', 'yard-market': 'surfaces/plaza/pavers', 'pavement-old': 'surfaces/ground/deck', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' } /* Round 556 (owner: "the ground textures clash with the city objects and buildings"): only the pale ones: the lavender deck for the ground and the islands' edges (the dark grating ring is gone), pale stone pavers for squares and yards (no dark cargo plates, mosaic or chequered glass), the glass walkway for roads */,
+  tex: { pipes: 'surfaces/ground/deck', chasm: 'surfaces/water/cloud-sea', overgrowth: 'surfaces/ground/deck', water: 'surfaces/water/cloud-sea', sand: 'surfaces/ground/deck', floor: 'surfaces/ground/deck', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/ground/deck', yard: 'surfaces/ground/deck', 'yard-cargo': 'surfaces/ground/deck', 'yard-rubble': 'surfaces/ground/deck', 'yard-market': 'surfaces/ground/deck', 'pavement-old': 'surfaces/ground/deck', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' } /* Round 556 (owner: "the ground textures clash with the city objects and buildings"; "use this tile for the ground in sky isles ... don't use the other texture tiles for ground"): one ground, the riveted lavender deck, for islands, squares and yards alike; the glass walkway for roads; the cloud sea for the sky */,
   texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.35, plaza: 0.35, sand: 0.35, water: 0.4, overgrowth: 0.35, pipes: 0.35 },
   kerb: ['#2a1d3a', '#e6d8ff', '#8a74b8'], yardRim: ['#2a1d3a', '#d8c8f4'], groundShade: 'rgba(40,0,60,.05)', lamp: '190,240,255', vignette: '30,10,50',
   tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
@@ -2471,7 +2479,10 @@ function paintChronoRoom(canvas, key) {
       if (ea && ea.naturalWidth) { const [gq, gr] = GEN.world(key), gx = gq * FG_COLS, gy = gr * FG_ROWS, wl4 = genWorld(chronoSeed()), sd4 = chronoSeed();
         const landC = (X, Y) => (X >= 0 && Y >= 0 && X < wl4.CW && Y < wl4.CH && wl4.cell[Y * wl4.CW + X] === 2) || !GEN.hole(sd4, Math.floor(X / 2), Math.floor(Y / 2));
         coastSandCell = (X, Y) => !landC(X, Y);
-        coastWallDraw = () => { for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, landC, gx, gy, FG_COLS, FG_ROWS, FG_CELL, 14, K, ea, GEN.isleEdgeT || 16, gq * 800, gr * 500); }; } }
+        const roadC = (X, Y) => X >= 0 && Y >= 0 && X < wl4.CW && Y < wl4.CH && wl4.cell[Y * wl4.CW + X] === 2, T4 = GEN.isleEdgeT || 16;
+        // (no edge along a road: a road over the sky has its own rails, and one beside the sky its kerb; the strip lies wholly on
+        // the island, moved in by half its width)
+        coastWallDraw = () => { for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, landC, gx, gy, FG_COLS, FG_ROWS, FG_CELL, 14, K, ea, T4, gq * 800, gr * 500, (X, Y) => !roadC(X, Y), T4 / 2); }; } }
     else { ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
     ctx.drawImage(tintIn(coast.sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(30,70,110,.16)'; g.fillRect(0, 0, W, H); }), 0, 0);
     ctx.save(); ctx.globalAlpha = 0.28; ctx.drawImage(flat(coast.deep, '#02040e'), 0, 0); ctx.restore();                      // deep water
