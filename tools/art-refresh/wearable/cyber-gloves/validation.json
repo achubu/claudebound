@@ -1,0 +1,56 @@
+{
+  "source_commit": "8141c47c3c42689b4dd7aa01169efd983a2660dd",
+  "base_sha256": "a1317e9671b0da27e75edee3268cc6a6723ccc140c8b1bdac3f48ee7ea00ba2f",
+  "overlay_sha256": "a94dfecea6ea39cd0468b118572b1e6bb9e1fc3d4e206f1ce838f93bfe2984b3",
+  "coverage": [
+    [
+      419,
+      363,
+      380,
+      406,
+      402,
+      347,
+      360,
+      316,
+      317
+    ],
+    [
+      365,
+      381,
+      356,
+      224,
+      376,
+      378,
+      368,
+      222,
+      371
+    ],
+    [
+      197,
+      319,
+      202,
+      215,
+      333,
+      362,
+      334,
+      241,
+      219
+    ],
+    [
+      323,
+      181,
+      246,
+      257,
+      184,
+      261,
+      239,
+      276,
+      172
+    ]
+  ],
+  "outside_hand_mask_pixels": 0,
+  "silhouette_support_changed_pixels": 0,
+  "base_cyan_tech_overlap_pixels": 0,
+  "validator_dry_run": "PASS",
+  "live_test": "not performed; Claude owns integration"
+}
