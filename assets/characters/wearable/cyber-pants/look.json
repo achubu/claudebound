@@ -1,0 +1,9 @@
+{
+ "slot": "pants",
+ "items": [
+  "galeweavePants",
+  "mossweavePants"
+ ],
+ "clear": false,
+ "v": 1
+}

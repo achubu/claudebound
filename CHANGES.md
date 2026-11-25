@@ -3496,6 +3496,82 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 559: a beltless base sheet for all future gear
+
+(Owner: "Can we create a new sprite sheet without the tool belt to use for future gear".) `assets/characters/protagonist-walk9-base.png`
+is the hero without his brown tool belt and pouch (Codex's cleaned sheet from the belt handoff: same grid, outline identical).
+Every look is now fitted on it and drawn on it. The brown belt became the belt slot's **default look**
+(`assets/characters/wearable/default-belt/patch.png`: the pixels the base changed, opaque, laid source-atop like a clear patch),
+drawn whenever no belt with a look is worn; base + it is the original hero exactly (0 difference; `tools/wearable_add.py --check`
+proves it each run). So:
+- with nothing worn the game shows the original sheet as before; with gear on, the outfit is built on the base: slot by slot,
+  the worn look's overlay or the slot's default (`assets/hero-wear.js`, `HERO_WEAR_BASE`, `HERO_WEAR_DEFAULTS` in the generated
+  `assets/hero-wear-looks.js`);
+- the cyber belt no longer needs a clear patch (removed); a belt never will again;
+- the tool fits and proofs against the base, and a `--clean` sheet is the base with one slot's clothing painted out.
+Checked: in the browser, boots alone give the original hero (brown belt and all) with the boots over it (`tests/hero-wear.test.cjs`).
+The guide (`tools/art-refresh/wearable-gear.md`) and `CHATGPT-NOTES.md` say to fit on the base; the pants' tan hip patch goes
+away when ChatGPT re-fits the pants on it.
+
+**Codex's wearable-process review (PR #323, `tools/art-refresh/reviews/wearable-process-2026-11-25/`), taken up:**
+- `assets/hero-wear.js`: one owner per composed sheet's URL (revoked when neither cache nor screen holds it; Codex's probe left
+  five live URLs for four cache entries), LRU cache, one build per outfit, no encoding of a build no longer wanted, bounded
+  retries (2s, 8s, 30s; at once on a gear change or coming back online) for a picture that won't load, a picture of the wrong
+  size or no blob (a failed load used to be remembered for the whole session, a null blob stalled the outfit).
+- `tools/wearable_add.py`: `--check` read-only (it rewrote the registry); empty or repeated item ids refused; any overlay pixel
+  more than 2px outside the hero refused (a faint full-sheet matte and far fragments passed); 40 solid item pixels per frame (one
+  alpha-1 pixel per frame passed); pure key-colour pixels refused; a diagnostic picture of rejected pixels; `--dry-run`.
+- Tests: `tests/hero-wear-renderer.test.cjs` (Codex's probe turned round: ownership, de-duplication, retries, sizes),
+  `tests/wearable-tool.test.cjs` (each new rule on a real look with one fault; `--check` writes nothing); `REQUIRE_BROWSER=1`
+  makes `tests/hero-wear.test.cjs` fail without a server or a reload check.
+- Left for Codex to lead (CHATGPT-NOTES.md): calibrated per-slot regions and protected masks (Aetherlink, face, hands), so a
+  stray pixel inside an otherwise good item can be refused; a release manifest; measuring decode time on phones.
+
+## Round 558: cyber pants and chest armor; the hero never blinks out
+
+- **Two more looks** from ChatGPT through the Round 555 process: `cyber-pants` (slot pants; Galeweave and Mossweave Pants; PR
+  #321) and `cyber-chest` (slot shirt, sleeveless armor over the navy shirt; Sunwoven and Timeworn Shirts; PR #322). The tool
+  took both first time (36 frames, 0 px past the outline, no clear patch). With the boots and belt, the hero can now wear a whole
+  outfit: pants, boots, chest, belt, drawn in that order. Checked by eye at 256px and at game size in all four directions.
+- **One flaw left for ChatGPT** (`CHATGPT-NOTES.md`): with the pants and the belt worn together, a tan patch shows at the hip in
+  the side views: the belt's clear patch repaints the old pouch as tan trouser cloth, and that area lies just outside the leg the
+  pants follow. Hard to see at game size; the pants overlay should cover the belt's clear patch too.
+- **Bug fixed:** changing gear left the hero blank for a moment: the new sheet was put in place while the browser was still
+  decoding it. The new sheet is now decoded first; until then the look on screen stays (`assets/hero-wear.js`).
+- Gloves (`cyber-gloves`) are still to come: ChatGPT hit its image-generation limit; its preparation notes are in
+  `tools/art-refresh/wearable/cyber-gloves-preparation/`.
+
+## Round 557: the cyber boots on the hero
+
+ChatGPT's boots (PR #319, `tools/art-refresh/wearable/cyber-boots/`), the first look delivered through the Round 555 process:
+`python3 tools/wearable_add.py --look cyber-boots --slot boots --items boots,cloudstepBoots --overlay ...` took it first time
+(36 frames, 0 px past the hero's outline, no clear patch: the overlay covers the brown shoes). Worn with the belt, the two stack
+(boots, then belt). Checked by eye at 256px and 84px in all four directions: the brown shoes are covered in every frame. One flaw
+is left for ChatGPT to redraw (`CHATGPT-NOTES.md`): in the right-facing row, frames 3 and 7, a hard-edged rectangular patch at
+the back boot's ankle, hard to see at game size. `tests/hero-wear.test.cjs` checks that boots and belt stack in slot order.
+
+## Round 556: the Sky Isles' ground, more sky, edges on the islands
+
+(Owner: "sky isles still looks pretty bad, the ground textures clash with the city objects and buildings and we still need more
+cloud and sky than ground tiles"; "think we need edges where the ground meets open sky".)
+
+- **Ground** (owner: "use this tile for the ground in sky isles ... don't use the other texture tiles for ground"): one ground,
+  the riveted lavender deck, for islands, squares and yards alike (`sidewalk/deck` is a copy, as the generator fills the
+  ground from that slot); the glass walkway for roads, the cloud sea for the sky. The dark grating ring, the cargo plates,
+  mosaic, chequered glass and stone pavers are no longer used.
+- **More sky:** one block in sixteen is an island (`isleShare` 0.22 to 0.06); a room's guaranteed island for its objects is
+  kept. Lots on islands no longer count as docks (`noDocks`: every lot near the sky became a cargo yard 30% of the time).
+- **Floating buildings:** in the sky blocks, islets 10-12 cells across for one building each, a cell of sky from every road
+  (scenery, not walked on). Building pictures may be drawn at 0.6 of their size in the Sky Isles (`buildFit`; 0.75 elsewhere).
+- **Edges** (owner: "think we need edges where the ground meets open sky"; then "fix the edge algo, its no good"; "the edge
+  you used is great"): the glass railing on every seam between ground and open sky (`isleEdge`), on the 25px grid by the 3x3
+  bitmask (`cityGridKerb`), drawn after the streets like the sea wall, street kerbs stopping short of it. The first try zigzagged
+  in 50px steps, gave thin slivers of deck their own railing and ran a railing beside roads that have their own rails. Now:
+  the islands' outlines are smoothed on their 50px cells before the bridges are checked (a majority filter, two passes:
+  notches fill, one-cell spurs and slivers go; ground under a dry road always stays, a bridge always stays a bridge); no edge
+  along a road; the strip lies wholly on the island (moved in by half its width).
+- Elaris inherits the Sky Isles' theme, so it sets its own values back (`noDocks: false`, `buildFit: null`, `isleEdge: null`).
+
 ## Round 555: a process for wearable gear
 
 (Owner: "lets make sure that we document and create a process for adding new gear to the character, we don't want this to be

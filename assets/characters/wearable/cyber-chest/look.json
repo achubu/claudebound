@@ -1,0 +1,9 @@
+{
+ "slot": "shirt",
+ "items": [
+  "sunwovenShirt",
+  "timewornShirt"
+ ],
+ "clear": false,
+ "v": 1
+}

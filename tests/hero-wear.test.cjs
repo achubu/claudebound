@@ -23,6 +23,7 @@ const r = JSON.parse(run(`(() => { newGame(); ensureGear(); const out = {};
   equipGear('belt', 'scarabBelt'); out.worn = heroWearLooks().join('+');
   const before = gearStat('pierce'); equipGear('belt', 'stormglassBelt'); out.swapped = heroWearLooks().join('+'); out.pierce = [before, gearStat('pierce')];
   equipGear('belt', null); out.off = heroWearLooks().join('+');
+  state.relics.push('cloudstepBoots'); equipGear('belt', 'scarabBelt'); equipGear('boots', 'cloudstepBoots'); out.stacked = heroWearLooks().join('+'); equipGear('boots', null); /* (Round 557: boots and belt stack, boots first) */
   equipGear('belt', 'scarabBelt'); collectRelic(['hourglassBelt']); out.foundWhileWorn = [state.gear.belt, heroWearLooks().join('+')];
   return JSON.stringify(out); })()`));
 for (const f of r.files) assert(fs.existsSync(path.join(ROOT, f)), f + ' is on disk');
@@ -34,13 +35,14 @@ assert.strictEqual(r.worn, 'cyber-belt', 'a worn belt shows');
 assert.strictEqual(r.swapped, 'cyber-belt', 'and after a swap');
 assert.deepStrictEqual(r.pierce, [1, 2], 'belt stats are as before');
 assert.strictEqual(r.off, '', 'taking it off goes back to the plain hero');
+assert.strictEqual(r.stacked, 'cyber-boots+cyber-belt', 'boots and belt worn together stack, in slot order');
 assert.deepStrictEqual(r.foundWhileWorn, ['scarabBelt', 'cyber-belt'], 'finding a belt while one is worn keeps the worn one');
 console.log('hero-wear (harness) ok');
 
 // the browser check
 (async () => {
   const ok = await new Promise(res => require('http').get('http://localhost:8123/index.html', x => { x.resume(); res(x.statusCode === 200); }).on('error', () => res(false)));
-  if (!ok) { console.log('hero-wear: no server on :8123, browser check skipped'); return; }
+  if (!ok) { if (process.env.REQUIRE_BROWSER) { console.error('hero-wear: REQUIRE_BROWSER is set and there is no server on :8123'); process.exit(1); } console.log('hero-wear: no server on :8123, browser check skipped (REQUIRE_BROWSER=1 makes this a failure)'); return; }
   const { chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright');
   const browser = await chromium.launch(), ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } }), page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://localhost:8123/index.html'); await page.waitForTimeout(800); await page.click('#newBtn'); await page.waitForTimeout(300);
@@ -54,12 +56,20 @@ console.log('hero-wear (harness) ok');
     const px = (img) => { const c = document.createElement('canvas'); c.width = 2304; c.height = 1024; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return g.getImageData(0, 0, 2304, 1024).data; }, A = px(a), B = px(b); let n = 0, alpha = 0; for (let i = 0; i < A.length; i += 4) { if (A[i] !== B[i] || A[i + 1] !== B[i + 1] || A[i + 2] !== B[i + 2]) n++; if (A[i + 3] < 128 && B[i + 3] - A[i + 3] > 60) alpha++; } return { n, alpha }; });
   assert(differs.n > 10000, 'the belted sheet differs from the plain one at the waist (' + differs.n + ' px)');
   assert(differs.alpha < 1500, 'and keeps the hero\'s outline: the belt reaches past it in only ' + differs.alpha + ' px (its soft edge over the waist\'s antialiasing is expected)');
+  // (Round 559) the base is the beltless hero; with no belt worn the brown belt is drawn back: boots alone = the original hero
+  // with the boots over it, to the pixel (rounding aside)
+  await page.evaluate(() => { equipGear('belt', null); state.relics.push('cloudstepBoots'); equipGear('boots', 'cloudstepBoots'); }); await settle(); await page.waitForTimeout(300);
+  const exact = await page.evaluate(async () => { const load = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = s; }); const [a, o, b] = await Promise.all([load('assets/characters/protagonist-walk9.png'), load(HERO_WEAR_LOOKS['cyber-boots'].overlay), load(heroWearUrl)]);
+    const c = document.createElement('canvas'); c.width = 2304; c.height = 1024; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(o, 0, 0); const A = g.getImageData(0, 0, 2304, 1024).data;
+    g.clearRect(0, 0, 2304, 1024); g.drawImage(b, 0, 0); const B = g.getImageData(0, 0, 2304, 1024).data; let n = 0; for (let i = 0; i < A.length; i += 4) if (Math.abs(A[i] - B[i]) > 3 || Math.abs(A[i + 1] - B[i + 1]) > 3 || Math.abs(A[i + 2] - B[i + 2]) > 3 || Math.abs(A[i + 3] - B[i + 3]) > 3) n++; return n; });
+  assert(exact < 50, 'boots alone: the original hero, brown belt and all, with the boots over it (' + exact + ' px differ)');
+  await page.evaluate(() => { equipGear('boots', null); equipGear('belt', 'scarabBelt'); }); await settle();
   await page.evaluate(() => { state.region = 'elaris'; configureRegion('elaris'); state.room = regionStartRoom(); state.pos = { x: 400, y: 250 }; renderWorld(); }); assert(/^url\("blob:/.test(await bg()), 'kept after a world change');
   await page.evaluate(() => save()); await page.reload(); await page.waitForTimeout(1200);
   await page.evaluate(() => { const b = document.getElementById('resumeBtn'); if (b) b.click(); });
   await page.waitForTimeout(800); await page.evaluate(() => { closeMenu(); for (const id of ['menuOverlay', 'startOverlay', 'battleOverlay']) document.getElementById(id).classList.add('hidden'); if (state) renderWorld(); });
   const afterLoad = await page.evaluate(() => state && state.gear && state.gear.belt); if (afterLoad) { await settle(); assert(/^url\("blob:/.test(await bg()), 'kept after a save and reload'); }
-  else console.log('  (no continue button found: reload check skipped)');
+  else { assert(!process.env.REQUIRE_BROWSER, 'the reload check must run when REQUIRE_BROWSER is set'); console.log('  (no continue button found: reload check skipped)'); }
   await page.evaluate(() => { equipGear('belt', null); }); assert(/protagonist-walk9\.png/.test(await bg()), 'back to the plain hero on unequip');
   // missing art falls back to the plain hero
   

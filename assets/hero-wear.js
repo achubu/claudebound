@@ -7,11 +7,23 @@
 // must go, a clear patch (only the pixels it repaints, opaque). The hero's sheet is drawn, then every worn look's clear patch
 // source-atop (its colours, the hero's own outline), then every overlay, in slot order (HERO_WEAR_SLOTS: pants, boots,
 // shirt, belt, gloves). So looks for different slots stack, with no cleaned hero for each combination.
-const HERO_WEAR_VERSION = '555';
+const HERO_WEAR_VERSION = '559';
 const HERO_BASE_SHEET = 'assets/characters/protagonist-walk9.png?v=round251';
 const HERO_WEAR_LOOKS = typeof HERO_WEAR_DATA === 'object' ? HERO_WEAR_DATA : {};
 const HERO_WEAR_ART = {}; for (const [look, d] of Object.entries(HERO_WEAR_LOOKS)) for (const id of d.items) (HERO_WEAR_ART[d.slot] = HERO_WEAR_ART[d.slot] || {})[id] = look;
-let heroWearUrl = null, heroWearKey = '', heroWearToken = 0; const heroWearCache = new Map(), heroWearFailed = new Set();
+// Round 559 (Codex's review, tools/art-refresh/reviews/wearable-process-2026-11-25/): each composed sheet's blob URL has one
+// owner (the cache or the screen) and is revoked when neither holds it; the cache is LRU (4); one build at a time per outfit;
+// a build no longer wanted stops before it encodes; a failed build (a picture that won't load, a picture of the wrong size, no
+// blob) is retried after 2s, 8s and 30s, and at once on the next gear change or when the browser comes back online.
+let heroWearUrl = null, heroWearKey = '', heroWearToken = 0;
+const heroWearCache = new Map(), heroWearPending = new Set(), heroWearFailed = new Map(), HERO_WEAR_RETRY_MS = [2000, 8000, 30000];
+function heroWearRelease(url) { if (url && url !== heroWearUrl && ![...heroWearCache.values()].includes(url) && typeof URL !== 'undefined' && URL.revokeObjectURL) URL.revokeObjectURL(url); }
+function heroWearShow(url) { const old = heroWearUrl; heroWearUrl = url; heroWearPaint(); if (old && old !== url) heroWearRelease(old); }
+function heroWearStore(key, url) { const prev = heroWearCache.get(key); heroWearCache.delete(key); heroWearCache.set(key, url); if (prev && prev !== url) heroWearRelease(prev);
+  while (heroWearCache.size > 4) { const [k0, u0] = heroWearCache.entries().next().value; heroWearCache.delete(k0); heroWearRelease(u0); } }
+function heroWearRetryDue(key) { const f = heroWearFailed.get(key); return !f || (f.n <= HERO_WEAR_RETRY_MS.length && Date.now() - f.at >= HERO_WEAR_RETRY_MS[f.n - 1]); }
+function heroWearFail(key, why) { heroWearPending.delete(key); const f = heroWearFailed.get(key); heroWearFailed.set(key, { n: (f ? f.n : 0) + 1, at: Date.now(), why: String(why) });
+  if (typeof console !== 'undefined' && console.warn) console.warn('hero-wear: ' + key + ': ' + why); if (key === heroWearKey) heroWearShow(null); }
 // the looks the worn gear calls for, slot by slot
 function heroWearLooks() {
   if (typeof state === 'undefined' || !state || typeof ensureGear !== 'function') return [];
@@ -23,24 +35,40 @@ function heroWearPaint() { if (typeof document === 'undefined' || !document.quer
 // called whenever the world is drawn or gear changes: cheap when nothing changed
 function heroWearApply() {
   const looks = heroWearLooks(), key = looks.map(l => l + '.' + (HERO_WEAR_LOOKS[l].v || 1)).join('+') + '@' + HERO_WEAR_VERSION;
-  if (!looks.length || heroWearFailed.has(key)) { heroWearKey = key; heroWearUrl = null; heroWearToken++; return heroWearPaint(); }
-  if (key === heroWearKey) return heroWearPaint();
-  heroWearKey = key; const tok = ++heroWearToken;
-  if (heroWearCache.has(key)) { heroWearUrl = heroWearCache.get(key); return heroWearPaint(); }
-  heroWearUrl = null; heroWearPaint(); // (the plain hero until the new sheet is ready, never a blank one)
-  if (typeof document === 'undefined' || !document.createElement || typeof Image === 'undefined') return;
+  if (!looks.length) { heroWearKey = key; heroWearToken++; return heroWearShow(null); }
+  const cached = heroWearCache.get(key);
+  if (cached) { heroWearKey = key; heroWearCache.delete(key); heroWearCache.set(key, cached); return heroWearShow(cached); } // (LRU: a hit moves to the back)
+  if (key === heroWearKey && (heroWearUrl || heroWearPending.has(key) || !heroWearRetryDue(key))) return heroWearPaint(); // (on screen, even if since pushed out of the cache: no rebuild)
+  if (key !== heroWearKey) { heroWearKey = key; heroWearToken++; }
+  if (!heroWearRetryDue(key)) return heroWearShow(null);
+  // (the look on screen stays until the new sheet is ready and decoded: never a blank hero)
+  if (heroWearPending.has(key) || typeof document === 'undefined' || !document.createElement || typeof Image === 'undefined') return;
+  heroWearPending.add(key);
   const ver = l => '?v=' + HERO_WEAR_VERSION + '.' + (HERO_WEAR_LOOKS[l].v || 1); // (a look's art version: tools/wearable_add.py raises it on every update)
-  const clears = looks.filter(l => HERO_WEAR_LOOKS[l].clear).map(l => HERO_WEAR_LOOKS[l].clear + ver(l)), overlays = looks.map(l => HERO_WEAR_LOOKS[l].overlay + ver(l));
-  const srcs = [HERO_BASE_SHEET, ...clears, ...overlays];
-  Promise.all(srcs.map(src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; })))
-    .then(imgs => { const c = document.createElement('canvas'); c.width = imgs[0].naturalWidth; c.height = imgs[0].naturalHeight; const g = c.getContext('2d');
+  const clears = looks.filter(l => HERO_WEAR_LOOKS[l].clear).map(l => HERO_WEAR_LOOKS[l].clear + ver(l));
+  // Round 559: drawn on the base (the hero without his brown tool belt); slot by slot the worn look's overlay, or the slot's
+  // default look (the brown belt) where nothing with a look is worn there, laid like a clear patch so base + it is the hero exactly
+  const worn = new Set(looks.map(l => HERO_WEAR_LOOKS[l].slot)), defs = typeof HERO_WEAR_DEFAULTS === 'object' ? HERO_WEAR_DEFAULTS : {}, order = typeof HERO_WEAR_SLOTS !== 'undefined' ? HERO_WEAR_SLOTS : [];
+  const layers = []; for (const sl of order) { const l = looks.find(x => HERO_WEAR_LOOKS[x].slot === sl); if (l) layers.push({ src: HERO_WEAR_LOOKS[l].overlay + ver(l), op: 'source-over' }); else if (defs[sl] && !worn.has(sl)) layers.push({ src: defs[sl] + '?v=' + HERO_WEAR_VERSION, op: 'source-atop' }); }
+  const base = typeof HERO_WEAR_BASE === 'string' ? HERO_WEAR_BASE + '?v=' + HERO_WEAR_VERSION : HERO_BASE_SHEET, srcs = [base, ...clears, ...layers.map(x => x.src)];
+  Promise.all(srcs.map(src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('failed to load ' + src)); i.src = src; })))
+    .then(imgs => {
+      const W = imgs[0].naturalWidth, H = imgs[0].naturalHeight, odd = srcs.filter((s, i) => imgs[i].naturalWidth !== W || imgs[i].naturalHeight !== H || (W && (W !== 2304 || H !== 1024)));
+      if (odd.length) throw new Error('not on the hero\'s 2304 x 1024 grid: ' + odd.join(', ')); // (a misplaced picture would cache a misregistered outfit)
+      if (key !== heroWearKey) { heroWearPending.delete(key); return; } // (no longer wanted: not encoded)
+      const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
       g.drawImage(imgs[0], 0, 0); g.globalCompositeOperation = 'source-atop'; for (let i = 1; i <= clears.length; i++) g.drawImage(imgs[i], 0, 0); // (the clear patches: their colours inside the hero's own outline)
-      g.globalCompositeOperation = 'source-over'; for (let i = 1 + clears.length; i < imgs.length; i++) g.drawImage(imgs[i], 0, 0);
-      c.toBlob(b => { if (!b) return; const url = URL.createObjectURL(b);
-        while (heroWearCache.size >= 4) { const [k0, u0] = heroWearCache.entries().next().value; heroWearCache.delete(k0); if (u0 !== heroWearUrl) URL.revokeObjectURL(u0); }
-        heroWearCache.set(key, url); if (tok === heroWearToken) { heroWearUrl = url; heroWearPaint(); } }); })
-    .catch(() => { heroWearFailed.add(key); if (tok === heroWearToken) { heroWearUrl = null; heroWearPaint(); } }); // (a rapid change since: its own call answers)
+      layers.forEach((x, j) => { g.globalCompositeOperation = x.op; g.drawImage(imgs[1 + clears.length + j], 0, 0); }); g.globalCompositeOperation = 'source-over';
+      c.toBlob(b => { try {
+        if (!b) return heroWearFail(key, 'no image from the canvas');
+        heroWearPending.delete(key); heroWearFailed.delete(key); const url = URL.createObjectURL(b); heroWearStore(key, url);
+        // (Round 558: decoded before it is shown: swapping to a sheet still decoding left the hero blank for a moment)
+        const im = new Image(); im.src = url; const show = () => { if (key === heroWearKey && heroWearCache.get(key) === url) heroWearShow(url); };
+        (im.decode ? im.decode() : Promise.resolve()).then(show, show);
+      } catch (e) { heroWearFail(key, e && e.message || e); } }); })
+    .catch(e => heroWearFail(key, e && e.message || e));
 }
 if (typeof renderWorld === 'function') { const renderWorldBeforeWear = renderWorld; renderWorld = function () { const r = renderWorldBeforeWear.apply(this, arguments); heroWearApply(); return r; }; }
-if (typeof equipGear === 'function') { const equipGearBeforeWear = equipGear; equipGear = function () { const r = equipGearBeforeWear.apply(this, arguments); heroWearApply(); return r; }; }
+if (typeof equipGear === 'function') { const equipGearBeforeWear = equipGear; equipGear = function () { const r = equipGearBeforeWear.apply(this, arguments); heroWearFailed.clear(); heroWearApply(); return r; }; } // (a gear change retries a failed outfit at once)
+if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('online', () => { heroWearFailed.clear(); heroWearApply(); });
 // (finding gear needs no hook: collectRelic redraws the world, and the renderWorld hook above applies the look)

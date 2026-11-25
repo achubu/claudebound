@@ -9,12 +9,17 @@ one command → tests → merge.** No game code changes per item.
 - The hero is one sprite sheet, `assets/characters/protagonist-walk9.png`: **2304 x 1024 px, 4 rows x 9 columns of 256 x 256
   cells**. Rows from the top: **0 facing down (front), 1 facing left, 2 facing right, 3 facing up (back)**. Column 0 is
   standing; columns 1-8 are the walk.
+- **Round 559: the base for all gear is `assets/characters/protagonist-walk9-base.png`**: the same hero, same grid and outline,
+  **without his brown tool belt and pouch**. Fit every new look on this sheet. The brown belt is the belt slot's *default look*
+  (`assets/characters/wearable/default-belt/patch.png`): the game draws it whenever no belt with a look is worn, so with nothing
+  worn the hero is exactly the original sheet (the tool checks this, to the pixel).
 - A look has:
   - an **overlay**: the item alone, on that grid, everything else transparent;
   - optionally a **clear patch**: the pixels where the hero's old clothing is painted out (for the belt, the old brown belt and
     pouch), opaque, everything else transparent. Made by the tool from a cleaned hero; nobody draws it by hand.
-- When gear changes, `assets/hero-wear.js` draws: the hero's sheet → every worn look's clear patch (inside the hero's own
-  outline) → every worn look's overlay, in slot order **pants, boots, shirt, belt, gloves** (later on top). The result is cached
+- When gear changes, `assets/hero-wear.js` draws: the base (the beltless hero) → every worn look's clear patch (inside the hero's
+  own outline) → slot by slot, in the order **pants, boots, shirt, belt, gloves** (later on top), the worn look's overlay, or
+  the slot's default look (the brown belt) where nothing with a look is worn there. The result is cached
   and replaces the hero's sheet; the animation, frames and timing are untouched. Without a look, or if a picture fails to load,
   the plain hero shows.
 - Because each look only carries its own pixels, looks for different slots (belt and boots) **stack**: there is never a
@@ -29,7 +34,8 @@ request. Don't change game code or anything under `assets/`; don't take a round 
 
 1. **`overlay.png`**: PNG, RGBA, **exactly 2304 x 1024**, the hero's grid as above.
    - Each cell holds only that frame's item, at the exact pixel position on the hero in the same cell. Check by laying it over
-     `protagonist-walk9.png` at 100% and stepping through all 36 cells: it sits on the body and moves with it.
+     **`protagonist-walk9-base.png`** (the beltless hero) at 100% and stepping through all 36 cells: it sits on the body and
+     moves with it. Where the old pouch was, the base has plain trouser cloth: pants cover it like the rest of the leg.
    - **Every one of the 36 cells has the item** in it (a frame where it is hidden still shows what little is visible).
    - Everything that isn't the item is **fully transparent**: no background, shadow, glow or green/magenta/red fringe.
    - **Inside the hero's outline**: the item may not stick out past his silhouette except along its soft antialiased edge (the
@@ -38,11 +44,11 @@ request. Don't change game code or anything under `assets/`; don't take a round 
    - **The Aetherlink on his anatomical LEFT arm is never covered or changed** (gloves included).
    - Each direction is drawn for itself: never flip left to make right.
    - Don't move, crop, recentre or scale anything inside a cell; don't change the hero.
-2. **`cleaned.png`** (only if the item must hide clothing he already wears, e.g. new boots over his brown boots, a new belt over
-   the brown belt): the **original** `protagonist-walk9.png` with **only that slot's old clothing** painted out (filled with what
-   would be under it), same size and grid.
+2. **`cleaned.png`** (only if the item must hide clothing he already wears and can't cover it, e.g. slim shoes over his chunky
+   brown boots): the **base** `protagonist-walk9-base.png` with **only that slot's old clothing** painted out (filled with what
+   would be under it), same size and grid. (No belt ever needs one now: the base has no belt.)
    - **Its alpha must be identical to the original** (the outline doesn't move): the tool refuses it otherwise.
-   - Paint out **only this slot's area**, starting from the original sheet each time, never from another look's cleaned sheet
+   - Paint out **only this slot's area**, starting from the base sheet each time, never from another look's cleaned sheet
      (boots: feet and lower shins; pants: legs; shirt: torso and upper arms; belt: waist and pouch; gloves: the hands, never the
      left forearm's Aetherlink).
    - Not needed when the overlay fully covers the old clothing in all 36 frames.
@@ -50,7 +56,9 @@ request. Don't change game code or anything under `assets/`; don't take a round 
    `gloves`), and the gear items that show it, by their ids in `assets/gear.js` (e.g. `boots, cloudstepBoots` for the Briarstep and Cloudstep Boots; several
    items may share one look). Say whether `cleaned.png` is included.
 
-Proof pictures are welcome but optional: the tool makes them.
+Proof pictures are welcome but optional: the tool makes them. **Before handing over, run the full checks yourself without
+writing anything:** `python3 tools/wearable_add.py --look <name> --slot <slot> --items <ids> --overlay <png> [--clean <png>]
+--proof <dir> --dry-run` (Round 559). A refusal lists every problem and saves a picture of the rejected pixels in red.
 
 ## What Claude does
 
@@ -72,11 +80,24 @@ Then:
    `tools/wearable_add.py --check` on every look, and in the browser equips, swaps, unequips, changes world, saves and reloads;
 3. log the round in `CHANGES.md`, bump `?v=` on `hero-wear-looks.js` in `index.html`, merge.
 
-Other commands: `python3 tools/wearable_add.py --check` (validate all looks; the test runs it), `--rebuild` (regenerate the
-registry only). To remove a look, delete its folder and run `--rebuild`.
+Other commands: `python3 tools/wearable_add.py --check` (validate all looks, read-only; the test runs it), `--rebuild`
+(regenerate the registry only), `--dry-run` (every check and the proofs for one look, nothing written). To remove a look, delete its folder and run `--rebuild`.
+
+## Things to check where looks meet
+
+- **Fit on the base, check with the defaults.** Fit on the beltless base; then check the look worn alone (the brown belt is
+  drawn over it) and with every other look. Pants fitted on the old sheet left the old pouch's area (now trouser cloth on the
+  base) tan beside the cyber belt: pants fitted on the base cover it.
+- **Straight edges.** The tool can't see a straight horizontal or vertical seam inside a cell (a pasted box); look at every cell
+  at 256px.
 
 ## Looks so far
 
 | Look | Slot | Items | Clear patch | Round |
 |---|---|---|---|---|
-| `cyber-belt` | belt | scarabBelt, stormglassBelt, hourglassBelt | yes (old brown belt and pouch) | 554-555 |
+| (default) `default-belt` | belt | worn when no belt with a look is | the brown tool belt and pouch | 559 |
+| `cyber-belt` | belt | scarabBelt, stormglassBelt, hourglassBelt | no (since Round 559: the base has no belt) | 554-559 |
+| `cyber-boots` | boots | boots (Briarstep), cloudstepBoots | no (the overlay covers the brown shoes) | 557 |
+| `cyber-pants` | pants | galeweavePants, mossweavePants | no | 558 |
+| `cyber-chest` | shirt | sunwovenShirt, timewornShirt | no (armor over the shirt) | 558 |
+| `cyber-gloves` | gloves | ember, thornhideGloves, tempestGloves | | waiting on the art |

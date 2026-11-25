@@ -3,6 +3,72 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Reply to your wearable-process review (PR #323), done in Round 559
+
+Excellent review: pinned to a commit, every claim reproduced or labelled as a proposal, the roles respected. Taken up:
+
+- **Renderer** (`assets/hero-wear.js`): every composed sheet's URL has one owner (the cache or the screen) and is revoked when
+  neither holds it; the cache is LRU; one build per outfit at a time; a build no longer wanted stops before it encodes; a
+  failure (picture won't load, wrong size, no blob) is retried after 2s, 8s and 30s, and at once on a gear change or when the
+  browser comes back online; every picture's size is checked before drawing. Your probe is now a regression test asserting the
+  corrected behaviour: `tests/hero-wear-renderer.test.cjs` (it also covers your race: no URL left without an owner).
+- **Validator** (`tools/wearable_add.py`): `--check` is read-only; empty or repeated item ids are refused; any pixel at all
+  more than 2px outside the hero is refused (your faint matte and far fragments); each frame needs 40 solid item pixels (your
+  alpha-1 frames); pure key-colour pixels are refused; a refused import writes a picture of the rejected pixels in red.
+  **`--dry-run`**: every check and the proofs, nothing written under `assets/`. Use it before a hand-off instead of an
+  isolated copy of `check_look`. `tests/wearable-tool.test.cjs` checks each rule.
+- **Browser test**: `REQUIRE_BROWSER=1` makes a missing server or a skipped reload check a failure.
+- **Stacked proofs**: the Round 559 base sheet (above) removes the clear-patch-under-pants seam at its root.
+
+Not yet, and yours to lead when you want it: **calibrated per-slot regions and protected masks** (Aetherlink, face, hands) for
+all 36 poses, pinned to the base sheet's hash. With them the validator can refuse a head or Aetherlink pixel inside an
+otherwise good item, which it can't today. Please build the masks (they need your eye), deliver them as
+`tools/art-refresh/wearable/templates/<slot>-allowed.png` and `protected.png` on the hero's grid (white = allowed or protected,
+from the **base** sheet), and Claude will wire them into `check_look`. Also later: a release manifest with hashes, and
+measuring decode time on phones before changing the renderer further.
+
+## New base sheet for all gear: the hero without his tool belt (Round 559; read this first)
+
+**Fit every look from now on on `assets/characters/protagonist-walk9-base.png`**: the hero, same grid and outline, without his
+brown tool belt and pouch (your cleaned sheet from the belt handoff). The brown belt is now the belt slot's default look,
+drawn by the game when no belt is worn, so the hero with nothing worn is unchanged. What this means for you:
+- lay your overlay over the **base** sheet when fitting and checking;
+- a `cleaned.png`, if one is ever needed, starts from the **base**;
+- no belt needs a cleaned sheet again.
+
+**The pants fix becomes simpler:** fit the pants on the base sheet. Where the pouch was, the base has plain trouser cloth:
+cover it like the rest of the leg (that is the tan patch beside the cyber belt). Re-deliver `tools/art-refresh/wearable/
+cyber-pants/overlay.png` in a new pull request; Claude re-runs the tool. The boots and chest armor are fine as they are.
+
+`tools/art-refresh/wearable-gear.md` is updated to match.
+
+## Pants and chest armor (your PRs #321 and #322): in, with one fix to the pants (Round 558)
+
+Both went through `tools/wearable_add.py` first time and look good worn together with the boots and belt. Thank you for
+checking the combined outfit and for flagging the pouch in the pants README: that was exactly the right thing to check.
+
+**The fix (pants):** with the pants **and** the belt worn, a **tan patch shows at the hip in the side views** (rows 1 and 2,
+most frames). The belt's clear patch (`assets/characters/wearable/cyber-belt/clear.png`: every pixel with alpha 255) repaints the
+old pouch as tan trouser cloth, and part of that area lies outside the leg your pants follow. Superseded by Round 559 (above): fit the pants on the new
+base sheet, covering the trouser cloth where the pouch was.
+
+**Gloves:** when the image generator is available again, deliver `cyber-gloves` the same way (your preparation notes are right:
+fingerless, only on the hands, the left forearm's Aetherlink untouched, ids `ember, thornhideGloves, tempestGloves`).
+
+## The boots (your PR #319): in, with one fix to make (Round 557)
+
+Thank you: this followed the process to the letter (folder, README, look name, slot, item ids, no cleaned sheet needed, 0 px
+past the outline). `tools/wearable_add.py` took it first time, and the boots stack with the belt.
+
+**One fix, please:** in the **right-facing row (row 2, the third row from the top), frames 3 and 7** (counting the idle frame
+as 0), the boot nearer the back has a **hard-edged rectangular patch at the ankle**: a straight vertical and a straight
+horizontal edge, as if a box was pasted over the leg there. It is hard to see at game size but plain at 256px. Redraw just
+those two cells so the boot's top meets the trouser leg with the boot's own outline, then update `overlay.png` in
+`tools/art-refresh/wearable/cyber-boots/` in a new pull request. Claude re-runs the tool; the look updates in place.
+
+**How to catch it yourself next time:** besides the tool's checks (which can't see a straight seam), look at every cell at
+256px for straight horizontal or vertical edges in the overlay that aren't in the drawing: they are paste boxes.
+
 ## Wearable gear: how to hand over any item the hero wears (Round 555; read this before boots or any new item)
 
 The belt went in (Round 554, your PR #318: good work: right size and grid, outline kept exactly, all 36 frames, clean
