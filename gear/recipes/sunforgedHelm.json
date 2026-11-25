@@ -1,0 +1,17 @@
+{
+ "v": 1,
+ "slot": "helmet",
+ "name": "Sunforged Helm",
+ "texture": "plain",
+ "tint": "#9a7646",
+ "shade": 1,
+ "pixel": {
+  "dark": "#3a2a18",
+  "base": "#9a7646",
+  "light": "#d8b47a",
+  "accent": "#33d1c0"
+ },
+ "helmet": {
+  "style": "knight"
+ }
+}

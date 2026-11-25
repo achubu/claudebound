@@ -3496,6 +3496,66 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 574: the owner's carbon weave; a cutter for gear textures; one prompt for eight
+
+- **Carbon weave** (the owner's first texture, prompt 1): `assets/items/gear-textures/carbon-weave.webp`, in the Gear Studio's
+  texture list. The picture's left and right edges didn't meet (a visible seam), so it was cut, not used whole.
+- **`tools/gear_texture_cut.py`**: finds a texture's own repeat across and down (separately: generated weaves drift a little),
+  cross-fades the wrap so it has no seam, and saves the tile at a quarter size (one factor both ways; a generated texture's
+  detail is about four times the hero's pixels), with a 3x3 preview. It also cuts a sheet of textures on magenta gutters.
+- `assets/gear-recipe.js`: a picture texture keeps its proportions (tiles may be oblong), and a gear texture draws at its own
+  pixel size times the recipe's scale.
+- **One prompt for eight textures** (owner): `tools/art-refresh/gear-texture-prompts.md`, "All eight at once": a 4x2 sheet of
+  grey swatches on magenta gutters, which the cutter splits and makes seamless.
+- `tests/gear.test.cjs` counts the six helmets and the sixth slot (Round 571 left it expecting five).
+
+## Round 573: faceted armour, after the owner's line-art reference
+
+The owner sent a line-art sci-fi armoured hero ("Can you get to this level of detail"). The hero is drawn on 256px frames and
+shown at about 84px, so the reference's fine bevels can't survive; its design language can:
+
+- **Faceted armour** (`armor.style: 'faceted'` in `gearArmorRender`, `assets/gear-recipe.js`): angular six-sided pectoral plates
+  either side of a centre keel, a small diamond emblem, chevron belly segments split down the middle, an angular gorget, and
+  shoulder guards in three angular tiers. Side views get a profile chest plate and slanted segments. The rounded style stays
+  (`style: 'rounded'`, or no style).
+- **Highlight edges** (`gearPixelize`): a light line along the top of every panel, inside its black outline.
+- **Helmets**: a faceted shell (cut corners in place of the dome), brow and cheek-plate seams, and a V-shaped visor.
+- Gear Studio: the Designer has a "faceted" box (on by default); every armour set now uses the faceted style with three belly
+  segments.
+
+## Round 572: twice the detail on designed gear; prompts for texture fills
+
+(Owner: "now double the complexity of each design, and give me prompts for texture fill".) `assets/gear-recipe.js`:
+- **Armor:** the chest plate in panels (left and right pectoral plates and a lower plate, clipped from its shape), a diamond emblem
+  at its heart facing forward (in the accent colour in sets), a second lame below each pauldron, belly plates split down the middle.
+- **Helmets:** ear pods (both sides, one on the side views), a crest ridge over the dome (visor and mask), an antenna, and cheek vents
+  drawn as black lines (`ink`).
+- **Template pieces in the set style** split into panels per slot from each frame's box: pants (waistband, knee pads, cuffs, a fly
+  seam front and back), boots (cuff, toe cap), gloves (knuckle plate), belt (buckle), shirt (yoke).
+- **Every panel** gets rivets along its inner ring (`gearPixelize`, distance 5 from its edge).
+- `tools/art-refresh/gear-texture-prompts.md`: ten complete prompts for seamless neutral-grey textures the game tints (carbon weave,
+  hex mesh, brushed titanium, quilting, scale mail, chainmail, worn leather, circuit-etched plate, ribbed survival suit, bone).
+
+## Round 571: helmets
+
+(Owner: "add helmet slot but use the design for your outlines of our armor vector graphics, search Google images for
+inspiration"; "All bosses should drop loot, if we need more bosses add small chance for elite enemy to drop gear".)
+- **A sixth gear slot, `helmet`** (`assets/gear.js`), and one helmet per world, each giving max HP (3, 5, 7, 9, 11, 14): Neon
+  Visor, Sunforged Helm, Galecrest Helm, Thornward Helm, Stormcaller Helm, Chronoguard Helm. **Every boss now drops gear**: each
+  mini-boss its door piece (as before), each world's final boss its helmet (worn at once if the head is bare). Helmets are not
+  door pieces (`bossDrop`; `gearOf` leaves them out), so the boss door still opens with the two mini-boss pieces. **Elites** have a
+  6% chance (`GEAR_ELITE_DROP`) to drop their world's helmet early; never a door piece, so the mini-bosses stay the way to the boss.
+  Helmets give HP only, no battle rule (`tests/gear-rules` exempts them).
+- **Drawn as built helmets** (`gearHelmetRender`, `assets/gear-recipe.js`), after references for pixel-art sci-fi helmets
+  (tactical helmets with a glowing visor, full-face masks with eye lenses, closed knight helms): a shell over the head template
+  (a dome, straight sides, a jaw guard tapering to the collar) in the set style, and by style a glowing visor band, two eye
+  lenses and a grille, or a narrow eye slit with a crest; sides and back drawn for themselves. The helmet template
+  (`gear/templates/helmet-mask.png`) is his head above the shirt, column by column (his chin hangs into the collar's V). The
+  helmet is drawn last. Each helmet has a recipe (`gear/recipes/<id>.json`, a style and palette for its world) and a pixel-art
+  icon (`assets/items/gear/<id>.png`). Gear Studio: the helmet slot, a helmet style in the Designer, and a helmet in every set.
+- Tests: `tests/helmets.test.cjs` (one per world, never a door piece, the boss and the elite drops, icons and recipes); the slot
+  lists in `hero-wear` and `gear-page`.
+
 ## Round 570: pixel-art armour sets
 
 (Owner, with a sheet of pixel-art armour sets: "Can you build something more like this".) A recipe with `pixel: { dark, base,

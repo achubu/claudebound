@@ -1,0 +1,17 @@
+{
+ "v": 1,
+ "slot": "helmet",
+ "name": "Stormcaller Helm",
+ "texture": "plain",
+ "tint": "#3c4c68",
+ "shade": 1,
+ "pixel": {
+  "dark": "#1a2232",
+  "base": "#3c4c68",
+  "light": "#8494b4",
+  "accent": "#4ff0ff"
+ },
+ "helmet": {
+  "style": "visor"
+ }
+}

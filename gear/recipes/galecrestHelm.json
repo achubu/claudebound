@@ -1,0 +1,17 @@
+{
+ "v": 1,
+ "slot": "helmet",
+ "name": "Galecrest Helm",
+ "texture": "plain",
+ "tint": "#c8c4e0",
+ "shade": 1,
+ "pixel": {
+  "dark": "#3a3a52",
+  "base": "#c8c4e0",
+  "light": "#f4f2ff",
+  "accent": "#7fe8ff"
+ },
+ "helmet": {
+  "style": "visor"
+ }
+}

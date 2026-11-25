@@ -1,0 +1,17 @@
+{
+ "v": 1,
+ "slot": "helmet",
+ "name": "Neon Visor",
+ "texture": "plain",
+ "tint": "#24344c",
+ "shade": 1,
+ "pixel": {
+  "dark": "#0e1622",
+  "base": "#24344c",
+  "light": "#4a6a8a",
+  "accent": "#ff3ec8"
+ },
+ "helmet": {
+  "style": "visor"
+ }
+}

@@ -15,7 +15,7 @@ assert(/'pants': \(\(152, 119, 81\), \(118, 236\)\)/.test(tool) && /pants: \[\[1
   const dir = path.join(ROOT, 'gear/recipes');
   for (const f of fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')) : []) { const id = f.replace(/\.json$/, ''), r = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
     assert(items[id], f + ': ' + id + ' is a gear item'); assert.equal(r.slot, items[id], f + ': its slot is the item\'s');
-    assert.equal(JSON.stringify(ctx.P(r, ['pants', 'boots', 'shirt', 'belt', 'gloves'])), '[]', f + ' is a valid recipe'); } } // (compared as text: the array comes from another vm context)
+    assert.equal(JSON.stringify(ctx.P(r, ['pants', 'boots', 'shirt', 'belt', 'gloves', 'helmet'])), '[]', f + ' is a valid recipe'); } } // (compared as text: the array comes from another vm context)
 (async () => {
   const ok = await new Promise(res => require('http').get('http://localhost:8123/gear/', x => { x.resume(); res(x.statusCode === 200); }).on('error', () => res(false)));
   if (!ok) { if (process.env.REQUIRE_BROWSER) { console.error('gear-page: no server on :8123'); process.exit(1); } console.log('gear-page: static ok; no server on :8123, browser check skipped'); return; }
@@ -39,7 +39,7 @@ assert(/'pants': \(\(152, 119, 81\), \(118, 236\)\)/.test(tool) && /pants: \[\[1
   await page.setInputFiles('#overlayFile', path.join(ROOT, 'assets/characters/protagonist.jpeg').replace('.jpeg', '.jpeg')); await page.waitForTimeout(2000);
   c = await checks(); assert(c.some(x => x.startsWith('bad') && /must be 2304/.test(x)) || c.some(x => /could not be read/.test(x)), 'a wrong picture is refused: ' + c.join(' | '));
   // (Round 563) the fit templates: a guide per slot, with the slot's area and the Aetherlink
-  for (const f of ['shirt-mask', 'pants-mask', 'boots-mask', 'belt-mask', 'gloves-mask', 'protected']) assert(fs.existsSync(path.join(ROOT, 'gear/templates', f + '.png')), f + '.png exists');
+  for (const f of ['shirt-mask', 'pants-mask', 'boots-mask', 'belt-mask', 'gloves-mask', 'helmet-mask', 'protected']) assert(fs.existsSync(path.join(ROOT, 'gear/templates', f + '.png')), f + '.png exists');
   await page.selectOption('#tmplSlot', 'boots'); await page.waitForTimeout(2000);
   const tv = await page.evaluate(() => { const c = document.getElementById('tmplView'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let cyan = 0, red = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 2] > 180 && d[i + 1] > 150 && d[i] < 120) cyan++; if (d[i] > 230 && d[i + 1] < 80) red++; } return { cyan, red }; });
   assert(tv.cyan > 1000 && tv.red > 50, 'the boots guide shows its area and the Aetherlink ' + JSON.stringify(tv));
@@ -55,7 +55,7 @@ assert(/'pants': \(\(152, 119, 81\), \(118, 236\)\)/.test(tool) && /pants: \[\[1
   // (Round 570) a whole pixel-art set worn at once, with a save link per item
   await page.selectOption('#setPick', 'crimson'); await page.click('#setWear'); await page.waitForFunction(() => window.gearSetWorn === 'crimson', null, { timeout: 60000 });
   const st = await page.evaluate(() => ({ worn: SLOTS.filter(sl => choice[sl] === '*set*').length, links: document.querySelectorAll('#setSave a').length, items: Object.keys(gear).length }));
-  assert(st.worn === 5 && st.links === st.items, 'the set dresses every slot and offers a save per item ' + JSON.stringify(st));
+  assert(st.worn === 6 && st.links === st.items, 'the set dresses every slot and offers a save per item ' + JSON.stringify(st));
   assert.deepEqual(errors, [], 'no page errors');
   await browser.close(); console.log('gear-page ok');
 })().catch(e => { console.error(e); process.exit(1); });

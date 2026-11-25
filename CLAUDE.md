@@ -7,7 +7,7 @@ gallery; `arena.html` is a standalone prototype and is left untouched.
 **`CODEX-NOTES.md`** records Codex's generation review and recommendations for Claude; check its pinned baseline before acting.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 570) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 574) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -222,7 +222,8 @@ change set.
   - Pockets are tracked; reachability is checked.
   - `organicItemSpot()` places items beside the paths.
 - **Gear** (Round 176, `assets/gear.js`): two pieces per world, one in each mini-boss room;
-  both open the final boss room (`requires: 'gate:<world>'`). Worn in 5 slots via the Gear screen.
+  both open the final boss room (`requires: 'gate:<world>'`). Worn in 6 slots via the Gear screen (Round 571: a helmet per
+  world from its final boss, `bossDrop`, or a 6% elite drop; never a door piece).
 - **Interactables** (chests, relics, POIs, merchant, Nexus Waypoints) sit just
   off the walkable path, 12–28px from reachable street, clear of the HUD/minimap corners
   (`screenCovered`) and of patrols. In Solaris and the Sky Isles, where off the path is all buildings,
