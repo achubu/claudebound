@@ -29,4 +29,15 @@ const reg = path.join(ROOT, 'assets/hero-wear-looks.js'), before = fs.readFileSy
 try { fs.writeFileSync(reg, before + '// stale\n'); const c = spawnSync('python3', ['tools/wearable_add.py', '--check'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(c.status, 1, 'a stale registry fails the check'); assert.equal(fs.readFileSync(reg, 'utf8'), before + '// stale\n', 'and --check leaves it as it was');
 } finally { fs.writeFileSync(reg, before); }
+// (Round 562) --from reads a hand-off folder's manifest.json; --review writes the review sheet and walk animations
+{ const os = require('node:os'), dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wear-')), out = fs.mkdtempSync(path.join(os.tmpdir(), 'rev-'));
+  fs.copyFileSync(path.join(ROOT, 'assets/characters/wearable/cyber-gloves/overlay.png'), path.join(dir, 'overlay.png'));
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ look: 'cyber-gloves', slot: 'gloves', items: ['ember', 'thornhideGloves', 'tempestGloves'], cleaned: false }));
+  let c = spawnSync('python3', ['tools/wearable_add.py', '--from', dir, '--dry-run', '--review', out], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(c.status, 0, c.stdout + c.stderr); assert(fs.existsSync(path.join(out, 'cyber-gloves-review.png')) && fs.existsSync(path.join(out, 'cyber-gloves-walk-right.gif')), 'review sheet and walks written');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ look: 'cyber-gloves', slot: 'gloves', items: 'ember', cleaned: false }));
+  c = spawnSync('python3', ['tools/wearable_add.py', '--from', dir, '--dry-run'], { cwd: ROOT, encoding: 'utf8' }); assert.notEqual(c.status, 0, 'items must be a list');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ look: 'cyber-gloves', slot: 'gloves', items: ['ember'], cleaned: true }));
+  c = spawnSync('python3', ['tools/wearable_add.py', '--from', dir, '--dry-run'], { cwd: ROOT, encoding: 'utf8' }); assert.notEqual(c.status, 0, 'a manifest promising cleaned.png that is not there is refused');
+  fs.rmSync(dir, { recursive: true }); fs.rmSync(out, { recursive: true }); }
 console.log('wearable-tool ok');

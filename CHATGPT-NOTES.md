@@ -3,6 +3,16 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## The Gear Studio: check your gear there before handing it over (Round 562)
+
+**aethercede.com/gear** draws the hero exactly as the game does and runs the same checks as `tools/wearable_add.py`. Drop in
+your overlay (and cleaned sheet), pick the slot and gear items, and it shows: every check; a review sheet of all 36 frames (as he
+is · with your look · the whole outfit with old clothing that should be hidden in red); the walk at game size; and your piece
+worn with every other look. When it passes, **download `manifest.json` there** and put it in your hand-off folder beside
+`overlay.png` (Claude's tool reads the name, slot and items from it). Go through the **fit checklist** in
+`tools/art-refresh/wearable-gear.md` on the review sheet: shoulders, nothing red, no paste boxes, the walk. Those are the three
+problems found so far (boots, pants, chest armor), and all three show plainly on the review sheet.
+
 ## Chest armor: refit the shoulders (owner, Nov 25; Round 561)
 
 The owner: the armor is "not fitting around the shoulders". At 256px, `cyber-chest` (overlay over the base sheet):

@@ -4,6 +4,33 @@ When the hero wears a piece of gear that has a **look**, the map shows it on him
 sprite-sheet grid, plus a line saying which gear items show it. Adding one is: **Codex delivers the two pictures → Claude runs
 one command → tests → merge.** No game code changes per item.
 
+## In short (Round 562)
+
+1. **Codex** fits the item on `assets/characters/protagonist-walk9-base.png`, checks it in the **Gear Studio**
+   (**aethercede.com/gear**, `gear/index.html`: drop in the overlay, pick the slot and items, see every check, the review sheet and
+   the walk, try it with the rest of the outfit), downloads `manifest.json` there, and opens a pull request with
+   `tools/art-refresh/wearable/<look>/{overlay.png, manifest.json, README.md}` (and `cleaned.png` if any).
+2. **Claude** runs one command and looks at the review sheet and walks:
+   `python3 tools/wearable_add.py --from tools/art-refresh/wearable/<look> --review /tmp/<look>-review`
+   then `node tests/hero-wear.test.cjs` with the server running, logs the round and merges.
+
+`manifest.json` is `{"look": "cyber-boots", "slot": "boots", "items": ["boots", "cloudstepBoots"], "cleaned": false}`: the tool
+reads the name, slot and items from it, so nothing is copied by hand.
+
+## Fit checklist (look at the review sheet for each)
+
+The tool can't judge fit; these are what went wrong before, and what to look for in every frame of the review sheet:
+- **Shoulders** (shirts, vests, armor): the piece wraps over the top of each shoulder to the seam; no shirt shoulder showing
+  beside it facing down or up; in the side views the shoulder piece sits on the shoulder and moves with it, with no straight cut
+  edge down its front (the chest armor, Round 561).
+- **Covers what it replaces:** with the whole outfit on, nothing red on the review sheet's last row (the old khaki trousers and
+  brown shoes; the tan hip beside the pouch's old place, Round 558).
+- **No paste boxes:** no straight horizontal or vertical edge where the item meets the body that isn't in the drawing (the
+  right-facing boots, Round 557).
+- **Stacks:** the last row shows it with every other look; look where they meet (waist, ankles, wrists).
+- **Walks:** the four walk animations (game size): nothing slides, flickers or jumps between frames.
+- **The Aetherlink** on the left forearm is never covered or changed.
+
 ## How it works in the game
 
 - The hero is one sprite sheet, `assets/characters/protagonist-walk9.png`: **2304 x 1024 px, 4 rows x 9 columns of 256 x 256
