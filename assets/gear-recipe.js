@@ -103,6 +103,23 @@ function gearArmorRender(recipe, imgs) {
     // Round 573 (owner, with a line-art armoured hero: "Can you get to this level of detail"): the faceted style: angular
     // pectoral plates either side of a keel, chevron belly segments split down the middle, an angular gorget, shoulder guards in
     // three angular tiers. Side views: a profile chest plate and slanted segments.
+    // Round 575 (owner: "Shoulder pads need to be bigger to cover the shoulders entirely"): each pad is sized to its sleeve: from a
+    // little inside the torso's edge to past the sleeve's outer edge, and from the top of the shoulder to below the sleeve's hem.
+    // Side views: from the chest's middle to past the back at the shoulder line. pads: [x of the inner edge, outer edge, top, bottom, sign].
+    const ps = A.pauldrons == null ? 1 : +A.pauldrons, pads = [];
+    if (ps > 0) { const run = (x, y, d) => { while (y > 2 && y < 200 && inMask(x0 + Math.round(x), y0 + y + d)) y += d; return y; };
+      if (side) { const fw = r === 1 ? -1 : 1, back = fw > 0 ? sl : sr, hh = (Hh * .13 + 3) * Math.max(.6, ps); pads.push([cx + fw * w * .22, back - fw * 11, sy - hh * 1.3, sy + hh * 1.6, -fw]); } // (side: from just before the chest's middle to past the back)
+      else for (const [sg, e, t2] of [[-1, sl, tl], [1, sr, tr]]) { const sleeve = Math.abs(t2 - e) > 5, xs = sleeve ? (e + t2) / 2 : t2 - sg * 3;
+        const yt = run(xs, Math.round(sy), -1), yb = sleeve ? Math.min(top + Hh * .62, run(xs, Math.round(sy), 1)) : sy + Hh * .14;
+        const ext = (Math.max(6, Math.abs(t2 - e)) + 8) * Math.max(.6, ps), dn = (yb - yt) * Math.max(.6, ps);
+        pads.push([t2 - sg * 7, t2 - sg * 7 + sg * (ext * 1.35 + 8), yt - 9, yt + dn * 1.15 + 8, sg]); } } // (owner, again: "larger than the character's shoulders": a third wider, rising above the shoulder)
+    // Round 575 (owner's second reference, a horned knight): an armoured skirt under the belt: a pointed tabard down the middle and
+    // a plate over each hip (side views: one hip plate and the tabard's edge). Ids under 40, so his hands stay in front of it.
+    if (A.skirt) { const sp = (id, pts) => plate(id, g => { pts.forEach(([a2, b2], j) => j ? g.lineTo(X(a2), Y(b2)) : g.moveTo(X(a2), Y(b2))); g.closePath(); }), y1 = bot - 4, L2 = Hh * .55;
+      if (!side) { sp(35, [[cx - w * .19, y1], [cx + w * .19, y1], [cx + w * .16, y1 + L2 * .85], [cx, y1 + L2], [cx - w * .16, y1 + L2 * .85]]);
+        for (const [id, sg] of [[36, -1], [37, 1]]) sp(id, [[cx + sg * w * .21, y1], [cx + sg * w * .5, y1], [cx + sg * w * .56, y1 + L2 * .55], [cx + sg * w * .25, y1 + L2 * .62]]); }
+      else { const fw = r === 1 ? -1 : 1; sp(36, [[cx - w * .36, y1], [cx + w * .3, y1], [cx + w * .36, y1 + L2 * .55], [cx - w * .42, y1 + L2 * .55]]);
+        sp(35, [[cx + fw * w * .28, y1], [cx + fw * w * .48, y1], [cx + fw * w * .5, y1 + L2 * .85], [cx + fw * w * .34, y1 + L2 * .92]]); } }
     if (A.style === 'faceted') {
       const poly = (id, pts) => plate(id, g => { pts.forEach(([px2, py2], j) => j ? g.lineTo(X(px2), Y(py2)) : g.moveTo(X(px2), Y(py2))); g.closePath(); });
       const t = top + Hh * (side ? .14 : .1), mid = top + Hh * .42, l = cx - w / 2 - 2, rt = cx + w / 2 + 2, fwd = r === 1 ? -1 : 1, mir = pts => pts.map(([a, b2]) => [2 * cx - a, b2]);
@@ -118,13 +135,10 @@ function gearArmorRender(recipe, imgs) {
         for (let k = 0; k < segs; k++) { const y1 = mid + Hh * .06 + k * (bot - mid - Hh * .06) / segs, y2 = y1 + (bot - mid - Hh * .06) / segs - 2;
           poly(10 + k, [[back, y1], [front - fwd * k * 2, y1 + v], [front - fwd * k * 2, y2 + v], [back, y2]]); }
         if (A.collar !== false) poly(30, [[back, top + Hh * .08], [front, top + Hh * .06], [front - fwd * 3, top + Hh * .16], [back + fwd * 2, top + Hh * .16]]); }
-      const ps = A.pauldrons == null ? 1 : +A.pauldrons;
-      if (ps > 0) { const rx = (w * (side ? .2 : .15) * ps + 2) * 1.15, ry = (Hh * .085 * ps + 2) * 1.15;
-        const at = side ? [[cx - fwd * w * .08, sy + 2, -fwd]] : [[Math.max(sl + 3, tl - 1), sy, -1], [Math.min(sr - 3, tr + 1), sy, 1]];
-        at.forEach(([ax, ay, sg], k) => { const P = (fx, fy) => [ax + sg * rx * fx, ay + ry * fy];
-          poly(46 + k, [P(-.2, .9), P(.95, 1.15), P(.8, 1.7), P(-.05, 1.55)]);
-          poly(44 + k, [P(-.5, .2), P(1.05, .5), P(.95, 1.2), P(-.3, 1.05)]);
-          poly(40 + k, [P(-.5, -1.1), P(.9, -.6), P(1.1, .3), P(.3, .5), P(-.8, .1)]); }); }
+      pads.forEach(([xi, xo, yt, yb, sg], k) => { const rx = Math.abs(xo - xi) / 1.9, ry = (yb - yt) / 2.8, ax = xi + sg * .8 * rx, ay = yt + ry * 1.1, P = (fx, fy) => [ax + sg * rx * fx, ay + ry * fy];
+        poly(46 + k, [P(-.6, .9), P(1.05, 1.1), P(.9, 1.7), P(-.4, 1.6)]);
+        poly(44 + k, [P(-.7, .2), P(1.1, .45), P(1.0, 1.2), P(-.6, 1.05)]);
+        poly(40 + k, [P(-.8, -1.1), P(.85, -.75), P(1.1, .35), P(.3, .55), P(-.8, .2)]); });
       continue; }
     // belly plates, narrowing toward the waist
     for (let k = 0; k < n; k++) { const ya = chestBot + 1 + k * (bot - chestBot) / n, yb = chestBot + (k + 1) * (bot - chestBot) / n - 1, s2 = 1 - .06 * (k + 1);
@@ -144,14 +158,14 @@ function gearArmorRender(recipe, imgs) {
     // the collar: a raised band at the neck
     if (A.collar !== false) plate(30, g => rrect(g, X(cx - w * (side ? .22 : .2)), Y(top + Hh * (side ? .08 : .03)), X(cx + w * (side ? .22 : .2)), Y(top + Hh * (side ? .17 : .11)), 2));
     // pauldrons: at each shoulder (one, at the near shoulder, in the side views), past the outline
-    const ps = A.pauldrons == null ? 1 : +A.pauldrons;
-    if (ps > 0) { const rx = w * (side ? .2 : .15) * ps + 2, ry = Hh * .085 * ps + 2;
-      const at = side ? [[cx + (r === 1 ? 1 : -1) * w * .08, sy + 2]] : [[Math.max(sl + 3, tl - 1), sy], [Math.min(sr - 3, tr + 1), sy]];
-      at.forEach(([ax, ay], k) => plate(44 + k, g => g.ellipse(X(ax + (side ? 0 : (k ? 2 : -2))), Y(ay + ry * .75), rx * .9, ry * .7, side ? 0 : (k ? .25 : -.25), 0, Math.PI * 2))); // (Round 572: a second lame below each pauldron)
-      at.forEach(([ax, ay], k) => plate(40 + k, g => g.ellipse(X(ax), Y(ay), rx, ry, side ? 0 : (k ? .25 : -.25), 0, Math.PI * 2))); } }
+    pads.forEach(([xi, xo, yt, yb, sg], k) => { const ax = (xi + xo) / 2, rx = Math.abs(xo - xi) / 2, ry = (yb - yt) / 2, tilt = side ? 0 : sg * .25;
+      plate(46 + k, g => g.ellipse(X(ax + sg * 2), Y(yt + ry * 1.55), rx * .8, ry * .42, tilt, 0, Math.PI * 2));
+      plate(44 + k, g => g.ellipse(X(ax + sg * 1), Y(yt + ry * 1.2), rx * .9, ry * .5, tilt, 0, Math.PI * 2)); // (Round 572: lames below each pauldron; Round 575: three tiers)
+      plate(40 + k, g => g.ellipse(X(ax), Y(yt + ry * .72), rx, ry * .72, tilt, 0, Math.PI * 2)); }); }
   const pd = pg.getImageData(0, 0, W, H).data, id = i => pd[i * 4 + 3] > 127 ? pd[i * 4] : 0;
   // what stays in front: bare skin that isn't shirt (forearms, hands) over the chest and belly; the Aetherlink everywhere
   const skin = i => { const R = b[i * 4], G = b[i * 4 + 1], B = b[i * 4 + 2]; return b[i * 4 + 3] > 200 && m[i * 4] <= 127 && R > G && G > B && R - B > 40 && R > 110; };
+  const carve = (i, k) => k < 40 && skin(i) && (k < 35 || k > 37 || b[i * 4] - b[i * 4 + 1] > 35); // (Round 575: the skirt (35-37) lies over his khaki trousers, which pass the loose skin test; only real skin, his hands, stays in front)
   const n2 = Math.max(8, Math.round((recipe.scale || 1) * 48)), tile = document.createElement('canvas'); tile.width = tile.height = n2; const tg = tile.getContext('2d');
   if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n2); else if (imgs.texture) { const nat = /gear-textures\//.test(recipe.texture || ''), tw = nat ? Math.max(4, Math.round((imgs.texture.width || n2) * (recipe.scale || 1))) : n2; tile.width = tw; tile.height = Math.max(4, Math.round(tw * (imgs.texture.height || n2) / (imgs.texture.width || n2))); tg.drawImage(imgs.texture, 0, 0, tile.width, tile.height); } // (Round 574: a picture keeps its proportions; a gear texture draws at its own pixel size times the scale) else GEAR_TEXTURES.plain(tg, n2);
   const t = tg.getImageData(0, 0, tile.width, tile.height).data, tint = gearHex(recipe.tint, [120, 128, 140]), rim = gearHex(A.trim, [24, 20, 16]), shadeK = recipe.shade == null ? .35 : Math.min(.6, +recipe.shade * .4);
@@ -164,14 +178,14 @@ function gearArmorRender(recipe, imgs) {
   const under = A.under === false ? null : gearHex(A.under, tint.map(v => v * .55));
   if (under) for (let i = 0; i < W * H; i++) { if (m[i * 4] <= 127 || p[i * 4] > 127 || skin(i)) continue; const sh = b[i * 4 + 3] > 128 ? .55 + lum(i) * 1.6 : 1, edge = [i - 1, i + 1, i - W, i + W].some(j => m[j * 4] <= 127);
     const col = edge ? rim : under.map(v => v * sh); out.set([col[0], col[1], col[2], 255], i * 4); }
-  for (let i = 0; i < W * H; i++) { const k = id(i); if (!k || p[i * 4] > 127) continue; if (k < 40 && skin(i)) continue; // (his face, forearms and hands stay in front of the collar, chest and belly)
+  for (let i = 0; i < W * H; i++) { const k = id(i); if (!k || p[i * 4] > 127) continue; if (carve(i, k)) continue; // (his face, forearms and hands stay in front of the collar, chest and belly)
     const x = i % W, y = Math.floor(i / W), cell = Math.floor(y / C) * 9 + Math.floor(x / C), q = box[cell * 100 + k], fx = (x - q[0]) / Math.max(1, q[2] - q[0]), fy = (y - q[1]) / Math.max(1, q[3] - q[1]);
     const ti = (((y - q[1]) % tile.height) * tile.width + ((x - q[0]) % tile.width)) * 4, light = 1.18 - .32 * (fx * .4 + fy * .6), hero = b[i * 4 + 3] > 128 ? 1 + (lum(i) - .35) * shadeK : 1;
     let col = [t[ti] / 255 * tint[0] * 1.6, t[ti + 1] / 255 * tint[1] * 1.6, t[ti + 2] / 255 * tint[2] * 1.6].map(v => v * light * hero);
     const nb = [i - 1, i + 1, i - W, i + W], edge = nb.some(j => id(j) !== k), inner = !edge && [i - W - 1, i - W, i - W + 1, i - 1].some(j => id(j) !== k) && fy < .5;
     if (edge) col = rim.slice(); else if (inner) col = col.map(v => Math.min(255, v * 1.35 + 18));
     out.set([col[0], col[1], col[2], 255], i * 4); }
-  if (recipe.pixel) { const reg = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!out[i * 4 + 3]) continue; const k = id(i); reg[i] = k && p[i * 4] <= 127 && !(k < 40 && skin(i)) ? k : 99; }
+  if (recipe.pixel) { const reg = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!out[i * 4 + 3]) continue; const k = id(i); reg[i] = k && p[i * 4] <= 127 && !carve(i, k) ? k : 99; }
     const em = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) if (reg[i] === 61) em[i] = 1; gearPixelize(out, reg, em, recipe.pixel, W, H, r => r === 99); } // (Round 570: plates in the set style, the undersuit dark with no accent)
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
@@ -239,7 +253,12 @@ function gearHelmetRender(recipe, imgs) {
     const er = Math.max(3, w * .13), pods = side ? [[cx - fwd * w * .12, eye + 1]] : [[L - 1, eye + 1], [R + 1, eye + 1]];
     pgx.fillStyle = 'rgb(2,0,0)'; pgx.beginPath(); for (const [ex, ey] of pods) { pgx.moveTo(X(ex + er), Y(ey)); pgx.ellipse(X(ex), Y(ey), er, er * 1.25, 0, 0, 7); } pgx.fill();
     if (style !== 'knight') { pgx.fillStyle = 'rgb(3,0,0)'; pgx.beginPath(); if (side) pgx.rect(X(cx - w * .32), Y(T + 1), w * .5, h * .12); else rrect(pgx, X(cx - w * .09), Y(T - 1), X(cx + w * .09), Y(eye - h * .14), 2); pgx.fill(); }
-    pgx.fillStyle = 'rgb(4,0,0)'; pgx.beginPath(); const ax = side ? cx - fwd * w * .3 : R - w * .12; pgx.rect(X(ax - 1), Y(T - h * .28), 2, h * .3); pgx.rect(X(ax - 2), Y(T - h * .3), 4, 3); pgx.fill();
+    // (Round 575, owner's horned knight: horns curving out and up from the dome, in place of the antenna)
+    if (Hm.horns) { pgx.fillStyle = 'rgb(5,0,0)'; pgx.beginPath();
+      const horn = (bx, by, sg, up) => { const tx = bx + sg * w * .3, ty = by - h * up; pgx.moveTo(X(bx - sg * w * .1), Y(by + h * .06)); pgx.quadraticCurveTo(X(bx + sg * w * .5), Y(by + h * .02), X(tx), Y(ty));
+        pgx.quadraticCurveTo(X(bx + sg * w * .2), Y(by - h * .06), X(bx + sg * w * .08), Y(by - h * .1)); pgx.closePath(); };
+      if (side) horn(cx - fwd * w * .05, T + h * .2, fwd, .52); else { horn(L + w * .12, T + h * .2, -1, .5); horn(R - w * .12, T + h * .2, 1, .5); } pgx.fill(); }
+    else { pgx.fillStyle = 'rgb(4,0,0)'; pgx.beginPath(); const ax = side ? cx - fwd * w * .3 : R - w * .12; pgx.rect(X(ax - 1), Y(T - h * .28), 2, h * .3); pgx.rect(X(ax - 2), Y(T - h * .3), 4, 3); pgx.fill(); }
     ig.fillStyle = '#fff'; ig.beginPath(); for (let k = 0; k < 3; k++) { const vy = eye + h * .2 + k * 3; if (side) ig.rect(X(cx + fwd * w * .12 - w * .08), Y(vy), w * .16, 1); else if (style !== 'mask') { ig.rect(X(cx - w * .34), Y(vy), w * .14, 1); ig.rect(X(cx + w * .2), Y(vy), w * .14, 1); } } ig.fill(); }
   const sd = sg.getImageData(0, 0, W, H).data, ld = lg.getImageData(0, 0, W, H).data, out = new Uint8ClampedArray(W * H * 4), reg = new Uint8Array(W * H), acc = new Uint8Array(W * H);
   const xd = pgxC.getContext('2d').getImageData(0, 0, W, H).data, idd = inkC.getContext('2d').getImageData(0, 0, W, H).data, ink = new Uint8Array(W * H);
