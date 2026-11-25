@@ -3,6 +3,19 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Chest armor: refit the shoulders (owner, Nov 25; Round 561)
+
+The owner: the armor is "not fitting around the shoulders". At 256px, `cyber-chest` (overlay over the base sheet):
+- **Facing down (row 0) and up (row 3):** the vest's top edge is narrower than his shoulders, so the navy shirt's shoulder seams
+  stick out past it on both sides. Make the vest **wrap over the top of each shoulder** to the shoulder seam, its armhole meeting
+  the sleeve, so no shirt shoulder shows above or beside the vest (the sleeves below stay navy).
+- **Facing left (row 1):** a round shoulder pad floats behind the shoulder blade. Put the shoulder piece **on** the shoulder,
+  following its curve, moving with it in every walk frame.
+- **Facing right (row 2):** the vest stops in a straight vertical edge down the front of the shoulder. Wrap it round the shoulder
+  the same way; no straight cut edges.
+Check all 36 frames at 256px over `protagonist-walk9-base.png`, keep the outline (`--dry-run` will refuse anything outside it),
+and re-deliver `tools/art-refresh/wearable/cyber-chest/overlay.png` in a pull request. The rest of the vest is good.
+
 ## The gloves (your PR #325): in (Round 560). Still to come: the pants and boot fixes
 
 The gloves went in first time: fitted on the new base sheet, the fingertips showing, the Aetherlink untouched, every direction

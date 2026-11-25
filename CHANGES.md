@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 561: the chest armor's shoulders, sent back for a refit
+
+(Owner: "Can you fix the armor not fitting around the shoulders".) At 256px the `cyber-chest` vest is narrower than his shoulders
+facing down and up (the shirt's shoulder seams show beside it), and in the side views its shoulder piece floats (behind the
+shoulder blade facing left, a straight cut edge facing right). Fixing that is redrawing, which is ChatGPT's (Round 537), so
+`CHATGPT-NOTES.md` has the frame-by-frame request; the look updates in place when the new overlay is run through
+`tools/wearable_add.py`. No code changed.
+
 ## Round 560: the cyber gloves; the whole outfit
 
 ChatGPT's gloves (PR #325, `tools/art-refresh/wearable/cyber-gloves/`): short fingerless gunmetal gloves for Ember, Thornhide and
