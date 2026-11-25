@@ -1,0 +1,17 @@
+{
+ "v": 1,
+ "slot": "helmet",
+ "name": "Thornward Helm",
+ "texture": "plain",
+ "tint": "#1f3a2c",
+ "shade": 1,
+ "pixel": {
+  "dark": "#0f1a16",
+  "base": "#1f3a2c",
+  "light": "#3d6b4c",
+  "accent": "#3cff6a"
+ },
+ "helmet": {
+  "style": "mask"
+ }
+}

@@ -28,7 +28,7 @@ const r = JSON.parse(run(`(() => { newGame(); ensureGear(); const out = {};
   return JSON.stringify(out); })()`));
 for (const f of r.files) assert(fs.existsSync(path.join(ROOT, f)), f + ' is on disk');
 assert.deepStrictEqual(r.mapped.sort(), r.belts.sort(), 'every belt item names a look');
-assert.strictEqual(r.order, 'pants,boots,shirt,belt,gloves', 'looks stack in slot order');
+assert.strictEqual(r.order, 'pants,boots,shirt,belt,gloves,helmet', 'looks stack in slot order (Round 571: the helmet last)');
 assert.strictEqual(r.none, '', 'no belt, no look');
 assert.strictEqual(r.ownedOnly, '', 'owning a belt is not wearing it');
 assert.strictEqual(r.worn, 'cyber-belt', 'a worn belt shows');

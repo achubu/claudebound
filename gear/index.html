@@ -86,6 +86,7 @@
       <label><input type="checkbox" id="dCollar" checked> collar</label>
       <label>Plate rims <input type="color" id="dRim" value="#231a10"></label>
       <label><input type="checkbox" id="dUnder" checked> undersuit</label>
+      <label>Helmet style <select id="dHelm"><option value="visor">visor</option><option value="mask">mask</option><option value="knight">knight</option></select></label>
     </div>
     <p class="muted" style="margin:10px 0 4px">Save it for these items:</p>
     <div class="items" id="dItems"></div>
@@ -265,7 +266,7 @@ async function maskCanvas(slot) { const m = await tmplMask(slot + '-mask'), d = 
 // ---------------- armour sets (Round 570; GEAR_SETS in assets/gear-recipe.js) ----------------
 const setLooks = {};
 function setRecipe(key, sl) { const pal = GEAR_SETS[key], r = { v: GEAR_RECIPE_VERSION, slot: sl, name: pal.name + ' ' + sl, texture: 'plain', tint: pal.base, shade: 1, pixel: { dark: pal.dark, base: pal.base, light: pal.light, accent: pal.accent } };
-  if (sl === 'shirt') r.armor = { pauldrons: 1, collar: true, plates: 2 }; if (sl === 'pants') r.bands = { color: pal.accent, width: 2, at: [.45] }; return r; }
+  if (sl === 'shirt') r.armor = { pauldrons: 1, collar: true, plates: 2 }; if (sl === 'pants') r.bands = { color: pal.accent, width: 2, at: [.45] }; if (sl === 'helmet') r.helmet = { style: { crimson: 'mask', venom: 'mask', goldline: 'knight', bone: 'mask', frost: 'visor', dune: 'visor' }[key] || 'visor' }; return r; }
 async function wearSet() { const key = $('setPick').value, prot = await load('templates/protected.png'); $('status').textContent = 'Building the set…';
   for (const sl of SLOTS) { const r = setRecipe(key, sl); setLooks[sl] = { name: GEAR_SETS[key].name, recipe: r, canvas: gearRecipeRender(r, { base: baseImg, mask: await load('templates/' + sl + '-mask.png?x=' + Date.now() % 1e6), protected: prot }) }; choice[sl] = '*set*'; }
   window.gearSetWorn = key; buildSlots(); await refresh();
@@ -278,6 +279,7 @@ function recipeNow() { const at = $('dBandAt').value.split(',').map(Number).filt
   if (+$('dTrimW').value) r.trim = { color: $('dTrimC').value, width: +$('dTrimW').value };
   if (+$('dBandW').value && at.length) r.bands = { color: $('dBandC').value, width: +$('dBandW').value, at };
   if (+$('dSeamW').value) r.seam = { color: $('dSeamC').value, width: +$('dSeamW').value, glow: $('dSeamGlow').checked };
+  if (r.slot === 'helmet') r.helmet = { style: $('dHelm').value }; // (Round 571)
   if ($('dArmor').checked && r.slot === 'shirt') { r.armor = { pauldrons: +$('dPaul').value, plates: +$('dPlates').value, collar: $('dCollar').checked, trim: $('dRim').value }; if (!$('dUnder').checked) r.armor.under = false; } // (Round 569)
   return r; }
 async function design() { const r = recipeNow(), probs = gearRecipeProblems(r, SLOTS); $('dJson').textContent = JSON.stringify(r, null, 1);
@@ -305,7 +307,7 @@ function dItems() { const sl = $('dSlot').value, host = $('dItems'); host.innerH
     for (const [k, v] of Object.entries(GEAR_SETS)) $('setPick').append(new Option(v.name, k)); $('setPick').value = 'goldline'; $('setWear').onclick = wearSet;
     for (const k of Object.keys(GEAR_TEXTURES)) $('dTex').append(new Option(k, k)); for (const [k, v] of Object.entries(PICTURE_TEXTURES)) $('dTex').append(new Option(k, v)); $('dTex').value = 'plates';
     $('dSlot').onchange = () => { dItems(); design(); };
-    for (const id of ['dTex', 'dTint', 'dScale', 'dShade', 'dTrimC', 'dTrimW', 'dBandC', 'dBandW', 'dBandAt', 'dSeamC', 'dSeamW', 'dSeamGlow', 'dArmor', 'dPaul', 'dPlates', 'dCollar', 'dRim', 'dUnder']) $(id).oninput = () => { clearTimeout(dTimer); dTimer = setTimeout(design, 150); };
+    for (const id of ['dTex', 'dTint', 'dScale', 'dShade', 'dTrimC', 'dTrimW', 'dBandC', 'dBandW', 'dBandAt', 'dSeamC', 'dSeamW', 'dSeamGlow', 'dArmor', 'dPaul', 'dPlates', 'dCollar', 'dRim', 'dUnder', 'dHelm']) $(id).oninput = () => { clearTimeout(dTimer); dTimer = setTimeout(design, 150); };
     $('dWear').onclick = async () => { await design(); if (designed) { choice[designed.slot] = '*recipe*'; buildSlots(); refresh(); } };
     dItems(); await design();
     $('lookSlot').onchange = () => { buildItems(); checkNew(); };

@@ -29,7 +29,7 @@ HERO = os.path.join(ROOT, 'assets/characters/protagonist-walk9.png')  # the hero
 BASE = os.path.join(ROOT, 'assets/characters/protagonist-walk9-base.png')
 WEAR = os.path.join(ROOT, 'assets/characters/wearable')
 REGISTRY = os.path.join(ROOT, 'assets/hero-wear-looks.js')
-SLOTS = ['pants', 'boots', 'shirt', 'belt', 'gloves']  # the order looks are drawn in (later over earlier)
+SLOTS = ['pants', 'boots', 'shirt', 'belt', 'gloves', 'helmet']  # the order looks are drawn in (later over earlier; Round 571: the helmet last)
 W, H, CELL = 2304, 1024, 256
 OUTLINE_SLACK = 2000  # overlay pixels allowed past the hero's outline (the soft edge where it meets the body)
 
@@ -324,6 +324,21 @@ def slot_templates(base):
                 down |= np.roll(m, k, 0)
             m = m | (down & belt & body)
         out[sl] = m
+    # Round 571: the helmet's template is his head: everything of him above the shirt's top in each frame
+    if 'helmet' in SLOTS and 'shirt' in out:
+        head = np.zeros(body.shape, bool)
+        for r in range(body.shape[0] // CELL):
+            for c in range(body.shape[1] // CELL):
+                sh = out['shirt'][r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL]; rows = np.nonzero(sh.any(1))[0]
+                if not len(rows):
+                    continue
+                y1 = rows.min() + 2
+                head[r * CELL:r * CELL + y1, c * CELL:(c + 1) * CELL] = body[r * CELL:r * CELL + y1, c * CELL:(c + 1) * CELL]
+                for x in range(CELL):  # (column by column down to the shirt: his chin hangs into the collar's V)
+                    col = np.nonzero(sh[:, x])[0]
+                    if len(col) and col[0] > y1 and col[0] < y1 + 24:
+                        head[r * CELL + y1:r * CELL + col[0], c * CELL + x] = body[r * CELL + y1:r * CELL + col[0], c * CELL + x]
+        out['helmet'] = _main_parts(head)
     r, g, bb = b[..., 0], b[..., 1], b[..., 2]
     out['protected'] = _grow(body & (bb > 150) & (g > 150) & (r < 140) & (bb - r > 60), 2) & body  # (the Aetherlink's bright cyan, with a 2px margin)
     return out

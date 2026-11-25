@@ -12,9 +12,9 @@
 // (now the Ember Gloves) and Briarstep Boots carry over in old saves.
 // Icons: assets/items/gear/<id>.png (placeholders from tools/paint_gear_icons.py).
 // =====================================================================
-const GEAR_SLOTS = ['boots', 'shirt', 'pants', 'belt', 'gloves'];
-const GEAR_SLOT_NAMES = { boots: 'Boots', shirt: 'Shirt', pants: 'Pants', belt: 'Belt', gloves: 'Gloves' };
-const GEAR_SLOT_ICONS = { boots: '🥾', shirt: '👕', pants: '👖', belt: '🎗', gloves: '🧤' };
+const GEAR_SLOTS = ['boots', 'shirt', 'pants', 'belt', 'gloves', 'helmet']; // (Round 571: the helmet)
+const GEAR_SLOT_NAMES = { boots: 'Boots', shirt: 'Shirt', pants: 'Pants', belt: 'Belt', gloves: 'Gloves', helmet: 'Helmet' };
+const GEAR_SLOT_ICONS = { boots: '🥾', shirt: '👕', pants: '👖', belt: '🎗', gloves: '🧤', helmet: '⛑' };
 const GEAR_STATS = {
   attack: n => '+' + n + ' attack-card damage',
   armor: n => '+' + n + ' Armor (every enemy hit deals ' + n + ' less)',
@@ -36,9 +36,16 @@ const GEAR = {
   stormglassBelt:  { name: 'Stormglass Belt', slot: 'belt', world: 'vespera', stat: 'pierce', value: 2 },
   tempestGloves:   { name: 'Tempest Gloves', slot: 'gloves', world: 'vespera', stat: 'elemental', value: 2 },
   timewornShirt:   { name: 'Timeworn Shirt', slot: 'shirt', world: 'chronospire', stat: 'health', value: 12 },
-  hourglassBelt:   { name: 'Hourglass Belt', slot: 'belt', world: 'chronospire', stat: 'cleanse', value: 1 }
+  hourglassBelt:   { name: 'Hourglass Belt', slot: 'belt', world: 'chronospire', stat: 'cleanse', value: 1 },
+  // Round 571: a helmet per world, won from its final boss (not one of the two pieces that open the boss door)
+  neonVisor:       { name: 'Neon Visor', slot: 'helmet', world: 'city', stat: 'health', value: 3, bossDrop: true },
+  sunforgedHelm:   { name: 'Sunforged Helm', slot: 'helmet', world: 'elaris', stat: 'health', value: 5, bossDrop: true },
+  galecrestHelm:   { name: 'Galecrest Helm', slot: 'helmet', world: 'sky', stat: 'health', value: 7, bossDrop: true },
+  thornwardHelm:   { name: 'Thornward Helm', slot: 'helmet', world: 'wilds', stat: 'health', value: 9, bossDrop: true },
+  stormcallerHelm: { name: 'Stormcaller Helm', slot: 'helmet', world: 'vespera', stat: 'health', value: 11, bossDrop: true },
+  chronoguardHelm: { name: 'Chronoguard Helm', slot: 'helmet', world: 'chronospire', stat: 'health', value: 14, bossDrop: true }
 };
-const gearOf = world => Object.keys(GEAR).filter(id => GEAR[id].world === world);
+const gearOf = world => Object.keys(GEAR).filter(id => GEAR[id].world === world && !GEAR[id].bossDrop); // (the two door pieces; helmets drop from the boss)
 const gearArtPath = id => 'assets/items/gear/' + id + '.png';
 function gearText(id) { const g = GEAR[id]; return GEAR_STATS[g.stat](g.value); }
 
@@ -240,3 +247,18 @@ if (typeof document !== 'undefined' && document.createElement) {
   document.head.append(style);
 }
 ensureGear();
+
+// Round 571: beating a world's final boss gives its helmet (worn at once if the head is bare)
+const GEAR_ELITE_DROP = 0.06;
+if (typeof winBattle === 'function') { const winBattleBeforeHelmet = winBattle;
+  winBattle = function () { const b = state && state.battle, r = winBattleBeforeHelmet.apply(this, arguments);
+    try { const giveHelmet = w => { const id = Object.keys(GEAR).find(g => GEAR[g].bossDrop && GEAR[g].world === w); if (!id || state.relics.includes(id)) return; return id; };
+      // (owner: "if we need more bosses add small chance for elite enemy to drop gear"): an elite has a small chance to drop its
+      // world's helmet early; never a door piece, so the mini-bosses stay the way to the boss door
+      if (b && b.enemy && b.enemy.elite && !b.enemy.boss && Math.random() < GEAR_ELITE_DROP) { const w = typeof activeRegion === 'string' ? activeRegion : state.region, id = giveHelmet(w);
+        if (id) { state.relics.push(id); ensureGear(); const wear = !state.gear.helmet; if (wear) state.gear.helmet = id; syncTalentVitals(false); toast('The elite dropped the ' + GEAR[id].name + ': ' + gearText(id) + '. ' + (wear ? 'You put it on.' : 'Open Gear to wear it.')); save(); } }
+      if (b && b.enemy && b.enemy.boss && typeof WORLD_BOSS_ROOMS === 'object') for (const [w, room] of Object.entries(WORLD_BOSS_ROOMS)) if (room && room[1] === b.id) {
+      const id = giveHelmet(w);
+      if (id) { state.relics.push(id); ensureGear(); const wear = !state.gear.helmet; if (wear) state.gear.helmet = id; syncTalentVitals(false);
+        toast(GEAR[id].name + ' won: ' + gearText(id) + '. ' + (wear ? 'You put it on.' : 'Open Gear to wear it.')); save(); } } } catch (e) {}
+    return r; }; }

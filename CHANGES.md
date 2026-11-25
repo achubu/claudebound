@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 571: helmets
+
+(Owner: "add helmet slot but use the design for your outlines of our armor vector graphics, search Google images for
+inspiration"; "All bosses should drop loot, if we need more bosses add small chance for elite enemy to drop gear".)
+- **A sixth gear slot, `helmet`** (`assets/gear.js`), and one helmet per world, each giving max HP (3, 5, 7, 9, 11, 14): Neon
+  Visor, Sunforged Helm, Galecrest Helm, Thornward Helm, Stormcaller Helm, Chronoguard Helm. **Every boss now drops gear**: each
+  mini-boss its door piece (as before), each world's final boss its helmet (worn at once if the head is bare). Helmets are not
+  door pieces (`bossDrop`; `gearOf` leaves them out), so the boss door still opens with the two mini-boss pieces. **Elites** have a
+  6% chance (`GEAR_ELITE_DROP`) to drop their world's helmet early; never a door piece, so the mini-bosses stay the way to the boss.
+  Helmets give HP only, no battle rule (`tests/gear-rules` exempts them).
+- **Drawn as built helmets** (`gearHelmetRender`, `assets/gear-recipe.js`), after references for pixel-art sci-fi helmets
+  (tactical helmets with a glowing visor, full-face masks with eye lenses, closed knight helms): a shell over the head template
+  (a dome, straight sides, a jaw guard tapering to the collar) in the set style, and by style a glowing visor band, two eye
+  lenses and a grille, or a narrow eye slit with a crest; sides and back drawn for themselves. The helmet template
+  (`gear/templates/helmet-mask.png`) is his head above the shirt, column by column (his chin hangs into the collar's V). The
+  helmet is drawn last. Each helmet has a recipe (`gear/recipes/<id>.json`, a style and palette for its world) and a pixel-art
+  icon (`assets/items/gear/<id>.png`). Gear Studio: the helmet slot, a helmet style in the Designer, and a helmet in every set.
+- Tests: `tests/helmets.test.cjs` (one per world, never a door piece, the boss and the elite drops, icons and recipes); the slot
+  lists in `hero-wear` and `gear-page`.
+
 ## Round 570: pixel-art armour sets
 
 (Owner, with a sheet of pixel-art armour sets: "Can you build something more like this".) A recipe with `pixel: { dark, base,

@@ -27,6 +27,7 @@ function gearHex(c, fb) { const m = /^#?([0-9a-f]{6})$/i.exec(c || ''); if (!m) 
 // imgs: { base, mask, protected, texture? } (images or canvases on the hero's grid; texture only for picture textures)
 function gearRecipeRender(recipe, imgs) {
   if (recipe.armor && recipe.slot === 'shirt') return gearArmorRender(recipe, imgs); // (Round 569: built armor)
+  if (recipe.slot === 'helmet') return gearHelmetRender(recipe, imgs); // (Round 571)
   const W = 2304, H = 1024, C = 256, mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
   const px = im => { const c = mk(), g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, W, H).data; };
   const b = px(imgs.base), m = px(imgs.mask), p = px(imgs.protected);
@@ -157,6 +158,42 @@ function gearPixelize(out, reg, acc, pal, W, H, noAccent) {
     let c = v < .86 ? D : v > 1.16 ? L : B; if (under) c = v > 1.14 ? B : D;
     if (d[i] === 1) c = K; else if (acc[i]) c = A; else if (d[i] === 3 && !under) c = A;
     out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = 255; } }
+// Round 571 (owner: "add helmet slot but use the design for your outlines of our armor vector graphics"): a helmet built over
+// his head in every frame, from the helmet template (his head above the shirt): a shell covering hair and face, and by style
+//   visor  a glowing band across the eyes (front), on the facing half (sides), a crest line behind;
+//   mask   two glowing eye lenses and a breathing grille;
+//   knight a narrow eye slit and a raised crest down the middle.
+// Drawn in the set style (gearPixelize): the recipe's `pixel` palette, or one made from its tint; the lenses in the accent colour.
+function gearHelmetRender(recipe, imgs) {
+  const W = 2304, H = 1024, C = 256, Hm = recipe.helmet || {}, style = Hm.style || 'visor', mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
+  const px = im => { const c = mk(), g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, W, H).data; };
+  const m = px(imgs.mask), shell = mk(), sg = shell.getContext('2d'), lens = mk(), lg = lens.getContext('2d');
+  const rrect = (g, x0, y0, x1, y1, r) => { r = Math.min(r, (x1 - x0) / 2, (y1 - y0) / 2); g.moveTo(x0 + r, y0); g.arcTo(x1, y0, x1, y1, r); g.arcTo(x1, y1, x0, y1, r); g.arcTo(x0, y1, x0, y0, r); g.arcTo(x0, y0, x1, y0, r); g.closePath(); };
+  sg.fillStyle = lg.fillStyle = '#fff';
+  for (let r = 0; r < 4; r++) for (let col = 0; col < 9; col++) {
+    const x0 = col * C, y0 = r * C; let L = C, R = -1, T = C, B = -1;
+    for (let y = 0; y < 180; y++) for (let x = 0; x < C; x++) if (m[((y0 + y) * W + x0 + x) * 4] > 127) { if (x < L) L = x; if (x > R) R = x; if (y < T) T = y; if (y > B) B = y; }
+    if (R < 0) continue; const h = B - T, w = R - L, cx = (L + R) / 2, X = x => x0 + x, Y = y => y0 + y, side = r === 1 || r === 2, fwd = r === 1 ? -1 : 1, eye = T + h * .5;
+    // the shell: hair and face covered, its foot a little above the shirt's collar
+    { const a = L - 2, z = R + 2, top = T - 2, bot = B + 1, mid = eye + h * .16, jaw = side ? w * .36 : w * .3, jx = side ? cx + fwd * w * .08 : cx; // (a dome, straight sides, a jaw guard tapering to the collar)
+      sg.beginPath(); sg.moveTo(X(a), Y(mid)); sg.lineTo(X(a), Y(top + h * .4)); sg.quadraticCurveTo(X(a), Y(top), X(cx), Y(top)); sg.quadraticCurveTo(X(z), Y(top), X(z), Y(top + h * .4));
+      sg.lineTo(X(z), Y(mid)); sg.lineTo(X(jx + jaw), Y(bot)); sg.lineTo(X(jx - jaw), Y(bot)); sg.closePath(); sg.fill(); }
+    lg.beginPath();
+    if (r === 3) { if (style === 'knight' || style === 'visor') lg.rect(X(cx - 1.5), Y(T + 1), 3, h * .62); } // (behind: a crest line)
+    else if (style === 'visor') { if (side) lg.rect(fwd < 0 ? X(L - 1) : X(cx), Y(eye - h * .1), w / 2 + 1, h * .2); else lg.rect(X(L + w * .1), Y(eye - h * .1), w * .8, h * .2); }
+    else if (style === 'mask') { const er = Math.max(3, w * .12); if (side) lg.ellipse(X(cx + fwd * w * .26), Y(eye), er, er * .8, 0, 0, 7); else { lg.ellipse(X(cx - w * .22), Y(eye), er, er * .8, 0, 0, 7); lg.moveTo(X(cx + w * .22 + er), Y(eye)); lg.ellipse(X(cx + w * .22), Y(eye), er, er * .8, 0, 0, 7);
+        for (let k = -1; k <= 1; k++) { lg.moveTo(0, 0); lg.rect(X(cx + k * w * .1 - 1), Y(eye + h * .2), 2, h * .14); } } }
+    else { lg.rect(side ? (fwd < 0 ? X(L - 1) : X(cx)) : X(L + w * .14), Y(eye - 1.5), side ? w / 2 + 1 : w * .72, 3); if (!side) lg.rect(X(cx - 1.5), Y(T + 1), 3, eye - T - 2); }
+    lg.fill(); }
+  const sd = sg.getImageData(0, 0, W, H).data, ld = lg.getImageData(0, 0, W, H).data, out = new Uint8ClampedArray(W * H * 4), reg = new Uint8Array(W * H), acc = new Uint8Array(W * H);
+  const p = px(imgs.protected), b = px(imgs.base), tint = gearHex(recipe.tint, [90, 96, 110]);
+  for (let i = 0; i < W * H; i++) { if (sd[i * 4 + 3] < 128 || p[i * 4] > 127) continue; reg[i] = 1; if (ld[i * 4 + 3] > 127) acc[i] = 1;
+    const y = Math.floor(i / W) % C, f = 1.2 - .5 * (y % 256) / 120, v = b[i * 4 + 3] > 128 ? .85 + .3 * (.3 * b[i * 4] + .59 * b[i * 4 + 1] + .11 * b[i * 4 + 2]) / 255 : 1; // (lit from above, a touch of his shading)
+    out.set([tint[0] * f * v, tint[1] * f * v, tint[2] * f * v, 255], i * 4); }
+  const pal = recipe.pixel || { dark: '#' + tint.map(v => Math.round(v * .5).toString(16).padStart(2, '0')).join(''), base: recipe.tint || '#5a6070', light: '#' + tint.map(v => Math.min(255, Math.round(v * 1.45)).toString(16).padStart(2, '0')).join(''), accent: (recipe.seam && recipe.seam.color) || '#4ff0ff' };
+  gearPixelize(out, reg, acc, pal, W, H);
+  const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
+}
 // a recipe's problems (the Gear Studio shows them; the game ignores a recipe that has any)
 function gearRecipeProblems(r, slots) { const out = [];
   if (!r || typeof r !== 'object') return ['not a recipe'];

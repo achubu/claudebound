@@ -1,0 +1,17 @@
+{
+ "v": 1,
+ "slot": "helmet",
+ "name": "Chronoguard Helm",
+ "texture": "plain",
+ "tint": "#26263a",
+ "shade": 1,
+ "pixel": {
+  "dark": "#111118",
+  "base": "#26263a",
+  "light": "#3f3f58",
+  "accent": "#ffcc33"
+ },
+ "helmet": {
+  "style": "knight"
+ }
+}

@@ -8,7 +8,7 @@ const r = JSON.parse(run(`(() => { const o = {};
     state.hp = state.maxHp = 100; state.room = '1,5'; const s = roomSpawns('1,5').find(x => !x.boss); startBattle(s.uid); const b = state.battle;
     b.enemy = { ...b.enemy, hp: 300, maxHp: 300, armor: 0, guard: 0, attack: 10, element: null }; b.hand = []; b.draw = Array.from({ length: 20 }, () => make('guard')); b.discard = []; b.energy = 9; b.turn = 1; return b; };
   const play = (b, id) => { b.hand.push(make(id)); playCard(b.hand.length - 1); };
-  o.ids = Object.keys(GEAR).filter(id => !GEAR_RULES[id]);
+  o.ids = Object.keys(GEAR).filter(id => !GEAR_RULES[id] && !GEAR[id].bossDrop); // (Round 571: the helmets, a boss's reward, give max HP only)
   let b = fight('ember'); play(b, 'strike'); const burn1 = b.burn; play(b, 'strike'); o.kindle = { burn: burn1, once: (b.logs.join(' ').match(/Kindle/g) || []).length };
   b = fight('scarabBelt'); play(b, 'mend'); play(b, 'mend'); o.scarab = b.hand.length;
   b = fight('galeweavePants'); for (let i = 0; i < 3; i++) play(b, 'guard'); const blk = b.block; play(b, 'guard'); o.gale = b.block - blk - statBeforeTwists(make('guard')).block;
