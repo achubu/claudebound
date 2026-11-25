@@ -5,6 +5,6 @@
   "stormglassBelt",
   "hourglassBelt"
  ],
- "clear": true,
- "v": 1
+ "clear": false,
+ "v": 2
 }

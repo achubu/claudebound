@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 559: a beltless base sheet for all future gear
+
+(Owner: "Can we create a new sprite sheet without the tool belt to use for future gear".) `assets/characters/protagonist-walk9-base.png`
+is the hero without his brown tool belt and pouch (Codex's cleaned sheet from the belt handoff: same grid, outline identical).
+Every look is now fitted on it and drawn on it. The brown belt became the belt slot's **default look**
+(`assets/characters/wearable/default-belt/patch.png`: the pixels the base changed, opaque, laid source-atop like a clear patch),
+drawn whenever no belt with a look is worn; base + it is the original hero exactly (0 difference; `tools/wearable_add.py --check`
+proves it each run). So:
+- with nothing worn the game shows the original sheet as before; with gear on, the outfit is built on the base: slot by slot,
+  the worn look's overlay or the slot's default (`assets/hero-wear.js`, `HERO_WEAR_BASE`, `HERO_WEAR_DEFAULTS` in the generated
+  `assets/hero-wear-looks.js`);
+- the cyber belt no longer needs a clear patch (removed); a belt never will again;
+- the tool fits and proofs against the base, and a `--clean` sheet is the base with one slot's clothing painted out.
+Checked: in the browser, boots alone give the original hero (brown belt and all) with the boots over it (`tests/hero-wear.test.cjs`).
+The guide (`tools/art-refresh/wearable-gear.md`) and `CHATGPT-NOTES.md` say to fit on the base; the pants' tan hip patch goes
+away when ChatGPT re-fits the pants on it.
+
 ## Round 558: cyber pants and chest armor; the hero never blinks out
 
 - **Two more looks** from ChatGPT through the Round 555 process: `cyber-pants` (slot pants; Galeweave and Mossweave Pants; PR

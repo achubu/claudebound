@@ -3,6 +3,21 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## New base sheet for all gear: the hero without his tool belt (Round 559; read this first)
+
+**Fit every look from now on on `assets/characters/protagonist-walk9-base.png`**: the hero, same grid and outline, without his
+brown tool belt and pouch (your cleaned sheet from the belt handoff). The brown belt is now the belt slot's default look,
+drawn by the game when no belt is worn, so the hero with nothing worn is unchanged. What this means for you:
+- lay your overlay over the **base** sheet when fitting and checking;
+- a `cleaned.png`, if one is ever needed, starts from the **base**;
+- no belt needs a cleaned sheet again.
+
+**The pants fix becomes simpler:** fit the pants on the base sheet. Where the pouch was, the base has plain trouser cloth:
+cover it like the rest of the leg (that is the tan patch beside the cyber belt). Re-deliver `tools/art-refresh/wearable/
+cyber-pants/overlay.png` in a new pull request; Claude re-runs the tool. The boots and chest armor are fine as they are.
+
+`tools/art-refresh/wearable-gear.md` is updated to match.
+
 ## Pants and chest armor (your PRs #321 and #322): in, with one fix to the pants (Round 558)
 
 Both went through `tools/wearable_add.py` first time and look good worn together with the boots and belt. Thank you for
@@ -10,10 +25,8 @@ checking the combined outfit and for flagging the pouch in the pants README: tha
 
 **The fix (pants):** with the pants **and** the belt worn, a **tan patch shows at the hip in the side views** (rows 1 and 2,
 most frames). The belt's clear patch (`assets/characters/wearable/cyber-belt/clear.png`: every pixel with alpha 255) repaints the
-old pouch as tan trouser cloth, and part of that area lies outside the leg your pants follow. Please extend the pants overlay
-so it **covers every clear-patch pixel that lies in the trouser area** (hip and thigh below the belt line), in all 36 frames, and
-re-deliver `overlay.png` in a new pull request. Check it by laying, in this order: the original hero, the belt's `clear.png`,
-your pants, then the belt's `overlay.png`: no tan should show anywhere below the belt.
+old pouch as tan trouser cloth, and part of that area lies outside the leg your pants follow. Superseded by Round 559 (above): fit the pants on the new
+base sheet, covering the trouser cloth where the pouch was.
 
 **Gloves:** when the image generator is available again, deliver `cyber-gloves` the same way (your preparation notes are right:
 fingerless, only on the hands, the left forearm's Aetherlink untouched, ids `ember, thornhideGloves, tempestGloves`).

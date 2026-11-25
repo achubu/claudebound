@@ -7,7 +7,7 @@
 // must go, a clear patch (only the pixels it repaints, opaque). The hero's sheet is drawn, then every worn look's clear patch
 // source-atop (its colours, the hero's own outline), then every overlay, in slot order (HERO_WEAR_SLOTS: pants, boots,
 // shirt, belt, gloves). So looks for different slots stack, with no cleaned hero for each combination.
-const HERO_WEAR_VERSION = '555';
+const HERO_WEAR_VERSION = '559';
 const HERO_BASE_SHEET = 'assets/characters/protagonist-walk9.png?v=round251';
 const HERO_WEAR_LOOKS = typeof HERO_WEAR_DATA === 'object' ? HERO_WEAR_DATA : {};
 const HERO_WEAR_ART = {}; for (const [look, d] of Object.entries(HERO_WEAR_LOOKS)) for (const id of d.items) (HERO_WEAR_ART[d.slot] = HERO_WEAR_ART[d.slot] || {})[id] = look;
@@ -30,12 +30,16 @@ function heroWearApply() {
   // (the look on screen stays until the new sheet is ready and decoded: never a blank hero)
   if (typeof document === 'undefined' || !document.createElement || typeof Image === 'undefined') return;
   const ver = l => '?v=' + HERO_WEAR_VERSION + '.' + (HERO_WEAR_LOOKS[l].v || 1); // (a look's art version: tools/wearable_add.py raises it on every update)
-  const clears = looks.filter(l => HERO_WEAR_LOOKS[l].clear).map(l => HERO_WEAR_LOOKS[l].clear + ver(l)), overlays = looks.map(l => HERO_WEAR_LOOKS[l].overlay + ver(l));
-  const srcs = [HERO_BASE_SHEET, ...clears, ...overlays];
+  const clears = looks.filter(l => HERO_WEAR_LOOKS[l].clear).map(l => HERO_WEAR_LOOKS[l].clear + ver(l));
+  // Round 559: drawn on the base (the hero without his brown tool belt); slot by slot the worn look's overlay, or the slot's
+  // default look (the brown belt) where nothing with a look is worn there, laid like a clear patch so base + it is the hero exactly
+  const worn = new Set(looks.map(l => HERO_WEAR_LOOKS[l].slot)), defs = typeof HERO_WEAR_DEFAULTS === 'object' ? HERO_WEAR_DEFAULTS : {}, order = typeof HERO_WEAR_SLOTS !== 'undefined' ? HERO_WEAR_SLOTS : [];
+  const layers = []; for (const sl of order) { const l = looks.find(x => HERO_WEAR_LOOKS[x].slot === sl); if (l) layers.push({ src: HERO_WEAR_LOOKS[l].overlay + ver(l), op: 'source-over' }); else if (defs[sl] && !worn.has(sl)) layers.push({ src: defs[sl] + '?v=' + HERO_WEAR_VERSION, op: 'source-atop' }); }
+  const base = typeof HERO_WEAR_BASE === 'string' ? HERO_WEAR_BASE + '?v=' + HERO_WEAR_VERSION : HERO_BASE_SHEET, srcs = [base, ...clears, ...layers.map(x => x.src)];
   Promise.all(srcs.map(src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; })))
     .then(imgs => { const c = document.createElement('canvas'); c.width = imgs[0].naturalWidth; c.height = imgs[0].naturalHeight; const g = c.getContext('2d');
       g.drawImage(imgs[0], 0, 0); g.globalCompositeOperation = 'source-atop'; for (let i = 1; i <= clears.length; i++) g.drawImage(imgs[i], 0, 0); // (the clear patches: their colours inside the hero's own outline)
-      g.globalCompositeOperation = 'source-over'; for (let i = 1 + clears.length; i < imgs.length; i++) g.drawImage(imgs[i], 0, 0);
+      layers.forEach((x, j) => { g.globalCompositeOperation = x.op; g.drawImage(imgs[1 + clears.length + j], 0, 0); }); g.globalCompositeOperation = 'source-over';
       c.toBlob(b => { if (!b) return; const url = URL.createObjectURL(b);
         while (heroWearCache.size >= 4) { const [k0, u0] = heroWearCache.entries().next().value; heroWearCache.delete(k0); if (u0 !== heroWearUrl) URL.revokeObjectURL(u0); }
         heroWearCache.set(key, url);

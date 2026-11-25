@@ -56,6 +56,14 @@ console.log('hero-wear (harness) ok');
     const px = (img) => { const c = document.createElement('canvas'); c.width = 2304; c.height = 1024; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return g.getImageData(0, 0, 2304, 1024).data; }, A = px(a), B = px(b); let n = 0, alpha = 0; for (let i = 0; i < A.length; i += 4) { if (A[i] !== B[i] || A[i + 1] !== B[i + 1] || A[i + 2] !== B[i + 2]) n++; if (A[i + 3] < 128 && B[i + 3] - A[i + 3] > 60) alpha++; } return { n, alpha }; });
   assert(differs.n > 10000, 'the belted sheet differs from the plain one at the waist (' + differs.n + ' px)');
   assert(differs.alpha < 1500, 'and keeps the hero\'s outline: the belt reaches past it in only ' + differs.alpha + ' px (its soft edge over the waist\'s antialiasing is expected)');
+  // (Round 559) the base is the beltless hero; with no belt worn the brown belt is drawn back: boots alone = the original hero
+  // with the boots over it, to the pixel (rounding aside)
+  await page.evaluate(() => { equipGear('belt', null); state.relics.push('cloudstepBoots'); equipGear('boots', 'cloudstepBoots'); }); await settle(); await page.waitForTimeout(300);
+  const exact = await page.evaluate(async () => { const load = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = s; }); const [a, o, b] = await Promise.all([load('assets/characters/protagonist-walk9.png'), load(HERO_WEAR_LOOKS['cyber-boots'].overlay), load(heroWearUrl)]);
+    const c = document.createElement('canvas'); c.width = 2304; c.height = 1024; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(o, 0, 0); const A = g.getImageData(0, 0, 2304, 1024).data;
+    g.clearRect(0, 0, 2304, 1024); g.drawImage(b, 0, 0); const B = g.getImageData(0, 0, 2304, 1024).data; let n = 0; for (let i = 0; i < A.length; i += 4) if (Math.abs(A[i] - B[i]) > 3 || Math.abs(A[i + 1] - B[i + 1]) > 3 || Math.abs(A[i + 2] - B[i + 2]) > 3 || Math.abs(A[i + 3] - B[i + 3]) > 3) n++; return n; });
+  assert(exact < 50, 'boots alone: the original hero, brown belt and all, with the boots over it (' + exact + ' px differ)');
+  await page.evaluate(() => { equipGear('boots', null); equipGear('belt', 'scarabBelt'); }); await settle();
   await page.evaluate(() => { state.region = 'elaris'; configureRegion('elaris'); state.room = regionStartRoom(); state.pos = { x: 400, y: 250 }; renderWorld(); }); assert(/^url\("blob:/.test(await bg()), 'kept after a world change');
   await page.evaluate(() => save()); await page.reload(); await page.waitForTimeout(1200);
   await page.evaluate(() => { const b = document.getElementById('resumeBtn'); if (b) b.click(); });

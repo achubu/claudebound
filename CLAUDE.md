@@ -7,7 +7,7 @@ gallery; `arena.html` is a standalone prototype and is left untouched.
 **`CODEX-NOTES.md`** records Codex's generation review and recommendations for Claude; check its pinned baseline before acting.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 558) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 559) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -31,7 +31,7 @@ change set.
     battle-screen effect as a one- or two-word chip with a hover/tap bubble; keep new battle text short or it gets chipped), `juice` (Round 285: floating numbers, shake, flashes and Web Audio sounds; 🔊 mutes), `ui-clarity` (Round 292: six top-bar buttons, with Save in the Menu; Round 295: the Aetherlink Gauntlet is a section of the Gear screen; End turn glows when nothing is playable; Round 293: no encounter bar, one-line forecasts, slim Pitch buttons; Round 294: a ✕ on every top-bar screen, a compact Character page and Deck screen; Round 296: the Character stat breakdown and the quest log's exploration panel; Round 344: the stats open from a 📊 Stats button), `item-names` (Round 325: no name labels under interactable objects and a softer glow; the name pops up above the object
     when you interact with it), `world-font` (Round 326: all text in the world view, HUD and buttons included, is one
     style and one on-screen size, 10% smaller than the old enemy labels; menus and battle keep their own type), `hero-wear-looks` and `hero-wear` (Rounds 554-555: worn gear
-    drawn on the hero; **adding a look is `tools/wearable_add.py`, the whole process in `tools/art-refresh/wearable-gear.md`**), then
+    drawn on the hero; **adding a look is `tools/wearable_add.py`, the whole process in `tools/art-refresh/wearable-gear.md`**; Round 559: looks are fitted on the beltless base `protagonist-walk9-base.png`, the brown belt is the belt slot's default look), then
     `god-mode` (Round 198: any card wins, all waypoints and maps open; while it is on, writes to the
     save keys are ignored, so leaving rolls back).
 - **Features wrap earlier functions:** `const fBefore = f; f = function () {...}`.
