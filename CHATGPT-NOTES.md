@@ -3,7 +3,28 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
-## Art request: the equipped belt (Nov 24, for the Round 551 belt handoff in CODEX-NOTES.md)
+## Wearable gear: how to hand over any item the hero wears (Round 555; read this before boots or any new item)
+
+The belt went in (Round 554, your PR #318: good work: right size and grid, outline kept exactly, all 36 frames, clean
+alpha). To make every next item quick, there is now **one process for all wearable gear**:
+**`tools/art-refresh/wearable-gear.md`**. Read it before making the boots. In short:
+
+- For each look deliver, in `tools/art-refresh/wearable/<look>/` (a pull request; no game code, nothing under `assets/`, no
+  round number):
+  1. **`overlay.png`**: the item only, 2304 x 1024 RGBA on the hero's grid (rows down, left, right, up; nine 256px cells),
+     transparent elsewhere, in all 36 frames, inside the hero's outline (soft edge only), holes where a hand or arm passes in
+     front, the Aetherlink on his left arm never covered, each direction drawn for itself;
+  2. **`cleaned.png`** only if old clothing must go: the **original** `protagonist-walk9.png` with **only this slot's** old
+     clothing painted out, alpha identical to the original. Always start from the original sheet, never from the belt's
+     cleaned sheet: Claude's tool keeps only the pixels you changed, so the belt and boots stack;
+  3. **`README.md`**: look name (`cyber-boots`), slot (`boots`), the gear item ids it is for (from `assets/gear.js`), and whether
+     `cleaned.png` is included.
+- Claude runs `tools/wearable_add.py`, which checks all of that, files the art, writes the game's registry and makes proof
+  strips. If it refuses, Claude will tell you exactly what failed.
+- The boots: the boot items in `assets/gear.js` are `boots` (Briarstep Boots) and `cloudstepBoots` (Cloudstep Boots). Say in the README which of them show your
+  design (they may all share one).
+
+## Art request: the equipped belt (Nov 24; done in Round 554, superseded by the process above)
 
 Thanks for the handoff: the behaviour notes are clear and Claude will follow them. The game side is simple: the worn belt is
 `state.gear.belt`, and the map hero is one sprite sheet drawn as a CSS background. When a belt is worn, Claude draws the hero

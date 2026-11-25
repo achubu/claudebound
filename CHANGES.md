@@ -3496,6 +3496,81 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 555: a process for wearable gear
+
+(Owner: "lets make sure that we document and create a process for adding new gear to the character, we don't want this to be
+labor intensive with new gear"; "make sure chatgpt knows what it needs to as well".)
+
+- **One command adds a look:** `tools/wearable_add.py --look <name> --slot <slot> --items <ids> --overlay <png> [--clean <png>]
+  [--proof <dir>]`. It checks the art against the hero's sheet (2304 x 1024, all 36 frames, inside the outline, a cleaned sheet
+  keeps the outline exactly, the items exist in `assets/gear.js` and are of that slot, no item in two looks), refuses with a list
+  of problems, or writes `assets/characters/wearable/<look>/` (`overlay.png`, `clear.png`, `look.json`), raises the look's art
+  version, regenerates the game's registry `assets/hero-wear-looks.js` and writes proof strips at 256px and 84px.
+  `--check` validates every look (the test runs it); `--rebuild` regenerates the registry.
+- **Looks stack:** a look no longer carries a whole cleaned hero. The tool keeps only the pixels the cleaned sheet changed, as an
+  opaque *clear patch*; the game draws the hero, every worn look's clear patch inside the hero's own outline (`source-atop`),
+  then the overlays in slot order (pants, boots, shirt, belt, gloves). So belt and boots combine without a cleaned hero for each
+  pair. The belt was converted: the result is identical to Round 554's to the pixel; the patch is 133 KB instead of a 1.3 MB
+  sheet.
+- **Documented:** `tools/art-refresh/wearable-gear.md` (how it works, what Codex delivers for each look, what Claude runs, the
+  looks so far). `CHATGPT-NOTES.md` has the short version for ChatGPT, for the boots and anything after.
+
+## Round 554: the worn belt shows on the hero
+
+(Owner: "implement this as the belt item when equiped as gear".) Codex's belt art (PR #318, kept in
+`tools/art-refresh/wearable-belt/integration-test/`): a copy of the hero's sheet with the old brown belt and pouch painted out
+and a belt-only sheet on the same grid, both 2304 x 1024 (four directions, nine 256px frames). Copied to
+`assets/characters/wearable/`.
+
+`assets/hero-wear.js` (after `world-font`): while a belt is worn (`state.gear.belt`, not merely owned), the two are drawn into
+one sheet once, cached by look and art version (four at most), and shown in place of the hero's sheet; the hero's own animation,
+frames and timing are untouched. All three belts (Scarab, Stormglass, Hourglass) share the one look through a registry
+(`HERO_WEAR_ART`, `HERO_WEAR_LOOKS`), so other designs can be added per item. It follows equip, swap and unequip, finding a belt
+(only when the slot was empty), saves and reloads, and world changes (it reapplies after every `renderWorld`). Until the sheet
+is ready, or if a picture fails to load, the plain hero shows, never a blank one; a change made while one is loading never
+lets the older one land. No stats, rewards or saves change.
+
+Checked: the cleaned base keeps the hero's outline exactly (alpha identical); all 36 frames have belt; the belt reaches past
+the outline only at the waist's soft edge (~640 px across the sheet); by eye at 256px and at game size (84px) in all four
+directions, standing and mid-stride, the Aetherlink untouched. `tests/hero-wear.test.cjs`: the art, the registry, the look
+following what is worn, and in the browser equip, world change, save and reload, unequip and a missing picture.
+
+## Round 553: the Sky Isles float
+
+(Owner: "sky isles needs to be more sky than land if possible, buildings need to be floating in the clouds with land bridges
+and some open areas and space for interactable objects".) The generated Sky Isles were a city with two winding strips of open
+sky through it. Now they are open sky with floating islands (`GEN_THEMES.sky.rivers`, `assets/chrono-gen.js`):
+
+- The roads are planned first (they never read the terrain). The ground they enclose, room by room, is cut into blocks. About
+  one block in five (`isleShare: 0.22`) is an island, always those under the start and boss rooms' middles. A room without a
+  sizeable island (120 cells) gets a round one on its road nearest the middle, so it has room for its objects. An island's edge
+  facing the sky wavers a little. Junctions, bends and dead ends of the roads stand on small islands.
+- A road beside an island is on it across its whole width (decided across the road, not by the sky's 50px cells: half a road
+  over the sky made bridges that bent); a road between two sky blocks is a glass bridge. Every bridge is checked to be a clean
+  crossing (straight, land at both ends, 3 to 16 cells, none beside another), with a stepping island added where it isn't,
+  until all are.
+- Islands are small, so the Sky Isles build closer to the edge: a 25px gap from the sky instead of 75px (`shoreGap: 1`), and
+  buildings on rows 6 cells deep instead of 7 (`buildD: 6`). Both are theme settings; the other worlds keep theirs (Elaris sets
+  its gap back to 3, as it inherits the Sky Isles' theme).
+
+Result on seeds 77, 1 and 9: about 48% land (it was about 90%), 37-52 bridges, about 50 buildings, every road over the sky under
+a bridge, and a square for objects in every room but at most two. Browser walks on seeds 77 and 1 reach every room, door and
+item with no problems. `tests/sky-isles.test.cjs` checks these on three seeds.
+
+**The sky's clouds** (owner: "we need better variety of cloud tiles ... i want some variation in clouds"; prompts in
+`tools/art-refresh/sky-clouds-prompts.md`): the owner's large cloud-sea picture (`src/cloud-sea.jpg`) replaces the 512px tile.
+It didn't wrap top to bottom (seam score 6.2), so a band of 200 rows (120 columns across) was crossfaded over each seam:
+`surfaces/water/cloud-sea.webp`, 1800 x 1880, seam scores 1.3 and 1.6. Drawn at 0.4, it repeats every ~720px instead of 256px.
+The sky is drawn as painted (`plainSea`): the sea's wet sand, blue tint, depth, shallows and foam greyed the pastel clouds.
+Elaris keeps them for its lakes.
+
+**Loose clouds:** the owner's sheet of twelve clouds on green (`src/cloud-sheet.jpg`) is keyed (green unmixed from the soft
+edges, then held back) and cut by shape into `props/cloud/` (round puff, long bank, puff trio, wisp, heart, torn, tower, twin
+wisps, small puff, scallop, curl, lobed). `genSkyClouds()` scatters them over the open sky from the seed: one chance in two on
+each 260px of sky, at a third to a half of the picture's size (never larger), some flipped, placed in world positions so a cloud
+over a room's edge is drawn by both rooms, only where its middle is over the sky, and clipped to the sky so it passes under the
+islands.
+
 ## Round 552: Elaris on the generator
 
 (Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm".) Elaris, the

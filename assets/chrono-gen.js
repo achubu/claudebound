@@ -481,7 +481,7 @@ function genTileExtraLinks(id) { const T = GEN_THEMES[id]; if (T.linksCache) ret
 // (assets/environment/sky-gen/, Rounds 545-547). Open sky takes the place of Solaris's rivers (the same machinery: nothing is
 // built beside it, a walkway crossing it is a glass bridge); no grass parks (roof gardens are pictures); glass walkways.
 // =====================================================================
-GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548',
+GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.22 /* Round 553: floating islands (rivers) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.sky && TILE_WORLD_DATA.sky.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   // the generated Sky Isles have no diagonal walkways; where dropping one would cut rooms off from the start (1,5 to 2,4 joins
@@ -497,20 +497,76 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
   alley: (key, d) => { const T = GEN_THEMES.sky, [wx, wy] = T.world(key), m = T.mains(T.seedNow != null ? T.seedNow : chronoSeed()); return d === 'e' || d === 'w' ? !m.rows.includes(wy) : !m.cols.includes(wx); },
   // open sky between the islands: Solaris's two rivers (a long one north to south, a short one meeting it), from the seed
   hole: (seed, gx, gy) => GEN_THEMES.sky.rivers(seed).has(gx + ',' + gy), riverCache: null,
+  // Round 553 (owner: "sky isles needs to be more sky than land ... buildings need to be floating in the clouds with land
+  // bridges and some open areas and space for interactable objects"): open sky everywhere but floating islands. The roads are
+  // planned first (they never read the terrain). The ground they enclose, room by room, is cut into blocks; about one block in
+  // five (isleShare) is an island, its edges facing the sky wavering, always those under the start and boss rooms' middles, and
+  // a room with no sizeable island gets a round one on its road. Junctions, bends and dead ends stand on small islands. A road
+  // beside an island is on it across its whole width; a road between two sky blocks is a glass bridge. Every bridge is made a
+  // clean crossing (straight, land at both ends, 3 to 16 cells, none beside another), a stepping island added where it isn't,
+  // until all are. hole() is the sky.
   rivers: seed => { const T = GEN_THEMES.sky, ck = String(seed); if (T.riverCache && T.riverCache.ck === ck) return T.riverCache.set;
-    const keys = T.keys(), set = new Set(), h = t => chronoHash(ck + ':skyvoid:' + t) / 4294967296;
+    const keys = T.keys(), land = new Set(), rnd = chronoRng(ck + ':isles');
     let mx = 0, my = 0; for (const k of keys) { const [x, y] = k.split(',').map(Number); mx = Math.max(mx, x); my = Math.max(my, y); }
-    const NXc = (mx + 1) * CG_COLS, NYc = (my + 1) * CG_ROWS, X0 = NXc * (0.3 + 0.4 * h('x')), p1 = 6.283 * h('p1'), p2 = 6.283 * h('p2'), p3 = 6.283 * h('p3');
-    const mainX = y => X0 + 7 * Math.sin(y / 8 + p1) + 3 * Math.sin(y / 3.3 + p2);
-    for (let y = -3; y < NYc + 3; y++) { const c = mainX(y), hw = 1.25 + 0.4 * Math.sin(y / 5 + p3); for (let x = Math.floor(c - hw - 1); x <= Math.ceil(c + hw + 1); x++) if (Math.abs(x + 0.5 - c) <= hw) set.add(x + ',' + y); }
-    const Y0 = NYc * (0.3 + 0.4 * h('y')), west = h('side') < 0.5, q1 = 6.283 * h('q1'), q2 = 6.283 * h('q2');
-    for (let x = west ? -3 : NXc + 2; west ? x < NXc : x >= 0; x += west ? 1 : -1) { const c = Y0 + 4 * Math.sin(x / 7 + q1) + 1.5 * Math.sin(x / 2.9 + q2), hw = 1.0;
-      for (let y = Math.floor(c - hw - 1); y <= Math.ceil(c + hw + 1); y++) if (Math.abs(y + 0.5 - c) <= hw) set.add(x + ',' + y);
-      if (Math.abs(x + 0.5 - mainX(c)) < 1.5) break; }
+    const CW = (mx + 1) * FG_COLS, CH = (my + 1) * FG_ROWS, plans = {};
+    const road = (X, Y) => { if (X < 0 || Y < 0 || X >= CW || Y >= CH) return false; const k = Math.floor(X / FG_COLS) + ',' + Math.floor(Y / FG_ROWS); if (!(k in plans)) plans[k] = keys.includes(k) ? genWith('sky', () => chronoRoomPlan(seed, k, { roadsOnly: true })) : null;
+      const pl = plans[k]; return !!(pl && pl.floor[(Y % FG_ROWS) * FG_COLS + X % FG_COLS]); };
+    const dry = (X, Y) => land.has((X >> 1) + ',' + (Y >> 1)); // (a 25px cell on an island's 50px cell)
+    // 25px work grid: 1 an island's ground, 2 road on an island
+    const L = new Uint8Array(CW * CH), at = (X, Y) => X >= 0 && Y >= 0 && X < CW && Y < CH ? L[Y * CW + X] : 0;
+    const isle = (cx, cy, r) => { r *= 2; const p = 6.283 * rnd(); for (let y = Math.floor(cy - r * 1.2); y <= Math.ceil(cy + r * 1.2); y++) for (let x = Math.floor(cx - r * 1.2); x <= Math.ceil(cx + r * 1.2); x++) { // (cx, cy, r in 25px cells after doubling)
+      if (x < 0 || y < 0 || x >= CW || y >= CH) continue; const dx = x + 0.5 - cx, dy = y + 0.5 - cy; if (Math.hypot(dx, dy) <= r * (1 + 0.12 * Math.sin(3 * Math.atan2(dy, dx) + p))) L[y * CW + x] = 1; } };
+    // the blocks: the ground the roads enclose. About half of them are islands (the rest open sky), always those under the
+    // start and boss rooms' middles; a room with no island block gets its biggest
+    const blk = new Int32Array(CW * CH).fill(-1), blocks = [];
+    for (let Y = 0; Y < CH; Y++) for (let X = 0; X < CW; X++) { if (road(X, Y) || blk[Y * CW + X] >= 0) continue; const id = blocks.length, st = [[X, Y]], cells = []; blk[Y * CW + X] = id;
+      while (st.length) { const [x, y] = st.pop(); cells.push([x, y]); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < CW && ny < CH && blk[ny * CW + nx] < 0 && !road(nx, ny) && Math.floor(nx / FG_COLS) === Math.floor(X / FG_COLS) && Math.floor(ny / FG_ROWS) === Math.floor(Y / FG_ROWS)) { /* (one room's: the roads don't close every block) */ blk[ny * CW + nx] = id; st.push([nx, ny]); } } }
+      blocks.push(cells); }
+    const pick = new Set(); blocks.forEach((c, i) => { if (c.length >= 12 && rnd() < T.isleShare) pick.add(i); });
+    for (const k of T.landing()) { const [x, y] = k.split(',').map(Number); for (const [a, b] of [[12, 7], [20, 7], [12, 13], [20, 13]]) { const i = blk[(y * FG_ROWS + b) * CW + x * FG_COLS + a]; if (i >= 0) pick.add(i); } }
+    const need = []; for (const k of keys) { const [x, y] = k.split(',').map(Number), here = {}; for (let b = 0; b < FG_ROWS; b++) for (let a = 0; a < FG_COLS; a++) { const i = blk[(y * FG_ROWS + b) * CW + x * FG_COLS + a]; if (i >= 0) here[i] = (here[i] || 0) + 1; }
+      const ids = Object.keys(here).map(Number); if (!ids.some(i => pick.has(i) && here[i] >= 120)) need.push(k); }
+    for (const i of pick) for (const [x, y] of blocks[i]) L[y * CW + x] = 1;
+    // (a room with no island block: a round island on its road nearest the middle, room for its objects)
+    for (const k of need) { const [x, y] = k.split(',').map(Number); let best = null, bd = Infinity; for (let b = 3; b < FG_ROWS - 3; b++) for (let a = 4; a < FG_COLS - 4; a++) { const X = x * FG_COLS + a, Y = y * FG_ROWS + b; if (!road(X, Y)) continue; const d = Math.hypot(a - FG_COLS / 2, b - FG_ROWS / 2); if (d < bd) { bd = d; best = [X, Y]; } }
+      if (best) isle(best[0] + 0.5, best[1] + 0.5, 3.6); }
+   
+    // an island's edge facing the sky wavers (seeded noise, two cells deep at most), so islands aren't plain rectangles; its
+    // ground beside the roads stays
+    for (let pass = 0; pass < 2; pass++) { const cut = []; for (const i of pick) for (const [x, y] of blocks[i]) { if (!L[y * CW + x]) continue;
+        let sky = false, nearRoad = false; for (let b = -1; b <= 1; b++) for (let a = -1; a <= 1; a++) { const nx = x + a, ny = y + b; if (road(nx, ny)) nearRoad = true; else if (nx >= 0 && ny >= 0 && nx < CW && ny < CH && !L[ny * CW + nx]) sky = true; }
+        if (sky && !nearRoad && chronoNoise(seed, 'isle-edge' + pass, x, y, 2.5) > 0.45) cut.push(y * CW + x); }
+      for (const i of cut) L[i] = 0; }
+    // the roads' junctions, bends and dead ends stand on land (a small island each)
+    const run = (X, Y, dx, dy) => { let n = 1; for (let t = 1; road(X + dx * t, Y + dy * t); t++) n++; for (let t = 1; road(X - dx * t, Y - dy * t); t++) n++; return n; };
+    for (let Y = 0; Y < CH; Y++) for (let X = 0; X < CW; X++) if (road(X, Y)) { const h = run(X, Y, 1, 0), v = run(X, Y, 0, 1);
+      const inner = X % FG_COLS > 1 && X % FG_COLS < FG_COLS - 2 && Y % FG_ROWS > 1 && Y % FG_ROWS < FG_ROWS - 2, end = inner && ((h > v && (!road(X + 1, Y) || !road(X - 1, Y))) || (v > h && (!road(X, Y + 1) || !road(X, Y - 1))));
+      if ((h >= 5 && v >= 5) || end) for (let b = -2; b <= 2; b++) for (let a = -2; a <= 2; a++) if (X + a >= 0 && Y + b >= 0 && X + a < CW && Y + b < CH) L[(Y + b) * CW + X + a] = 1; }
+    // the 50px cells: land where half its ground is island, or a road beside an island
+    const toLand = () => { land.clear();
+      // a road cell is on an island when, walking straight across the road from it either way, the first ground is island:
+      // the road's whole width is then dry (a 50px cell holding any of it is land), never half a road over the sky
+      const dryRoad = (X, Y) => { if (at(X, Y)) return true; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { let t = 1; while (t < 6 && road(X + dx * t, Y + dy * t)) t++; const nx = X + dx * t, ny = Y + dy * t; if (t < 6 && at(nx, ny)) return true; } return false; };
+      for (let y = 0; y < CH / 2; y++) for (let x = 0; x < CW / 2; x++) { let n = 0, dr = false;
+        for (let b = 0; b < 2; b++) for (let a = 0; a < 2; a++) { const X = x * 2 + a, Y = y * 2 + b; if (road(X, Y)) { if (dryRoad(X, Y)) dr = true; } else if (at(X, Y)) n++; }
+        if (dr || n >= 2) land.add(x + ',' + y); } };
+    toLand(); T.isleStats = { first: land.size }; // (how much land the blocks gave, and after the stepping islands: for QA)
+    // every road over the sky a clean crossing: where one isn't, a stepping island at its middle (or over its corner), again
+    // until none is left
+    for (let pass = 0; pass < 12; pass++) { const wet = new Set(); for (let Y = 0; Y < CH; Y++) for (let X = 0; X < CW; X++) if (road(X, Y) && !dry(X, Y)) wet.add(X + ',' + Y);
+      const fix = [], boxes = [], sn = new Set(); for (const k0 of wet) { if (sn.has(k0)) continue; const st = [k0], g = []; sn.add(k0);
+        while (st.length) { const k = st.pop(), [x, y] = k.split(',').map(Number); g.push([x, y]); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = (x + dx) + ',' + (y + dy); if (wet.has(n) && !sn.has(n)) { sn.add(n); st.push(n); } } }
+        const x0 = Math.min(...g.map(c => c[0])), x1 = Math.max(...g.map(c => c[0])), y0 = Math.min(...g.map(c => c[1])), y1 = Math.max(...g.map(c => c[1])), w = x1 - x0 + 1, h = y1 - y0 + 1;
+        const on = (x, y) => road(x, y) && !wet.has(x + ',' + y), sides = { ew: 0, ns: 0 }; for (const [x, y] of g) { if (on(x - 1, y) || on(x + 1, y)) sides.ew++; if (on(x, y - 1) || on(x, y + 1)) sides.ns++; }
+        const ends = sides.ew ? [x0 - 1, x1 + 1].map(x => g.some(([, y]) => on(x, y))) : [y0 - 1, y1 + 1].map(y => g.some(([x]) => on(x, y)));
+        const cx = (x0 + x1 + 1) / 4, cy = (y0 + y1 + 1) / 4, near = boxes.some(q => x0 <= q[2] + 5 && x1 >= q[0] - 5 && y0 <= q[3] + 5 && y1 >= q[1] - 5);
+        if ((sides.ew && sides.ns) || Math.min(w, h) > 4 || Math.max(w, h) > 16 || Math.max(w, h) < 3 || !ends.every(Boolean) || !(sides.ew || sides.ns) || near) fix.push([cx, cy, Math.max(w, h) < 3 ? 1.6 : 2.6]); else boxes.push([x0, y0, x1, y1]); }
+      if (!fix.length) break; for (const [cx, cy, r] of fix) isle(cx * 2, cy * 2, r); toLand(); T.isleStats.pass = pass; }
+    T.isleStats.final = land.size; const set = new Set(); for (let y = -3; y < (my + 1) * CG_ROWS + 3; y++) for (let x = -3; x < (mx + 1) * CG_COLS + 3; x++) if (!land.has(x + ',' + y)) set.add(x + ',' + y);
     T.riverCache = { ck, set }; return set; },
   noParks: true, oasis: false, alleyVerge: false, lampGlow: .14, parkDim: 'rgba(10,0,20,.06)', floorRange: [2, 3], landmarkLot: 380, landmarkW: 300,
-  tex: { pipes: 'surfaces/plaza/pavers', chasm: 'surfaces/water/clouds', overgrowth: 'surfaces/plaza/pavers', water: 'surfaces/water/clouds', sand: 'surfaces/sand/grating', floor: 'surfaces/plaza/glass-panes', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/plaza/pavers', yard: 'surfaces/lot/cargo-plates', 'yard-cargo': 'surfaces/lot/cargo-plates', 'yard-rubble': 'surfaces/lot/cargo-plates', 'yard-market': 'surfaces/plaza/mosaic', 'pavement-old': 'surfaces/sidewalk/glass-tiles', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' },
-  texScale: { chasm: 0.5, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.35, plaza: 0.35, sand: 0.35, water: 0.5, overgrowth: 0.35, pipes: 0.35 },
+  tex: { pipes: 'surfaces/plaza/pavers', chasm: 'surfaces/water/cloud-sea', overgrowth: 'surfaces/plaza/pavers', water: 'surfaces/water/cloud-sea', sand: 'surfaces/sand/grating', floor: 'surfaces/plaza/glass-panes', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/plaza/pavers', yard: 'surfaces/lot/cargo-plates', 'yard-cargo': 'surfaces/lot/cargo-plates', 'yard-rubble': 'surfaces/lot/cargo-plates', 'yard-market': 'surfaces/plaza/mosaic', 'pavement-old': 'surfaces/sidewalk/glass-tiles', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' },
+  texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.35, plaza: 0.35, sand: 0.35, water: 0.4, overgrowth: 0.35, pipes: 0.35 },
   kerb: ['#2a1d3a', '#e6d8ff', '#8a74b8'], yardRim: ['#2a1d3a', '#d8c8f4'], groundShade: 'rgba(40,0,60,.05)', lamp: '190,240,255', vignette: '30,10,50',
   tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
     curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['glass-tiles'], park: [], 'waterfront-edge': [],
@@ -519,7 +575,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     car: ['sky-skiff', 'hover-van'], tree: ['blossom-tree', 'teal-tree'], lamp: ['glow-street-lamp'], 'sign-traffic': ['holo-post'], cargo: ["sky-pods", "hover-crates", "drone-pad", "cargo-crane", "neon-kiosk", "holo-stand", "glow-vending", "noodle-cart"], clutter: ["planter-cluster", "curved-bench", "glow-lamp", "recycle-bin", "crate-pile", "potted-blossom", "mini-dish", "glow-bollard"],
     'ruinpic-garden': ['shattered-greenhouse', 'broken-skygate'], 'ruinpic-homes': ['broken-block', 'cracked-pod'], 'ruinpic-tech': ['snapped-antenna', 'crashed-gondola'], 'ruinpic-market': ['wrecked-hall', 'burnt-arcade'],
     'parkpic-garden': ['blossom-court', 'tea-garden', 'stream-garden'], 'parkpic-homes': ['garden-path', 'flower-beds'], 'parkpic-market': ['lantern-garden', 'fountain-court'], 'parkpic-tech': ['cushion-terrace'],
-    landmark: ['sky-crystal', 'wind-spire', 'guardian-statue', 'glass-fountain'],
+    landmark: ['sky-crystal', 'wind-spire', 'guardian-statue', 'glass-fountain'], cloud: ['round-puff', 'long-bank', 'puff-trio', 'wisp', 'heart', 'torn', 'tower', 'twin-wisps', 'small-puff', 'scallop', 'curl', 'lobed'] /* Round 553: loose clouds over the sky */,
     'building-market': ['holo-shop', 'glass-market', 'drone-stall', 'tea-bar', 'boutique', 'courier-depot', 'sky-arcade', 'lantern-shop'], 'building-homes': ['balcony-block', 'garden-terrace', 'dome-pod', 'bay-tower', 'townhouses', 'courtyard-apts', 'pod-cluster', 'round-window-apt'],
     'building-tech': ['crystal-hall', 'dock-tower', 'data-spire', 'antenna-house', 'turbine-hall', 'weather-station', 'crystal-battery', 'beacon-house'], 'building-garden': ['glass-greenhouse', 'tea-pavilion', 'hydro-house', 'bell-tower', 'cloud-temple', 'blossom-pavilion', 'sky-observatory', 'shrine-gate'] },
   roofKit: {}, doorWalls: [],
@@ -535,7 +591,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
 // owner's forest art (assets/environment/wilds-gen/, Rounds 549-550). Three lakes from the journey's seed take the place of the
 // rivers (the same machinery: nothing is built on their muddy banks, a road crossing one is the boardwalk bridge).
 // =====================================================================
-GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552',
+GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false /* (not the Sky Isles' settings) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds && TILE_WORLD_DATA.wilds.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.wilds.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   extraLinks: () => genTileExtraLinks('wilds'), linksCache: null,
@@ -638,7 +694,7 @@ function genWorld(seed) {
   // (owner: "there is a square shape overlapping the beach ... make sure it cant happen"): nothing is built within 3 cells
   // (75px) of the sea, diagonals included. It was 2 cells straight across only, so a lot at a corner of the shore, or one
   // against the shoreline strip, lay over the sand.
-  { const SH = GEN.topdown ? 3 : 2, shore = []; for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) if (cell[y * CW + x] === 1) { let near = false;
+  { const SH = GEN.shoreGap != null ? GEN.shoreGap : GEN.topdown ? 3 : 2 /* Round 553: a theme's own (the Sky Isles' islands are small) */, shore = []; for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) if (cell[y * CW + x] === 1) { let near = false;
       if (GEN.topdown) { for (let b = -SH; b <= SH && !near; b++) for (let a = -SH; a <= SH; a++) if (at(x + a, y + b) === 3) { near = true; break; } }
       else for (let d = 1; d <= 2 && !near; d++) if ([[d, 0], [-d, 0], [0, d], [0, -d]].some(([a, b]) => at(x + a, y + b) === 3)) near = true;
       if (near) shore.push(y * CW + x); } for (const i of shore) cell[i] = 3; }
@@ -679,7 +735,7 @@ function genWorld(seed) {
   //   3. A piece too shallow or too narrow for a building at that scale is a `small` lot: a yard, a parking lot or a
   //      pocket park, never a building with squeezed storeys.
   // =====================================================================
-  const BUILD_D = 7, BUILD_W = 5, ROW_MAX = 13, LOT_MAX = 11;
+  const BUILD_D = GEN.buildD || 7 /* Round 553: a theme's own (the Sky Isles' islands are small) */, BUILD_W = 5, ROW_MAX = 13, LOT_MAX = 11;
   const isBuild = r => r[2] - r[0] >= BUILD_W - 1 && r[3] - r[1] >= BUILD_D; // (a building may be 4 cells wide where a square was cut from its lot)
   if (GEN.topdown) { const free = new Uint8Array(CW * CH); for (let i = 0; i < cell.length; i++) free[i] = cell[i] === 1 ? 1 : 0;
     const rects = [], hgt = new Int16Array(CW);
@@ -1185,6 +1241,21 @@ const CITY_BRIDGE_PIECES = [322, 494, 322]; // (the west, middle and east pieces
 // its bottom (489); the middle's deck runs from cut 31 to cut 435 (it repeats every 404); the south piece's top cut is at 35 and
 // its deck ends at 689 (its towers hang below, the front of them showing).
 const CITY_BRIDGE_V = { north: { deckL: 49, w: 450, start: 194, cut: 489 }, mid: { deckL: 42, w: 450, top: 31, bottom: 435 }, south: { deckL: 46, w: 445, top: 35, end: 689 } };
+// Round 553 (owner: "i want some variation in clouds"): the owner's loose clouds (props/cloud/) scattered over the open sky
+// from the seed, in world positions (a cloud over a room's edge is drawn by both rooms), one chance in two on each 260px of
+// sky, only where the cloud's middle is over the sky, clipped to the sky so it passes under the islands; never drawn wider
+// than its picture (a third to a half of it).
+function genSkyClouds(ctx, key, seaMask, K, W, H, imgs) {
+  const list = (CITY_TD_ART.cloud || []).map(n => imgs[cityArtPath('cloud', n)]).filter(i => i && i.naturalWidth); if (!list.length) return;
+  const seed = chronoSeed(), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, STEP = 260, M = 320, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); let any = false;
+  for (let gy = Math.floor((oy - M) / STEP); gy <= Math.floor((oy + 500 + M) / STEP); gy++) for (let gx = Math.floor((ox - M) / STEP); gx <= Math.floor((ox + 800 + M) / STEP); gx++) {
+    const h = chronoHash(seed + ':cloud:' + gx + ',' + gy), u = k => ((h >>> k) & 255) / 255; if (u(0) > 0.5) continue;
+    const img = list[(h >>> 8) % list.length], w = img.naturalWidth * (0.33 + 0.17 * u(16)), hh = w * img.naturalHeight / img.naturalWidth;
+    const cx = gx * STEP + STEP * (0.15 + 0.7 * u(24)), cy = gy * STEP + STEP * (0.15 + 0.7 * u(4));
+    if (!(GEN.hole && GEN.hole(seed, Math.floor(cx / 50), Math.floor(cy / 50)))) continue; // (its middle over the sky)
+    const x = cx - w / 2 - ox, y = cy - hh / 2 - oy; if (x > 800 || y > 500 || x + w < 0 || y + hh < 0) continue;
+    g.save(); g.globalAlpha = 0.92; if (u(12) < 0.5) { g.translate((x + w) * K, y * K); g.scale(-1, 1); g.drawImage(img, 0, 0, w * K, hh * K); } else g.drawImage(img, x * K, y * K, w * K, hh * K); g.restore(); any = true; }
+  if (!any) return; g.globalCompositeOperation = 'destination-in'; g.drawImage(seaMask, 0, 0); ctx.drawImage(c, 0, 0); }
 function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V = GEN.bridgeV || CITY_BRIDGE_V; /* Round 548: a theme's own pieces */
   const road = (b.x1 - b.x0) * C, wide = road * CITY_BRIDGE_COVER, k = wide / V.north.w, kS = wide / V.south.w, deckX = b.x0 * C - (wide - road) / 2 - ox;
   let a0 = b.y0 * C, a1 = b.y1 * C; const need = (V.north.cut - V.north.start) * k + (V.south.end - V.south.top) * kS + (V.mid.bottom - V.mid.top) * k * 0.5;
@@ -2382,11 +2453,13 @@ function paintChronoRoom(canvas, key) {
     const flat = (mask, col) => tintIn(mask, g => { g.fillStyle = col; g.fillRect(0, 0, W, H); });
     const beach = coast.beach;
     ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
-    ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
+    if (GEN.plainSea) { ctx.drawImage(tintIn(coast.sea, g => waterFill(g)), 0, 0); // Round 553: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
+      genSkyClouds(ctx, key, coast.sea, K, W, H, imgs); }
+    else { ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
     ctx.drawImage(tintIn(coast.sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(30,70,110,.16)'; g.fillRect(0, 0, W, H); }), 0, 0);
     ctx.save(); ctx.globalAlpha = 0.28; ctx.drawImage(flat(coast.deep, '#02040e'), 0, 0); ctx.restore();                      // deep water
     ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.42; ctx.drawImage(flat(coast.shallow, '#2a7f8e'), 0, 0); ctx.restore(); // shallows
-    ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore();                     // foam
+    ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore(); }                   // foam
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART['waterfront-edge'] || []).map(n => imgs[cityArtPath('waterfront-edge', n)]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
     if (GEN.coastLip) { // Round 461: no strip: the paving ends in a drawn concrete lip, crisp at canvas resolution, with a soft shadow on the sand
