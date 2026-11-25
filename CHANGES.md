@@ -3496,6 +3496,25 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 555: a process for wearable gear
+
+(Owner: "lets make sure that we document and create a process for adding new gear to the character, we don't want this to be
+labor intensive with new gear"; "make sure chatgpt knows what it needs to as well".)
+
+- **One command adds a look:** `tools/wearable_add.py --look <name> --slot <slot> --items <ids> --overlay <png> [--clean <png>]
+  [--proof <dir>]`. It checks the art against the hero's sheet (2304 x 1024, all 36 frames, inside the outline, a cleaned sheet
+  keeps the outline exactly, the items exist in `assets/gear.js` and are of that slot, no item in two looks), refuses with a list
+  of problems, or writes `assets/characters/wearable/<look>/` (`overlay.png`, `clear.png`, `look.json`), raises the look's art
+  version, regenerates the game's registry `assets/hero-wear-looks.js` and writes proof strips at 256px and 84px.
+  `--check` validates every look (the test runs it); `--rebuild` regenerates the registry.
+- **Looks stack:** a look no longer carries a whole cleaned hero. The tool keeps only the pixels the cleaned sheet changed, as an
+  opaque *clear patch*; the game draws the hero, every worn look's clear patch inside the hero's own outline (`source-atop`),
+  then the overlays in slot order (pants, boots, shirt, belt, gloves). So belt and boots combine without a cleaned hero for each
+  pair. The belt was converted: the result is identical to Round 554's to the pixel; the patch is 133 KB instead of a 1.3 MB
+  sheet.
+- **Documented:** `tools/art-refresh/wearable-gear.md` (how it works, what Codex delivers for each look, what Claude runs, the
+  looks so far). `CHATGPT-NOTES.md` has the short version for ChatGPT, for the boots and anything after.
+
 ## Round 554: the worn belt shows on the hero
 
 (Owner: "implement this as the belt item when equiped as gear".) Codex's belt art (PR #318, kept in

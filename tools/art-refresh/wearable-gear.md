@@ -1,0 +1,82 @@
+# Wearable gear: showing gear on the hero (Rounds 554-555)
+
+When the hero wears a piece of gear that has a **look**, the map shows it on him. A look is two pictures on the hero's own
+sprite-sheet grid, plus a line saying which gear items show it. Adding one is: **Codex delivers the two pictures → Claude runs
+one command → tests → merge.** No game code changes per item.
+
+## How it works in the game
+
+- The hero is one sprite sheet, `assets/characters/protagonist-walk9.png`: **2304 x 1024 px, 4 rows x 9 columns of 256 x 256
+  cells**. Rows from the top: **0 facing down (front), 1 facing left, 2 facing right, 3 facing up (back)**. Column 0 is
+  standing; columns 1-8 are the walk.
+- A look has:
+  - an **overlay**: the item alone, on that grid, everything else transparent;
+  - optionally a **clear patch**: the pixels where the hero's old clothing is painted out (for the belt, the old brown belt and
+    pouch), opaque, everything else transparent. Made by the tool from a cleaned hero; nobody draws it by hand.
+- When gear changes, `assets/hero-wear.js` draws: the hero's sheet → every worn look's clear patch (inside the hero's own
+  outline) → every worn look's overlay, in slot order **pants, boots, shirt, belt, gloves** (later on top). The result is cached
+  and replaces the hero's sheet; the animation, frames and timing are untouched. Without a look, or if a picture fails to load,
+  the plain hero shows.
+- Because each look only carries its own pixels, looks for different slots (belt and boots) **stack**: there is never a
+  cleaned hero per combination.
+- The registry `assets/hero-wear-looks.js` is generated from `assets/characters/wearable/<look>/look.json` by the tool. Never
+  edit it by hand.
+
+## What Codex delivers for each look
+
+Put the files in `tools/art-refresh/wearable/<look>/` (for example `tools/art-refresh/wearable/cyber-boots/`) and open a pull
+request. Don't change game code or anything under `assets/`; don't take a round number (Claude logs it).
+
+1. **`overlay.png`**: PNG, RGBA, **exactly 2304 x 1024**, the hero's grid as above.
+   - Each cell holds only that frame's item, at the exact pixel position on the hero in the same cell. Check by laying it over
+     `protagonist-walk9.png` at 100% and stepping through all 36 cells: it sits on the body and moves with it.
+   - **Every one of the 36 cells has the item** in it (a frame where it is hidden still shows what little is visible).
+   - Everything that isn't the item is **fully transparent**: no background, shadow, glow or green/magenta/red fringe.
+   - **Inside the hero's outline**: the item may not stick out past his silhouette except along its soft antialiased edge (the
+     tool allows 2000 px across the whole sheet).
+   - Where a hand, arm or other body part passes in front of the item, the item has a hole there.
+   - **The Aetherlink on his anatomical LEFT arm is never covered or changed** (gloves included).
+   - Each direction is drawn for itself: never flip left to make right.
+   - Don't move, crop, recentre or scale anything inside a cell; don't change the hero.
+2. **`cleaned.png`** (only if the item must hide clothing he already wears, e.g. new boots over his brown boots, a new belt over
+   the brown belt): the **original** `protagonist-walk9.png` with **only that slot's old clothing** painted out (filled with what
+   would be under it), same size and grid.
+   - **Its alpha must be identical to the original** (the outline doesn't move): the tool refuses it otherwise.
+   - Paint out **only this slot's area**, starting from the original sheet each time, never from another look's cleaned sheet
+     (boots: feet and lower shins; pants: legs; shirt: torso and upper arms; belt: waist and pouch; gloves: the hands, never the
+     left forearm's Aetherlink).
+   - Not needed when the overlay fully covers the old clothing in all 36 frames.
+3. **`README.md`**: the look's name (lower-case, hyphens: `cyber-boots`), its slot (`boots`, `pants`, `shirt`, `belt` or
+   `gloves`), and the gear items that show it, by their ids in `assets/gear.js` (e.g. `featherBoots, cloudstepBoots`; several
+   items may share one look). Say whether `cleaned.png` is included.
+
+Proof pictures are welcome but optional: the tool makes them.
+
+## What Claude does
+
+```
+python3 tools/wearable_add.py --look cyber-boots --slot boots --items featherBoots,cloudstepBoots \
+    --overlay tools/art-refresh/wearable/cyber-boots/overlay.png \
+    [--clean tools/art-refresh/wearable/cyber-boots/cleaned.png] --proof /tmp/proofs
+```
+
+The tool checks everything above (size, all 36 frames, inside the outline, the cleaned sheet's outline, the items exist and
+are of that slot, no item in two looks), refuses with a list of problems if any fail, otherwise writes
+`assets/characters/wearable/<look>/{overlay.png, clear.png, look.json}`, raises the look's art version (so browsers fetch
+the new pictures), regenerates `assets/hero-wear-looks.js` and writes proof strips (original | with the look, all 9 frames of
+each direction, at 256px and at the game's 84px). Re-running it with new art updates the look.
+
+Then:
+1. look at the proof strips (both sizes, all four directions);
+2. `node tests/hero-wear.test.cjs` with the local server running (`python3 -m http.server 8123`): it runs
+   `tools/wearable_add.py --check` on every look, and in the browser equips, swaps, unequips, changes world, saves and reloads;
+3. log the round in `CHANGES.md`, bump `?v=` on `hero-wear-looks.js` in `index.html`, merge.
+
+Other commands: `python3 tools/wearable_add.py --check` (validate all looks; the test runs it), `--rebuild` (regenerate the
+registry only). To remove a look, delete its folder and run `--rebuild`.
+
+## Looks so far
+
+| Look | Slot | Items | Clear patch | Round |
+|---|---|---|---|---|
+| `cyber-belt` | belt | scarabBelt, stormglassBelt, hourglassBelt | yes (old brown belt and pouch) | 554-555 |

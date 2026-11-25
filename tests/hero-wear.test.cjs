@@ -1,7 +1,6 @@
 'use strict';
 // Round 554: the worn belt on the hero (assets/hero-wear.js; Codex's art, PR #318).
-//  1. the art: both sheets are 2304 x 1024 RGBA on the hero's grid, the cleaned base keeps the hero's silhouette exactly,
-//     and every one of the 36 cells has belt pixels;
+//  1. the art: tools/wearable_add.py --check (Round 555);
 //  2. every belt item names a look whose pictures are on disk;
 //  3. the look follows what is worn (not what is owned): none without a belt, the belt's with one, back to none on taking
 //     it off; finding a belt while one is worn changes nothing; no stats change;
@@ -10,25 +9,14 @@
 process.env.HARNESS_ONLY = '1';
 const assert = require('assert'), fs = require('fs'), path = require('path'), zlib = require('zlib');
 const ROOT = path.join(__dirname, '..');
-// a minimal PNG reader: size, and the alpha channel (8-bit RGBA, non-interlaced)
-function png(file) { const b = fs.readFileSync(file); const w = b.readUInt32BE(16), h = b.readUInt32BE(20), depth = b[24], type = b[25]; let o = 8, idat = [];
-  while (o < b.length) { const len = b.readUInt32BE(o), t = b.toString('ascii', o + 4, o + 8); if (t === 'IDAT') idat.push(b.slice(o + 8, o + 8 + len)); o += 12 + len; }
-  assert(depth === 8 && type === 6, file + ' is 8-bit RGBA'); const raw = zlib.inflateSync(Buffer.concat(idat)), bpp = 4, stride = w * bpp, px = Buffer.alloc(h * stride);
-  for (let y = 0; y < h; y++) { const f = raw[y * (stride + 1)], line = raw.slice(y * (stride + 1) + 1, (y + 1) * (stride + 1));
-    for (let x = 0; x < stride; x++) { const a = x >= bpp ? px[y * stride + x - bpp] : 0, up = y ? px[(y - 1) * stride + x] : 0, c = x >= bpp && y ? px[(y - 1) * stride + x - bpp] : 0; let v = line[x];
-      if (f === 1) v += a; else if (f === 2) v += up; else if (f === 3) v += (a + up) >> 1; else if (f === 4) { const p = a + up - c, pa = Math.abs(p - a), pb = Math.abs(p - up), pc = Math.abs(p - c); v += pa <= pb && pa <= pc ? a : pb <= pc ? up : c; }
-      px[y * stride + x] = v & 255; } }
-  return { w, h, alpha: (x, y) => px[(y * w + x) * 4 + 3] }; }
-const hero = png(path.join(ROOT, 'assets/characters/protagonist-walk9.png')), base = png(path.join(ROOT, 'assets/characters/wearable/protagonist-walk9-nobelt.png')), belt = png(path.join(ROOT, 'assets/characters/wearable/belt-overlay.png'));
-for (const s of [base, belt]) assert(s.w === 2304 && s.h === 1024, 'the sheets are on the hero\'s 2304 x 1024 grid');
-let silhouette = 0; for (let y = 0; y < 1024; y++) for (let x = 0; x < 2304; x++) if (hero.alpha(x, y) !== base.alpha(x, y)) silhouette++;
-assert.strictEqual(silhouette, 0, 'the cleaned base keeps the hero\'s silhouette exactly');
-const empty = []; for (let r = 0; r < 4; r++) for (let c = 0; c < 9; c++) { let n = 0; for (let y = r * 256; y < r * 256 + 256 && !n; y++) for (let x = c * 256; x < c * 256 + 256; x++) if (belt.alpha(x, y) > 20) { n++; break; } if (!n) empty.push(r + ',' + c); }
-assert.deepStrictEqual(empty, [], 'the belt is in all 36 frames');
-
+// (1, Round 555) every look in assets/characters/wearable/ passes tools/wearable_add.py --check (sizes, all 36 frames, inside
+// the outline, clear patches opaque and inside the hero, items real and of the look's slot, no item in two looks) and the
+// generated registry matches the look folders
+{ const r = require('child_process').spawnSync('python3', [path.join(ROOT, 'tools/wearable_add.py'), '--check'], { encoding: 'utf8' });
+  assert.strictEqual(r.status, 0, 'wearable looks check:\n' + r.stdout + r.stderr); console.log(r.stdout.trim().split('\n').filter(l => !l.startsWith('wrote')).join('\n')); }
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); ensureGear(); const out = {};
-  out.files = Object.values(HERO_WEAR_LOOKS).flatMap(l => [l.base, l.overlay]); out.belts = Object.keys(GEAR).filter(id => GEAR[id].slot === 'belt'); out.mapped = Object.keys(HERO_WEAR_ART.belt);
+  out.files = Object.values(HERO_WEAR_LOOKS).flatMap(l => [l.clear, l.overlay]).filter(Boolean); out.order = HERO_WEAR_SLOTS.join(','); out.belts = Object.keys(GEAR).filter(id => GEAR[id].slot === 'belt'); out.mapped = Object.keys(HERO_WEAR_ART.belt);
   out.none = heroWearLooks().join('+');
   const stats = () => JSON.stringify(GEAR_SLOTS.map(s => state.gear[s]));
   state.relics.push('scarabBelt', 'stormglassBelt'); out.ownedOnly = heroWearLooks().join('+');
@@ -39,6 +27,7 @@ const r = JSON.parse(run(`(() => { newGame(); ensureGear(); const out = {};
   return JSON.stringify(out); })()`));
 for (const f of r.files) assert(fs.existsSync(path.join(ROOT, f)), f + ' is on disk');
 assert.deepStrictEqual(r.mapped.sort(), r.belts.sort(), 'every belt item names a look');
+assert.strictEqual(r.order, 'pants,boots,shirt,belt,gloves', 'looks stack in slot order');
 assert.strictEqual(r.none, '', 'no belt, no look');
 assert.strictEqual(r.ownedOnly, '', 'owning a belt is not wearing it');
 assert.strictEqual(r.worn, 'cyber-belt', 'a worn belt shows');
@@ -73,8 +62,8 @@ console.log('hero-wear (harness) ok');
   else console.log('  (no continue button found: reload check skipped)');
   await page.evaluate(() => { equipGear('belt', null); }); assert(/protagonist-walk9\.png/.test(await bg()), 'back to the plain hero on unequip');
   // missing art falls back to the plain hero
-  await page.route('**/belt-overlay.png*', rt => rt.abort());
-  await page.evaluate(() => { heroWearCache.clear(); heroWearKey = ''; HERO_WEAR_LOOKS['cyber-belt'].overlay = 'assets/characters/wearable/belt-overlay.png?missing=1'; state.relics.push('scarabBelt'); equipGear('belt', 'scarabBelt'); });
+  
+  await page.evaluate(() => { heroWearCache.clear(); heroWearKey = ''; HERO_WEAR_LOOKS['cyber-belt'].overlay = 'assets/characters/wearable/cyber-belt/missing.png'; state.relics.push('scarabBelt'); equipGear('belt', 'scarabBelt'); });
   await page.waitForTimeout(1500); assert(/protagonist-walk9\.png/.test(await bg()), 'missing art: the plain hero, never a blank one');
   assert.deepStrictEqual(errors, [], 'no page errors');
   await browser.close(); console.log('hero-wear (browser) ok');

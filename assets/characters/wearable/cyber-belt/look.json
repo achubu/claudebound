@@ -1,0 +1,10 @@
+{
+ "slot": "belt",
+ "items": [
+  "scarabBelt",
+  "stormglassBelt",
+  "hourglassBelt"
+ ],
+ "clear": true,
+ "v": 1
+}
