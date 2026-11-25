@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 567: designed gear keeps a solid shape, past the outline where it needs to
+
+(Owner: "dont be afraid to make the gear larger than the character outline, we want to keep it's shape without random pixels
+being missing".) The shirt, pants and boots templates are now solid: closed over small gaps (3px), holes filled, and grown 2px
+past the hero's outline onto empty space (never over his skin). The recipe renderer (`assets/gear-recipe.js`) draws gear solid
+wherever its shape is, on or off the body (no shading to borrow off the body), with a dark rim on the shape's own edge like the
+hero's outline. The Aetherlink stays clear. Drawn looks are unaffected.
+
 ## Round 566: desert armor for Solaris's gear, designed with recipes
 
 (Owner: "can you use your technique to create a desert style armor for the character?") The two Solaris (desert) items get

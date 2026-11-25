@@ -261,6 +261,14 @@ def _main_parts(m):
     return out
 
 
+def _fill_holes(m):
+    try:
+        from scipy import ndimage
+        return ndimage.binary_fill_holes(m)
+    except ImportError:
+        return m
+
+
 def slot_templates(base):
     b = base.astype(np.int32); body = b[..., 3] > 128; cy = np.arange(b.shape[0])[:, None] % CELL
     dist = lambda col: np.sqrt(((b[..., :3] - np.array(col)) ** 2).sum(-1))
@@ -286,6 +294,12 @@ def slot_templates(base):
             loose &= ~_grow(body & (b[..., 2] > 150) & (b[..., 1] > 150) & (b[..., 0] < 140) & (b[..., 2] - b[..., 0] > 60), 2)
             for _ in range(6):
                 m = m | (_grow(m, 1) & loose)
+        if sl in TEMPLATE_CLASSES:  # (Round 567, owner: "dont be afraid to make the gear larger than the character outline, we want to
+            # keep it's shape without random pixels being missing"): a solid shape: closed over small gaps, holes filled, then 2px past
+            # the hero's outline (onto empty space only, never over skin), so gear keeps its own silhouette with no pinholes
+            m = _shrink(_grow(m, 3), 3) & (body | _grow(body, 2))
+            m = _fill_holes(m)
+            m = m | (_grow(m, 2) & ~body)
         if sl == 'shirt':  # (Round 565, owner: "you could make it a little longer"): tucked under the belt, up to 8px down, only where
             # a belt is (the brown belt's own part or a fitted belt), so no gap shows between shirt and belt and nothing pokes out
             belt = np.zeros(body.shape, bool)

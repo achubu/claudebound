@@ -51,12 +51,15 @@ function gearRecipeRender(recipe, imgs) {
       xs.sort((a, b) => a - b); if (xs.length) mid = xs[xs.length >> 1]; }
     for (let y = top; y <= bot; y++) { const rl = 0, rr = 99;
       for (let x = left; x <= right; x++) { const i = (y0 + y) * W + x0 + x; if (!inM(i)) continue;
-        const ti = (((y - top) % n) * n + ((x - left) % n)) * 4, sh = Math.max(0, 1 + (lum(i) / avg - 1) * shadeK);
+        const ti = (((y - top) % n) * n + ((x - left) % n)) * 4, sh = b[i * 4 + 3] < 128 ? 1 : Math.max(0, 1 + (lum(i) / avg - 1) * shadeK); // (off the body: no shading to borrow)
         let col = [t[ti] / 255 * tint[0] * 1.6, t[ti + 1] / 255 * tint[1] * 1.6, t[ti + 2] / 255 * tint[2] * 1.6];
         if (bands) { const f = (y - top) / Math.max(1, bot - top); if (bands.at.some(a => Math.abs(f - a) * (bot - top) < bands.w / 2)) col = bands.c.slice(); }
         if (seam && rr > rl + 6 && Math.abs(x - mid) <= seam.w / 2) { col = seam.c.slice(); if (seam.glow) col = col.map(v => Math.min(255, v * 1.25)); }
         if (dist && dist[y * C + x] <= trim.w) col = trim.c.slice();
-        out.set([col[0] * sh, col[1] * sh, col[2] * sh, b[i * 4 + 3]], i * 4); } } }
+        // (Round 567: solid wherever the shape is, off the hero's body too; a dark rim on the shape's own edge, like his outline)
+        const X = x0 + x, Y = y0 + y, edge = !inM(i - 1) || !inM(i + 1) || !inM(i - W) || !inM(i + W), k2 = b[i * 4 + 3] < 128 ? 0.92 : 1;
+        if (edge) col = col.map(v => v * 0.22);
+        void X; void Y; out.set([col[0] * sh * k2, col[1] * sh * k2, col[2] * sh * k2, 255], i * 4); } } }
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
 // a recipe's problems (the Gear Studio shows them; the game ignores a recipe that has any)
