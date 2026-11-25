@@ -1,0 +1,10 @@
+{
+ "slot": "gloves",
+ "items": [
+  "ember",
+  "thornhideGloves",
+  "tempestGloves"
+ ],
+ "clear": false,
+ "v": 1
+}

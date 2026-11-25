@@ -35,6 +35,17 @@ const HERO_WEAR_DATA = {
   "clear": null,
   "v": 1
  },
+ "cyber-gloves": {
+  "slot": "gloves",
+  "items": [
+   "ember",
+   "thornhideGloves",
+   "tempestGloves"
+  ],
+  "overlay": "assets/characters/wearable/cyber-gloves/overlay.png",
+  "clear": null,
+  "v": 1
+ },
  "cyber-pants": {
   "slot": "pants",
   "items": [

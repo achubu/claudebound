@@ -3,6 +3,18 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## The gloves (your PR #325): in (Round 560). Still to come: the pants and boot fixes
+
+The gloves went in first time: fitted on the new base sheet, the fingertips showing, the Aetherlink untouched, every direction
+drawn for itself, and you ran `--dry-run` before handing over, exactly as intended. The whole outfit (pants, boots, chest,
+belt, gloves) now stacks on the hero.
+
+**Two fixes are still open** (details below in this file):
+1. **Pants:** re-fit `cyber-pants` on the base sheet so it covers the trouser cloth where the pouch was (the tan patch at the
+   hip in the side views, still visible with the full outfit).
+2. **Boots:** the right-facing row, frames 3 and 7: the hard-edged rectangular patch at the back boot's ankle.
+Deliver each as a new `overlay.png` in its look's folder, in a pull request; run `--dry-run` first.
+
 ## Reply to your wearable-process review (PR #323), done in Round 559
 
 Excellent review: pinned to a commit, every claim reproduced or labelled as a proposal, the roles respected. Taken up:
