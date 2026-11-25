@@ -7,7 +7,7 @@
 // must go, a clear patch (only the pixels it repaints, opaque). The hero's sheet is drawn, then every worn look's clear patch
 // source-atop (its colours, the hero's own outline), then every overlay, in slot order (HERO_WEAR_SLOTS: pants, boots,
 // shirt, belt, gloves). So looks for different slots stack, with no cleaned hero for each combination.
-const HERO_WEAR_VERSION = '559';
+const HERO_WEAR_VERSION = '565';
 const HERO_BASE_SHEET = 'assets/characters/protagonist-walk9.png?v=round251';
 const HERO_WEAR_LOOKS = typeof HERO_WEAR_DATA === 'object' ? HERO_WEAR_DATA : {};
 const HERO_WEAR_ART = {}; for (const [look, d] of Object.entries(HERO_WEAR_LOOKS)) for (const id of d.items) (HERO_WEAR_ART[d.slot] = HERO_WEAR_ART[d.slot] || {})[id] = look;
@@ -62,9 +62,13 @@ function heroWearApply() {
   // default look (the brown belt) where nothing with a look is worn there, laid like a clear patch so base + it is the hero exactly
   const worn = new Set(looks.map(l => HERO_WEAR_LOOKS[l].slot)), defs = typeof HERO_WEAR_DEFAULTS === 'object' ? HERO_WEAR_DEFAULTS : {}, order = typeof HERO_WEAR_SLOTS !== 'undefined' ? HERO_WEAR_SLOTS : [];
   const tv = '?v=' + HERO_WEAR_VERSION + '.' + (Object.values(HERO_WEAR_LOOKS).filter(d => !d.recipe).map(d => d.v).join('.')); // (the fit templates change with the drawn looks)
-  const layers = []; for (const sl of order) { const l = looks.find(x => HERO_WEAR_LOOKS[x].slot === sl);
+  // (Round 565: a default look comes in two parts: its cloth (the shirt and trousers round the brown belt) drawn first, under
+  // every look, and the belt itself in its slot; a part given as one path is the old single patch)
+  const part = (d, k) => typeof d === 'string' ? (k === 'over' ? d : null) : d && d[k];
+  const layers = []; for (const sl of order) if (defs[sl] && !worn.has(sl) && part(defs[sl], 'under')) layers.push({ src: part(defs[sl], 'under') + '?v=' + HERO_WEAR_VERSION, op: 'source-atop' });
+  for (const sl of order) { const l = looks.find(x => HERO_WEAR_LOOKS[x].slot === sl);
     if (l && HERO_WEAR_LOOKS[l].recipe) { const r = HERO_WEAR_LOOKS[l].recipe; layers.push({ recipe: r, srcs: ['gear/templates/' + sl + '-mask.png' + tv, 'gear/templates/protected.png' + tv].concat(GEAR_TEXTURES[r.texture] ? [] : [r.texture]), op: 'source-over' }); }
-    else if (l) layers.push({ src: HERO_WEAR_LOOKS[l].overlay + ver(l), op: 'source-over' }); else if (defs[sl] && !worn.has(sl)) layers.push({ src: defs[sl] + '?v=' + HERO_WEAR_VERSION, op: 'source-atop' }); }
+    else if (l) layers.push({ src: HERO_WEAR_LOOKS[l].overlay + ver(l), op: 'source-over' }); else if (defs[sl] && !worn.has(sl) && part(defs[sl], 'over')) layers.push({ src: part(defs[sl], 'over') + '?v=' + HERO_WEAR_VERSION, op: 'source-atop' }); }
   const base = typeof HERO_WEAR_BASE === 'string' ? HERO_WEAR_BASE + '?v=' + HERO_WEAR_VERSION : HERO_BASE_SHEET, srcs = [base, ...clears, ...layers.flatMap(x => x.recipe ? x.srcs : [x.src])];
   Promise.all(srcs.map(src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('failed to load ' + src)); i.src = src; })))
     .then(imgs => {

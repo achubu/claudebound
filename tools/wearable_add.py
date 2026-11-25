@@ -130,7 +130,8 @@ def clear_from_cleaned(hero, cleaned):
 def composite(base, clears, overlays, defaults_by_slot=None):
     """what the game draws: the base (the beltless hero), each clear patch source-atop (its colour, the hero's alpha), then
     slot by slot (SLOTS order) the worn look's overlay, or the slot's default patch source-atop where nothing is worn there.
-    overlays: [(slot, rgba)]; defaults_by_slot: {slot: rgba}"""
+    overlays: [(slot, rgba)]; defaults_by_slot: {slot: (under, over)}: Round 565: a default look's cloth part is drawn first,
+    under every look, its own part (the brown belt and pouch) in its slot"""
     a = base.astype(np.float64).copy()
     def atop(c):
         m = c[..., 3:4] / 255.0
@@ -139,11 +140,14 @@ def composite(base, clears, overlays, defaults_by_slot=None):
         atop(c)
     out = None
     worn = {sl for sl, _ in overlays}
+    for sl in SLOTS:  # (Round 565: a default's cloth part first, under every look)
+        if sl not in worn and defaults_by_slot and sl in defaults_by_slot:
+            atop(defaults_by_slot[sl][0])
     for sl in SLOTS:
         if sl not in worn and defaults_by_slot and sl in defaults_by_slot:
             if out is not None:
                 a = np.asarray(out).astype(np.float64); out = None
-            atop(defaults_by_slot[sl])
+            atop(defaults_by_slot[sl][1])
         for s2, o in overlays:
             if s2 == sl:
                 if out is None:
@@ -152,8 +156,30 @@ def composite(base, clears, overlays, defaults_by_slot=None):
     return out if out is not None else Image.fromarray(np.rint(a).clip(0, 255).astype(np.uint8), 'RGBA')
 
 
+def split_default(patch, hero):
+    """Round 565 (owner: a designed shirt "doesnt go down all the way to the belt"): a default look's patch holds the hero's
+    original pixels wherever the base was repainted, which for the brown belt includes a band of shirt and trousers round it.
+    Drawn in the belt slot, that band painted the old shirt back over a new one. Split by the original pixel's colour: his navy
+    shirt or khaki trousers (r >= g >= b, red 25-95 above blue, not dark) is cloth, drawn first under every look; the rest (belt,
+    buckle, pouch) is drawn in its slot. Together they are the patch, so with nothing worn the hero is unchanged."""
+    h = hero.astype(np.int32); r, g, b = h[..., 0], h[..., 1], h[..., 2]; on = patch[..., 3] > 0
+    navy = np.sqrt(((h[..., :3] - np.array((51, 57, 84))) ** 2).sum(-1)) < 40
+    khaki = (r >= g) & (g >= b) & (r - b >= 25) & (r - b <= 95) & (r + g + b >= 230) & (g - b >= 15)
+    cloth = on & (navy | khaki)
+    under, over = patch.copy(), patch.copy(); under[~cloth] = 0; over[cloth] = 0
+    return under, over
+
+
 def default_patches():
-    return {sl: rgba(os.path.join(WEAR, n, 'patch.png')) for sl, n in defaults().items()}
+    hero = rgba(HERO)
+    return {sl: split_default(rgba(os.path.join(WEAR, n, 'patch.png')), hero) for sl, n in defaults().items()}
+
+
+def write_default_parts():
+    for sl, n in defaults().items():
+        u, o = split_default(rgba(os.path.join(WEAR, n, 'patch.png')), rgba(HERO))
+        for name, im in (('under', u), ('over', o)):
+            Image.fromarray(im.astype(np.uint8), 'RGBA').save(os.path.join(WEAR, n, name + '.png'), optimize=True)
 
 
 def proofs(hero, comp, out_dir, name):
@@ -249,7 +275,21 @@ def slot_templates(base):
                 m |= rgba(os.path.join(WEAR, n, 'overlay.png'))[..., 3] > (128 if sl == 'belt' else 40)
         m = _shrink(_grow(m, 2), 2) & body  # (closing: small gaps between a piece's parts filled)
         m = _grow(_shrink(m, 1), 1) & body  # (opening: single stray pixels dropped)
-        out[sl] = _main_parts(m)
+        m = _main_parts(m)
+        if sl == 'shirt':  # (Round 565, owner: "you could make it a little longer"): tucked under the belt, up to 8px down, only where
+            # a belt is (the brown belt's own part or a fitted belt), so no gap shows between shirt and belt and nothing pokes out
+            belt = np.zeros(body.shape, bool)
+            for n2, v2 in looks().items():
+                if v2['slot'] == 'belt':
+                    belt |= rgba(os.path.join(WEAR, n2, 'overlay.png'))[..., 3] > 60
+            for sl2, n2 in defaults().items():
+                if sl2 == 'belt':
+                    belt |= split_default(rgba(os.path.join(WEAR, n2, 'patch.png')), rgba(HERO))[1][..., 3] > 0
+            down = m.copy()
+            for k in range(1, 9):
+                down |= np.roll(m, k, 0)
+            m = m | (down & belt & body)
+        out[sl] = m
     r, g, bb = b[..., 0], b[..., 1], b[..., 2]
     out['protected'] = _grow(body & (bb > 150) & (g > 150) & (r < 140) & (bb - r > 60), 2) & body  # (the Aetherlink's bright cyan, with a 2px margin)
     return out
@@ -270,12 +310,13 @@ def registry_text():
           '// Round 555: the looks the hero can wear (tools/art-refresh/wearable-gear.md).\n'
           f'const HERO_WEAR_SLOTS = {json.dumps(SLOTS)};\n'
           "const HERO_WEAR_BASE = 'assets/characters/protagonist-walk9-base.png';\n"
-          'const HERO_WEAR_DEFAULTS = ' + json.dumps({sl: f'assets/characters/wearable/{n}/patch.png' for sl, n in defaults().items()}) + ';\n'
+          'const HERO_WEAR_DEFAULTS = ' + json.dumps({sl: {'under': f'assets/characters/wearable/{n}/under.png', 'over': f'assets/characters/wearable/{n}/over.png'} for sl, n in defaults().items()}) + ';\n'
           'const HERO_WEAR_DATA = ' + json.dumps(data, indent=1) + ';\n')
     return js, len(data)
 
 
 def rebuild():
+    write_default_parts()
     js, n = registry_text()
     open(REGISTRY, 'w').write(js)
     print(f'wrote {os.path.relpath(REGISTRY, ROOT)}: {n} look(s)')

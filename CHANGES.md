@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 565: a designed shirt reaches the belt
+
+(Owner: the designed shirt "doesnt go down all the way to the belt"; "as long as the shirt is placed before the belt goes over it,
+that should cause less issues with perfect sizing? you could make it a little longer?")
+- The brown belt's default patch held the hero's original pixels wherever the base was repainted, including a band of shirt
+  and trousers round the belt; drawn in the belt slot, after the shirt, it painted the old navy shirt back over a new one. It is
+  now split (`split_default` in `tools/wearable_add.py`) by the original pixel's colour: his navy shirt and khaki trousers are
+  its **cloth** part (`default-belt/under.png`), drawn first, under every look; the belt, buckle and pouch are its own part
+  (`over.png`), still drawn in the belt slot. Together they are the patch: with nothing worn the hero is unchanged (`--check`,
+  0 difference). The registry, `assets/hero-wear.js` and the Gear Studio draw both parts.
+- The shirt's fit template is **tucked under the belt**: up to 8px further down, only where a belt is (the brown belt's own part
+  or a fitted belt), so there's never a gap between shirt and belt and nothing pokes out below it.
+
 ## Round 564: designed gear: textures and vector details, no uploading
 
 (Owner: "could we combine vector graphics and add textures to the gear generator to fill the gaps so we never need to upload to
