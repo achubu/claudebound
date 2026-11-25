@@ -3496,6 +3496,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 575: bigger shoulder pads, an armoured skirt, horned helmets (the owner's knight reference)
+
+The owner sent a second reference (a horned knight with a spear) and asked twice for bigger shoulder pads: "they should be
+larger than the character's shoulders". Then: "work on one armor at a time until we perfect one"; Goldline (gold on black, horned
+knight helm) is the one being perfected.
+
+- **Shoulder pads sized to the sleeves** (`gearArmorRender`, both styles): each is measured from its own sleeve (the torso's edge to
+  past the sleeve's outer edge, the shoulder's top to below its hem), then made a third wider and set to rise above the shoulder.
+  Side views run from the chest's middle to past the back. Three tiers in the rounded style too.
+- **Armoured skirt** (`armor.skirt`): a pointed tabard down the middle and a plate over each hip, under the belt (side views: a
+  hip plate and the tabard's edge). The hero's khaki trousers passed the loose "skin stays in front" test, which cut the skirt
+  away; skirt plates use a stricter one (`carve`), so only his hands stay in front.
+- **Horns** (`helmet.horns`): horns curving out and up from the helmet, in place of the antenna.
+- Gear Studio: "horns" and "armoured skirt" boxes; the Goldline and Bone sets wear horns, Goldline, Bone and Crimson the skirt.
+
 ## Round 574: the owner's carbon weave; a cutter for gear textures; one prompt for eight
 
 - **Carbon weave** (the owner's first texture, prompt 1): `assets/items/gear-textures/carbon-weave.webp`, in the Gear Studio's
