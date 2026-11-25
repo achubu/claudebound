@@ -1,0 +1,25 @@
+{
+ "v": 1,
+ "slot": "shirt",
+ "texture": "scales",
+ "scale": 0.55,
+ "tint": "#a07a44",
+ "shade": 1.05,
+ "trim": {
+  "color": "#2e1c0c",
+  "width": 3
+ },
+ "bands": {
+  "color": "#d4ad4a",
+  "width": 2,
+  "at": [
+   0.72
+  ]
+ },
+ "seam": {
+  "color": "#33d1c0",
+  "width": 1,
+  "glow": false
+ },
+ "name": "Desert scale armor"
+}

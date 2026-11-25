@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 566: desert armor for Solaris's gear, designed with recipes
+
+(Owner: "can you use your technique to create a desert style armor for the character?") The two Solaris (desert) items get
+designed looks, made with the Round 564 recipes: `gear/recipes/sunwovenShirt.json` (sand-bronze scale mail, thick dark leather
+trim, a gold band at the waist, a thin turquoise seam) and `gear/recipes/scarabBelt.json` (aged-bronze scales, dark trim, a
+glowing turquoise gem line). Chosen from five variants rendered side by side (plates, quilting, woven straw, copper; brighter gold
+looked plastic). They replace the cyber looks for these two items only; the other shirt and belts keep theirs. Checked in the game
+at game size in all four directions while walking.
+
 ## Round 565: a designed shirt reaches the belt
 
 (Owner: the designed shirt "doesnt go down all the way to the belt"; "as long as the shirt is placed before the belt goes over it,
