@@ -35,7 +35,7 @@ function gearRecipeRender(recipe, imgs) {
   if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n); else if (imgs.texture) tg.drawImage(imgs.texture, 0, 0, n, n); else GEAR_TEXTURES.plain(tg, n);
   const t = tg.getImageData(0, 0, n, n).data, tint = gearHex(recipe.tint, [120, 128, 140]), shadeK = recipe.shade == null ? 0.8 : +recipe.shade;
   const inM = i => m[i * 4] > 127 && p[i * 4] <= 127;
-  const out = new Uint8ClampedArray(W * H * 4), lum = i => (0.3 * b[i * 4] + 0.59 * b[i * 4 + 1] + 0.11 * b[i * 4 + 2]) / 255;
+  const out = new Uint8ClampedArray(W * H * 4), acc = new Uint8Array(W * H), lum = i => (0.3 * b[i * 4] + 0.59 * b[i * 4 + 1] + 0.11 * b[i * 4 + 2]) / 255;
   const trim = recipe.trim && recipe.trim.width ? { c: gearHex(recipe.trim.color, [40, 40, 48]), w: Math.min(6, recipe.trim.width | 0) } : null;
   const bands = recipe.bands && recipe.bands.at && recipe.bands.at.length ? { c: gearHex(recipe.bands.color, [30, 30, 36]), w: Math.max(1, Math.min(8, recipe.bands.width | 0 || 2)), at: recipe.bands.at.slice(0, 6) } : null;
   const seam = recipe.seam && recipe.seam.width ? { c: gearHex(recipe.seam.color, [54, 241, 255]), w: Math.min(4, recipe.seam.width | 0), glow: !!recipe.seam.glow } : null;
@@ -54,13 +54,14 @@ function gearRecipeRender(recipe, imgs) {
       for (let x = left; x <= right; x++) { const i = (y0 + y) * W + x0 + x; if (!inM(i)) continue;
         const ti = (((y - top) % n) * n + ((x - left) % n)) * 4, sh = b[i * 4 + 3] < 128 ? 1 : Math.max(0, 1 + (lum(i) / avg - 1) * shadeK); // (off the body: no shading to borrow)
         let col = [t[ti] / 255 * tint[0] * 1.6, t[ti + 1] / 255 * tint[1] * 1.6, t[ti + 2] / 255 * tint[2] * 1.6];
-        if (bands) { const f = (y - top) / Math.max(1, bot - top); if (bands.at.some(a => Math.abs(f - a) * (bot - top) < bands.w / 2)) col = bands.c.slice(); }
-        if (seam && rr > rl + 6 && Math.abs(x - mid) <= seam.w / 2) { col = seam.c.slice(); if (seam.glow) col = col.map(v => Math.min(255, v * 1.25)); }
+        if (bands) { const f = (y - top) / Math.max(1, bot - top); if (bands.at.some(a => Math.abs(f - a) * (bot - top) < bands.w / 2)) { col = bands.c.slice(); acc[i] = 1; } }
+        if (seam && rr > rl + 6 && Math.abs(x - mid) <= seam.w / 2) { col = seam.c.slice(); acc[i] = 1; if (seam.glow) col = col.map(v => Math.min(255, v * 1.25)); }
         if (dist && dist[y * C + x] <= trim.w) col = trim.c.slice();
         // (Round 567: solid wherever the shape is, off the hero's body too; a dark rim on the shape's own edge, like his outline)
         const X = x0 + x, Y = y0 + y, edge = !inM(i - 1) || !inM(i + 1) || !inM(i - W) || !inM(i + W), k2 = b[i * 4 + 3] < 128 ? 0.92 : 1;
         if (edge) col = col.map(v => v * 0.22);
         void X; void Y; out.set([col[0] * sh * k2, col[1] * sh * k2, col[2] * sh * k2, 255], i * 4); } } }
+  if (recipe.pixel) { const reg = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) reg[i] = out[i * 4 + 3] ? 1 : 0; gearPixelize(out, reg, acc, recipe.pixel, W, H); } // (Round 570)
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
 // Round 569 (owner: "I want to see if you can design armor that can be filled with texture"). Built armor: plates placed on the
@@ -125,8 +126,37 @@ function gearArmorRender(recipe, imgs) {
     const nb = [i - 1, i + 1, i - W, i + W], edge = nb.some(j => id(j) !== k), inner = !edge && [i - W - 1, i - W, i - W + 1, i - 1].some(j => id(j) !== k) && fy < .5;
     if (edge) col = rim.slice(); else if (inner) col = col.map(v => Math.min(255, v * 1.35 + 18));
     out.set([col[0], col[1], col[2], 255], i * 4); }
+  if (recipe.pixel) { const reg = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!out[i * 4 + 3]) continue; const k = id(i); reg[i] = k && p[i * 4] <= 127 && !(k < 40 && skin(i)) ? k : 99; }
+    gearPixelize(out, reg, new Uint8Array(W * H), recipe.pixel, W, H, r => r === 99); } // (Round 570: plates in the set style, the undersuit dark with no accent)
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
+// Round 570 (owner: "Can you build something more like this", a sheet of pixel-art armour sets): the set style. A recipe with
+// `pixel: { dark, base, light, accent }` is drawn as flat pixel art: each region (a plate, the undersuit, a template piece) in three
+// flat tones from its own light, a black outline round it, and a neon accent line two pixels inside the outline (not on the
+// undersuit); bands and seams are drawn in the accent colour. GEAR_SETS: palettes that dress every slot alike.
+const GEAR_SETS = {
+  crimson: { name: 'Crimson mech', dark: '#3a1820', base: '#b3303a', light: '#efe6e2', accent: '#ff5a64' },
+  venom: { name: 'Venom neon', dark: '#0f1a16', base: '#1f3a2c', light: '#3d6b4c', accent: '#3cff6a' },
+  goldline: { name: 'Gold line', dark: '#111118', base: '#26263a', light: '#3f3f58', accent: '#ffcc33' },
+  bone: { name: 'Bone', dark: '#3a3a44', base: '#d6d4cc', light: '#ffffff', accent: '#ff3048' },
+  frost: { name: 'Frost', dark: '#1a2232', base: '#3c4c68', light: '#8494b4', accent: '#4ff0ff' },
+  dune: { name: 'Dune', dark: '#3a2a18', base: '#9a7646', light: '#d8b47a', accent: '#33d1c0' },
+};
+function gearPixelize(out, reg, acc, pal, W, H, noAccent) {
+  const D = gearHex(pal.dark, [30, 30, 40]), B = gearHex(pal.base, [80, 80, 100]), L = gearHex(pal.light, [160, 160, 180]), A = gearHex(pal.accent, [80, 240, 255]), K = [12, 10, 16];
+  // light, smoothed over 7x7 within the region, so the tones form broad shapes instead of speckle
+  const raw = new Float32Array(W * H); for (let i = 0; i < W * H; i++) raw[i] = reg[i] ? .3 * out[i * 4] + .59 * out[i * 4 + 1] + .11 * out[i * 4 + 2] : 0;
+  const box = (src, horiz) => { const dst = new Float32Array(W * H), R = 3; for (let i = 0; i < W * H; i++) { if (!reg[i]) continue; let t = 0, n = 0; for (let k = -R; k <= R; k++) { const j = horiz ? i + k : i + k * W; if (j >= 0 && j < W * H && reg[j] === reg[i] && (!horiz || Math.floor(j / W) === Math.floor(i / W))) { t += src[j]; n++; } } dst[i] = t / n; } return dst; };
+  const sm = box(box(raw, true), false), lum = i => sm[i];
+  // each region's mean light, per 256px frame
+  const sum = new Map(); for (let i = 0; i < W * H; i++) { const r = reg[i]; if (!r) continue; const key = r * 64 + Math.floor(Math.floor(i / W) / 256) * 9 + Math.floor((i % W) / 256); const q = sum.get(key) || [0, 0]; q[0] += lum(i); q[1]++; sum.set(key, q); }
+  // distance to the region's edge, up to 3
+  const d = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!reg[i]) continue; const x = i % W; if (x === 0 || x === W - 1 || reg[i - 1] !== reg[i] || reg[i + 1] !== reg[i] || reg[i - W] !== reg[i] || reg[i + W] !== reg[i]) d[i] = 1; }
+  for (let k = 2; k <= 3; k++) for (let i = W; i < W * H - W; i++) if (reg[i] && !d[i] && (d[i - 1] === k - 1 || d[i + 1] === k - 1 || d[i - W] === k - 1 || d[i + W] === k - 1)) d[i] = k;
+  for (let i = 0; i < W * H; i++) { const r = reg[i]; if (!r) continue; const key = r * 64 + Math.floor(Math.floor(i / W) / 256) * 9 + Math.floor((i % W) / 256), q = sum.get(key), v = lum(i) / Math.max(1, q[0] / q[1]), under = noAccent && noAccent(r);
+    let c = v < .86 ? D : v > 1.16 ? L : B; if (under) c = v > 1.14 ? B : D;
+    if (d[i] === 1) c = K; else if (acc[i]) c = A; else if (d[i] === 3 && !under) c = A;
+    out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = 255; } }
 // a recipe's problems (the Gear Studio shows them; the game ignores a recipe that has any)
 function gearRecipeProblems(r, slots) { const out = [];
   if (!r || typeof r !== 'object') return ['not a recipe'];

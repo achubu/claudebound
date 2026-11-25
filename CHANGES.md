@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 570: pixel-art armour sets
+
+(Owner, with a sheet of pixel-art armour sets: "Can you build something more like this".) A recipe with `pixel: { dark, base,
+light, accent }` is drawn in that style (`gearPixelize`, `assets/gear-recipe.js`): every region (each plate, the undersuit, a
+template piece) in three flat tones from its own light, smoothed over 7x7 within the region so the tones form broad shapes
+rather than speckle, a black outline round it, and a neon accent line two pixels inside (not on the undersuit, which keeps two
+dark tones); bands and seams in the accent colour. `GEAR_SETS`: six palettes (Crimson mech, Venom neon, Gold line, Bone, Frost,
+Dune). Gear Studio: **Armour set**, **Wear the whole set** dresses all five slots alike (shirt as built armor, pants with a knee
+band), with a save link per gear item. Not saved to the game: the owner picks which set goes on which items.
+
 ## Round 569: built armor, filled with any texture
 
 (Owner: "I want to see if you can design armor that can be filled with texture".) `gearArmorRender` (`assets/gear-recipe.js`), used
