@@ -3496,6 +3496,26 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 554: the worn belt shows on the hero
+
+(Owner: "implement this as the belt item when equiped as gear".) Codex's belt art (PR #318, kept in
+`tools/art-refresh/wearable-belt/integration-test/`): a copy of the hero's sheet with the old brown belt and pouch painted out
+and a belt-only sheet on the same grid, both 2304 x 1024 (four directions, nine 256px frames). Copied to
+`assets/characters/wearable/`.
+
+`assets/hero-wear.js` (after `world-font`): while a belt is worn (`state.gear.belt`, not merely owned), the two are drawn into
+one sheet once, cached by look and art version (four at most), and shown in place of the hero's sheet; the hero's own animation,
+frames and timing are untouched. All three belts (Scarab, Stormglass, Hourglass) share the one look through a registry
+(`HERO_WEAR_ART`, `HERO_WEAR_LOOKS`), so other designs can be added per item. It follows equip, swap and unequip, finding a belt
+(only when the slot was empty), saves and reloads, and world changes (it reapplies after every `renderWorld`). Until the sheet
+is ready, or if a picture fails to load, the plain hero shows, never a blank one; a change made while one is loading never
+lets the older one land. No stats, rewards or saves change.
+
+Checked: the cleaned base keeps the hero's outline exactly (alpha identical); all 36 frames have belt; the belt reaches past
+the outline only at the waist's soft edge (~640 px across the sheet); by eye at 256px and at game size (84px) in all four
+directions, standing and mid-stride, the Aetherlink untouched. `tests/hero-wear.test.cjs`: the art, the registry, the look
+following what is worn, and in the browser equip, world change, save and reload, unequip and a missing picture.
+
 ## Round 553: the Sky Isles float
 
 (Owner: "sky isles needs to be more sky than land if possible, buildings need to be floating in the clouds with land bridges
