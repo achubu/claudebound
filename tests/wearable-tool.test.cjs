@@ -13,6 +13,8 @@ f = boots.copy(); f[5:20, 5:20] = [255, 255, 255, 1]; out['far_alpha1'] = probs(
 f = boots.copy(); f[..., 3] = np.maximum(f[..., 3], 30); out['faint_sheet'] = probs(f)                  # a faint matte over the whole sheet
 f = boots.copy(); f[1 * 256:2 * 256, 3 * 256:4 * 256] = 0; out['empty_frame'] = probs(f)                  # one frame missing the item
 f = boots.copy(); ys, xs = np.nonzero(f[..., 3] > 200); f[ys[:60], xs[:60]] = [0, 255, 0, 255]; out['key_green'] = probs(f)
+prot = np.asarray(__import__('PIL.Image', fromlist=['Image']).open('gear/templates/protected.png').convert('L')) > 127
+f = boots.copy(); f[prot] = [40, 40, 40, 255]; out['aetherlink'] = probs(f)                                # painted over the Aetherlink
 out['no_items'] = probs(boots, []); out['repeated'] = probs(boots, ['boots', 'boots']); out['wrong_slot'] = probs(boots, ['scarabBelt'])
 print(json.dumps(out))`;
 const r = spawnSync('python3', ['-c', py], { cwd: ROOT, encoding: 'utf8' });
@@ -23,6 +25,7 @@ assert(o.far_alpha1.some(p => /outside the hero/.test(p)), 'any alpha far outsid
 assert(o.faint_sheet.some(p => /outside the hero/.test(p)), 'a faint matte over the sheet is caught');
 assert(o.empty_frame.some(p => /under 40 solid/.test(p) && /1,3/.test(p)), 'an empty frame is caught, by its cell');
 assert(o.key_green.some(p => /green or magenta/.test(p)), 'background colour left in the art is caught');
+assert(o.aetherlink.some(p => /Aetherlink/.test(p)), 'paint over the Aetherlink is caught (Round 563)');
 assert(o.no_items.some(p => /no item ids/.test(p)) && o.repeated.some(p => /repeated/.test(p)) && o.wrong_slot.some(p => /not a boots/.test(p)), 'item ids checked');
 // --check is read-only
 const reg = path.join(ROOT, 'assets/hero-wear-looks.js'), before = fs.readFileSync(reg, 'utf8');

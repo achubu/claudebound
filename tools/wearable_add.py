@@ -90,6 +90,14 @@ def check_look(name, slot, items, overlay, clear, hero, bad_px=None):
     key = (oa > 0) & (((g > 200) & (r < 80) & (b < 80)) | ((r > 200) & (b > 200) & (g < 80)))
     if key.sum() > 20:
         problems.append(f'{int(key.sum())} pure green or magenta pixels (background left in the art)')
+    pp = os.path.join(TEMPLATES, 'protected.png')
+    if os.path.isfile(pp):  # (Round 563: the Aetherlink is never covered)
+        prot = np.asarray(Image.open(pp).convert('L')) > 127
+        cov = int(((oa > 60) & prot).sum())
+        if cov > 30:
+            problems.append(f'{cov} px over the Aetherlink on the left forearm (gear/templates/protected.png): it is never covered')
+        if bad_px is not None:
+            bad_px |= (oa > 60) & prot
     if bad_px is not None:
         bad_px |= far | key
     if clear is not None:
@@ -186,6 +194,74 @@ def defaults():
     return out
 
 
+# Round 563 (owner: "the gear tool should provide the perfect size outline for each piece of gear"): a fit template per slot,
+# where that slot's gear goes in each of the 36 frames, from the hero himself (his navy shirt, khaki trousers and shoes, in the rows
+# of the cell they're in) and the looks already fitted for the slot (the belt's and gloves' templates are their fitted looks).
+# White on black, the hero's grid: gear/templates/<slot>-mask.png (for an image generator's masked edit, and the Gear Studio's
+# guide). gear/templates/protected.png: the Aetherlink on the left forearm, never to be covered. Rebuilt with the registry.
+TEMPLATES = os.path.join(ROOT, 'gear/templates')
+TEMPLATE_CLASSES = {'shirt': ((51, 57, 84), 45, 40, 150, 0), 'pants': ((152, 119, 81), 34, 110, 240, 15), 'boots': ((80, 40, 25), 40, 200, 256, 0)}
+
+
+def _grow(m, r):
+    g = m.copy()
+    for dy in range(-r, r + 1):
+        for dx in range(-r, r + 1):
+            if dx * dx + dy * dy <= r * r:
+                g |= np.roll(np.roll(m, dy, 0), dx, 1)
+    return g
+
+
+def _shrink(m, r):
+    return ~_grow(~m, r)
+
+
+def _main_parts(m):
+    """in each 256px frame, only the parts at least a fifth the size of the largest (wristbands the colour of the shirt, a stray
+    patch of khaki-coloured skin, are dropped)"""
+    try:
+        from scipy import ndimage
+    except ImportError:
+        return m
+    out = np.zeros_like(m)
+    for r in range(m.shape[0] // CELL):
+        for c in range(m.shape[1] // CELL):
+            cell = m[r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL]
+            lab, n = ndimage.label(cell)
+            if not n:
+                continue
+            sizes = ndimage.sum(cell, lab, range(1, n + 1)); keep = [i + 1 for i, v in enumerate(sizes) if v >= 0.2 * sizes.max()]
+            out[r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL] = np.isin(lab, keep)
+    return out
+
+
+def slot_templates(base):
+    b = base.astype(np.int32); body = b[..., 3] > 128; cy = np.arange(b.shape[0])[:, None] % CELL
+    dist = lambda col: np.sqrt(((b[..., :3] - np.array(col)) ** 2).sum(-1))
+    out = {}
+    for sl in SLOTS:
+        m = np.zeros(body.shape, bool)
+        if sl in TEMPLATE_CLASSES:
+            col, t, y0, y1, margin = TEMPLATE_CLASSES[sl]
+            m |= body & (dist(col) < t) & (dist(col) < dist(SKIN) - margin) & (cy >= y0) & (cy < y1)
+        for n, v in looks().items():
+            if v['slot'] == sl:
+                m |= rgba(os.path.join(WEAR, n, 'overlay.png'))[..., 3] > (128 if sl == 'belt' else 40)
+        m = _shrink(_grow(m, 2), 2) & body  # (closing: small gaps between a piece's parts filled)
+        m = _grow(_shrink(m, 1), 1) & body  # (opening: single stray pixels dropped)
+        out[sl] = _main_parts(m)
+    r, g, bb = b[..., 0], b[..., 1], b[..., 2]
+    out['protected'] = _grow(body & (bb > 150) & (g > 150) & (r < 140) & (bb - r > 60), 2) & body  # (the Aetherlink's bright cyan, with a 2px margin)
+    return out
+
+
+def write_templates(base):
+    os.makedirs(TEMPLATES, exist_ok=True)
+    for k, m in slot_templates(base).items():
+        Image.fromarray((m * 255).astype(np.uint8), 'L').save(os.path.join(TEMPLATES, ('protected' if k == 'protected' else k + '-mask') + '.png'), optimize=True)
+    print(f'wrote the fit templates: {os.path.relpath(TEMPLATES, ROOT)}/<slot>-mask.png, protected.png')
+
+
 def registry_text():
     L = looks()
     data = {n: {'slot': v['slot'], 'items': v['items'], 'overlay': f'assets/characters/wearable/{n}/overlay.png',
@@ -203,6 +279,7 @@ def rebuild():
     js, n = registry_text()
     open(REGISTRY, 'w').write(js)
     print(f'wrote {os.path.relpath(REGISTRY, ROOT)}: {n} look(s)')
+    write_templates(rgba(BASE))
 
 
 # Round 562: the review sheet. Every frame of every direction in three rows: the hero as he is (base + defaults), with this look
@@ -308,6 +385,10 @@ def main():
         print(f'nothing worn: the base and the default looks give the hero back (max difference {d})')
         if d > 1:
             bad += 1
+        for k, m in slot_templates(base).items():  # (Round 563: the fit templates match the looks)
+            f = os.path.join(TEMPLATES, ('protected' if k == 'protected' else k + '-mask') + '.png')
+            if not os.path.isfile(f) or not ((np.asarray(Image.open(f).convert('L')) > 127) == m).all():
+                print(f'{os.path.relpath(f, ROOT)} is out of date: run tools/wearable_add.py --rebuild'); bad += 1
         cur = open(REGISTRY).read() if os.path.isfile(REGISTRY) else ''
         if cur != registry_text()[0]:  # (Round 559: read-only; --rebuild writes it)
             print('assets/hero-wear-looks.js is out of date: run tools/wearable_add.py --rebuild'); bad += 1

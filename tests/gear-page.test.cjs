@@ -31,6 +31,11 @@ assert(/'pants': \(\(152, 119, 81\), \(118, 236\)\)/.test(tool) && /pants: \[\[1
   // a picture of the wrong size is refused
   await page.setInputFiles('#overlayFile', path.join(ROOT, 'assets/characters/protagonist.jpeg').replace('.jpeg', '.jpeg')); await page.waitForTimeout(2000);
   c = await checks(); assert(c.some(x => x.startsWith('bad') && /must be 2304/.test(x)) || c.some(x => /could not be read/.test(x)), 'a wrong picture is refused: ' + c.join(' | '));
+  // (Round 563) the fit templates: a guide per slot, with the slot's area and the Aetherlink
+  for (const f of ['shirt-mask', 'pants-mask', 'boots-mask', 'belt-mask', 'gloves-mask', 'protected']) assert(fs.existsSync(path.join(ROOT, 'gear/templates', f + '.png')), f + '.png exists');
+  await page.selectOption('#tmplSlot', 'boots'); await page.waitForTimeout(2000);
+  const tv = await page.evaluate(() => { const c = document.getElementById('tmplView'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let cyan = 0, red = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 2] > 180 && d[i + 1] > 150 && d[i] < 120) cyan++; if (d[i] > 230 && d[i + 1] < 80) red++; } return { cyan, red }; });
+  assert(tv.cyan > 1000 && tv.red > 50, 'the boots guide shows its area and the Aetherlink ' + JSON.stringify(tv));
   assert.deepEqual(errors, [], 'no page errors');
   await browser.close(); console.log('gear-page ok');
 })().catch(e => { console.error(e); process.exit(1); });

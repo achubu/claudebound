@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 563: fit templates for every gear slot; the belt off the Aetherlink
+
+(Owner: "the gear tool should provide the perfect size outline for each piece of gear and allow me to upload it".)
+- **Fit templates** (`tools/wearable_add.py`, `slot_templates`): per slot, where its gear goes in each of the 36 frames, from the
+  hero himself (his navy shirt, khaki trousers and shoes, each within its rows of the cell, skin told apart by colour) and the
+  looks already fitted (the belt's and gloves' are their fitted looks); gaps closed, stray pixels and detached bits (wristbands
+  the shirt's colour) dropped. Written to `gear/templates/<slot>-mask.png` with every import and `--rebuild`; `--check` fails when
+  they're stale. `gear/templates/protected.png`: the Aetherlink's bright cyan plus 2px; a look over it by more than 30 px is
+  refused.
+- That check found the **cyber belt drawn over the Aetherlink's screen** in left-facing frames 5, 7 and 8. Its pixels there were
+  removed (237 px) and the belt re-imported the new way (`tools/art-refresh/wearable/cyber-belt/` with `manifest.json`, `--from`).
+- **Gear Studio:** a Fit templates section (a guide per slot: the hero dimmed, the slot's area in cyan with its outline, the
+  Aetherlink in red; download the guide or the black-and-white mask, ready for an image generator's masked edit of the base
+  sheet); new looks are checked against the Aetherlink (refused) and their slot's template (a note when over 15% lies outside);
+  when a look passes, it links to its folder's **upload page on GitHub**, so the owner can drag in the files and commit.
+- Tests: `wearable-tool` (paint over the Aetherlink is refused), `gear-page` (the templates and the guide).
+
 ## Round 562: the Gear Studio (aethercede.com/gear) and a faster gear pipeline
 
 (Owner: "let's make sure that we have this figured out for future gear, also optimize the gear pipeline further"; "Can we
