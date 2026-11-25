@@ -3505,6 +3505,11 @@ glowing turquoise gem line). Chosen from five variants rendered side by side (pl
 looked plastic). They replace the cyber looks for these two items only; the other shirt and belts keep theirs. Checked in the game
 at game size in all four directions while walking.
 
+**Fuller fit** (owner: "you are being too carefull with the cutout and missing pixels that should be filled in"): the shirt,
+pants and boots templates left a rim of the hero's own clothing round a designed piece (his navy at the shirt's shaded edges,
+seams and armholes: ~1,700 px across the sheet). Each template now grows into the rest of his own cloth that touches it (looser
+colour test, plus for the shirt his darkened navy), never into his skin or the Aetherlink.
+
 ## Round 565: a designed shirt reaches the belt
 
 (Owner: the designed shirt "doesnt go down all the way to the belt"; "as long as the shirt is placed before the belt goes over it,

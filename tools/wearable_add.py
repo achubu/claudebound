@@ -276,6 +276,16 @@ def slot_templates(base):
         m = _shrink(_grow(m, 2), 2) & body  # (closing: small gaps between a piece's parts filled)
         m = _grow(_shrink(m, 1), 1) & body  # (opening: single stray pixels dropped)
         m = _main_parts(m)
+        if sl in TEMPLATE_CLASSES:  # (Round 566, owner: "too careful with the cutout and missing pixels that should be filled in"):
+            # grow into the rest of the hero's own cloth that touches it: shaded edges and folds the colour test missed, so no
+            # rim of the old clothing shows round a designed piece; the Aetherlink and his skin stay out
+            col, t, y0, y1, margin = TEMPLATE_CLASSES[sl]
+            loose = body & (dist(col) < t * 1.9) & (dist(col) < dist(SKIN) - 4) & (cy >= y0 - 6) & (cy < y1 + 4)
+            if sl == 'shirt':  # (his navy, darkened in shade: blue the strongest channel)
+                loose |= body & (b[..., 2] >= b[..., 0] + 6) & (b[..., 2] >= b[..., 1]) & (b[..., 0] + b[..., 1] + b[..., 2] < 330) & (cy >= y0 - 6) & (cy < y1 + 4)
+            loose &= ~_grow(body & (b[..., 2] > 150) & (b[..., 1] > 150) & (b[..., 0] < 140) & (b[..., 2] - b[..., 0] > 60), 2)
+            for _ in range(6):
+                m = m | (_grow(m, 1) & loose)
         if sl == 'shirt':  # (Round 565, owner: "you could make it a little longer"): tucked under the belt, up to 8px down, only where
             # a belt is (the brown belt's own part or a fitted belt), so no gap shows between shirt and belt and nothing pokes out
             belt = np.zeros(body.shape, bool)
