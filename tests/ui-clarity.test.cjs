@@ -26,7 +26,7 @@ server.listen(0, async () => {
     const device = await page.evaluate(() => { showGear(); const m = document.getElementById('menuModal'); const sec = m.querySelector('.gear-aetherlink');
       const r = { section: !!sec && /Aetherlink/.test((sec.querySelector('h2') || {}).textContent || ''), sockets: m.querySelectorAll('.gear-aetherlink [data-socket]').length, slots: m.querySelectorAll('[data-gear-slot]').length, returns: m.querySelectorAll('#deviceClose').length };
       closeMenu(); showDevice(); r.redirect = !!document.querySelector('#menuModal [data-gear-slot]') && !!document.querySelector('#menuModal .gear-aetherlink'); closeMenu(); return r; });
-    assert(device.section && device.sockets > 0 && device.slots === 5 && device.returns === 0, 'Round 295: the Aetherlink Gauntlet is a section of the Gear screen (' + JSON.stringify(device) + ')');
+    assert(device.section && device.sockets > 0 && device.slots === 6 && device.returns === 0, 'Round 295: the Aetherlink Gauntlet is a section of the Gear screen (' + JSON.stringify(device) + ')');
     assert(device.redirect, 'opening the Aetherlink shows the Gear screen');
     const battle = await page.evaluate(() => { configureRegion('city'); state.room = '1,5'; renderWorld(); startBattle(roomSpawns('1,5').find(x => !x.boss).uid); const b = state.battle; b.hand = [make('strike'), make('guard')]; b.energy = 3; renderBattle();
       const end = () => document.getElementById('endTurn').classList.contains('end-turn-ready'); const withEnergy = end(); b.energy = 0; b.aether = 0; renderBattle(); const without = end();
