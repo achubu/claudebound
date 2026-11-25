@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 556: the Sky Isles' ground, more sky, edges on the islands
+
+(Owner: "sky isles still looks pretty bad, the ground textures clash with the city objects and buildings and we still need more
+cloud and sky than ground tiles"; "think we need edges where the ground meets open sky".)
+
+- **Ground:** only the pale textures that suit the pastel buildings: the lavender deck for all ground (the dark metal grating
+  ring round the islands is gone; `sidewalk/deck` is a copy, as the generator fills the ground from that slot), pale stone
+  pavers for squares and every yard (no dark cargo plates, stained-glass mosaic or chequered glass), the glass walkway for roads.
+- **More sky:** one block in sixteen is an island (`isleShare` 0.22 to 0.06); a room's guaranteed island for its objects is
+  kept. Lots on islands no longer count as docks (`noDocks`: every lot near the sky became a cargo yard 30% of the time).
+- **Floating buildings:** in the sky blocks, islets 10-12 cells across for one building each, a cell of sky from every road
+  (scenery, not walked on). Building pictures may be drawn at 0.6 of their size in the Sky Isles (`buildFit`; 0.75 elsewhere).
+- **Edges:** an edge strip on every seam between ground and open sky (`isleEdge`), on the 25px grid by the 3x3 bitmask
+  (`cityGridKerb`), drawn after the streets like the sea wall, street kerbs stopping short of it; a road counts as ground, so
+  bridges keep their own parapets. The strip is the Sky Isles' glass railing for now (shown to the owner first, Round 460 rule).
+- Elaris inherits the Sky Isles' theme, so it sets its own values back (`noDocks: false`, `buildFit: null`, `isleEdge: null`).
+
 ## Round 555: a process for wearable gear
 
 (Owner: "lets make sure that we document and create a process for adding new gear to the character, we don't want this to be

@@ -481,7 +481,7 @@ function genTileExtraLinks(id) { const T = GEN_THEMES[id]; if (T.linksCache) ret
 // (assets/environment/sky-gen/, Rounds 545-547). Open sky takes the place of Solaris's rivers (the same machinery: nothing is
 // built beside it, a walkway crossing it is a glass bridge); no grass parks (roof gardens are pictures); glass walkways.
 // =====================================================================
-GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.22 /* Round 553: floating islands (rivers) */,
+GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.06, isletChance: 0.75, buildFit: { min: 0.6 }, noDocks: true /* (every lot on an island is near the sky: no cargo docks) */, isleEdge: ['yard-edge', 'glass-rail'], isleEdgeT: 16 /* Round 553: floating islands (rivers) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.sky && TILE_WORLD_DATA.sky.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   // the generated Sky Isles have no diagonal walkways; where dropping one would cut rooms off from the start (1,5 to 2,4 joins
@@ -525,12 +525,20 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     const pick = new Set(); blocks.forEach((c, i) => { if (c.length >= 12 && rnd() < T.isleShare) pick.add(i); });
     for (const k of T.landing()) { const [x, y] = k.split(',').map(Number); for (const [a, b] of [[12, 7], [20, 7], [12, 13], [20, 13]]) { const i = blk[(y * FG_ROWS + b) * CW + x * FG_COLS + a]; if (i >= 0) pick.add(i); } }
     const need = []; for (const k of keys) { const [x, y] = k.split(',').map(Number), here = {}; for (let b = 0; b < FG_ROWS; b++) for (let a = 0; a < FG_COLS; a++) { const i = blk[(y * FG_ROWS + b) * CW + x * FG_COLS + a]; if (i >= 0) here[i] = (here[i] || 0) + 1; }
-      const ids = Object.keys(here).map(Number); if (!ids.some(i => pick.has(i) && here[i] >= 120)) need.push(k); }
+      const ids = Object.keys(here).map(Number); if (!ids.some(i => pick.has(i) && here[i] >= 80)) need.push(k); }
     for (const i of pick) for (const [x, y] of blocks[i]) L[y * CW + x] = 1;
     // (a room with no island block: a round island on its road nearest the middle, room for its objects)
     for (const k of need) { const [x, y] = k.split(',').map(Number); let best = null, bd = Infinity; for (let b = 3; b < FG_ROWS - 3; b++) for (let a = 4; a < FG_COLS - 4; a++) { const X = x * FG_COLS + a, Y = y * FG_ROWS + b; if (!road(X, Y)) continue; const d = Math.hypot(a - FG_COLS / 2, b - FG_ROWS / 2); if (d < bd) { bd = d; best = [X, Y]; } }
       if (best) isle(best[0] + 0.5, best[1] + 0.5, 3.6); }
    
+    // Round 556 (owner: "buildings need to be floating in the clouds"): in the sky blocks, floating islets for single buildings,
+    // set off from every road by a cell of sky (scenery: not joined to a street, so not walked on and never an object's spot)
+    for (let i = 0; i < blocks.length; i++) { if (pick.has(i)) continue; const cells = blocks[i]; if (cells.length < 120) continue; const inB = new Set(cells.map(([x, y]) => x + ',' + y));
+      const tries = cells.length > 260 ? 2 : 1; for (let n = 0; n < tries; n++) { if (rnd() > T.isletChance) continue;
+        const w = 10 + Math.floor(rnd() * 3), h = 10 + Math.floor(rnd() * 3), spots = [];
+        for (const [x, y] of cells) { let ok = true; for (let b = -1; b <= h && ok; b++) for (let a = -1; a <= w; a++) { const k = (x + a) + ',' + (y + b); if (!inB.has(k) || at(x + a, y + b)) { ok = false; break; } } if (ok) spots.push([x, y]); }
+        if (!spots.length) continue; const [x0, y0] = spots[Math.floor(rnd() * spots.length)];
+        for (let b = 0; b < h; b++) for (let a = 0; a < w; a++) { const corner = (a === 0 || a === w - 1) && (b === 0 || b === h - 1); if (!corner) L[(y0 + b) * CW + x0 + a] = 1; } } }
     // an island's edge facing the sky wavers (seeded noise, two cells deep at most), so islands aren't plain rectangles; its
     // ground beside the roads stays
     for (let pass = 0; pass < 2; pass++) { const cut = []; for (const i of pick) for (const [x, y] of blocks[i]) { if (!L[y * CW + x]) continue;
@@ -565,11 +573,11 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     T.isleStats.final = land.size; const set = new Set(); for (let y = -3; y < (my + 1) * CG_ROWS + 3; y++) for (let x = -3; x < (mx + 1) * CG_COLS + 3; x++) if (!land.has(x + ',' + y)) set.add(x + ',' + y);
     T.riverCache = { ck, set }; return set; },
   noParks: true, oasis: false, alleyVerge: false, lampGlow: .14, parkDim: 'rgba(10,0,20,.06)', floorRange: [2, 3], landmarkLot: 380, landmarkW: 300,
-  tex: { pipes: 'surfaces/plaza/pavers', chasm: 'surfaces/water/cloud-sea', overgrowth: 'surfaces/plaza/pavers', water: 'surfaces/water/cloud-sea', sand: 'surfaces/sand/grating', floor: 'surfaces/plaza/glass-panes', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/plaza/pavers', yard: 'surfaces/lot/cargo-plates', 'yard-cargo': 'surfaces/lot/cargo-plates', 'yard-rubble': 'surfaces/lot/cargo-plates', 'yard-market': 'surfaces/plaza/mosaic', 'pavement-old': 'surfaces/sidewalk/glass-tiles', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' },
+  tex: { pipes: 'surfaces/plaza/pavers', chasm: 'surfaces/water/cloud-sea', overgrowth: 'surfaces/plaza/pavers', water: 'surfaces/water/cloud-sea', sand: 'surfaces/ground/deck', floor: 'surfaces/plaza/pavers', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/plaza/pavers', yard: 'surfaces/plaza/pavers', 'yard-cargo': 'surfaces/plaza/pavers', 'yard-rubble': 'surfaces/plaza/pavers', 'yard-market': 'surfaces/plaza/pavers', 'pavement-old': 'surfaces/ground/deck', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' } /* Round 556 (owner: "the ground textures clash with the city objects and buildings"): only the pale ones: the lavender deck for the ground and the islands' edges (the dark grating ring is gone), pale stone pavers for squares and yards (no dark cargo plates, mosaic or chequered glass), the glass walkway for roads */,
   texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.35, plaza: 0.35, sand: 0.35, water: 0.4, overgrowth: 0.35, pipes: 0.35 },
   kerb: ['#2a1d3a', '#e6d8ff', '#8a74b8'], yardRim: ['#2a1d3a', '#d8c8f4'], groundShade: 'rgba(40,0,60,.05)', lamp: '190,240,255', vignette: '30,10,50',
   tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
-    curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['glass-tiles'], park: [], 'waterfront-edge': [],
+    curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['deck'] /* (the ground between the roads: Round 556) */, park: [], 'waterfront-edge': [],
     'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': ['beacon-post'], 'prop-ac': ['air-unit'], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
     'prop-vent': ['roof-vent', 'dish'], 'prop-tank': ['water-tower'], 'prop-stairs': [], 'prop-solar': ['solar-panel'],
     car: ['sky-skiff', 'hover-van'], tree: ['blossom-tree', 'teal-tree'], lamp: ['glow-street-lamp'], 'sign-traffic': ['holo-post'], cargo: ["sky-pods", "hover-crates", "drone-pad", "cargo-crane", "neon-kiosk", "holo-stand", "glow-vending", "noodle-cart"], clutter: ["planter-cluster", "curved-bench", "glow-lamp", "recycle-bin", "crate-pile", "potted-blossom", "mini-dish", "glow-bollard"],
@@ -591,7 +599,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
 // owner's forest art (assets/environment/wilds-gen/, Rounds 549-550). Three lakes from the journey's seed take the place of the
 // rivers (the same machinery: nothing is built on their muddy banks, a road crossing one is the boardwalk bridge).
 // =====================================================================
-GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false /* (not the Sky Isles' settings) */,
+GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false, noDocks: false, buildFit: null, isleEdge: null /* (not the Sky Isles' settings) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds && TILE_WORLD_DATA.wilds.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.wilds.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   extraLinks: () => genTileExtraLinks('wilds'), linksCache: null,
@@ -880,7 +888,7 @@ function genWorld(seed) {
     for (let y = q[1] - M; y < q[3] + M; y++) for (let x = q[0] - M; x < q[2] + M; x++) if (at(x, y) === 3) return false; return true; };
   lots.forEach((l, i) => { let pieces = [l.r]; for (const h of holes[i] || []) pieces = pieces.flatMap(q => cut(q, h));
     for (const q of pieces) { const lseed = Math.floor(rnd() * 1e9); let dock = false; // Round 436: a lot within 4 cells of the shore is on the docks
-      if (GEN.topdown) for (let y = q[1] - 4; !dock && y < q[3] + 4; y++) for (let x = q[0] - 4; x < q[2] + 4; x++) if (at(x, y) === 3) { dock = true; break; }
+      if (GEN.topdown && !GEN.noDocks) for (let y = q[1] - 4; !dock && y < q[3] + 4; y++) for (let x = q[0] - 4; x < q[2] + 4; x++) if (at(x, y) === 3) { dock = true; break; }
       // Round 413 (owner: "make a rule that there can never be edge on edge, there must be tile in between"): a park (edged
       // by a kerb) keeps at least one clear cell of paving from any other park and from the shore (whose strip is an edge too)
       // Round 445: what a lot is follows from its size. A lot with room for a building at full scale is a building (a few
@@ -950,7 +958,7 @@ function genWorld(seed) {
   // ruin pictures come), and the mall is off (GEN.mall) since it is a generated building.
   // =====================================================================
   if (GEN.spriteWorld && GEN.topdown) {
-    const slotsAll = Object.keys(CITY_TD_ART).filter(k => k.startsWith('building-') && (CITY_TD_ART[k] || []).length), F = CITY_BUILDING_FIT, picked = [];
+    const slotsAll = Object.keys(CITY_TD_ART).filter(k => k.startsWith('building-') && (CITY_TD_ART[k] || []).length), F = GEN.buildFit ? Object.assign({}, CITY_BUILDING_FIT, GEN.buildFit) : CITY_BUILDING_FIT /* Round 556: a theme's own (the Sky Isles' islands are small) */, picked = [];
     const fits = (slots, bw, bh) => { const out = []; for (const slot of slots) for (const n of CITY_TD_ART[slot]) { const d = CITY_BUILDING_PX[n]; if (!d) continue; const sc = Math.min(bw / d[0], bh / d[1], F.max);
       if (sc >= F.min) out.push({ slot, n, s: sc, w: d[0] * sc, h: d[1] * sc, fill: (d[0] * sc * d[1] * sc) / (bw * bh) }); } return out.sort((x, y) => y.fill - x.fill || (x.n < y.n ? -1 : 1)); };
     const extra = [], has = k => (CITY_TD_ART[k] || []).length > 0;
@@ -2454,7 +2462,16 @@ function paintChronoRoom(canvas, key) {
     const beach = coast.beach;
     ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
     if (GEN.plainSea) { ctx.drawImage(tintIn(coast.sea, g => waterFill(g)), 0, 0); // Round 553: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
-      genSkyClouds(ctx, key, coast.sea, K, W, H, imgs); }
+      genSkyClouds(ctx, key, coast.sea, K, W, H, imgs);
+      // Round 556 (owner: "we need edges where the ground meets open sky"): an edge strip on every seam between ground (a road
+      // counts as ground, so a bridge's sides are left to its own parapet) and open sky, on the 25px grid by the 3x3 bitmask
+      // (cityGridKerb: one piece per straight run, an arc per corner), drawn after the streets like the sea wall; street kerbs
+      // stop short of it (never an edge on an edge)
+      const ea = GEN.isleEdge && (() => { const [sl, n] = GEN.isleEdge; return imgs[cityArtPath(sl, n)]; })();
+      if (ea && ea.naturalWidth) { const [gq, gr] = GEN.world(key), gx = gq * FG_COLS, gy = gr * FG_ROWS, wl4 = genWorld(chronoSeed()), sd4 = chronoSeed();
+        const landC = (X, Y) => (X >= 0 && Y >= 0 && X < wl4.CW && Y < wl4.CH && wl4.cell[Y * wl4.CW + X] === 2) || !GEN.hole(sd4, Math.floor(X / 2), Math.floor(Y / 2));
+        coastSandCell = (X, Y) => !landC(X, Y);
+        coastWallDraw = () => { for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, landC, gx, gy, FG_COLS, FG_ROWS, FG_CELL, 14, K, ea, GEN.isleEdgeT || 16, gq * 800, gr * 500); }; } }
     else { ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
     ctx.drawImage(tintIn(coast.sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(30,70,110,.16)'; g.fillRect(0, 0, W, H); }), 0, 0);
     ctx.save(); ctx.globalAlpha = 0.28; ctx.drawImage(flat(coast.deep, '#02040e'), 0, 0); ctx.restore();                      // deep water

@@ -28,7 +28,7 @@ for (const sd of [77, 1, 9]) {
   assert.strictEqual(r.bare, 0, sd + ': every road over the sky is under a bridge');
   assert.strictEqual(r.close, 0, sd + ': no two bridges meet');
   assert.deepStrictEqual(r.wetLanding, [], sd + ': the start and boss rooms stand on an island');
-  assert(r.buildings >= 30, sd + ': buildings on the islands (' + r.buildings + ')');
+  assert(r.buildings >= 20, sd + ': buildings on the islands (' + r.buildings + ')');
   assert(r.noSquare.length <= 3, sd + ': almost every room has a square for its objects (none in ' + r.noSquare.join(' ') + ')');
   assert.strictEqual(r.reached, r.rooms, sd + ': every room is reached');
   console.log('seed ' + sd + ': ' + Math.round(r.land * 100) + '% land, ' + r.bridges + ' bridges, ' + r.buildings + ' buildings, rooms without a square: ' + (r.noSquare.join(' ') || 'none'));
