@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 568: the Sunwoven Shirt as a ribbed desert survival suit
+
+(Owner: "now change the shirt look to a body armor look out of dune for the desert".) An original design in that spirit (not a
+copy of any film's costume): `gear/recipes/sunwovenShirt.json` is now dusty sand ribbing (`stripes`), with heavy dark trim, three
+darker segment bands and a dark centre seam; the hero's own shading is turned down (0.6) so his polo's collar and pocket fade.
+Chosen from five variants (brushed, quilted, ribbed; grey ones read as a striped shirt). A recipe keeps the shirt's silhouette (short
+sleeves, collar): a true armored silhouette (a high collar, chest plates, shoulder guards) needs drawn art.
+
 ## Round 567: designed gear keeps a solid shape, past the outline where it needs to
 
 (Owner: "dont be afraid to make the gear larger than the character outline, we want to keep it's shape without random pixels
