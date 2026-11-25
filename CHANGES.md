@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 557: the cyber boots on the hero
+
+ChatGPT's boots (PR #319, `tools/art-refresh/wearable/cyber-boots/`), the first look delivered through the Round 555 process:
+`python3 tools/wearable_add.py --look cyber-boots --slot boots --items boots,cloudstepBoots --overlay ...` took it first time
+(36 frames, 0 px past the hero's outline, no clear patch: the overlay covers the brown shoes). Worn with the belt, the two stack
+(boots, then belt). Checked by eye at 256px and 84px in all four directions: the brown shoes are covered in every frame. One flaw
+is left for ChatGPT to redraw (`CHATGPT-NOTES.md`): in the right-facing row, frames 3 and 7, a hard-edged rectangular patch at
+the back boot's ankle, hard to see at game size. `tests/hero-wear.test.cjs` checks that boots and belt stack in slot order.
+
 ## Round 556: the Sky Isles' ground, more sky, edges on the islands
 
 (Owner: "sky isles still looks pretty bad, the ground textures clash with the city objects and buildings and we still need more

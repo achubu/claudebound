@@ -23,6 +23,7 @@ const r = JSON.parse(run(`(() => { newGame(); ensureGear(); const out = {};
   equipGear('belt', 'scarabBelt'); out.worn = heroWearLooks().join('+');
   const before = gearStat('pierce'); equipGear('belt', 'stormglassBelt'); out.swapped = heroWearLooks().join('+'); out.pierce = [before, gearStat('pierce')];
   equipGear('belt', null); out.off = heroWearLooks().join('+');
+  state.relics.push('cloudstepBoots'); equipGear('belt', 'scarabBelt'); equipGear('boots', 'cloudstepBoots'); out.stacked = heroWearLooks().join('+'); equipGear('boots', null); /* (Round 557: boots and belt stack, boots first) */
   equipGear('belt', 'scarabBelt'); collectRelic(['hourglassBelt']); out.foundWhileWorn = [state.gear.belt, heroWearLooks().join('+')];
   return JSON.stringify(out); })()`));
 for (const f of r.files) assert(fs.existsSync(path.join(ROOT, f)), f + ' is on disk');
@@ -34,6 +35,7 @@ assert.strictEqual(r.worn, 'cyber-belt', 'a worn belt shows');
 assert.strictEqual(r.swapped, 'cyber-belt', 'and after a swap');
 assert.deepStrictEqual(r.pierce, [1, 2], 'belt stats are as before');
 assert.strictEqual(r.off, '', 'taking it off goes back to the plain hero');
+assert.strictEqual(r.stacked, 'cyber-boots+cyber-belt', 'boots and belt worn together stack, in slot order');
 assert.deepStrictEqual(r.foundWhileWorn, ['scarabBelt', 'cyber-belt'], 'finding a belt while one is worn keeps the worn one');
 console.log('hero-wear (harness) ok');
 

@@ -1,0 +1,9 @@
+{
+ "slot": "boots",
+ "items": [
+  "boots",
+  "cloudstepBoots"
+ ],
+ "clear": false,
+ "v": 1
+}

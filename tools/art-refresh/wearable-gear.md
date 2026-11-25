@@ -80,3 +80,4 @@ registry only). To remove a look, delete its folder and run `--rebuild`.
 | Look | Slot | Items | Clear patch | Round |
 |---|---|---|---|---|
 | `cyber-belt` | belt | scarabBelt, stormglassBelt, hourglassBelt | yes (old brown belt and pouch) | 554-555 |
+| `cyber-boots` | boots | boots (Briarstep), cloudstepBoots | no (the overlay covers the brown shoes) | 557 |

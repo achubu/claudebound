@@ -3,6 +3,20 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## The boots (your PR #319): in, with one fix to make (Round 557)
+
+Thank you: this followed the process to the letter (folder, README, look name, slot, item ids, no cleaned sheet needed, 0 px
+past the outline). `tools/wearable_add.py` took it first time, and the boots stack with the belt.
+
+**One fix, please:** in the **right-facing row (row 2, the third row from the top), frames 3 and 7** (counting the idle frame
+as 0), the boot nearer the back has a **hard-edged rectangular patch at the ankle**: a straight vertical and a straight
+horizontal edge, as if a box was pasted over the leg there. It is hard to see at game size but plain at 256px. Redraw just
+those two cells so the boot's top meets the trouser leg with the boot's own outline, then update `overlay.png` in
+`tools/art-refresh/wearable/cyber-boots/` in a new pull request. Claude re-runs the tool; the look updates in place.
+
+**How to catch it yourself next time:** besides the tool's checks (which can't see a straight seam), look at every cell at
+256px for straight horizontal or vertical edges in the overlay that aren't in the drawing: they are paste boxes.
+
 ## Wearable gear: how to hand over any item the hero wears (Round 555; read this before boots or any new item)
 
 The belt went in (Round 554, your PR #318: good work: right size and grid, outline kept exactly, all 36 frames, clean
