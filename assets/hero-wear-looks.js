@@ -2,7 +2,7 @@
 // Round 555: the looks the hero can wear (tools/art-refresh/wearable-gear.md).
 const HERO_WEAR_SLOTS = ["pants", "boots", "shirt", "belt", "gloves"];
 const HERO_WEAR_BASE = 'assets/characters/protagonist-walk9-base.png';
-const HERO_WEAR_DEFAULTS = {"belt": "assets/characters/wearable/default-belt/patch.png"};
+const HERO_WEAR_DEFAULTS = {"belt": {"under": "assets/characters/wearable/default-belt/under.png", "over": "assets/characters/wearable/default-belt/over.png"}};
 const HERO_WEAR_DATA = {
  "cyber-belt": {
   "slot": "belt",

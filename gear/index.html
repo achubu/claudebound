@@ -134,12 +134,13 @@ function compose(base, clears, layers) { const c = document.createElement('canva
   g.drawImage(base, 0, 0); g.globalCompositeOperation = 'source-atop'; for (const cl of clears) g.drawImage(cl, 0, 0);
   for (const l of layers) { g.globalCompositeOperation = l.op; g.drawImage(l.img, 0, 0); } g.globalCompositeOperation = 'source-over'; return c; }
 async function outfitFor(choice) { // choice: slot -> look name | '' (none) | '*new*'
-  const clears = [], layers = [];
+  const clears = [], layers = [], wornSl = new Set(SLOTS.filter(sl => choice[sl] && !(choice[sl] === '*new*' && !(newLook && newLook.slot === sl)) && !(choice[sl] === '*recipe*' && !(designed && designed.slot === sl))));
+  for (const sl of SLOTS) if (DEFAULTS[sl] && !wornSl.has(sl)) layers.push({ img: await lookImg(DEFAULTS[sl].under), op: 'source-atop' }); // (Round 565: a default's cloth part, under every look)
   for (const sl of SLOTS) { const v = choice[sl];
     if (v === '*new*' && newLook && newLook.slot === sl) { if (newLook.clear) clears.push(newLook.clear); layers.push({ img: newLook.overlay, op: 'source-over' }); }
     else if (v === '*recipe*' && designed && designed.slot === sl) layers.push({ img: designed.canvas, op: 'source-over' });
     else if (v && DATA[v]) { if (DATA[v].clear) clears.push(await lookImg(DATA[v].clear)); layers.push({ img: await lookImg(DATA[v].overlay), op: 'source-over' }); }
-    else if (DEFAULTS[sl]) layers.push({ img: await lookImg(DEFAULTS[sl]), op: 'source-atop' }); }
+    else if (DEFAULTS[sl]) layers.push({ img: await lookImg(DEFAULTS[sl].over), op: 'source-atop' }); }
   return compose(baseImg, clears, layers); }
 // ---------------- the wardrobe ----------------
 const choice = {}; let walkTimer = null;
