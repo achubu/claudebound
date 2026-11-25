@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 562: the Gear Studio (aethercede.com/gear) and a faster gear pipeline
+
+(Owner: "let's make sure that we have this figured out for future gear, also optimize the gear pipeline further"; "Can we
+create a separate tool for gear creation at aethercede.com/gear".)
+- **Gear Studio** (`gear/index.html`): a wardrobe (a look per slot, the hero walking in all four directions at game size, drawn
+  exactly as `assets/hero-wear.js` draws him) and a new-look checker (drop in `overlay.png` and `cleaned.png`, pick the slot and
+  items: the tool's checks, the rejected pixels in red, a review sheet of all 36 frames with the whole outfit and old clothing
+  in red, and the new look worn in the wardrobe); it downloads the hand-off's `manifest.json`. It reads the registry, the base
+  sheet and the gear table from the game's own files. `tests/gear-page.test.cjs`.
+- **`tools/wearable_add.py --from <folder>`** reads a hand-off folder's `manifest.json` (look, slot, items, cleaned): no copying
+  by hand. **`--review <dir>`**: the same review sheet and the outfit's four walk animations at game size, for every import.
+  Writes are staged and moved in together, so a failure leaves no half-written look.
+- **Fit checklist** in `tools/art-refresh/wearable-gear.md` (shoulders, old clothing showing, paste boxes, stacking, the walk):
+  the three problems so far were caught only by eye, so the review sheet is where to look. Automatic seam detection was tried
+  and dropped: overlapping legs and ordinary straight lines in the art made it flag good frames.
+- `CHATGPT-NOTES.md`: use the studio and the checklist before every hand-off.
+
 ## Round 561: the chest armor's shoulders, sent back for a refit
 
 (Owner: "Can you fix the armor not fitting around the shoulders".) At 256px the `cyber-chest` vest is narrower than his shoulders

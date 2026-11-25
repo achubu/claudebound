@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gear Studio · Aethercede</title>
+<!-- Round 562 (owner: "Can we create a separate tool for gear creation at aethercede.com/gear"). The wearable-gear pipeline in the
+     browser: try the outfits the game has, and check a new look before it is handed over. It draws exactly as the game does
+     (assets/hero-wear.js: the beltless base, clear patches source-atop, then slot by slot the worn look's overlay or the slot's
+     default) and runs the same checks as tools/wearable_add.py. The process: tools/art-refresh/wearable-gear.md. -->
+<style>
+  :root { --bg: #0b0f17; --panel: #131a26; --line: #243041; --ink: #e8edf5; --muted: #8d9bb0; --accent: #36f1ff; --warm: #ffcf7a; --no: #ff7a8a; --yes: #6fe0a0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header, main { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+  header { padding-top: 26px; padding-bottom: 10px; }
+  h1 { margin: 0 0 4px; font-size: 30px; }
+  header p { margin: 0; color: var(--muted); }
+  a { color: var(--accent); }
+  h2 { font-size: 21px; margin: 26px 0 8px; color: var(--accent); }
+  section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 12px 0; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  label { font-size: 14px; color: var(--muted); }
+  select, input[type=text] { background: #0e141e; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font: inherit; }
+  input[type=file] { color: var(--muted); max-width: 100%; }
+  button { background: #0e141e; color: var(--ink); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  .slotpick { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  .slotpick div { display: flex; flex-direction: column; gap: 4px; }
+  .walks { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+  .walks figure { margin: 0; text-align: center; }
+  .walks canvas { width: 168px; height: 168px; image-rendering: pixelated; background: #3c4650; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  figcaption { font-size: 12px; color: var(--muted); }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #0e141e; }
+  .scroll canvas { display: block; }
+  ul.checks { list-style: none; padding: 0; margin: 8px 0; }
+  ul.checks li { padding: 3px 0; }
+  .ok { color: var(--yes); } .bad { color: var(--no); } .note { color: var(--warm); }
+  .items { display: flex; gap: 10px; flex-wrap: wrap; }
+  .items label { color: var(--ink); background: #0e141e; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+  pre { background: #0e141e; border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; font-size: 13px; white-space: pre-wrap; }
+  .muted { color: var(--muted); font-size: 14px; }
+  @media (max-width: 640px) { .walks canvas { width: 140px; height: 140px; } h1 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Gear Studio</h1>
+  <p>Try the hero's outfits, and check a new piece of gear before it is handed over. Drawn exactly as the game draws it, with the
+  same checks as <code>tools/wearable_add.py</code>. The process: <a href="https://github.com/achubu/claudebound/blob/main/tools/art-refresh/wearable-gear.md">wearable-gear.md</a> ·
+  fit new art on the <a href="../assets/characters/protagonist-walk9-base.png" download>base sheet</a> (the hero without his tool belt).</p>
+</header>
+<main>
+  <h2>Wardrobe</h2>
+  <section class="panel">
+    <div class="slotpick" id="slots"></div>
+    <div class="walks" id="walks"></div>
+    <p class="muted" id="status">Loading…</p>
+  </section>
+
+  <h2>New look</h2>
+  <section class="panel">
+    <div class="row">
+      <div><label>Look name<br><input type="text" id="lookName" placeholder="cyber-boots" pattern="[a-z0-9-]+"></label></div>
+      <div><label>Slot<br><select id="lookSlot"></select></label></div>
+      <div><label>overlay.png (2304 × 1024)<br><input type="file" id="overlayFile" accept="image/png"></label></div>
+      <div><label>cleaned.png (only if old clothing must be painted out)<br><input type="file" id="cleanFile" accept="image/png"></label></div>
+    </div>
+    <p class="muted" style="margin:10px 0 4px">Gear items that show this look:</p>
+    <div class="items" id="items"></div>
+    <ul class="checks" id="checks"><li class="muted">Drop in an overlay to check it.</li></ul>
+    <div class="row"><button id="useNew" disabled>Wear it in the wardrobe above</button><button id="dlManifest" disabled>Download manifest.json</button></div>
+    <div id="handoff"></div>
+  </section>
+
+  <h2>Review sheet</h2>
+  <section class="panel">
+    <p class="muted">Every frame, facing down, left, right and up: the hero as he is · with the new look (or the wardrobe's outfit) ·
+    the whole outfit with old clothing that should be hidden (the khaki trousers, the brown shoes) in <span class="bad">red</span>.
+    Rejected pixels are shown in red on the checks' picture below it.</p>
+    <div class="scroll"><canvas id="sheet"></canvas></div>
+    <div class="scroll" style="margin-top:10px"><canvas id="diag"></canvas></div>
+  </section>
+</main>
+<script src="../assets/hero-wear-looks.js"></script>
+<script>
+'use strict';
+const W = 2304, H = 1024, CELL = 256, BASE = '../' + HERO_WEAR_BASE, ORIGINAL = '../assets/characters/protagonist-walk9.png';
+const SLOTS = HERO_WEAR_SLOTS, DATA = HERO_WEAR_DATA, DEFAULTS = HERO_WEAR_DEFAULTS;
+const OLD_CLOTHES = { pants: [[152, 119, 81], 118, 236], boots: [[80, 40, 25], 212, 256] }, SKIN = [178, 124, 70]; // (as tools/wearable_add.py)
+const $ = id => document.getElementById(id);
+const load = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('could not load ' + src)); i.src = src; });
+const canvasOf = img => { const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(img, 0, 0); return c; };
+const pixels = c => c.getContext('2d').getImageData(0, 0, W, H).data;
+let baseImg, baseData, gear = {}, newLook = null; const cache = {};
+async function lookImg(src) { return cache[src] || (cache[src] = await load('../' + src)); }
+// the game's drawing (assets/hero-wear.js): the base, clear patches source-atop, then per slot the look's overlay or the default
+function compose(base, clears, layers) { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  g.drawImage(base, 0, 0); g.globalCompositeOperation = 'source-atop'; for (const cl of clears) g.drawImage(cl, 0, 0);
+  for (const l of layers) { g.globalCompositeOperation = l.op; g.drawImage(l.img, 0, 0); } g.globalCompositeOperation = 'source-over'; return c; }
+async function outfitFor(choice) { // choice: slot -> look name | '' (none) | '*new*'
+  const clears = [], layers = [];
+  for (const sl of SLOTS) { const v = choice[sl];
+    if (v === '*new*' && newLook && newLook.slot === sl) { if (newLook.clear) clears.push(newLook.clear); layers.push({ img: newLook.overlay, op: 'source-over' }); }
+    else if (v && DATA[v]) { if (DATA[v].clear) clears.push(await lookImg(DATA[v].clear)); layers.push({ img: await lookImg(DATA[v].overlay), op: 'source-over' }); }
+    else if (DEFAULTS[sl]) layers.push({ img: await lookImg(DEFAULTS[sl]), op: 'source-atop' }); }
+  return compose(baseImg, clears, layers); }
+// ---------------- the wardrobe ----------------
+const choice = {}; let walkTimer = null;
+function buildSlots() { const host = $('slots'); host.innerHTML = '';
+  for (const sl of SLOTS) { const d = document.createElement('div'), s = document.createElement('select'); s.id = 'slot-' + sl;
+    s.append(new Option(DEFAULTS[sl] ? 'none (the brown belt)' : 'none', ''));
+    for (const [n, v] of Object.entries(DATA)) if (v.slot === sl) s.append(new Option(n + ' · ' + v.items.join(', '), n));
+    if (newLook && newLook.slot === sl) s.append(new Option('★ new: ' + newLook.name, '*new*'));
+    s.value = choice[sl] || ''; s.onchange = () => { choice[sl] = s.value; refresh(); };
+    const l = document.createElement('label'); l.textContent = sl; d.append(l, s); host.append(d); } }
+async function refresh() { $('status').textContent = 'Drawing…';
+  const sheet = await outfitFor(choice); drawWalks(sheet); await drawReview(sheet);
+  $('status').textContent = 'The walk at game size (shown twice as large). ' + (Object.values(choice).some(Boolean) ? '' : 'Nothing worn: the hero as he is.'); }
+function drawWalks(sheet) { const host = $('walks'); host.innerHTML = ''; const cs = [];
+  ['down', 'left', 'right', 'up'].forEach((name, r) => { const f = document.createElement('figure'), c = document.createElement('canvas'); c.width = 84; c.height = 84;
+    const cap = document.createElement('figcaption'); cap.textContent = 'facing ' + name; f.append(c, cap); host.append(f); cs.push([c, r]); });
+  let fr = 1; clearInterval(walkTimer);
+  const tick = () => { for (const [c, r] of cs) { const g = c.getContext('2d'); g.clearRect(0, 0, 84, 84); g.imageSmoothingQuality = 'high'; g.drawImage(sheet, fr * CELL, r * CELL, CELL, CELL, 0, 0, 84, 84); } fr = fr % 8 + 1; };
+  tick(); walkTimer = setInterval(tick, 110); }
+// ---------------- the review sheet ----------------
+async function drawReview(outfit) {
+  const asIs = await outfitFor({}), solo = newLook ? await outfitFor({ [newLook.slot]: '*new*' }) : outfit;
+  const od = pixels(outfit), red = new Uint8ClampedArray(od), worn = new Set(SLOTS.filter(sl => choice[sl])); if (newLook) worn.add(newLook.slot);
+  let marked = 0;
+  for (const [sl, [col, y0, y1]] of Object.entries(OLD_CLOTHES)) { if (!worn.has(sl)) continue;
+    for (let i = 0; i < W * H; i++) { const y = Math.floor(i / W) % CELL; if (y < y0 || y >= y1 || od[i * 4 + 3] <= 200) continue;
+      const dc = Math.hypot(od[i * 4] - col[0], od[i * 4 + 1] - col[1], od[i * 4 + 2] - col[2]), ds = Math.hypot(od[i * 4] - SKIN[0], od[i * 4 + 1] - SKIN[1], od[i * 4 + 2] - SKIN[2]);
+      if (dc < 28 && dc < ds - 15) { red[i * 4] = 255; red[i * 4 + 1] >>= 2; red[i * 4 + 2] >>= 2; marked++; } } }
+  const redC = document.createElement('canvas'); redC.width = W; redC.height = H; redC.getContext('2d').putImageData(new ImageData(red, W, H), 0, 0);
+  const rows = [['as he is', asIs], [newLook ? 'with ' + newLook.name : 'this outfit', solo], ['outfit · red = old', redC]];
+  const Z = 120, LAB = 120, sheet = $('sheet'); sheet.width = LAB + 9 * Z; sheet.height = 4 * (rows.length * Z + 22); const g = sheet.getContext('2d');
+  g.fillStyle = '#0e141e'; g.fillRect(0, 0, sheet.width, sheet.height); g.font = '13px system-ui'; let y = 0;
+  ['facing down', 'facing left', 'facing right', 'facing up'].forEach((dn, r) => { g.fillStyle = '#e8edf5'; g.fillText(dn + ' · frames 0 (standing) to 8', 6, y + 15); y += 22;
+    for (const [name, im] of rows) { g.fillStyle = '#8d9bb0'; g.fillText(name.slice(0, 18), 6, y + Z / 2);
+      for (let c = 0; c < 9; c++) { g.fillStyle = '#5a6e5a'; g.fillRect(LAB + c * Z, y, Z - 2, Z - 2); g.imageSmoothingQuality = 'high'; g.drawImage(im, c * CELL, r * CELL, CELL, CELL, LAB + c * Z, y, Z - 2, Z - 2); }
+      y += Z; } });
+  return marked; }
+// ---------------- checking a new look (tools/wearable_add.py's rules) ----------------
+function nearOutline(alpha, r = 2) { const m = new Uint8Array(W * H); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (alpha[(y * W + x) * 4 + 3] > 0) { for (let dy = -r; dy <= r; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue; for (let dx = -r; dx <= r; dx++) { const xx = x + dx; if (xx >= 0 && xx < W) m[yy * W + xx] = 1; } } } return m; }
+let nearMask = null;
+async function checkNew() {
+  const out = [], file = $('overlayFile').files[0], cfile = $('cleanFile').files[0], name = $('lookName').value.trim(), slot = $('lookSlot').value;
+  const items = [...document.querySelectorAll('#items input:checked')].map(i => i.value);
+  newLook = null; $('useNew').disabled = $('dlManifest').disabled = true; $('handoff').innerHTML = '';
+  if (!file) { $('checks').innerHTML = '<li class="muted">Drop in an overlay to check it.</li>'; return; }
+  const bad = (t) => out.push(['bad', t]), ok = (t) => out.push(['ok', t]), note = (t) => out.push(['note', t]);
+  if (!/^[a-z0-9-]+$/.test(name)) bad('Look name: lower-case letters, digits and hyphens (e.g. cyber-boots).');
+  if (!items.length) bad('Tick the gear items that show this look.');
+  for (const it of items) for (const [n, v] of Object.entries(DATA)) if (n !== name && v.items.includes(it)) bad(`${it} already shows the look ${n}.`);
+  if (DATA[name] && DATA[name].slot !== slot) bad(`${name} is already a ${DATA[name].slot} look.`);
+  else if (DATA[name]) note(`${name} already exists: this would update it.`);
+  let img; try { img = await load(URL.createObjectURL(file)); } catch (e) { bad('overlay.png could not be read.'); return show(out); }
+  if (img.naturalWidth !== W || img.naturalHeight !== H) { bad(`overlay.png is ${img.naturalWidth} × ${img.naturalHeight}: it must be ${W} × ${H}, the hero's grid.`); return show(out); }
+  const oc = canvasOf(img), o = pixels(oc), b = baseData, rejected = new Uint8Array(W * H);
+  nearMask = nearMask || nearOutline(b);
+  const thin = []; for (let r = 0; r < 4; r++) for (let c = 0; c < 9; c++) { let n = 0; for (let y = r * CELL; y < (r + 1) * CELL; y++) for (let x = c * CELL; x < (c + 1) * CELL; x++) if (o[(y * W + x) * 4 + 3] >= 128) n++; if (n < 40) thin.push(r + ',' + c); }
+  thin.length ? bad(`Frames (row,col) with under 40 solid item pixels: ${thin.join(' ')}. Every frame needs the item.`) : ok('All 36 frames have the item.');
+  let past = 0, far = 0, key = 0; const farCells = new Set();
+  for (let i = 0; i < W * H; i++) { const a = o[i * 4 + 3]; if (!a) continue;
+    if (a > 60 && b[i * 4 + 3] < 128) past++;
+    if (!nearMask[i]) { far++; rejected[i] = 1; farCells.add(Math.floor(Math.floor(i / W) / CELL) + ',' + Math.floor((i % W) / CELL)); }
+    const R = o[i * 4], G = o[i * 4 + 1], B = o[i * 4 + 2]; if ((G > 200 && R < 80 && B < 80) || (R > 200 && B > 200 && G < 80)) { key++; rejected[i] = 1; } }
+  past > 2000 ? bad(`It reaches past the hero's outline in ${past} px (2000 allowed for the soft edge).`) : ok(`Inside the hero's outline (${past} px on its soft edge).`);
+  far ? bad(`${far} px (any transparency) lie more than 2 px outside the hero, in frames ${[...farCells].slice(0, 12).join(' ')}: a faint background or stray bits.`) : ok('Nothing outside the hero.');
+  key > 20 ? bad(`${key} pure green or magenta pixels: background left in the art.`) : ok('No background colour left in it.');
+  let clear = null;
+  if (cfile) { try { const ci = await load(URL.createObjectURL(cfile)); if (ci.naturalWidth !== W || ci.naturalHeight !== H) bad('cleaned.png must be ' + W + ' × ' + H + '.');
+      else { const cd = pixels(canvasOf(ci)); let moved = 0; const cp = new Uint8ClampedArray(W * H * 4); let changed = 0;
+        for (let i = 0; i < W * H; i++) { if (cd[i * 4 + 3] !== b[i * 4 + 3]) moved++; else if (b[i * 4 + 3] > 0 && (cd[i * 4] !== b[i * 4] || cd[i * 4 + 1] !== b[i * 4 + 1] || cd[i * 4 + 2] !== b[i * 4 + 2])) { cp.set([cd[i * 4], cd[i * 4 + 1], cd[i * 4 + 2], 255], i * 4); changed++; } }
+        if (moved) bad(`cleaned.png changes the hero's outline in ${moved} px: it must be the base sheet with only this slot's clothing painted out.`);
+        else { ok(`cleaned.png keeps the outline; it repaints ${changed} px.`); const cc = document.createElement('canvas'); cc.width = W; cc.height = H; cc.getContext('2d').putImageData(new ImageData(cp, W, H), 0, 0); clear = cc; } } }
+    catch (e) { bad('cleaned.png could not be read.'); } }
+  const failed = out.some(x => x[0] === 'bad');
+  newLook = { name: name || 'new-look', slot, items, overlay: oc, clear, cleaned: !!cfile };
+  // the checks' picture: the base dimmed, rejected pixels red
+  const dg = $('diag'); dg.width = W / 2; dg.height = H / 2; const gg = dg.getContext('2d'); const dd = new Uint8ClampedArray(b);
+  for (let i = 0; i < W * H; i++) { dd[i * 4] *= .35; dd[i * 4 + 1] *= .35; dd[i * 4 + 2] *= .35; dd[i * 4 + 3] = 255; if (rejected[i]) dd.set([255, 0, 0, 255], i * 4); }
+  const tc = document.createElement('canvas'); tc.width = W; tc.height = H; tc.getContext('2d').putImageData(new ImageData(dd, W, H), 0, 0); gg.drawImage(tc, 0, 0, W / 2, H / 2);
+  $('useNew').disabled = false; $('dlManifest').disabled = failed;
+  if (!failed) { ok('Passes every check. Look at the review sheet and the walk, then hand it over.');
+    $('handoff').innerHTML = `<p class="muted">Hand-off: put <b>overlay.png</b>${cfile ? ', <b>cleaned.png</b>' : ''}, <b>manifest.json</b> and a short README in
+      <code>tools/art-refresh/wearable/${name}/</code> in a pull request. Claude then runs:</p><pre>python3 tools/wearable_add.py --from tools/art-refresh/wearable/${name} --review /tmp/${name}-review</pre>`; }
+  show(out); choice[slot] = '*new*'; buildSlots(); refresh(); }
+function show(out) { $('checks').innerHTML = out.map(([k, t]) => `<li class="${k}">${k === 'ok' ? '✓' : k === 'bad' ? '✗' : '•'} ${t.replace(/</g, '&lt;')}</li>`).join(''); }
+function buildItems() { const sl = $('lookSlot').value, host = $('items'); host.innerHTML = '';
+  for (const [id, g] of Object.entries(gear)) if (g.slot === sl) { const l = document.createElement('label'), c = document.createElement('input'); c.type = 'checkbox'; c.value = id; c.onchange = checkNew; l.append(c, ' ' + g.name + ' (' + id + ')'); host.append(l); }
+  if (!host.children.length) host.innerHTML = '<span class="muted">No gear items in this slot.</span>'; }
+// ---------------- start ----------------
+(async () => {
+  try {
+    baseImg = await load(BASE); baseData = pixels(canvasOf(baseImg));
+    // the gear items, read from assets/gear.js's text (the file wraps game functions, so it isn't loaded as a script here)
+    const src = await (await fetch('../assets/gear.js')).text();
+    for (const m of src.matchAll(/^\s*(\w+):\s*\{\s*name:\s*'([^']+)',\s*slot:\s*'(\w+)'/gm)) gear[m[1]] = { name: m[2], slot: m[3] };
+    for (const sl of SLOTS) $('lookSlot').append(new Option(sl, sl));
+    $('lookSlot').onchange = () => { buildItems(); checkNew(); };
+    for (const id of ['overlayFile', 'cleanFile']) $(id).onchange = checkNew; $('lookName').oninput = () => { if ($('overlayFile').files[0]) checkNew(); };
+    $('useNew').onclick = () => { if (newLook) { choice[newLook.slot] = '*new*'; buildSlots(); refresh(); } };
+    $('dlManifest').onclick = () => { if (!newLook) return; const blob = new Blob([JSON.stringify({ look: newLook.name, slot: newLook.slot, items: newLook.items, cleaned: newLook.cleaned }, null, 1) + '\n'], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'manifest.json'; a.click(); };
+    buildItems(); buildSlots(); await refresh();
+    window.gearStudioReady = true;
+  } catch (e) { $('status').textContent = 'Could not load: ' + e.message; window.gearStudioError = e.message; }
+})();
+</script>
+</body>
+</html>

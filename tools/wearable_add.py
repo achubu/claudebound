@@ -205,12 +205,87 @@ def rebuild():
     print(f'wrote {os.path.relpath(REGISTRY, ROOT)}: {n} look(s)')
 
 
+# Round 562: the review sheet. Every frame of every direction in three rows: the hero as he is (base + defaults), with this look
+# alone, and with the whole current outfit (every registered look of the other slots), where old clothing the outfit should hide
+# (the brown shoes when boots are worn, the khaki trousers when pants are) is tinted red. Then walk animations of the outfit at
+# game size. Every fit problem found so far (the boot box, the tan hip, the vest's shoulders) shows plainly on it.
+OLD_CLOTHES = {'pants': ((152, 119, 81), (118, 236)), 'boots': ((80, 40, 25), (212, 256))}  # (the base sheet's trouser and shoe colours, and the rows of a 256px cell they're in)
+SKIN = (178, 124, 70)
+
+
+def review(hero, base, look, slot, ov, cl, out_dir):
+    from PIL import ImageDraw
+    os.makedirs(out_dir, exist_ok=True)
+    D = default_patches()
+    others = [(v['slot'], rgba(os.path.join(WEAR, n, 'overlay.png'))) for n, v in looks().items() if n != look and v['slot'] != slot]
+    oclears = [rgba(os.path.join(WEAR, n, 'clear.png')) for n, v in looks().items() if n != look and v['slot'] != slot and v.get('clear')]
+    mine = [cl] if cl is not None else []
+    rows = {'as he is': composite(base, [], [], D), look: composite(base, mine, [(slot, ov)], D),
+            'whole outfit': composite(base, oclears + mine, others + [(slot, ov)], D)}
+    outfit = np.asarray(rows['whole outfit']).astype(np.int16)
+    worn = {sl for sl, _ in others} | {slot}
+    tint = np.zeros(outfit.shape[:2], bool)
+    cy = np.arange(outfit.shape[0])[:, None] % CELL
+    for sl, (col, (y0, y1)) in OLD_CLOTHES.items():
+        if sl in worn:
+            dc = np.sqrt(((outfit[..., :3] - np.array(col)) ** 2).sum(-1)); ds = np.sqrt(((outfit[..., :3] - np.array(SKIN)) ** 2).sum(-1))
+            tint |= (outfit[..., 3] > 200) & (dc < 28) & (dc < ds - 15) & (cy >= y0) & (cy < y1)
+    t = outfit.copy(); t[tint, 0] = 255; t[tint, 1] //= 3; t[tint, 2] //= 3
+    rows['outfit, old clothing in red'] = Image.fromarray(t.astype(np.uint8), 'RGBA'); del rows['whole outfit']
+    Z, lab = 150, 150
+    sheet = Image.new('RGB', (lab + 9 * Z, 4 * (len(rows) * Z + 24)), (40, 44, 52)); d = ImageDraw.Draw(sheet)
+    y = 0
+    for r, dname in enumerate(['facing down', 'facing left', 'facing right', 'facing up']):
+        d.text((6, y + 6), f'{dname}: frames 0 (standing) to 8', fill=(230, 230, 230)); y += 24
+        for name, im in rows.items():
+            d.text((6, y + Z // 2), name[:22], fill=(200, 200, 200))
+            for c in range(9):
+                cell = im.crop((c * CELL, r * CELL, (c + 1) * CELL, (r + 1) * CELL)).resize((Z, Z), Image.LANCZOS)
+                bg = Image.new('RGBA', (Z, Z), (90, 110, 90, 255)); bg.alpha_composite(cell); sheet.paste(bg.convert('RGB'), (lab + c * Z, y))
+            y += Z
+    sp = os.path.join(out_dir, f'{look}-review.png'); sheet.save(sp)
+    outfit_im = Image.fromarray(np.asarray(rows[look]).astype(np.uint8), 'RGBA') if False else Image.fromarray(outfit.astype(np.uint8), 'RGBA')
+    gifs = []
+    for r, dname in enumerate(['down', 'left', 'right', 'up']):
+        fr = []
+        for c in range(1, 9):
+            cell = outfit_im.crop((c * CELL, r * CELL, (c + 1) * CELL, (r + 1) * CELL)).resize((84, 84), Image.LANCZOS).resize((168, 168), Image.NEAREST)
+            bg = Image.new('RGBA', (168, 168), (60, 70, 80, 255)); bg.alpha_composite(cell); fr.append(bg.convert('RGB'))
+        g = os.path.join(out_dir, f'{look}-walk-{dname}.gif'); fr[0].save(g, save_all=True, append_images=fr[1:], duration=110, loop=0); gifs.append(g)
+    print(f'review sheet: {sp}; walk animations (whole outfit, game size x2): {", ".join(os.path.basename(g) for g in gifs)}; red tint marks {int(tint.sum())} px of old clothing showing')
+
+
+def from_folder(a):
+    """--from: read the hand-off folder's manifest.json (look, slot, items, cleaned) and its overlay.png / cleaned.png"""
+    m = os.path.join(a.from_dir, 'manifest.json')
+    if not os.path.isfile(m):
+        raise SystemExit(f'{m} not found: a hand-off folder needs manifest.json ({{"look": ..., "slot": ..., "items": [...], "cleaned": false}})')
+    j = json.load(open(m))
+    for k in ('look', 'slot', 'items'):
+        if k not in j:
+            raise SystemExit(f'{m}: no {k!r}')
+    if not isinstance(j['items'], list):
+        raise SystemExit(f'{m}: "items" must be a list of gear ids')
+    a.look, a.slot, a.items = j['look'], j['slot'], ','.join(j['items'])
+    a.overlay = os.path.join(a.from_dir, 'overlay.png')
+    cp = os.path.join(a.from_dir, 'cleaned.png')
+    if j.get('cleaned') and not os.path.isfile(cp):
+        raise SystemExit(f'{m} says cleaned.png is included, but it is not there')
+    if os.path.isfile(cp) and not j.get('cleaned'):
+        raise SystemExit(f'{cp} is there but {m} does not say "cleaned": true')
+    a.clean = cp if j.get('cleaned') else None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--look'); ap.add_argument('--slot'); ap.add_argument('--items'); ap.add_argument('--overlay'); ap.add_argument('--clean')
     ap.add_argument('--proof'); ap.add_argument('--rebuild', action='store_true'); ap.add_argument('--check', action='store_true')
     ap.add_argument('--dry-run', action='store_true', help='every check and the proofs, nothing written under assets/ (for Codex before a hand-off)')
+    ap.add_argument('--from', dest='from_dir', help='a hand-off folder with manifest.json and overlay.png (Round 562)')
+    ap.add_argument('--review', help='write the review sheet and walk animations here (Round 562)')
     a = ap.parse_args()
+    if a.from_dir:
+        from_folder(a)
     hero, base = rgba(HERO), rgba(BASE)
     if not (hero[..., 3] == base[..., 3]).all():
         raise SystemExit('the base sheet must keep the hero\'s outline exactly')
@@ -260,21 +335,31 @@ def main():
     if a.dry_run:
         if a.proof:
             proofs(hero, composite(base, [cl] if cl is not None else [], [(a.slot, ov)], default_patches()), a.proof, a.look); print(f'proofs in {a.proof}')
+        if a.review:
+            review(hero, base, a.look, a.slot, ov, cl, a.review)
         print(f'dry run: {a.look} passes every check; nothing written'); return
     d = os.path.join(WEAR, a.look); os.makedirs(d, exist_ok=True)
     old = json.load(open(os.path.join(d, 'look.json'))) if os.path.isfile(os.path.join(d, 'look.json')) else {}
-    Image.fromarray(ov.astype(np.uint8), 'RGBA').save(os.path.join(d, 'overlay.png'), optimize=True)
+    # (Round 562: every file written beside its place first, then all moved in, so a failure leaves no half-written look)
+    tmp = {}
+    def stage(name, write):
+        t = os.path.join(d, '.' + name + '.new'); write(t); tmp[name] = t
+    stage('overlay.png', lambda t: Image.fromarray(ov.astype(np.uint8), 'RGBA').save(t, 'PNG', optimize=True))
     if cl is not None:
-        Image.fromarray(cl.astype(np.uint8), 'RGBA').save(os.path.join(d, 'clear.png'), optimize=True)
-    elif os.path.isfile(os.path.join(d, 'clear.png')):
+        stage('clear.png', lambda t: Image.fromarray(cl.astype(np.uint8), 'RGBA').save(t, 'PNG', optimize=True))
+    stage('look.json', lambda t: json.dump({'slot': a.slot, 'items': items, 'clear': cl is not None, 'v': old.get('v', 0) + 1}, open(t, 'w'), indent=1))
+    for name, t in tmp.items():
+        os.replace(t, os.path.join(d, name))
+    if cl is None and os.path.isfile(os.path.join(d, 'clear.png')):
         os.remove(os.path.join(d, 'clear.png'))
-    json.dump({'slot': a.slot, 'items': items, 'clear': cl is not None, 'v': old.get('v', 0) + 1}, open(os.path.join(d, 'look.json'), 'w'), indent=1)
     print(f'added {a.look}: slot {a.slot}, items {", ".join(items)}; {past} overlay px on the outline\'s edge'
           + (f'; clear patch {int((cl[..., 3] == 255).sum())} px' if cl is not None else '; no clear patch (the overlay must cover the old clothes)'))
     rebuild()
     if a.proof:
         proofs(hero, composite(base, [cl] if cl is not None else [], [(a.slot, ov)], default_patches()), a.proof, a.look)
         print(f'proofs in {a.proof}')
+    if a.review:
+        review(hero, base, a.look, a.slot, ov, cl, a.review)
 
 
 if __name__ == '__main__':
