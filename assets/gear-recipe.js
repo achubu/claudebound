@@ -26,6 +26,7 @@ const GEAR_TEXTURES = { // procedural textures: (ctx, size) draws one seamless t
 function gearHex(c, fb) { const m = /^#?([0-9a-f]{6})$/i.exec(c || ''); if (!m) return fb; const v = parseInt(m[1], 16); return [v >> 16, (v >> 8) & 255, v & 255]; }
 // imgs: { base, mask, protected, texture? } (images or canvases on the hero's grid; texture only for picture textures)
 function gearRecipeRender(recipe, imgs) {
+  if (recipe.armor && recipe.slot === 'shirt') return gearArmorRender(recipe, imgs); // (Round 569: built armor)
   const W = 2304, H = 1024, C = 256, mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
   const px = im => { const c = mk(), g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, W, H).data; };
   const b = px(imgs.base), m = px(imgs.mask), p = px(imgs.protected);
@@ -62,11 +63,76 @@ function gearRecipeRender(recipe, imgs) {
         void X; void Y; out.set([col[0] * sh * k2, col[1] * sh * k2, col[2] * sh * k2, 255], i * 4); } } }
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
+// Round 569 (owner: "I want to see if you can design armor that can be filled with texture"). Built armor: plates placed on the
+// body in every frame from the shirt template's measurements (its top, waist, shoulder line and torso width per frame), not
+// traced from the shirt: a chest plate, belly plates, a raised collar and pauldrons that stand past the outline. Each plate is
+// filled with the recipe's texture and tint, shaded as its own hard surface (lit from the top left, a little of his shading),
+// with a dark rim and a light inner edge. His bare forearms and hands stay in front of the chest; the Aetherlink stays clear.
+// recipe.armor: { pauldrons: 0-1.6 (size), collar: true|false, plates: 0-3 (belly plates), trim: '#rrggbb' (plate rims),
+//                 under: '#rrggbb' | false (the undersuit: the rest of the shirt, darker cloth by default) }
+function gearArmorRender(recipe, imgs) {
+  const W = 2304, H = 1024, C = 256, A = recipe.armor || {}, mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
+  const px = im => { const c = mk(), g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, W, H).data; };
+  const b = px(imgs.base), m = px(imgs.mask), p = px(imgs.protected);
+  const pieces = mk(), pg = pieces.getContext('2d'); // each plate in its own colour: red = id
+  const plate = (id, draw) => { pg.fillStyle = `rgb(${id},0,0)`; pg.beginPath(); draw(pg); pg.fill(); };
+  const rrect = (g, x0, y0, x1, y1, r) => { r = Math.min(r, (x1 - x0) / 2, (y1 - y0) / 2); g.moveTo(x0 + r, y0); g.arcTo(x1, y0, x1, y1, r); g.arcTo(x1, y1, x0, y1, r); g.arcTo(x0, y1, x0, y0, r); g.arcTo(x0, y0, x1, y0, r); g.closePath(); };
+  const inMask = (x, y) => m[(y * W + x) * 4] > 127;
+  for (let r = 0; r < 4; r++) for (let col = 0; col < 9; col++) {
+    const x0 = col * C, y0 = r * C; let top = -1, bot = -1;
+    for (let y = 0; y < 170 && bot < 0; y++) { let any = false; for (let x = 0; x < C; x++) if (inMask(x0 + x, y0 + y)) { any = true; break; } if (any && top < 0) top = y; if (!any && top >= 0 && y > top + 30) bot = y - 1; }
+    if (top < 0) continue; if (bot < 0) bot = 169; const Hh = bot - top;
+    const extent = y => { let l = -1, rr = -1; for (let x = 0; x < C; x++) if (inMask(x0 + x, y0 + y)) { if (l < 0) l = x; rr = x; } return [l, rr]; };
+    // the torso's width a little above the waist (below the sleeves), its middle, and the shoulder line
+    const ts = [.68, .72, .76].map(f => extent(top + Math.round(Hh * f))).filter(e => e[0] >= 0), tl = Math.min(...ts.map(e => e[0])), tr = Math.max(...ts.map(e => e[1]));
+    const cx = (tl + tr) / 2, w = tr - tl, sy = top + Hh * .21, [sl, sr] = extent(Math.round(sy)), side = r === 1 || r === 2, X = x => x0 + x, Y = y => y0 + y;
+    const n = Math.max(0, Math.min(3, A.plates == null ? 2 : A.plates | 0)), chestBot = top + Hh * (n ? .6 : .9);
+    // belly plates, narrowing toward the waist
+    for (let k = 0; k < n; k++) { const ya = chestBot + 1 + k * (bot - chestBot) / n, yb = chestBot + (k + 1) * (bot - chestBot) / n - 1, s2 = 1 - .06 * (k + 1);
+      plate(10 + k, g => rrect(g, X(cx - w * s2 / 2 - 1), Y(ya), X(cx + w * s2 / 2 + 1), Y(yb), 3)); }
+    // the chest plate: wider than the torso, a point at its foot facing toward or away from us
+    plate(20, g => { const l = cx - w / 2 - 2, rt = cx + w / 2 + 2, t = top + Hh * (side ? .16 : .1), bt = chestBot;
+      const ul = side ? l : Math.min(l, sl + w * .18), ur = side ? rt : Math.max(rt, sr - w * .18); // (front and back: wider at the shoulders)
+      g.moveTo(X(ul + 4), Y(t)); g.lineTo(X(ur - 4), Y(t)); g.quadraticCurveTo(X(ur + 1), Y(t + 2), X(ur), Y(t + 8)); g.lineTo(X(rt), Y(bt - 4));
+      if (!side) { g.lineTo(X(cx + w * .2), Y(bt)); g.lineTo(X(cx), Y(bt + 3)); g.lineTo(X(cx - w * .2), Y(bt)); } else g.lineTo(X(rt - 3), Y(bt));
+      g.lineTo(X(l), Y(bt - 4)); g.lineTo(X(ul), Y(t + 8)); g.quadraticCurveTo(X(ul - 1), Y(t + 2), X(ul + 4), Y(t)); g.closePath(); });
+    // the collar: a raised band at the neck
+    if (A.collar !== false) plate(30, g => rrect(g, X(cx - w * (side ? .22 : .2)), Y(top + Hh * (side ? .08 : .03)), X(cx + w * (side ? .22 : .2)), Y(top + Hh * (side ? .17 : .11)), 2));
+    // pauldrons: at each shoulder (one, at the near shoulder, in the side views), past the outline
+    const ps = A.pauldrons == null ? 1 : +A.pauldrons;
+    if (ps > 0) { const rx = w * (side ? .2 : .15) * ps + 2, ry = Hh * .085 * ps + 2;
+      const at = side ? [[cx + (r === 1 ? 1 : -1) * w * .08, sy + 2]] : [[Math.max(sl + 3, tl - 1), sy], [Math.min(sr - 3, tr + 1), sy]];
+      at.forEach(([ax, ay], k) => plate(40 + k, g => g.ellipse(X(ax), Y(ay), rx, ry, side ? 0 : (k ? .25 : -.25), 0, Math.PI * 2))); } }
+  const pd = pg.getImageData(0, 0, W, H).data, id = i => pd[i * 4 + 3] > 127 ? pd[i * 4] : 0;
+  // what stays in front: bare skin that isn't shirt (forearms, hands) over the chest and belly; the Aetherlink everywhere
+  const skin = i => { const R = b[i * 4], G = b[i * 4 + 1], B = b[i * 4 + 2]; return b[i * 4 + 3] > 200 && m[i * 4] <= 127 && R > G && G > B && R - B > 40 && R > 110; };
+  const n2 = Math.max(8, Math.round((recipe.scale || 1) * 48)), tile = document.createElement('canvas'); tile.width = tile.height = n2; const tg = tile.getContext('2d');
+  if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n2); else if (imgs.texture) tg.drawImage(imgs.texture, 0, 0, n2, n2); else GEAR_TEXTURES.plain(tg, n2);
+  const t = tg.getImageData(0, 0, n2, n2).data, tint = gearHex(recipe.tint, [120, 128, 140]), rim = gearHex(A.trim, [24, 20, 16]), shadeK = recipe.shade == null ? .35 : Math.min(.6, +recipe.shade * .4);
+  const lum = i => (.3 * b[i * 4] + .59 * b[i * 4 + 1] + .11 * b[i * 4 + 2]) / 255;
+  const out = new Uint8ClampedArray(W * H * 4);
+  // each plate's box, for its own light
+  const box = {}; for (let i = 0; i < W * H; i++) { const k = id(i); if (!k) continue; const cell = Math.floor(Math.floor(i / W) / C) * 9 + Math.floor((i % W) / C), key = cell * 100 + k, x = i % W, y = Math.floor(i / W);
+    const q = box[key] || (box[key] = [x, y, x, y]); if (x < q[0]) q[0] = x; if (y < q[1]) q[1] = y; if (x > q[2]) q[2] = x; if (y > q[3]) q[3] = y; }
+  // the undersuit: the rest of the shirt (sleeves, sides) in a darker cloth of the armor's colour, with his own folds
+  const under = A.under === false ? null : gearHex(A.under, tint.map(v => v * .55));
+  if (under) for (let i = 0; i < W * H; i++) { if (m[i * 4] <= 127 || p[i * 4] > 127 || skin(i)) continue; const sh = b[i * 4 + 3] > 128 ? .55 + lum(i) * 1.6 : 1, edge = [i - 1, i + 1, i - W, i + W].some(j => m[j * 4] <= 127);
+    const col = edge ? rim : under.map(v => v * sh); out.set([col[0], col[1], col[2], 255], i * 4); }
+  for (let i = 0; i < W * H; i++) { const k = id(i); if (!k || p[i * 4] > 127) continue; if (k < 40 && skin(i)) continue; // (his face, forearms and hands stay in front of the collar, chest and belly)
+    const x = i % W, y = Math.floor(i / W), cell = Math.floor(y / C) * 9 + Math.floor(x / C), q = box[cell * 100 + k], fx = (x - q[0]) / Math.max(1, q[2] - q[0]), fy = (y - q[1]) / Math.max(1, q[3] - q[1]);
+    const ti = (((y - q[1]) % n2) * n2 + ((x - q[0]) % n2)) * 4, light = 1.18 - .32 * (fx * .4 + fy * .6), hero = b[i * 4 + 3] > 128 ? 1 + (lum(i) - .35) * shadeK : 1;
+    let col = [t[ti] / 255 * tint[0] * 1.6, t[ti + 1] / 255 * tint[1] * 1.6, t[ti + 2] / 255 * tint[2] * 1.6].map(v => v * light * hero);
+    const nb = [i - 1, i + 1, i - W, i + W], edge = nb.some(j => id(j) !== k), inner = !edge && [i - W - 1, i - W, i - W + 1, i - 1].some(j => id(j) !== k) && fy < .5;
+    if (edge) col = rim.slice(); else if (inner) col = col.map(v => Math.min(255, v * 1.35 + 18));
+    out.set([col[0], col[1], col[2], 255], i * 4); }
+  const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
+}
 // a recipe's problems (the Gear Studio shows them; the game ignores a recipe that has any)
 function gearRecipeProblems(r, slots) { const out = [];
   if (!r || typeof r !== 'object') return ['not a recipe'];
   if (r.v !== GEAR_RECIPE_VERSION) out.push('version must be ' + GEAR_RECIPE_VERSION);
   if (!slots.includes(r.slot)) out.push('slot must be one of ' + slots.join(', '));
   if (!r.texture || !(GEAR_TEXTURES[r.texture] || /^assets\/[\w\/.-]+\.(png|webp|jpe?g)$/.test(r.texture))) out.push('texture must be one of ' + Object.keys(GEAR_TEXTURES).join(', ') + ', or a picture under assets/');
+  if (r.armor && r.slot !== 'shirt') out.push('armor is built on the shirt slot');
   for (const k of ['tint']) if (r[k] != null && !gearHex(r[k], null)) out.push(k + ' must be a colour like #7a8494');
   return out; }
