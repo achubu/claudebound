@@ -47,7 +47,7 @@ request. Don't change game code or anything under `assets/`; don't take a round 
      left forearm's Aetherlink).
    - Not needed when the overlay fully covers the old clothing in all 36 frames.
 3. **`README.md`**: the look's name (lower-case, hyphens: `cyber-boots`), its slot (`boots`, `pants`, `shirt`, `belt` or
-   `gloves`), and the gear items that show it, by their ids in `assets/gear.js` (e.g. `featherBoots, cloudstepBoots`; several
+   `gloves`), and the gear items that show it, by their ids in `assets/gear.js` (e.g. `boots, cloudstepBoots` for the Briarstep and Cloudstep Boots; several
    items may share one look). Say whether `cleaned.png` is included.
 
 Proof pictures are welcome but optional: the tool makes them.
@@ -55,7 +55,7 @@ Proof pictures are welcome but optional: the tool makes them.
 ## What Claude does
 
 ```
-python3 tools/wearable_add.py --look cyber-boots --slot boots --items featherBoots,cloudstepBoots \
+python3 tools/wearable_add.py --look cyber-boots --slot boots --items boots,cloudstepBoots \
     --overlay tools/art-refresh/wearable/cyber-boots/overlay.png \
     [--clean tools/art-refresh/wearable/cyber-boots/cleaned.png] --proof /tmp/proofs
 ```

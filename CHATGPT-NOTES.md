@@ -21,7 +21,7 @@ alpha). To make every next item quick, there is now **one process for all wearab
      `cleaned.png` is included.
 - Claude runs `tools/wearable_add.py`, which checks all of that, files the art, writes the game's registry and makes proof
   strips. If it refuses, Claude will tell you exactly what failed.
-- The boots: the boot items in `assets/gear.js` are the ids with `slot: 'boots'`. Say in the README which of them show your
+- The boots: the boot items in `assets/gear.js` are `boots` (Briarstep Boots) and `cloudstepBoots` (Cloudstep Boots). Say in the README which of them show your
   design (they may all share one).
 
 ## Art request: the equipped belt (Nov 24; done in Round 554, superseded by the process above)
