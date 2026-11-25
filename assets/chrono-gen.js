@@ -575,7 +575,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     car: ['sky-skiff', 'hover-van'], tree: ['blossom-tree', 'teal-tree'], lamp: ['glow-street-lamp'], 'sign-traffic': ['holo-post'], cargo: ["sky-pods", "hover-crates", "drone-pad", "cargo-crane", "neon-kiosk", "holo-stand", "glow-vending", "noodle-cart"], clutter: ["planter-cluster", "curved-bench", "glow-lamp", "recycle-bin", "crate-pile", "potted-blossom", "mini-dish", "glow-bollard"],
     'ruinpic-garden': ['shattered-greenhouse', 'broken-skygate'], 'ruinpic-homes': ['broken-block', 'cracked-pod'], 'ruinpic-tech': ['snapped-antenna', 'crashed-gondola'], 'ruinpic-market': ['wrecked-hall', 'burnt-arcade'],
     'parkpic-garden': ['blossom-court', 'tea-garden', 'stream-garden'], 'parkpic-homes': ['garden-path', 'flower-beds'], 'parkpic-market': ['lantern-garden', 'fountain-court'], 'parkpic-tech': ['cushion-terrace'],
-    landmark: ['sky-crystal', 'wind-spire', 'guardian-statue', 'glass-fountain'],
+    landmark: ['sky-crystal', 'wind-spire', 'guardian-statue', 'glass-fountain'], cloud: ['round-puff', 'long-bank', 'puff-trio', 'wisp', 'heart', 'torn', 'tower', 'twin-wisps', 'small-puff', 'scallop', 'curl', 'lobed'] /* Round 553: loose clouds over the sky */,
     'building-market': ['holo-shop', 'glass-market', 'drone-stall', 'tea-bar', 'boutique', 'courier-depot', 'sky-arcade', 'lantern-shop'], 'building-homes': ['balcony-block', 'garden-terrace', 'dome-pod', 'bay-tower', 'townhouses', 'courtyard-apts', 'pod-cluster', 'round-window-apt'],
     'building-tech': ['crystal-hall', 'dock-tower', 'data-spire', 'antenna-house', 'turbine-hall', 'weather-station', 'crystal-battery', 'beacon-house'], 'building-garden': ['glass-greenhouse', 'tea-pavilion', 'hydro-house', 'bell-tower', 'cloud-temple', 'blossom-pavilion', 'sky-observatory', 'shrine-gate'] },
   roofKit: {}, doorWalls: [],
@@ -1241,6 +1241,21 @@ const CITY_BRIDGE_PIECES = [322, 494, 322]; // (the west, middle and east pieces
 // its bottom (489); the middle's deck runs from cut 31 to cut 435 (it repeats every 404); the south piece's top cut is at 35 and
 // its deck ends at 689 (its towers hang below, the front of them showing).
 const CITY_BRIDGE_V = { north: { deckL: 49, w: 450, start: 194, cut: 489 }, mid: { deckL: 42, w: 450, top: 31, bottom: 435 }, south: { deckL: 46, w: 445, top: 35, end: 689 } };
+// Round 553 (owner: "i want some variation in clouds"): the owner's loose clouds (props/cloud/) scattered over the open sky
+// from the seed, in world positions (a cloud over a room's edge is drawn by both rooms), one chance in two on each 260px of
+// sky, only where the cloud's middle is over the sky, clipped to the sky so it passes under the islands; never drawn wider
+// than its picture (a third to a half of it).
+function genSkyClouds(ctx, key, seaMask, K, W, H, imgs) {
+  const list = (CITY_TD_ART.cloud || []).map(n => imgs[cityArtPath('cloud', n)]).filter(i => i && i.naturalWidth); if (!list.length) return;
+  const seed = chronoSeed(), [wx, wy] = GEN.world(key), ox = wx * 800, oy = wy * 500, STEP = 260, M = 320, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); let any = false;
+  for (let gy = Math.floor((oy - M) / STEP); gy <= Math.floor((oy + 500 + M) / STEP); gy++) for (let gx = Math.floor((ox - M) / STEP); gx <= Math.floor((ox + 800 + M) / STEP); gx++) {
+    const h = chronoHash(seed + ':cloud:' + gx + ',' + gy), u = k => ((h >>> k) & 255) / 255; if (u(0) > 0.5) continue;
+    const img = list[(h >>> 8) % list.length], w = img.naturalWidth * (0.33 + 0.17 * u(16)), hh = w * img.naturalHeight / img.naturalWidth;
+    const cx = gx * STEP + STEP * (0.15 + 0.7 * u(24)), cy = gy * STEP + STEP * (0.15 + 0.7 * u(4));
+    if (!(GEN.hole && GEN.hole(seed, Math.floor(cx / 50), Math.floor(cy / 50)))) continue; // (its middle over the sky)
+    const x = cx - w / 2 - ox, y = cy - hh / 2 - oy; if (x > 800 || y > 500 || x + w < 0 || y + hh < 0) continue;
+    g.save(); g.globalAlpha = 0.92; if (u(12) < 0.5) { g.translate((x + w) * K, y * K); g.scale(-1, 1); g.drawImage(img, 0, 0, w * K, hh * K); } else g.drawImage(img, x * K, y * K, w * K, hh * K); g.restore(); any = true; }
+  if (!any) return; g.globalCompositeOperation = 'destination-in'; g.drawImage(seaMask, 0, 0); ctx.drawImage(c, 0, 0); }
 function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V = GEN.bridgeV || CITY_BRIDGE_V; /* Round 548: a theme's own pieces */
   const road = (b.x1 - b.x0) * C, wide = road * CITY_BRIDGE_COVER, k = wide / V.north.w, kS = wide / V.south.w, deckX = b.x0 * C - (wide - road) / 2 - ox;
   let a0 = b.y0 * C, a1 = b.y1 * C; const need = (V.north.cut - V.north.start) * k + (V.south.end - V.south.top) * kS + (V.mid.bottom - V.mid.top) * k * 0.5;
@@ -2438,7 +2453,8 @@ function paintChronoRoom(canvas, key) {
     const flat = (mask, col) => tintIn(mask, g => { g.fillStyle = col; g.fillRect(0, 0, W, H); });
     const beach = coast.beach;
     ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
-    if (GEN.plainSea) ctx.drawImage(tintIn(coast.sea, g => waterFill(g)), 0, 0); // Round 554: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
+    if (GEN.plainSea) { ctx.drawImage(tintIn(coast.sea, g => waterFill(g)), 0, 0); // Round 553: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
+      genSkyClouds(ctx, key, coast.sea, K, W, H, imgs); }
     else { ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
     ctx.drawImage(tintIn(coast.sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(30,70,110,.16)'; g.fillRect(0, 0, W, H); }), 0, 0);
     ctx.save(); ctx.globalAlpha = 0.28; ctx.drawImage(flat(coast.deep, '#02040e'), 0, 0); ctx.restore();                      // deep water

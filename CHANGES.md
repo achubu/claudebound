@@ -3525,6 +3525,13 @@ It didn't wrap top to bottom (seam score 6.2), so a band of 200 rows (120 column
 The sky is drawn as painted (`plainSea`): the sea's wet sand, blue tint, depth, shallows and foam greyed the pastel clouds.
 Elaris keeps them for its lakes.
 
+**Loose clouds:** the owner's sheet of twelve clouds on green (`src/cloud-sheet.jpg`) is keyed (green unmixed from the soft
+edges, then held back) and cut by shape into `props/cloud/` (round puff, long bank, puff trio, wisp, heart, torn, tower, twin
+wisps, small puff, scallop, curl, lobed). `genSkyClouds()` scatters them over the open sky from the seed: one chance in two on
+each 260px of sky, at a third to a half of the picture's size (never larger), some flipped, placed in world positions so a cloud
+over a room's edge is drawn by both rooms, only where its middle is over the sky, and clipped to the sky so it passes under the
+islands.
+
 ## Round 552: Elaris on the generator
 
 (Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm".) Elaris, the
