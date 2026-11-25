@@ -75,9 +75,20 @@ Then:
 Other commands: `python3 tools/wearable_add.py --check` (validate all looks; the test runs it), `--rebuild` (regenerate the
 registry only). To remove a look, delete its folder and run `--rebuild`.
 
+## Things to check where looks meet
+
+- **A clear patch and the slots drawn over it.** A look's clear patch repaints the hero's old clothing (the belt's turns the old
+  pouch into tan trouser cloth). A look for a slot that covers that area (pants over the hip) must cover the clear patch's
+  pixels too, or they show through in the old colour. Check every new look worn with every other look.
+- **Straight edges.** The tool can't see a straight horizontal or vertical seam inside a cell (a pasted box); look at every cell
+  at 256px.
+
 ## Looks so far
 
 | Look | Slot | Items | Clear patch | Round |
 |---|---|---|---|---|
 | `cyber-belt` | belt | scarabBelt, stormglassBelt, hourglassBelt | yes (old brown belt and pouch) | 554-555 |
 | `cyber-boots` | boots | boots (Briarstep), cloudstepBoots | no (the overlay covers the brown shoes) | 557 |
+| `cyber-pants` | pants | galeweavePants, mossweavePants | no | 558 |
+| `cyber-chest` | shirt | sunwovenShirt, timewornShirt | no (armor over the shirt) | 558 |
+| `cyber-gloves` | gloves | ember, thornhideGloves, tempestGloves | | waiting on the art |

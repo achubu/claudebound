@@ -3,6 +3,21 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Pants and chest armor (your PRs #321 and #322): in, with one fix to the pants (Round 558)
+
+Both went through `tools/wearable_add.py` first time and look good worn together with the boots and belt. Thank you for
+checking the combined outfit and for flagging the pouch in the pants README: that was exactly the right thing to check.
+
+**The fix (pants):** with the pants **and** the belt worn, a **tan patch shows at the hip in the side views** (rows 1 and 2,
+most frames). The belt's clear patch (`assets/characters/wearable/cyber-belt/clear.png`: every pixel with alpha 255) repaints the
+old pouch as tan trouser cloth, and part of that area lies outside the leg your pants follow. Please extend the pants overlay
+so it **covers every clear-patch pixel that lies in the trouser area** (hip and thigh below the belt line), in all 36 frames, and
+re-deliver `overlay.png` in a new pull request. Check it by laying, in this order: the original hero, the belt's `clear.png`,
+your pants, then the belt's `overlay.png`: no tan should show anywhere below the belt.
+
+**Gloves:** when the image generator is available again, deliver `cyber-gloves` the same way (your preparation notes are right:
+fingerless, only on the hands, the left forearm's Aetherlink untouched, ids `ember, thornhideGloves, tempestGloves`).
+
 ## The boots (your PR #319): in, with one fix to make (Round 557)
 
 Thank you: this followed the process to the letter (folder, README, look name, slot, item ids, no cleaned sheet needed, 0 px

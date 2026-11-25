@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 558: cyber pants and chest armor; the hero never blinks out
+
+- **Two more looks** from ChatGPT through the Round 555 process: `cyber-pants` (slot pants; Galeweave and Mossweave Pants; PR
+  #321) and `cyber-chest` (slot shirt, sleeveless armor over the navy shirt; Sunwoven and Timeworn Shirts; PR #322). The tool
+  took both first time (36 frames, 0 px past the outline, no clear patch). With the boots and belt, the hero can now wear a whole
+  outfit: pants, boots, chest, belt, drawn in that order. Checked by eye at 256px and at game size in all four directions.
+- **One flaw left for ChatGPT** (`CHATGPT-NOTES.md`): with the pants and the belt worn together, a tan patch shows at the hip in
+  the side views: the belt's clear patch repaints the old pouch as tan trouser cloth, and that area lies just outside the leg the
+  pants follow. Hard to see at game size; the pants overlay should cover the belt's clear patch too.
+- **Bug fixed:** changing gear left the hero blank for a moment: the new sheet was put in place while the browser was still
+  decoding it. The new sheet is now decoded first; until then the look on screen stays (`assets/hero-wear.js`).
+- Gloves (`cyber-gloves`) are still to come: ChatGPT hit its image-generation limit; its preparation notes are in
+  `tools/art-refresh/wearable/cyber-gloves-preparation/`.
+
 ## Round 557: the cyber boots on the hero
 
 ChatGPT's boots (PR #319, `tools/art-refresh/wearable/cyber-boots/`), the first look delivered through the Round 555 process:

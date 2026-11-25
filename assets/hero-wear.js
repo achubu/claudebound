@@ -27,7 +27,7 @@ function heroWearApply() {
   if (key === heroWearKey) return heroWearPaint();
   heroWearKey = key; const tok = ++heroWearToken;
   if (heroWearCache.has(key)) { heroWearUrl = heroWearCache.get(key); return heroWearPaint(); }
-  heroWearUrl = null; heroWearPaint(); // (the plain hero until the new sheet is ready, never a blank one)
+  // (the look on screen stays until the new sheet is ready and decoded: never a blank hero)
   if (typeof document === 'undefined' || !document.createElement || typeof Image === 'undefined') return;
   const ver = l => '?v=' + HERO_WEAR_VERSION + '.' + (HERO_WEAR_LOOKS[l].v || 1); // (a look's art version: tools/wearable_add.py raises it on every update)
   const clears = looks.filter(l => HERO_WEAR_LOOKS[l].clear).map(l => HERO_WEAR_LOOKS[l].clear + ver(l)), overlays = looks.map(l => HERO_WEAR_LOOKS[l].overlay + ver(l));
@@ -38,7 +38,10 @@ function heroWearApply() {
       g.globalCompositeOperation = 'source-over'; for (let i = 1 + clears.length; i < imgs.length; i++) g.drawImage(imgs[i], 0, 0);
       c.toBlob(b => { if (!b) return; const url = URL.createObjectURL(b);
         while (heroWearCache.size >= 4) { const [k0, u0] = heroWearCache.entries().next().value; heroWearCache.delete(k0); if (u0 !== heroWearUrl) URL.revokeObjectURL(u0); }
-        heroWearCache.set(key, url); if (tok === heroWearToken) { heroWearUrl = url; heroWearPaint(); } }); })
+        heroWearCache.set(key, url);
+        // (Round 558: decoded before it is shown: swapping to a sheet still decoding left the hero blank for a moment)
+        const im = new Image(); im.src = url; const show = () => { if (tok === heroWearToken) { heroWearUrl = url; heroWearPaint(); } };
+        (im.decode ? im.decode() : Promise.resolve()).then(show, show); }); })
     .catch(() => { heroWearFailed.add(key); if (tok === heroWearToken) { heroWearUrl = null; heroWearPaint(); } }); // (a rapid change since: its own call answers)
 }
 if (typeof renderWorld === 'function') { const renderWorldBeforeWear = renderWorld; renderWorld = function () { const r = renderWorldBeforeWear.apply(this, arguments); heroWearApply(); return r; }; }
