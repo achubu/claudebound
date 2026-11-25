@@ -3496,6 +3496,11 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 576: the UI test counts the helmet slot
+
+`tests/ui-clarity.test.cjs` expected five gear slots on the Gear screen; Round 571 added the helmet, so six. (Found by the full
+suite run for Rounds 571-575; its only other failure, `tests/gear.test.cjs`, was fixed in Round 574.)
+
 ## Round 575: bigger shoulder pads, an armoured skirt, horned helmets (the owner's knight reference)
 
 The owner sent a second reference (a horned knight with a spear) and asked twice for bigger shoulder pads: "they should be
