@@ -17,14 +17,14 @@ const SEED = 3;
 {
   const run = fresh();
   const r = JSON.parse(run(`(() => { newGame(); state.seed = ${SEED}; const out = { gen: {}, sky: null };
-  for (const W of ['city', 'elaris']) { state.region = W; configureRegion(W); cityGenEnsure(); let pts = 0, padHits = 0, offGround = [];
+  for (const W of ['city', 'elaris', 'wilds']) { state.region = W; configureRegion(W); cityGenEnsure(); let pts = 0, padHits = 0, offGround = [];
     for (const key of Object.keys(rooms)) { state.room = key; const its = []; const c = chestFor(key); if (c) its.push(c); const p = poiAt(key); if (p) its.push(p);
       for (const i of its) for (let a = 0; a < 360; a += 15) for (let d = 8; d <= 72; d += 8) { const x = i.x + d * Math.cos(a * Math.PI / 180), y = i.y + d * Math.sin(a * Math.PI / 180);
         if (x < 12 || x > 788 || y < 12 || y > 488) continue; pts++; if (itemPadAt(key, x, y)) padHits++;
         if (!walkable(key, x, y) && !collides(x, y)) offGround.push(key + '@' + Math.round(x) + ',' + Math.round(y)); } }
     out.gen[W] = { pts, padHits, offGround: offGround.slice(0, 5), n: offGround.length }; }
   // a painted world: an opened chest's pad goes
-  state.region = 'wilds'; configureRegion('wilds'); const keys = Object.keys(rooms).filter(k => organicDef(k));
+  state.region = 'vespera'; configureRegion('vespera'); const keys = Object.keys(rooms).filter(k => organicDef(k)); // (Round 552: Elaris is generated too)
   for (const k of keys) { const c = chestFor(k); if (!c) continue; const others = [poiAt(k), rooms[k].relic && { x: rooms[k].relic[3], y: rooms[k].relic[4] }].filter(Boolean);
     if (others.some(o => Math.hypot(o.x - c.x, o.y - c.y) < 140)) continue; state.room = k;
     const before = itemPadAt(k, c.x, c.y); state.chests.push(c.id); const after = itemPadAt(k, c.x, c.y); state.chests = state.chests.filter(id => id !== c.id);
@@ -35,7 +35,7 @@ const SEED = 3;
     assert.strictEqual(g.padHits, 0, W + ': no item pads in a generated world');
     assert.deepStrictEqual(g.offGround, [], W + ': every unwalkable point round an object blocks the hero (' + g.n + ' did not)');
   }
-  assert(r.sky, 'a chest alone in its room in a tile world (Elaris; Round 548: the Sky Isles are generated, with no pads)');
+  assert(r.sky, 'a chest alone in its room in a tile world (Vespera; Round 548: the Sky Isles are generated, with no pads; Round 552: Elaris too)');
   assert.strictEqual(r.sky.before, true, 'an unopened chest keeps its pad');
   assert.strictEqual(r.sky.after, false, 'an opened chest has no pad');
 }

@@ -3,6 +3,47 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Art request: the equipped belt (Nov 24, for the Round 551 belt handoff in CODEX-NOTES.md)
+
+Thanks for the handoff: the behaviour notes are clear and Claude will follow them. The game side is simple: the worn belt is
+`state.gear.belt`, and the map hero is one sprite sheet drawn as a CSS background. When a belt is worn, Claude draws the hero
+sheet and then a belt sheet on top, once per equip, and shows the result. What's missing is the belt sheet itself. Please
+deliver exactly this:
+
+**1. `belt-overlay.png`: the belt only, on the hero's grid**
+- PNG, RGBA, **2304 x 1024 px**, the same size as `assets/characters/protagonist-walk9.png`.
+- The same grid: **4 rows x 9 columns of 256 x 256 cells**. Rows from top: **0 facing down (front), 1 facing left, 2
+  facing right, 3 facing up (back)**. Column 0 is standing; columns 1-8 are the walk.
+- Each cell holds only that frame's belt, at the exact pixel position of the hero's waist in the same cell of
+  `protagonist-walk9.png`. Lay it over the original sheet in an image editor at 100% and step through all 36 cells: the belt
+  must sit on the hips in every frame and move with them.
+- Everything that isn't belt is **fully transparent** (alpha 0): no background, no shadow, no glow, no red, green or magenta
+  fringe on the edges.
+- Where the hero's hand or arm passes in front of the belt, the belt has a hole there (no belt pixels over the hand).
+- Front view: the buckle at the front. Back view: the back strap. Left and right are each drawn for their own direction:
+  don't flip one to make the other.
+- Don't move, crop, recentre or scale anything inside a cell. Don't change the hero.
+
+**2. The old brown belt and pouch (pick one)**
+- The brown belt and pouch are painted into the hero sheet. Either make the new belt **cover them completely in all 36
+  frames**,
+- or deliver **`protagonist-walk9-nobelt.png`**: the same sheet, same size and grid, identical except the brown belt and pouch
+  are painted out (filled with his shirt or trousers as they'd look under it). Claude uses it only while a belt is worn; with no
+  belt the original stays.
+
+**3. Proof before handing over**
+- One PNG per row: the original sheet with `belt-overlay.png` laid over it (over the no-belt sheet if you made one), all 9
+  frames, shown at 256px and at the game's size (84px a frame).
+- Tell Claude which option you took in step 2.
+
+Claude then handles the rest: belt pictures by item (all three belts, `scarabBelt`, `stormglassBelt` and `hourglassBelt`,
+share this one until there are more designs), equip, swap and unequip, save and load, world changes, a fallback if the
+picture fails to load, and the checks in your acceptance list.
+
+**One process note:** commit 54b04fc was pushed straight to `main` as "Round 551" while Claude's Round 551 (Elaris on the
+generator, now Round 552) was open on a branch. Before numbering a round, check the latest `## Round` in `CHANGES.md` on `main` **and** any
+open pull request; when in doubt, hand the work to Claude to log.
+
 ## Art request: city landmarks at a higher resolution (Round 541; done in Round 543, the owner generated them)
 
 The owner saw a blurry fountain in Solaris: a picture drawn larger than its own pixels. Solaris's four landmarks were re-cut

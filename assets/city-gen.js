@@ -16,13 +16,14 @@ const CITY_GEN_VERSION = 1;
 // world grid (the city's keys run from row 4, Solaris's from row 0).
 let GEN_SOLARIS_LIVE = true;
 let GEN_SKY_LIVE = true; // Round 548: the Sky Isles on the generator (theme GEN_THEMES.sky)
-const GEN_REGIONS = { city: { id: 'city', theme: 'city', dy: 4 }, elaris: { id: 'elaris', theme: 'solaris', dy: 0, live: () => GEN_SOLARIS_LIVE }, sky: { id: 'sky', theme: 'sky', dy: 0, live: () => GEN_SKY_LIVE } };
+let GEN_WILDS_LIVE = true; // Round 552: Elaris, the forest, on the generator (theme GEN_THEMES.wilds)
+const GEN_REGIONS = { city: { id: 'city', theme: 'city', dy: 4 }, elaris: { id: 'elaris', theme: 'solaris', dy: 0, live: () => GEN_SOLARIS_LIVE }, sky: { id: 'sky', theme: 'sky', dy: 0, live: () => GEN_SKY_LIVE }, wilds: { id: 'wilds', theme: 'wilds', dy: 0, live: () => GEN_WILDS_LIVE } };
 // Round 488: these run for every walk test (millions while a journey is placed), so the current region's answer is kept
 // until the region or the Solaris switch changes.
 let genRegionMemo = { reg: undefined, live: undefined, r: null };
 function genRegion(region) {
-  if (region === undefined) { const reg = typeof activeRegion !== 'undefined' ? activeRegion : 'city', m = genRegionMemo; if (m.reg === reg && m.live === GEN_SOLARIS_LIVE + ':' + GEN_SKY_LIVE) return m.r;
-    const r = GEN_REGIONS[reg], out = r && (!r.live || r.live()) ? r : null; genRegionMemo = { reg, live: GEN_SOLARIS_LIVE + ':' + GEN_SKY_LIVE, r: out }; return out; }
+  if (region === undefined) { const reg = typeof activeRegion !== 'undefined' ? activeRegion : 'city', m = genRegionMemo; if (m.reg === reg && m.live === GEN_SOLARIS_LIVE + ':' + GEN_SKY_LIVE + ':' + GEN_WILDS_LIVE) return m.r;
+    const r = GEN_REGIONS[reg], out = r && (!r.live || r.live()) ? r : null; genRegionMemo = { reg, live: GEN_SOLARIS_LIVE + ':' + GEN_SKY_LIVE + ':' + GEN_WILDS_LIVE, r: out }; return out; }
   const r = GEN_REGIONS[region]; return r && (!r.live || r.live()) ? r : null; }
 function genLive(region) { return !!genRegion(region); }
 function genTheme() { const r = genRegion(); return r ? r.theme : 'city'; }
@@ -262,8 +263,8 @@ function cityRoomWalk(key, x, y) {
   configureRegion = function (region) { if (genLive(region)) { const was = activeRegion; activeRegion = region; try { cityGenEnsure(); } finally { activeRegion = was; } }
     const out = configureBefore.apply(this, arguments);
     // Round 486: the generated Solaris has no diagonal roads (its rooms stay joined through their straight doors)
-    if ((region === 'elaris' || region === 'sky') && genLive(region)) for (const k of Object.keys(rooms)) for (const d of Object.keys(rooms[k].exits || {})) if (d.length > 1) delete rooms[k].exits[d]; // (Round 548: the Sky Isles too)
-    if (region === 'sky' && genLive('sky') && GEN_THEMES.sky.extraLinks) for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (rooms[a] && rooms[b] && !rooms[a].exits[d]) rooms[a].exits[d] = b; // (the straight links that replace a diagonal walkway)
+    if ((region === 'elaris' || region === 'sky' || region === 'wilds') && genLive(region)) for (const k of Object.keys(rooms)) for (const d of Object.keys(rooms[k].exits || {})) if (d.length > 1) delete rooms[k].exits[d]; // (Round 548: the Sky Isles too)
+    if ((region === 'sky' || region === 'wilds') && genLive(region) && GEN_THEMES[region].extraLinks) for (const [a, d, b] of GEN_THEMES[region].extraLinks()) if (rooms[a] && rooms[b] && !rooms[a].exits[d]) rooms[a].exits[d] = b; // (the straight links that replace a diagonal walkway)
     return out; };
   // A position off the generated roads (an older save, or a fall-back spot) moves to the room's hub.
   const renderBefore = renderWorld;
@@ -316,12 +317,12 @@ function cityRoomWalk(key, x, y) {
   if (typeof paintSolaris === 'function') { const paintSolarisBefore = paintSolaris; paintSolaris = function (canvas, key) { if (activeRegion === 'elaris' && genLive('elaris') && rooms[key]) { cityGenEnsure(); return genWith('solaris', () => paintChronoRoom(canvas, key)); } return paintSolarisBefore.apply(this, arguments); }; }
   if (typeof ORGANIC_AREAS !== 'undefined' && ORGANIC_AREAS['world:elaris']) { const A = ORGANIC_AREAS['world:elaris'], atBefore = A.at;
     A.at = function (o, ax, ay) { if (!genLive('elaris')) return atBefore.apply(this, arguments); if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return cityGenWalk(o.area.left * 800 + ax, o.area.top * 500 + ay); }; }
-  if (typeof worldDiagTable === 'function') { const diagBefore = worldDiagTable; worldDiagTable = function () { return (activeRegion === 'elaris' || activeRegion === 'sky') && genLive(activeRegion) ? {} : diagBefore.apply(this, arguments); }; }
+  if (typeof worldDiagTable === 'function') { const diagBefore = worldDiagTable; worldDiagTable = function () { return (activeRegion === 'elaris' || activeRegion === 'sky' || activeRegion === 'wilds') && genLive(activeRegion) ? {} : diagBefore.apply(this, arguments); }; }
   // Round 548: the Sky Isles the same way: painted by the generator, walked on its mask, no diagonal walkways
-  if (typeof paintTileWorld === 'function') { const paintTileBefore = paintTileWorld; paintTileWorld = function (canvas, id, key) { if (id === 'sky' && genLive('sky') && rooms[key]) { cityGenEnsure(); return genWith('sky', () => paintChronoRoom(canvas, key)); } return paintTileBefore.apply(this, arguments); }; }
-  if (typeof ORGANIC_AREAS !== 'undefined' && ORGANIC_AREAS['world:sky']) { const A = ORGANIC_AREAS['world:sky'], atBefore = A.at;
-    A.at = function (o, ax, ay) { if (!genLive('sky')) return atBefore.apply(this, arguments); if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return cityGenWalk(o.area.left * 800 + ax, o.area.top * 500 + ay); }; }
+  if (typeof paintTileWorld === 'function') { const paintTileBefore = paintTileWorld; paintTileWorld = function (canvas, id, key) { if ((id === 'sky' || id === 'wilds') && genLive(id) && rooms[key]) { cityGenEnsure(); return genWith(id, () => paintChronoRoom(canvas, key)); } /* (Round 552: Elaris too) */ return paintTileBefore.apply(this, arguments); }; }
+  for (const W of ['sky', 'wilds']) if (typeof ORGANIC_AREAS !== 'undefined' && ORGANIC_AREAS['world:' + W]) { const A = ORGANIC_AREAS['world:' + W], atBefore = A.at;
+    A.at = function (o, ax, ay) { if (!genLive(W)) return atBefore.apply(this, arguments); if (ay >= 0 && ay < 500) ay = Math.min(ay, 495); return cityGenWalk(o.area.left * 800 + ax, o.area.top * 500 + ay); }; }
 }
 // Objects in the generated Solaris are placed as in the city (open ground beside the streets, clear of every sprite), not
 // on the old tile world's "ground 22-40px inside its edge" (Round 212).
-if (typeof itemsOnGround === 'function') { const onGroundBefore = itemsOnGround; itemsOnGround = function () { return (activeRegion === 'elaris' || activeRegion === 'sky') && genLive(activeRegion) ? false : onGroundBefore.apply(this, arguments); }; }
+if (typeof itemsOnGround === 'function') { const onGroundBefore = itemsOnGround; itemsOnGround = function () { return (activeRegion === 'elaris' || activeRegion === 'sky' || activeRegion === 'wilds') && genLive(activeRegion) ? false : onGroundBefore.apply(this, arguments); }; }

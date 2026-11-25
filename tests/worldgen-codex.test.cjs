@@ -11,7 +11,7 @@ process.env.HARNESS_ONLY = '1';
 const assert = require('assert');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(() => { newGame(); const out = {};
-  for (const [W, th] of [['city', 'city'], ['elaris', 'solaris']]) { state.region = W; configureRegion(W); cityGenEnsure(); const o = out[W] = { maskBad: [], gridBad: [], rooms: 0 };
+  for (const [W, th] of [['city', 'city'], ['elaris', 'solaris'], ['wilds', 'wilds'] /* Round 552 */]) { state.region = W; configureRegion(W); cityGenEnsure(); const o = out[W] = { maskBad: [], gridBad: [], rooms: 0 };
     for (const key of Object.keys(rooms)) { const [cx, cy0] = key.split(',').map(Number), cy = cy0 - genDy(), p = cityGenPlan(key); if (!p) continue; o.rooms++;
       // (1) the old blocker loop, as it was before Round 540, on the room's floor and blockers
       const b = genWith(th, () => cityBlockers(cityGenSeed, key, p)), ref = new Uint8Array(100 * 63);
@@ -45,7 +45,7 @@ const r = JSON.parse(run(`(() => { newGame(); const out = {};
   const nowSaved = JSON.parse(JSON.stringify(state)); restoreGame(nowSaved); out.legacyKept = state.shuffleV;
   newGame(); const fresh = JSON.parse(JSON.stringify(state)); restoreGame(fresh); out.freshKept = state.shuffleV;
   return JSON.stringify(out); })()`));
-for (const W of ['city', 'elaris']) {
+for (const W of ['city', 'elaris', 'wilds']) {
   const o = r[W];
   assert(o.rooms > 40, W + ': rooms checked');
   assert.deepStrictEqual(o.maskBad, [], W + ': the mask never walks where a blocker stands (old loop as reference)');
@@ -56,7 +56,7 @@ for (const W of ['city', 'elaris']) {
   assert(o.residual > 0 && o.residual < 0.3, W + ': residual ground reported ' + o.residual);
   assert(o.portal.every(q => q && q.ok), W + ': the portal stands off the street, clear of sprites, on walkable ground ' + JSON.stringify(o.portal));
   assert.deepStrictEqual(o.landmarkBig, [], W + ': no landmark drawn larger than its picture');
-  if (W === 'elaris') assert(o.landmarkPx, 'Solaris lists its landmark pictures\' widths');
+  if (W !== 'city') assert(o.landmarkPx, W + ' lists its landmark pictures\' widths');
   console.log(W + ': ' + o.rooms + ' rooms; ' + o.buildings + ' buildings; residual ground ' + (o.residual * 100).toFixed(1) + '%');
 }
 assert.strictEqual(r.shuffle.a, r.shuffle.b, 'the same seed shuffles the same way');
