@@ -100,4 +100,4 @@ Other commands: `python3 tools/wearable_add.py --check` (validate all looks, rea
 | `cyber-boots` | boots | boots (Briarstep), cloudstepBoots | no (the overlay covers the brown shoes) | 557 |
 | `cyber-pants` | pants | galeweavePants, mossweavePants | no | 558 |
 | `cyber-chest` | shirt | sunwovenShirt, timewornShirt | no (armor over the shirt) | 558 |
-| `cyber-gloves` | gloves | ember, thornhideGloves, tempestGloves | | waiting on the art |
+| `cyber-gloves` | gloves | ember, thornhideGloves, tempestGloves | no (fingerless, over the hands) | 560 |

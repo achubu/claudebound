@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 560: the cyber gloves; the whole outfit
+
+ChatGPT's gloves (PR #325, `tools/art-refresh/wearable/cyber-gloves/`): short fingerless gunmetal gloves for Ember, Thornhide and
+Tempest Gloves, fitted on the Round 559 base sheet and checked with `--dry-run` before the hand-off. `tools/wearable_add.py`
+took them first time (36 frames, 0 px past the outline). Checked by eye at 256px and at game size in all four directions: the
+fingertips show, the Aetherlink on the left forearm is untouched, and the whole outfit (pants, boots, chest, belt, gloves) stacks.
+Still with ChatGPT: the pants re-fit (the tan hip patch in the side views) and the two right-facing boot frames.
+
 ## Round 559: a beltless base sheet for all future gear
 
 (Owner: "Can we create a new sprite sheet without the tool belt to use for future gear".) `assets/characters/protagonist-walk9-base.png`
