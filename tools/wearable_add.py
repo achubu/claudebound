@@ -47,10 +47,28 @@ def gear_items():
     return {m.group(1): m.group(2) for m in re.finditer(r"^\s*(\w+):\s*\{[^}]*slot:\s*'(\w+)'", src, re.M)}
 
 
-def check_look(name, slot, items, overlay, clear, hero):
+def near_outline(hero, r=2):
+    """the hero's silhouette grown by r px: art may reach this far past it (its soft edge), never further"""
+    m = hero[..., 3] > 0
+    g = m.copy()
+    for dy in range(-r, r + 1):
+        for dx in range(-r, r + 1):
+            g |= np.roll(np.roll(m, dy, 0), dx, 1)
+    return g
+
+
+def check_look(name, slot, items, overlay, clear, hero, bad_px=None):
+    """problems with a look, and how many overlay pixels lie on the outline's soft edge. Round 559 (Codex's review): also any
+    pixel at all (even alpha 1) more than 2px past the silhouette, frames with less than 40 solid pixels, empty or repeated
+    item ids, and pure key-colour (green/magenta) pixels left from the background. bad_px, if given, collects the rejected
+    pixels as a mask (for a diagnostic picture)."""
     problems = []
     if slot not in SLOTS:
         problems.append(f'slot {slot!r} is not one of {SLOTS}')
+    if not items:
+        problems.append('no item ids')
+    if len(set(items)) != len(items):
+        problems.append(f'item ids repeated: {items}')
     known = gear_items()
     for it in items:
         if it not in known:
@@ -58,12 +76,22 @@ def check_look(name, slot, items, overlay, clear, hero):
         elif known[it] != slot:
             problems.append(f'item {it!r} is a {known[it]}, not a {slot}')
     oa = overlay[..., 3]
-    empty = [f'{r},{c}' for r in range(4) for c in range(9) if oa[r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL].max() == 0]
-    if empty:
-        problems.append(f'overlay has no pixels in frames (row,col) {" ".join(empty)}')
+    thin = [f'{r},{c}' for r in range(4) for c in range(9) if (oa[r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL] >= 128).sum() < 40]
+    if thin:
+        problems.append(f'frames (row,col) with under 40 solid item pixels: {" ".join(thin)}')
     past = int(((oa > 60) & (hero[..., 3] < 128)).sum())
     if past > OUTLINE_SLACK:
         problems.append(f'overlay reaches past the hero\'s outline in {past} px (allowed {OUTLINE_SLACK})')
+    far = (oa > 0) & ~near_outline(hero)
+    if far.any():
+        cells = sorted({f'{y // CELL},{x // CELL}' for y, x in zip(*np.nonzero(far))})
+        problems.append(f'{int(far.sum())} overlay px (any alpha) more than 2px outside the hero, in frames {" ".join(cells[:12])}{" ..." if len(cells) > 12 else ""}')
+    r, g, b = overlay[..., 0], overlay[..., 1], overlay[..., 2]
+    key = (oa > 0) & (((g > 200) & (r < 80) & (b < 80)) | ((r > 200) & (b > 200) & (g < 80)))
+    if key.sum() > 20:
+        problems.append(f'{int(key.sum())} pure green or magenta pixels (background left in the art)')
+    if bad_px is not None:
+        bad_px |= far | key
     if clear is not None:
         ca = clear[..., 3]
         if not np.isin(ca, [0, 255]).all():
@@ -71,6 +99,13 @@ def check_look(name, slot, items, overlay, clear, hero):
         if ((ca == 255) & (hero[..., 3] == 0)).any():
             problems.append('clear patch paints outside the hero')
     return problems, past
+
+
+def diagnostic(path, hero, bad):
+    """the hero dimmed, with the rejected pixels in red"""
+    im = hero.astype(np.float64).copy(); im[..., :3] *= 0.35; im[..., 3] = 255
+    im[bad] = [255, 0, 0, 255]
+    Image.fromarray(im.astype(np.uint8), 'RGBA').save(path)
 
 
 def clear_from_cleaned(hero, cleaned):
@@ -151,7 +186,7 @@ def defaults():
     return out
 
 
-def rebuild():
+def registry_text():
     L = looks()
     data = {n: {'slot': v['slot'], 'items': v['items'], 'overlay': f'assets/characters/wearable/{n}/overlay.png',
                 'clear': f'assets/characters/wearable/{n}/clear.png' if v.get('clear') else None, 'v': v.get('v', 1)} for n, v in L.items()}
@@ -161,14 +196,20 @@ def rebuild():
           "const HERO_WEAR_BASE = 'assets/characters/protagonist-walk9-base.png';\n"
           'const HERO_WEAR_DEFAULTS = ' + json.dumps({sl: f'assets/characters/wearable/{n}/patch.png' for sl, n in defaults().items()}) + ';\n'
           'const HERO_WEAR_DATA = ' + json.dumps(data, indent=1) + ';\n')
+    return js, len(data)
+
+
+def rebuild():
+    js, n = registry_text()
     open(REGISTRY, 'w').write(js)
-    print(f'wrote {os.path.relpath(REGISTRY, ROOT)}: {len(data)} look(s)')
+    print(f'wrote {os.path.relpath(REGISTRY, ROOT)}: {n} look(s)')
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--look'); ap.add_argument('--slot'); ap.add_argument('--items'); ap.add_argument('--overlay'); ap.add_argument('--clean')
     ap.add_argument('--proof'); ap.add_argument('--rebuild', action='store_true'); ap.add_argument('--check', action='store_true')
+    ap.add_argument('--dry-run', action='store_true', help='every check and the proofs, nothing written under assets/ (for Codex before a hand-off)')
     a = ap.parse_args()
     hero, base = rgba(HERO), rgba(BASE)
     if not (hero[..., 3] == base[..., 3]).all():
@@ -180,7 +221,7 @@ def main():
             d = os.path.join(WEAR, n)
             ov = rgba(os.path.join(d, 'overlay.png'))
             cl = rgba(os.path.join(d, 'clear.png')) if v.get('clear') else None
-            p, past = check_look(n, v['slot'], v['items'], ov, cl, hero)
+            p, past = check_look(n, v['slot'], v['items'], ov, cl, base)
             for it in v['items']:
                 if it in claimed:
                     p.append(f'item {it!r} is also in look {claimed[it]!r}')
@@ -193,10 +234,8 @@ def main():
         if d > 1:
             bad += 1
         cur = open(REGISTRY).read() if os.path.isfile(REGISTRY) else ''
-        rebuild_txt = cur
-        rebuild()
-        if open(REGISTRY).read() != rebuild_txt:
-            print('assets/hero-wear-looks.js was out of date (regenerated now)'); bad += 1
+        if cur != registry_text()[0]:  # (Round 559: read-only; --rebuild writes it)
+            print('assets/hero-wear-looks.js is out of date: run tools/wearable_add.py --rebuild'); bad += 1
         sys.exit(1 if bad else 0)
     if a.rebuild:
         return rebuild()
@@ -207,12 +246,21 @@ def main():
     items = [s.strip() for s in a.items.split(',') if s.strip()]
     ov = rgba(a.overlay)
     cl = clear_from_cleaned(base, rgba(a.clean)) if a.clean else None  # (Round 559: a cleaned sheet is the base with this slot's clothing painted out)
-    p, past = check_look(a.look, a.slot, items, ov, cl, hero)
+    bad_px = np.zeros(hero.shape[:2], bool)
+    p, past = check_look(a.look, a.slot, items, ov, cl, base, bad_px)
     for n, v in looks().items():
         if n != a.look:
             p += [f'item {it!r} is already in look {n!r}' for it in items if it in v['items']]
     if p:
-        print('NOT ADDED:\n  ' + '\n  '.join(p)); sys.exit(1)
+        print('NOT ADDED:\n  ' + '\n  '.join(p))
+        if bad_px.any():
+            dp = os.path.join(a.proof or '/tmp', f'{a.look}-rejected.png'); os.makedirs(os.path.dirname(dp), exist_ok=True); diagnostic(dp, hero, bad_px)
+            print(f'rejected pixels shown in red: {dp}')
+        sys.exit(1)
+    if a.dry_run:
+        if a.proof:
+            proofs(hero, composite(base, [cl] if cl is not None else [], [(a.slot, ov)], default_patches()), a.proof, a.look); print(f'proofs in {a.proof}')
+        print(f'dry run: {a.look} passes every check; nothing written'); return
     d = os.path.join(WEAR, a.look); os.makedirs(d, exist_ok=True)
     old = json.load(open(os.path.join(d, 'look.json'))) if os.path.isfile(os.path.join(d, 'look.json')) else {}
     Image.fromarray(ov.astype(np.uint8), 'RGBA').save(os.path.join(d, 'overlay.png'), optimize=True)

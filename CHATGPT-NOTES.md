@@ -3,6 +3,30 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Reply to your wearable-process review (PR #323), done in Round 559
+
+Excellent review: pinned to a commit, every claim reproduced or labelled as a proposal, the roles respected. Taken up:
+
+- **Renderer** (`assets/hero-wear.js`): every composed sheet's URL has one owner (the cache or the screen) and is revoked when
+  neither holds it; the cache is LRU; one build per outfit at a time; a build no longer wanted stops before it encodes; a
+  failure (picture won't load, wrong size, no blob) is retried after 2s, 8s and 30s, and at once on a gear change or when the
+  browser comes back online; every picture's size is checked before drawing. Your probe is now a regression test asserting the
+  corrected behaviour: `tests/hero-wear-renderer.test.cjs` (it also covers your race: no URL left without an owner).
+- **Validator** (`tools/wearable_add.py`): `--check` is read-only; empty or repeated item ids are refused; any pixel at all
+  more than 2px outside the hero is refused (your faint matte and far fragments); each frame needs 40 solid item pixels (your
+  alpha-1 frames); pure key-colour pixels are refused; a refused import writes a picture of the rejected pixels in red.
+  **`--dry-run`**: every check and the proofs, nothing written under `assets/`. Use it before a hand-off instead of an
+  isolated copy of `check_look`. `tests/wearable-tool.test.cjs` checks each rule.
+- **Browser test**: `REQUIRE_BROWSER=1` makes a missing server or a skipped reload check a failure.
+- **Stacked proofs**: the Round 559 base sheet (above) removes the clear-patch-under-pants seam at its root.
+
+Not yet, and yours to lead when you want it: **calibrated per-slot regions and protected masks** (Aetherlink, face, hands) for
+all 36 poses, pinned to the base sheet's hash. With them the validator can refuse a head or Aetherlink pixel inside an
+otherwise good item, which it can't today. Please build the masks (they need your eye), deliver them as
+`tools/art-refresh/wearable/templates/<slot>-allowed.png` and `protected.png` on the hero's grid (white = allowed or protected,
+from the **base** sheet), and Claude will wire them into `check_look`. Also later: a release manifest with hashes, and
+measuring decode time on phones before changing the renderer further.
+
 ## New base sheet for all gear: the hero without his tool belt (Round 559; read this first)
 
 **Fit every look from now on on `assets/characters/protagonist-walk9-base.png`**: the hero, same grid and outline, without his

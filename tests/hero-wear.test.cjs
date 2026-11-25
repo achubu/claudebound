@@ -42,7 +42,7 @@ console.log('hero-wear (harness) ok');
 // the browser check
 (async () => {
   const ok = await new Promise(res => require('http').get('http://localhost:8123/index.html', x => { x.resume(); res(x.statusCode === 200); }).on('error', () => res(false)));
-  if (!ok) { console.log('hero-wear: no server on :8123, browser check skipped'); return; }
+  if (!ok) { if (process.env.REQUIRE_BROWSER) { console.error('hero-wear: REQUIRE_BROWSER is set and there is no server on :8123'); process.exit(1); } console.log('hero-wear: no server on :8123, browser check skipped (REQUIRE_BROWSER=1 makes this a failure)'); return; }
   const { chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright');
   const browser = await chromium.launch(), ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } }), page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://localhost:8123/index.html'); await page.waitForTimeout(800); await page.click('#newBtn'); await page.waitForTimeout(300);
@@ -69,7 +69,7 @@ console.log('hero-wear (harness) ok');
   await page.evaluate(() => { const b = document.getElementById('resumeBtn'); if (b) b.click(); });
   await page.waitForTimeout(800); await page.evaluate(() => { closeMenu(); for (const id of ['menuOverlay', 'startOverlay', 'battleOverlay']) document.getElementById(id).classList.add('hidden'); if (state) renderWorld(); });
   const afterLoad = await page.evaluate(() => state && state.gear && state.gear.belt); if (afterLoad) { await settle(); assert(/^url\("blob:/.test(await bg()), 'kept after a save and reload'); }
-  else console.log('  (no continue button found: reload check skipped)');
+  else { assert(!process.env.REQUIRE_BROWSER, 'the reload check must run when REQUIRE_BROWSER is set'); console.log('  (no continue button found: reload check skipped)'); }
   await page.evaluate(() => { equipGear('belt', null); }); assert(/protagonist-walk9\.png/.test(await bg()), 'back to the plain hero on unequip');
   // missing art falls back to the plain hero
   

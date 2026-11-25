@@ -56,7 +56,9 @@ request. Don't change game code or anything under `assets/`; don't take a round 
    `gloves`), and the gear items that show it, by their ids in `assets/gear.js` (e.g. `boots, cloudstepBoots` for the Briarstep and Cloudstep Boots; several
    items may share one look). Say whether `cleaned.png` is included.
 
-Proof pictures are welcome but optional: the tool makes them.
+Proof pictures are welcome but optional: the tool makes them. **Before handing over, run the full checks yourself without
+writing anything:** `python3 tools/wearable_add.py --look <name> --slot <slot> --items <ids> --overlay <png> [--clean <png>]
+--proof <dir> --dry-run` (Round 559). A refusal lists every problem and saves a picture of the rejected pixels in red.
 
 ## What Claude does
 
@@ -78,8 +80,8 @@ Then:
    `tools/wearable_add.py --check` on every look, and in the browser equips, swaps, unequips, changes world, saves and reloads;
 3. log the round in `CHANGES.md`, bump `?v=` on `hero-wear-looks.js` in `index.html`, merge.
 
-Other commands: `python3 tools/wearable_add.py --check` (validate all looks; the test runs it), `--rebuild` (regenerate the
-registry only). To remove a look, delete its folder and run `--rebuild`.
+Other commands: `python3 tools/wearable_add.py --check` (validate all looks, read-only; the test runs it), `--rebuild`
+(regenerate the registry only), `--dry-run` (every check and the proofs for one look, nothing written). To remove a look, delete its folder and run `--rebuild`.
 
 ## Things to check where looks meet
 

@@ -3513,6 +3513,20 @@ Checked: in the browser, boots alone give the original hero (brown belt and all)
 The guide (`tools/art-refresh/wearable-gear.md`) and `CHATGPT-NOTES.md` say to fit on the base; the pants' tan hip patch goes
 away when ChatGPT re-fits the pants on it.
 
+**Codex's wearable-process review (PR #323, `tools/art-refresh/reviews/wearable-process-2026-11-25/`), taken up:**
+- `assets/hero-wear.js`: one owner per composed sheet's URL (revoked when neither cache nor screen holds it; Codex's probe left
+  five live URLs for four cache entries), LRU cache, one build per outfit, no encoding of a build no longer wanted, bounded
+  retries (2s, 8s, 30s; at once on a gear change or coming back online) for a picture that won't load, a picture of the wrong
+  size or no blob (a failed load used to be remembered for the whole session, a null blob stalled the outfit).
+- `tools/wearable_add.py`: `--check` read-only (it rewrote the registry); empty or repeated item ids refused; any overlay pixel
+  more than 2px outside the hero refused (a faint full-sheet matte and far fragments passed); 40 solid item pixels per frame (one
+  alpha-1 pixel per frame passed); pure key-colour pixels refused; a diagnostic picture of rejected pixels; `--dry-run`.
+- Tests: `tests/hero-wear-renderer.test.cjs` (Codex's probe turned round: ownership, de-duplication, retries, sizes),
+  `tests/wearable-tool.test.cjs` (each new rule on a real look with one fault; `--check` writes nothing); `REQUIRE_BROWSER=1`
+  makes `tests/hero-wear.test.cjs` fail without a server or a reload check.
+- Left for Codex to lead (CHATGPT-NOTES.md): calibrated per-slot regions and protected masks (Aetherlink, face, hands), so a
+  stray pixel inside an otherwise good item can be refused; a release manifest; measuring decode time on phones.
+
 ## Round 558: cyber pants and chest armor; the hero never blinks out
 
 - **Two more looks** from ChatGPT through the Round 555 process: `cyber-pants` (slot pants; Galeweave and Mossweave Pants; PR
