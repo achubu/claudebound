@@ -1,25 +1,27 @@
 {
  "v": 1,
  "slot": "shirt",
- "texture": "scales",
- "scale": 0.55,
- "tint": "#a07a44",
- "shade": 1.05,
+ "texture": "stripes",
+ "scale": 0.35,
+ "tint": "#94805f",
+ "shade": 0.6,
  "trim": {
-  "color": "#2e1c0c",
-  "width": 3
+  "color": "#33271a",
+  "width": 4
  },
  "bands": {
-  "color": "#d4ad4a",
-  "width": 2,
+  "color": "#5a4733",
+  "width": 5,
   "at": [
-   0.72
+   0.22,
+   0.48,
+   0.74
   ]
  },
  "seam": {
-  "color": "#33d1c0",
-  "width": 1,
+  "color": "#33271a",
+  "width": 2,
   "glow": false
  },
- "name": "Desert scale armor"
+ "name": "Desert ribbed survival suit"
 }
