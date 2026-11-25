@@ -3496,6 +3496,28 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 553: the Sky Isles float
+
+(Owner: "sky isles needs to be more sky than land if possible, buildings need to be floating in the clouds with land bridges
+and some open areas and space for interactable objects".) The generated Sky Isles were a city with two winding strips of open
+sky through it. Now they are open sky with floating islands (`GEN_THEMES.sky.rivers`, `assets/chrono-gen.js`):
+
+- The roads are planned first (they never read the terrain). The ground they enclose, room by room, is cut into blocks. About
+  one block in five (`isleShare: 0.22`) is an island, always those under the start and boss rooms' middles. A room without a
+  sizeable island (120 cells) gets a round one on its road nearest the middle, so it has room for its objects. An island's edge
+  facing the sky wavers a little. Junctions, bends and dead ends of the roads stand on small islands.
+- A road beside an island is on it across its whole width (decided across the road, not by the sky's 50px cells: half a road
+  over the sky made bridges that bent); a road between two sky blocks is a glass bridge. Every bridge is checked to be a clean
+  crossing (straight, land at both ends, 3 to 16 cells, none beside another), with a stepping island added where it isn't,
+  until all are.
+- Islands are small, so the Sky Isles build closer to the edge: a 25px gap from the sky instead of 75px (`shoreGap: 1`), and
+  buildings on rows 6 cells deep instead of 7 (`buildD: 6`). Both are theme settings; the other worlds keep theirs (Elaris sets
+  its gap back to 3, as it inherits the Sky Isles' theme).
+
+Result on seeds 77, 1 and 9: about 48% land (it was about 90%), 37-52 bridges, about 50 buildings, every road over the sky under
+a bridge, and a square for objects in every room but at most two. Browser walks on seeds 77 and 1 reach every room, door and
+item with no problems. `tests/sky-isles.test.cjs` checks these on three seeds.
+
 ## Round 552: Elaris on the generator
 
 (Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm".) Elaris, the

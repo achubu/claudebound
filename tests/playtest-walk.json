@@ -1,10 +1,10 @@
 {
- "wilds": {
+ "sky": {
   "rooms": 51,
   "fights": 0,
-  "crossings": 353,
+  "crossings": 354,
   "arrivals": 127,
-  "itemRoutes": 56,
+  "itemRoutes": 59,
   "problems": [],
   "interruptions": {},
   "unvisited": [],
