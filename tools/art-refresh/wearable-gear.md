@@ -24,6 +24,16 @@ to the look's folder on GitHub's upload page: drag in `overlay.png` and `manifes
 `manifest.json` is `{"look": "cyber-boots", "slot": "boots", "items": ["boots", "cloudstepBoots"], "cleaned": false}`: the tool
 reads the name, slot and items from it, so nothing is copied by hand.
 
+## Designed gear: recipes, no drawing (Round 564)
+
+The Gear Studio's **Designer** makes gear without art: the slot's fit template is the shape, a texture fills it (procedural
+ones drawn in code: plain, carbon, hex, brushed, quilted, scales, stripes, plates; or any texture picture under `assets/`),
+tinted, with the hero's own shading multiplied in, plus trim along its edge, bands and a glowing seam, all drawn per frame.
+**Save to game** opens GitHub's new-file page for `gear/recipes/<itemId>.json` with the recipe filled in; commit it, and the game
+draws that item from the recipe (`assets/gear-recipe.js`, used by both the game and the studio) in place of its drawn look.
+Committing to `main` puts it live at once; `tests/gear-page.test.cjs` checks every recipe file. Recipes suit plated, woven and
+trimmed gear; for painted detail (folds, worn leather, ornament) use the drawn-look process above.
+
 ## Fit checklist (look at the review sheet for each)
 
 The tool can't judge fit; these are what went wrong before, and what to look for in every frame of the review sheet:

@@ -71,6 +71,14 @@ console.log('hero-wear (harness) ok');
   const afterLoad = await page.evaluate(() => state && state.gear && state.gear.belt); if (afterLoad) { await settle(); assert(/^url\("blob:/.test(await bg()), 'kept after a save and reload'); }
   else { assert(!process.env.REQUIRE_BROWSER, 'the reload check must run when REQUIRE_BROWSER is set'); console.log('  (no continue button found: reload check skipped)'); }
   await page.evaluate(() => { equipGear('belt', null); }); assert(/protagonist-walk9\.png/.test(await bg()), 'back to the plain hero on unequip');
+  // (Round 564) a recipe file for a worn item: the game draws it in place of the item's drawn look
+  const rdir = path.join(ROOT, 'gear/recipes'), rfile = path.join(rdir, 'mossweavePants.json'), hadDir = fs.existsSync(rdir);
+  fs.mkdirSync(rdir, { recursive: true }); fs.writeFileSync(rfile, JSON.stringify({ v: 1, slot: 'pants', texture: 'carbon', tint: '#334455', shade: 0.9, trim: { color: '#111111', width: 2 } }));
+  try { await page.evaluate(() => { state.relics.push('mossweavePants'); equipGear('pants', 'mossweavePants'); });
+    await page.waitForFunction(() => /recipe:mossweavePants/.test(heroWearKey) && heroWearUrl, null, { timeout: 15000 });
+    assert.match(await bg(), /^url\("blob:/, 'a recipe is drawn by the game');
+    await page.evaluate(() => equipGear('pants', null)); }
+  finally { fs.rmSync(rfile); if (!hadDir) fs.rmSync(rdir, { recursive: true }); }
   // missing art falls back to the plain hero
   
   await page.evaluate(() => { heroWearCache.clear(); heroWearKey = ''; HERO_WEAR_LOOKS['cyber-belt'].overlay = 'assets/characters/wearable/cyber-belt/missing.png'; state.relics.push('scarabBelt'); equipGear('belt', 'scarabBelt'); });

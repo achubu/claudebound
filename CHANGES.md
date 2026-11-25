@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 564: designed gear: textures and vector details, no uploading
+
+(Owner: "could we combine vector graphics and add textures to the gear generator to fill the gaps so we never need to upload to
+the site, just choose from textures and vector?")
+- **`assets/gear-recipe.js`**: a gear recipe (a few lines of JSON) drawn on the hero's grid. Shape: the slot's fit template,
+  never over the Aetherlink. Material: a texture tiled in it, anchored to each frame's piece so it moves with the body (eight
+  procedural textures drawn in code, or a texture picture), tinted. Shading: the hero's own light and folds multiplied in, so
+  the new material keeps his painted shading. Details drawn per frame: trim along the edge (by distance to it), bands at
+  fractions of the piece's height, a seam down the piece's middle (one line per frame, from its middle half, so the arms don't
+  pull it about), optionally glowing.
+- **The game** (`assets/hero-wear.js`): a worn item with `gear/recipes/<itemId>.json` is drawn from it in place of its drawn
+  look (fetched once, checked; the drawn look shows until it loads and if it's missing or broken).
+- **Gear Studio Designer**: slot, texture, tint, texture size, shading, trim, bands and seam, the hero wearing it live with the
+  rest of the outfit; **Save to game** opens GitHub's new-file page for `gear/recipes/<item>.json` with the recipe filled in, so
+  a design goes live with one commit and no files to upload.
+- Tests: `hero-wear` (a recipe file makes the game draw it), `gear-page` (the designer draws it and links to saving it; every
+  file in `gear/recipes/` is valid and names a real item of its slot).
+
 ## Round 563: fit templates for every gear slot; the belt off the Aetherlink
 
 (Owner: "the gear tool should provide the perfect size outline for each piece of gear and allow me to upload it".)

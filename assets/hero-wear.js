@@ -25,10 +25,22 @@ function heroWearRetryDue(key) { const f = heroWearFailed.get(key); return !f ||
 function heroWearFail(key, why) { heroWearPending.delete(key); const f = heroWearFailed.get(key); heroWearFailed.set(key, { n: (f ? f.n : 0) + 1, at: Date.now(), why: String(why) });
   if (typeof console !== 'undefined' && console.warn) console.warn('hero-wear: ' + key + ': ' + why); if (key === heroWearKey) heroWearShow(null); }
 // the looks the worn gear calls for, slot by slot
+// Round 564: a worn item may have a recipe, gear/recipes/<itemId>.json (assets/gear-recipe.js): fetched once, checked, and drawn
+// by the game in place of its drawn look (the drawn look shows until it loads, and when there is none or it is broken)
+const heroWearRecipes = {};
+function heroWearRecipeFor(id, slot) {
+  if (!(id in heroWearRecipes)) { heroWearRecipes[id] = 'pending';
+    if (typeof fetch !== 'function' || typeof gearRecipeRender !== 'function') { heroWearRecipes[id] = null; return null; }
+    fetch('gear/recipes/' + id + '.json?v=' + HERO_WEAR_VERSION).then(r => r.ok ? r.json() : null).catch(() => null).then(r => {
+      const ok = r && r.slot === slot && !gearRecipeProblems(r, typeof HERO_WEAR_SLOTS !== 'undefined' ? HERO_WEAR_SLOTS : [slot]).length;
+      heroWearRecipes[id] = ok ? r : null;
+      if (ok) { const look = 'recipe:' + id; HERO_WEAR_LOOKS[look] = { slot, recipe: r, items: [id], v: JSON.stringify(r).split('').reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) }; heroWearApply(); } }); }
+  return heroWearRecipes[id] && heroWearRecipes[id] !== 'pending' ? 'recipe:' + id : null; }
 function heroWearLooks() {
   if (typeof state === 'undefined' || !state || typeof ensureGear !== 'function') return [];
   ensureGear(); const out = [], order = typeof HERO_WEAR_SLOTS !== 'undefined' ? HERO_WEAR_SLOTS : Object.keys(HERO_WEAR_ART);
-  for (const slot of order) { const id = state.gear && state.gear[slot], look = id && HERO_WEAR_ART[slot] && HERO_WEAR_ART[slot][id]; if (look && HERO_WEAR_LOOKS[look]) out.push(look); }
+  for (const slot of order) { const id = state.gear && state.gear[slot]; if (!id) continue; const look = HERO_WEAR_ART[slot] && HERO_WEAR_ART[slot][id];
+    const rl = heroWearRecipeFor(id, slot); if (rl) out.push(rl); else if (look && HERO_WEAR_LOOKS[look]) out.push(look); } // (a recipe, when the item has one, before its drawn look)
   return out;
 }
 function heroWearPaint() { if (typeof document === 'undefined' || !document.querySelector) return; const el = document.querySelector('#player .hero-sprite'); if (el && el.style) el.style.backgroundImage = heroWearUrl ? 'url("' + heroWearUrl + '")' : ''; }
@@ -49,16 +61,22 @@ function heroWearApply() {
   // Round 559: drawn on the base (the hero without his brown tool belt); slot by slot the worn look's overlay, or the slot's
   // default look (the brown belt) where nothing with a look is worn there, laid like a clear patch so base + it is the hero exactly
   const worn = new Set(looks.map(l => HERO_WEAR_LOOKS[l].slot)), defs = typeof HERO_WEAR_DEFAULTS === 'object' ? HERO_WEAR_DEFAULTS : {}, order = typeof HERO_WEAR_SLOTS !== 'undefined' ? HERO_WEAR_SLOTS : [];
-  const layers = []; for (const sl of order) { const l = looks.find(x => HERO_WEAR_LOOKS[x].slot === sl); if (l) layers.push({ src: HERO_WEAR_LOOKS[l].overlay + ver(l), op: 'source-over' }); else if (defs[sl] && !worn.has(sl)) layers.push({ src: defs[sl] + '?v=' + HERO_WEAR_VERSION, op: 'source-atop' }); }
-  const base = typeof HERO_WEAR_BASE === 'string' ? HERO_WEAR_BASE + '?v=' + HERO_WEAR_VERSION : HERO_BASE_SHEET, srcs = [base, ...clears, ...layers.map(x => x.src)];
+  const tv = '?v=' + HERO_WEAR_VERSION + '.' + (Object.values(HERO_WEAR_LOOKS).filter(d => !d.recipe).map(d => d.v).join('.')); // (the fit templates change with the drawn looks)
+  const layers = []; for (const sl of order) { const l = looks.find(x => HERO_WEAR_LOOKS[x].slot === sl);
+    if (l && HERO_WEAR_LOOKS[l].recipe) { const r = HERO_WEAR_LOOKS[l].recipe; layers.push({ recipe: r, srcs: ['gear/templates/' + sl + '-mask.png' + tv, 'gear/templates/protected.png' + tv].concat(GEAR_TEXTURES[r.texture] ? [] : [r.texture]), op: 'source-over' }); }
+    else if (l) layers.push({ src: HERO_WEAR_LOOKS[l].overlay + ver(l), op: 'source-over' }); else if (defs[sl] && !worn.has(sl)) layers.push({ src: defs[sl] + '?v=' + HERO_WEAR_VERSION, op: 'source-atop' }); }
+  const base = typeof HERO_WEAR_BASE === 'string' ? HERO_WEAR_BASE + '?v=' + HERO_WEAR_VERSION : HERO_BASE_SHEET, srcs = [base, ...clears, ...layers.flatMap(x => x.recipe ? x.srcs : [x.src])];
   Promise.all(srcs.map(src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('failed to load ' + src)); i.src = src; })))
     .then(imgs => {
-      const W = imgs[0].naturalWidth, H = imgs[0].naturalHeight, odd = srcs.filter((s, i) => imgs[i].naturalWidth !== W || imgs[i].naturalHeight !== H || (W && (W !== 2304 || H !== 1024)));
+      const texSrcs = new Set(layers.filter(x => x.recipe && x.srcs.length > 2).map(x => x.srcs[2]));
+      const W = imgs[0].naturalWidth, H = imgs[0].naturalHeight, odd = srcs.filter((s, i) => !texSrcs.has(s) && (imgs[i].naturalWidth !== W || imgs[i].naturalHeight !== H || (W && (W !== 2304 || H !== 1024))));
       if (odd.length) throw new Error('not on the hero\'s 2304 x 1024 grid: ' + odd.join(', ')); // (a misplaced picture would cache a misregistered outfit)
       if (key !== heroWearKey) { heroWearPending.delete(key); return; } // (no longer wanted: not encoded)
       const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
       g.drawImage(imgs[0], 0, 0); g.globalCompositeOperation = 'source-atop'; for (let i = 1; i <= clears.length; i++) g.drawImage(imgs[i], 0, 0); // (the clear patches: their colours inside the hero's own outline)
-      layers.forEach((x, j) => { g.globalCompositeOperation = x.op; g.drawImage(imgs[1 + clears.length + j], 0, 0); }); g.globalCompositeOperation = 'source-over';
+      let k = 1 + clears.length; for (const x of layers) { g.globalCompositeOperation = x.op;
+        if (x.recipe) { const [mask, prot, tex] = x.srcs.map(() => imgs[k++]); g.drawImage(gearRecipeRender(x.recipe, { base: imgs[0], mask, protected: prot, texture: tex }), 0, 0); } // (Round 564: a recipe drawn here)
+        else g.drawImage(imgs[k++], 0, 0); } g.globalCompositeOperation = 'source-over';
       c.toBlob(b => { try {
         if (!b) return heroWearFail(key, 'no image from the canvas');
         heroWearPending.delete(key); heroWearFailed.delete(key); const url = URL.createObjectURL(b); heroWearStore(key, url);
