@@ -3503,6 +3503,8 @@ being missing".) The shirt, pants and boots templates are now solid: closed over
 past the hero's outline onto empty space (never over his skin). The recipe renderer (`assets/gear-recipe.js`) draws gear solid
 wherever its shape is, on or off the body (no shading to borrow off the body), with a dark rim on the shape's own edge like the
 hero's outline. The Aetherlink stays clear. Drawn looks are unaffected.
+(Owner: "no jagged edges, just big enough to cover the character outline, we don't need to be precise".) Each template is then
+smoothed (blurred, cut a little below half: `_smooth`), so its edge is a clean curve slightly outside the outline, with no steps.
 
 ## Round 566: desert armor for Solaris's gear, designed with recipes
 

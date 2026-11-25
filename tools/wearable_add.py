@@ -261,6 +261,15 @@ def _main_parts(m):
     return out
 
 
+def _smooth(m, sigma=2.2, cut=0.38):
+    """a clean, rounded edge a little outside the shape: blurred and cut below half, so steps and notches vanish"""
+    try:
+        from scipy import ndimage
+        return _fill_holes(ndimage.gaussian_filter(m.astype(np.float32), sigma) > cut)
+    except ImportError:
+        return m
+
+
 def _fill_holes(m):
     try:
         from scipy import ndimage
@@ -300,6 +309,7 @@ def slot_templates(base):
             m = _shrink(_grow(m, 3), 3) & (body | _grow(body, 2))
             m = _fill_holes(m)
             m = m | (_grow(m, 2) & ~body)
+            m = _smooth(m)  # (owner: "no jagged edges, just big enough to cover the character outline, we don't need to be precise")
         if sl == 'shirt':  # (Round 565, owner: "you could make it a little longer"): tucked under the belt, up to 8px down, only where
             # a belt is (the brown belt's own part or a fitted belt), so no gap shows between shirt and belt and nothing pokes out
             belt = np.zeros(body.shape, bool)
