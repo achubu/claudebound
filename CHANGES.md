@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 574: the owner's carbon weave; a cutter for gear textures; one prompt for eight
+
+- **Carbon weave** (the owner's first texture, prompt 1): `assets/items/gear-textures/carbon-weave.webp`, in the Gear Studio's
+  texture list. The picture's left and right edges didn't meet (a visible seam), so it was cut, not used whole.
+- **`tools/gear_texture_cut.py`**: finds a texture's own repeat across and down (separately: generated weaves drift a little),
+  cross-fades the wrap so it has no seam, and saves the tile at a quarter size (one factor both ways; a generated texture's
+  detail is about four times the hero's pixels), with a 3x3 preview. It also cuts a sheet of textures on magenta gutters.
+- `assets/gear-recipe.js`: a picture texture keeps its proportions (tiles may be oblong), and a gear texture draws at its own
+  pixel size times the recipe's scale.
+- **One prompt for eight textures** (owner): `tools/art-refresh/gear-texture-prompts.md`, "All eight at once": a 4x2 sheet of
+  grey swatches on magenta gutters, which the cutter splits and makes seamless.
+- `tests/gear.test.cjs` counts the six helmets and the sixth slot (Round 571 left it expecting five).
+
 ## Round 573: faceted armour, after the owner's line-art reference
 
 The owner sent a line-art sci-fi armoured hero ("Can you get to this level of detail"). The hero is drawn on 256px frames and

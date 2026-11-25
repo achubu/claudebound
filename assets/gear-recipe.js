@@ -33,8 +33,8 @@ function gearRecipeRender(recipe, imgs) {
   const b = px(imgs.base), m = px(imgs.mask), p = px(imgs.protected);
   // the material tile
   const n = Math.max(8, Math.round((recipe.scale || 1) * 48)), tile = document.createElement('canvas'); tile.width = tile.height = n; const tg = tile.getContext('2d');
-  if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n); else if (imgs.texture) tg.drawImage(imgs.texture, 0, 0, n, n); else GEAR_TEXTURES.plain(tg, n);
-  const t = tg.getImageData(0, 0, n, n).data, tint = gearHex(recipe.tint, [120, 128, 140]), shadeK = recipe.shade == null ? 0.8 : +recipe.shade;
+  if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n); else if (imgs.texture) { const nat = /gear-textures\//.test(recipe.texture || ''), tw = nat ? Math.max(4, Math.round((imgs.texture.width || n) * (recipe.scale || 1))) : n; tile.width = tw; tile.height = Math.max(4, Math.round(tw * (imgs.texture.height || n) / (imgs.texture.width || n))); tg.drawImage(imgs.texture, 0, 0, tile.width, tile.height); } // (Round 574: a picture keeps its proportions; a gear texture draws at its own pixel size times the scale) else GEAR_TEXTURES.plain(tg, n);
+  const t = tg.getImageData(0, 0, tile.width, tile.height).data, tint = gearHex(recipe.tint, [120, 128, 140]), shadeK = recipe.shade == null ? 0.8 : +recipe.shade;
   const inM = i => m[i * 4] > 127 && p[i * 4] <= 127;
   const out = new Uint8ClampedArray(W * H * 4), acc = new Uint8Array(W * H), lum = i => (0.3 * b[i * 4] + 0.59 * b[i * 4 + 1] + 0.11 * b[i * 4 + 2]) / 255;
   const trim = recipe.trim && recipe.trim.width ? { c: gearHex(recipe.trim.color, [40, 40, 48]), w: Math.min(6, recipe.trim.width | 0) } : null;
@@ -53,7 +53,7 @@ function gearRecipeRender(recipe, imgs) {
       xs.sort((a, b) => a - b); if (xs.length) mid = xs[xs.length >> 1]; }
     for (let y = top; y <= bot; y++) { const rl = 0, rr = 99;
       for (let x = left; x <= right; x++) { const i = (y0 + y) * W + x0 + x; if (!inM(i)) continue;
-        const ti = (((y - top) % n) * n + ((x - left) % n)) * 4, sh = b[i * 4 + 3] < 128 ? 1 : Math.max(0, 1 + (lum(i) / avg - 1) * shadeK); // (off the body: no shading to borrow)
+        const ti = (((y - top) % tile.height) * tile.width + ((x - left) % tile.width)) * 4, sh = b[i * 4 + 3] < 128 ? 1 : Math.max(0, 1 + (lum(i) / avg - 1) * shadeK); // (off the body: no shading to borrow)
         let col = [t[ti] / 255 * tint[0] * 1.6, t[ti + 1] / 255 * tint[1] * 1.6, t[ti + 2] / 255 * tint[2] * 1.6];
         if (bands) { const f = (y - top) / Math.max(1, bot - top); if (bands.at.some(a => Math.abs(f - a) * (bot - top) < bands.w / 2)) { col = bands.c.slice(); acc[i] = 1; } }
         if (seam && rr > rl + 6 && Math.abs(x - mid) <= seam.w / 2) { col = seam.c.slice(); acc[i] = 1; if (seam.glow) col = col.map(v => Math.min(255, v * 1.25)); }
@@ -153,8 +153,8 @@ function gearArmorRender(recipe, imgs) {
   // what stays in front: bare skin that isn't shirt (forearms, hands) over the chest and belly; the Aetherlink everywhere
   const skin = i => { const R = b[i * 4], G = b[i * 4 + 1], B = b[i * 4 + 2]; return b[i * 4 + 3] > 200 && m[i * 4] <= 127 && R > G && G > B && R - B > 40 && R > 110; };
   const n2 = Math.max(8, Math.round((recipe.scale || 1) * 48)), tile = document.createElement('canvas'); tile.width = tile.height = n2; const tg = tile.getContext('2d');
-  if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n2); else if (imgs.texture) tg.drawImage(imgs.texture, 0, 0, n2, n2); else GEAR_TEXTURES.plain(tg, n2);
-  const t = tg.getImageData(0, 0, n2, n2).data, tint = gearHex(recipe.tint, [120, 128, 140]), rim = gearHex(A.trim, [24, 20, 16]), shadeK = recipe.shade == null ? .35 : Math.min(.6, +recipe.shade * .4);
+  if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n2); else if (imgs.texture) { const nat = /gear-textures\//.test(recipe.texture || ''), tw = nat ? Math.max(4, Math.round((imgs.texture.width || n2) * (recipe.scale || 1))) : n2; tile.width = tw; tile.height = Math.max(4, Math.round(tw * (imgs.texture.height || n2) / (imgs.texture.width || n2))); tg.drawImage(imgs.texture, 0, 0, tile.width, tile.height); } // (Round 574: a picture keeps its proportions; a gear texture draws at its own pixel size times the scale) else GEAR_TEXTURES.plain(tg, n2);
+  const t = tg.getImageData(0, 0, tile.width, tile.height).data, tint = gearHex(recipe.tint, [120, 128, 140]), rim = gearHex(A.trim, [24, 20, 16]), shadeK = recipe.shade == null ? .35 : Math.min(.6, +recipe.shade * .4);
   const lum = i => (.3 * b[i * 4] + .59 * b[i * 4 + 1] + .11 * b[i * 4 + 2]) / 255;
   const out = new Uint8ClampedArray(W * H * 4);
   // each plate's box, for its own light
@@ -166,7 +166,7 @@ function gearArmorRender(recipe, imgs) {
     const col = edge ? rim : under.map(v => v * sh); out.set([col[0], col[1], col[2], 255], i * 4); }
   for (let i = 0; i < W * H; i++) { const k = id(i); if (!k || p[i * 4] > 127) continue; if (k < 40 && skin(i)) continue; // (his face, forearms and hands stay in front of the collar, chest and belly)
     const x = i % W, y = Math.floor(i / W), cell = Math.floor(y / C) * 9 + Math.floor(x / C), q = box[cell * 100 + k], fx = (x - q[0]) / Math.max(1, q[2] - q[0]), fy = (y - q[1]) / Math.max(1, q[3] - q[1]);
-    const ti = (((y - q[1]) % n2) * n2 + ((x - q[0]) % n2)) * 4, light = 1.18 - .32 * (fx * .4 + fy * .6), hero = b[i * 4 + 3] > 128 ? 1 + (lum(i) - .35) * shadeK : 1;
+    const ti = (((y - q[1]) % tile.height) * tile.width + ((x - q[0]) % tile.width)) * 4, light = 1.18 - .32 * (fx * .4 + fy * .6), hero = b[i * 4 + 3] > 128 ? 1 + (lum(i) - .35) * shadeK : 1;
     let col = [t[ti] / 255 * tint[0] * 1.6, t[ti + 1] / 255 * tint[1] * 1.6, t[ti + 2] / 255 * tint[2] * 1.6].map(v => v * light * hero);
     const nb = [i - 1, i + 1, i - W, i + W], edge = nb.some(j => id(j) !== k), inner = !edge && [i - W - 1, i - W, i - W + 1, i - 1].some(j => id(j) !== k) && fy < .5;
     if (edge) col = rim.slice(); else if (inner) col = col.map(v => Math.min(255, v * 1.35 + 18));

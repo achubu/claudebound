@@ -3,7 +3,7 @@ process.env.HARNESS_ONLY = '1';
 const assert = require('assert'), fs = require('fs'), path = require('path');
 const { run } = require('./expansion.test.cjs');
 const r = JSON.parse(run(`(()=>{const o={};newGame();
- o.ids=Object.keys(GEAR);o.perWorld=WORLD_ORDER.map(w=>gearOf(w).length);o.slots=[...new Set(Object.values(GEAR).map(g=>g.slot))].sort();
+ o.ids=Object.keys(GEAR).filter(g=>!GEAR[g].bossDrop);o.helmets=Object.keys(GEAR).filter(g=>GEAR[g].bossDrop).length;o.perWorld=WORLD_ORDER.map(w=>gearOf(w).length);o.slots=[...new Set(Object.values(GEAR).map(g=>g.slot))].sort();
  o.stats=[...new Set(Object.values(GEAR).map(g=>g.stat))].sort();
  // Boosts
  const base=JSON.parse(JSON.stringify(state));
@@ -33,8 +33,8 @@ const r = JSON.parse(run(`(()=>{const o={};newGame();
  // Round 199: with nothing found, the collection says so instead of listing what's out there.
  const kept=state.relics;state.relics=[];showGear();o.emptyMenu=document.getElementById('menuModal').innerHTML||'';state.relics=kept;
  return JSON.stringify(o)})()`));
-assert.strictEqual(r.ids.length, 12); assert.deepStrictEqual(r.perWorld, [2, 2, 2, 2, 2, 2], 'two pieces per world');
-assert.deepStrictEqual(r.slots, ['belt', 'boots', 'gloves', 'pants', 'shirt']);
+assert.strictEqual(r.ids.length, 12); assert.strictEqual(r.helmets, 6, 'and six helmets, one per world (Round 571)'); assert.deepStrictEqual(r.perWorld, [2, 2, 2, 2, 2, 2], 'two pieces per world');
+assert.deepStrictEqual(r.slots, ['belt', 'boots', 'gloves', 'helmet', 'pants', 'shirt']);
 assert.deepStrictEqual(r.stats, ['armor', 'attack', 'cleanse', 'elemental', 'health', 'pierce']);
 for (const id of r.ids) assert(fs.existsSync(path.join(__dirname, '../assets/items/gear', id + '.png')), id + ' icon ships');
 assert(r.emptyAtFirst, 'old relics are carried but nothing is worn until equipped');
@@ -47,11 +47,11 @@ assert.strictEqual(r.left, 1); assert.strictEqual(r.leftAfter, 0, 'one free clea
 assert(r.lockedInFight, 'gear cannot change mid-fight');
 assert(r.kept, 'worn gear survives save and load');
 assert.strictEqual(r.junk, 'rejected');
-assert.deepStrictEqual(JSON.parse(r.cleaned), { boots: null, shirt: null, pants: null, belt: null, gloves: 'ember' }, 'unowned or unknown gear is taken off');
+assert.deepStrictEqual(JSON.parse(r.cleaned), { boots: null, shirt: null, pants: null, belt: null, gloves: 'ember', helmet: null }, 'unowned or unknown gear is taken off');
 assert(r.oldGate, 'an old save with the Ember Sigil and Briarstep Boots opens the Warden\'s Crown');
 assert(r.oldChest, 'the hidden crystal already taken leaves its new chest open');
 assert(r.bossOpens, 'a beaten world boss keeps its door open');
 assert(/Gear collection/.test(r.menu) && /Ember Gloves/.test(r.menu) && /data-gear-slot="boots"/.test(r.menu), 'the Gear screen lists slots and the collection');
 assert(r.unowned.length && r.unowned.every(n => !r.menu.includes(n)) && !/Undiscovered/.test(r.menu), 'gear not yet found is not listed');
 assert(/No gear found yet/.test(r.emptyMenu), 'an empty collection says so');
-console.log('PASS: 12 gear pieces (2 per world) in 5 slots: boosts, one free cleanse, equip rules, saves, old-save carry-over and the Gear screen.');
+console.log('PASS: 12 gear pieces (2 per world) in 5 slots, plus six helmets: boosts, one free cleanse, equip rules, saves, old-save carry-over and the Gear screen.');

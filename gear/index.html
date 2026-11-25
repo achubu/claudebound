@@ -274,7 +274,7 @@ async function wearSet() { const key = $('setPick').value, prot = await load('te
   $('setSave').innerHTML = '<span class="muted">Save to game (one commit each):</span> ' + Object.entries(gear).map(([id, g]) => `<a href="https://github.com/achubu/claudebound/new/main/gear/recipes?filename=${id}.json&value=${encodeURIComponent(JSON.stringify(setRecipe(key, g.slot), null, 1) + '\n')}" target="_blank" rel="noopener"><button>${g.name}</button></a>`).join(' '); }
 // ---------------- the designer (Round 564; assets/gear-recipe.js draws it, as the game does) ----------------
 let designed = null, dTimer = null;
-const PICTURE_TEXTURES = { 'deck plates (Sky Isles)': 'assets/environment/sky-gen/surfaces/ground/deck.webp', 'cargo plates (Sky Isles)': 'assets/environment/sky-gen/surfaces/lot/cargo-plates.webp' };
+const PICTURE_TEXTURES = { 'carbon weave': 'assets/items/gear-textures/carbon-weave.webp', 'deck plates (Sky Isles)': 'assets/environment/sky-gen/surfaces/ground/deck.webp', 'cargo plates (Sky Isles)': 'assets/environment/sky-gen/surfaces/lot/cargo-plates.webp' };
 function recipeNow() { const at = $('dBandAt').value.split(',').map(Number).filter(v => v >= 0 && v <= 1);
   const r = { v: GEAR_RECIPE_VERSION, slot: $('dSlot').value, texture: $('dTex').value, scale: +$('dScale').value, tint: $('dTint').value, shade: +$('dShade').value };
   if (+$('dTrimW').value) r.trim = { color: $('dTrimC').value, width: +$('dTrimW').value };

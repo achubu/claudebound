@@ -5,8 +5,42 @@ design's colour, so each one is asked for in **neutral grey**: its pattern and r
 **seamless tile**, 1024 x 1024, lit flat from straight above so it repeats without a visible light direction. Every prompt is
 complete on its own (owner rule): copy one whole block per image.
 
-When they're back, Claude cuts each to a seamless tile (seam check), saves it as `assets/items/gear-textures/<name>.webp` and adds
-it to the Designer's texture list.
+When they're back, Claude cuts each to a seamless tile with `python3 tools/gear_texture_cut.py <picture> <name>[,<name>...]`
+(Round 574: it finds the pattern's own repeat, cross-fades the wrap and saves `assets/items/gear-textures/<name>.webp` at a
+quarter size), checks the 3x3 preview it writes, and adds it to the Designer's texture list. Done: 1 (carbon weave).
+
+## All eight at once (Round 574)
+
+One picture holding eight textures in a grid; `tools/gear_texture_cut.py sheet.png hex-mesh,brushed-titanium,quilted,scale-mail,chainmail,leather,circuit-plate,ribbed-suit`
+cuts it (the magenta gutters find the cells; the tool makes each seamless itself, so small seams in the picture are fine).
+
+```
+One image, 2048 x 1024 pixels: a sheet of eight separate square material swatches for filling armour in a 2D game, arranged
+in a grid of 4 columns and 2 rows. Each swatch is a 480 x 480 pixel square, and the swatches are separated by solid flat pure
+magenta (#FF00FF) gutters 32 pixels wide, with a 32 pixel magenta border round the whole sheet; nothing but magenta in the
+gutters, and no magenta, pink or purple anywhere inside a swatch. Every swatch is a flat, straight-on texture filling its whole
+square edge to edge, with a small regular repeating pattern (each pattern repeats many times inside its square), seen exactly
+from the front with no perspective, no curvature, no object, no frame, no drop shadow and no label. Every swatch is neutral grey
+only: mid-grey with lighter and darker greys, no colour and no hue at all, so the game can tint it any colour. Flat even lighting
+from straight above, the same brightness everywhere in each swatch, no light direction, no vignette, no glare. No text, numbers,
+logos or captions anywhere in the image.
+Top row, left to right:
+1. Hex armour mesh: a honeycomb of small raised hexagonal armour cells, each slightly domed, thin dark grooves between cells and
+   a tiny bevel highlight on each cell's upper edge; about 12 hexagons across the swatch.
+2. Brushed titanium: fine straight horizontal brush lines with subtle lighter and darker streaks and a few faint scratches.
+3. Quilted padding: thick padded fabric of puffy diamond-shaped cushions stitched along diagonal seams, soft fabric grain and
+   small stitch marks along every seam; about 6 diamonds across.
+4. Scale mail: overlapping rounded metal scales in rows offset by half a scale, each with a raised centre ridge, a bevelled rim
+   and a dark gap under its lower edge; about 8 scales across.
+Bottom row, left to right:
+5. Chainmail: small interlocking metal rings in the four-in-one weave, a small highlight on each ring and dark gaps between
+   them; about 16 rings across.
+6. Worn leather: a soft pebbled leather grain with creases, scuffs and a few faint straight stitched seams.
+7. Circuit-etched plate: a smooth metal plate engraved with thin circuit traces turning at right angles and 45 degrees, small
+   round solder pads and a few tiny square chips.
+8. Ribbed survival suit: rows of thick horizontal padded rubber ribs with narrow pinched seams between them, a fine matte rubber
+   grain and a few small vent holes in the seams; about 10 ribs from top to bottom.
+```
 
 ## 1. Carbon weave
 
