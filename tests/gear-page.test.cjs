@@ -15,7 +15,7 @@ assert(/'pants': \(\(152, 119, 81\), \(118, 236\)\)/.test(tool) && /pants: \[\[1
   const dir = path.join(ROOT, 'gear/recipes');
   for (const f of fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')) : []) { const id = f.replace(/\.json$/, ''), r = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
     assert(items[id], f + ': ' + id + ' is a gear item'); assert.equal(r.slot, items[id], f + ': its slot is the item\'s');
-    assert.deepEqual(ctx.P(r, ['pants', 'boots', 'shirt', 'belt', 'gloves']), [], f + ' is a valid recipe'); } }
+    assert.equal(JSON.stringify(ctx.P(r, ['pants', 'boots', 'shirt', 'belt', 'gloves'])), '[]', f + ' is a valid recipe'); } } // (compared as text: the array comes from another vm context)
 (async () => {
   const ok = await new Promise(res => require('http').get('http://localhost:8123/gear/', x => { x.resume(); res(x.statusCode === 200); }).on('error', () => res(false)));
   if (!ok) { if (process.env.REQUIRE_BROWSER) { console.error('gear-page: no server on :8123'); process.exit(1); } console.log('gear-page: static ok; no server on :8123, browser check skipped'); return; }
