@@ -3501,16 +3501,21 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 (Owner: "sky isles still looks pretty bad, the ground textures clash with the city objects and buildings and we still need more
 cloud and sky than ground tiles"; "think we need edges where the ground meets open sky".)
 
-- **Ground:** only the pale textures that suit the pastel buildings: the lavender deck for all ground (the dark metal grating
-  ring round the islands is gone; `sidewalk/deck` is a copy, as the generator fills the ground from that slot), pale stone
-  pavers for squares and every yard (no dark cargo plates, stained-glass mosaic or chequered glass), the glass walkway for roads.
+- **Ground** (owner: "use this tile for the ground in sky isles ... don't use the other texture tiles for ground"): one ground,
+  the riveted lavender deck, for islands, squares and yards alike (`sidewalk/deck` is a copy, as the generator fills the
+  ground from that slot); the glass walkway for roads, the cloud sea for the sky. The dark grating ring, the cargo plates,
+  mosaic, chequered glass and stone pavers are no longer used.
 - **More sky:** one block in sixteen is an island (`isleShare` 0.22 to 0.06); a room's guaranteed island for its objects is
   kept. Lots on islands no longer count as docks (`noDocks`: every lot near the sky became a cargo yard 30% of the time).
 - **Floating buildings:** in the sky blocks, islets 10-12 cells across for one building each, a cell of sky from every road
   (scenery, not walked on). Building pictures may be drawn at 0.6 of their size in the Sky Isles (`buildFit`; 0.75 elsewhere).
-- **Edges:** an edge strip on every seam between ground and open sky (`isleEdge`), on the 25px grid by the 3x3 bitmask
-  (`cityGridKerb`), drawn after the streets like the sea wall, street kerbs stopping short of it; a road counts as ground, so
-  bridges keep their own parapets. The strip is the Sky Isles' glass railing for now (shown to the owner first, Round 460 rule).
+- **Edges** (owner: "think we need edges where the ground meets open sky"; then "fix the edge algo, its no good"; "the edge
+  you used is great"): the glass railing on every seam between ground and open sky (`isleEdge`), on the 25px grid by the 3x3
+  bitmask (`cityGridKerb`), drawn after the streets like the sea wall, street kerbs stopping short of it. The first try zigzagged
+  in 50px steps, gave thin slivers of deck their own railing and ran a railing beside roads that have their own rails. Now:
+  the islands' outlines are smoothed on their 50px cells before the bridges are checked (a majority filter, two passes:
+  notches fill, one-cell spurs and slivers go; ground under a dry road always stays, a bridge always stays a bridge); no edge
+  along a road; the strip lies wholly on the island (moved in by half its width).
 - Elaris inherits the Sky Isles' theme, so it sets its own values back (`noDocks: false`, `buildFit: null`, `isleEdge: null`).
 
 ## Round 555: a process for wearable gear
