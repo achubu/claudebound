@@ -481,7 +481,7 @@ function genTileExtraLinks(id) { const T = GEN_THEMES[id]; if (T.linksCache) ret
 // (assets/environment/sky-gen/, Rounds 545-547). Open sky takes the place of Solaris's rivers (the same machinery: nothing is
 // built beside it, a walkway crossing it is a glass bridge); no grass parks (roof gardens are pictures); glass walkways.
 // =====================================================================
-GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, isleShare: 0.22 /* Round 553: floating islands (rivers) */,
+GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.22 /* Round 553: floating islands (rivers) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.sky && TILE_WORLD_DATA.sky.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   // the generated Sky Isles have no diagonal walkways; where dropping one would cut rooms off from the start (1,5 to 2,4 joins
@@ -565,8 +565,8 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     T.isleStats.final = land.size; const set = new Set(); for (let y = -3; y < (my + 1) * CG_ROWS + 3; y++) for (let x = -3; x < (mx + 1) * CG_COLS + 3; x++) if (!land.has(x + ',' + y)) set.add(x + ',' + y);
     T.riverCache = { ck, set }; return set; },
   noParks: true, oasis: false, alleyVerge: false, lampGlow: .14, parkDim: 'rgba(10,0,20,.06)', floorRange: [2, 3], landmarkLot: 380, landmarkW: 300,
-  tex: { pipes: 'surfaces/plaza/pavers', chasm: 'surfaces/water/clouds', overgrowth: 'surfaces/plaza/pavers', water: 'surfaces/water/clouds', sand: 'surfaces/sand/grating', floor: 'surfaces/plaza/glass-panes', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/plaza/pavers', yard: 'surfaces/lot/cargo-plates', 'yard-cargo': 'surfaces/lot/cargo-plates', 'yard-rubble': 'surfaces/lot/cargo-plates', 'yard-market': 'surfaces/plaza/mosaic', 'pavement-old': 'surfaces/sidewalk/glass-tiles', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' },
-  texScale: { chasm: 0.5, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.35, plaza: 0.35, sand: 0.35, water: 0.5, overgrowth: 0.35, pipes: 0.35 },
+  tex: { pipes: 'surfaces/plaza/pavers', chasm: 'surfaces/water/cloud-sea', overgrowth: 'surfaces/plaza/pavers', water: 'surfaces/water/cloud-sea', sand: 'surfaces/sand/grating', floor: 'surfaces/plaza/glass-panes', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/plaza/pavers', yard: 'surfaces/lot/cargo-plates', 'yard-cargo': 'surfaces/lot/cargo-plates', 'yard-rubble': 'surfaces/lot/cargo-plates', 'yard-market': 'surfaces/plaza/mosaic', 'pavement-old': 'surfaces/sidewalk/glass-tiles', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' },
+  texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.35, plaza: 0.35, sand: 0.35, water: 0.4, overgrowth: 0.35, pipes: 0.35 },
   kerb: ['#2a1d3a', '#e6d8ff', '#8a74b8'], yardRim: ['#2a1d3a', '#d8c8f4'], groundShade: 'rgba(40,0,60,.05)', lamp: '190,240,255', vignette: '30,10,50',
   tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
     curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['glass-tiles'], park: [], 'waterfront-edge': [],
@@ -591,7 +591,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
 // owner's forest art (assets/environment/wilds-gen/, Rounds 549-550). Three lakes from the journey's seed take the place of the
 // rivers (the same machinery: nothing is built on their muddy banks, a road crossing one is the boardwalk bridge).
 // =====================================================================
-GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3 /* (not the Sky Isles' 1) */,
+GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false /* (not the Sky Isles' settings) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds && TILE_WORLD_DATA.wilds.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.wilds.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   extraLinks: () => genTileExtraLinks('wilds'), linksCache: null,
@@ -2438,11 +2438,12 @@ function paintChronoRoom(canvas, key) {
     const flat = (mask, col) => tintIn(mask, g => { g.fillStyle = col; g.fillRect(0, 0, W, H); });
     const beach = coast.beach;
     ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
-    ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
+    if (GEN.plainSea) ctx.drawImage(tintIn(coast.sea, g => waterFill(g)), 0, 0); // Round 554: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
+    else { ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
     ctx.drawImage(tintIn(coast.sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(30,70,110,.16)'; g.fillRect(0, 0, W, H); }), 0, 0);
     ctx.save(); ctx.globalAlpha = 0.28; ctx.drawImage(flat(coast.deep, '#02040e'), 0, 0); ctx.restore();                      // deep water
     ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.42; ctx.drawImage(flat(coast.shallow, '#2a7f8e'), 0, 0); ctx.restore(); // shallows
-    ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore();                     // foam
+    ctx.save(); ctx.globalAlpha = 0.5; ctx.drawImage(flat(coast.foam, '#d7ecee'), 0, 0); ctx.restore(); }                   // foam
     const shoreArt = typeof CITY_TD_ART !== 'undefined' ? (CITY_TD_ART['waterfront-edge'] || []).map(n => imgs[cityArtPath('waterfront-edge', n)]).find(i => i && i.naturalWidth) : null;
     const [wx0, wy0] = GEN.world(key);
     if (GEN.coastLip) { // Round 461: no strip: the paving ends in a drawn concrete lip, crisp at canvas resolution, with a soft shadow on the sand

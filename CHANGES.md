@@ -3518,6 +3518,13 @@ Result on seeds 77, 1 and 9: about 48% land (it was about 90%), 37-52 bridges, a
 a bridge, and a square for objects in every room but at most two. Browser walks on seeds 77 and 1 reach every room, door and
 item with no problems. `tests/sky-isles.test.cjs` checks these on three seeds.
 
+**The sky's clouds** (owner: "we need better variety of cloud tiles ... i want some variation in clouds"; prompts in
+`tools/art-refresh/sky-clouds-prompts.md`): the owner's large cloud-sea picture (`src/cloud-sea.jpg`) replaces the 512px tile.
+It didn't wrap top to bottom (seam score 6.2), so a band of 200 rows (120 columns across) was crossfaded over each seam:
+`surfaces/water/cloud-sea.webp`, 1800 x 1880, seam scores 1.3 and 1.6. Drawn at 0.4, it repeats every ~720px instead of 256px.
+The sky is drawn as painted (`plainSea`): the sea's wet sand, blue tint, depth, shallows and foam greyed the pastel clouds.
+Elaris keeps them for its lakes.
+
 ## Round 552: Elaris on the generator
 
 (Owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm".) Elaris, the
