@@ -52,6 +52,10 @@ assert(/'pants': \(\(152, 119, 81\), \(118, 236\)\)/.test(tool) && /pants: \[\[1
   await page.selectOption('#dSlot', 'shirt'); await page.check('#dArmor'); await page.waitForTimeout(3000);
   const ar = await page.evaluate(() => ({ armor: !!(window.gearDesigned && gearDesigned.recipe.armor), n: (() => { const c = gearDesigned.canvas, d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; })() }));
   assert(ar.armor && ar.n > 40000, 'built armor is drawn ' + JSON.stringify(ar));
+  // (Round 570) a whole pixel-art set worn at once, with a save link per item
+  await page.selectOption('#setPick', 'crimson'); await page.click('#setWear'); await page.waitForFunction(() => window.gearSetWorn === 'crimson', null, { timeout: 60000 });
+  const st = await page.evaluate(() => ({ worn: SLOTS.filter(sl => choice[sl] === '*set*').length, links: document.querySelectorAll('#setSave a').length, items: Object.keys(gear).length }));
+  assert(st.worn === 5 && st.links === st.items, 'the set dresses every slot and offers a save per item ' + JSON.stringify(st));
   assert.deepEqual(errors, [], 'no page errors');
   await browser.close(); console.log('gear-page ok');
 })().catch(e => { console.error(e); process.exit(1); });

@@ -60,6 +60,9 @@
 
   <h2>Designer</h2>
   <section class="panel">
+    <div class="row"><label>Armour set <select id="setPick"></select></label><button id="setWear">Wear the whole set</button>
+      <span class="muted">Pixel-art sets: flat tones, a black outline and neon panel lines, the same palette on every slot.</span></div>
+    <div id="setSave" style="margin:8px 0 14px"></div>
     <p class="muted">Make gear without drawing: the slot's fit template is the shape, a texture fills it, his own shading is kept,
     and trim, bands and a seam are drawn on every frame. The hero above wears it as you change it. <b>Save to game</b> writes a
     small recipe file (<code>gear/recipes/&lt;item&gt;.json</code>) through GitHub's new-file page: commit it and the game draws the
@@ -142,11 +145,12 @@ function compose(base, clears, layers) { const c = document.createElement('canva
   g.drawImage(base, 0, 0); g.globalCompositeOperation = 'source-atop'; for (const cl of clears) g.drawImage(cl, 0, 0);
   for (const l of layers) { g.globalCompositeOperation = l.op; g.drawImage(l.img, 0, 0); } g.globalCompositeOperation = 'source-over'; return c; }
 async function outfitFor(choice) { // choice: slot -> look name | '' (none) | '*new*'
-  const clears = [], layers = [], wornSl = new Set(SLOTS.filter(sl => choice[sl] && !(choice[sl] === '*new*' && !(newLook && newLook.slot === sl)) && !(choice[sl] === '*recipe*' && !(designed && designed.slot === sl))));
+  const clears = [], layers = [], wornSl = new Set(SLOTS.filter(sl => choice[sl] && !(choice[sl] === '*new*' && !(newLook && newLook.slot === sl)) && !(choice[sl] === '*recipe*' && !(designed && designed.slot === sl)) && !(choice[sl] === '*set*' && !setLooks[sl])));
   for (const sl of SLOTS) if (DEFAULTS[sl] && !wornSl.has(sl)) layers.push({ img: await lookImg(DEFAULTS[sl].under), op: 'source-atop' }); // (Round 565: a default's cloth part, under every look)
   for (const sl of SLOTS) { const v = choice[sl];
     if (v === '*new*' && newLook && newLook.slot === sl) { if (newLook.clear) clears.push(newLook.clear); layers.push({ img: newLook.overlay, op: 'source-over' }); }
     else if (v === '*recipe*' && designed && designed.slot === sl) layers.push({ img: designed.canvas, op: 'source-over' });
+    else if (v === '*set*' && setLooks[sl]) layers.push({ img: setLooks[sl].canvas, op: 'source-over' });
     else if (v && DATA[v]) { if (DATA[v].clear) clears.push(await lookImg(DATA[v].clear)); layers.push({ img: await lookImg(DATA[v].overlay), op: 'source-over' }); }
     else if (DEFAULTS[sl]) layers.push({ img: await lookImg(DEFAULTS[sl].over), op: 'source-atop' }); }
   return compose(baseImg, clears, layers); }
@@ -158,6 +162,7 @@ function buildSlots() { const host = $('slots'); host.innerHTML = '';
     for (const [n, v] of Object.entries(DATA)) if (v.slot === sl) s.append(new Option(n + ' · ' + v.items.join(', '), n));
     if (newLook && newLook.slot === sl) s.append(new Option('★ new: ' + newLook.name, '*new*'));
     if (designed && designed.slot === sl) s.append(new Option('✎ designer', '*recipe*'));
+    if (setLooks[sl]) s.append(new Option('◆ set: ' + setLooks[sl].name, '*set*'));
     s.value = choice[sl] || ''; s.onchange = () => { choice[sl] = s.value; refresh(); };
     const l = document.createElement('label'); l.textContent = sl; d.append(l, s); host.append(d); } }
 async function refresh() { $('status').textContent = 'Drawing…';
@@ -257,6 +262,14 @@ async function showTemplate() { const sl = $('tmplSlot').value, c = await guideF
 function download(canvas, name) { canvas.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); }); }
 async function maskCanvas(slot) { const m = await tmplMask(slot + '-mask'), d = new Uint8ClampedArray(W * H * 4); for (let i = 0; i < W * H; i++) { const v = m[i * 4] > 127 ? 255 : 0; d.set([v, v, v, 255], i * 4); }
   const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(new ImageData(d, W, H), 0, 0); return c; }
+// ---------------- armour sets (Round 570; GEAR_SETS in assets/gear-recipe.js) ----------------
+const setLooks = {};
+function setRecipe(key, sl) { const pal = GEAR_SETS[key], r = { v: GEAR_RECIPE_VERSION, slot: sl, name: pal.name + ' ' + sl, texture: 'plain', tint: pal.base, shade: 1, pixel: { dark: pal.dark, base: pal.base, light: pal.light, accent: pal.accent } };
+  if (sl === 'shirt') r.armor = { pauldrons: 1, collar: true, plates: 2 }; if (sl === 'pants') r.bands = { color: pal.accent, width: 2, at: [.45] }; return r; }
+async function wearSet() { const key = $('setPick').value, prot = await load('templates/protected.png'); $('status').textContent = 'Building the set…';
+  for (const sl of SLOTS) { const r = setRecipe(key, sl); setLooks[sl] = { name: GEAR_SETS[key].name, recipe: r, canvas: gearRecipeRender(r, { base: baseImg, mask: await load('templates/' + sl + '-mask.png?x=' + Date.now() % 1e6), protected: prot }) }; choice[sl] = '*set*'; }
+  window.gearSetWorn = key; buildSlots(); await refresh();
+  $('setSave').innerHTML = '<span class="muted">Save to game (one commit each):</span> ' + Object.entries(gear).map(([id, g]) => `<a href="https://github.com/achubu/claudebound/new/main/gear/recipes?filename=${id}.json&value=${encodeURIComponent(JSON.stringify(setRecipe(key, g.slot), null, 1) + '\n')}" target="_blank" rel="noopener"><button>${g.name}</button></a>`).join(' '); }
 // ---------------- the designer (Round 564; assets/gear-recipe.js draws it, as the game does) ----------------
 let designed = null, dTimer = null;
 const PICTURE_TEXTURES = { 'deck plates (Sky Isles)': 'assets/environment/sky-gen/surfaces/ground/deck.webp', 'cargo plates (Sky Isles)': 'assets/environment/sky-gen/surfaces/lot/cargo-plates.webp' };
@@ -289,6 +302,7 @@ function dItems() { const sl = $('dSlot').value, host = $('dItems'); host.innerH
     $('tmplSlot').onchange = showTemplate; $('dlGuide').onclick = async () => download(await guideFor($('tmplSlot').value), $('tmplSlot').value + '-guide.png'); $('dlMask').onclick = async () => download(await maskCanvas($('tmplSlot').value), $('tmplSlot').value + '-mask.png');
     showTemplate();
     for (const sl of SLOTS) $('dSlot').append(new Option(sl, sl)); $('dSlot').value = 'shirt';
+    for (const [k, v] of Object.entries(GEAR_SETS)) $('setPick').append(new Option(v.name, k)); $('setPick').value = 'goldline'; $('setWear').onclick = wearSet;
     for (const k of Object.keys(GEAR_TEXTURES)) $('dTex').append(new Option(k, k)); for (const [k, v] of Object.entries(PICTURE_TEXTURES)) $('dTex').append(new Option(k, v)); $('dTex').value = 'plates';
     $('dSlot').onchange = () => { dItems(); design(); };
     for (const id of ['dTex', 'dTint', 'dScale', 'dShade', 'dTrimC', 'dTrimW', 'dBandC', 'dBandW', 'dBandAt', 'dSeamC', 'dSeamW', 'dSeamGlow', 'dArmor', 'dPaul', 'dPlates', 'dCollar', 'dRim', 'dUnder']) $(id).oninput = () => { clearTimeout(dTimer); dTimer = setTimeout(design, 150); };
