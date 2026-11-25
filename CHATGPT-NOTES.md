@@ -3,6 +3,15 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Fit templates for every slot (Round 563)
+
+`gear/templates/<slot>-mask.png`: white where that slot's gear goes, in each of the 36 frames (the Gear Studio shows it as a
+guide). Use it as the inpainting mask when you generate a piece on the base sheet, and keep the piece inside it unless it is
+meant to be bigger (a cape, shoulder plates). `gear/templates/protected.png` is the Aetherlink: the tool now refuses a look with
+more than 30 px over it. It caught the cyber belt covering the Aetherlink's screen in three left-facing frames; Claude removed
+those pixels (`tools/art-refresh/wearable/cyber-belt/`). For the chest armor's shoulder refit, the shirt template shows exactly
+where the shoulders are.
+
 ## The Gear Studio: check your gear there before handing it over (Round 562)
 
 **aethercede.com/gear** draws the hero exactly as the game does and runs the same checks as `tools/wearable_add.py`. Drop in

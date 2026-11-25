@@ -13,7 +13,7 @@ const HERO_WEAR_DATA = {
   ],
   "overlay": "assets/characters/wearable/cyber-belt/overlay.png",
   "clear": null,
-  "v": 2
+  "v": 3
  },
  "cyber-boots": {
   "slot": "boots",

@@ -14,6 +14,13 @@ one command → tests → merge.** No game code changes per item.
    `python3 tools/wearable_add.py --from tools/art-refresh/wearable/<look> --review /tmp/<look>-review`
    then `node tests/hero-wear.test.cjs` with the server running, logs the round and merges.
 
+**Fit templates (Round 563):** `gear/templates/<slot>-mask.png` (white where the slot's gear goes in each of the 36 frames,
+from the hero's own clothing and the looks already fitted) and `protected.png` (the Aetherlink, never covered: the tool refuses
+more than 30 px over it). The Gear Studio shows each as a guide (the slot's area in cyan, the Aetherlink in red) and downloads
+the guide and the mask; the mask is ready for an image generator's masked edit (inpainting) of the base sheet. They are rebuilt
+with every import and `--rebuild`; `--check` fails if they are out of date. **Uploading:** when the studio's checks pass, it links
+to the look's folder on GitHub's upload page: drag in `overlay.png` and `manifest.json`, commit, and tell Claude.
+
 `manifest.json` is `{"look": "cyber-boots", "slot": "boots", "items": ["boots", "cloudstepBoots"], "cleaned": false}`: the tool
 reads the name, slot and items from it, so nothing is copied by hand.
 

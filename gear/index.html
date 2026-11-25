@@ -58,6 +58,16 @@
     <p class="muted" id="status">Loading…</p>
   </section>
 
+  <h2>Fit templates</h2>
+  <section class="panel">
+    <p class="muted">Where each slot's gear goes in all 36 frames, from the hero himself and the pieces already fitted. Draw or
+    generate inside it: the <b>guide</b> shows the hero dimmed, the slot's area in cyan with its outline, and the Aetherlink (never
+    covered) in red; the <b>mask</b> is white where the piece goes, black elsewhere, for an image generator's masked edit
+    (inpainting) of the <a href="../assets/characters/protagonist-walk9-base.png" download>base sheet</a>. Both are 2304 × 1024, the hero's grid.</p>
+    <div class="row"><label>Slot <select id="tmplSlot"></select></label><button id="dlGuide">Download guide.png</button><button id="dlMask">Download mask.png</button></div>
+    <div class="scroll" style="margin-top:10px"><canvas id="tmplView"></canvas></div>
+  </section>
+
   <h2>New look</h2>
   <section class="panel">
     <div class="row">
@@ -169,6 +179,10 @@ async function checkNew() {
   past > 2000 ? bad(`It reaches past the hero's outline in ${past} px (2000 allowed for the soft edge).`) : ok(`Inside the hero's outline (${past} px on its soft edge).`);
   far ? bad(`${far} px (any transparency) lie more than 2 px outside the hero, in frames ${[...farCells].slice(0, 12).join(' ')}: a faint background or stray bits.`) : ok('Nothing outside the hero.');
   key > 20 ? bad(`${key} pure green or magenta pixels: background left in the art.`) : ok('No background colour left in it.');
+  { const pr = await tmplMask('protected'), m = await tmplMask(slot + '-mask'); let onA = 0, outside = 0, inside = 0;
+    for (let i = 0; i < W * H; i++) { if (o[i * 4 + 3] <= 60) continue; if (pr[i * 4] > 127) { onA++; rejected[i] = 1; } if (m[i * 4] > 127) inside++; else outside++; }
+    onA > 30 ? bad(`${onA} px over the Aetherlink on his left forearm: it is never covered (red on the checks' picture).`) : ok('The Aetherlink is clear.');
+    const share = outside / Math.max(1, inside + outside); share > .15 ? note(`${Math.round(share * 100)}% of it lies outside the ${slot} template: fine for a bigger piece (a cape, shoulder plates), otherwise check the fit.`) : ok(`Inside the ${slot} template (${Math.round((1 - share) * 100)}%).`); }
   let clear = null;
   if (cfile) { try { const ci = await load(URL.createObjectURL(cfile)); if (ci.naturalWidth !== W || ci.naturalHeight !== H) bad('cleaned.png must be ' + W + ' × ' + H + '.');
       else { const cd = pixels(canvasOf(ci)); let moved = 0; const cp = new Uint8ClampedArray(W * H * 4); let changed = 0;
@@ -184,13 +198,29 @@ async function checkNew() {
   const tc = document.createElement('canvas'); tc.width = W; tc.height = H; tc.getContext('2d').putImageData(new ImageData(dd, W, H), 0, 0); gg.drawImage(tc, 0, 0, W / 2, H / 2);
   $('useNew').disabled = false; $('dlManifest').disabled = failed;
   if (!failed) { ok('Passes every check. Look at the review sheet and the walk, then hand it over.');
-    $('handoff').innerHTML = `<p class="muted">Hand-off: put <b>overlay.png</b>${cfile ? ', <b>cleaned.png</b>' : ''}, <b>manifest.json</b> and a short README in
-      <code>tools/art-refresh/wearable/${name}/</code> in a pull request. Claude then runs:</p><pre>python3 tools/wearable_add.py --from tools/art-refresh/wearable/${name} --review /tmp/${name}-review</pre>`; }
+    $('handoff').innerHTML = `<p class="muted"><b>Upload it:</b> download manifest.json above, then
+      <a href="https://github.com/achubu/claudebound/upload/main/tools/art-refresh/wearable/${name}" target="_blank" rel="noopener">open this look's upload page on GitHub</a>,
+      drag in <b>overlay.png</b>${cfile ? ', <b>cleaned.png</b>' : ''} and <b>manifest.json</b>, and commit (a new branch and pull request is fine). Then tell Claude,
+      who runs:</p><pre>python3 tools/wearable_add.py --from tools/art-refresh/wearable/${name} --review /tmp/${name}-review</pre>`; }
   show(out); choice[slot] = '*new*'; buildSlots(); refresh(); }
 function show(out) { $('checks').innerHTML = out.map(([k, t]) => `<li class="${k}">${k === 'ok' ? '✓' : k === 'bad' ? '✗' : '•'} ${t.replace(/</g, '&lt;')}</li>`).join(''); }
 function buildItems() { const sl = $('lookSlot').value, host = $('items'); host.innerHTML = '';
   for (const [id, g] of Object.entries(gear)) if (g.slot === sl) { const l = document.createElement('label'), c = document.createElement('input'); c.type = 'checkbox'; c.value = id; c.onchange = checkNew; l.append(c, ' ' + g.name + ' (' + id + ')'); host.append(l); }
   if (!host.children.length) host.innerHTML = '<span class="muted">No gear items in this slot.</span>'; }
+// ---------------- fit templates (Round 563; gear/templates/, written by tools/wearable_add.py) ----------------
+const tmpl = {};
+async function tmplMask(name) { if (!tmpl[name]) { const img = await load('templates/' + name + '.png?v=' + Object.values(DATA).map(d => d.v).join('.')); tmpl[name] = pixels(canvasOf(img)); } return tmpl[name]; }
+async function guideFor(slot) { const m = await tmplMask(slot + '-mask'), pr = await tmplMask('protected'), b = baseData, d = new Uint8ClampedArray(W * H * 4);
+  const inM = i => m[i * 4] > 127;
+  for (let i = 0; i < W * H; i++) { const a = b[i * 4 + 3]; let r = b[i * 4] * .3, g = b[i * 4 + 1] * .3, bl = b[i * 4 + 2] * .3;
+    if (inM(i)) { r = r * .4 + 40; g = g * .4 + 200; bl = bl * .4 + 230; const x = i % W; if (!inM(i - 1) || !inM(i + 1) || !inM(i - W) || !inM(i + W) || x === 0) { r = g = bl = 255; } }
+    if (pr[i * 4] > 127) { r = 255; g = 40; bl = 60; }
+    d.set([r, g, bl, a ? 255 : 0], i * 4); }
+  const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(new ImageData(d, W, H), 0, 0); return c; }
+async function showTemplate() { const sl = $('tmplSlot').value, c = await guideFor(sl), v = $('tmplView'); v.width = W / 2; v.height = H / 2; const g = v.getContext('2d'); g.fillStyle = '#0e141e'; g.fillRect(0, 0, v.width, v.height); g.drawImage(c, 0, 0, W / 2, H / 2); }
+function download(canvas, name) { canvas.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); }); }
+async function maskCanvas(slot) { const m = await tmplMask(slot + '-mask'), d = new Uint8ClampedArray(W * H * 4); for (let i = 0; i < W * H; i++) { const v = m[i * 4] > 127 ? 255 : 0; d.set([v, v, v, 255], i * 4); }
+  const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(new ImageData(d, W, H), 0, 0); return c; }
 // ---------------- start ----------------
 (async () => {
   try {
@@ -198,7 +228,9 @@ function buildItems() { const sl = $('lookSlot').value, host = $('items'); host.
     // the gear items, read from assets/gear.js's text (the file wraps game functions, so it isn't loaded as a script here)
     const src = await (await fetch('../assets/gear.js')).text();
     for (const m of src.matchAll(/^\s*(\w+):\s*\{\s*name:\s*'([^']+)',\s*slot:\s*'(\w+)'/gm)) gear[m[1]] = { name: m[2], slot: m[3] };
-    for (const sl of SLOTS) $('lookSlot').append(new Option(sl, sl));
+    for (const sl of SLOTS) { $('lookSlot').append(new Option(sl, sl)); $('tmplSlot').append(new Option(sl, sl)); }
+    $('tmplSlot').onchange = showTemplate; $('dlGuide').onclick = async () => download(await guideFor($('tmplSlot').value), $('tmplSlot').value + '-guide.png'); $('dlMask').onclick = async () => download(await maskCanvas($('tmplSlot').value), $('tmplSlot').value + '-mask.png');
+    showTemplate();
     $('lookSlot').onchange = () => { buildItems(); checkNew(); };
     for (const id of ['overlayFile', 'cleanFile']) $(id).onchange = checkNew; $('lookName').oninput = () => { if ($('overlayFile').files[0]) checkNew(); };
     $('useNew').onclick = () => { if (newLook) { choice[newLook.slot] = '*new*'; buildSlots(); refresh(); } };
