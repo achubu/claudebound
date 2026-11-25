@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 572: twice the detail on designed gear; prompts for texture fills
+
+(Owner: "now double the complexity of each design, and give me prompts for texture fill".) `assets/gear-recipe.js`:
+- **Armor:** the chest plate in panels (left and right pectoral plates and a lower plate, clipped from its shape), a diamond emblem
+  at its heart facing forward (in the accent colour in sets), a second lame below each pauldron, belly plates split down the middle.
+- **Helmets:** ear pods (both sides, one on the side views), a crest ridge over the dome (visor and mask), an antenna, and cheek vents
+  drawn as black lines (`ink`).
+- **Template pieces in the set style** split into panels per slot from each frame's box: pants (waistband, knee pads, cuffs, a fly
+  seam front and back), boots (cuff, toe cap), gloves (knuckle plate), belt (buckle), shirt (yoke).
+- **Every panel** gets rivets along its inner ring (`gearPixelize`, distance 5 from its edge).
+- `tools/art-refresh/gear-texture-prompts.md`: ten complete prompts for seamless neutral-grey textures the game tints (carbon weave,
+  hex mesh, brushed titanium, quilting, scale mail, chainmail, worn leather, circuit-etched plate, ribbed survival suit, bone).
+
 ## Round 571: helmets
 
 (Owner: "add helmet slot but use the design for your outlines of our armor vector graphics, search Google images for

@@ -62,7 +62,18 @@ function gearRecipeRender(recipe, imgs) {
         const X = x0 + x, Y = y0 + y, edge = !inM(i - 1) || !inM(i + 1) || !inM(i - W) || !inM(i + W), k2 = b[i * 4 + 3] < 128 ? 0.92 : 1;
         if (edge) col = col.map(v => v * 0.22);
         void X; void Y; out.set([col[0] * sh * k2, col[1] * sh * k2, col[2] * sh * k2, 255], i * 4); } } }
-  if (recipe.pixel) { const reg = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) reg[i] = out[i * 4 + 3] ? 1 : 0; gearPixelize(out, reg, acc, recipe.pixel, W, H); } // (Round 570)
+  if (recipe.pixel) { const reg = new Uint8Array(W * H), sl = recipe.slot; // (Round 572: each piece in panels, its own per slot)
+    for (let r = 0; r < 4; r++) for (let col = 0; col < 9; col++) { const x0 = col * C, y0 = r * C; let t0 = C, b0 = -1, l0 = C, r0 = -1;
+      for (let y = 0; y < C; y++) for (let x = 0; x < C; x++) if (out[((y0 + y) * W + x0 + x) * 4 + 3]) { if (y < t0) t0 = y; if (y > b0) b0 = y; if (x < l0) l0 = x; if (x > r0) r0 = x; }
+      if (b0 < 0) continue; const hh = Math.max(1, b0 - t0), ww = Math.max(1, r0 - l0), cx = (l0 + r0) / 2;
+      for (let y = t0; y <= b0; y++) for (let x = l0; x <= r0; x++) { const i = (y0 + y) * W + x0 + x; if (!out[i * 4 + 3]) continue; const f = (y - t0) / hh; let id = 1;
+        if (sl === 'pants') id = f < .1 ? 4 : f > .42 && f < .56 ? 2 : f > .86 ? 3 : (r === 0 || r === 3) && Math.abs(x - cx) < ww * .04 && f < .42 ? 5 : 1; // (waistband, knee pads, cuffs, fly seam)
+        else if (sl === 'boots') id = f < .3 ? 2 : f > .64 ? 3 : 1; // (cuff, toe cap)
+        else if (sl === 'gloves') id = f < .45 ? 2 : 1; // (knuckle plate)
+        else if (sl === 'belt') id = Math.abs(x - cx) < ww * .12 ? 2 : 1; // (buckle)
+        else if (sl === 'shirt') id = f < .2 ? 2 : 1; // (yoke)
+        reg[i] = id; } }
+    gearPixelize(out, reg, acc, recipe.pixel, W, H); } // (Round 570)
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
 // Round 569 (owner: "I want to see if you can design armor that can be filled with texture"). Built armor: plates placed on the
@@ -91,19 +102,26 @@ function gearArmorRender(recipe, imgs) {
     const n = Math.max(0, Math.min(3, A.plates == null ? 2 : A.plates | 0)), chestBot = top + Hh * (n ? .6 : .9);
     // belly plates, narrowing toward the waist
     for (let k = 0; k < n; k++) { const ya = chestBot + 1 + k * (bot - chestBot) / n, yb = chestBot + (k + 1) * (bot - chestBot) / n - 1, s2 = 1 - .06 * (k + 1);
-      plate(10 + k, g => rrect(g, X(cx - w * s2 / 2 - 1), Y(ya), X(cx + w * s2 / 2 + 1), Y(yb), 3)); }
+      plate(10 + k, g => rrect(g, X(cx - w * s2 / 2 - 1), Y(ya), X(cx + w * s2 / 2 + 1), Y(yb), 3));
+      if (!side) { pg.save(); pg.beginPath(); rrect(pg, X(cx - w * s2 / 2 - 1), Y(ya), X(cx + w * s2 / 2 + 1), Y(yb), 3); pg.clip(); pg.fillStyle = `rgb(${15 + k},0,0)`; pg.fillRect(X(cx), Y(0), C, C); pg.restore(); } } // (Round 572: split down the middle)
     // the chest plate: wider than the torso, a point at its foot facing toward or away from us
-    plate(20, g => { const l = cx - w / 2 - 2, rt = cx + w / 2 + 2, t = top + Hh * (side ? .16 : .1), bt = chestBot;
+    const chestPath = g => { const l = cx - w / 2 - 2, rt = cx + w / 2 + 2, t = top + Hh * (side ? .16 : .1), bt = chestBot;
       const ul = side ? l : Math.min(l, sl + w * .18), ur = side ? rt : Math.max(rt, sr - w * .18); // (front and back: wider at the shoulders)
       g.moveTo(X(ul + 4), Y(t)); g.lineTo(X(ur - 4), Y(t)); g.quadraticCurveTo(X(ur + 1), Y(t + 2), X(ur), Y(t + 8)); g.lineTo(X(rt), Y(bt - 4));
       if (!side) { g.lineTo(X(cx + w * .2), Y(bt)); g.lineTo(X(cx), Y(bt + 3)); g.lineTo(X(cx - w * .2), Y(bt)); } else g.lineTo(X(rt - 3), Y(bt));
-      g.lineTo(X(l), Y(bt - 4)); g.lineTo(X(ul), Y(t + 8)); g.quadraticCurveTo(X(ul - 1), Y(t + 2), X(ul + 4), Y(t)); g.closePath(); });
+      g.lineTo(X(l), Y(bt - 4)); g.lineTo(X(ul), Y(t + 8)); g.quadraticCurveTo(X(ul - 1), Y(t + 2), X(ul + 4), Y(t)); g.closePath(); };
+    plate(20, chestPath);
+    // (Round 572: the chest in panels: left and right pectoral plates, a lower plate; a small emblem at its heart)
+    pg.save(); pg.beginPath(); chestPath(pg); pg.clip(); if (!side) { pg.fillStyle = 'rgb(21,0,0)'; pg.fillRect(X(cx), Y(0), C, C); }
+    pg.fillStyle = 'rgb(22,0,0)'; pg.fillRect(X(0), Y(top + Hh * .4), C, C); pg.restore();
+    if (r === 0) plate(61, g => { const ey = top + Hh * .32, er = Math.max(3, w * .07); g.moveTo(X(cx), Y(ey - er)); g.lineTo(X(cx + er), Y(ey)); g.lineTo(X(cx), Y(ey + er)); g.lineTo(X(cx - er), Y(ey)); g.closePath(); });
     // the collar: a raised band at the neck
     if (A.collar !== false) plate(30, g => rrect(g, X(cx - w * (side ? .22 : .2)), Y(top + Hh * (side ? .08 : .03)), X(cx + w * (side ? .22 : .2)), Y(top + Hh * (side ? .17 : .11)), 2));
     // pauldrons: at each shoulder (one, at the near shoulder, in the side views), past the outline
     const ps = A.pauldrons == null ? 1 : +A.pauldrons;
     if (ps > 0) { const rx = w * (side ? .2 : .15) * ps + 2, ry = Hh * .085 * ps + 2;
       const at = side ? [[cx + (r === 1 ? 1 : -1) * w * .08, sy + 2]] : [[Math.max(sl + 3, tl - 1), sy], [Math.min(sr - 3, tr + 1), sy]];
+      at.forEach(([ax, ay], k) => plate(44 + k, g => g.ellipse(X(ax + (side ? 0 : (k ? 2 : -2))), Y(ay + ry * .75), rx * .9, ry * .7, side ? 0 : (k ? .25 : -.25), 0, Math.PI * 2))); // (Round 572: a second lame below each pauldron)
       at.forEach(([ax, ay], k) => plate(40 + k, g => g.ellipse(X(ax), Y(ay), rx, ry, side ? 0 : (k ? .25 : -.25), 0, Math.PI * 2))); } }
   const pd = pg.getImageData(0, 0, W, H).data, id = i => pd[i * 4 + 3] > 127 ? pd[i * 4] : 0;
   // what stays in front: bare skin that isn't shirt (forearms, hands) over the chest and belly; the Aetherlink everywhere
@@ -128,7 +146,7 @@ function gearArmorRender(recipe, imgs) {
     if (edge) col = rim.slice(); else if (inner) col = col.map(v => Math.min(255, v * 1.35 + 18));
     out.set([col[0], col[1], col[2], 255], i * 4); }
   if (recipe.pixel) { const reg = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!out[i * 4 + 3]) continue; const k = id(i); reg[i] = k && p[i * 4] <= 127 && !(k < 40 && skin(i)) ? k : 99; }
-    gearPixelize(out, reg, new Uint8Array(W * H), recipe.pixel, W, H, r => r === 99); } // (Round 570: plates in the set style, the undersuit dark with no accent)
+    const em = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) if (reg[i] === 61) em[i] = 1; gearPixelize(out, reg, em, recipe.pixel, W, H, r => r === 99); } // (Round 570: plates in the set style, the undersuit dark with no accent)
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
 // Round 570 (owner: "Can you build something more like this", a sheet of pixel-art armour sets): the set style. A recipe with
@@ -143,7 +161,7 @@ const GEAR_SETS = {
   frost: { name: 'Frost', dark: '#1a2232', base: '#3c4c68', light: '#8494b4', accent: '#4ff0ff' },
   dune: { name: 'Dune', dark: '#3a2a18', base: '#9a7646', light: '#d8b47a', accent: '#33d1c0' },
 };
-function gearPixelize(out, reg, acc, pal, W, H, noAccent) {
+function gearPixelize(out, reg, acc, pal, W, H, noAccent, ink) { // (Round 572: ink = drawn black lines, rivets inside each panel)
   const D = gearHex(pal.dark, [30, 30, 40]), B = gearHex(pal.base, [80, 80, 100]), L = gearHex(pal.light, [160, 160, 180]), A = gearHex(pal.accent, [80, 240, 255]), K = [12, 10, 16];
   // light, smoothed over 7x7 within the region, so the tones form broad shapes instead of speckle
   const raw = new Float32Array(W * H); for (let i = 0; i < W * H; i++) raw[i] = reg[i] ? .3 * out[i * 4] + .59 * out[i * 4 + 1] + .11 * out[i * 4 + 2] : 0;
@@ -153,10 +171,11 @@ function gearPixelize(out, reg, acc, pal, W, H, noAccent) {
   const sum = new Map(); for (let i = 0; i < W * H; i++) { const r = reg[i]; if (!r) continue; const key = r * 64 + Math.floor(Math.floor(i / W) / 256) * 9 + Math.floor((i % W) / 256); const q = sum.get(key) || [0, 0]; q[0] += lum(i); q[1]++; sum.set(key, q); }
   // distance to the region's edge, up to 3
   const d = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!reg[i]) continue; const x = i % W; if (x === 0 || x === W - 1 || reg[i - 1] !== reg[i] || reg[i + 1] !== reg[i] || reg[i - W] !== reg[i] || reg[i + W] !== reg[i]) d[i] = 1; }
-  for (let k = 2; k <= 3; k++) for (let i = W; i < W * H - W; i++) if (reg[i] && !d[i] && (d[i - 1] === k - 1 || d[i + 1] === k - 1 || d[i - W] === k - 1 || d[i + W] === k - 1)) d[i] = k;
+  for (let k = 2; k <= 6; k++) for (let i = W; i < W * H - W; i++) if (reg[i] && !d[i] && (d[i - 1] === k - 1 || d[i + 1] === k - 1 || d[i - W] === k - 1 || d[i + W] === k - 1)) d[i] = k;
   for (let i = 0; i < W * H; i++) { const r = reg[i]; if (!r) continue; const key = r * 64 + Math.floor(Math.floor(i / W) / 256) * 9 + Math.floor((i % W) / 256), q = sum.get(key), v = lum(i) / Math.max(1, q[0] / q[1]), under = noAccent && noAccent(r);
     let c = v < .86 ? D : v > 1.16 ? L : B; if (under) c = v > 1.14 ? B : D;
-    if (d[i] === 1) c = K; else if (acc[i]) c = A; else if (d[i] === 3 && !under) c = A;
+    if (d[i] === 1 || (ink && ink[i])) c = K; else if (acc[i]) c = A; else if (d[i] === 3 && !under) c = A;
+    else if (d[i] === 5 && !under && ((i % W) + Math.floor(i / W)) % 9 === 0) c = L; // (rivets along each panel's inner ring)
     out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = 255; } }
 // Round 571 (owner: "add helmet slot but use the design for your outlines of our armor vector graphics"): a helmet built over
 // his head in every frame, from the helmet template (his head above the shirt): a shell covering hair and face, and by style
@@ -169,7 +188,7 @@ function gearHelmetRender(recipe, imgs) {
   const px = im => { const c = mk(), g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, W, H).data; };
   const m = px(imgs.mask), shell = mk(), sg = shell.getContext('2d'), lens = mk(), lg = lens.getContext('2d');
   const rrect = (g, x0, y0, x1, y1, r) => { r = Math.min(r, (x1 - x0) / 2, (y1 - y0) / 2); g.moveTo(x0 + r, y0); g.arcTo(x1, y0, x1, y1, r); g.arcTo(x1, y1, x0, y1, r); g.arcTo(x0, y1, x0, y0, r); g.arcTo(x0, y0, x1, y0, r); g.closePath(); };
-  sg.fillStyle = lg.fillStyle = '#fff';
+  sg.fillStyle = lg.fillStyle = '#fff'; const pgxC = mk(), pgx = pgxC.getContext('2d'), inkC = mk(), ig = inkC.getContext('2d');
   for (let r = 0; r < 4; r++) for (let col = 0; col < 9; col++) {
     const x0 = col * C, y0 = r * C; let L = C, R = -1, T = C, B = -1;
     for (let y = 0; y < 180; y++) for (let x = 0; x < C; x++) if (m[((y0 + y) * W + x0 + x) * 4] > 127) { if (x < L) L = x; if (x > R) R = x; if (y < T) T = y; if (y > B) B = y; }
@@ -184,14 +203,21 @@ function gearHelmetRender(recipe, imgs) {
     else if (style === 'mask') { const er = Math.max(3, w * .12); if (side) lg.ellipse(X(cx + fwd * w * .26), Y(eye), er, er * .8, 0, 0, 7); else { lg.ellipse(X(cx - w * .22), Y(eye), er, er * .8, 0, 0, 7); lg.moveTo(X(cx + w * .22 + er), Y(eye)); lg.ellipse(X(cx + w * .22), Y(eye), er, er * .8, 0, 0, 7);
         for (let k = -1; k <= 1; k++) { lg.moveTo(0, 0); lg.rect(X(cx + k * w * .1 - 1), Y(eye + h * .2), 2, h * .14); } } }
     else { lg.rect(side ? (fwd < 0 ? X(L - 1) : X(cx)) : X(L + w * .14), Y(eye - 1.5), side ? w / 2 + 1 : w * .72, 3); if (!side) lg.rect(X(cx - 1.5), Y(T + 1), 3, eye - T - 2); }
-    lg.fill(); }
+    lg.fill();
+    // (Round 572: ear pods, a crest ridge over the dome, cheek vents and an antenna)
+    const er = Math.max(3, w * .13), pods = side ? [[cx - fwd * w * .12, eye + 1]] : [[L - 1, eye + 1], [R + 1, eye + 1]];
+    pgx.fillStyle = 'rgb(2,0,0)'; pgx.beginPath(); for (const [ex, ey] of pods) { pgx.moveTo(X(ex + er), Y(ey)); pgx.ellipse(X(ex), Y(ey), er, er * 1.25, 0, 0, 7); } pgx.fill();
+    if (style !== 'knight') { pgx.fillStyle = 'rgb(3,0,0)'; pgx.beginPath(); if (side) pgx.rect(X(cx - w * .32), Y(T + 1), w * .5, h * .12); else rrect(pgx, X(cx - w * .09), Y(T - 1), X(cx + w * .09), Y(eye - h * .14), 2); pgx.fill(); }
+    pgx.fillStyle = 'rgb(4,0,0)'; pgx.beginPath(); const ax = side ? cx - fwd * w * .3 : R - w * .12; pgx.rect(X(ax - 1), Y(T - h * .28), 2, h * .3); pgx.rect(X(ax - 2), Y(T - h * .3), 4, 3); pgx.fill();
+    ig.fillStyle = '#fff'; ig.beginPath(); for (let k = 0; k < 3; k++) { const vy = eye + h * .2 + k * 3; if (side) ig.rect(X(cx + fwd * w * .12 - w * .08), Y(vy), w * .16, 1); else if (style !== 'mask') { ig.rect(X(cx - w * .34), Y(vy), w * .14, 1); ig.rect(X(cx + w * .2), Y(vy), w * .14, 1); } } ig.fill(); }
   const sd = sg.getImageData(0, 0, W, H).data, ld = lg.getImageData(0, 0, W, H).data, out = new Uint8ClampedArray(W * H * 4), reg = new Uint8Array(W * H), acc = new Uint8Array(W * H);
+  const xd = pgxC.getContext('2d').getImageData(0, 0, W, H).data, idd = inkC.getContext('2d').getImageData(0, 0, W, H).data, ink = new Uint8Array(W * H);
   const p = px(imgs.protected), b = px(imgs.base), tint = gearHex(recipe.tint, [90, 96, 110]);
-  for (let i = 0; i < W * H; i++) { if (sd[i * 4 + 3] < 128 || p[i * 4] > 127) continue; reg[i] = 1; if (ld[i * 4 + 3] > 127) acc[i] = 1;
+  for (let i = 0; i < W * H; i++) { const xr = xd[i * 4 + 3] > 127 ? xd[i * 4] : 0; if ((sd[i * 4 + 3] < 128 && !xr) || p[i * 4] > 127) continue; reg[i] = xr || 1; if (ld[i * 4 + 3] > 127 && !xr) acc[i] = 1; if (idd[i * 4 + 3] > 127 && sd[i * 4 + 3] >= 128) ink[i] = 1;
     const y = Math.floor(i / W) % C, f = 1.2 - .5 * (y % 256) / 120, v = b[i * 4 + 3] > 128 ? .85 + .3 * (.3 * b[i * 4] + .59 * b[i * 4 + 1] + .11 * b[i * 4 + 2]) / 255 : 1; // (lit from above, a touch of his shading)
     out.set([tint[0] * f * v, tint[1] * f * v, tint[2] * f * v, 255], i * 4); }
   const pal = recipe.pixel || { dark: '#' + tint.map(v => Math.round(v * .5).toString(16).padStart(2, '0')).join(''), base: recipe.tint || '#5a6070', light: '#' + tint.map(v => Math.min(255, Math.round(v * 1.45)).toString(16).padStart(2, '0')).join(''), accent: (recipe.seam && recipe.seam.color) || '#4ff0ff' };
-  gearPixelize(out, reg, acc, pal, W, H);
+  gearPixelize(out, reg, acc, pal, W, H, null, ink);
   const c = mk(); c.getContext('2d').putImageData(new ImageData(out, W, H), 0, 0); return c;
 }
 // a recipe's problems (the Gear Studio shows them; the game ignores a recipe that has any)
