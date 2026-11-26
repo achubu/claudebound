@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 578: crisp outlines on all armour (owner)
+
+Owner: "The outlines need to be more crisp ... for all armor pieces". The hero is drawn on 256px frames and shown at about 84px, so
+the set style's 1px black outline and 1px accent line were a third of a screen pixel: they blurred into the plates and the accent
+broke into dashes. Now (`gearPixelize`, every slot in the set style) the outline is 2px, the accent a solid 2px line two pixels
+inside it, the top-edge highlight and rivets moved in to match; about one screen pixel each. Textured armour: plate rims and the
+undersuit's edge are 2px, and a recipe's trim is never under 2px.
+
 ## Round 577: the owner's eight gear textures
 
 The owner's eight-at-once sheet (Round 574's prompt) came back clean on its magenta gutters. `tools/gear_texture_cut.py` cut it:
