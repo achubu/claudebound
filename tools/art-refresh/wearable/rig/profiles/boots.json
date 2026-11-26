@@ -1,0 +1,18 @@
+{
+  "slot": "boots",
+  "parts": [
+    "screen-left boot",
+    "screen-right boot"
+  ],
+  "base_sha256": "a1317e9671b0da27e75edee3268cc6a6723ccc140c8b1bdac3f48ee7ea00ba2f",
+  "labels_sha256": "327e21d967996162f91bca6fa0bdeda44e48f300ba3e8a36a4bb9f1bc39da775",
+  "template_sha256": "370d60934c0459e767b480c523b6493aeb045cfda9a5a97ed9ce6ee111cfee87",
+  "protected_sha256": "82caf3d41e3c944903d2277d3c04632d8c098bd7032d19c948b2f61b7a3d024c",
+  "views": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "source_layout": "4 rows x part-count columns; helmet/belt also accept 2x2"
+}

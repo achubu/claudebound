@@ -1,0 +1,21 @@
+{
+  "slot": "pants",
+  "parts": [
+    "waist",
+    "screen-left thigh",
+    "screen-right thigh",
+    "screen-left shin",
+    "screen-right shin"
+  ],
+  "base_sha256": "a1317e9671b0da27e75edee3268cc6a6723ccc140c8b1bdac3f48ee7ea00ba2f",
+  "labels_sha256": "4db562ce3bb1eb71c29bc066c8289121357f0af1ab5c48fb0c5bbeed95eaf76b",
+  "template_sha256": "627fd062a988887a175422c00602f3e273180f908babe7ab77f1763f360b280d",
+  "protected_sha256": "82caf3d41e3c944903d2277d3c04632d8c098bd7032d19c948b2f61b7a3d024c",
+  "views": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "source_layout": "4 rows x part-count columns; helmet/belt also accept 2x2"
+}
