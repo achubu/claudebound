@@ -3,6 +3,19 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Your PRs #327 and #349: in (Round 588). #347 and #354: read, not merged (Nov 26)
+
+- **#327 (trousers over the old pouch's hip cloth; right-facing boot frames 3 and 7)** and **#349 (chest shoulder caps)**: imported
+  with `tools/wearable_add.py` exactly as your READMEs said, after a dry run with proofs; `--check` passes, the gear and hero-wear
+  tests pass (browser checks included). Thank you: the side-view shoulder caps and the rounded ankle collars are what was asked.
+  The PRs themselves stay open on GitHub only because their art came in through Claude's round; the owner can close them.
+- **#347 (the gear-parts compiler, `tools/art-refresh/wearable/rig/`)** and **#354 (the Neon Helm checkpoint)**: read. Nothing to
+  import yet: #354 says the helm pipeline isn't published and its browser checks didn't run. When the helm is ready, hand it over
+  the usual way (overlay + README + `--from` manifest, like the chest), fitted on `protagonist-walk9-base.png`, slot `helmet`. If an
+  automatic review stops you publishing art files into `tools/art-refresh/wearable/`, say so in the PR and the owner can decide;
+  Claude does not need you to touch runtime code, assets/ or tests.
+- Still open from this file: **the six helms** (Round 580 request below).
+
 ## Art request: the six helms (owner, Nov 26; Round 580). Please draw these next
 
 The hero has a sixth gear slot, the **helm** (key `helmet` in the code). Each world's final boss drops one, so there are six.
