@@ -446,54 +446,71 @@ Even light everywhere, low contrast, so the islands and bridges stand out on top
 NOT IN THE PICTURE: no islands, buildings, birds, ships, people, sun, moon or stars; no shadows.
 ```
 
-## Round 585: the north-south bridge again (owner: "vertical bridge bottom is no good, we need to regenerate that")
+## Round 585: both bridges again, in one picture (owner: "vertical bridge bottom is no good, we need to regenerate that";
+## "these are upside down"; "in future when we generate bridge prompts we need to account for this"; "vertical and horizontal
+## bridges should be generated in a single prompt")
 
-The old south end (`props/bridge/south`) is a thin cap narrower than the deck, with its two pylons hanging off its bottom edge, so
-the bridge stops short where it meets the walkway. Regenerate the whole north-south set so its three pieces match, in the Sky Isles'
-blue and steel (Round 583). When it is back: cut the three pieces from column 1's whole bridge, measure them into `bridgeV` (Round
-528's `CITY_BRIDGE_V` measurements: where each piece's deck starts and ends, its deck's left edge and width), and run
-`tools/recolor_sky.py` over them.
+The old north-south south end was a thin cap narrower than the deck, with its two pylons hanging off its bottom edge upside down
+(caps pointing down). Until new art comes the game draws that piece only down to the end of its deck (`bridgeV.south.clip`).
 
-### 12. The bridge, north to south (blue and steel)
+**Rules for every bridge prompt** (any world):
+1. One prompt makes both bridges, east-west and north-south, in one picture, so they match.
+2. The two ends of a bridge are mirror images, the same length and as wide as the deck; each ends in a flat landing with a
+   straight edge, and nothing is drawn past it.
+3. Every standing thing (pylons, posts, lamps, banners) stands UPRIGHT in every piece, caps and lamps at the top, the same at the
+   south end as at the north: image generators like to mirror the north end into the south end, which turns its pylons upside
+   down. Say so in the prompt, and check the pieces before cutting them.
+4. Each bridge comes whole and cut into its three pieces, at one scale; the middle piece repeats seamlessly.
+
+When it is back: cut the six pieces from the two whole bridges, measure them into `bridgeDeck` (east-west) and `bridgeV`
+(north-south; Round 528's measurements: where each piece's deck starts and ends, its deck's left edge and width), drop `clip`,
+and run `tools/recolor_sky.py` over them.
+
+### 12. Both bridges, east to west and north to south (blue and steel)
 
 ```
-A sprite sheet of one grand glass sky bridge for a top-down 2D game, matching a cool blue and steel cyberpunk city floating
-above white clouds (steel-grey and white buildings with cyan glass, glass domes, walked on a pale steel deck with riveted
-panels), drawn in clean, crisp game art with dark outlines. On a flat solid pure green (#00FF00) background, with no gradient,
-pattern or texture in the background.
+A sprite sheet of one grand glass sky bridge drawn twice, once running east to west and once running north to south, for a
+top-down 2D game, matching a cool blue and steel cyberpunk city floating above white clouds (steel-grey and white buildings with
+cyan glass, glass domes, walked on a pale steel deck with riveted panels), drawn in clean, crisp game art with dark outlines. On a
+flat solid pure green (#00FF00) background, with no gradient, pattern or texture in the background.
 
 THE BRIDGE: a monumental bridge for a walkway crossing open sky between two floating islands: a wide deck of pale glowing cyan
-glass panes in brushed steel frames, with a thin bright cyan light line running along both long edges; tall balustrades of
-clear cyan glass panels between slim steel posts along both sides; tall lamp posts with glowing white globes and a few hanging
-blue banners along the balustrades. AT EACH END a pair of gate pylons of steel and glass with glowing cyan crystals and small
-silver caps, standing ON the deck's two end corners, inside the deck's width; and a short flat landing plate of riveted steel
-deck, as wide as the bridge, that ends the deck with a straight horizontal edge. THE TWO ENDS ARE MIRROR IMAGES OF EACH OTHER
-(the south end is the north end turned upside down), the same length and the same width as the deck. Nothing hangs past either
-end: the landing plate's straight edge is the last thing drawn. THE DECK RUNS FROM THE TOP OF THE IMAGE TO THE BOTTOM: its two
-long sides, with the balustrades, are its left and right edges, straight and vertical, and the same width from end to end.
+glass panes in brushed steel frames, with a thin bright cyan light line along both long edges; tall balustrades of clear cyan
+glass panels between slim steel posts along both long sides; tall lamp posts with glowing white globes and a few hanging blue
+banners along the balustrades. AT EACH END a pair of gate pylons of steel and glass with glowing cyan crystals and small silver
+caps, standing ON the deck's two end corners, inside the deck's width, and a short flat landing plate of riveted steel deck, as
+wide as the bridge, that ends the deck with a straight edge. Nothing is drawn past either landing plate. THE TWO ENDS OF EACH
+BRIDGE ARE THE SAME LENGTH AND THE SAME WIDTH AS THE DECK.
 
-LAYOUT: three columns, with clear green space between every piece and round the edge of the sheet. No labels, numbers, letters
-or text anywhere.
-COLUMN 1: the whole bridge, about 4 times as tall as it is wide, centred.
-COLUMNS 2 AND 3: the same bridge cut into three separate pieces, at exactly the same scale and the same width (left edge to
-right edge) as the bridge in column 1, one above another in column 2 and column 3 with green space between them:
-  PIECE 1 (top of column 2), the NORTH END: the top landing plate, the top pair of gate pylons and the first part of the deck;
-  its bottom edge is a straight horizontal cut through the deck.
-  PIECE 2 (bottom of column 2), the MIDDLE SECTION: a square length of deck with balustrades, one lamp post on each side in its
-  middle; its top and bottom edges are straight horizontal cuts, and it repeats seamlessly: its top edge continues exactly into
-  its bottom edge, so many copies stacked one above another make one unbroken bridge.
-  PIECE 3 (column 3), the SOUTH END: the last part of the deck, the bottom pair of gate pylons and the bottom landing plate; its
-  top edge is a straight horizontal cut through the deck, matching the middle section exactly; it is the same length as the
-  north end.
+EVERYTHING STANDS UPRIGHT: every pylon, post, lamp and banner in every piece stands the right way up, its cap, crystal, globe or
+top at the top of the image, at both ends of both bridges. The pylons at the south end of the north-south bridge stand upright on
+the deck exactly like the ones at its north end: never upside down, never hanging below the deck, never mirrored top to bottom.
+
+LAYOUT: two bands, one above the other, with clear green space between every piece and round the edge of the sheet. No labels,
+numbers, letters or text anywhere.
+TOP BAND, THE EAST-WEST BRIDGE: its deck runs from left to right, its two long sides (with the balustrades) are its top and
+bottom edges. ROW 1: the whole bridge, about 4 times as wide as it is tall, centred. ROW 2: the same bridge cut into three
+separate pieces side by side, at exactly the same scale and height as in row 1: the WEST END (the left landing plate, the left
+pair of pylons and the first part of the deck; its right edge a straight vertical cut through the deck), the MIDDLE SECTION (a
+square length of deck with balustrades, one lamp post on each side in its middle; its left and right edges straight vertical
+cuts; it repeats seamlessly, its right edge continuing exactly into its left), and the EAST END (the last part of the deck, the
+right pair of pylons and the right landing plate; its left edge a straight vertical cut matching the middle section).
+BOTTOM BAND, THE NORTH-SOUTH BRIDGE: its deck runs from top to bottom, its two long sides (with the balustrades) are its left and
+right edges, straight vertical lines. COLUMN 1: the whole bridge, about 4 times as tall as it is wide. COLUMNS 2 AND 3: the same
+bridge cut into three separate pieces at exactly the same scale and width as in column 1: the NORTH END (top of column 2: the top
+landing plate, the top pair of pylons and the first part of the deck; its bottom edge a straight horizontal cut), the MIDDLE
+SECTION (bottom of column 2: a square length of deck, one lamp post on each side in its middle; straight horizontal cuts top and
+bottom; it repeats seamlessly, its top edge continuing exactly into its bottom), and the SOUTH END (column 3: the last part of the
+deck, the bottom pair of pylons, standing upright, and the bottom landing plate; its top edge a straight horizontal cut matching
+the middle section; the same length as the north end).
 
 VIEW: seen from above, tilted 30 degrees from straight down, orthographic (no perspective, no vanishing point), like the
-buildings: you see the deck from above, the pylons, posts and lamps standing up with a little of their south-facing front
-showing. The deck itself is flat, so its two long edges are straight vertical lines. The pylons at the south end stand on the
-deck like the ones at the north end; they do not hang below it.
+buildings: you see each deck from above, and the pylons, posts and lamps standing up with a little of their south-facing front
+showing, on both bridges. The decks themselves are flat, so their long edges are straight lines.
 
 STYLE: detailed 2D game art, crisp clean shapes and thin dark line work, flat colours with light, simple shading, a 1-pixel dark
 outline round each piece. Cool blues, cyan glass, steel grey, white and silver, soft cyan glows. No pink, no purple, no gold.
 
-NOT IN THE PICTURE: no clouds, no sky, no islands, no ground beyond the landing plates, no walkway beyond the bridge; no cast
+NOT IN THE PICTURE: no clouds, no sky, no islands, no ground beyond the landing plates, no walkway beyond the bridges; no cast
 shadows; no glow spilling onto the green background; no people or vehicles; nothing floating between the pieces.
 ```
