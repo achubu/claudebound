@@ -7,7 +7,7 @@ gallery; `arena.html` is a standalone prototype and is left untouched.
 **`CODEX-NOTES.md`** records Codex's generation review and recommendations for Claude; check its pinned baseline before acting.
 
 **`NOTES.md`** holds the owner's ideas for later (not to build until asked); remind the owner of them when
-relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 585) is
+relevant. **Read `CHANGES.md` first.** Every round of work (Round 1 to Round 586) is
 logged there with its reasoning. Add a new `## Round N:` entry for each
 change set.
 
@@ -345,6 +345,7 @@ A playtest flagged these and the owner confirmed they are intended:
   how to avoid them) for it to learn from.
 - Art comes from the owner's image generator (Gemini). When integrating, skip
   `.DS_Store` files and duplicate top-level folders.
+- **Bridge prompts (owner, Round 585):** one prompt makes both bridges (east-west and north-south) in one picture; the two ends are mirror images ending in a flat landing with nothing past it; every pylon, post and lamp stands upright in every piece (generators mirror the north end into an upside-down south end): say so, and check before cutting. See `tools/art-refresh/sky-gen-prompts.md`, Round 585.
 - **Image prompts (owner, Round 494): every prompt is complete on its own.** Never split prompts into a shared part and
   per-sheet parts: repeat the shared text inside each prompt, so the owner can copy one whole block per image.
 - Painted dead ends at room edges are intentional. A street that ends at an

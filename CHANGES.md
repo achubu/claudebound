@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 586: the upside-down bridge end hidden; one prompt for both bridges, and rules for bridge prompts
+
+Owner: "these are upside down" (the north-south bridge's south pylons); "in future when we generate bridge prompts we need to account
+for this being a possibility"; "vertical and horizontal bridges should be generated in a single prompt".
+- Until the new art comes, the Sky Isles' north-south bridge draws its south end only down to the end of its deck
+  (`bridgeV.south.clip` in `cityBridgeGrandV`): it ends flat at the walkway, without the upside-down pylons.
+- Prompt 12 (`tools/art-refresh/sky-gen-prompts.md`) now asks for both bridges in one picture, each whole and in three pieces, with
+  the four rules for every bridge prompt (also in CLAUDE.md): both bridges in one prompt; mirror-image ends with a flat landing and
+  nothing past it; everything upright in every piece, said outright; one scale, a seamless middle.
+
 ## Round 585: a prompt to regenerate the north-south bridge
 
 Owner: "now that is beautiful edge work, vertical bridge bottom is no good, we need to regenerate that". The south end of the

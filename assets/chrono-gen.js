@@ -600,7 +600,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
   yardSets: { cargo: ['sky-pods', 'hover-crates', 'drone-pad', 'cargo-crane'], market: ['neon-kiosk', 'holo-stand', 'glow-vending', 'noodle-cart'] },
   clutterH: { 'planter-cluster': 34, 'curved-bench': 26, 'glow-lamp': 48, 'recycle-bin': 30, 'crate-pile': 28, 'potted-blossom': 46, 'mini-dish': 34, 'glow-bollard': 26 },
   // the glass bridges (Rounds 545-546), measured in each piece's own px like Solaris's (CITY_BRIDGE_DECK, CITY_BRIDGE_V)
-  bridgeDeck: [62, 257], bridgeV: { north: { deckL: 6, w: 452, start: 168, cut: 765 }, mid: { deckL: 4, w: 456, top: 25, bottom: 913 }, south: { deckL: 6, w: 452, top: 28, end: 1120 } } });
+  bridgeDeck: [62, 257], bridgeV: { north: { deckL: 6, w: 452, start: 168, cut: 765 }, mid: { deckL: 4, w: 456, top: 25, bottom: 913 }, south: { deckL: 6, w: 452, top: 28, end: 1120, clip: true /* Round 585: its pylons hang upside down below the deck */ } } });
 // =====================================================================
 // Round 552 (owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm"):
 // Elaris, the forest, on the generator: the Sky Isles' room hooks on Elaris's own rooms (TILE_WORLD_DATA.wilds.layout) and the
@@ -1319,7 +1319,11 @@ function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V =
   D(N, deckX - V.north.deckL * k, a0 - V.north.start * k, k);
   ctx.save(); ctx.beginPath(); ctx.rect(-1e4, -1e4, 2e4, (sCut - oy) * K + 1e4); ctx.clip(); // (the last middle copy is cut short where the south end begins)
   for (let u = nCut; u < sCut; u += step) D(M, deckX - V.mid.deckL * k, u - V.mid.top * k, k);
-  ctx.restore(); D(S, deckX - V.south.deckL * kS, sTop, kS); }
+  ctx.restore();
+  // Round 585 (owner: "these are upside down"): the south end's pylons, drawn hanging below its deck, came out upside down; until
+  // the regenerated bridge (prompt 12) comes, the south piece is drawn only down to the end of its deck (V.south.clip)
+  if (V.south.clip) { ctx.save(); ctx.beginPath(); ctx.rect(-1e4, -1e4, 2e4, (a1 - oy) * K + 1e4); ctx.clip(); D(S, deckX - V.south.deckL * kS, sTop, kS); ctx.restore(); }
+  else D(S, deckX - V.south.deckL * kS, sTop, kS); }
 function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, horiz = b.horiz, CITY_BRIDGE_DECK = GEN.bridgeDeck || CITY_BRIDGE_DECK_BASE; /* Round 548: a theme's own pieces */
   const road = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C; let wide = road * CITY_BRIDGE_COVER, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]);
   let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C;
