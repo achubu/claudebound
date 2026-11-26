@@ -3496,6 +3496,39 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 587: the owner's new blue bridges; a bridge never overlaps another edge
+
+The owner generated prompt 12 (both bridges in one picture). Every piece checked upright before cutting (Round 585's rule).
+- **Cut** by `tools/cut_sky_bridges.py` (source `sky-gen/src/bridge-sheet-blue.jpeg`): the six pieces (the two whole bridges are
+  references), keyed, with the glass the green showed through turned cyan instead of cut away; the east-west pieces share one top and
+  bottom; the south end trimmed to the north end's length; 3px off every cut edge (the keying had touched them). The script prints
+  `bridgeDeck` and `bridgeV` for `GEN_THEMES.sky`; the old `clip` (Round 586) is gone.
+- **Joins**: each piece's ends land on whole pixels (`cityBridgeGrand`, `cityBridgeGrandV`); at fractional ones the edge pixel was
+  part-covered and the walkway showed through as a pale line at every join.
+- **Owner: "lets not have the bridge overlap with other edges as a rule, it can overlap the road but i see its overlapping a 2nd set
+  of edges"; "theres an edge fiasco"**: a bridge was 1.3 x its road (Round 526), so on land its end covered the road's kerbs and
+  reached the yard rim beside them. Now (every world) a bridge is its road's width plus 5px of kerb each side (`genBridgeWide`,
+  `GEN.bridgeKerbPad`), and on land each side reaches only along its own road's straight run with no side street joining
+  (`cityBridgeSpans` gives `runA`/`runB`; `genBridgeFit` places it), still 100px at most; when that is too short the whole bridge
+  is drawn smaller by one factor. `tests/sky-isles.test.cjs` checks both.
+- The faint lines left on the deck are the art's own pane frames (steel frames between glass panes), not joins.
+- **Owner: "bridge needs to go over that edge"**: a long crossing needed no reach onto land, so its end stopped exactly at the sky's
+  edge and the island's rim showed beside the road. Now every bridge lands at least `GEN.bridgeLand` (20px: the rim's 16 and a little)
+  onto each bank, where its road goes on that far (`genBridgeFit`).
+- **Owner: "this edge isnt over the texture tile"**: the Sky Isles' yard rim was the see-through glass rail, so the yard's grey ground
+  showed through it past the edge. Their yards now take the islands' opaque steel deck rim (`sky-gen/surfaces/yard-edge/deck-rim`).
+  (Trimming every edge picture to its drawn rows was tried and left out: it would change the city's and Elaris's edges.)
+- A crossing with no water and no straight road either side was scaled to nothing, and its 0px middle sections were laid for
+  ever (the walk test hung): the scale never goes below 0.35 and the loops need a step of at least 1px.
+- **Objects' keep-clear boxes for bridges** (`citySpriteBoxes`) were still worked out from the city's old bridge pieces and the old
+  1.3 width, far longer than the Sky Isles' bridges as drawn: in a small island room (7,1) they covered almost all the land, and its
+  sealed door had nowhere clear to stand (6 open spots; now 246). The box now comes from the painter's own rules (`genBridgeFit`,
+  the theme's `bridgePieces` and `bridgeV`).
+- **A spot search that finds nothing waits 2s before it is tried again** (`cityFixSpot`, `cityFixFail`): it ran on every frame while
+  walking (28ms a frame in that room), which is what ran the walk test out of time.
+- Checked: `SEED=77` and `SEED=1 node tests/playtest-walk.cjs sky`, `SEED=77 ... elaris` (every room, no problems); sky-isles,
+  gen-theme-contract, sky-art, solaris-gen, wilds-gen, city-buildings, item-placement, city-layout.
+
 ## Round 586: the upside-down bridge end hidden; one prompt for both bridges, and rules for bridge prompts
 
 Owner: "these are upside down" (the north-south bridge's south pylons); "in future when we generate bridge prompts we need to account
