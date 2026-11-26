@@ -55,5 +55,14 @@ const HERO_WEAR_DATA = {
   "overlay": "assets/characters/wearable/cyber-pants/overlay.png",
   "clear": null,
   "v": 2
+ },
+ "neon-visor": {
+  "slot": "helmet",
+  "items": [
+   "neonVisor"
+  ],
+  "overlay": "assets/characters/wearable/neon-visor/overlay.png",
+  "clear": "assets/characters/wearable/neon-visor/clear.png",
+  "v": 1
  }
 };
