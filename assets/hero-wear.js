@@ -27,8 +27,14 @@ function heroWearFail(key, why) { heroWearPending.delete(key); const f = heroWea
 // the looks the worn gear calls for, slot by slot
 // Round 564: a worn item may have a recipe, gear/recipes/<itemId>.json (assets/gear-recipe.js): fetched once, checked, and drawn
 // by the game in place of its drawn look (the drawn look shows until it loads, and when there is none or it is broken)
+// Round 580 (owner: "we aren't quite getting the results we need, let's scrap this idea, maybe we will revisit it at a later time,
+// let's go back to our old plan of waiting for chat gpt to draw all the gear"): the game no longer draws recipes; every item shows
+// its drawn look (or none yet). The recipe code, the Gear Studio's Designer and gear/recipes/ stay for a later revisit: set this
+// to true to bring them back.
+var HERO_WEAR_USE_RECIPES = false;
 const heroWearRecipes = {};
 function heroWearRecipeFor(id, slot) {
+  if (!HERO_WEAR_USE_RECIPES) return null;
   if (!(id in heroWearRecipes)) { heroWearRecipes[id] = 'pending';
     if (typeof fetch !== 'function' || typeof gearRecipeRender !== 'function') { heroWearRecipes[id] = null; return null; }
     fetch('gear/recipes/' + id + '.json?v=' + HERO_WEAR_VERSION).then(r => r.ok ? r.json() : null).catch(() => null).then(r => {

@@ -74,10 +74,14 @@ console.log('hero-wear (harness) ok');
   // (Round 564) a recipe file for a worn item: the game draws it in place of the item's drawn look
   const rdir = path.join(ROOT, 'gear/recipes'), rfile = path.join(rdir, 'mossweavePants.json'), hadDir = fs.existsSync(rdir);
   fs.mkdirSync(rdir, { recursive: true }); fs.writeFileSync(rfile, JSON.stringify({ v: 1, slot: 'pants', texture: 'carbon', tint: '#334455', shade: 0.9, trim: { color: '#111111', width: 2 } }));
-  try { await page.evaluate(() => { state.relics.push('mossweavePants'); equipGear('pants', 'mossweavePants'); });
+  try { // (Round 580: recipes are off in the game; a worn item with a recipe shows its drawn look, or none)
+    await page.evaluate(() => { state.relics.push('mossweavePants'); equipGear('pants', 'mossweavePants'); }); await page.waitForTimeout(1500);
+    assert(!(await page.evaluate(() => /recipe:/.test(heroWearKey))), 'recipes are off: the game does not draw them');
+    await page.evaluate(() => { equipGear('pants', null); HERO_WEAR_USE_RECIPES = true; for (const k of Object.keys(heroWearRecipes)) delete heroWearRecipes[k]; }); /* (switched back on, they still work) */
+    await page.evaluate(() => { equipGear('pants', 'mossweavePants'); });
     await page.waitForFunction(() => /recipe:mossweavePants/.test(heroWearKey) && heroWearUrl, null, { timeout: 15000 });
     assert.match(await bg(), /^url\("blob:/, 'a recipe is drawn by the game');
-    await page.evaluate(() => equipGear('pants', null)); }
+    await page.evaluate(() => { equipGear('pants', null); HERO_WEAR_USE_RECIPES = false; }); }
   finally { fs.rmSync(rfile); if (!hadDir) fs.rmSync(rdir, { recursive: true }); }
   // missing art falls back to the plain hero
   

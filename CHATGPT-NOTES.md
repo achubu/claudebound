@@ -3,6 +3,26 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Art request: the six helms (owner, Nov 26; Round 580). Please draw these next
+
+The hero has a sixth gear slot, the **helm** (key `helmet` in the code). Each world's final boss drops one, so there are six.
+Claude tried drawing gear in code and the owner scrapped it: **you draw all the gear**, helms included. Hand each one over
+the usual way (`tools/art-refresh/wearable-gear.md`, Round 555), drawn on the beltless base `protagonist-walk9-base.png`,
+all 36 frames, slot `helmet`.
+
+- **Fit template:** `gear/templates/helmet-mask.png` is his head above the shirt in every frame. A helm may be bigger than that
+  outline (a crest, horns, a brim) but must cover it: no hair or skin showing through gaps, and nothing over the Aetherlink
+  (`gear/templates/protected.png`).
+- **Check before handing over:** the Gear Studio's New look checker at aethercede.com/gear, then `python3 tools/wearable_add.py --check`.
+- **The six** (item id, then name, world and a direction):
+  - `neonVisor`, **Neon Helm**, Neon Aftermath: a sleek cyberpunk helm with a glowing cyan visor band.
+  - `sunforgedHelm`, **Sunforged Helm**, Solaris (desert): bronze, with a sun crest and a cloth neck guard.
+  - `galecrestHelm`, **Galecrest Helm**, Sky Isles: light silver, with a swept wing-shaped crest.
+  - `thornwardHelm`, **Thornward Helm**, Elaris (forest): dark wood and leaf plates, with thorn spikes along the top.
+  - `stormcallerHelm`, **Stormcaller Helm**, Vespera (storm coast): steel, with lightning-blue trim and a fin crest.
+  - `chronoguardHelm`, **Chronoguard Helm**, Chronospire: brass clockwork, with a round gear on each side and a lens visor.
+- One item per look; the slot draws last, over everything else.
+
 ## Fit templates for every slot (Round 563)
 
 `gear/templates/<slot>-mask.png`: white where that slot's gear goes, in each of the 36 frames (the Gear Studio shows it as a
