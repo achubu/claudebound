@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 590: the Neon Helm's cheek and chin guards (front view cut flat)
+
+Owner: "Helm is cut wrong on the front view". The helm's cheek guards ended in a flat cut right under the visor. Cause: the helmet's fit
+template was the head above the shirt (Round 571), and ChatGPT's rig scales a part to its template and cuts it to exactly that shape,
+so in the front view (the collar rises at the sides of the neck) the guards were cut off. Permanent rules, for every helm to come:
+- **The helmet template reaches below the head** (`HELM_CHIN` = 16px in `tools/wearable_add.py`, deepest at the middle of the head's
+  width, a third of that at its sides), over the neck and collar, where a helmet's guards hang. Templates rebuilt (`--rebuild`).
+- **The rig sizes a helmet by the head alone** (`rig/fit_atlas.py`: the template less the shirt's) and below the head keeps the
+  drawing's own outline, only where the drawing has pixels. (First tried without this: the whole helm grew to the taller template
+  and its visor dropped to the collar.) Helmet profile recalibrated (`rig/calibrate.py profiles --slot helmet`); the rig's test checks
+  full coverage of the head for helmets. Its three tests pass.
+- The Neon Helm rebuilt from ChatGPT's own `source-atlas.png` with `prepare_gear.py` and re-imported; every view looked at by eye.
+  `--check`, hero-wear, hero-wear-renderer, wearable-tool, gear-page and helmets pass (browser checks required).
+
 ## Round 589: ChatGPT's Neon Helm in
 
 Owner: "Chat gpt says it's done". ChatGPT/Codex's PR #356: the Neon Helm (`neon-visor`, slot `helmet`, item `neonVisor`) over all

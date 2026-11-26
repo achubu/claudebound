@@ -1,2 +1,2 @@
-review sheet: /workspace/scratch/6fb62b93ef4d/gear-resume/tools/art-refresh/wearable/neon-visor/review/neon-visor-review.png; walk animations (whole outfit, game size x2): neon-visor-walk-down.gif, neon-visor-walk-left.gif, neon-visor-walk-right.gif, neon-visor-walk-up.gif; red tint marks 814 px of old clothing showing
+review sheet: /home/user/claudebound/tools/art-refresh/wearable/neon-visor/review/neon-visor-review.png; walk animations (whole outfit, game size x2): neon-visor-walk-down.gif, neon-visor-walk-left.gif, neon-visor-walk-right.gif, neon-visor-walk-up.gif; red tint marks 814 px of old clothing showing
 dry run: neon-visor passes every check; nothing written

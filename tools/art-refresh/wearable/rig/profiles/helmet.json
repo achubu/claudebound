@@ -4,8 +4,8 @@
     "shell"
   ],
   "base_sha256": "a1317e9671b0da27e75edee3268cc6a6723ccc140c8b1bdac3f48ee7ea00ba2f",
-  "labels_sha256": "c32346c702c5e9e0bc5651547b8c7557509364ff736c6ec1ba2f9bb7b0f63ad0",
-  "template_sha256": "159c1acad276a1395ac0a959df8ddceeeec1c13e85facaa94a5e37c62a579371",
+  "labels_sha256": "1a3b6ce7cff82869582825bb03051d1d0e145fd6e3ee30b9e69dad2b07bd6e86",
+  "template_sha256": "75a69e1d46597cd06021b5ff21faac6217147da2d6ea50a6ece50af3771abda4",
   "protected_sha256": "82caf3d41e3c944903d2277d3c04632d8c098bd7032d19c948b2f61b7a3d024c",
   "views": [
     "down",

@@ -63,6 +63,6 @@ const HERO_WEAR_DATA = {
   ],
   "overlay": "assets/characters/wearable/neon-visor/overlay.png",
   "clear": "assets/characters/wearable/neon-visor/clear.png",
-  "v": 1
+  "v": 2
  }
 };
