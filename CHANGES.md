@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 588: ChatGPT's trouser, boot and chest-shoulder fixes in
+
+Owner: "Check on chatgpt notes". ChatGPT/Codex had four open PRs. Two were the fixes asked for in CHATGPT-NOTES (Rounds 560-561):
+- **#327**: the cyber trousers re-fitted on the beltless base, covering the hip cloth the old pouch left bare; the cyber boots'
+  right-facing frames 3 and 7 with a rounded rear ankle instead of the pasted square corner (the other 34 frames unchanged).
+- **#349**: the cyber chest's shoulders: filled, curved caps in the side views and straps out to the shoulder seams front and back.
+Both were fitted on our base (hash checked), dry-run with proofs and looked at by eye (side-view shoulders, boot frames 3 and 7, the
+whole outfit at 256 and 84px), then imported with `tools/wearable_add.py` (each look's `v` goes to 2, so browsers fetch the new
+pictures; the fit templates are rewritten, the helmet's too as it follows the shirt). `--check`, hero-wear, hero-wear-renderer,
+wearable-tool, gear-page, gear and helmets pass (browser checks required).
+- **#347** (a gear-parts compiler prototype) and **#354** (a Neon Helm checkpoint: not published, browser checks not run) have nothing
+  to import yet. CHATGPT-NOTES.md says so and what to hand over when the helm is ready; the six helms are still open.
+
 ## Round 587: the owner's new blue bridges; a bridge never overlaps another edge
 
 The owner generated prompt 12 (both bridges in one picture). Every piece checked upright before cutting (Round 585's rule).

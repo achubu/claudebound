@@ -23,7 +23,7 @@ const HERO_WEAR_DATA = {
   ],
   "overlay": "assets/characters/wearable/cyber-boots/overlay.png",
   "clear": null,
-  "v": 1
+  "v": 2
  },
  "cyber-chest": {
   "slot": "shirt",
@@ -33,7 +33,7 @@ const HERO_WEAR_DATA = {
   ],
   "overlay": "assets/characters/wearable/cyber-chest/overlay.png",
   "clear": null,
-  "v": 1
+  "v": 2
  },
  "cyber-gloves": {
   "slot": "gloves",
@@ -54,6 +54,6 @@ const HERO_WEAR_DATA = {
   ],
   "overlay": "assets/characters/wearable/cyber-pants/overlay.png",
   "clear": null,
-  "v": 1
+  "v": 2
  }
 };

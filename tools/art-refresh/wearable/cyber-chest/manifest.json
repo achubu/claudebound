@@ -1,0 +1,9 @@
+{
+ "look": "cyber-chest",
+ "slot": "shirt",
+ "items": [
+  "sunwovenShirt",
+  "timewornShirt"
+ ],
+ "cleaned": false
+}
