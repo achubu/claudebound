@@ -3512,6 +3512,12 @@ The owner generated prompt 12 (both bridges in one picture). Every piece checked
   (`cityBridgeSpans` gives `runA`/`runB`; `genBridgeFit` places it), still 100px at most; when that is too short the whole bridge
   is drawn smaller by one factor. `tests/sky-isles.test.cjs` checks both.
 - The faint lines left on the deck are the art's own pane frames (steel frames between glass panes), not joins.
+- **Owner: "bridge needs to go over that edge"**: a long crossing needed no reach onto land, so its end stopped exactly at the sky's
+  edge and the island's rim showed beside the road. Now every bridge lands at least `GEN.bridgeLand` (20px: the rim's 16 and a little)
+  onto each bank, where its road goes on that far (`genBridgeFit`).
+- **Owner: "this edge isnt over the texture tile"**: the Sky Isles' yard rim was the see-through glass rail, so the yard's grey ground
+  showed through it past the edge. Their yards now take the islands' opaque steel deck rim (`sky-gen/surfaces/yard-edge/deck-rim`).
+  (Trimming every edge picture to its drawn rows was tried and left out: it would change the city's and Elaris's edges.)
 
 ## Round 586: the upside-down bridge end hidden; one prompt for both bridges, and rules for bridge prompts
 

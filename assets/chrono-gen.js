@@ -585,7 +585,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
   texScale: { chasm: 0.4, gravel: 0.4, floor: 0.4, yard: 0.4, 'yard-cargo': 0.4, 'yard-rubble': 0.4, 'yard-market': 0.4, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.4, plaza: 0.4, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4, 'rubble-big': 0.4, 'surfaces/sidewalk/deck': 0.4 /* (the same deck picture as the ground: it was drawn at full size, its panels 2.5 times the ground's) */ } /* Round 583 (owner: "ground textures under buildings shouldnt be mixed just use one steel one"): every ground is the one deck at one size, so its panels run on unbroken; at 0.35 and 0.4 side by side the grids didn't meet */,
   kerb: ['#1a2a3a', '#d8ecff', '#6f97c2'], yardRim: ['#1a2a3a', '#c8def4'], groundShade: 'rgba(0,30,60,.05)' /* Round 583 (owner: blue and cool steel, not pink or purple) */, lamp: '190,240,255', vignette: '8,24,48',
   tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
-    curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['deck'] /* (the ground between the roads: Round 556) */, park: [], 'waterfront-edge': ['deck-rim'] /* (Round 584: the islands' edge on the open sky) */,
+    curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['deck-rim'] /* Round 587 (owner: "this edge isnt over the texture tile"): the see-through glass rail let the yard's ground show past it; the islands' opaque steel rim */, 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['deck'] /* (the ground between the roads: Round 556) */, park: [], 'waterfront-edge': ['deck-rim'] /* (Round 584: the islands' edge on the open sky) */,
     'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': ['beacon-post'], 'prop-ac': ['air-unit'], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
     'prop-vent': ['roof-vent', 'dish'], 'prop-tank': ['water-tower'], 'prop-stairs': [], 'prop-solar': ['solar-panel'],
     car: ['sky-skiff', 'hover-van'], tree: ['blossom-tree', 'teal-tree'], lamp: ['glow-street-lamp'], 'sign-traffic': ['holo-post'], cargo: ["sky-pods", "hover-crates", "drone-pad", "cargo-crane", "neon-kiosk", "holo-stand", "glow-vending", "noodle-cart"], clutter: ["planter-cluster", "curved-bench", "glow-lamp", "recycle-bin", "crate-pile", "potted-blossom", "mini-dish", "glow-bollard"],
@@ -1315,9 +1315,12 @@ const CITY_BRIDGE_REACH = 100;
 function genBridgeFit(water, ends, half, b) { const RR = GEN.bridgeReach != null ? GEN.bridgeReach : CITY_BRIDGE_REACH, C = FG_CELL;
   // Round 587: each side's reach is also held to its own road's straight run (b.runA / b.runB, cells), so it stops before any other edge
   const rA = b && b.runA != null ? Math.min(RR, b.runA * C) : RR, rB = b && b.runB != null ? Math.min(RR, b.runB * C) : RR, max = Math.max(0, water) + rA + rB;
-  const len = ends + half <= max ? ends + half : ends <= max ? Math.max(ends, Math.min(max, ends + half)) : max;
-  // where it lies: over the water, then on past each bank as evenly as the two reaches allow
-  const extra = Math.max(0, len - Math.max(0, water)); let eA = Math.min(rA, extra / 2), eB = Math.min(rB, extra - eA); eA = Math.min(rA, extra - eB);
+  // Round 587 (owner: "bridge needs to go over that edge"): it always lands at least GEN.bridgeLand px (default 20: the island rim's
+  // 16 and a little) onto each bank, where its road goes on that far, so it covers the edge it crosses instead of stopping at it
+  const LAND = GEN.bridgeLand != null ? GEN.bridgeLand : 20, mA = Math.min(rA, LAND), mB = Math.min(rB, LAND);
+  const len = Math.max(Math.max(0, water) + mA + mB, ends + half <= max ? ends + half : ends <= max ? Math.max(ends, Math.min(max, ends + half)) : max);
+  // where it lies: over the water, then on past each bank as evenly as the two reaches allow, never less than its landing
+  const extra = Math.max(0, len - Math.max(0, water)); let eA = Math.max(mA, Math.min(rA, extra / 2)), eB = Math.max(mB, Math.min(rB, extra - eA)); eA = Math.max(mA, Math.min(rA, extra - eB));
   return { len, f: ends <= max ? 1 : max / ends, eA, eB }; }
 // Round 587: a bridge is as wide as its road and the road's kerbs (GEN.bridgeKerbPad px each side, default 5), so its sides lie on
 // the kerbs instead of across them (it was 1.3 x the road, Round 526, which on land covered the kerbs and what lay beside them)

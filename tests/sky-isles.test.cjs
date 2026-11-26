@@ -40,7 +40,7 @@ assert.strictEqual(JSON.parse(run(`JSON.stringify([GEN_THEMES.sky.skyEdge, GEN_T
 // (Round 584, owner: "the bridge also extends too far onto the road ... only 100px over the edge") a bridge reaches at most 100px
 // past the open water or sky on each side: a short crossing drops the extra half section, then the whole bridge is scaled down
 { const f = JSON.parse(run(`JSON.stringify([genBridgeFit(400, 300, 100), genBridgeFit(150, 300, 100), genBridgeFit(50, 300, 100)])`));
-  assert(f[0].len === 400 && f[0].f === 1, 'a long crossing: the whole bridge');
+  assert(f[0].len === 440 && f[0].f === 1 && f[0].eA === 20 && f[0].eB === 20, 'a long crossing: the whole bridge, landing 20px onto each bank (Round 587) ' + JSON.stringify(f[0]));
   assert(f[1].len <= 150 + 200 && f[1].f === 1, 'a short one: no more than 100px past each side, the ends kept whole ' + JSON.stringify(f[1]));
   assert(f[2].len <= 50 + 200 && f[2].f < 1, 'a very short one: drawn smaller, by one factor ' + JSON.stringify(f[2])); }
 // (Round 584, owner: "change the sky edges to clean straight cuts", "corners of the edges don't align") the sky is exactly the cells
