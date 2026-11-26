@@ -198,12 +198,15 @@ function cityRoomWalk(key, x, y) {
   };
   // The same rule for spots that don't come through organicItemSpot (a point of interest's own spot table, the start
   // room's waypoint, the city's night objects, chests, the merchant): each is checked once per journey and moved if needed.
-  const cityFixCache = {}; let cityFixBusy = false;
+  const cityFixCache = {}, cityFixFail = {}; let cityFixBusy = false;
   // Round 536: objects placed by relaxing a rule, by theme, seed and room: cityPlacementReport() lists the current world's
   const cityPlacementLog = globalThis.cityPlacementLog = {};
   globalThis.cityPlacementReport = () => { const pre = genTheme() + ':' + String(state && state.seed) + ':'; return Object.keys(cityPlacementLog).filter(k => k.startsWith(pre)).map(k => cityPlacementLog[k]); };
   const cityFixSpot = (key, o) => { if (o && genLive() && cityGenStale()) cityGenEnsure(); if (!o || !genLive() || !rooms[key] || !genWorldCell(key) || !cityGenPlan(key)) return o; const tag = genTheme() + ':' + String(state && state.seed) + ':' + key /* (the theme too: room keys exist in the city and in Solaris; the mark and the cache both carry it) */, mark = () => tag + '@' + Math.round(o.x) + ',' + Math.round(o.y); if (o.cityClear === mark()) return o; // (Round 473: the mark holds the spot it was checked at: a copy moved elsewhere, as the waypoint's is, is checked again)
-    const fk = tag + ':' + Math.round(o.x) + ',' + Math.round(o.y), hit = cityFixCache[fk]; if (hit) { o.x = hit[0]; o.y = hit[1]; o.cityClear = mark(); return o; } // (some callers build a new object every time: the answer is kept by spot)
+    const fk = tag + ':' + Math.round(o.x) + ',' + Math.round(o.y), hit = cityFixCache[fk]; if (hit) { o.x = hit[0]; o.y = hit[1]; o.cityClear = mark(); return o; }
+    // Round 587: a spot with no answer was searched again on every call, which is every frame while walking (the Sky Isles' room 7,1
+    // took 28ms a frame and the walk test ran out of time); a failed search waits 2s before it is tried again
+    if (cityFixFail[fk] && Date.now() - cityFixFail[fk] < 2000) return o; // (some callers build a new object every time: the answer is kept by spot)
     // the rule in order of what gives way when a room has little open ground: first the HUD and the room's margin, then
     // the patrols' distance down to 60px, then the street, last the patrols' distance; never a sprite, never ground that
     // can't be reached
@@ -235,7 +238,7 @@ function cityRoomWalk(key, x, y) {
         // (cityPlacementReport()); a clean one (off the street, clear of the HUD and the edges, 70px from patrols) isn't
         if (how && (how.tier || how.soft || how.far < 70) && !skipped) cityPlacementLog[tag + ':' + (o.type || o.id || 'object')] = { room: key, type: o.type || o.id || 'object', at: [o.x, o.y],
           gave: [how.tier > 1 ? 'on the street' : '', how.tier > 0 ? 'HUD and margin' : '', how.soft ? 'edge gap' : '', how.far < 70 ? 'patrols ' + (how.far || 'any') + 'px' : ''].filter(Boolean) };
-      } else return o; } // (Round 473: nothing found, as while the region is still being set up and no ground counts as reachable yet: not remembered, so it is tried again)
+      } else { cityFixFail[fk] = Date.now(); return o; } } // (Round 473: nothing found, as while the region is still being set up and no ground counts as reachable yet: not remembered for good, so it is tried again; Round 587: but not sooner than 2s later)
     if (skipped) return o;
     cityFixCache[fk] = [o.x, o.y]; o.cityClear = mark(); return o; };
   // "beside the street" in the city means: on open ground joined to the streets, off the street itself, clear of every sprite

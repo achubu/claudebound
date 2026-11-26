@@ -600,7 +600,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
   yardSets: { cargo: ['sky-pods', 'hover-crates', 'drone-pad', 'cargo-crane'], market: ['neon-kiosk', 'holo-stand', 'glow-vending', 'noodle-cart'] },
   clutterH: { 'planter-cluster': 34, 'curved-bench': 26, 'glow-lamp': 48, 'recycle-bin': 30, 'crate-pile': 28, 'potted-blossom': 46, 'mini-dish': 34, 'glow-bollard': 26 },
   // the glass bridges (Rounds 545-546), measured in each piece's own px like Solaris's (CITY_BRIDGE_DECK, CITY_BRIDGE_V)
-  bridgeDeck: [173, 399], bridgeV: { north: { deckL: 64, w: 312, start: 62, cut: 414 }, mid: { deckL: 57, w: 312, top: 0, bottom: 367 }, south: { deckL: 56, w: 312, top: 0, end: 448 } } /* Round 587: the owner's blue bridges (prompt 12), measured by tools/cut_sky_bridges.py */ });
+  bridgeDeck: [173, 399], bridgePieces: [438, 383, 438] /* (the west, middle and east pieces' widths) */, bridgeV: { north: { deckL: 64, w: 312, start: 62, cut: 414 }, mid: { deckL: 57, w: 312, top: 0, bottom: 367 }, south: { deckL: 56, w: 312, top: 0, end: 448 } } /* Round 587: the owner's blue bridges (prompt 12), measured by tools/cut_sky_bridges.py */ });
 // =====================================================================
 // Round 552 (owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm"):
 // Elaris, the forest, on the generator: the Sky Isles' room hooks on Elaris's own rooms (TILE_WORLD_DATA.wilds.layout) and the
@@ -1594,9 +1594,12 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
       add(r[0], r[1], r[2], r[1] + R, 'edge:rim'); add(r[0], r[3] - R, r[2], r[3], 'edge:rim'); add(r[0], r[1], r[0] + R, r[3], 'edge:rim'); add(r[2] - R, r[1], r[2], r[3], 'edge:rim'); } }
   // Round 520: a grand bridge's picture (Round 519): its deck and the gate towers that stand out past the road on both banks
   if (GEN.hole && CITY_HAS('bridge')) { const x0 = wx * FG_COLS, y0 = wy * FG_ROWS, road = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2, river = (X, Y) => !!GEN.hole(seed, Math.floor(X / 2), Math.floor(Y / 2));
-    for (const b of cityBridgeSpans(road, river, x0, y0)) { const road = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * FG_CELL, wide = genBridgeWide(road), DK = GEN.bridgeDeck || CITY_BRIDGE_DECK_BASE, k = wide / (DK[1] - DK[0]), over = DK[0] * k + (wide - road) / 2;
-      const X0 = b.x0 * FG_CELL - ox, Y0 = b.y0 * FG_CELL - oy, X1 = b.x1 * FG_CELL - ox, Y1 = b.y1 * FG_CELL - oy, need = 0.5 * Math.max(0, (CITY_BRIDGE_PIECES[0] + CITY_BRIDGE_PIECES[2] + CITY_BRIDGE_PIECES[1] * 0.5) * k - (b.horiz ? X1 - X0 : Y1 - Y0)); // (the same lengthening as cityBridgeGrand)
-      if (b.horiz) add(X0 - need, Y0 - over, X1 + need, Y1 + over, 'bridge'); else add(X0 - over, Y0 - need, X1 + over, Y1 + need, 'bridge'); } }
+    for (const b of cityBridgeSpans(road, river, x0, y0)) { const C = FG_CELL, rw = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * C, wide = genBridgeWide(rw); // Round 587: the box the painter's own rules give (genBridgeFit, the theme's piece sizes), not the old city bridge's
+      let k, ends, half, side, ahead; if (b.horiz) { const DK = GEN.bridgeDeck || CITY_BRIDGE_DECK_BASE, P = GEN.bridgePieces || CITY_BRIDGE_PIECES; k = wide / (DK[1] - DK[0]); ends = (P[0] + P[2]) * k; half = P[1] * k * 0.5; side = DK[0] * k + (wide - rw) / 2; ahead = 0; }
+      else { const V = GEN.bridgeV || CITY_BRIDGE_V; k = wide / V.north.w; ends = (V.north.cut - V.north.start + V.south.end - V.south.top) * k; half = (V.mid.bottom - V.mid.top) * k * 0.5; side = V.north.deckL * k + (wide - rw) / 2; ahead = V.north.start * k; }
+      const fit = genBridgeFit((b.horiz ? b.x1 - b.x0 : b.y1 - b.y0) * C - 2 * C, ends, half, b), f = fit.f, A0 = (b.horiz ? b.x0 : b.y0) * C, A1 = (b.horiz ? b.x1 : b.y1) * C;
+      let a0 = A0 + C - fit.eA, a1 = A1 - C + fit.eB; if (a1 - a0 < fit.len) { const c = (a0 + a1) / 2; a0 = c - fit.len / 2; a1 = c + fit.len / 2; }
+      if (b.horiz) add(a0 - ox, b.y0 * C - side * f - oy, a1 - ox, b.y1 * C + side * f - oy, 'bridge'); else add(b.x0 * C - side * f - ox, a0 - ahead * f - oy, b.x1 * C + side * f - ox, a1 - oy, 'bridge'); } }
   return out; }
 // Round 520 (owner: "they should have at least a 5px buffer between anything else next to them"): the clear space round every
 // interactable object's picture, against every sprite (citySpriteBoxes) and every other object in its room

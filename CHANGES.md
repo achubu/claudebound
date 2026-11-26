@@ -3520,6 +3520,14 @@ The owner generated prompt 12 (both bridges in one picture). Every piece checked
   (Trimming every edge picture to its drawn rows was tried and left out: it would change the city's and Elaris's edges.)
 - A crossing with no water and no straight road either side was scaled to nothing, and its 0px middle sections were laid for
   ever (the walk test hung): the scale never goes below 0.35 and the loops need a step of at least 1px.
+- **Objects' keep-clear boxes for bridges** (`citySpriteBoxes`) were still worked out from the city's old bridge pieces and the old
+  1.3 width, far longer than the Sky Isles' bridges as drawn: in a small island room (7,1) they covered almost all the land, and its
+  sealed door had nowhere clear to stand (6 open spots; now 246). The box now comes from the painter's own rules (`genBridgeFit`,
+  the theme's `bridgePieces` and `bridgeV`).
+- **A spot search that finds nothing waits 2s before it is tried again** (`cityFixSpot`, `cityFixFail`): it ran on every frame while
+  walking (28ms a frame in that room), which is what ran the walk test out of time.
+- Checked: `SEED=77` and `SEED=1 node tests/playtest-walk.cjs sky`, `SEED=77 ... elaris` (every room, no problems); sky-isles,
+  gen-theme-contract, sky-art, solaris-gen, wilds-gen, city-buildings, item-placement, city-layout.
 
 ## Round 586: the upside-down bridge end hidden; one prompt for both bridges, and rules for bridge prompts
 
