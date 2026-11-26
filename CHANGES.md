@@ -3496,6 +3496,31 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 584: sky edges as clean straight cuts; mitred corners; bridges reach 100px at most
+
+Owner, on the Sky Isles' island edges: "edges still no good here next to sky"; "this wasnt an issue in other worlds, this is very
+strange that this edge can't be fixed with similar rules"; "change the sky edges to clean straight cuts so that its easier to edge";
+"the edge textures you are using look rediculous but they cover the edge, find a fix with a different edge tile"; "corners of the
+edges don't align, looks bad ... the texture doesnt align, not the edge itself"; "the bridge also extends too far onto the road, we
+need a rule where it maybe extends only 100px over the edge".
+
+- **The sky on the grid** (`GEN.skyEdge`): the open sky was painted from the coast's smooth fields (made for beaches), while the
+  island's edge runs on the 25px grid, so a soft band of deck lay outside the edge. Now the sky is exactly the cells that aren't land
+  (`genSkyEdgeLand`; `genSkyEdgeMask` paints it, `genSeaDrawn` reads it for the walk mask, so you can never walk where sky is drawn),
+  and the old beach outline is not drawn in a sky-edge world. This is the other worlds' rule (Rounds 506-511: the sea wall stands on
+  the grid and the walk mask's sea is the sea as drawn), applied to the sky.
+- **Straight cuts, a new edge**: the glass rail is replaced by the flat steel `deck-rim` (made for deck meeting open sky); its picture
+  is trimmed to its drawn rows (`genEdgeTrim`: the rail had a clear bottom 30% that showed as deck between edge and sky).
+  `cityGridKerb` with r = 0 turns square corners, **mitred like a picture frame**: each run is cut at 45 degrees at a corner so the
+  two runs' patterns meet on the diagonal (the light line runs on round the corner) instead of lying one over the other.
+- **Bridges** (`genBridgeFit`, every world): a bridge reaches at most `CITY_BRIDGE_REACH` (100px; a theme's `bridgeReach`) past the
+  water or sky on each side; a short crossing gives up the extra half middle section first, and if even its two ends are too long
+  the whole bridge is drawn smaller by one factor (never stretched).
+- `tests/sky-isles.test.cjs` checks the bridge rule and the sky edge settings. Checked: sky-isles, gen-theme-contract, coast-wall,
+  wilds-gen, solaris-gen, sky-art, city-layout, city-surfaces; `SEED=77` and `SEED=1 node tests/playtest-walk.cjs sky` (all 51 rooms,
+  no problems). `seam-check.cjs sky` now lists ~70 stretches: the edges lie on the grid, so many fall exactly on a room's border
+  (land and rim on one side, sky on the other); checked by eye, none is cut.
+
 ## Round 583: the Sky Isles in blue and steel; one ground; sky edges; the owner's deck dressing and second sky cut
 
 Owner: "sky isles is too pink, i want it to be more blue and cool steel and vibrant but not pink or purple"; "some of the art didnt

@@ -481,7 +481,7 @@ function genTileExtraLinks(id) { const T = GEN_THEMES[id]; if (T.linksCache) ret
 // (assets/environment/sky-gen/, Rounds 545-547). Open sky takes the place of Solaris's rivers (the same machinery: nothing is
 // built beside it, a walkway crossing it is a glass bridge); no grass parks (roof gardens are pictures); glass walkways.
 // =====================================================================
-GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '583', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.06, isletChance: 0.75, buildFit: { min: 0.6 }, yardsBuild: true /* Round 581 */, samePics: [['surfaces/ground/deck', 'surfaces/sidewalk/deck']] /* Round 583: one deck picture in two files */, skyEdge: true /* Round 583: islands end at their rail, no beach */, noDocks: true /* (every lot on an island is near the sky: no cargo docks) */, isleEdge: ['yard-edge', 'glass-rail'], isleEdgeT: 16 /* Round 553: floating islands (rivers) */,
+GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '583', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.06, isletChance: 0.75, buildFit: { min: 0.6 }, yardsBuild: true /* Round 581 */, samePics: [['surfaces/ground/deck', 'surfaces/sidewalk/deck']] /* Round 583: one deck picture in two files */, skyEdge: true /* Round 583: islands end at their rail, no beach */, noDocks: true /* (every lot on an island is near the sky: no cargo docks) */, isleEdge: ['waterfront-edge', 'deck-rim'] /* Round 584 (owner: the glass rail looked ridiculous): the flat steel lip made for deck meeting open sky */, isleEdgeT: 16 /* Round 553: floating islands (rivers) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.sky && TILE_WORLD_DATA.sky.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   // the generated Sky Isles have no diagonal walkways; where dropping one would cut rooms off from the start (1,5 to 2,4 joins
@@ -585,7 +585,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
   texScale: { chasm: 0.4, gravel: 0.4, floor: 0.4, yard: 0.4, 'yard-cargo': 0.4, 'yard-rubble': 0.4, 'yard-market': 0.4, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.4, plaza: 0.4, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4, 'rubble-big': 0.4, 'surfaces/sidewalk/deck': 0.4 /* (the same deck picture as the ground: it was drawn at full size, its panels 2.5 times the ground's) */ } /* Round 583 (owner: "ground textures under buildings shouldnt be mixed just use one steel one"): every ground is the one deck at one size, so its panels run on unbroken; at 0.35 and 0.4 side by side the grids didn't meet */,
   kerb: ['#1a2a3a', '#d8ecff', '#6f97c2'], yardRim: ['#1a2a3a', '#c8def4'], groundShade: 'rgba(0,30,60,.05)' /* Round 583 (owner: blue and cool steel, not pink or purple) */, lamp: '190,240,255', vignette: '8,24,48',
   tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
-    curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['deck'] /* (the ground between the roads: Round 556) */, park: [], 'waterfront-edge': [],
+    curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['deck'] /* (the ground between the roads: Round 556) */, park: [], 'waterfront-edge': ['deck-rim'] /* (Round 584: the islands' edge on the open sky) */,
     'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': ['beacon-post'], 'prop-ac': ['air-unit'], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
     'prop-vent': ['roof-vent', 'dish'], 'prop-tank': ['water-tower'], 'prop-stairs': [], 'prop-solar': ['solar-panel'],
     car: ['sky-skiff', 'hover-van'], tree: ['blossom-tree', 'teal-tree'], lamp: ['glow-street-lamp'], 'sign-traffic': ['holo-post'], cargo: ["sky-pods", "hover-crates", "drone-pad", "cargo-crane", "neon-kiosk", "holo-stand", "glow-vending", "noodle-cart"], clutter: ["planter-cluster", "curved-bench", "glow-lamp", "recycle-bin", "crate-pile", "potted-blossom", "mini-dish", "glow-bollard"],
@@ -1229,10 +1229,22 @@ function cityGridKerb(ctx, road, x0, y0, nx, ny, C, r, K, art, T, wx0, wy0, keep
       // (Round 471, owner: "make the park edge run up until the curb edge"): a rim's open end runs on to the edge it gives way
       // to: up to the kerb's inner face (3.5px, half the kerb) where a street touches that corner, else right to the corner
       const openCut = i => { if (!keep || !keep.street) return 0; const [px, py] = pts[i], X = x0 + px, Y = y0 + py; return [[-1, -1], [0, -1], [-1, 0], [0, 0]].some(([a, b]) => keep.street(X + a, Y + b)) ? 3.5 : 0; };
-      const cutA = closed || j > 0 ? R : openCut(i0), cutB = closed || j < ends.length - 2 ? R : openCut(i1);
-      const A = [pts[i0][0] * S, pts[i0][1] * S], nr = [-d[1], d[0]] /* the road's side */, cut = cutA, len = L * S - cutA + cutB; // the run, less r at each end that turns into an arc
+      // Round 583 (owner: "change the sky edges to clean straight cuts so that its easier to edge"): r = 0 turns each corner square.
+      // An outer corner is covered where the two runs overlap; at an inner one each run goes on by the strip's width to close it
+      const inner = i => { const d0 = dir(i - 1), d1 = dir(i); return d0[0] * d1[1] - d0[1] * d1[0] <= 0; }, sq = i => (R ? R : inner(i) ? -T : 0);
+      const cutA = closed || j > 0 ? sq(i0) : openCut(i0), cutB = closed || j < ends.length - 2 ? sq(i1) : openCut(i1);
+      const A = [pts[i0][0] * S, pts[i0][1] * S], nr = [-d[1], d[0]] /* the road's side */, cut = cutA, len = L * S - cutA + cutB;
+      if (!R) { // Round 584 (owner: "corners of the edges don't align ... the texture doesnt align"): square corners are mitred like a
+        // picture frame: each run's strip is cut at 45 degrees at a corner, so the two runs' patterns meet on the diagonal instead
+        // of lying one over the other. Local frame: u along the run from its start vertex, v 0 = the strip's inner edge, T = the seam.
+        const conv = i => { const d0 = dir(i - 1), d1 = dir(i); return d0[0] * d1[1] - d0[1] * d1[0] > 0; }, Lf = L * S, openA = !(closed || j > 0), openB = !(closed || j < ends.length - 2);
+        const oA = openA ? cutA : 0, iA = openA ? cutA : (conv(i0) ? T : -T), oB = openB ? Lf - cutB : Lf, iB = openB ? Lf - cutB : (conv(i1) ? Lf - T : Lf + T), u0 = Math.min(oA, iA), u1 = Math.max(oB, iB);
+        ctx.save(); ctx.translate((A[0] + nr[0] * (T / 2 + off)) * K, (A[1] + nr[1] * (T / 2 + off)) * K); ctx.rotate(Math.atan2(d[1], d[0])); ctx.scale(1, -1);
+        ctx.beginPath(); ctx.moveTo(oA * K, T * K); ctx.lineTo(oB * K, T * K); ctx.lineTo(iB * K, 0); ctx.lineTo(iA * K, 0); ctx.closePath(); ctx.clip();
+        ctx.translate(u0 * K, 0); strip(wx0 * d[0] + wy0 * d[1] + (A[0] + d[0] * u0) * d[0] + (A[1] + d[1] * u0) * d[1], u1 - u0); ctx.restore(); continue; } // the run, less r at each end that turns into an arc
       ctx.save(); ctx.translate((A[0] + d[0] * cut + nr[0] * (T / 2 + off)) * K, (A[1] + d[1] * cut + nr[1] * (T / 2 + off)) * K); ctx.rotate(Math.atan2(d[1], d[0])); ctx.scale(1, -1);
       strip(wx0 * d[0] + wy0 * d[1] + (A[0] + d[0] * cut) * d[0] + (A[1] + d[1] * cut) * d[1], L * S - cutA - cutB); ctx.restore(); void len; if (!closed && j === ends.length - 2) continue;
+      if (!R) continue; // (square corners: no arc)
       // the arc at the run's end: centre r back along this run and r on along the next
       const V = [pts[i1][0] * S, pts[i1][1] * S], e = dir(i1), cen = [V[0] - d[0] * R + e[0] * R, V[1] - d[1] * R + e[1] * R], convex = d[0] * e[1] - d[1] * e[0] > 0;
       const aStart = Math.atan2(V[1] - d[1] * R - cen[1], V[0] - d[0] * R - cen[0]), aEnd = Math.atan2(V[1] + e[1] * R - cen[1], V[0] + e[0] * R - cen[0]); let sweep = aEnd - aStart; while (sweep > Math.PI) sweep -= 2 * Math.PI; while (sweep < -Math.PI) sweep += 2 * Math.PI;
@@ -1289,9 +1301,18 @@ function genSkyClouds(ctx, key, seaMask, K, W, H, imgs) {
     const x = cx - w / 2 - ox, y = cy - hh / 2 - oy; if (x > 800 || y > 500 || x + w < 0 || y + hh < 0) continue;
     g.save(); g.globalAlpha = 0.92; if (u(12) < 0.5) { g.translate((x + w) * K, y * K); g.scale(-1, 1); g.drawImage(img, 0, 0, w * K, hh * K); } else g.drawImage(img, x * K, y * K, w * K, hh * K); g.restore(); any = true; }
   if (!any) return; g.globalCompositeOperation = 'destination-in'; g.drawImage(seaMask, 0, 0); ctx.drawImage(c, 0, 0); }
+// Round 584: how long a bridge is drawn over `water` px of open water or sky, its two ends `ends` px long and half a middle
+// section `half` px: never more than CITY_BRIDGE_REACH (or the theme's GEN.bridgeReach) past the water on each side. Returns the
+// length and the factor (1, or less when even the two ends don't fit) the whole bridge is scaled by.
+const CITY_BRIDGE_REACH = 100;
+function genBridgeFit(water, ends, half) { const max = Math.max(0, water) + 2 * (GEN.bridgeReach != null ? GEN.bridgeReach : CITY_BRIDGE_REACH);
+  if (ends + half <= max) return { len: ends + half, f: 1 }; if (ends <= max) return { len: Math.max(ends, Math.min(max, ends + half)), f: 1 };
+  return { len: max, f: max / ends }; }
 function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V = GEN.bridgeV || CITY_BRIDGE_V; /* Round 548: a theme's own pieces */
-  const road = (b.x1 - b.x0) * C, wide = road * CITY_BRIDGE_COVER, k = wide / V.north.w, kS = wide / V.south.w, deckX = b.x0 * C - (wide - road) / 2 - ox;
-  let a0 = b.y0 * C, a1 = b.y1 * C; const need = (V.north.cut - V.north.start) * k + (V.south.end - V.south.top) * kS + (V.mid.bottom - V.mid.top) * k * 0.5;
+  const road = (b.x1 - b.x0) * C; let wide = road * CITY_BRIDGE_COVER, k = wide / V.north.w, kS = wide / V.south.w;
+  let a0 = b.y0 * C, a1 = b.y1 * C;
+  const reach = genBridgeFit(a1 - a0 - 2 * C, (V.north.cut - V.north.start) * k + (V.south.end - V.south.top) * kS, (V.mid.bottom - V.mid.top) * k * 0.5); k *= reach.f; kS *= reach.f; wide *= reach.f; // (Round 584: at most CITY_BRIDGE_REACH past the water)
+  const deckX = b.x0 * C - (wide - road) / 2 - ox, need = reach.len;
   if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
   const nCut = a0 + (V.north.cut - V.north.start) * k, sTop = a1 - V.south.end * kS, sCut = sTop + V.south.top * kS, step = (V.mid.bottom - V.mid.top) * k;
   const D = (img, x, y, kk) => ctx.drawImage(img, x * K, (y - oy) * K, img.width * kk * K, img.height * kk * K);
@@ -1300,8 +1321,14 @@ function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V =
   for (let u = nCut; u < sCut; u += step) D(M, deckX - V.mid.deckL * k, u - V.mid.top * k, k);
   ctx.restore(); D(S, deckX - V.south.deckL * kS, sTop, kS); }
 function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, horiz = b.horiz, CITY_BRIDGE_DECK = GEN.bridgeDeck || CITY_BRIDGE_DECK_BASE; /* Round 548: a theme's own pieces */
-  const road = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C, wide = road * CITY_BRIDGE_COVER, grow = (wide - road) / 2, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]), ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k;
-  let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C; const need = ew + eeW + mw * 0.5; if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
+  const road = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C; let wide = road * CITY_BRIDGE_COVER, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]);
+  let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C;
+  // Round 584 (owner: "the bridge also extends too far onto the road, we need a rule where it maybe extends only 100px over the
+  // edge"): a bridge reaches at most CITY_BRIDGE_REACH px past the open water or sky on each side (the span is the water plus a
+  // cell each side). A short crossing gives up the extra half middle section first; if even its two ends are too long, the whole
+  // bridge is drawn smaller, by one factor (never stretched)
+  const reach = genBridgeFit(a1 - a0 - 2 * C, (W.width + E.width) * k, M.width * k * 0.5); k *= reach.f; wide *= reach.f;
+  const grow = (wide - road) / 2, ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k, need = reach.len; if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
   const L = a1 - a0, top = -CITY_BRIDGE_DECK[0] * k; ctx.save();
   if (horiz) ctx.translate((a0 - ox) * K, (b.y0 * C - grow - oy) * K); else { ctx.translate((b.x1 * C + grow - ox) * K, (a0 - oy) * K); ctx.rotate(Math.PI / 2); }
   // (turned, the deck's top edge lies on the east side: local v runs from x1 back to x0)
@@ -2164,7 +2191,31 @@ function genCoastReach(seed, X, Y) { const BW = GEN.beachWide || GEN.beachMin * 
 function genPavingDist(seed, X, Y, R) { const f = genCoastSand(seed), cx = Math.floor(X / FG_CELL), cy = Math.floor(Y / FG_CELL); let d = 1e9;
   for (let b = -R; b <= R; b++) for (let a = -R; a <= R; a++) { if (f(cx + a, cy + b)) continue; const X0 = (cx + a) * FG_CELL, Y0 = (cy + b) * FG_CELL, dx = Math.max(X0 - X, 0, X - X0 - FG_CELL), dy = Math.max(Y0 - Y, 0, Y - Y0 - FG_CELL), dd = dx * dx + dy * dy; if (dd < d) d = dd; }
   return Math.sqrt(d); }
-function genSeaDrawn(seed, X, Y) { const f = genCoastSand(seed); if (!f(Math.floor(X / FG_CELL), Math.floor(Y / FG_CELL))) return false;
+// Round 583: an edge picture cut to the rows that are drawn (alpha), so a strip laid against an edge meets it with its rail, not
+// with an empty margin (the Sky Isles' glass rail leaves its bottom 30% clear, which showed as a band of deck between rail and sky).
+const genEdgeTrimCache = new Map();
+function genEdgeTrim(img) { const ck = img.src; if (genEdgeTrimCache.has(ck)) return genEdgeTrimCache.get(ck);
+  const w = img.naturalWidth, h = img.naturalHeight, c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, w, h).data, rowOn = y => { let n = 0; for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 40) n++; return n > w * 0.5; };
+  let y0 = 0, y1 = h - 1, best = -1; // (the largest run of drawn rows: a stray line at the picture's edge isn't the rail)
+  for (let y = 0, st = -1; y <= h; y++) { const on = y < h && rowOn(y); if (on && st < 0) st = y; if (!on && st >= 0) { if (y - st > best) { best = y - st; y0 = st; y1 = y - 1; } st = -1; } }
+  if (y0 === 0 && y1 === h - 1) { genEdgeTrimCache.set(ck, img); return img; }
+  const o = document.createElement('canvas'); o.width = w; o.height = y1 - y0 + 1; o.getContext('2d').drawImage(c, 0, y0, w, o.height, 0, 0, w, o.height); o.naturalWidth = w; o.naturalHeight = o.height;
+  genEdgeTrimCache.set(ck, o); return o; }
+// Round 583: a sky-edge world's land, cell by cell: a street, or a 50px block that isn't open sky. The sky is every other cell.
+function genSkyEdgeLand(seed, X, Y) { const wl = genWorld(seed); return (X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2) || !GEN.hole(seed, Math.floor(X / 2), Math.floor(Y / 2)); }
+function genSkyEdgeMask(key, W, H, K) { const seed = chronoSeed(), [gq, gr] = GEN.world(key), gx = gq * FG_COLS, gy = gr * FG_ROWS, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d'); g.fillStyle = '#fff';
+  const L = (x, y) => genSkyEdgeLand(seed, gx + x, gy + y), C = FG_CELL, R = GEN.skyEdgeR || 0; // (owner: straight cuts, square corners; skyEdgeR would round them)
+  for (let y = -1; y <= FG_ROWS; y++) for (let x = -1; x <= FG_COLS; x++) if (!L(x, y)) g.fillRect(Math.floor(x * C * K), Math.floor(y * C * K), Math.ceil(C * K) + 1, Math.ceil(C * K) + 1);
+  // (with GEN.skyEdgeR, a rail that turns its outer corners in an arc: the sky follows it round (a land cell with sky on two sides and the corner
+  // between: the square outside a quarter circle of radius R is sky)
+  if (GEN.skyEdgeR) for (let y = -1; y <= FG_ROWS; y++) for (let x = -1; x <= FG_COLS; x++) { if (!L(x, y)) continue;
+    for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { if (L(x + dx, y) || L(x, y + dy) || L(x + dx, y + dy)) continue;
+      const qx = (dx < 0 ? x : x + 1) * C, qy = (dy < 0 ? y : y + 1) * C, ox = qx - dx * R, oy = qy - dy * R;
+      g.beginPath(); g.moveTo(qx * K, qy * K); g.lineTo(qx * K, oy * K); g.arc(ox * K, oy * K, R * K, dx < 0 ? Math.PI : 0, dy < 0 ? -0.5 * Math.PI : 0.5 * Math.PI, dx * dy < 0); /* (the short way round, from the corner's side to its top) */ g.lineTo(ox * K, qy * K); g.closePath(); g.fill(); } }
+  return c; }
+function genSeaDrawn(seed, X, Y) { if (GEN.skyEdge) return !genSkyEdgeLand(seed, Math.floor(X / FG_CELL), Math.floor(Y / FG_CELL)); const f = genCoastSand(seed); if (!f(Math.floor(X / FG_CELL), Math.floor(Y / FG_CELL))) return false;
   const gx = Math.floor(X / CG_CELL), gy = Math.floor(Y / CG_CELL); if (!(GEN.hole ? GEN.hole(seed, gx, gy) : chronoNoise(seed, 'chasm', gx, gy, 6) > 0.66)) return false; // (only the sea's own cells)
   const reach = genCoastReach(seed, X, Y), R = Math.ceil(reach / FG_CELL) + 1; return genPavingDist(seed, X, Y, R) > reach; }
 const genCoastSandCache = {};
@@ -2499,20 +2550,25 @@ function paintChronoRoom(canvas, key) {
     // floats: an island ends at its rail (GEN.isleEdge), straight onto the open sky, with no beach, wet sand or foam between.
     const sameAsPaving = genSamePicture(imgs.sand, pavingImg);
     if (!GEN.skyEdge && !sameAsPaving) ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
-    if (GEN.plainSea) { ctx.drawImage(tintIn(coast.sea, g => waterFill(g)), 0, 0); // Round 553: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
-      genSkyClouds(ctx, key, coast.sea, K, W, H, imgs);
+    if (GEN.plainSea) { // Round 553: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
+      // Round 583 (owner: "edges still no good here next to sky"): with GEN.skyEdge the sky is exactly the cells that aren't land, the
+      // line the island's rail runs along (not the coast's smooth fields, which left a soft band of deck outside the rail); the walk
+      // mask reads the same cells (genSeaDrawn)
+      const skyMask = GEN.skyEdge ? genSkyEdgeMask(key, W, H, K) : coast.sea;
+      ctx.drawImage(tintIn(skyMask, g => waterFill(g)), 0, 0);
+      genSkyClouds(ctx, key, skyMask, K, W, H, imgs);
       // Round 556 (owner: "we need edges where the ground meets open sky"): an edge strip on every seam between ground (a road
       // counts as ground, so a bridge's sides are left to its own parapet) and open sky, on the 25px grid by the 3x3 bitmask
       // (cityGridKerb: one piece per straight run, an arc per corner), drawn after the streets like the sea wall; street kerbs
       // stop short of it (never an edge on an edge)
       const ea = GEN.isleEdge && (() => { const [sl, n] = GEN.isleEdge; return imgs[cityArtPath(sl, n)]; })();
-      if (ea && ea.naturalWidth) { const [gq, gr] = GEN.world(key), gx = gq * FG_COLS, gy = gr * FG_ROWS, wl4 = genWorld(chronoSeed()), sd4 = chronoSeed();
+      if (ea && ea.naturalWidth) { const eaT = GEN.skyEdge ? genEdgeTrim(ea) : ea; const [gq, gr] = GEN.world(key), gx = gq * FG_COLS, gy = gr * FG_ROWS, wl4 = genWorld(chronoSeed()), sd4 = chronoSeed();
         const landC = (X, Y) => (X >= 0 && Y >= 0 && X < wl4.CW && Y < wl4.CH && wl4.cell[Y * wl4.CW + X] === 2) || !GEN.hole(sd4, Math.floor(X / 2), Math.floor(Y / 2));
         coastSandCell = (X, Y) => !landC(X, Y);
         const roadC = (X, Y) => X >= 0 && Y >= 0 && X < wl4.CW && Y < wl4.CH && wl4.cell[Y * wl4.CW + X] === 2, T4 = GEN.isleEdgeT || 16;
         // (no edge along a road: a road over the sky has its own rails, and one beside the sky its kerb; the strip lies wholly on
         // the island, moved in by half its width)
-        coastWallDraw = () => { for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, landC, gx, gy, FG_COLS, FG_ROWS, FG_CELL, 14, K, ea, T4, gq * 800, gr * 500, (X, Y) => !roadC(X, Y), T4 / 2); }; } }
+        coastWallDraw = () => { for (const cx2 of [ctx, cityEdgeMask && cityEdgeMask.getContext('2d')]) if (cx2) cityGridKerb(cx2, landC, gx, gy, FG_COLS, FG_ROWS, FG_CELL, GEN.skyEdge ? 0 : 14, K, eaT, T4, gq * 800, gr * 500, (X, Y) => !roadC(X, Y), T4 / 2); }; } }
     else { ctx.save(); ctx.globalAlpha = 0.55; ctx.drawImage(flat(coast.wet, '#0a1420'), 0, 0); ctx.restore();                       // wet sand
     ctx.drawImage(tintIn(coast.sea, g => { waterFill(g); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(30,70,110,.16)'; g.fillRect(0, 0, W, H); }), 0, 0);
     ctx.save(); ctx.globalAlpha = 0.28; ctx.drawImage(flat(coast.deep, '#02040e'), 0, 0); ctx.restore();                      // deep water
@@ -2550,7 +2606,7 @@ function paintChronoRoom(canvas, key) {
       else lipWith(shown, null);
       // (the streets are drawn later, over the sand where they reach it: their edge against the sand gets the same lip, on the street's side)
       coastBeachMask = beach; coastLipDraw = road => { const sand = cv(), sg = sand.getContext('2d'); sg.drawImage(shown, 0, 0); /* (Round 479: only the beach that shows) */ sg.globalCompositeOperation = 'destination-out'; sg.drawImage(road, 0, 0); if (!(GEN.coastWall && shoreArt)) lipWith(sand, road); /* (Round 507: the grid wall already runs round the streets) */ return grow(sand, 10 * K); }; }
-    else if (shoreArt) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); else if (!GEN.softBanks) { ring(chronoTint(beach, '#0b0e14'), 3); } // (Round 514: a desert river's sandy bank meets the sand with no edge)
+    else if (shoreArt && !GEN.skyEdge) cityEdgeAlong(ctx, beach, 0, 0, K, shoreArt, 18, wx0, wy0); /* (Round 584: a sky-edge world has no beach to edge: its islands' edge is the rail, on the grid) */ else if (!GEN.softBanks) { ring(chronoTint(beach, '#0b0e14'), 3); } // (Round 514: a desert river's sandy bank meets the sand with no edge)
   } else if (any(terrain.chasm) && GEN.beach) { // water with a beach: sand, a darker wet band, a foam line at the water's edge
     const s = layer(terrain.chasm, imgs.chasm, 24), shore = ragged(terrain.chasm, 'shore', { blur: 26, amp: 0.8, sharp: 7, grow: 8 }), sand = ragged(terrain.chasm, 'sand', { blur: 26, amp: 0.8, sharp: 9, grow: 38 });
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
