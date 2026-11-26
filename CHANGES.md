@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 585: a prompt to regenerate the north-south bridge
+
+Owner: "now that is beautiful edge work, vertical bridge bottom is no good, we need to regenerate that". The south end of the
+north-south bridge is a thin cap narrower than its deck, its pylons hanging off the bottom, so the bridge stops short of the
+walkway. `tools/art-refresh/sky-gen-prompts.md` prompt 12 asks for the whole north-south set again (the three pieces matching), in
+the Sky Isles' blue and steel, the two ends mirror images standing on the deck with a flat landing plate and nothing past it.
+
 ## Round 584: sky edges as clean straight cuts; mitred corners; bridges reach 100px at most
 
 Owner, on the Sky Isles' island edges: "edges still no good here next to sky"; "this wasnt an issue in other worlds, this is very
