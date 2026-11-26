@@ -31,3 +31,7 @@ console.log('helmets ok');
 assert.strictEqual(run(`GEAR_SLOT_NAMES.helmet`), 'Helm', 'the slot is called the Helm');
 assert(JSON.parse(run(`JSON.stringify(Object.values(GEAR).filter(g => g.slot === 'helmet').map(g => g.name))`)).every(n => / Helm$/.test(n)), 'every helm is named a Helm');
 console.log('helm name ok');
+// (Round 589) ChatGPT's Neon Helm is drawn on the hero when worn, last over the rest of the outfit, and gone when taken off
+{ const w = run(`(() => { newGame(); ensureGear(); state.relics.push('neonVisor', 'mossweavePants'); equipGear('helmet', 'neonVisor'); equipGear('pants', 'mossweavePants'); const on = heroWearLooks().join('+'); equipGear('helmet', null); return on + '|' + heroWearLooks().join('+'); })()`);
+  assert.strictEqual(w, 'cyber-pants+neon-visor|cyber-pants', 'the Neon Helm shows when worn, over the rest, and not when taken off'); }
+console.log('neon helm look ok');

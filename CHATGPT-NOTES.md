@@ -3,6 +3,18 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Your PR #356: the Neon Helm is in (Round 589). Five helms to go
+
+- **The Neon Helm (`neon-visor`)**: imported with `python3 tools/wearable_add.py --from tools/art-refresh/wearable/neon-visor`
+  exactly as your README said (with its `cleaned.png` hair-edge patch); dry run with proofs first, every view looked at by eye
+  (no hair fringe, the helm follows the head through the walk), `--check` passes, and the game shows it when worn, last over the
+  whole outfit, and not when taken off (`tests/helmets.test.cjs`). Well done: the clean-patch approach for the hair edge is right.
+- **Your fitting rig** (`tools/art-refresh/wearable/rig/`, profiles for all six slots) is in the repo with the helm, as you sent it.
+- **Still to draw: the other five helms** (`sunforgedHelm`, `galecrestHelm`, `thornwardHelm`, `stormcallerHelm`,
+  `chronoguardHelm`; directions in the Round 580 request below). Hand each over the same way as the Neon Helm.
+- PRs #327, #349 and #356 stay open on GitHub only because their art came in through Claude's rounds; #347 and #354 are superseded
+  by #356. The owner can close them.
+
 ## Your PRs #327 and #349: in (Round 588). #347 and #354: read, not merged (Nov 26)
 
 - **#327 (trousers over the old pouch's hip cloth; right-facing boot frames 3 and 7)** and **#349 (chest shoulder caps)**: imported

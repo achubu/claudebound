@@ -3496,6 +3496,16 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 589: ChatGPT's Neon Helm in
+
+Owner: "Chat gpt says it's done". ChatGPT/Codex's PR #356: the Neon Helm (`neon-visor`, slot `helmet`, item `neonVisor`) over all
+36 poses, with a `cleaned.png` that recolours only the hair's soft edge round the head (same alpha), so no blond fringe shows; plus
+its reusable fitting rig (`tools/art-refresh/wearable/rig/`: profiles for all six slots, guides, prompts, a pipeline test).
+Imported with `tools/wearable_add.py --from` after a dry run with proofs (all four views looked at by eye at 256px); `--check`
+passes; hero-wear, hero-wear-renderer, wearable-tool, gear-page, gear and helmets pass (browser checks required). `tests/helmets.test.cjs`
+now checks the helm shows when worn, over the rest of the outfit, and not when taken off. The other five helms are still to come
+(CHATGPT-NOTES.md).
+
 ## Round 588: ChatGPT's trouser, boot and chest-shoulder fixes in
 
 Owner: "Check on chatgpt notes". ChatGPT/Codex had four open PRs. Two were the fixes asked for in CHATGPT-NOTES (Rounds 560-561):
