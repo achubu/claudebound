@@ -3496,6 +3496,15 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 591: ChatGPT's set polish: waistband, boot edges, original fingers under the gloves
+
+Owner: "Check on gpt". ChatGPT/Codex's PR #359 (`tools/art-refresh/wearable/set-review/`): the cyber trousers fill the tan
+waistband strip that showed between the chest armour and the belt; ten brown boot-edge pixels covered; and the cyber gloves gain a
+`cleaned.png` that puts back 985 of the hero's own finger pixels which the beltless base (Round 559) had painted over. Dry-run with
+proofs, then imported with `--from`; `--check`, hero-wear, hero-wear-renderer, wearable-tool, gear-page, gear and helmets pass
+(browser checks required). With nothing worn the hands were already right (the default belt's patch restores them; 13 near-invisible
+pixels differ from the original hero), so the base stays as it is.
+
 ## Round 590: the Neon Helm's cheek and chin guards (front view cut flat)
 
 Owner: "Helm is cut wrong on the front view". The helm's cheek guards ended in a flat cut right under the visor. Cause: the helmet's fit
