@@ -42,6 +42,8 @@ def build(source,out,slot,look,items,profile_dir=None):
             a[~keep]=0; ys,xs=np.where(keep)
             view.append(Image.fromarray(a).crop((xs.min(),ys.min(),xs.max()+1,ys.max()+1)))
         parts.append(view)
+    shirt_t=np.array(Image.open(ROOT/'gear/templates/shirt-mask.png').convert('L'))>128
+    shirt_cell=lambda r,c: shirt_t[r*256:(r+1)*256,c*256:(c+1)*256]
     target=labels>0
     overlay=Image.new('RGBA',base.size); placements=[]; cleaned=np.array(base)
     for r in range(4):
@@ -50,6 +52,12 @@ def build(source,out,slot,look,items,profile_dir=None):
             for i in range(count):
                 m=cell_labels==i+1; ys,xs=np.where(m)
                 if not len(xs): continue  # This part is fully occluded in this pose.
+                # Round 590 (Claude, owner: "Helm is cut wrong on the front view"): a helmet's template reaches below the head
+                # for cheek and chin guards (tools/wearable_add.py HELM_CHIN). It is sized and placed by the head alone (the
+                # template less the shirt's), must cover the head, and below it keeps the drawing's own outline
+                place=m & ~shirt_cell(r,c) if slot=='helmet' else m
+                if not place.any(): place=m
+                ys,xs=np.where(place)
                 x0,x1,y0,y1=xs.min(),xs.max()+1,ys.min(),ys.max()+1
                 p=parts[r][i]; scale=max((x1-x0)/p.width,(y1-y0)/p.height)*1.15
                 for attempt in range(24):
@@ -58,13 +66,15 @@ def build(source,out,slot,look,items,profile_dir=None):
                     resized=p.resize(size,Image.Resampling.LANCZOS)
                     xy=(round((x0+x1-size[0])/2),round((y0+y1-size[1])/2))
                     cell=Image.new('RGBA',(256,256)); cell.paste(resized,xy); arr=np.array(cell)
-                    if np.all(arr[:,:,3][m]>=128): break
+                    if np.all(arr[:,:,3][place]>=128): break
                     scale*=1.06
                 else: raise ValueError('Source has holes over target')
                 edge=m & (ba[r*256:(r+1)*256,c*256:(c+1)*256,3]<128)
                 clean_cell=cleaned[r*256:(r+1)*256,c*256:(c+1)*256]
                 clean_cell[edge,:3]=arr[edge,:3]
-                arr[~m]=0; arr[m,3]=255; arr[edge]=0
+                below=m & ~place & (arr[:,:,3]>=128)  # (the guards: only where the drawing has them)
+                keep=(place|below); arr[~keep]=0; arr[keep,3]=255; arr[edge & place]=0
+                m=keep
                 # Each labelled target is disjoint; preserve already fitted parts.
                 old=np.array(overlay.crop((c*256,r*256,(c+1)*256,(r+1)*256)))
                 old[m]=arr[m]; overlay.paste(Image.fromarray(old),(c*256,r*256))

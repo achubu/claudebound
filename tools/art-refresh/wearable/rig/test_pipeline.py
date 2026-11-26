@@ -38,6 +38,7 @@ class Pipeline(unittest.TestCase):
                             lab=labels[r*256:(r+1)*256,c*256:(c+1)*256];p=preview[r*256:(r+1)*256,c*256:(c+1)*256]
                             for i in range(len(PARTS[slot])):
                                 solid=(lab==i+1)&(base[r*256:(r+1)*256,c*256:(c+1)*256,3]>=128)
+                                if slot=='helmet': solid&=~(np.array(Image.open(ROOT/'gear/templates/shirt-mask.png').convert('L'))[r*256:(r+1)*256,c*256:(c+1)*256]>128)  # (Round 590: below the head a helmet keeps its own outline; the head itself must be covered)
                                 self.assertTrue((p[solid,:3]==(45+r*20,65+i*15,100+r*10)).all())
                     first=sha(out/'overlay.png');build(src,out,slot,'fixture-'+slot,[item],t/'profiles');self.assertEqual(first,sha(out/'overlay.png'))
             self.assertEqual(before,sha(ROOT/'assets/characters/protagonist-walk9-base.png'))

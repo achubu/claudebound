@@ -3,6 +3,19 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## The Neon Helm refitted, and two changes to the rig: read before the next helms (Round 590)
+
+The owner saw the Neon Helm "cut wrong on the front view": the cheek guards ended in a flat cut just under the visor. Cause: the helmet
+template was the head above the shirt, and the rig scales a part to its template and then cuts it to exactly that shape, so the helm
+could only ever be the head's shape. Fixed on Claude's side, so **pull main before fitting the next helms**:
+- `tools/wearable_add.py`: the helmet template now reaches `HELM_CHIN` (16px) below the head, deepest at the middle and tapering to the
+  sides, over the neck and collar.
+- `rig/fit_atlas.py`: a helmet is **sized and placed by the head alone** (the template less the shirt's), must cover the head, and
+  below it keeps **the drawing's own outline** (only where the drawing has pixels). `rig/profiles/helmet*` recalibrated;
+  `test_pipeline.py`'s full-coverage check now applies to the head for helmets. Your three tests pass.
+- The Neon Helm was rebuilt from your `source-atlas.png` with `prepare_gear.py` (unchanged art, only the fitting) and re-imported.
+So draw the helms with their cheek and chin guards as they should look: the rig now keeps them.
+
 ## Your PR #356: the Neon Helm is in (Round 589). Five helms to go
 
 - **The Neon Helm (`neon-visor`)**: imported with `python3 tools/wearable_add.py --from tools/art-refresh/wearable/neon-visor`

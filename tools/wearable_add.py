@@ -29,6 +29,7 @@ HERO = os.path.join(ROOT, 'assets/characters/protagonist-walk9.png')  # the hero
 BASE = os.path.join(ROOT, 'assets/characters/protagonist-walk9-base.png')
 WEAR = os.path.join(ROOT, 'assets/characters/wearable')
 REGISTRY = os.path.join(ROOT, 'assets/hero-wear-looks.js')
+HELM_CHIN = 16  # Round 590: how far below the head a helmet may hang (cheek and chin guards), at the middle
 SLOTS = ['pants', 'boots', 'shirt', 'belt', 'gloves', 'helmet']  # the order looks are drawn in (later over earlier; Round 571: the helmet last)
 W, H, CELL = 2304, 1024, 256
 OUTLINE_SLACK = 2000  # overlay pixels allowed past the hero's outline (the soft edge where it meets the body)
@@ -338,6 +339,22 @@ def slot_templates(base):
                     col = np.nonzero(sh[:, x])[0]
                     if len(col) and col[0] > y1 and col[0] < y1 + 24:
                         head[r * CELL + y1:r * CELL + col[0], c * CELL + x] = body[r * CELL + y1:r * CELL + col[0], c * CELL + x]
+        # Round 590 (owner: "Helm is cut wrong on the front view"): a helmet's cheek and chin guards hang below the jaw, over the
+        # neck and collar; the template stopped at the shirt's top, so a fitted helm was cut flat just under its visor. Below the
+        # head it now reaches on down, HELM_CHIN px at the middle of the head's width, tapering to a third of that at its sides
+        for r in range(body.shape[0] // CELL):
+            for c in range(body.shape[1] // CELL):
+                hd = head[r * CELL:(r + 1) * CELL, c * CELL:(c + 1) * CELL]; cols = np.nonzero(hd.any(0))[0]
+                if not len(cols):
+                    continue
+                xa, xb = cols.min(), cols.max(); xc, half = (xa + xb) / 2, max(1, (xb - xa) / 2)
+                for x in range(xa, xb + 1):
+                    ys = np.nonzero(hd[:, x])[0]
+                    if not len(ys):
+                        continue
+                    t = abs(x - xc) / half; ext = int(round(HELM_CHIN * (1 - (2 / 3) * t * t)))
+                    y0 = ys.max() + 1; y1 = min(CELL, y0 + ext)
+                    hd[y0:y1, x] = body[r * CELL + y0:r * CELL + y1, c * CELL + x]
         out['helmet'] = _main_parts(head)
     r, g, bb = b[..., 0], b[..., 1], b[..., 2]
     out['protected'] = _grow(body & (bb > 150) & (g > 150) & (r < 140) & (bb - r > 60), 2) & body  # (the Aetherlink's bright cyan, with a 2px margin)
