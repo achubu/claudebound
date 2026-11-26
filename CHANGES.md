@@ -3496,6 +3496,19 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 579: armour is an overlay, not a tracing (owner)
+
+Owner: "I think you are trying to draw the armor around edges you found, just try to draw armor that covers the edges, straight
+lines or curved lines, nothing jagged, don't try to trace anything exactly, this is an overlay armor piece."
+
+- **`gearCover`** (`assets/gear-recipe.js`): every designed piece (templates and built armour) now covers a few straight-edged
+  shapes laid over its fit template instead of the template's traced outline. Each frame is cut into 10px bands; each band's runs
+  (a leg, an arm, the torso) are followed down as strands, and each strand is one polygon through the middle of its bands, 3px past
+  the template on every side. A belt is one straight band at the waist (the rows at least 70% of its widest, so a hanging pouch
+  isn't covered).
+- The armoured skirt is never cut by the "skin stays in front" test; it lies over everything.
+- Plates, pads, helmets and skirt were already drawn as shapes; with the cover under them, no edge follows the hero's pixels.
+
 ## Round 578: crisp outlines on all armour (owner)
 
 Owner: "The outlines need to be more crisp ... for all armor pieces". The hero is drawn on 256px frames and shown at about 84px, so
