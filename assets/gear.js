@@ -13,7 +13,7 @@
 // Icons: assets/items/gear/<id>.png (placeholders from tools/paint_gear_icons.py).
 // =====================================================================
 const GEAR_SLOTS = ['boots', 'shirt', 'pants', 'belt', 'gloves', 'helmet']; // (Round 571: the helmet)
-const GEAR_SLOT_NAMES = { boots: 'Boots', shirt: 'Shirt', pants: 'Pants', belt: 'Belt', gloves: 'Gloves', helmet: 'Helmet' };
+const GEAR_SLOT_NAMES = { boots: 'Boots', shirt: 'Shirt', pants: 'Pants', belt: 'Belt', gloves: 'Gloves', helmet: 'Helm' }; // (Round 580, owner: "We will call it a helm"; the save key stays helmet)
 const GEAR_SLOT_ICONS = { boots: '🥾', shirt: '👕', pants: '👖', belt: '🎗', gloves: '🧤', helmet: '⛑' };
 const GEAR_STATS = {
   attack: n => '+' + n + ' attack-card damage',
@@ -38,7 +38,7 @@ const GEAR = {
   timewornShirt:   { name: 'Timeworn Shirt', slot: 'shirt', world: 'chronospire', stat: 'health', value: 12 },
   hourglassBelt:   { name: 'Hourglass Belt', slot: 'belt', world: 'chronospire', stat: 'cleanse', value: 1 },
   // Round 571: a helmet per world, won from its final boss (not one of the two pieces that open the boss door)
-  neonVisor:       { name: 'Neon Visor', slot: 'helmet', world: 'city', stat: 'health', value: 3, bossDrop: true },
+  neonVisor:       { name: 'Neon Helm', slot: 'helmet', world: 'city', stat: 'health', value: 3, bossDrop: true },
   sunforgedHelm:   { name: 'Sunforged Helm', slot: 'helmet', world: 'elaris', stat: 'health', value: 5, bossDrop: true },
   galecrestHelm:   { name: 'Galecrest Helm', slot: 'helmet', world: 'sky', stat: 'health', value: 7, bossDrop: true },
   thornwardHelm:   { name: 'Thornward Helm', slot: 'helmet', world: 'wilds', stat: 'health', value: 9, bossDrop: true },

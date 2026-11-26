@@ -3496,6 +3496,20 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 580: designed gear on hold; ChatGPT draws all gear; the helmet is the Helm
+
+Owner: "I think we aren't quite getting the results we need, let's scrap this idea, maybe we will revisit it at a later time,
+let's go back to our old plan of waiting for chat gpt to draw all the gear." Then: "We will still want a helmet though ... We will
+call it a helm."
+
+- **The game no longer draws recipes** (`HERO_WEAR_USE_RECIPES = false` in `assets/hero-wear.js`): the Sunwoven Shirt and the
+  Scarab Belt show their drawn looks again, and the helms show nothing on the hero until ChatGPT draws them. Nothing is deleted:
+  `assets/gear-recipe.js`, the Gear Studio's Designer and Sets, `gear/recipes/`, the textures and the cutter stay, and NOTES.md
+  says how to bring it back. `tests/hero-wear.test.cjs` checks recipes are off, and that switching them on still works.
+- **The Helm**: the sixth slot stays (a helm per world from its final boss, 6% from elites), named "Helm" on screen; the Neon
+  Visor is the Neon Helm (ids and the save key `helmet` unchanged, so saves carry over). `tests/helmets.test.cjs` checks the names.
+- `CHATGPT-NOTES.md`: an art request for the six helms through the usual wearable process, with a direction for each world.
+
 ## Round 579: armour is an overlay, not a tracing (owner)
 
 Owner: "I think you are trying to draw the armor around edges you found, just try to draw armor that covers the edges, straight

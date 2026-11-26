@@ -9,7 +9,7 @@ const r = JSON.parse(run(`(() => { newGame(); const out = {};
   out.perWorld = WORLD_ORDER.map(w => helmets.filter(id => GEAR[id].world === w).length);
   out.door = WORLD_ORDER.map(w => gearOf(w).some(id => GEAR[id].slot === 'helmet'));
   out.helmets = helmets;
-  // the city's final boss gives the Neon Visor, worn at once
+  // the city's final boss gives the Neon Helm, worn at once
   state.region = 'city'; configureRegion('city'); const bossRoom = WORLD_BOSS_ROOMS.city[0]; state.battle = null; state.room = bossRoom;
   const boss = roomSpawns(bossRoom).find(s => s.boss); try { startBattle(boss.uid); state.battle.enemy.hp = 0; winBattle(); } catch (e) { out.err = String(e); }
   out.won = state.relics.includes('neonVisor'); out.worn = state.gear.helmet; out.health = gearStat('health');
@@ -27,3 +27,7 @@ assert(!r.foundElite || (r.eliteDrop && r.doorPieces === 0), 'an elite can drop 
 for (const id of r.helmets) { assert(fs.existsSync(path.join(__dirname, '../assets/items/gear', id + '.png')), id + ' has an icon');
   const rec = JSON.parse(fs.readFileSync(path.join(__dirname, '../gear/recipes', id + '.json'), 'utf8')); assert.strictEqual(rec.slot, 'helmet', id + ' has a helmet recipe'); }
 console.log('helmets ok');
+// (Round 580, owner: "We will call it a helm") the slot's name on screen; the save key stays `helmet`
+assert.strictEqual(run(`GEAR_SLOT_NAMES.helmet`), 'Helm', 'the slot is called the Helm');
+assert(JSON.parse(run(`JSON.stringify(Object.values(GEAR).filter(g => g.slot === 'helmet').map(g => g.name))`)).every(n => / Helm$/.test(n)), 'every helm is named a Helm');
+console.log('helm name ok');
