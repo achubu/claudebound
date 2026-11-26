@@ -3518,6 +3518,8 @@ The owner generated prompt 12 (both bridges in one picture). Every piece checked
 - **Owner: "this edge isnt over the texture tile"**: the Sky Isles' yard rim was the see-through glass rail, so the yard's grey ground
   showed through it past the edge. Their yards now take the islands' opaque steel deck rim (`sky-gen/surfaces/yard-edge/deck-rim`).
   (Trimming every edge picture to its drawn rows was tried and left out: it would change the city's and Elaris's edges.)
+- A crossing with no water and no straight road either side was scaled to nothing, and its 0px middle sections were laid for
+  ever (the walk test hung): the scale never goes below 0.35 and the loops need a step of at least 1px.
 
 ## Round 586: the upside-down bridge end hidden; one prompt for both bridges, and rules for bridge prompts
 

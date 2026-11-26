@@ -1321,7 +1321,7 @@ function genBridgeFit(water, ends, half, b) { const RR = GEN.bridgeReach != null
   const len = Math.max(Math.max(0, water) + mA + mB, ends + half <= max ? ends + half : ends <= max ? Math.max(ends, Math.min(max, ends + half)) : max);
   // where it lies: over the water, then on past each bank as evenly as the two reaches allow, never less than its landing
   const extra = Math.max(0, len - Math.max(0, water)); let eA = Math.max(mA, Math.min(rA, extra / 2)), eB = Math.max(mB, Math.min(rB, extra - eA)); eA = Math.max(mA, Math.min(rA, extra - eB));
-  return { len, f: ends <= max ? 1 : max / ends, eA, eB }; }
+  return { len, f: ends <= max ? 1 : Math.max(0.35, max / ends), eA, eB }; } // (never below 0.35: a crossing with no room at all once scaled the bridge to nothing, and its middle sections, 0px long, were laid for ever)
 // Round 587: a bridge is as wide as its road and the road's kerbs (GEN.bridgeKerbPad px each side, default 5), so its sides lie on
 // the kerbs instead of across them (it was 1.3 x the road, Round 526, which on land covered the kerbs and what lay beside them)
 function genBridgeWide(road) { return road + 2 * (GEN.bridgeKerbPad != null ? GEN.bridgeKerbPad : 5); }
@@ -1335,7 +1335,7 @@ function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V =
   const RY = v => Math.round((v - oy) * K), D = (img, x, y, kk) => ctx.drawImage(img, x * K, RY(y), img.width * kk * K, RY(y + img.height * kk) - RY(y)); // (Round 587: top and bottom on whole pixels, so pieces meet without a line)
   D(N, deckX - V.north.deckL * k, a0 - V.north.start * k, k);
   ctx.save(); ctx.beginPath(); ctx.rect(-1e4, -1e4, 2e4, RY(sCut) + 1e4); ctx.clip(); // (the last middle copy is cut short where the south end begins)
-  for (let u = nCut; u < sCut; u += step) D(M, deckX - V.mid.deckL * k, u - V.mid.top * k, k);
+  if (step > 1) for (let u = nCut; u < sCut; u += step) D(M, deckX - V.mid.deckL * k, u - V.mid.top * k, k);
   ctx.restore();
   // Round 585 (owner: "these are upside down"): the south end's pylons, drawn hanging below its deck, came out upside down; until
   // the regenerated bridge (prompt 12) comes, the south piece is drawn only down to the end of its deck (V.south.clip)
@@ -1356,7 +1356,7 @@ function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, hori
   // Round 587: each piece's ends land on whole pixels (Math.round), so two pieces share one exact boundary; at a fractional one the
   // edge pixel was only partly covered and the walkway showed through as a pale line at every join
   const R = v => Math.round(v * K), put = (img, sx, sw, u0, u1) => ctx.drawImage(img, sx, 0, sw, img.height, R(u0), top * K, R(u1) - R(u0), ph * K);
-  for (let u = ew; u < L - eeW; u += mw) { const w = Math.min(mw, L - eeW - u); put(M, 0, w / k, u, u + w); }
+  if (mw > 1) for (let u = ew; u < L - eeW; u += mw) { const w = Math.min(mw, L - eeW - u); put(M, 0, w / k, u, u + w); }
   put(W, 0, W.width, 0, ew); put(E, 0, E.width, L - eeW, L); ctx.restore(); }
 // Round 517: one bridge: the parapet strip down both long sides of the deck (its outer face outward, world-anchored along its
 // length so it meets itself across a room's edge) and a square pier block at each of the four corners
