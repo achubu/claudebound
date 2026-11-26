@@ -37,7 +37,7 @@ function gearRecipeRender(recipe, imgs) {
   const t = tg.getImageData(0, 0, tile.width, tile.height).data, tint = gearHex(recipe.tint, [120, 128, 140]), shadeK = recipe.shade == null ? 0.8 : +recipe.shade;
   const inM = i => m[i * 4] > 127 && p[i * 4] <= 127;
   const out = new Uint8ClampedArray(W * H * 4), acc = new Uint8Array(W * H), lum = i => (0.3 * b[i * 4] + 0.59 * b[i * 4 + 1] + 0.11 * b[i * 4 + 2]) / 255;
-  const trim = recipe.trim && recipe.trim.width ? { c: gearHex(recipe.trim.color, [40, 40, 48]), w: Math.min(6, recipe.trim.width | 0) } : null;
+  const trim = recipe.trim && recipe.trim.width ? { c: gearHex(recipe.trim.color, [40, 40, 48]), w: Math.min(6, Math.max(2, recipe.trim.width | 0)) } /* (Round 578: never under 2px: a 1px line blurs at the game's size) */ : null;
   const bands = recipe.bands && recipe.bands.at && recipe.bands.at.length ? { c: gearHex(recipe.bands.color, [30, 30, 36]), w: Math.max(1, Math.min(8, recipe.bands.width | 0 || 2)), at: recipe.bands.at.slice(0, 6) } : null;
   const seam = recipe.seam && recipe.seam.width ? { c: gearHex(recipe.seam.color, [54, 241, 255]), w: Math.min(4, recipe.seam.width | 0), glow: !!recipe.seam.glow } : null;
   for (let r = 0; r < 4; r++) for (let col = 0; col < 9; col++) {
@@ -176,13 +176,13 @@ function gearArmorRender(recipe, imgs) {
     const q = box[key] || (box[key] = [x, y, x, y]); if (x < q[0]) q[0] = x; if (y < q[1]) q[1] = y; if (x > q[2]) q[2] = x; if (y > q[3]) q[3] = y; }
   // the undersuit: the rest of the shirt (sleeves, sides) in a darker cloth of the armor's colour, with his own folds
   const under = A.under === false ? null : gearHex(A.under, tint.map(v => v * .55));
-  if (under) for (let i = 0; i < W * H; i++) { if (m[i * 4] <= 127 || p[i * 4] > 127 || skin(i)) continue; const sh = b[i * 4 + 3] > 128 ? .55 + lum(i) * 1.6 : 1, edge = [i - 1, i + 1, i - W, i + W].some(j => m[j * 4] <= 127);
+  if (under) for (let i = 0; i < W * H; i++) { if (m[i * 4] <= 127 || p[i * 4] > 127 || skin(i)) continue; const sh = b[i * 4 + 3] > 128 ? .55 + lum(i) * 1.6 : 1, edge = [i - 1, i + 1, i - W, i + W, i - 2, i + 2, i - 2 * W, i + 2 * W].some(j => m[j * 4] <= 127); // (Round 578: 2px)
     const col = edge ? rim : under.map(v => v * sh); out.set([col[0], col[1], col[2], 255], i * 4); }
   for (let i = 0; i < W * H; i++) { const k = id(i); if (!k || p[i * 4] > 127) continue; if (carve(i, k)) continue; // (his face, forearms and hands stay in front of the collar, chest and belly)
     const x = i % W, y = Math.floor(i / W), cell = Math.floor(y / C) * 9 + Math.floor(x / C), q = box[cell * 100 + k], fx = (x - q[0]) / Math.max(1, q[2] - q[0]), fy = (y - q[1]) / Math.max(1, q[3] - q[1]);
     const ti = (((y - q[1]) % tile.height) * tile.width + ((x - q[0]) % tile.width)) * 4, light = 1.18 - .32 * (fx * .4 + fy * .6), hero = b[i * 4 + 3] > 128 ? 1 + (lum(i) - .35) * shadeK : 1;
     let col = [t[ti] / 255 * tint[0] * 1.6, t[ti + 1] / 255 * tint[1] * 1.6, t[ti + 2] / 255 * tint[2] * 1.6].map(v => v * light * hero);
-    const nb = [i - 1, i + 1, i - W, i + W], edge = nb.some(j => id(j) !== k), inner = !edge && [i - W - 1, i - W, i - W + 1, i - 1].some(j => id(j) !== k) && fy < .5;
+    const nb = [i - 1, i + 1, i - W, i + W, i - 2, i + 2, i - 2 * W, i + 2 * W], edge = nb.some(j => id(j) !== k), /* (Round 578: a 2px rim) */ inner = !edge && [i - W - 1, i - W, i - W + 1, i - 1].some(j => id(j) !== k) && fy < .5;
     if (edge) col = rim.slice(); else if (inner) col = col.map(v => Math.min(255, v * 1.35 + 18));
     out.set([col[0], col[1], col[2], 255], i * 4); }
   if (recipe.pixel) { const reg = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!out[i * 4 + 3]) continue; const k = id(i); reg[i] = k && p[i * 4] <= 127 && !carve(i, k) ? k : 99; }
@@ -209,14 +209,16 @@ function gearPixelize(out, reg, acc, pal, W, H, noAccent, ink) { // (Round 572: 
   const sm = box(box(raw, true), false), lum = i => sm[i];
   // each region's mean light, per 256px frame
   const sum = new Map(); for (let i = 0; i < W * H; i++) { const r = reg[i]; if (!r) continue; const key = r * 64 + Math.floor(Math.floor(i / W) / 256) * 9 + Math.floor((i % W) / 256); const q = sum.get(key) || [0, 0]; q[0] += lum(i); q[1]++; sum.set(key, q); }
-  // distance to the region's edge, up to 3
+  // distance to the region's edge, up to 9
   const d = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) { if (!reg[i]) continue; const x = i % W; if (x === 0 || x === W - 1 || reg[i - 1] !== reg[i] || reg[i + 1] !== reg[i] || reg[i - W] !== reg[i] || reg[i + W] !== reg[i]) d[i] = 1; }
-  for (let k = 2; k <= 6; k++) for (let i = W; i < W * H - W; i++) if (reg[i] && !d[i] && (d[i - 1] === k - 1 || d[i + 1] === k - 1 || d[i - W] === k - 1 || d[i + W] === k - 1)) d[i] = k;
+  for (let k = 2; k <= 9; k++) for (let i = W; i < W * H - W; i++) if (reg[i] && !d[i] && (d[i - 1] === k - 1 || d[i + 1] === k - 1 || d[i - W] === k - 1 || d[i + W] === k - 1)) d[i] = k;
   for (let i = 0; i < W * H; i++) { const r = reg[i]; if (!r) continue; const key = r * 64 + Math.floor(Math.floor(i / W) / 256) * 9 + Math.floor((i % W) / 256), q = sum.get(key), v = lum(i) / Math.max(1, q[0] / q[1]), under = noAccent && noAccent(r);
     let c = v < .86 ? D : v > 1.16 ? L : B; if (under) c = v > 1.14 ? B : D;
-    if (d[i] === 1 || (ink && ink[i])) c = K; else if (acc[i]) c = A; else if (d[i] === 3 && !under) c = A;
-    else if (d[i] === 5 && !under && ((i % W) + Math.floor(i / W)) % 9 === 0) c = L; // (rivets along each panel's inner ring)
-    else if (d[i] === 2 && !under && d[i - W] === 1) c = L; // (Round 573: a highlight along each panel's top edge)
+    // (Round 578, owner: "The outlines need to be more crisp": the hero is shown at a third of this size, so a 1px line blurred
+    // into the plate. Outline 2px, the accent a solid 2px line two pixels inside it: about one screen pixel each)
+    if ((d[i] && d[i] <= 2) || (ink && ink[i])) c = K; /* (d 0 = deeper than 9: the plate's middle) */ else if (acc[i]) c = A; else if ((d[i] === 5 || d[i] === 6) && !under) c = A;
+    else if (d[i] === 8 && !under && ((i % W) + Math.floor(i / W)) % 11 === 0) c = L; // (rivets along each panel's inner ring)
+    else if (d[i] === 3 && !under && d[i - W] === 2) c = L; // (Round 573: a highlight along each panel's top edge)
     out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = 255; } }
 // Round 571 (owner: "add helmet slot but use the design for your outlines of our armor vector graphics"): a helmet built over
 // his head in every frame, from the helmet template (his head above the shirt): a shell covering hair and face, and by style
