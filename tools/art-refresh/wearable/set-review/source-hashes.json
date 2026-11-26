@@ -1,0 +1,14 @@
+{
+  "assets/characters/protagonist-walk9-base.png": "a1317e9671b0da27e75edee3268cc6a6723ccc140c8b1bdac3f48ee7ea00ba2f",
+  "assets/characters/protagonist-walk9.png": "5c0e6e4f834f317f193e33202700ae7dbb94e0570a5c2924d48c0a079400fb42",
+  "gear/templates/protected.png": "82caf3d41e3c944903d2277d3c04632d8c098bd7032d19c948b2f61b7a3d024c",
+  "gear/templates/pants-mask.png": "627fd062a988887a175422c00602f3e273180f908babe7ab77f1763f360b280d",
+  "gear/templates/boots-mask.png": "370d60934c0459e767b480c523b6493aeb045cfda9a5a97ed9ce6ee111cfee87",
+  "tools/art-refresh/wearable/cyber-gloves-preparation/Gloves-Preparation.zip": "362c952a2684f3867425b18e2ddd60c045c2656619e846e016096efa984aa24c",
+  "assets/characters/wearable/cyber-pants/overlay.png": "a72b870baac21b4981c49891caaa1bad4512ed8b2d7d3c435b1de03507791e2e",
+  "assets/characters/wearable/cyber-boots/overlay.png": "29740710802271ad332fbbb9fbfbe974dcbf3709d9caf5d41d84fc188c8f39f9",
+  "assets/characters/wearable/cyber-gloves/overlay.png": "a94dfecea6ea39cd0468b118572b1e6bb9e1fc3d4e206f1ce838f93bfe2984b3",
+  "assets/characters/wearable/cyber-belt/overlay.png": "0ac183014232e0cc3a19f6457f41b985fd6ed6f1f6a546c85557163d15b2daa3",
+  "assets/characters/wearable/cyber-chest/overlay.png": "27742d03a32301372e27131d497d64070fefc45b46d274494aacbdc035dc1a49",
+  "assets/characters/wearable/neon-visor/overlay.png": "f672a7cbb55cc5cf02bf0ec442bc42e24f1b22954f1aa036e51b9985522d5e41"
+}

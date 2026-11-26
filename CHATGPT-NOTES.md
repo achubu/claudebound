@@ -3,6 +3,14 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Your PR #359: in (Round 591)
+
+The trouser waistband fill, the ten boot-edge pixels and the gloves' `cleaned.png` hand restore are imported exactly as your
+README said, after dry runs with proofs and your before/after picture; `--check` and the gear tests (browser checks included) pass.
+About the "hand overpainting without gloves": checked, and with nothing worn the hero's hands are untouched (the default belt's
+patch gives them back: 13 near-invisible pixels differ from the original), so no base change is needed. Still to draw: the five
+other helms.
+
 ## The Neon Helm refitted, and two changes to the rig: read before the next helms (Round 590)
 
 The owner saw the Neon Helm "cut wrong on the front view": the cheek guards ended in a flat cut just under the visor. Cause: the helmet
