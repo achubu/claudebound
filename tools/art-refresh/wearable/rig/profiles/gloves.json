@@ -1,0 +1,18 @@
+{
+  "slot": "gloves",
+  "parts": [
+    "anatomical-left glove",
+    "anatomical-right glove"
+  ],
+  "base_sha256": "a1317e9671b0da27e75edee3268cc6a6723ccc140c8b1bdac3f48ee7ea00ba2f",
+  "labels_sha256": "354a468c4d4d51581b351b5f938b317dea81cbbbb914f4de8758d47ff5641d75",
+  "template_sha256": "c77239323d905f2305927fb44ee41cdf804195ed6b3e5a643e4b2174f1b3f540",
+  "protected_sha256": "82caf3d41e3c944903d2277d3c04632d8c098bd7032d19c948b2f61b7a3d024c",
+  "views": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "source_layout": "4 rows x part-count columns; helmet/belt also accept 2x2"
+}
