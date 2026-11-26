@@ -8,7 +8,11 @@
 //     distort art: an owner rule) within 3%;
 //  4. every landmark's aspect is its picture's within 1%, and its landmarkPx is the picture's width (Round 541: never drawn
 //     larger than its picture);
-//  5. every cargo piece has a size (cargoSize) and every clutter piece a height (clutterH).
+//  5. every cargo piece has a size (cargoSize) and every clutter piece a height (clutterH);
+//  6. (Round 583, owner: "3 seperate textures here not cleanly overlapping ... these need to be permanent procedural generation
+//     fixes") the ground surfaces the painter lays side by side with no edge between them (the main ground or paving, the
+//     sidewalk paving, the squares' floor, the plaza tile, the sand) are drawn at one size whenever they are the same picture,
+//     compared by content, so two copies of one picture under different names are caught too.
 process.env.HARNESS_ONLY = '1';
 const assert = require('assert'), fs = require('fs'), path = require('path');
 const { run } = require('./expansion.test.cjs');
@@ -27,8 +31,11 @@ const themes = JSON.parse(run(`(() => { newGame(); const out = {};
     const pics = []; for (const [slot, names] of Object.entries(CITY_TD_ART)) if (/^(building|ruinpic|parkpic)-/.test(slot)) for (const n of names || []) pics.push({ slot, n, px: CITY_BUILDING_PX[n] || null });
     const lm = (CITY_TD_ART.landmark || []).map(n => ({ n, asp: CITY_LANDMARK_ASPECT[n] || null, px: T.landmarkPx ? T.landmarkPx[n] || null : null, path: T.art + cityArtPath('landmark', n) + '.webp' }));
     const cargo = (CITY_TD_ART.cargo || []).map(n => ({ n, size: CITY_CARGO_SIZE[n] || null })), clutter = (CITY_TD_ART.clutter || []).map(n => ({ n, h: CITY_CLUTTER_H[n] || null }));
+    const sc = n => genTexScale(n) /* (the painter's own answer: Round 583) */, src = n => String(chronoArtImage(n).src).split('?')[0];
+    const sw = (CITY_TD_ART.sidewalk || []).map(n => cityArtPath('sidewalk', n)), groundSlots = [...(T.topdown ? (sw.length ? sw : ['pavement-old']) : ['ground']), 'floor', ...(T.plazaTex ? [T.plazaTex] : []), ...(T.beach ? ['sand'] : [])];
+    const ground = groundSlots.map(n => ({ n, scale: sc(n), path: src(n) }));
     const names = T.districtNames || Object.keys(CITY_DISTRICT_ART);
-    return { hooks: ['exits', 'world', 'keys', 'bossRooms'].filter(h => typeof T[h] !== 'function'), startKey: T.startKey || null, rooms: typeof T.keys === 'function' ? T.keys().length : 0,
+    return { ground, hooks: ['exits', 'world', 'keys', 'bossRooms'].filter(h => typeof T[h] !== 'function'), startKey: T.startKey || null, rooms: typeof T.keys === 'function' ? T.keys().length : 0,
       districts: names, districtSlots: names.filter(d => !(CITY_TD_ART['building-' + d] || []).length) /* (Round 501: buildings are whole pictures, by quarter) */, files, pics, lm, cargo, clutter }; });
   return JSON.stringify(out); })()`));
 let checked = 0;
@@ -48,6 +55,10 @@ for (const [id, t] of Object.entries(themes)) {
     assert.strictEqual(l.px, w, id + ': landmark ' + l.n + ' has its picture\'s width in landmarkPx'); }
   assert.deepStrictEqual(t.cargo.filter(c => !c.size).map(c => c.n), [], id + ': every cargo piece has a size');
   assert.deepStrictEqual(t.clutter.filter(c => !c.h).map(c => c.n), [], id + ': every clutter piece has a height');
+  { const crypto = require('crypto'), byPic = {}; // (6) one picture, one size
+    for (const g of t.ground) { const f = path.join(ROOT, g.path.replace(/^.*?(assets\/)/, '$1')); if (!fs.existsSync(f)) continue;
+      const h = crypto.createHash('md5').update(fs.readFileSync(f)).digest('hex'); (byPic[h] = byPic[h] || []).push(g.n + ' at ' + g.scale); }
+    for (const v of Object.values(byPic)) assert.strictEqual(new Set(v.map(x => x.split(' at ')[1])).size, 1, id + ': the same ground picture is drawn at two sizes side by side: ' + v.join(', ')); }
   checked++; console.log(id + ': ' + t.rooms + ' rooms, ' + t.files.length + ' pictures, ' + t.pics.length + ' buildings/ruins/parks, ' + t.lm.length + ' landmarks: ok');
 }
 assert(checked >= 2, 'the city and Solaris are checked');

@@ -34,4 +34,7 @@ for (const sd of [77, 1, 9]) {
   assert.strictEqual(r.reached, r.rooms, sd + ': every room is reached');
   console.log('seed ' + sd + ': ' + Math.round(r.land * 100) + '% land, ' + r.bridges + ' bridges, ' + r.buildings + ' buildings, ' + r.yards + ' yards, rooms without a square: ' + (r.noSquare.join(' ') || 'none'));
 }
+// (Round 583, owner: "theres no beach in sky isles ... create a new rule for sky edges") the Sky Isles are a sky-edge world: an
+// island ends at its rail, never a beach; Elaris (which inherits the Sky Isles' settings) keeps its lake shores
+assert.strictEqual(JSON.parse(run(`JSON.stringify([GEN_THEMES.sky.skyEdge, GEN_THEMES.sky.plainSea, (GEN_THEMES.sky.isleEdge || []).length > 0, GEN_THEMES.wilds.skyEdge])`)).join(), 'true,true,true,false', 'sky edges: no beach, plain sky, a rail round every island; not in Elaris');
 console.log('sky-isles ok');
