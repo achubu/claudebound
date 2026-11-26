@@ -1,0 +1,10 @@
+{
+  "look": "cyber-gloves",
+  "slot": "gloves",
+  "items": [
+    "ember",
+    "thornhideGloves",
+    "tempestGloves"
+  ],
+  "cleaned": true
+}
