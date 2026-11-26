@@ -3496,6 +3496,34 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 583: the Sky Isles in blue and steel; one ground; sky edges; the owner's deck dressing and second sky cut
+
+Owner: "sky isles is too pink, i want it to be more blue and cool steel and vibrant but not pink or purple"; "some of the art didnt
+have the green background cut out properly"; "ground textures under buildings shouldnt be mixed just use one steel one"; "3 seperate
+textures here not cleanly overlapping and the edges are not aligned at all"; "never implement one time fixes ... these need to be
+permanent procedural generation fixes for future world generation"; "theres no beach in sky isles ... create a new rule for sky edges".
+
+- **Blue and steel** (`tools/recolor_sky.py`): every Sky Isles picture recoloured: pinks, magentas, purples and periwinkles to blues
+  (purple to clear blue, pink to azure), pale lavender, blush and cream to cool steel, a little more colour elsewhere; cyan, greens and
+  golds keep their hue; shapes untouched. Originals kept in `unused assets/environment/sky-gen-pink/` (the tool always starts from
+  them; copy them back to undo). The theme's kerb, rim, shade and vignette colours and its Map-screen colours moved to blue too.
+- **Keying green**: the tool clears the bright pure green left inside props (shrine gate, tea pavilion's doorway, the sides of the
+  weather station, turbine hall and cloud temple...) and takes the green tinge off their edges; the hydro-house's grow-lights stay.
+  `tests/sky-art.test.cjs`: no pink or purple picture (112 of the 132 originals fail it), no keying green, every original kept.
+- **One ground** (the cause of the mixed deck): the sidewalk paving's size came from the city's surface list (0.22) whatever the
+  theme said, so the Sky Isles' deck was drawn at 0.22 inside each island beside 0.4 along its edges, and the edge band (the beach
+  layer, the same deck again) was darkened. Now `genTexScale(name)` is the one answer for a ground picture's size (the theme's own
+  setting first), shared by the painter and the world contract; **`tests/gen-theme-contract.test.cjs` fails any world that draws the
+  same picture, compared by content, at two sizes side by side**; `GEN.samePics` lists files that are copies of one picture; a beach
+  of the paving's own picture is never drawn. All ground in the Sky Isles is the one deck at 0.4.
+- **Sky edges** (`GEN.skyEdge`): a floating world's island ends at its rail, straight onto the sky, never a beach (the Sky Isles; not
+  Elaris). Checked in `tests/sky-isles.test.cjs`.
+- **The owner's two new sheets** (Round 582's prompts) are cut by `tools/cut_sky_dressing.py` (sources in `sky-gen/src/`): 8 flat
+  deck pieces (cut out of the deck squares they were drawn on) in `props/deck-flat/`, 8 standing pieces in `props/deck-stand/`, two more
+  cloud seas `surfaces/water/cloud-sea-2` and `-3` (made to wrap), all recoloured. Placing them comes next.
+- Checked: sky-isles, gen-theme-contract, city-buildings, wilds-gen, solaris-gen, city-layout, coast-wall, city-surfaces, sprites-page;
+  `SEED=77 node tests/playtest-walk.cjs sky` (all 51 rooms, no problems); `node tests/seam-check.cjs sky 77`: 2 short stretches.
+
 ## Round 582: prompts for the Sky Isles' bare deck and a second sky
 
 Owner, on Round 581's next steps (fill the bare deck; break up the cloud texture's repeat): "I can generate those using a prompt and

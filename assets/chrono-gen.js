@@ -481,7 +481,7 @@ function genTileExtraLinks(id) { const T = GEN_THEMES[id]; if (T.linksCache) ret
 // (assets/environment/sky-gen/, Rounds 545-547). Open sky takes the place of Solaris's rivers (the same machinery: nothing is
 // built beside it, a walkway crossing it is a glass bridge); no grass parks (roof gardens are pictures); glass walkways.
 // =====================================================================
-GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.06, isletChance: 0.75, buildFit: { min: 0.6 }, yardsBuild: true /* Round 581 */, noDocks: true /* (every lot on an island is near the sky: no cargo docks) */, isleEdge: ['yard-edge', 'glass-rail'], isleEdgeT: 16 /* Round 553: floating islands (rivers) */,
+GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '583', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.06, isletChance: 0.75, buildFit: { min: 0.6 }, yardsBuild: true /* Round 581 */, samePics: [['surfaces/ground/deck', 'surfaces/sidewalk/deck']] /* Round 583: one deck picture in two files */, skyEdge: true /* Round 583: islands end at their rail, no beach */, noDocks: true /* (every lot on an island is near the sky: no cargo docks) */, isleEdge: ['yard-edge', 'glass-rail'], isleEdgeT: 16 /* Round 553: floating islands (rivers) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.sky && TILE_WORLD_DATA.sky.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   // the generated Sky Isles have no diagonal walkways; where dropping one would cut rooms off from the start (1,5 to 2,4 joins
@@ -582,8 +582,8 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
     T.riverCache = { ck, set }; return set; },
   noParks: true, oasis: false, alleyVerge: false, lampGlow: .14, parkDim: 'rgba(10,0,20,.06)', floorRange: [2, 3], landmarkLot: 380, landmarkW: 300,
   tex: { pipes: 'surfaces/ground/deck', chasm: 'surfaces/water/cloud-sea', overgrowth: 'surfaces/ground/deck', water: 'surfaces/water/cloud-sea', sand: 'surfaces/ground/deck', floor: 'surfaces/ground/deck', 'road-wet': 'surfaces/road/glass-walk', gravel: 'surfaces/ground/deck', yard: 'surfaces/ground/deck', 'yard-cargo': 'surfaces/ground/deck', 'yard-rubble': 'surfaces/ground/deck', 'yard-market': 'surfaces/ground/deck', 'pavement-old': 'surfaces/ground/deck', ground: 'surfaces/ground/deck', 'rubble-big': 'surfaces/ground/deck' } /* Round 556 (owner: "the ground textures clash with the city objects and buildings"; "use this tile for the ground in sky isles ... don't use the other texture tiles for ground"): one ground, the riveted lavender deck, for islands, squares and yards alike; the glass walkway for roads; the cloud sea for the sky */,
-  texScale: { chasm: 0.4, gravel: 0.35, floor: 0.35, yard: 0.35, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.35, plaza: 0.35, sand: 0.35, water: 0.4, overgrowth: 0.35, pipes: 0.35 },
-  kerb: ['#2a1d3a', '#e6d8ff', '#8a74b8'], yardRim: ['#2a1d3a', '#d8c8f4'], groundShade: 'rgba(40,0,60,.05)', lamp: '190,240,255', vignette: '30,10,50',
+  texScale: { chasm: 0.4, gravel: 0.4, floor: 0.4, yard: 0.4, 'yard-cargo': 0.4, 'yard-rubble': 0.4, 'yard-market': 0.4, ground: 0.4, 'road-wet': 0.35, 'pavement-old': 0.4, plaza: 0.4, sand: 0.4, water: 0.4, overgrowth: 0.4, pipes: 0.4, 'rubble-big': 0.4, 'surfaces/sidewalk/deck': 0.4 /* (the same deck picture as the ground: it was drawn at full size, its panels 2.5 times the ground's) */ } /* Round 583 (owner: "ground textures under buildings shouldnt be mixed just use one steel one"): every ground is the one deck at one size, so its panels run on unbroken; at 0.35 and 0.4 side by side the grids didn't meet */,
+  kerb: ['#1a2a3a', '#d8ecff', '#6f97c2'], yardRim: ['#1a2a3a', '#c8def4'], groundShade: 'rgba(0,30,60,.05)' /* Round 583 (owner: blue and cool steel, not pink or purple) */, lamp: '190,240,255', vignette: '8,24,48',
   tdArt: { wall: [], roof: [], shop: [], 'market-wall': [], 'market-roof': [], 'market-shop': [], 'home-wall': [], 'home-roof': [], 'home-shop': [], 'tech-wall': [], 'tech-roof': [], 'tech-shop': [], 'garden-wall': [], 'garden-roof': [], 'garden-shop': [],
     curb: ['glass-kerb'], 'park-edge': ['planter-rim'], 'yard-edge': ['glass-rail'], 'bridge-edge': ['glass-parapet'], bridge: ['west', 'mid', 'east', 'north', 'vmid', 'south'], sidewalk: ['deck'] /* (the ground between the roads: Round 556) */, park: [], 'waterfront-edge': [],
     'mall-wall': [], 'mall-roof': [], 'mall-shop': [], 'roof-hole': [], 'ruin-wall': [], rubble: [], 'traffic-light': ['beacon-post'], 'prop-ac': ['air-unit'], 'prop-skylight': [], 'prop-heater': [], 'sign-h': [], 'sign-v': [],
@@ -607,7 +607,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
 // owner's forest art (assets/environment/wilds-gen/, Rounds 549-550). Three lakes from the journey's seed take the place of the
 // rivers (the same machinery: nothing is built on their muddy banks, a road crossing one is the boardwalk bridge).
 // =====================================================================
-GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false, noDocks: false, buildFit: null, yardsBuild: false, isleEdge: null /* (not the Sky Isles' settings) */,
+GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false, noDocks: false, buildFit: null, yardsBuild: false, samePics: null, skyEdge: false, isleEdge: null /* (not the Sky Isles' settings) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds && TILE_WORLD_DATA.wilds.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.wilds.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   extraLinks: () => genTileExtraLinks('wilds'), linksCache: null,
@@ -1154,6 +1154,19 @@ const CITY_SURFACES = [
   { key: 'ruin-wall', label: 'Destroyed buildings (burnt-out wall, one floor)', kind: 'building', walk: false, slot: 'ruin-wall', rule: 'A ruin\'s walls, floor by floor between window holes. Round 445: ruins gather in blast zones (the 18% of the city where a smooth noise runs highest): about 6 in 10 buildings there, 1 in 50 elsewhere. A ruin has an ordinary roof and parapet with a large hole in it (props/roof-hole/), no rooftop kit, no shopfront and no signs.' }
 ];
 const CITY_SURFACE_SLOTS = new Set(CITY_SURFACES.map(x => x.slot).filter(Boolean));
+// Round 583: the scale a ground picture is drawn at, one answer for the painter and the world contract test. A theme's own
+// setting for that picture first (as the theme was defined, before any painting); for a sidewalk picture with none, the surface
+// list's (CITY_SURFACES: 'sidewalk' scale, or its per-picture scales); else full size.
+function genTexScale(n) {
+  if (!GEN.texScaleOwn) GEN.texScaleOwn = Object.assign({}, GEN.texScale || {});
+  if (n in GEN.texScaleOwn) return GEN.texScaleOwn[n];
+  if (typeof CITY_TD_ART !== 'undefined' && (CITY_TD_ART.sidewalk || []).some(x => cityArtPath('sidewalk', x) === n)) { const r = CITY_SURFACES.find(x => x.key === 'sidewalk'); return (r.scales && r.scales[n.split('/').pop()]) || r.scale; }
+  return 1; }
+// Round 583: two loaded pictures are the same picture: the same file, or files a theme declares as copies (GEN.samePics: lists
+// of art paths holding one picture, e.g. the Sky Isles' ground and sidewalk decks).
+function genSamePicture(a, b) {
+  const f = i => String(i && i.src || '').split('?')[0].replace(/^.*?assets\//, 'assets/'); const fa = f(a), fb = f(b); if (!fa || !fb) return false; if (fa === fb) return true;
+  return (GEN.samePics || []).some(l => l.some(p => fa.endsWith(p + '.webp')) && l.some(p => fb.endsWith(p + '.webp'))); }
 function cityArtPath(slot, n) { const sl = GEN.surfaceSlots || CITY_SURFACE_SLOTS; return (sl.has(slot) ? 'surfaces/' : 'props/') + ((GEN.slotDir && GEN.slotDir[slot]) || slot) + '/' + n; }
 function cityTdArtNames() { return Object.entries(CITY_TD_ART).flatMap(([slot, l]) => l.map(n => cityArtPath(slot, n))); }
 // Round 413 (owner: "the edges dont have rounded corner which is a problem, we need edges that can be curved and used at
@@ -2225,6 +2238,7 @@ function paintChronoRoom(canvas, key) {
   // clouds (1880x1800 at 0.4: 752x720) didn't, so the sky broke along every room's edge
   const fill = (g, img) => { const t = sized(img), tw = t.width || t.naturalWidth || 800, th = t.height || t.naturalHeight || 800, ox = (((cx * W) % tw) + tw) % tw, oy = (((cy * H) % th) + th) % th;
     g.save(); g.translate(-ox, -oy); g.fillStyle = g.createPattern(t, 'repeat'); g.fillRect(ox, oy, W, H); g.restore(); };
+  let pavingImg = GEN.topdown ? imgs['pavement-old'] : imgs.ground; // (the ground everything else stands on: Round 583)
   if (GEN.topdown) { fill(ctx, imgs['pavement-old']); ctx.fillStyle = GEN.groundDim || 'rgba(8,12,24,.5)'; /* Round 483: a theme's own light (Solaris is day) */ ctx.fillRect(0, 0, W, H); } else fill(ctx, imgs.ground);
   // Round 389 (owner: "use all the assets for neon aftermath, the rubble the puddles, the grass, everything should be
   // mixed"): a theme may lay a second texture over a first in soft patches from world-wide noise (GEN.mix: which
@@ -2240,14 +2254,17 @@ function paintChronoRoom(canvas, key) {
   ctx.fillStyle = GEN.groundShade; ctx.fillRect(0, 0, W, H); }
   else { const sw = (typeof CITY_TD_ART !== 'undefined' ? CITY_TD_ART.sidewalk : []).map(n => cityArtPath('sidewalk', n)).filter(n => imgs[n] && imgs[n].naturalWidth);
     // Round 407 (owner: "sidewalk tile size is far too big"): drawn at 0.35, a paving tile about 90px across
-    const swReg = CITY_SURFACES.find(x => x.key === 'sidewalk'); for (const n of sw) (GEN.texScale = GEN.texScale || {})[n] = (swReg.scales && swReg.scales[n.split('/').pop()]) || swReg.scale; // Round 423 (owner: "walk slabs and walk plates are too big"): per-picture scales // Round 420 (owner: "the road and curb tile scale should be smaller")
+    // Round 583 (owner: "3 seperate textures here not cleanly overlapping ... permanent procedural generation fixes"): a theme's
+    // own scale for its paving picture wins over the surface list's default (the Sky Isles' deck was forced to 0.22 inside each
+    // island beside 0.4 along its edges); genTexScale is the one answer, shared with the world contract test
+    for (const n of sw) (GEN.texScale = GEN.texScale || {})[n] = genTexScale(n); // Round 423 (owner: "walk slabs and walk plates are too big"): per-picture scales // Round 420 (owner: "the road and curb tile scale should be smaller")
     // Round 408 (owner: blends between very different tiles "look horrible ... set rules so it cant happen again"; "find what
     // technique is used by modern 2d games"): as with autotiled terrain, a material change is a hard edge on the grid,
     // never a fade. Each block of the city (the ground the streets enclose) takes one paving, half of them the main one;
     // a block's edges run along its streets, so a paving only changes across a street.
     // Round 445 (owner: "textures clashing"): one paving for the whole city, picked by the journey's seed. A paving per
     // block (Round 408) put a pale paving beside a dark one across every alley.
-    if (sw.length) { fill(ctx, imgs[sw[chronoHash(chronoSeed() + ':paving') % sw.length]]);
+    if (sw.length) { pavingImg = imgs[sw[chronoHash(chronoSeed() + ':paving') % sw.length]]; fill(ctx, pavingImg);
       ctx.fillStyle = GEN.pavingDim || 'rgba(8,12,24,.38)'; ctx.fillRect(0, 0, W, H); } } // the machinery sits back, so the roads read at a glance
   const layer = (grid, img, radius) => {
     const shape = chronoShape(grid, K, radius), c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -2476,7 +2493,12 @@ function paintChronoRoom(canvas, key) {
     const tintIn = (mask, paint) => { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(mask, 0, 0); g.globalCompositeOperation = 'source-in'; paint(g); return c; };
     const flat = (mask, col) => tintIn(mask, g => { g.fillStyle = col; g.fillRect(0, 0, W, H); });
     const beach = coast.beach;
-    ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
+    // Round 583: a beach of the very picture the paving is (the Sky Isles' deck beside the open sky) is no beach: drawn again,
+    // darkened, it only showed as a blotchy seam. It is left as the paving.
+    // Round 583 (owner: "theres no beach in sky isles ... create a new rule for sky edges"): GEN.skyEdge, a world whose land
+    // floats: an island ends at its rail (GEN.isleEdge), straight onto the open sky, with no beach, wet sand or foam between.
+    const sameAsPaving = genSamePicture(imgs.sand, pavingImg);
+    if (!GEN.skyEdge && !sameAsPaving) ctx.drawImage(tintIn(beach, g => { fill(g, imgs.sand); g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(8,12,24,.06)'; g.fillRect(0, 0, W, H); }), 0, 0);
     if (GEN.plainSea) { ctx.drawImage(tintIn(coast.sea, g => waterFill(g)), 0, 0); // Round 553: the Sky Isles' sky is clouds as painted: no wet sand, water tint, depth, shallows or foam
       genSkyClouds(ctx, key, coast.sea, K, W, H, imgs);
       // Round 556 (owner: "we need edges where the ground meets open sky"): an edge strip on every seam between ground (a road
@@ -2707,7 +2729,7 @@ function paintChronoRoom(canvas, key) {
 // textured tiles): ground, the faint blocks on it, road, and the kerb's dark and light lines
 const MAP_LOOK = {
   wilds: { ground: '#0e140c', block: 'rgba(200,255,190,.035)', road: '#a08c66', kerb: ['#070a05', '#e4dcb8'] },
-  sky: { ground: '#120e1c', block: 'rgba(220,200,255,.035)', road: '#8f86a8', kerb: ['#08060e', '#e6dcff'] },
+  sky: { ground: '#0c1420', block: 'rgba(200,225,255,.035)', road: '#86a0b8', kerb: ['#060a10', '#dcecff'] } /* Round 583: blue steel */,
   solaris: { ground: '#17110b', block: 'rgba(255,214,150,.035)', road: '#9e8a66', kerb: ['#0c0804', '#ecd6a6'] },
   chronospire: { ground: '#120e0a', block: 'rgba(255,200,120,.035)', road: '#937a4a', kerb: ['#0a0705', '#e6c274'] },
 };
