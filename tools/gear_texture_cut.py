@@ -3,6 +3,8 @@
 
   python3 tools/gear_texture_cut.py sheet.png name1,name2,...   a sheet of textures in a grid on magenta gutters
   python3 tools/gear_texture_cut.py single.jpg name             one texture filling the picture
+  name:free                                                       a texture with no repeat (leather, a circuit layout): most
+                                                                  of the picture, its edges cross-faded so it wraps
 
 For each texture it looks for the crop whose right edge continues its left edge and whose bottom continues its top (the pattern's
 own repeat, searched separately across and down), then cross-fades the last rows and columns into the pixels just past the crop's
@@ -36,6 +38,18 @@ def cells(path, count):
     if len(got) != count: sys.exit(f'found {len(got)} cells ({len(rows)} rows x {len(cols)} columns), expected {count}')
     return got
 
+def tile_free(im):
+    # (no repeat to find: leather, a circuit layout) most of the picture, its right and bottom bands faded into what lies just
+    # before its start, so it wraps; a wide band hides the join in an irregular pattern
+    from PIL import ImageFilter  # (first, even out broad light: a glow or vignette would show as a blob on every repeat)
+    low = np.asarray(Image.fromarray(im.clip(0, 255).astype('uint8')).filter(ImageFilter.GaussianBlur(min(im.shape) / 8))).astype(float); im = im - low + low.mean()
+    H, W = im.shape; m = min(H, W) // 10; h, w = H - 2 * m, W - 2 * m; f = min(h, w) // 7; y0 = x0 = m; t = im[y0:y0 + h, x0:x0 + w].copy()
+    for k in range(f):
+        a = (k + 1) / (f + 1); t[h - f + k] = (1 - a) * t[h - f + k] + a * im[y0 - f + k, x0:x0 + w]
+    for k in range(f):
+        a = (k + 1) / (f + 1); t[:, w - f + k] = (1 - a) * t[:, w - f + k] + a * im[y0:y0 + h, x0 - f + k]
+    return t.clip(0, 255).astype('uint8'), 0.0, 0.0
+
 def tile(im):
     H, W = im.shape; lo = max(48, min(H, W) // 6); hi = int(min(H, W) * .62)
     m0 = min(H, W) // 6
@@ -55,7 +69,8 @@ def main():
     if len(sys.argv) < 3: sys.exit(__doc__)
     names = sys.argv[2].split(','); os.makedirs(OUT, exist_ok=True)
     for name, im in zip(names, cells(sys.argv[1], len(names))):
-        t, a, b = tile(im); T = Image.fromarray(t); T = T.resize((max(8, round(T.width * SCALE)), max(8, round(T.height * SCALE))), Image.LANCZOS); t = np.asarray(T); T.save(os.path.join(OUT, name + '.webp'), lossless=True)
+        free = name.endswith(':free'); name = name.split(':')[0]
+        t, a, b = (tile_free if free else tile)(im); T = Image.fromarray(t); T = T.resize((max(8, round(T.width * SCALE)), max(8, round(T.height * SCALE))), Image.LANCZOS); t = np.asarray(T); T.save(os.path.join(OUT, name + '.webp'), lossless=True)
         h, w = t.shape; p = Image.new('L', (w * 3, h * 3))
         for x in range(3):
             for y in range(3): p.paste(T, (x * w, y * h))
