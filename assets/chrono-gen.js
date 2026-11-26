@@ -600,7 +600,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
   yardSets: { cargo: ['sky-pods', 'hover-crates', 'drone-pad', 'cargo-crane'], market: ['neon-kiosk', 'holo-stand', 'glow-vending', 'noodle-cart'] },
   clutterH: { 'planter-cluster': 34, 'curved-bench': 26, 'glow-lamp': 48, 'recycle-bin': 30, 'crate-pile': 28, 'potted-blossom': 46, 'mini-dish': 34, 'glow-bollard': 26 },
   // the glass bridges (Rounds 545-546), measured in each piece's own px like Solaris's (CITY_BRIDGE_DECK, CITY_BRIDGE_V)
-  bridgeDeck: [62, 257], bridgeV: { north: { deckL: 6, w: 452, start: 168, cut: 765 }, mid: { deckL: 4, w: 456, top: 25, bottom: 913 }, south: { deckL: 6, w: 452, top: 28, end: 1120, clip: true /* Round 585: its pylons hang upside down below the deck */ } } });
+  bridgeDeck: [173, 399], bridgeV: { north: { deckL: 64, w: 312, start: 62, cut: 414 }, mid: { deckL: 57, w: 312, top: 0, bottom: 367 }, south: { deckL: 56, w: 312, top: 0, end: 448 } } /* Round 587: the owner's blue bridges (prompt 12), measured by tools/cut_sky_bridges.py */ });
 // =====================================================================
 // Round 552 (owner: "lets do whatever will yield us consistent results across worlds when using our procedural algorithm"):
 // Elaris, the forest, on the generator: the Sky Isles' room hooks on Elaris's own rooms (TILE_WORLD_DATA.wilds.layout) and the
@@ -1270,7 +1270,14 @@ function cityBridgeSpans(road, river, x0, y0) { const M = 8, seen = new Set(), o
       let t0 = by0, t1 = by1; for (let y = by0 - 6; y < by1 + 6; y++) if (road(bx0 - 1, y) && road(bx1, y)) { t0 = Math.min(t0, y); t1 = Math.max(t1, y + 1); } by0 = t0; by1 = t1; bx0 -= 1; bx1 += 1; }
     else { let t0 = bx0, t1 = bx1; for (let x = bx0 - 6; x < bx1 + 6; x++) if (road(x, by0 - 1) && road(x, by1)) { t0 = Math.min(t0, x); t1 = Math.max(t1, x + 1); } bx0 = t0; bx1 = t1; by0 -= 1; by1 += 1; }
     const across = horiz ? by1 - by0 : bx1 - bx0, along = horiz ? bx1 - bx0 : by1 - by0; if (across > 6 || along > 20 || along < 3) continue; // Round 519: only a true crossing (a road running along a river is not a bridge)
-    if (!out.some(o => o.x0 === bx0 && o.y0 === by0)) out.push({ x0: bx0, y0: by0, x1: bx1, y1: by1, horiz }); }
+    // Round 587 (owner: "lets not have the bridge overlap with other edges as a rule, it can overlap the road"): how far its own road
+    // runs on straight past the water on each side, in cells (from the span's land cell), with no side street joining: the
+    // bridge may reach that far onto land and no further, so it never covers a junction's kerbs or anything beside the road
+    const straight = horiz ? X => { for (let y = by0; y < by1; y++) if (!road(X, y) || river(X, y)) return false; return !road(X, by0 - 1) && !road(X, by1); }
+      : Y => { for (let x = bx0; x < bx1; x++) if (!road(x, Y) || river(x, Y)) return false; return !road(bx0 - 1, Y) && !road(bx1, Y); };
+    let runA = 0, runB = 0; if (horiz) { for (let X = bx0; straight(X) && runA < 8; X--) runA++; for (let X = bx1 - 1; straight(X) && runB < 8; X++) runB++; }
+    else { for (let Y = by0; straight(Y) && runA < 8; Y--) runA++; for (let Y = by1 - 1; straight(Y) && runB < 8; Y++) runB++; }
+    if (!out.some(o => o.x0 === bx0 && o.y0 === by0)) out.push({ x0: bx0, y0: by0, x1: bx1, y1: by1, horiz, runA, runB }); }
   return out; }
 // Round 519 (owner: "lets just generate an over the top bridge graphic"): the owner's grand bridge in three pieces (src/bridge-sheet.jpeg):
 // gate towers at each end and a middle section that repeats. Every piece is scaled by one factor so the deck between its
@@ -1305,19 +1312,26 @@ function genSkyClouds(ctx, key, seaMask, K, W, H, imgs) {
 // section `half` px: never more than CITY_BRIDGE_REACH (or the theme's GEN.bridgeReach) past the water on each side. Returns the
 // length and the factor (1, or less when even the two ends don't fit) the whole bridge is scaled by.
 const CITY_BRIDGE_REACH = 100;
-function genBridgeFit(water, ends, half) { const max = Math.max(0, water) + 2 * (GEN.bridgeReach != null ? GEN.bridgeReach : CITY_BRIDGE_REACH);
-  if (ends + half <= max) return { len: ends + half, f: 1 }; if (ends <= max) return { len: Math.max(ends, Math.min(max, ends + half)), f: 1 };
-  return { len: max, f: max / ends }; }
+function genBridgeFit(water, ends, half, b) { const RR = GEN.bridgeReach != null ? GEN.bridgeReach : CITY_BRIDGE_REACH, C = FG_CELL;
+  // Round 587: each side's reach is also held to its own road's straight run (b.runA / b.runB, cells), so it stops before any other edge
+  const rA = b && b.runA != null ? Math.min(RR, b.runA * C) : RR, rB = b && b.runB != null ? Math.min(RR, b.runB * C) : RR, max = Math.max(0, water) + rA + rB;
+  const len = ends + half <= max ? ends + half : ends <= max ? Math.max(ends, Math.min(max, ends + half)) : max;
+  // where it lies: over the water, then on past each bank as evenly as the two reaches allow
+  const extra = Math.max(0, len - Math.max(0, water)); let eA = Math.min(rA, extra / 2), eB = Math.min(rB, extra - eA); eA = Math.min(rA, extra - eB);
+  return { len, f: ends <= max ? 1 : max / ends, eA, eB }; }
+// Round 587: a bridge is as wide as its road and the road's kerbs (GEN.bridgeKerbPad px each side, default 5), so its sides lie on
+// the kerbs instead of across them (it was 1.3 x the road, Round 526, which on land covered the kerbs and what lay beside them)
+function genBridgeWide(road) { return road + 2 * (GEN.bridgeKerbPad != null ? GEN.bridgeKerbPad : 5); }
 function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V = GEN.bridgeV || CITY_BRIDGE_V; /* Round 548: a theme's own pieces */
-  const road = (b.x1 - b.x0) * C; let wide = road * CITY_BRIDGE_COVER, k = wide / V.north.w, kS = wide / V.south.w;
+  const road = (b.x1 - b.x0) * C; let wide = genBridgeWide(road), k = wide / V.north.w, kS = wide / V.south.w;
   let a0 = b.y0 * C, a1 = b.y1 * C;
-  const reach = genBridgeFit(a1 - a0 - 2 * C, (V.north.cut - V.north.start) * k + (V.south.end - V.south.top) * kS, (V.mid.bottom - V.mid.top) * k * 0.5); k *= reach.f; kS *= reach.f; wide *= reach.f; // (Round 584: at most CITY_BRIDGE_REACH past the water)
-  const deckX = b.x0 * C - (wide - road) / 2 - ox, need = reach.len;
-  if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
+  const reach = genBridgeFit(a1 - a0 - 2 * C, (V.north.cut - V.north.start) * k + (V.south.end - V.south.top) * kS, (V.mid.bottom - V.mid.top) * k * 0.5, b); k *= reach.f; kS *= reach.f; wide *= reach.f; // (Round 584: at most CITY_BRIDGE_REACH past the water)
+  const deckX = b.x0 * C - (wide - road) / 2 - ox;
+  { const w0 = a0 + C, w1 = a1 - C; a0 = w0 - reach.eA; a1 = w1 + reach.eB; if (a1 - a0 < reach.len) { const c = (a0 + a1) / 2; a0 = c - reach.len / 2; a1 = c + reach.len / 2; } }
   const nCut = a0 + (V.north.cut - V.north.start) * k, sTop = a1 - V.south.end * kS, sCut = sTop + V.south.top * kS, step = (V.mid.bottom - V.mid.top) * k;
-  const D = (img, x, y, kk) => ctx.drawImage(img, x * K, (y - oy) * K, img.width * kk * K, img.height * kk * K);
+  const RY = v => Math.round((v - oy) * K), D = (img, x, y, kk) => ctx.drawImage(img, x * K, RY(y), img.width * kk * K, RY(y + img.height * kk) - RY(y)); // (Round 587: top and bottom on whole pixels, so pieces meet without a line)
   D(N, deckX - V.north.deckL * k, a0 - V.north.start * k, k);
-  ctx.save(); ctx.beginPath(); ctx.rect(-1e4, -1e4, 2e4, (sCut - oy) * K + 1e4); ctx.clip(); // (the last middle copy is cut short where the south end begins)
+  ctx.save(); ctx.beginPath(); ctx.rect(-1e4, -1e4, 2e4, RY(sCut) + 1e4); ctx.clip(); // (the last middle copy is cut short where the south end begins)
   for (let u = nCut; u < sCut; u += step) D(M, deckX - V.mid.deckL * k, u - V.mid.top * k, k);
   ctx.restore();
   // Round 585 (owner: "these are upside down"): the south end's pylons, drawn hanging below its deck, came out upside down; until
@@ -1325,19 +1339,22 @@ function cityBridgeGrandV(ctx, b, ox, oy, K, [N, M, S]) { const C = FG_CELL, V =
   if (V.south.clip) { ctx.save(); ctx.beginPath(); ctx.rect(-1e4, -1e4, 2e4, (a1 - oy) * K + 1e4); ctx.clip(); D(S, deckX - V.south.deckL * kS, sTop, kS); ctx.restore(); }
   else D(S, deckX - V.south.deckL * kS, sTop, kS); }
 function cityBridgeGrand(ctx, b, ox, oy, K, [W, M, E]) { const C = FG_CELL, horiz = b.horiz, CITY_BRIDGE_DECK = GEN.bridgeDeck || CITY_BRIDGE_DECK_BASE; /* Round 548: a theme's own pieces */
-  const road = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C; let wide = road * CITY_BRIDGE_COVER, k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]);
+  const road = horiz ? (b.y1 - b.y0) * C : (b.x1 - b.x0) * C; let wide = genBridgeWide(road), k = wide / (CITY_BRIDGE_DECK[1] - CITY_BRIDGE_DECK[0]);
   let a0 = (horiz ? b.x0 : b.y0) * C, a1 = (horiz ? b.x1 : b.y1) * C;
   // Round 584 (owner: "the bridge also extends too far onto the road, we need a rule where it maybe extends only 100px over the
   // edge"): a bridge reaches at most CITY_BRIDGE_REACH px past the open water or sky on each side (the span is the water plus a
   // cell each side). A short crossing gives up the extra half middle section first; if even its two ends are too long, the whole
   // bridge is drawn smaller, by one factor (never stretched)
-  const reach = genBridgeFit(a1 - a0 - 2 * C, (W.width + E.width) * k, M.width * k * 0.5); k *= reach.f; wide *= reach.f;
-  const grow = (wide - road) / 2, ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k, need = reach.len; if (a1 - a0 < need) { const c = (a0 + a1) / 2; a0 = c - need / 2; a1 = c + need / 2; }
+  const reach = genBridgeFit(a1 - a0 - 2 * C, (W.width + E.width) * k, M.width * k * 0.5, b); k *= reach.f; wide *= reach.f;
+  const grow = (wide - road) / 2, ew = W.width * k, eeW = E.width * k, mw = M.width * k, ph = W.height * k; { const w0 = a0 + C, w1 = a1 - C; a0 = w0 - reach.eA; a1 = w1 + reach.eB; if (a1 - a0 < reach.len) { const c = (a0 + a1) / 2; a0 = c - reach.len / 2; a1 = c + reach.len / 2; } }
   const L = a1 - a0, top = -CITY_BRIDGE_DECK[0] * k; ctx.save();
   if (horiz) ctx.translate((a0 - ox) * K, (b.y0 * C - grow - oy) * K); else { ctx.translate((b.x1 * C + grow - ox) * K, (a0 - oy) * K); ctx.rotate(Math.PI / 2); }
   // (turned, the deck's top edge lies on the east side: local v runs from x1 back to x0)
-  for (let u = ew; u < L - eeW; u += mw) { const w = Math.min(mw, L - eeW - u); ctx.drawImage(M, 0, 0, w / k, M.height, u * K, top * K, w * K + 0.6, ph * K); }
-  ctx.drawImage(W, 0, top * K, ew * K, ph * K); ctx.drawImage(E, (L - eeW) * K, top * K, eeW * K, ph * K); ctx.restore(); }
+  // Round 587: each piece's ends land on whole pixels (Math.round), so two pieces share one exact boundary; at a fractional one the
+  // edge pixel was only partly covered and the walkway showed through as a pale line at every join
+  const R = v => Math.round(v * K), put = (img, sx, sw, u0, u1) => ctx.drawImage(img, sx, 0, sw, img.height, R(u0), top * K, R(u1) - R(u0), ph * K);
+  for (let u = ew; u < L - eeW; u += mw) { const w = Math.min(mw, L - eeW - u); put(M, 0, w / k, u, u + w); }
+  put(W, 0, W.width, 0, ew); put(E, 0, E.width, L - eeW, L); ctx.restore(); }
 // Round 517: one bridge: the parapet strip down both long sides of the deck (its outer face outward, world-anchored along its
 // length so it meets itself across a room's edge) and a square pier block at each of the four corners
 function cityBridgeDraw(ctx, b, ox, oy, K, art) { const C = FG_CELL, T = 16, x0 = b.x0 * C - ox, y0 = b.y0 * C - oy, x1 = b.x1 * C - ox, y1 = b.y1 * C - oy;
@@ -1574,7 +1591,7 @@ function citySpriteBoxes(seed, key, plan) { const wl = genWorld(seed), [wx, wy] 
       add(r[0], r[1], r[2], r[1] + R, 'edge:rim'); add(r[0], r[3] - R, r[2], r[3], 'edge:rim'); add(r[0], r[1], r[0] + R, r[3], 'edge:rim'); add(r[2] - R, r[1], r[2], r[3], 'edge:rim'); } }
   // Round 520: a grand bridge's picture (Round 519): its deck and the gate towers that stand out past the road on both banks
   if (GEN.hole && CITY_HAS('bridge')) { const x0 = wx * FG_COLS, y0 = wy * FG_ROWS, road = (X, Y) => X >= 0 && Y >= 0 && X < wl.CW && Y < wl.CH && wl.cell[Y * wl.CW + X] === 2, river = (X, Y) => !!GEN.hole(seed, Math.floor(X / 2), Math.floor(Y / 2));
-    for (const b of cityBridgeSpans(road, river, x0, y0)) { const road = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * FG_CELL, wide = road * CITY_BRIDGE_COVER, DK = GEN.bridgeDeck || CITY_BRIDGE_DECK_BASE, k = wide / (DK[1] - DK[0]), over = DK[0] * k + (wide - road) / 2;
+    for (const b of cityBridgeSpans(road, river, x0, y0)) { const road = (b.horiz ? b.y1 - b.y0 : b.x1 - b.x0) * FG_CELL, wide = genBridgeWide(road), DK = GEN.bridgeDeck || CITY_BRIDGE_DECK_BASE, k = wide / (DK[1] - DK[0]), over = DK[0] * k + (wide - road) / 2;
       const X0 = b.x0 * FG_CELL - ox, Y0 = b.y0 * FG_CELL - oy, X1 = b.x1 * FG_CELL - ox, Y1 = b.y1 * FG_CELL - oy, need = 0.5 * Math.max(0, (CITY_BRIDGE_PIECES[0] + CITY_BRIDGE_PIECES[2] + CITY_BRIDGE_PIECES[1] * 0.5) * k - (b.horiz ? X1 - X0 : Y1 - Y0)); // (the same lengthening as cityBridgeGrand)
       if (b.horiz) add(X0 - need, Y0 - over, X1 + need, Y1 + over, 'bridge'); else add(X0 - over, Y0 - need, X1 + over, Y1 + need, 'bridge'); } }
   return out; }

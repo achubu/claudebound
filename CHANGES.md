@@ -3496,6 +3496,23 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 587: the owner's new blue bridges; a bridge never overlaps another edge
+
+The owner generated prompt 12 (both bridges in one picture). Every piece checked upright before cutting (Round 585's rule).
+- **Cut** by `tools/cut_sky_bridges.py` (source `sky-gen/src/bridge-sheet-blue.jpeg`): the six pieces (the two whole bridges are
+  references), keyed, with the glass the green showed through turned cyan instead of cut away; the east-west pieces share one top and
+  bottom; the south end trimmed to the north end's length; 3px off every cut edge (the keying had touched them). The script prints
+  `bridgeDeck` and `bridgeV` for `GEN_THEMES.sky`; the old `clip` (Round 586) is gone.
+- **Joins**: each piece's ends land on whole pixels (`cityBridgeGrand`, `cityBridgeGrandV`); at fractional ones the edge pixel was
+  part-covered and the walkway showed through as a pale line at every join.
+- **Owner: "lets not have the bridge overlap with other edges as a rule, it can overlap the road but i see its overlapping a 2nd set
+  of edges"; "theres an edge fiasco"**: a bridge was 1.3 x its road (Round 526), so on land its end covered the road's kerbs and
+  reached the yard rim beside them. Now (every world) a bridge is its road's width plus 5px of kerb each side (`genBridgeWide`,
+  `GEN.bridgeKerbPad`), and on land each side reaches only along its own road's straight run with no side street joining
+  (`cityBridgeSpans` gives `runA`/`runB`; `genBridgeFit` places it), still 100px at most; when that is too short the whole bridge
+  is drawn smaller by one factor. `tests/sky-isles.test.cjs` checks both.
+- The faint lines left on the deck are the art's own pane frames (steel frames between glass panes), not joins.
+
 ## Round 586: the upside-down bridge end hidden; one prompt for both bridges, and rules for bridge prompts
 
 Owner: "these are upside down" (the north-south bridge's south pylons); "in future when we generate bridge prompts we need to account
