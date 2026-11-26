@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 582: prompts for the Sky Isles' bare deck and a second sky
+
+Owner, on Round 581's next steps (fill the bare deck; break up the cloud texture's repeat): "I can generate those using a prompt and
+Google Gemini". `tools/art-refresh/sky-gen-prompts.md` gains two complete prompts: 10, deck dressing (8 flat walk-over pieces and 8
+small standing ones) and 11, a second sky (2 seamless cloud tiles to mix in patches over the first). Wiring them in follows when
+the art is back.
+
 ## Round 581: the Sky Isles reviewed: seamless clouds, more buildings on the islands
 
 Owner: "Try to review sky isles and improve the world there." A whole-world render (seed 77) showed two problems:

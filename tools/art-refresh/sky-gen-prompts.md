@@ -370,3 +370,78 @@ north-south one and its row-2 middle piece is two panes deep against the ends' o
 bridge instead (west end, a 2-pane middle that repeats, east end). The hexagonal plaza's pattern isn't regular, so a
 replacement plaza tile was asked for: a strict 8 x 8 checkerboard of square glass panes, seamless (optional; the mosaic and
 pavers stand in).
+
+## Round 582: filling the bare deck, and a second sky
+
+After Round 581 about a fifth of the Sky Isles' land is still bare deck. Two more sheets (owner: "I can generate those using a
+prompt and Google Gemini"). Each prompt is complete on its own.
+
+- **10. Deck dressing (16 pictures):** 8 flat pieces you can walk over (inlays, pads, low beds) and 8 small standing pieces, for the
+  bare deck. Cut with `tools/cut_building_sheet.py`; the flat ones go where the deck is bare and never block, the standing ones
+  block like clutter.
+- **11. A second sky (2 seamless tiles):** two more cloud seas in the same look as `surfaces/water/cloud-sea`, mixed in soft patches
+  over the first so its repeat stops showing. Cut and checked with `tools/prepare_city_art.py` and `python3 tools/tile_check.py`.
+
+### 10. Deck dressing (16 pictures)
+
+```
+A sprite sheet of 16 separate objects for a top-down 2D game set in a pastel cyberpunk city floating above the clouds (pink,
+violet and magenta towers with cyan glass, roof gardens and glass domes, walked on a pale pearl-white metal deck), on a flat
+solid pure green background (#00FF00), with no gradient, pattern or texture in the background.
+
+LAYOUT: an invisible grid of 4 columns by 4 rows of equal SQUARE cells. Exactly one object in each cell, centred, with clear
+green space between every object and on every side. Nothing crosses from one cell into another. No labels, numbers, letters
+or text anywhere.
+
+ONE SCALE FOR ALL 16: a person would stand as tall as the bench in row 3 is long. Rows 1 and 2 are flat pieces that nearly
+fill their cell; rows 3 and 4 are standing pieces about half the height of their cell.
+
+ROWS 1 AND 2 ARE FLAT, set into the deck, nothing standing up, so a person can walk across them; each has a clean edge all
+round: ROW 1: a round mosaic medallion of pink, violet and cyan glass tiles; a glowing cyan landing-pad circle with a thin
+ring of lights; a square inlay of lavender glass panes in a silver frame; a low round garden bed level with the deck, full of
+small pink and white flowers. ROW 2: a shallow square reflecting pool with a silver rim and pale glowing water; a hexagonal
+inlay of small cyan floor lights; a long rectangle of soft moss and tiny blossoms in a silver frame; a round compass rose of
+silver lines and glowing cyan points inlaid in the deck.
+ROWS 3 AND 4 ARE SMALL STANDING PIECES: ROW 3: a curved white metal bench with a pink cushion; a round planter with a small
+blossom tree; a slim holo-lantern on a short post with a soft cyan glow; a small drinking fountain of white metal and glass.
+ROW 4: a cluster of three short glowing bollards; a little round café table with two stools; a telescope on a tripod
+pointed at the sky; a tall narrow planter of hanging violet flowers.
+
+VIEW: seen from above, tilted 30 degrees from straight down, orthographic (no perspective, no vanishing point): you see the
+top of each object and a little of its front, which faces the viewer and the bottom of the image. The flat pieces in rows 1
+and 2 are seen almost straight down. Each object has a 1-pixel dark outline round its whole shape.
+
+STYLE: detailed 2D game art, crisp clean shapes and thin dark line work, flat colours with light, simple shading. Pastel
+pinks, violets, lavender, pale cyan and silver with soft neon glows, low contrast for the flat pieces so they sit on the deck
+and don't look like objects.
+
+NOT IN THE PICTURE: no ground, no deck patch or base around the objects (except a piece's own rim or frame); no cast shadows;
+no people; no glow spilling onto the background; nothing floating between the objects.
+```
+
+### 11. A second sky (2 seamless tiles)
+
+```
+A sprite sheet of 2 seamless textures for a top-down 2D game set in a pastel cyberpunk city floating above the clouds (pink,
+violet and magenta towers with cyan glass, walked on a pale glowing glass deck): the open sky seen from far above, between
+the floating islands.
+
+LAYOUT: 2 equal SQUARE tiles side by side, each filling its whole square, with a thin flat pure green (#00FF00) gap between
+them and round the edge of the sheet. No labels, numbers, letters or text anywhere.
+
+EVERY TILE IS SEAMLESS: the clouds run off all four edges and continue exactly on the opposite edge, so the tile repeats
+without any visible seam or border. No frame, vignette, edge shading or darker rim; no single big feature in the middle; even
+detail spread across the whole square, so no one cloud stands out when the tile repeats.
+
+VIEW: straight down from far above, onto a sea of clouds (no horizon, no perspective, no sun).
+
+TILE 1: soft billowing clouds in pale pink, lavender and white over a deep blue-violet sky, with a few small gaps showing the
+deep violet below. TILE 2: the same clouds thinner and wispier, more of the deep blue-violet sky showing through in long
+soft gaps, a faint cyan glow in the gaps.
+
+STYLE: the same as the rest of the Sky Isles: clean painted 2D game art, soft rounded cloud shapes with gentle violet
+shading and thin soft outlines, pastel pinks, violets, lavender and white over deep blue-violet; no photo texture, no noise.
+Even light everywhere, low contrast, so the islands and bridges stand out on top.
+
+NOT IN THE PICTURE: no islands, buildings, birds, ships, people, sun, moon or stars; no shadows.
+```
