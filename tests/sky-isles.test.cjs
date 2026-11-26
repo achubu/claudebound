@@ -19,18 +19,19 @@ for (const sd of [77, 1, 9]) {
     let bare = 0; for (let Y = 0; Y < wl.CH; Y++) for (let X = 0; X < wl.CW; X++) if (road(X, Y) && sky(X, Y) && !all.some(b => X >= b.x0 && X < b.x1 && Y >= b.y0 && Y < b.y1)) bare++;
     let close = 0; for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) { const a = all[i], b = all[j]; if (a.x0 <= b.x1 + 2 && a.x1 >= b.x0 - 2 && a.y0 <= b.y1 + 2 && a.y1 >= b.y0 - 2) close++; }
     const wetLanding = T.landing().filter(k => { const [x, y] = k.split(',').map(Number); return set.has((x * CG_COLS + 8) + ',' + (y * CG_ROWS + 5)); });
-    const buildings = wl.lotsPx.filter(l => l.sprite && l.sprite.slot.startsWith('building-')).length, noSquare = keys.filter(k => !(wl.plazas[k] && wl.plazas[k].length));
+    const buildings = wl.lotsPx.filter(l => l.sprite && l.sprite.slot.startsWith('building-')).length, yards = wl.lotsPx.filter(l => l.use === 'yard').length, noSquare = keys.filter(k => !(wl.plazas[k] && wl.plazas[k].length));
     const start = regionStartRoom(), seen = new Set([start]), q = [start], nb = k => Object.values(rooms[k].exits || {}).concat(Object.keys(rooms).filter(j => Object.values(rooms[j].exits || {}).includes(k)));
     while (q.length) { const k = q.pop(); for (const t of nb(k)) if (rooms[t] && !seen.has(t)) { seen.add(t); q.push(t); } }
-    return JSON.stringify({ land: landN / tot, bridges: all.length, bare, close, wetLanding, buildings, noSquare, reached: seen.size, rooms: Object.keys(rooms).length }); })()`));
+    return JSON.stringify({ land: landN / tot, bridges: all.length, bare, close, wetLanding, buildings, yards, noSquare, reached: seen.size, rooms: Object.keys(rooms).length }); })()`));
   assert(r.land < 0.55 && r.land > 0.25, sd + ': more sky than land (' + Math.round(r.land * 100) + '% land)');
   assert(r.bridges >= 20, sd + ': islands joined by bridges (' + r.bridges + ')');
   assert.strictEqual(r.bare, 0, sd + ': every road over the sky is under a bridge');
   assert.strictEqual(r.close, 0, sd + ': no two bridges meet');
   assert.deepStrictEqual(r.wetLanding, [], sd + ': the start and boss rooms stand on an island');
   assert(r.buildings >= 20, sd + ': buildings on the islands (' + r.buildings + ')');
+  assert(r.buildings > r.yards, sd + ': more buildings than empty yards (Round 581: yard lots try a building first; ' + r.buildings + ' to ' + r.yards + ')');
   assert(r.noSquare.length <= 3, sd + ': almost every room has a square for its objects (none in ' + r.noSquare.join(' ') + ')');
   assert.strictEqual(r.reached, r.rooms, sd + ': every room is reached');
-  console.log('seed ' + sd + ': ' + Math.round(r.land * 100) + '% land, ' + r.bridges + ' bridges, ' + r.buildings + ' buildings, rooms without a square: ' + (r.noSquare.join(' ') || 'none'));
+  console.log('seed ' + sd + ': ' + Math.round(r.land * 100) + '% land, ' + r.bridges + ' bridges, ' + r.buildings + ' buildings, ' + r.yards + ' yards, rooms without a square: ' + (r.noSquare.join(' ') || 'none'));
 }
 console.log('sky-isles ok');

@@ -481,7 +481,7 @@ function genTileExtraLinks(id) { const T = GEN_THEMES[id]; if (T.linksCache) ret
 // (assets/environment/sky-gen/, Rounds 545-547). Open sky takes the place of Solaris's rivers (the same machinery: nothing is
 // built beside it, a walkway crossing it is a glass bridge); no grass parks (roof gardens are pictures); glass walkways.
 // =====================================================================
-GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.06, isletChance: 0.75, buildFit: { min: 0.6 }, noDocks: true /* (every lot on an island is near the sky: no cargo docks) */, isleEdge: ['yard-edge', 'glass-rail'], isleEdgeT: 16 /* Round 553: floating islands (rivers) */,
+GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets/environment/sky-gen/', version: () => '548', shoreGap: 1, buildD: 6, plainSea: true, isleShare: 0.06, isletChance: 0.75, buildFit: { min: 0.6 }, yardsBuild: true /* Round 581 */, noDocks: true /* (every lot on an island is near the sky: no cargo docks) */, isleEdge: ['yard-edge', 'glass-rail'], isleEdgeT: 16 /* Round 553: floating islands (rivers) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.sky && TILE_WORLD_DATA.sky.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.sky.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   // the generated Sky Isles have no diagonal walkways; where dropping one would cut rooms off from the start (1,5 to 2,4 joins
@@ -607,7 +607,7 @@ GEN_THEMES.sky = Object.assign({}, GEN_THEMES.solaris, { id: 'sky', art: 'assets
 // owner's forest art (assets/environment/wilds-gen/, Rounds 549-550). Three lakes from the journey's seed take the place of the
 // rivers (the same machinery: nothing is built on their muddy banks, a road crossing one is the boardwalk bridge).
 // =====================================================================
-GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false, noDocks: false, buildFit: null, isleEdge: null /* (not the Sky Isles' settings) */,
+GEN_THEMES.wilds = Object.assign({}, GEN_THEMES.sky, { id: 'wilds', art: 'assets/environment/wilds-gen/', version: () => '552', shoreGap: 3, plainSea: false, noDocks: false, buildFit: null, yardsBuild: false, isleEdge: null /* (not the Sky Isles' settings) */,
   exits: key => { const r = typeof TILE_WORLD_DATA !== 'undefined' && TILE_WORLD_DATA.wilds && TILE_WORLD_DATA.wilds.layout[key]; if (!r) return null;
     const out = Object.fromEntries(Object.entries(r.exits).filter(([d]) => d.length === 1)); for (const [a, d, b] of GEN_THEMES.wilds.extraLinks()) if (a === key && !out[d]) out[d] = b; return out; },
   extraLinks: () => genTileExtraLinks('wilds'), linksCache: null,
@@ -993,6 +993,10 @@ function genWorld(seed) {
       return true; };
     for (const l of lotsPx) {
       if (l.use === 'roof' && l.ruin) { l.ruin = false; if (place(l, ['ruinpic-' + l.district, 'ruinpic-blast'], Object.keys(CITY_TD_ART).filter(k => k.startsWith('ruinpic-')), 0, true)) l.ruinPic = true; else { l.use = 'yard'; l.small = true; } continue; } // (no ruin picture fits: a rubble yard; cityYardKind picks rubble in a zone)
+      // Round 581 (the Sky Isles' review: 33 of 51 rooms had no building and yards outnumbered buildings, the islands being too
+      // small for three-storey lots): with GEN.yardsBuild a yard lot first tries a building picture of its quarter (any quarter's
+      // when none fits), same fit rules; a yard only where nothing fits
+      if (GEN.yardsBuild && l.use === 'yard' && !l.mall && !l.zone && !l.dock && place(l, ['building-' + l.district].filter(k => slotsAll.includes(k)), slotsAll, 0, true)) { l.use = 'roof'; continue; }
       if (l.use !== 'roof' || l.mall) continue;
       if (chronoHash('parklot:' + l.seed) % 100 < 8 && !l.dock && !l.zone && place(l, ['parkpic-' + l.district], Object.keys(CITY_TD_ART).filter(k => k.startsWith('parkpic-')), 0.6, true)) { l.use = 'parkpic'; continue; } // Round 502: about one building lot in twelve is a walkable park (where the old grass parks were ~6%)
       const bw = l.r[2] - l.r[0] - 16, bh = l.r[3] - l.r[1] - 16, own = fits(['building-' + l.district].filter(k => slotsAll.includes(k)), bw, bh), all = own.length ? own : fits(slotsAll, bw, bh);
@@ -2217,7 +2221,10 @@ function paintChronoRoom(canvas, key) {
   // Round 388 (owner: "the road tile is too big ... those puddles are huge"): a theme may draw a texture smaller (texScale).
   const sized = img => { const k = GEN.texScale && GEN.texScale[Object.keys(imgs).find(n => imgs[n] === img)]; if (!k || k === 1) return img;
     const ck = img.src + '@' + k; if (!chronoScaled[ck]) { const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k); const cg = c.getContext('2d'); cg.imageSmoothingQuality = 'high'; cg.drawImage(img, 0, 0, c.width, c.height); chronoScaled[ck] = c; } return chronoScaled[ck]; };
-  const fill = (g, img) => { g.save(); g.translate(-offX, -offY); g.fillStyle = g.createPattern(sized(img), 'repeat'); g.fillRect(offX, offY, W, H); g.restore(); };
+  // Round 581: a texture lines up across rooms by its own repeat. offX/offY assumed every texture repeats every 800px; the Sky Isles'
+  // clouds (1880x1800 at 0.4: 752x720) didn't, so the sky broke along every room's edge
+  const fill = (g, img) => { const t = sized(img), tw = t.width || t.naturalWidth || 800, th = t.height || t.naturalHeight || 800, ox = (((cx * W) % tw) + tw) % tw, oy = (((cy * H) % th) + th) % th;
+    g.save(); g.translate(-ox, -oy); g.fillStyle = g.createPattern(t, 'repeat'); g.fillRect(ox, oy, W, H); g.restore(); };
   if (GEN.topdown) { fill(ctx, imgs['pavement-old']); ctx.fillStyle = GEN.groundDim || 'rgba(8,12,24,.5)'; /* Round 483: a theme's own light (Solaris is day) */ ctx.fillRect(0, 0, W, H); } else fill(ctx, imgs.ground);
   // Round 389 (owner: "use all the assets for neon aftermath, the rubble the puddles, the grass, everything should be
   // mixed"): a theme may lay a second texture over a first in soft patches from world-wide noise (GEN.mix: which
@@ -2356,7 +2363,8 @@ function paintChronoRoom(canvas, key) {
     // picture's repeat no longer lines up into a visible grid.
     const waterFill = g => { fill(g, imgs.chasm); const img = sized(imgs.chasm), m = patches('water2', 4, 0.42), c = document.createElement('canvas'); c.width = W; c.height = H; const cg = c.getContext('2d');
       cg.drawImage(m, 0, 0); cg.globalCompositeOperation = 'source-in'; const p = cg.createPattern(img, 'repeat'); const [vx, vy] = GEN.world(key);
-      if (p.setTransform) p.setTransform(new DOMMatrix().translate(-((vx * W) % 1600) - 517, -((vy * H) % 1600) - 311).rotate(90).scale(-1, 1)); cg.fillStyle = p; cg.fillRect(0, 0, W, H);
+      const iw = img.width || img.naturalWidth, ih = img.height || img.naturalHeight, md = (a, b) => ((a % b) + b) % b; // (Round 581: turned a quarter, it repeats every ih across and iw down)
+      if (p.setTransform) p.setTransform(new DOMMatrix().translate(-md(vx * W, ih) - 517, -md(vy * H, iw) - 311).rotate(90).scale(-1, 1)); cg.fillStyle = p; cg.fillRect(0, 0, W, H);
       g.save(); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.85; g.drawImage(c, 0, 0); g.restore(); };
     // Round 446 (owner: "design a better beach and water algorithm, our beach and water looks terrible"). The coast used to
     // be the sea's 50px cells with their corners rounded: a staircase of square notches, a sand band of one fixed width, flat

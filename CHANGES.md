@@ -3496,6 +3496,24 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 581: the Sky Isles reviewed: seamless clouds, more buildings on the islands
+
+Owner: "Try to review sky isles and improve the world there." A whole-world render (seed 77) showed two problems:
+
+- **The clouds broke along every room's edge.** The painter lined each texture up across rooms on the assumption that it repeats
+  every 800px (`offX`/`offY`); the cloud sea (1880x1800 at 0.4 scale: 752x720) doesn't, so each room started it in the wrong place.
+  `fill` in `paintChronoRoom` now lines a texture up by its own repeat, and so does the cloud sea's second, turned layer (it assumed
+  1600px). `node tests/seam-check.cjs sky 77`: 291 cut stretches before, 1 after. The city is unchanged (6), Solaris 29 to 26; Elaris's
+  ~30 are its lakes and boardwalks, the same places as before.
+- **The islands were mostly bare.** 33 of the 51 rooms had no building, and yards (an empty deck square with a rim and one prop)
+  outnumbered buildings, 52 to 41: islands are small, and only lots with room for three storeys got a building picture. With
+  `yardsBuild` (the Sky Isles only; Elaris keeps its own) a yard lot first tries a building picture of its quarter, with the usual fit
+  rules (one scale for both sides, never under 0.6); a yard only where none fits. Seed 77: 55 buildings to 38 yards, 23 rooms without
+  a building. `tests/sky-isles.test.cjs` checks there are more buildings than yards on three seeds.
+- Checked: `SEED=77` and `SEED=1 node tests/playtest-walk.cjs sky` (all 51 rooms, every crossing and item route, no problems);
+  sky-isles, gen-theme-contract, city-buildings, wilds-gen, solaris-gen, city-layout. Saves keep working: a player saved where a
+  building now stands is moved to the room's square on load (the generated worlds already did this).
+
 ## Round 580: designed gear on hold; ChatGPT draws all gear; the helmet is the Helm
 
 Owner: "I think we aren't quite getting the results we need, let's scrap this idea, maybe we will revisit it at a later time,
