@@ -25,12 +25,40 @@ const GEAR_TEXTURES = { // procedural textures: (ctx, size) draws one seamless t
 };
 function gearHex(c, fb) { const m = /^#?([0-9a-f]{6})$/i.exec(c || ''); if (!m) return fb; const v = parseInt(m[1], 16); return [v >> 16, (v >> 8) & 255, v & 255]; }
 // imgs: { base, mask, protected, texture? } (images or canvases on the hero's grid; texture only for picture textures)
+// Round 579 (owner: "don't try to trace anything exactly, this is an overlay armor piece ... straight lines or curved lines, nothing
+// jagged"): the area a piece covers is not its fit template's traced outline but a few straight-edged shapes over it. In each frame
+// the template is cut into bands 10px tall; each band's runs (a leg, an arm, the torso) are followed down the frame as strands, and
+// each strand becomes one polygon through the middle of its bands, 3px wider than the template on every side. Where strands join or
+// part (the crotch), one ends and the next begins. Returns mask data in the template's own format (red > 127 = covered).
+function gearCover(m, W, H, slot) {
+  const C = 256, S = 10, MG = 3, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'); g.fillStyle = '#fff';
+  for (let r = 0; r < H / C; r++) for (let col = 0; col < W / C; col++) {
+    const x0 = col * C, y0 = r * C, done = []; let active = [];
+    if (slot === 'belt') { // (a belt is one straight band round the waist: the rows at least 70% as wide as its widest, so a hanging pouch isn't covered)
+      const rows = []; for (let y = 0; y < C; y++) { let l = -1, rr = -1; for (let x = 0; x < C; x++) if (m[((y0 + y) * W + x0 + x) * 4] > 127) { if (l < 0) l = x; rr = x; } if (l >= 0) rows.push([y, l, rr]); }
+      if (!rows.length) continue; const wmax = Math.max(...rows.map(q => q[2] - q[1])), keep = rows.filter(q => q[2] - q[1] >= wmax * .7), t = keep[0], z = keep[keep.length - 1];
+      const tl = Math.min(...keep.slice(0, 3).map(q => q[1])), tr = Math.max(...keep.slice(0, 3).map(q => q[2])), bl = Math.min(...keep.slice(-3).map(q => q[1])), br = Math.max(...keep.slice(-3).map(q => q[2]));
+      g.beginPath(); g.moveTo(x0 + tl - 2, y0 + t[0] - 1); g.lineTo(x0 + tr + 3, y0 + t[0] - 1); g.lineTo(x0 + br + 3, y0 + z[0] + 2); g.lineTo(x0 + bl - 2, y0 + z[0] + 2); g.closePath(); g.fill(); continue; }
+    for (let yb = 0; yb < C; yb += S) {
+      const occ = new Uint8Array(C); let top = -1, bot = -1;
+      for (let y = yb; y < Math.min(C, yb + S); y++) for (let x = 0; x < C; x++) if (m[((y0 + y) * W + x0 + x) * 4] > 127) { occ[x] = 1; if (top < 0) top = y; bot = y; }
+      const runs = []; for (let x = 0; x < C; x++) if (occ[x]) { const last = runs[runs.length - 1]; if (last && x - last[1] <= 1) last[1] = x; else runs.push([x, x]); }
+      const next = [], claimed = new Set();
+      for (const [l, rr] of runs) { const hits = active.filter(st => { const q = st.pts[st.pts.length - 1]; return q.l <= rr + 2 && l <= q.r + 2; });
+        let st = hits.length === 1 && !claimed.has(hits[0]) ? hits[0] : null; if (st) claimed.add(st); else { st = { pts: [] }; done.push(st); }
+        st.pts.push({ y: yb, l, r: rr, top, bot }); next.push(st); }
+      active = next; }
+    for (const st of done) { const P = st.pts, f = P[0], z = P[P.length - 1], my = q => q.y + S / 2;
+      const pts = [[f.l - MG, f.top - MG], ...P.map(q => [q.l - MG, my(q)]), [z.l - MG, z.bot + MG], [z.r + 1 + MG, z.bot + MG], ...P.slice().reverse().map(q => [q.r + 1 + MG, my(q)]), [f.r + 1 + MG, f.top - MG]];
+      g.beginPath(); pts.forEach(([x, y], j) => j ? g.lineTo(x0 + x, y0 + Math.max(0, Math.min(C - 1, y))) : g.moveTo(x0 + x, y0 + Math.max(0, Math.min(C - 1, y)))); g.closePath(); g.fill(); } }
+  const d = g.getImageData(0, 0, W, H).data; for (let i = 0; i < d.length; i += 4) { const on = d[i + 3] > 127 ? 255 : 0; d[i] = d[i + 1] = d[i + 2] = on; d[i + 3] = 255; } return d;
+}
 function gearRecipeRender(recipe, imgs) {
   if (recipe.armor && recipe.slot === 'shirt') return gearArmorRender(recipe, imgs); // (Round 569: built armor)
   if (recipe.slot === 'helmet') return gearHelmetRender(recipe, imgs); // (Round 571)
   const W = 2304, H = 1024, C = 256, mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
   const px = im => { const c = mk(), g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, W, H).data; };
-  const b = px(imgs.base), m = px(imgs.mask), p = px(imgs.protected);
+  const b = px(imgs.base), m = gearCover(px(imgs.mask), W, H, recipe.slot), p = px(imgs.protected); // (Round 579: an overlay shape, not the traced outline)
   // the material tile
   const n = Math.max(8, Math.round((recipe.scale || 1) * 48)), tile = document.createElement('canvas'); tile.width = tile.height = n; const tg = tile.getContext('2d');
   if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n); else if (imgs.texture) { const nat = /gear-textures\//.test(recipe.texture || ''), tw = nat ? Math.max(4, Math.round((imgs.texture.width || n) * (recipe.scale || 1))) : n; tile.width = tw; tile.height = Math.max(4, Math.round(tw * (imgs.texture.height || n) / (imgs.texture.width || n))); tg.drawImage(imgs.texture, 0, 0, tile.width, tile.height); } // (Round 574: a picture keeps its proportions; a gear texture draws at its own pixel size times the scale) else GEAR_TEXTURES.plain(tg, n);
@@ -86,7 +114,7 @@ function gearRecipeRender(recipe, imgs) {
 function gearArmorRender(recipe, imgs) {
   const W = 2304, H = 1024, C = 256, A = recipe.armor || {}, mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
   const px = im => { const c = mk(), g = c.getContext('2d'); g.drawImage(im, 0, 0); return g.getImageData(0, 0, W, H).data; };
-  const b = px(imgs.base), m = px(imgs.mask), p = px(imgs.protected);
+  const b = px(imgs.base), m = gearCover(px(imgs.mask), W, H, recipe.slot), p = px(imgs.protected); // (Round 579: an overlay shape, not the traced outline)
   const pieces = mk(), pg = pieces.getContext('2d'); // each plate in its own colour: red = id
   const plate = (id, draw) => { pg.fillStyle = `rgb(${id},0,0)`; pg.beginPath(); draw(pg); pg.fill(); };
   const rrect = (g, x0, y0, x1, y1, r) => { r = Math.min(r, (x1 - x0) / 2, (y1 - y0) / 2); g.moveTo(x0 + r, y0); g.arcTo(x1, y0, x1, y1, r); g.arcTo(x1, y1, x0, y1, r); g.arcTo(x0, y1, x0, y0, r); g.arcTo(x0, y0, x1, y0, r); g.closePath(); };
@@ -165,7 +193,7 @@ function gearArmorRender(recipe, imgs) {
   const pd = pg.getImageData(0, 0, W, H).data, id = i => pd[i * 4 + 3] > 127 ? pd[i * 4] : 0;
   // what stays in front: bare skin that isn't shirt (forearms, hands) over the chest and belly; the Aetherlink everywhere
   const skin = i => { const R = b[i * 4], G = b[i * 4 + 1], B = b[i * 4 + 2]; return b[i * 4 + 3] > 200 && m[i * 4] <= 127 && R > G && G > B && R - B > 40 && R > 110; };
-  const carve = (i, k) => k < 40 && skin(i) && (k < 35 || k > 37 || b[i * 4] - b[i * 4 + 1] > 35); // (Round 575: the skirt (35-37) lies over his khaki trousers, which pass the loose skin test; only real skin, his hands, stays in front)
+  const carve = (i, k) => k < 35 && skin(i); // (Round 579: the skirt (35-37) is an overlay: never cut) // (Round 575: the skirt (35-37) lies over his khaki trousers, which pass the loose skin test; only real skin, his hands, stays in front)
   const n2 = Math.max(8, Math.round((recipe.scale || 1) * 48)), tile = document.createElement('canvas'); tile.width = tile.height = n2; const tg = tile.getContext('2d');
   if (GEAR_TEXTURES[recipe.texture]) GEAR_TEXTURES[recipe.texture](tg, n2); else if (imgs.texture) { const nat = /gear-textures\//.test(recipe.texture || ''), tw = nat ? Math.max(4, Math.round((imgs.texture.width || n2) * (recipe.scale || 1))) : n2; tile.width = tw; tile.height = Math.max(4, Math.round(tw * (imgs.texture.height || n2) / (imgs.texture.width || n2))); tg.drawImage(imgs.texture, 0, 0, tile.width, tile.height); } // (Round 574: a picture keeps its proportions; a gear texture draws at its own pixel size times the scale) else GEAR_TEXTURES.plain(tg, n2);
   const t = tg.getImageData(0, 0, tile.width, tile.height).data, tint = gearHex(recipe.tint, [120, 128, 140]), rim = gearHex(A.trim, [24, 20, 16]), shadeK = recipe.shade == null ? .35 : Math.min(.6, +recipe.shade * .4);
