@@ -3496,6 +3496,14 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 577: the owner's eight gear textures
+
+The owner's eight-at-once sheet (Round 574's prompt) came back clean on its magenta gutters. `tools/gear_texture_cut.py` cut it:
+hex mesh, brushed titanium, quilted, scale mail, chainmail and ribbed suit by their own repeat; leather and the circuit plate have
+no repeat (a free-hand grain; a radial circuit layout), so the tool has a `name:free` mode for them: most of the swatch, broad light
+evened out first (the circuit's bright middle would show as a blob on every repeat), edges cross-faded so it wraps. All eight are in
+the Gear Studio's texture list beside the carbon weave (`assets/items/gear-textures/`), checked on the armour and trousers.
+
 ## Round 576: the UI test counts the helmet slot
 
 `tests/ui-clarity.test.cjs` expected five gear slots on the Gear screen; Round 571 added the helmet, so six. (Found by the full

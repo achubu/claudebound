@@ -7,7 +7,8 @@ complete on its own (owner rule): copy one whole block per image.
 
 When they're back, Claude cuts each to a seamless tile with `python3 tools/gear_texture_cut.py <picture> <name>[,<name>...]`
 (Round 574: it finds the pattern's own repeat, cross-fades the wrap and saves `assets/items/gear-textures/<name>.webp` at a
-quarter size), checks the 3x3 preview it writes, and adds it to the Designer's texture list. Done: 1 (carbon weave).
+quarter size), checks the 3x3 preview it writes, and adds it to the Designer's texture list. Done: 1 (carbon weave) and the eight-at-once sheet (Round 577; leather and the circuit plate have no repeat, so they are cut with
+`:free`).
 
 ## All eight at once (Round 574)
 
