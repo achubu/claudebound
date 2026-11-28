@@ -54,3 +54,5 @@ These profiles fit close-fitting equipment to the existing silhouette. They do n
 The test uses labelled solid-colour structural fixtures (not artwork) for all six slots and 36 frames: exact directional/part correspondence, full calibrated coverage, Aetherlink exclusion, actor preservation, deterministic rebuilds, repository check_look, and rejection of opaque/empty sources and profile drift. The Neon Visor is the real generated-art example and has separately passed the live Gear Studio.
 
 The original-foreground cleanup, final-compositor previews and outfit regression gate are documented in [PIPELINE-UPGRADE.md](PIPELINE-UPGRADE.md).
+
+For a shared complete-outfit design source, start with [WHOLE-OUTFIT.md](WHOLE-OUTFIT.md).
