@@ -58,6 +58,6 @@ class Pipeline(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             t=Path(tmp);src=t/'source.png';self.fixture('helmet',src)
             args=['prepare_gear.py','--atlas',str(src),'--slot','helmet','--look','fixture','--items','neonVisor','--out',str(t/'out')]
-            with patch.object(sys,'argv',args),patch.object(prepare_gear,'build'),patch.object(prepare_gear.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='NOT ADDED: invalid item',stderr='')):
+            with patch.object(sys,'argv',args),patch.object(prepare_gear,'build',side_effect=build),patch.object(prepare_gear.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='NOT ADDED: invalid item',stderr='')):
                 with self.assertRaisesRegex(SystemExit,'Validation failed'):prepare_gear.main()
 if __name__=='__main__':unittest.main()

@@ -1,0 +1,1416 @@
+{
+  "combinations": 64,
+  "frames_each": 36,
+  "rgb_tolerance": 3,
+  "new_regressions": 0,
+  "outfits_with_existing_or_candidate_issues": 32,
+  "outfits": [
+    {
+      "slots": [],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt",
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt",
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt",
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "shirt",
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt",
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt",
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt",
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "boots",
+        "shirt",
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt",
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt",
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt",
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "shirt",
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt",
+        "belt"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt",
+        "belt",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 689,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 412,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt",
+        "belt",
+        "gloves"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    },
+    {
+      "slots": [
+        "pants",
+        "boots",
+        "shirt",
+        "belt",
+        "gloves",
+        "helmet"
+      ],
+      "baseline": {
+        "hands": 90,
+        "device_core": 144,
+        "face": 0
+      },
+      "candidate": {
+        "hands": 90,
+        "device_core": 3,
+        "face": 0
+      },
+      "regressions": {
+        "hands": 0,
+        "device_core": 0,
+        "face": 0
+      }
+    }
+  ]
+}
