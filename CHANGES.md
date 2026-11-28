@@ -3496,6 +3496,13 @@ Playtest of Neon Aftermath's three relics (Moon Lens 5,4; Ember Sigil 5,7; Briar
 - Talent descriptions list the per-rank values. Tests updated: round76, chronospire,
   talent-matrix, card-variety, plating-armor.
 
+## Round 592: ChatGPT's belt fix (#361) sent back
+
+Owner: "Check gpt notes", then "Looks bad" about the new belt. PR #361 (the belt drawn behind the hands and the Aetherlink) passed every
+automatic check but showed old brown leather beside the new pouch in the side walks, speckled pixels round the pouch, and a plain
+black strap from behind; PR #362 (rig upgrade) came with it. Neither imported. CHATGPT-NOTES.md lists the faults with a review sheet
+(`tools/art-refresh/wearable/belt-361-review.png`) and how to catch them before handing over.
+
 ## Round 591: ChatGPT's set polish: waistband, boot edges, original fingers under the gloves
 
 Owner: "Check on gpt". ChatGPT/Codex's PR #359 (`tools/art-refresh/wearable/set-review/`): the cyber trousers fill the tan

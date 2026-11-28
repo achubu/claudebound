@@ -3,6 +3,25 @@
 Claude keeps this file. It lists what went wrong in earlier hand-offs and how to avoid it next time. Newest first. The owner
 asked for it (Round 538): ChatGPT/Codex fixes sprite animations and art; Claude handles everything non-graphical.
 
+## Your PRs #361 (belt foreground fix) and #362 (rig upgrade): not imported; the owner saw the belt and said "Looks bad" (Nov 28)
+
+Every automatic check passed (`--dry-run`, `--check`, the gear tests, your rig tests), but up close the new belt is not ready.
+`tools/art-refresh/wearable/belt-361-review.png` shows eight frames of it on the base (row 1: down 0 and 3, left 1 and 5; row 2:
+right 4 and 8, up 0 and 4). Please fix these and send it again:
+
+1. **The old brown belt and pouch peek out** next to the new one in the side-view walk frames (left 1 and 5, right 4 and 8): the
+   tan/brown leather strap and pouch edge show behind or beside the cyber pouch. Cover them, or put them in the `cleaned.png` patch
+   (restore trouser cloth there), so no old leather shows in any of the 36 frames.
+2. **Speckled pixels on the trousers round the side pouch** (right 8 most): scattered single dark pixels and a broken edge where the
+   foreground cut was made. The cut must leave clean, solid edges: no isolated pixels, no dotted outline.
+3. **The back view (up 0 and 4) is a plain black strap**: give it the same cyber detail as the front (plates, a cyan light, the rear
+   of the buckle/pouch), so it reads as the same belt.
+4. Keep what #361 got right: the hands and the Aetherlink in front of the belt, the base's alpha unchanged.
+
+**How to avoid it next time:** passing the validator is not the review. Look at every one of the 36 frames at 256px with the whole
+outfit, and at 84px, before handing over; old-clothing colour (tan, brown leather) and stray single pixels are what to look for.
+Send #362's tool upgrade again with the fixed belt, or say if it should go in on its own.
+
 ## Your PR #359: in (Round 591)
 
 The trouser waistband fill, the ten boot-edge pixels and the gloves' `cleaned.png` hand restore are imported exactly as your
