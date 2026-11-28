@@ -1,0 +1,15 @@
+# Generation prompts
+
+Built-in image generation; source material only. The fitted actor retains original pixels under its protected masks. These generated faces/hands are not authorized substitutes for the originals.
+
+## scalp-turnaround.png
+
+Use case: precise-object-edit. Edit target is the attached four-view JRPG hero head strip, front, left profile, right profile, back. Remove ONLY the blond hair from all four heads, reconstructing a naturally shaped completely bald scalp and the small concealed ear/temple portions. Keep the original facial identity, existing eyes, eyebrows, nose, mouth, jaw, neck, shirt collar, head direction, proportions and exact positions unchanged. The profile views must remain independently drawn as supplied. Match original warm skin colors and fine painted cel shading, not glossy or realistic. The cranium must be narrower and less voluminous than the original hair. Back head shows bald scalp and natural ears. No hair, stubble, new accessories, facial redesign, layout changes or text. Transparent background. Retain the exact four equal horizontal cells. This is production editing material for attaching the original untouched face pixels.
+
+## bare-feet-turnaround.png
+
+Use case: precise-object-edit. Production JRPG hero underlayer artwork. The input strip has four equal horizontal cells showing the same hero's lower khaki trouser cuffs and two brown shoes: front, left-facing, right-facing, rear. Replace only the brown shoes with anatomically natural bare feet in warm peach skin matching a blond male illustrated JRPG hero. Keep the four directions, both feet per cell, the ankle attachment points and original trouser cuffs. Feet are modestly narrower than the chunky removed boots; believable heels, toes, small top-of-foot shapes, no footwear, no soles, no laces. Keep the existing illustrated painted cel shading at sprite scale. Each direction independently drawn. True transparent background, no ground or shadow, no labels. These are production editing parts, not a replacement full character sheet.
+
+## bare-arms-turnaround.png
+
+Use case: precise-object-edit. Edit target: 4-row, 2-column hero forearm reference atlas. Rows front, left profile, right profile, back. Remove all cyan gauntlets, wristwatches and wristbands; paint the small concealed forearm and wrist skin beneath. Also remove all background belt, trouser, shirt or pouch fragments beside the arms, leaving isolated bare forearms/hands only. Preserve original elbow-to-wrist alignment, hand sizes, finger silhouettes and the 8 cells. Do not invent a large visible arm in the mostly occluded cell row3 column2; retain just its small visible skin section. Match the original male hero warm skin and illustrated shading. Natural slim forearms tapering into original wrists, smooth continuous skin with no accessory-shaped bumps or lines. Keep generous transparent gutters, original cell arrangement, no text, no extra limbs or jewelry. This is underlayer editing material; no facial edits are involved.

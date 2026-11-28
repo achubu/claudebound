@@ -1,0 +1,17 @@
+{
+  "production_ready": false,
+  "files": {
+    "bare-feet-turnaround.png": {
+      "sha256": "ef7eddc06f7ea9692b1cb2c3340ee2ae7264f2a6e5d04738efb9b664e2bdfa97",
+      "bytes": 416257
+    },
+    "scalp-turnaround.png": {
+      "sha256": "5705dae2072f8dcc5507a04b0cfaf9786bfdd3fe688e3325a4a354e1850f48c2",
+      "bytes": 725282
+    },
+    "bare-arms-turnaround.png": {
+      "sha256": "3f52e6a907fb59a7e5f1ea3ba3a0aa6f5f94dcfeb0799f906507e11c81df193c",
+      "bytes": 485022
+    }
+  }
+}
