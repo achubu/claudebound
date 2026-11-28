@@ -12,7 +12,11 @@ The owner's latest fit direction is coverage first: gear panels can cover the un
 
 `sources/bare-arms-turnaround.png`: eight cropped forearm references, no device or wristband. Not yet fitted. The mostly hidden right-facing far arm remains a small visible part. Do not replace the original hand/fingers with the generated hand drawings.
 
-All three sources were made with built-in image generation. They are working source material, not production-ready sheets. Their prompts are in `SOURCE-PROMPTS.md`.
+`sources/bare-feet-poses.png`: sixteen planted/lifted/heel-contact/toe-off/sole views. Fitted with manually authored original ankle coordinates in `fit_feet.py`; a review candidate, not production handoff.
+
+`sources/waist-cloth-turnaround.png`: clean cloth beneath all waist accessories in four directions. Not fitted successfully yet.
+
+All five sources were made with built-in image generation. They are working source material, not production-ready sheets. Their prompts are in `SOURCE-PROMPTS.md`.
 
 ## Reproducible checks
 
@@ -21,6 +25,7 @@ From the repository root:
 ```
 python3 tools/art-refresh/wearable/layered-master/master.py build /tmp/actor-planes
 python3 tools/art-refresh/wearable/layered-master/fit_heads.py /tmp/scalp-review
+python3 tools/art-refresh/wearable/layered-master/fit_feet.py /tmp/scalp-review /tmp/foot-review
 python3 tools/art-refresh/wearable/layered-master/test_master.py
 ```
 
@@ -37,3 +42,13 @@ The original source hash is `5c0e6e4f834f317f193e33202700ae7dbb94e0570a5c2924d48
 3. Fit the new bare wrist/forearm material beneath the removable Aetherlink/watch. Retain the original fingers and hand silhouette. Original device art must remain separately recoverable.
 4. Finish belt/pouch cloth cleanup without restoring brown leather fragments with a broad hand mask. The PR361 belt is visually rejected; PR362 is not integrated.
 5. Build the complete layer stack with seam overlap and correct foreground order, review all 36 poses and outfit combinations, then deliver usable art and a concrete integration contract. No draft actor is approved for production.
+
+## Ankle fitter and rejected waist attempt
+
+`fit_feet.py` uses 72 original ankle attachments, per-frame source-pose choices, rotations, cloth overlap and ground limits. It removes red fringe/disconnected source components, draws behind the existing cuffs, and verifies no changes outside its explicit editing domain. It saves a 36-frame proof, 84px proof, four walk GIFs and a report with all fit data. Its report is explicitly not production-ready. Some cuff boundaries still need manual seam review.
+
+A waist prototype reused the current base-sheet difference mask and broad skin/hand/cool-color selections. **Rejected:** the difference mask includes damaged forearm pixels; cool-color grouping also keeps blue holster fragments with the Aetherlink. The result clipped some moving forearms and left rectangular cloth transitions. That output is not included and must not be imported. Source cloth is useful, but this pass needs explicit original arm/hand/device ownership and per-frame hip masks before it can replace the cleanup. Simply expanding the current difference mask is unsafe.
+
+The next art work is explicit arm/waist occlusion fitting, retaining original hand/finger pixels and wrist/elbow endpoints, then fitting the generated bare forearm underneath the device/watch. The completed source art is available; the complete usable underlayer is not.
+
+A subsequent texture/capsule forearm prototype was also rejected. Cyan-device centroids and nearby skin clusters do not establish reliable elbow/wrist attachments or a clean visible forearm matte. Restoring warm pixels over that approximation left metal fragments, disconnected edges and straight rectangular joins. Do not use it as the neutral forearm or claim it preserves every finger. The arm source art is valid editing material; its fitting still needs explicit, reviewed limb boundaries and original joint anchors for each pose. Neither failed waist/arm composite is committed as a replacement sheet.

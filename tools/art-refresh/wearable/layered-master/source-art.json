@@ -9,6 +9,14 @@
       "sha256": "5705dae2072f8dcc5507a04b0cfaf9786bfdd3fe688e3325a4a354e1850f48c2",
       "bytes": 725282
     },
+    "waist-cloth-turnaround.png": {
+      "sha256": "32e4a8255630c79252c7de271bb77539423a2217f0fb75b8f224dcd0ea7ef037",
+      "bytes": 553130
+    },
+    "bare-feet-poses.png": {
+      "sha256": "e61885e351971af9a2907ab547aeb8dc4784c87dba23c3b8f1ff8d3255b5c5e3",
+      "bytes": 1005603
+    },
     "bare-arms-turnaround.png": {
       "sha256": "3f52e6a907fb59a7e5f1ea3ba3a0aa6f5f94dcfeb0799f906507e11c81df193c",
       "bytes": 485022

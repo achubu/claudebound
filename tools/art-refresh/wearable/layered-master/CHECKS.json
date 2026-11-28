@@ -1,0 +1,33 @@
+{
+  "production_ready": false,
+  "source_sha256": "5c0e6e4f834f317f193e33202700ae7dbb94e0570a5c2924d48c0a079400fb42",
+  "frames": 36,
+  "original_default_reconstruction_rgba_equal": true,
+  "head_fit": {
+    "protected_feature_changed_pixels": 0,
+    "outside_edit_domain_changed_pixels": 0,
+    "neck_changed_pixels": 0
+  },
+  "foot_fit": {
+    "outside_foot_edit_domain_changed_pixels": 0,
+    "neck_drift_after_fitting": 0,
+    "protected_feature_drift_after_fitting": 0
+  },
+  "checks_passed": [
+    "Lossless default reconstruction",
+    "Reject changed extracted plane",
+    "Reject duplicate gear slot",
+    "Original actor and editing source hash locks",
+    "36 head registrations above confidence gate",
+    "Foot fit no drift outside edit domain"
+  ],
+  "not_proven": [
+    "All original face skin pixels identical",
+    "Final scalp/temple/ear seam approval",
+    "All ankle seam/occlusion approval",
+    "Usable neutral arm/wrist fitting",
+    "Finished belt/pouch cleanup",
+    "Complete neutral actor production readiness"
+  ],
+  "runtime_files_changed": []
+}
