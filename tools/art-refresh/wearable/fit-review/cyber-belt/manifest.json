@@ -1,0 +1,10 @@
+{
+ "look": "cyber-belt",
+ "slot": "belt",
+ "items": [
+  "scarabBelt",
+  "stormglassBelt",
+  "hourglassBelt"
+ ],
+ "cleaned": true
+}

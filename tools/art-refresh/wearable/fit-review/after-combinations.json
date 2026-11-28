@@ -1,0 +1,705 @@
+[
+  {
+    "looks": [],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "neon-visor"
+    ],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-chest"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-chest",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-chest",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-chest",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-chest",
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-chest",
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots"
+    ],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 0,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 36,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 6,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest",
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest",
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 7,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 42,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 13,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": 0
+  },
+  {
+    "looks": [
+      "cyber-pants",
+      "cyber-boots",
+      "cyber-chest",
+      "cyber-belt",
+      "cyber-gloves",
+      "neon-visor"
+    ],
+    "protected_margin_changed": 48,
+    "aetherlink_cyan_changed": 0,
+    "uncovered_hand_changed": 0,
+    "face_changed_without_helm": null
+  }
+]
